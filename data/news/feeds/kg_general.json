@@ -1,0 +1,32 @@
+[
+  {
+    "site": "Tazabek. \u0414\u0435\u043b\u043e\u0432\u044b\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d\u0430, \u043e\u0431\u0437\u043e\u0440\u044b \u0440\u044b\u043d\u043a\u043e\u0432, \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u044f, \u043a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0438, \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0446\u0438\u0438, \u0444\u043e\u043d\u0434\u043e\u0432\u044b\u0439 \u0440\u044b\u043d\u043e\u043a.",
+    "favicon": "http://www.tazabek.kg/ui-img/favicon-3-0.png",
+    "url": "http://www.tazabek.kg/rss/news.rss"
+  },
+  {
+    "site": "CentralAsia : \u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u0426\u0435\u043d\u0442\u0440\u0430\u043b\u044c\u043d\u043e\u0439 \u0410\u0437\u0438\u0438",
+    "favicon": "https://centralasia.media/img/ca-icon.png",
+    "url": "https://centralasia.media/rss/"
+  },
+  {
+    "site": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d\u0430. \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d\u0430 \u043d\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+    "favicon": "https://24.kg/assets/7a772a43/images/ico/favicon.ico",
+    "url": "https://24.kg/oshskie_sobytija/rss/"
+  },
+  {
+    "site": " K-News",
+    "favicon": "https://knews.kg/favicon-16x16.png",
+    "url": "https://knews.kg/feed/"
+  },
+  {
+    "site": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d\u0430 \u2014 Kloop.kg",
+    "favicon": "https://kloop.kg/wp-content/uploads/2014/08/kloop_favicon.png",
+    "url": "https://kloop.kg/feed/"
+  },
+  {
+    "site": "\u0413\u043b\u0430\u0432\u043d\u0430\u044f - VESTI.KG - \u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d\u0430",
+    "favicon": "https://vesti.kg/favicon-16x16.png",
+    "url": "https://vesti.kg/?format=feed"
+  }
+]

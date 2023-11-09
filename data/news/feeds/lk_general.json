@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Divaina - Home",
+    "favicon": "https://divaina.com/daily/templates/divaina-template/favicon.ico",
+    "url": "https://divaina.com/daily/index.php?format=feed&type=rss"
+  },
+  {
+    "site": "Daily News | Breaking News, Latest News, Sports News and Live Updates",
+    "favicon": "http://www.dailynews.lk/sites/default/files/favicon.ico",
+    "url": "http://www.dailynews.lk/rss.xml"
+  },
+  {
+    "site": "Gossip Lanka Hot News | lankahotnews.com | Gossip lanka news | gossip lanka c news | lanka hot news",
+    "favicon": "https://www.lankahotnews.net/favicon.ico",
+    "url": "https://www.lankahotnews.net/feeds/posts/default"
+  },
+  {
+    "site": "The Island - Daily english language newspaper in sri lanka",
+    "favicon": "http://island.lk/wp-content/uploads/2020/07/cropped-site-icon-192x192.jpg",
+    "url": "http://island.lk/feed/"
+  }
+]

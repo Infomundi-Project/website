@@ -1,0 +1,42 @@
+[
+  {
+    "site": "El Comercio - Noticias del Ecuador y del mundo",
+    "favicon": "https://www.elcomercio.com/favicon.ico",
+    "url": "https://www.elcomercio.com/feed/"
+  },
+  {
+    "site": "HOY Ecuador",
+    "favicon": "https://www.hoy.com.ec/wp-content/uploads/2019/06/favicon-hoy-32-244x244.png",
+    "url": "https://www.hoy.com.ec/feed/"
+  },
+  {
+    "site": "La Hora Noticias de Ecuador, sus provincias y el mundo",
+    "favicon": "https://cdn.lahora.com.ec/2020/10/29220333/favicon.png",
+    "url": "https://www.lahora.com.ec/feed/"
+  },
+  {
+    "site": "El Diario Ecuador",
+    "favicon": "https://www.eldiario.ec/favicon.ico",
+    "url": "https://www.eldiario.ec/feed/"
+  },
+  {
+    "site": "Teleamazonas - Noticias de Ecuador e Internacionales al instante",
+    "favicon": "https://www.teleamazonas.com/wp-content/uploads/2020/10/cropped-FAVICON_1-1-192x192.png",
+    "url": "https://www.teleamazonas.com/feed/"
+  },
+  {
+    "site": "Diario El Mercurio en Cuenca - Lea las Noticias en el Ecuador y del mundo",
+    "favicon": "https://elmercurio.com.ec/wp-content/uploads/2018/01/favicon.png",
+    "url": "https://elmercurio.com.ec/feed/"
+  },
+  {
+    "site": "Noticias Ecuador - Ecuador en vivo | Portada",
+    "favicon": "http://ecuadorenvivo.com/templates/ecuadorenvivo/images/favicon.ico",
+    "url": "http://ecuadorenvivo.com/?format=feed&type=rss"
+  },
+  {
+    "site": "La Rep\u00fablica EC",
+    "favicon": "https://www.larepublica.ec/favicon.ico",
+    "url": "https://www.larepublica.ec/feed/"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "site": "Vijesti online - Najnovije iz Crne Gore i svijeta",
+    "favicon": "https://www.vijesti.me/favicon.ico?v=1.7",
+    "url": "https://www.vijesti.me/rss"
+  },
+  {
+    "site": "Najva\u017enije vijesti svakog dana - Pobjeda",
+    "favicon": "https://www.pobjeda.me/assets/images/favicons/favicon.ico",
+    "url": "https://rss.pobjeda.me"
+  },
+  {
+    "site": "Portal Analitika - najva\u017enije vijesti iz Crne Gore i svijeta",
+    "favicon": "https://www.portalanalitika.me/assets/images/favicons/favicon.ico",
+    "url": "https://rss.portalanalitika.me"
+  },
+  {
+    "site": "logo a 2 ",
+    "favicon": "https://www.aktuelno.me/wp-content/uploads/2020/11/cropped-Aktuelno_Logo-192x192.jpg",
+    "url": "https://www.aktuelno.me/feed/"
+  },
+  {
+    "site": "RTCG - Radio Televizija Crne Gore - Nacionalni javni servis :: Naslovna ",
+    "favicon": "http://rtcg.me/assets/img/favicons/favicon-32x32.png",
+    "url": "http://rss.html/"
+  }
+]

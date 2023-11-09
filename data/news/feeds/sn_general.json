@@ -1,0 +1,67 @@
+[
+  {
+    "site": "DAKARACTU.COM",
+    "favicon": "https://www.dakaractu.com/favicon.ico?v=1391475386",
+    "url": "https://www.dakaractu.com/xml/syndication.rss"
+  },
+  {
+    "site": "Leral.net - S'informer en temps r\u00e9el",
+    "favicon": "https://www.leral.net/favicon.ico?v=1278974226",
+    "url": "https://www.leral.net/xml/syndication.rss"
+  },
+  {
+    "site": "Accueil | Rewmi.com",
+    "favicon": "https://i0.wp.com/www.rewmi.com/wp-content/uploads/2020/09/cropped-Ic\u00f4ne_du_site.jpg?fit=192%2C192&ssl=1",
+    "url": "https://www.rewmi.com/feed/"
+  },
+  {
+    "site": "Xibar.net - L'oeil critique du S\u00e9n\u00e9gal",
+    "favicon": "https://www.xibar.net/favicon.ico?v=1184742166",
+    "url": "https://www.xibar.net/xml/syndication.rss"
+  },
+  {
+    "site": "123 Dakar -",
+    "favicon": "https://www.123dakar.com/wp-content/uploads/2019/09/cropped-atom-1341364_960_720-192x192.png",
+    "url": "https://www.123dakar.com/feed/"
+  },
+  {
+    "site": "- Xalima.com",
+    "favicon": "https://www.xalimasn.com/wp-content/uploads/2020/10/cropped-Xalima-02-192x192.png",
+    "url": "https://www.xalimasn.com/feed/"
+  },
+  {
+    "site": "SenXibar.com",
+    "favicon": "https://www.senxibar.com/favicon.ico?v=1309708590",
+    "url": "https://www.senxibar.com/xml/syndication.rss"
+  },
+  {
+    "site": "info continue en temps r\u00e9el",
+    "favicon": "http://www.walf-groupe.com/wp-content/uploads/2020/09/cropped-log-walfnet-1-192x192.png",
+    "url": "http://www.walf-groupe.com/feed/"
+  },
+  {
+    "site": "info",
+    "favicon": "http://lesoleil.sn/wp-content/uploads/2019/02/cropped-icon-192x192.png",
+    "url": "http://lesoleil.sn/feed/"
+  },
+  {
+    "site": "information G\u00e9n\u00e9rale",
+    "favicon": "https://lequotidien.sn/wp-content/uploads/2020/12/cropped-FAVICON-Le-Quotidien-192x192.jpg",
+    "url": "https://lequotidien.sn/feed/"
+  },
+  {
+    "site": "PRESSAFRIK.COM , L'info dans toute sa diversit\u00e9 (Libert\u00e9 - Professionnalisme - Cr\u00e9dibilit\u00e9)",
+    "favicon": "https://www.pressafrik.com/favicon.ico?v=1226146212",
+    "url": "https://www.pressafrik.com/xml/syndication.rss"
+  },
+  {
+    "site": "Setal.net",
+    "favicon": "https://www.setal.net/favicon.ico?v=1337006165",
+    "url": "https://www.setal.net/xml/syndication.rss"
+  },
+  {
+    "site": "Senenews - Actualit\u00e9 au S\u00e9n\u00e9gal, Politique, \u00c9conomie, Sport",
+    "favicon": "https://www.senenews.com/favicon-16x16.png",
+    "url": "https://www.senenews.com/feed"
+  }
+]

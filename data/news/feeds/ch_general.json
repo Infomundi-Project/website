@@ -1,0 +1,12 @@
+[
+  {
+    "site": "& Trading",
+    "favicon": "https://www.cash.ch/sites/all/themes/custom/cash_xtheme/favicon.ico",
+    "url": "https://www.cash.ch/newest-content-feed/all/all"
+  },
+  {
+    "site": "Il portale del Ticino - Ticinonline",
+    "favicon": "http://www.tio.ch/img/favicons/favicon-16x16.png",
+    "url": "https://media.tio.ch/files/domains/tio.ch/rss/feed_rss.xml"
+  }
+]

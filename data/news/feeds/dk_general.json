@@ -1,0 +1,12 @@
+[
+  {
+    "site": "Combined Shape",
+    "favicon": "https://politiken.dk/static/assets/favicon/politiken/favicon-96x96.png",
+    "url": "https://politiken.dk/rss/senestenyt.rss"
+  },
+  {
+    "site": "Nyheder \u2013 seneste nyt fra Nordjylland | Nordjyske.dk",
+    "favicon": "https://nordjyske.dk/favicon.ico",
+    "url": "https://nordjyske.dk/rss/nyheder"
+  }
+]

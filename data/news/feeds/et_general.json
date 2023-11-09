@@ -1,0 +1,62 @@
+[
+  {
+    "site": " Canada",
+    "favicon": "https://www.ethiomedia.com/wp-content/uploads/2020/11/20200522112020_logo.png",
+    "url": "https://www.ethiomedia.com/feed/"
+  },
+  {
+    "site": " No. 1 Ethiopian news media: Esat, Ethiopian news, daily Ethiopian news, ESAT tv, ESAT Radio, Ethiopia",
+    "favicon": "https://secureservercdn.net/198.71.233.254/127.702.myftpupload.com/wp-content/uploads/2012/07/ESAT-falvio.png",
+    "url": "https://ethsat.com/feed/"
+  },
+  {
+    "site": "\u126a\u12a6\u12a4 \u12a0\u121b\u122d\u129b- VOA Amharic",
+    "favicon": "https://amharic.voanews.com/Content/responsive/VOA/img/webApp/ico-128x128.png",
+    "url": "https://amharic.voanews.com/api/"
+  },
+  {
+    "site": " Ethiopian News and Opinion Journal",
+    "favicon": "https://www.ethiopianreview.com/favicon.ico",
+    "url": "https://ethiopianreview.com/content/feed"
+  },
+  {
+    "site": "Ethiopian news, the latest Ethiopian news daily from Ethiopia",
+    "favicon": "https://www.nazret.com/wp-content/uploads/2016/09/cropped-nazretIcon-192x192.jpg",
+    "url": "https://www.nazret.com/feed/"
+  },
+  {
+    "site": " Videos",
+    "favicon": "https://ecadforum.com/wp-content/uploads/2015/10/ECADF-iPad-Icon.png",
+    "url": "https://ecadforum.com/feed/"
+  },
+  {
+    "site": "Ethiopian News | ZeHabesha | Latest News Provider",
+    "favicon": "https://zehabesha.com/wp-content/uploads/2021/05/ZH-PV.png",
+    "url": "https://zehabesha.com/feed/"
+  },
+  {
+    "site": " Dubai, UAE",
+    "favicon": "https://www.abugidainfo.com/wp-content/uploads/2020/07/cropped-Abugida-Info-192x192.png",
+    "url": "https://www.abugidainfo.com/feed/"
+  },
+  {
+    "site": "Ethiopia Zare - Home",
+    "favicon": "https://ethiopiazare.com/templates/gk_news/favicon.ico",
+    "url": "https://ethiopiazare.com/?format=feed&type=rss"
+  },
+  {
+    "site": "ADDISVOICE.COM | | Satu Suara Kebaikan Semua",
+    "favicon": "http://www.addisvoice.com/misc/favicon.ico",
+    "url": "http://www.addisvoice.com/?q=rss.xml"
+  },
+  {
+    "site": "Home -",
+    "favicon": "https://waltainfo.com/wp-content/uploads/2019/11/cropped-android-chrome-512x512-1-192x192.png",
+    "url": "https://waltainfo.com/feed/"
+  },
+  {
+    "site": " Tadias Magazine",
+    "favicon": "http://www.tadias.com/favicon.ico",
+    "url": "http://www.tadias.com/feed/"
+  }
+]

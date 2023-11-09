@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Go - Jamaica - Jamaica's Portal to the World - Gleaner News, Coronavirus Coverage, Weather Forecasts, Jobs and more",
+    "favicon": "http://go-jamaica.com/favicon.ico",
+    "url": "http://jamaica-gleaner.com/feeds/rss.xml"
+  },
+  {
+    "site": "Latest News, Sports and Entertainment - CVM Television Online",
+    "favicon": "https://www.cvmtv.com/wp-content/uploads/2019/06/cropped-CVM-Logo-2016-1-3-192x192.png",
+    "url": "https://www.cvmtv.com/feed/"
+  },
+  {
+    "site": "Nationwide 90FM - Breaking News, Scoops, Opinion and Analysis",
+    "favicon": "https://nationwideradiojm.com/wp-content/uploads/2015/04/NNN-app-Logo-200-01.png",
+    "url": "https://nationwideradiojm.com/feed/"
+  }
+]

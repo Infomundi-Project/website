@@ -1,0 +1,32 @@
+[
+  {
+    "site": " Diario de Honduras, noticias de Honduras y el Mundo.",
+    "favicon": "https://d1mrtjpezxphht.cloudfront.net/wp-content/uploads/2021/04/cropped-Diario_La_Tribuna_Honduras_512x512-192x192.jpg",
+    "url": "https://www.latribuna.hn/feed/"
+  },
+  {
+    "site": "Noticias y acontecer nacional de Honduras y el mundo",
+    "favicon": "https://tiempo.hn/wp-content/uploads/2016/05/favicon-tiempo.jpg",
+    "url": "https://tiempo.hn/feed/"
+  },
+  {
+    "site": "Proceso Digital | Periodismo que evoluciona e informa",
+    "favicon": "https://proceso.hn/wp-content/uploads/2020/12/LogoFavicon.png",
+    "url": "https://proceso.hn/feed/"
+  },
+  {
+    "site": " Los j\u00f3venes se informan aqu\u00ed",
+    "favicon": "https://nuevo.ultimahora.hn/wp-content/uploads/2020/06/favicon.png",
+    "url": "https://ultimahora.hn/feed/"
+  },
+  {
+    "site": "Canal 6 | Noticias de Ultima Hora en Honduras",
+    "favicon": "https://cdn.canal6.com.hn/2021/01/unnamed-1.png",
+    "url": "https://canal6.com.hn/feed"
+  },
+  {
+    "site": "Inicio",
+    "favicon": "http://www.web.ellibertador.hn/templates/favourite/favicon.ico",
+    "url": "http://www.web.ellibertador.hn/index.php?format=feed&type=rss"
+  }
+]

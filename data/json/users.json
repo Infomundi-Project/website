@@ -1,0 +1,6 @@
+{
+  "diogo": "$argon2id$v=19$m=65536,t=3,p=4$k3IOofTeuxcCIOTcO6cUIg$bLgWGWznrRNg/xNu0YzF2eTXMe483YQEy66GFi1TI3g",
+  "behind": "$argon2id$v=19$m=65536,t=3,p=4$QEhpzTmHMKZU6n1vbY2Rsg$rAPy7PbEPdItvI8j5/HixRC2MaK68Ky+RH6Y1Kt8pAQ",
+  "valory": "$argon2id$v=19$m=65536,t=3,p=4$0hqDsHaulZKyVqoVojTGOA$cJsAWBFTlh9NokdhhbdQyX8sbYuSPJn4OeC4KZ+XzA0",
+  "barros": "$argon2id$v=19$m=65536,t=3,p=4$1Np7by1lTOmds1YqRUjJuQ$ljnPfcEzTqW/LEzX6w5iDdkYjZ6xEI/o7f8uu8YdkMs"
+}

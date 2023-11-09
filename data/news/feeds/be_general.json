@@ -1,0 +1,17 @@
+[
+  {
+    "site": "RTBF le site de la Radio T\u00e9l\u00e9vision Belge Francophone",
+    "favicon": "https://www.static.rtbf.be/rtbf/home/images/ico/favicon-info-32x32.png",
+    "url": "http://rss.rtbf.be/article/rss/highlight_rtbfhome_rtbfhome-homepage.xml?source=internal"
+  },
+  {
+    "site": "DH Les Sports+ - Toute l'actualit\u00e9 belge, internationale, r\u00e9gionale et sportive, c'est sur DH Les Sports+",
+    "favicon": "https://o0.ldh.be/img/icon/favicon-16x16-bfc1c519e590.png",
+    "url": "https://www.dhnet.be/rss.xml"
+  },
+  {
+    "site": "La Libre.be - Faisons vivre l'info",
+    "favicon": "https://www.lalibre.be/favicon.ico",
+    "url": "https://www.lalibre.be/rss.xml"
+  }
+]

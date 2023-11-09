@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Paraguay.com - Noticias de Paraguay en tiempo real. Paraguay en Internet.",
+    "favicon": "https://www.paraguay.com/favicon.ico",
+    "url": "https://www.paraguay.com/feed"
+  },
+  {
+    "site": "Diario HOY | En Paraguay y el Mundo",
+    "favicon": "https://www.hoy.com.py/assets/img/icons/favicon.png",
+    "url": "https://www.hoy.com.py/feed/home"
+  },
+  {
+    "site": "Diario TNPRESS - El poder de la informaci\u00f3n",
+    "favicon": "http://www.tnpress.com.py/wp-content/uploads/2021/05/Favicon.png",
+    "url": "http://www.tnpress.com.py/feed/"
+  }
+]

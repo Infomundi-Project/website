@@ -1,0 +1,57 @@
+[
+  {
+    "site": "DELFI - Vado\u0161ais zi\u0146u port\u0101ls Latvij\u0101 - DELFI",
+    "favicon": "https://g2.delphi.lv/delfi-bootstrap/assets/favicons/android-chrome-192x192.png",
+    "url": "https://www.delfi.lv/rss?channel=bizness"
+  },
+  {
+    "site": "TVNET",
+    "favicon": "https://f10.pmo.ee/bFk5Z4bhHSb_jQY1T4N1PvOk5rM=/256x256/https://f.pmo.ee/logos/4133/34435b8f20adb3642350d7c501ffded2.png",
+    "url": "https://www.tvnet.lv/rss"
+  },
+  {
+    "site": "Apollo.lv",
+    "favicon": "https://f10.pmo.ee/O-ILGKKRevLRW7SrP8-zkzs0TMw=/256x256/https://f.pmo.ee/logos/4132/85b9e85e80ef80f227fc870de1839ea0.png",
+    "url": "https://www.apollo.lv/rss"
+  },
+  {
+    "site": "Kasjauns zi\u0146as - Jauns.lv",
+    "favicon": "https://jauns.lv/jauns/favicon.ico",
+    "url": "https://jauns.lv/rss"
+  },
+  {
+    "site": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041b\u0430\u0442\u0432\u0438\u0438 \u0438 \u043c\u0438\u0440\u0430 \u043d\u0430 \u0440\u0443\u0441\u0441\u043a\u043e\u043c \u044f\u0437\u044b\u043a\u0435. \u041c\u044b \u0434\u0435\u043b\u0430\u0435\u043c \u043d\u043e\u0432\u043e\u0441\u0442\u0438",
+    "favicon": "https://mixnews.lv/wp-content/uploads/2020/03/28/2020-03-28-mixnews-cropped-2020-03-28-mixnews-mixnews-fav-1-192x192.png",
+    "url": "https://mixnews.lv/feed/"
+  },
+  {
+    "site": "Sportacentrs.com",
+    "favicon": "https://sportacentrs.com/images/favicons/esports.ico",
+    "url": "https://sportacentrs.com/static/non-publish/rss/sc/rss.xml"
+  },
+  {
+    "site": "\n  Gorod.lv: \u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u0414\u0430\u0443\u0433\u0430\u0432\u043f\u0438\u043b\u0441\u0430  ",
+    "favicon": "https://img.gorod.lv/favicon.ico",
+    "url": "https://www.gorod.lv/rss"
+  },
+  {
+    "site": "\u041d\u0410\u0428\u0410 \u0413\u0410\u0417\u0415\u0422\u0410 - www.nasha.lv",
+    "favicon": "https://nasha.lv/favicon.ico",
+    "url": "http://nasha.lv/rss.php"
+  },
+  {
+    "site": "Back to top",
+    "favicon": "https://kazinopasaule.lv/wp-content/uploads/2020/12/cropped-logo-192x192.png",
+    "url": "https://kazinopasaule.lv/feed/"
+  },
+  {
+    "site": "Instagram",
+    "favicon": "https://ir.lv/wp-content/uploads/2017/10/cropped-favico_512x512-400x400.png",
+    "url": "https://ir.lv/feed/"
+  },
+  {
+    "site": " Interneta \u017eurn\u0101ls",
+    "favicon": "https://puaro.lv/wp-content/uploads/2017/09/cropped-cropped-puaro-logo-black-retina-1-192x192.png",
+    "url": "https://puaro.lv/feed/"
+  }
+]

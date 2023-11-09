@@ -1,0 +1,47 @@
+[
+  {
+    "site": "Stiri , stiri online, stiri TV, stiri video, stiri mobil | PUBLIKA.MD - AICI SUNT \u0218TIRILE",
+    "favicon": "https://www.publika.md/favicons/favicon.ico?v=05022018",
+    "url": "https://rss.publika.md/stiri.xml"
+  },
+  {
+    "site": "UNIMEDIA - Portalul de \u0219tiri nr. 1 din Moldova",
+    "favicon": "https://unimedia.info/favicon-16x16.png",
+    "url": "https://unimedia.info/ro/rss/all/"
+  },
+  {
+    "site": "Ca s\u0103 \u0219tii totul! | Jurnal.md",
+    "favicon": "https://www.jurnal.md/favicons/favicon-16x16.png",
+    "url": "https://www.jurnal.md/ro/rss/all"
+  },
+  {
+    "site": "Timpul - \u015etiri din Moldova",
+    "favicon": "https://www.timpul.md/favicon.ico",
+    "url": "https://www.timpul.md/rss"
+  },
+  {
+    "site": "Totul.md - \u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043f\u043e\u0440\u0442\u0430\u043b. \u041f\u043e\u0440\u0442\u0430\u043b \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0438 \u041c\u043e\u043b\u0434\u043e\u0432\u0430",
+    "favicon": "https://totul.md/wp-content/uploads/2016/10/faviconColored.png",
+    "url": "https://totul.md/feed/"
+  },
+  {
+    "site": "AVA.MD - \u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u043e\u043d\u043d\u043e-\u0430\u043d\u0430\u043b\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043f\u043e\u0440\u0442\u0430\u043b, \u0432\u043a\u043b\u044e\u0447\u0430\u044e\u0449\u0438\u0439 \u0432 \u0441\u0435\u0431\u044f \u0441\u0432\u0435\u0436\u0438\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438, \u0430\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0443 \u0438 \u043a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0438",
+    "favicon": "https://static.avamd.info/front/favicon.ico?2021-04-09T12:38",
+    "url": "https://ava.md/feed/"
+  },
+  {
+    "site": " \u0412\u0415\u0421\u0422\u0418.\u041c\u0414 // \u0432\u0441\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438 \u0434\u043d\u044f ",
+    "favicon": "https://www.vesti.md/favicon.ico",
+    "url": "https://vesti.md/rss/news.xml"
+  },
+  {
+    "site": "prime.md",
+    "favicon": "https://prime.md/static/images/favicon.ico",
+    "url": "https://prime.md/feed/"
+  },
+  {
+    "site": "OMEGA: \u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u0432 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u0438",
+    "favicon": "https://omg.md/templates/ru/images/favicon.ico",
+    "url": "https://omg.md/rss.xml"
+  }
+]

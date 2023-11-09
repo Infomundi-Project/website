@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Starnieuws - ",
+    "favicon": "https://www.starnieuws.com/favicon.ico",
+    "url": "https://www.starnieuws.com/rss/starnieuws.rss"
+  },
+  {
+    "site": " Columns",
+    "favicon": "https://www.gfcnieuws.com/wp-content/uploads/2021/01/favicon.ico",
+    "url": "https://www.gfcnieuws.com/feed/"
+  },
+  {
+    "site": "Waterkant - Nieuws over Suriname, Surinamers en Surinaamse zaken",
+    "favicon": "https://www.waterkant.net/wp-content/2018/03/w-fav-300x300.png",
+    "url": "https://www.waterkant.net/feed/"
+  },
+  {
+    "site": " De stem van het volk",
+    "favicon": "https://i1.wp.com/www.dbsuriname.com/wp-content/uploads/2020/01/cropped-new-favicon.png?fit=192%2C192&ssl=1",
+    "url": "https://www.dbsuriname.com/feed/"
+  }
+]

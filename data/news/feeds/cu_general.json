@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Cubadebate, Contra el Terrorismo Medi\u00e1tico",
+    "favicon": "http://www.cubadebate.cu/favicon.ico",
+    "url": "http://www.cubadebate.cu/feed/"
+  },
+  {
+    "site": "CubaNet Noticias de Cuba - Prensa Independiente desde 1994",
+    "favicon": "https://www.cubanet.org/wp-content/uploads/2018/05/cropped-image-192x192.jpg",
+    "url": "https://www.cubanet.org/feed/"
+  },
+  {
+    "site": " ",
+    "favicon": "https://www.radiotelevisionmarti.com/Content/responsive/OCB/img/webApp/ico-128x128.png",
+    "url": "https://www.radiotelevisionmarti.com/api/"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Searchlight",
+    "favicon": "http://searchlight.vc/searchlight/news/wp-content/uploads/sites/2/2018/04/favicons.png",
+    "url": "http://searchlight.vc/searchlight/news/feed/"
+  },
+  {
+    "site": "The Vincentian Newspaper",
+    "favicon": "https://thevincentian.com/clients/thevincentian/favicon.ico?v=567513194444",
+    "url": "https://thevincentian.com/clients/thevincentian/headlines.rss"
+  },
+  {
+    "site": "NBC SVG - The Sound of the Nation",
+    "favicon": "https://i0.wp.com/www.nbcsvg.com/wp-content/uploads/2015/02/nbc-logo-fixed-54d36bd2v1_site_icon.png?fit=192%2C192",
+    "url": "http://www.nbcsvg.com/feed/"
+  }
+]

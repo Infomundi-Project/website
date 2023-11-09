@@ -1,0 +1,37 @@
+[
+  {
+    "site": "Bahamaspress.com | The Real News in The Bahamas",
+    "favicon": "https://bahamaspress.com/wp-content/uploads/2015/11/Favicon.png",
+    "url": "https://bahamaspress.com/feed/"
+  },
+  {
+    "site": "The Tribune",
+    "favicon": "http://www.tribune242.com/favicon.ico",
+    "url": "http://www.tribune242.com/rss/headlines/"
+  },
+  {
+    "site": "Home - The Nassau Guardian",
+    "favicon": "https://thenassauguardian.com/wp-content/uploads/2020/03/fav_icon.png",
+    "url": "https://thenassauguardian.com/feed/"
+  },
+  {
+    "site": "thebahamasweekly.com -  Bahamas News and events :: audio and video, tourism info and more. \n",
+    "favicon": "http://thebahamasweekly.com/favicon.ico",
+    "url": "http://thebahamasweekly.com/testarea//publish/rss.xml"
+  },
+  {
+    "site": "Bahamas B2B | Making Small Business Better in The Bahamas",
+    "favicon": "https://www.bahamasb2b.com/wp-content/uploads/2021/01/cropped-fb-logo-192x192.jpg",
+    "url": "https://www.bahamasb2b.com/feed/"
+  },
+  {
+    "site": "NEWS - ZNS BAHAMAS",
+    "favicon": "https://znsbahamas.com/wp-content/uploads/2017/12/cropped-ZNS-PL-1-192x192.png",
+    "url": "https://znsbahamas.com/feed/"
+  },
+  {
+    "site": "The Bahama Journal - Jones Communications Network",
+    "favicon": "http://jonesbahamas.com/favicon.ico",
+    "url": "http://jonesbahamas.com/feed/"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "site": "information et de services en RDC - Direct.cd",
+    "favicon": "https://www.direct.cd/wp-content/uploads/2018/05/cropped-directlogo-new-192x192.png",
+    "url": "https://www.direct.cd/feed/"
+  },
+  {
+    "site": "antith\u00e8se (Hegel)",
+    "favicon": "http://www.congoindependant.com/wp-content/uploads/2017/11/cropped-logo-cic-1-192x192.png",
+    "url": "http://www.congoindependant.com/feed/"
+  },
+  {
+    "site": " Beni Lubero Online",
+    "favicon": "https://benilubero.com/wp-content/uploads/2016/01/fobelulogomini200.jpg",
+    "url": "https://benilubero.com/feed/"
+  },
+  {
+    "site": "Starducongo - Fashion et Actu",
+    "favicon": "https://www.starducongo.com/wp-content/uploads/2020/03/Star-du-Congo-1-300x300.png",
+    "url": "https://www.starducongo.com/feed/"
+  },
+  {
+    "site": "Congopage - Congopage.com est un portail d\u2019information, d\u2019analyse et de d\u00e9bats sur le Congo-Brazzaville.",
+    "favicon": "https://d3l8p0mriqvr7u.cloudfront.net/CACHE/img/favicons/favicon-160x160.png",
+    "url": "http://www.congopage.com/spip.php?page=backend"
+  },
+  {
+    "site": "Congo Planet - News, Music, Videos, Photos from the Congo",
+    "favicon": "https://www.congoplanet.com/favicon.ico",
+    "url": "https://www.congoplanet.com/feeds/rss_congo_africa.xml"
+  },
+  {
+    "site": "acpcongo | ACP Congo",
+    "favicon": "https://acpcongo.com/favicon.ico",
+    "url": "https://acpcongo.com/index.php/feed/"
+  },
+  {
+    "site": "Le Soft international |  \u00caTRE LE SEUL M\u00c9DIA R\u00c9PERTORI\u00c9 PAR LE PLUS GRAND JOURNAL DU MONDE DONNE AU \u00abSOFT\u00bb UNE OBLIGATION DE QUALIT\u00c9",
+    "favicon": "http://www.lesoftonline.net/favicon.ico",
+    "url": "http://www.lesoftonline.net/rss.xml"
+  }
+]

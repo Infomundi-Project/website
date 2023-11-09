@@ -1,0 +1,32 @@
+[
+  {
+    "site": "\u0639\u0643\u0633 \u0627\u0644\u0633\u064a\u0631",
+    "favicon": "https://www.aksalser.com/news/wp-content/uploads/2017/06/fav.png",
+    "url": "https://www.aksalser.com/news/feed/"
+  },
+  {
+    "site": "syria.news \u0633\u064a\u0631\u064a\u0627\u0646\u064a\u0648\u0632 ...\u0623\u062e\u0628\u0627\u0631\u0633\u0648\u0631\u064a\u0629 \u0644\u062d\u0638\u0629 \u0628\u0644\u062d\u0638\u0629 SYRIA NEWS",
+    "favicon": "https://syria.news/images/favicon.ico",
+    "url": "https://syria.news/rss.php"
+  },
+  {
+    "site": " My WordPress Blog",
+    "favicon": null,
+    "url": "https://www.champress.net/feed/"
+  },
+  {
+    "site": "\"",
+    "favicon": "http://sooryoon.net/wp-content/uploads/2019/10/cropped-3-192x192.png",
+    "url": "http://sooryoon.net/feed/"
+  },
+  {
+    "site": "\u0623\u062e\u0628\u0627\u0631 \u0633\u0648\u0631\u064a\u0627 - \u062c\u0647\u064a\u0646\u0629 \u0646\u064a\u0648\u0632 - \u0633\u0648\u0631\u064a\u0629",
+    "favicon": "https://jpnews-sy.com/images/favicon.ico",
+    "url": "https://jpnews-sy.com/ar/rss.xml"
+  },
+  {
+    "site": "www.damaspost.com",
+    "favicon": "http://damaspost.com/wp-content/uploads/2019/06/cropped-b-192x192.jpg",
+    "url": "http://damaspost.com/feed"
+  }
+]

@@ -1,0 +1,77 @@
+[
+  {
+    "site": "wyborcza",
+    "favicon": "https://static.im-g.pl/img/gazeta.ico",
+    "url": "https://wiadomosci.gazeta.pl/pub/rss/wiadomosci.htm"
+  },
+  {
+    "site": "Interia - Polska i \u015bwiat: informacje, sport, gwiazdy.",
+    "favicon": "https://www.interia.pl/favicon.ico?v=2",
+    "url": "https://wydarzenia.interia.pl/feed"
+  },
+  {
+    "site": "Wiadomo\u015bci z kraju i ze \u015bwiata \u2013 wszystko co wa\u017cne \u2013 WP",
+    "favicon": "https://v.wpimg.pl/MTA4MTE5YjUgVjtnak5vIGMObz0sF2F2NBZ3dmp6YmV4BjVlfAdiMG9DPT0oUmMkLRt8ZXcDfmd1AnpjaAx5bHMEe2NwDWIyIEIkNypbEiAzVSMnNVQ_MS9AEmV8BzVleAZjJCtSbyk",
+    "url": "https://wiadomosci.wp.pl/rss.xml"
+  },
+  {
+    "site": "Babol.pl - wiadomo\u015bci ze \u015bwiata futbolu | plotki | skandale",
+    "favicon": "https://babol.pl/wp-content/uploads/2020/08/cropped-logo-192x192.png",
+    "url": "https://babol.pl/feed/"
+  },
+  {
+    "site": "WP Gwiazdy - pikantne \u017cycie gwiazd, plotki i skandale",
+    "favicon": "https://v.wpimg.pl/MDM4NTY3YiUsVjhndkhvMG8ObD0wEWFmOBZ0dnZ8YnV0BjZlYAFiIGNDPj00VGM0IRt5YmgLe3Z5A395dAt7dX4DfWVqCmIjOl0vLj1KYzQjU2wp",
+    "url": "https://gwiazdy.wp.pl/rss.xml"
+  },
+  {
+    "site": "Sport na Sport.pl - Wyniki i wiadomo\ufffdci sportowe",
+    "favicon": "https://static.im-g.pl/img/sport.ico",
+    "url": "http://rss.gazeta.pl/pub/rss/sport.xml"
+  },
+  {
+    "site": "Money.pl - Money.pl",
+    "favicon": "https://www.money.pl/static/favicon.ico",
+    "url": "https://www.money.pl/rss/rss.xml"
+  },
+  {
+    "site": "Strona g\u0142\u00f3wna - Na Sygnale",
+    "favicon": "https://www.nasygnale.pl/wp-content/uploads/2018/03/cropped-log-512x512-300x300.png",
+    "url": "https://www.nasygnale.pl/feed/"
+  },
+  {
+    "site": "Wiadomo\u015bci z kraju i ze \u015bwiata - najnowsze informacje w TVN24 - TVN24",
+    "favicon": "https://tvn24.pl/static/manifests/tvn24/icons/favicon-32x32.png",
+    "url": "https://tvn24.pl/najwazniejsze.xml"
+  },
+  {
+    "site": "Wyborcza.pl - Naj\ufffdwie\ufffdsze wiadomo\ufffdci od Gazety Wyborczej",
+    "favicon": "https://static.im-g.pl/aliasy/foto/wyborcza/favicon.ico",
+    "url": "http://rss.gazeta.pl/pub/rss/najnowsze_wyborcza.xml"
+  },
+  {
+    "site": "Pudelek.pl - Plotki, Gwiazdy, Sensacja - Pudelek",
+    "favicon": "https://www.pudelek.pl/static/favicon-512x512.png",
+    "url": "https://www.pudelek.pl/rss2.xml"
+  },
+  {
+    "site": "Plotek.pl - Najnowsze Plotki, Gwiazdy, Zdj\ufffdcia bez Cenzury",
+    "favicon": "https://static.im-g.pl/i/obrazki/plotek/plotek_favicona.ico",
+    "url": "http://rss.gazeta.pl/pub/rss/plotek.xml"
+  },
+  {
+    "site": "Rp.pl: Najwa\ufffdniejsze wiadomo\ufffdci gospodarcze, prawne i polityczne z Polski i ze \ufffdwiata. Aktualne wiadomo\ufffdci z dnia - rp.pl",
+    "favicon": "https://www.rp.pl/favicon-16x16.png",
+    "url": "https://www.rp.pl/rss/1056"
+  },
+  {
+    "site": "Wiadomo\u015bci Lokalne - WYDARZENIA w INTERIA.PL - wiadomo\u015bci z kraju",
+    "favicon": "https://wydarzenia.interia.pl/favicon.ico",
+    "url": "https://wydarzenia.interia.pl/polska/feed"
+  },
+  {
+    "site": "\n        Dziennik.pl - na bie\u017c\u0105co  - Dziennik \n    ",
+    "favicon": "https://ocdn.eu/workshopinforocdn/infor/favicon/favicon-196.png",
+    "url": "http://rss.dziennik.pl/Dziennik-PL"
+  }
+]

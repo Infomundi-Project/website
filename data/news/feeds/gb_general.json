@@ -1,0 +1,72 @@
+[
+  {
+    "site": "UK Home | Daily Mail Online",
+    "favicon": "https://www.dailymail.co.uk/favicon.ico?v=2",
+    "url": "https://www.dailymail.co.uk/home/index.rss"
+  },
+  {
+    "site": "News, sport and opinion from the Guardian's global edition | The Guardian",
+    "favicon": "https://assets.guim.co.uk/images/favicons/46bd2faa1ab438684a6d4528a655a8bd/32x32.ico",
+    "url": "https://www.theguardian.com/international/rss"
+  },
+  {
+    "site": "s headlines and latest breaking news",
+    "favicon": "https://www.independent.co.uk/img/shortcut-icons/icon-512x512.png",
+    "url": "https://www.independent.co.uk/rss"
+  },
+  {
+    "site": "The Mirror: The Heart of Britain",
+    "favicon": "https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/img/favicon.ec1359e58dd0bce2.ico",
+    "url": "https://www.mirror.co.uk/rss.xml"
+  },
+  {
+    "site": "Financial Times",
+    "favicon": "https://www.ft.com/__origami/service/image/v2/images/raw/ftlogo-v1%3Abrand-ft-logo-square-coloured?source=update-logos&format=svg",
+    "url": "https://www.ft.com/?format=rss"
+  },
+  {
+    "site": " Sunday Mail - Scottish News, Sport, Politics and Celeb gossip",
+    "favicon": "https://s2-prod.dailyrecord.co.uk/@trinitymirrordigital/chameleon-branding/publications/dailyrecord/img/favicon.013e9710c3385915.ico",
+    "url": "https://www.dailyrecord.co.uk/rss.xml"
+  },
+  {
+    "site": "Home | The Scotsman",
+    "favicon": "https://www.scotsman.com/img/icons/96x96.png",
+    "url": "https://www.scotsman.com/rss"
+  },
+  {
+    "site": " celebrity gossip",
+    "favicon": "https://s2-prod.manchestereveningnews.co.uk/@trinitymirrordigital/chameleon-branding/publications/men/img/favicon.fbd8979ab5459594.ico",
+    "url": "https://www.manchestereveningnews.co.uk/rss.xml"
+  },
+  {
+    "site": "London news | London Evening Standard",
+    "favicon": "https://www.standard.co.uk/img/shortcut-icons/icon-512x512.png",
+    "url": "https://www.standard.co.uk/rss"
+  },
+  {
+    "site": "WalesOnline: News, sport, weather and events from across Wales",
+    "favicon": "https://s2-prod.walesonline.co.uk/@trinitymirrordigital/chameleon-branding/publications/walesonline/img/favicon.03a6f3e8c0b768c5.ico",
+    "url": "https://www.walesonline.co.uk/rss.xml"
+  },
+  {
+    "site": "The Scottish Sun \u2013 Latest news, sports, showbiz, and celebrities",
+    "favicon": "https://www.thescottishsun.co.uk/wp-content/uploads/sites/2/2016/10/cropped-icon-e1459786005667.png?strip=all&w=192",
+    "url": "https://www.thescottishsun.co.uk/feed/"
+  },
+  {
+    "site": "Footymad News - Footymad.net",
+    "favicon": "http://www.footymad.net/img/favicon.png",
+    "url": "http://www.footymad.net/channel/rss/"
+  },
+  {
+    "site": "The Daily Star: Home of Fun Stuff",
+    "favicon": "https://s2-prod.dailystar.co.uk/@trinitymirrordigital/chameleon-branding/publications/dailystar/img/favicon.23503f7410f84687.ico",
+    "url": "https://www.dailystar.co.uk/rss.xml"
+  },
+  {
+    "site": " Photos | OK! Magazine",
+    "favicon": "https://s2-prod.ok.co.uk/@trinitymirrordigital/chameleon-branding/publications/ok/img/favicon.7387a2280d4845c6.ico",
+    "url": "https://www.ok.co.uk/rss.xml"
+  }
+]

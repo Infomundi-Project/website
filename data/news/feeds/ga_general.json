@@ -1,0 +1,27 @@
+[
+  {
+    "site": "information quotidienne du Gabon par des journalistes libres et ind\u00e9pendants",
+    "favicon": "https://www.gabonreview.com/wp-content/uploads/2020/10/cropped-Favicon-Gabon-Review-512x512-1-192x192.jpg",
+    "url": "https://www.gabonreview.com/feeds"
+  },
+  {
+    "site": "GABONEWS - Pour l'information Juste !",
+    "favicon": "http://www.gabonews.com/squelettes/images/favicon.png",
+    "url": "http://www.gabonews.com/spip.php?page=backend"
+  },
+  {
+    "site": "Accueil -",
+    "favicon": "https://gabonactu.com/wp-content/uploads/2021/01/LOGO_GA.jpg",
+    "url": "https://gabonactu.com/feed/"
+  },
+  {
+    "site": "Accueil - AGP - Agence Gabonaise de Presse",
+    "favicon": "https://agpgabon.ga/wp-content/uploads/2021/04/cropped-LOGO-AGP-HD-ACL-1-192x192.png",
+    "url": "https://agpgabon.ga/feed/"
+  },
+  {
+    "site": "INFO EN DIRECT DU GABON",
+    "favicon": "https://fr.infosgabon.com/favicon.ico",
+    "url": "https://fr.infosgabon.com/feed/"
+  }
+]

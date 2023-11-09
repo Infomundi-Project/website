@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Nayakhabar.com",
+    "favicon": "http://2.bp.blogspot.com/--yxBJtO7NOc/VbCvMbPOeZI/AAAAAAAAADA/MN29OUv7muM/s1600/nayakhabar.jpg",
+    "url": "http://www.nayakhabar.com/feeds/posts/default"
+  },
+  {
+    "site": "Nagarik News - Nepal Republic Media",
+    "favicon": "https://staticcdn.nagariknetwork.com/images/favicon.png",
+    "url": "https://nagariknews.nagariknetwork.com/feed"
+  },
+  {
+    "site": " No 1 News Portal from Nepal in Nepali.",
+    "favicon": "https://www.onlinekhabar.com/wp-content/uploads/2017/05/logo-mobile1.png",
+    "url": "https://www.onlinekhabar.com/feed"
+  },
+  {
+    "site": "Mysansar",
+    "favicon": "https://www.mysansar.com/wp-content/ata-images/favicon (1).ico",
+    "url": "https://www.mysansar.com/feed/"
+  }
+]

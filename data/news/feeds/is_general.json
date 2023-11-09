@@ -1,0 +1,32 @@
+[
+  {
+    "site": "DV - Frj\u00e1ls og \u00f3h\u00e1\u00f0ur mi\u00f0ill",
+    "favicon": "https://www.dv.is/wp-content/themes/dv/img/favicon/favicon-16x16.png",
+    "url": "https://www.dv.is/feed/"
+  },
+  {
+    "site": "Pressan - DV",
+    "favicon": "https://www.dv.is/wp-content/themes/dv/img/favicon/favicon-16x16.png",
+    "url": "https://www.dv.is/feed/"
+  },
+  {
+    "site": "B\u00e6jarins Besta | Vestfirskar fr\u00e9ttir",
+    "favicon": "http://www.bb.is/wp-content/uploads/2016/11/favicon.ico",
+    "url": "http://www.bb.is/feed/"
+  },
+  {
+    "site": "Veri\u00f0 hjartanlega velkomin \u00e1 vefs\u00ed\u00f0una akureyrivikubla\u00f0.is",
+    "favicon": "http://akureyrivikublad.is/wp-content/uploads/sites/498/2018/09/cropped-1231479578_df19e83b-296b-43f1-b6c9-70a93990770d-300x300.png",
+    "url": "http://akureyrivikublad.is/feed/"
+  },
+  {
+    "site": "Eyjafr\u00e9ttir | Fr\u00e9ttir \u00far Eyjum",
+    "favicon": "https://eyjafrettir.is/wp-content/uploads/2021/04/cropped-Eyjafr-02-1-scaled-1-192x192.jpg",
+    "url": "https://eyjafrettir.is/feed/"
+  },
+  {
+    "site": "Feykir.is - Ferskur \u00e1 netinu",
+    "favicon": "https://www.feykir.is/favicon.ico",
+    "url": "https://www.feykir.is/is/rss"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "site": "\u6642\u4e8b\u30c9\u30c3\u30c8\u30b3\u30e0\uff1a\u6642\u4e8b\u901a\u4fe1\u793e\u304c\u904b\u55b6\u3059\u308b\u30cb\u30e5\u30fc\u30b9\u30b5\u30a4\u30c8",
+    "favicon": "https://www.jiji.com/favicon.ico",
+    "url": "https://www.jiji.com/rss/ranking.rdf"
+  },
+  {
+    "site": "J-CAST  \u30cb\u30e5\u30fc\u30b9",
+    "favicon": "https://www.j-cast.com/favicon.ico",
+    "url": "https://www.j-cast.com/atom.xml"
+  },
+  {
+    "site": "\ufffd\u9964\ufffd\u05a5\u0265\ufffd\ufffd\u02e5\u587c\ufffd\ufffd\ufffd\ufffdlivedoor \ufffd\u02e5\u587c\ufffd\ufffd\ufffd\ufffd",
+    "favicon": "https://parts.news.livedoor.com/img/favicon.ico?v=20131002",
+    "url": "https://news.livedoor.com/topics/rss/top.xml"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "site": "Zambian News Watchdog - Zambian Watchdog",
+    "favicon": "https://www.zambiawatchdog.com/wp-content/uploads/2018/03/zwd-favicon.png",
+    "url": "https://www.zambiawatchdog.com/feed/"
+  },
+  {
+    "site": " Zambian News And Entertainment",
+    "favicon": "https://tumfweko.com/wp-content/themes/advanced-newspaper/framework/admin/images/favicon.ico",
+    "url": "https://tumfweko.com/feed/"
+  },
+  {
+    "site": "s Leading Online News Site - LusakaTimes.com",
+    "favicon": "https://i0.wp.com/www.lusakatimes.com/wp-content/uploads/2015/08/cropped-logo.png?fit=192%2C192&ssl=1",
+    "url": "https://www.lusakatimes.com/feed/"
+  },
+  {
+    "site": " Without fear or Favour",
+    "favicon": "http://www.daily-mail.co.zm/favicon.ico",
+    "url": "http://www.daily-mail.co.zm/feed/"
+  },
+  {
+    "site": "Times of Zambia ",
+    "favicon": null,
+    "url": "http://feedburner.google.com/fb/a/mailverify?uri=TimesOfZambia&loc=en_US"
+  },
+  {
+    "site": "s best Radio and Television services and reliable news",
+    "favicon": "https://www.znbc.co.zm/wp-content/uploads/2018/10/cropped-ZNBC-logo-192x192.png",
+    "url": "https://www.znbc.co.zm/feed/"
+  }
+]

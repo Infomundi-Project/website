@@ -1,0 +1,37 @@
+[
+  {
+    "site": "Le Monde.fr - Actualit\u00e9s et Infos en France et dans le monde",
+    "favicon": "https://www.lemonde.fr/dist/assets/img/logos/pwa-180.png",
+    "url": "https://www.lemonde.fr/rss/une.xml"
+  },
+  {
+    "site": "Municipales 2020",
+    "favicon": "https://www.20minutes.fr/favicons/favicon-16x16.png",
+    "url": "https://www.20minutes.fr/rss/une.xml"
+  },
+  {
+    "site": "Obs - Actualit\u00e9s du jour en direct",
+    "favicon": "https://www.nouvelobs.com/icons/lobs/favicon.ico",
+    "url": "https://www.nouvelobs.com/rss.xml"
+  },
+  {
+    "site": "Le Point \u2013 Actualit\u00e9 Politique, Monde, France, \u00c9conomie, High-Tech, Culture",
+    "favicon": "https://www.lepoint.fr/favicon.ico",
+    "url": "https://www.lepoint.fr/rss.xml"
+  },
+  {
+    "site": "La D\u00e9p\u00eache : Actualit\u00e9s en temps r\u00e9el et l'info en continu - ladepeche.fr",
+    "favicon": "https://www.ladepeche.fr/favicon-16x16.png",
+    "url": "https://www.ladepeche.fr/rss.xml"
+  },
+  {
+    "site": "Actu people. News people du jour. Toute l'info :  Purepeople",
+    "favicon": "https://www.purepeople.com/web/skins/v2/img/favicon/fr/android-icon-192x192.png",
+    "url": "https://www.purepeople.com/rss/news_t0.xml"
+  },
+  {
+    "site": "Rue 89",
+    "favicon": "https://www.nouvelobs.com/icons/rue89/favicon.ico",
+    "url": "https://www.nouvelobs.com/rue89/rss.xml"
+  }
+]

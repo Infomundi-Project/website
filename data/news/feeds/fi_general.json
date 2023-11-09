@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Iltalehti | IL - Suomen nopein uutispalvelu",
+    "favicon": "https://assets.ilcdn.fi/favicon-16x16.png",
+    "url": "https://www.iltalehti.fi/rss.xml"
+  },
+  {
+    "site": "Etusivu | Savon Sanomat",
+    "favicon": "https://www.savonsanomat.fi/favicon.ico",
+    "url": "https://www.savonsanomat.fi/feed/rss"
+  },
+  {
+    "site": "Etusivu | Keskisuomalainen",
+    "favicon": "https://www.ksml.fi/favicon.ico",
+    "url": "https://www.ksml.fi/feed/rss"
+  },
+  {
+    "site": "Etusivu | Etel\u00e4-Suomen Sanomat",
+    "favicon": "https://www.ess.fi/favicon.ico",
+    "url": "https://www.ess.fi/feed/rss"
+  }
+]

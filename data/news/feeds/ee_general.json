@@ -1,0 +1,57 @@
+[
+  {
+    "site": "Postimees: V\u00e4rsked uudised Eestist ja v\u00e4lismaalt",
+    "favicon": "https://f10.pmo.ee/Ftflr7jrGfyJFXxMrbFEqWyagvA=/256x256/https://f.pmo.ee/logos/81/512d410d18954b32fb524444ff3ff3be.png",
+    "url": "https://www.postimees.ee/rss"
+  },
+  {
+    "site": "Tarbija - Majandus",
+    "favicon": "https://f10.pmo.ee/jmHH3UHcNsYjkjFBn6aYrNJhF-g=/256x256/https://f.pmo.ee/logos/517/7e4379d38a11ee4b7e3a3a703c0dcc95.png",
+    "url": "https://majandus.postimees.ee/rss"
+  },
+  {
+    "site": "Elu24 - Eesti k\u00f5ige menukam veebitabloid",
+    "favicon": "https://f10.pmo.ee/rcbuK7_ph4_yG5BraILMCbQW1qo=/256x256/https://f.pmo.ee/logos/80/75269306570cb0dd76b758d8eed19038.png",
+    "url": "https://www.elu24.ee/rss"
+  },
+  {
+    "site": "Tallinn - Postimees: V\u00e4rsked uudised Eestist ja v\u00e4lismaalt",
+    "favicon": "https://f10.pmo.ee/PjAZnZonwp7fgluypDxg4sOIr4I=/256x256/https://f.pmo.ee/logos/253/03e6d292e6f720b12088280dd5185b3a.png",
+    "url": "https://www.postimees.ee/rss"
+  },
+  {
+    "site": "Tartu Postimees",
+    "favicon": "https://f10.pmo.ee/ijDFPMvo2sQ_rjA0q649JIc_5Ek=/256x256/https://f.pmo.ee/logos/384/22f8b967e68df021c35efc7544ab1761.png",
+    "url": "https://tartu.postimees.ee/rss"
+  },
+  {
+    "site": "Limon",
+    "favicon": "https://f10.pmo.ee/VEw40FrRDz_ADly3gVVl6LCn9hU=/256x256/https://f.pmo.ee/logos/933/192b2fa664dae82a550831dc1a91271d.png",
+    "url": "https://limon.postimees.ee/rss"
+  },
+  {
+    "site": "P\u00e4rnu Postimees",
+    "favicon": "https://f10.pmo.ee/hTYmo-Bi5Q4vYqCL-zMfHfafK28=/256x256/https://f.pmo.ee/logos/383/51b8930332f86740fa233acba771a548.png",
+    "url": "https://parnu.postimees.ee/rss"
+  },
+  {
+    "site": "Rus.Postimees.ee",
+    "favicon": "https://f10.pmo.ee/JkVMV3q81Ayn1rWuvIupdx1m8pI=/256x256/https://f.pmo.ee/logos/455/87e41ad4f22e6056418beed1b2af2967.png",
+    "url": "https://rus.postimees.ee/rss"
+  },
+  {
+    "site": "\u0421\u043f\u043e\u0440\u0442 - Rus.Postimees.ee",
+    "favicon": "https://f10.pmo.ee/JkVMV3q81Ayn1rWuvIupdx1m8pI=/256x256/https://f.pmo.ee/logos/455/87e41ad4f22e6056418beed1b2af2967.png",
+    "url": "https://rus.postimees.ee/rss"
+  },
+  {
+    "site": "Virumaa Teataja",
+    "favicon": "https://f10.pmo.ee/B1_P21QYqsBxVOGdUvB-Rho0fLM=/256x256/https://f.pmo.ee/logos/382/7e800035ea1e8303d7f5712e55f7d2d0.png",
+    "url": "https://virumaateataja.postimees.ee/rss"
+  },
+  {
+    "site": "Reporter",
+    "favicon": "https://f10.pmo.ee/y7qZ0lSCTBjWhj9nnLHTH4b5CV0=/256x256/https://f.pmo.ee/logos/2993/116bfa5b47a1f74db998b5ee0eaa62ff.png",
+    "url": "https://reporter.elu24.ee/rss"
+  }
+]

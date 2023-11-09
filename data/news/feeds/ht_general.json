@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Balistrad",
+    "favicon": "https://balistrad.com/wp-content/uploads/2020/07/20200723_145703_0000.png",
+    "url": "https://balistrad.com/feed/"
+  },
+  {
+    "site": "Grands Titres - METROPOLE",
+    "favicon": "https://metropole.ht/wp-content/uploads/2020/10/radio-tele-metropole-haiti-favicon.png",
+    "url": "https://metropole.ht/feed/"
+  },
+  {
+    "site": "Haiti",
+    "favicon": "https://www.signalfmhaiti.com/wp-content/uploads/2020/09/cropped-signal-fm-copy-192x192.jpg",
+    "url": "https://www.signalfmhaiti.com/feed"
+  },
+  {
+    "site": " La radio qui vous \u00e9coute!",
+    "favicon": "https://i2.wp.com/radiotelevision2000.com/home/wp-content/uploads/2020/01/cropped-logo-1-1.png?fit=192%2C192&ssl=1",
+    "url": "https://radiotelevision2000.com/home/?feed=rss2"
+  }
+]

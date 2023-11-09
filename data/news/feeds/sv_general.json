@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Deportes | Noticias de El Salvador",
+    "favicon": "https://cdn-pro.elsalvador.com/escom_the_one/images/favicon.ico",
+    "url": "https://www.elsalvador.com/category/deportes/feed/"
+  },
+  {
+    "site": " Noticias de El Salvador",
+    "favicon": "https://i1.wp.com/lapagina.com.sv/wp-content/uploads/2018/09/cropped-DLP_F.png?fit=192%2C192&ssl=1",
+    "url": "https://lapagina.com.sv/feed/"
+  },
+  {
+    "site": "Home - Diario Co Latino",
+    "favicon": "https://i1.wp.com/www.diariocolatino.com/wp-content/uploads/2015/03/Logoave-54f47339v1_site_icon.png?fit=192%2C192&ssl=1",
+    "url": "https://www.diariocolatino.com/feed/"
+  },
+  {
+    "site": "ContraPunto",
+    "favicon": "https://www.contrapunto.com.sv/wp-content/uploads/2021/01/favicon_16x16.png",
+    "url": "https://www.contrapunto.com.sv/feed/"
+  }
+]

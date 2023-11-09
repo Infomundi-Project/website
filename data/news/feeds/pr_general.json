@@ -1,0 +1,17 @@
+[
+  {
+    "site": " Telemundo de Puerto Rico canal l\u00edder en telenovelas, noticias y entretenimiento",
+    "favicon": "https://media.telemundopr.com/2019/09/cropped-TLMD_Puerto-Rico.png?fit=192%2C192&quality=85&strip=all",
+    "url": "https://www.telemundopr.com/?rss=y"
+  },
+  {
+    "site": "Inicio",
+    "favicon": "https://mk0radioislabdeo1p6u.kinstacdn.com/wp-content/uploads/2019/07/cropped-favicon-192x192.png",
+    "url": "https://radioisla.tv/feed/"
+  },
+  {
+    "site": "\n            Noticias, Deportes y Entretenimiento de Puerto Rico y el Mundo\n        \n         |\n        \n            Metro\n        ",
+    "favicon": "https://assets.metrolatam.com/favicon-16x16.png",
+    "url": "https://www.metro.pr/pr/sitemap/news-sitemap.xml"
+  }
+]

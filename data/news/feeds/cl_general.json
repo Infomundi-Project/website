@@ -1,0 +1,12 @@
+[
+  {
+    "site": "BioBioChile - La Red de Prensa M\u00e1s Grande de Chile",
+    "favicon": "https://www.biobiochile.cl/assets/biobiochile/img/icons/icon-16x16.png",
+    "url": "https://feeds.feedburner.com/radiobiobio/NNeJ"
+  },
+  {
+    "site": "Home - La Naci\u00f3n",
+    "favicon": "https://cdn.shortpixel.ai/spai/q_lossless+ret_img/https://storage.googleapis.com/lanacionwp-storage/1/2020/05/iconnac.png",
+    "url": "http://www.lanacion.cl/feed/"
+  }
+]

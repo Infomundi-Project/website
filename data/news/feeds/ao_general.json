@@ -1,0 +1,22 @@
+[
+  {
+    "site": "radioculturaangolana",
+    "favicon": "https://radioculturaangolana.com/favicon.ico",
+    "url": "https://radioculturaangolana.com/feed/"
+  },
+  {
+    "site": " UNIMOS O PA\u00cdS",
+    "favicon": "https://rna.ao/rna.ao/wp-content/uploads/2020/06/LOGO-SM.png",
+    "url": "https://rna.ao/rna.ao/feed/"
+  },
+  {
+    "site": "expansao - Pesquisa SAPO",
+    "favicon": "http://imgs.sapo.pt/images/sapo.ico",
+    "url": "http://pesquisa.sapo.ao/?adultfilter=strict&barra=resumo&cluster=0&format=rss&limit=10&location=ao&page=1&q=expansao&st=local"
+  },
+  {
+    "site": "economiaemercado - Pesquisa SAPO",
+    "favicon": "http://imgs.sapo.pt/images/sapo.ico",
+    "url": "http://pesquisa.sapo.ao/?adultfilter=strict&barra=resumo&cluster=0&format=rss&limit=10&location=ao&page=1&q=economiaemercado&st=local"
+  }
+]

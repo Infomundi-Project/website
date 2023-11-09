@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Yeni M\u00fcsavat - \u041e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e \u043f\u043e\u043b\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442 \u0433\u0430\u0437\u0435\u0442\u0430",
+    "favicon": "https://musavat.com/favicon.ico",
+    "url": "https://musavat.com/rss.xml"
+  },
+  {
+    "site": "Azadl\u0131qRadiosu",
+    "favicon": "https://www.azadliq.org/Content/responsive/RFE/img/webApp/ico-128x128.png",
+    "url": "https://www.azadliq.org/api/"
+  },
+  {
+    "site": "Azadliq",
+    "favicon": "https://i1.wp.com/www.azadliq.info/wp-content/uploads/2015/09/fav.png",
+    "url": "https://www.azadliq.info/feed"
+  },
+  {
+    "site": "Oxu.az - Az\u0259rbaycan X\u0259b\u0259rl\u0259ri",
+    "favicon": "https://cdn.oxu.az/assets/oxu/favicon-be69a7e075f480d5feb0e455336bd049b79ebed51157a5919d2c46e975c6c1ad.ico",
+    "url": "https://oxu.az/feed"
+  }
+]

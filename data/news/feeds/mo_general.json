@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Home | Macao News",
+    "favicon": "https://macaonews.org/wp-content/uploads/2021/02/cropped-MN_Monogram_Red-One-192x192.png",
+    "url": "https://macaonews.org/feed/"
+  },
+  {
+    "site": "MACAU DAILY TIMES \u6fb3\u9580\u6bcf\u65e5\u6642\u5831",
+    "favicon": "https://macaudailytimes.com.mo/wp-content/uploads/2016/12/cropped-mdt-logo-512a-192x192.png",
+    "url": "https://macaudailytimes.com.mo/feed"
+  },
+  {
+    "site": " Jornal em L\u00edngua Portuguesa",
+    "favicon": "https://hojemacau.com.mo/wp-content/uploads/2021/01/cropped-favicon-192x192.png",
+    "url": "https://hojemacau.com.mo/feed/"
+  }
+]

@@ -1,0 +1,6 @@
+[
+	{"site": "g1", "url": "https://g1.globo.com/rss/g1/tecnologia/"},
+	{"site": "uol", "url": "http://rss.uol.com.br/feed/tecnologia.xml"},
+	{"site": "r7", "url": "https://noticias.r7.com/tecnologia-e-ciencia/feed.xml"},
+	{"site": "Folha", "url": "https://feeds.folha.uol.com.br/tec/rss091.xml"}
+]

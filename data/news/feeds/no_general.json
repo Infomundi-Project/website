@@ -1,0 +1,32 @@
+[
+  {
+    "site": "Nyheter fra Norges mest leste nettavis \u2013 VG",
+    "favicon": "https://www.vg.no/cnp-assets/favicon/favicon.ico",
+    "url": "https://www.vg.no/rss/feed/forsiden/?format=rss"
+  },
+  {
+    "site": "Antall visninger",
+    "favicon": "https://www.tv2.no/view-resources/baseview/public/common/lab_assets/img/favicon/icon.svg",
+    "url": "https://www.tv2.no/rest/cms-feeds-dw-rest/v2/cms/article/"
+  },
+  {
+    "site": "Forsiden - Aftenposten",
+    "favicon": "https://cdn.aftenposten.no/ap/images/favicons/favicon-192x192.png",
+    "url": "https://www.aftenposten.no/rss/"
+  },
+  {
+    "site": "Forsiden - Bergens Tidende",
+    "favicon": "https://www.bt.no/seksjon/dist/img/favicon.ico",
+    "url": "https://www.bt.no/rss?characteristicsHotness=50..100"
+  },
+  {
+    "site": "Forsiden - Stavanger Aftenblad",
+    "favicon": "https://www.aftenbladet.no/seksjon/dist/img/android-icon-256x256.png",
+    "url": "https://www.aftenbladet.no/rss/"
+  },
+  {
+    "site": "adressa.no",
+    "favicon": "https://static.polarismedia.no/skins/prod/publication/adressa/gfx/favicon.png",
+    "url": "https://www.adressa.no/?service=rssfeed"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Khaleej Times - Dubai News, UAE News, Gulf, News, Latest news, Arab news, Gulf News, Dubai Labour News",
+    "favicon": "https://www.khaleejtimes.com/favicon.ico",
+    "url": "https://www.khaleejtimes.com/rss.xml"
+  },
+  {
+    "site": "Breaking News, UAE, GCC, Middle East, World News and Headlines - Emirates24|7",
+    "favicon": "https://www.emirates247.com/res/img/eb247/favicon.ico",
+    "url": "https://www.emirates247.com/cmlink/newstand-feed-1.679820"
+  },
+  {
+    "site": "& Opinion from the Middle East",
+    "favicon": "https://www.thenationalnews.com/polopoly_fs/7.107!/file/logo-32.jpg",
+    "url": "https://www.thenationalnews.com/cmlink/latest-travel-stories-1.1215701"
+  }
+]

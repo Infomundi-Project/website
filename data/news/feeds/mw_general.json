@@ -1,0 +1,27 @@
+[
+  {
+    "site": "Malawi Nyasa Times - News from Malawi about Malawi",
+    "favicon": "https://www.nyasatimes.com/favicon.ico",
+    "url": "https://www.nyasatimes.com/feed/"
+  },
+  {
+    "site": "Malawi Voice - Giving true online news from Malawi",
+    "favicon": "http://www.malawivoice.com/wp-content/themes/advanced-newspaper/framework/admin/images/favicon.ico",
+    "url": "https://www.malawivoice.com/feed/"
+  },
+  {
+    "site": " We Report It Just When It Happens",
+    "favicon": "http://timesmediamw.com/wp-content/uploads/2017/04/time.png",
+    "url": "http://timesmediamw.com/feed"
+  },
+  {
+    "site": "The Maravi Post - Breaking News, Malawi News, Nigeria News, Africa News and World Headlines",
+    "favicon": "https://www-maravipost-com.exactdn.com/wp-content/uploads/2021/02/cropped-mara-FB.png?strip=all&lossy=1&resize=192%2C192&ssl=1",
+    "url": "https://www.maravipost.com/feed/"
+  },
+  {
+    "site": "Malawi Voice - Giving true online news from Malawi",
+    "favicon": "http://www.malawivoice.com/wp-content/themes/advanced-newspaper/framework/admin/images/favicon.ico",
+    "url": "https://www.malawivoice.com/feed/"
+  }
+]

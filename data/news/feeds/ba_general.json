@@ -1,0 +1,32 @@
+[
+  {
+    "site": "Nezavisne novine",
+    "favicon": "https://www.nezavisne.com/favicon-16x16.png",
+    "url": "https://feeds.feedburner.com/NezavisneNovine"
+  },
+  {
+    "site": "\u2026",
+    "favicon": "http://24sata.info/favicon.ico",
+    "url": "http://24sata.info/feed/"
+  },
+  {
+    "site": "VijestiBa",
+    "favicon": "https://vijesti.ba/pages/img/favicon.png",
+    "url": "https://vijesti.ba/rss/svevijesti"
+  },
+  {
+    "site": "\n   \n Poskok.info ",
+    "favicon": "https://poskok.info/wp-content/uploads/2020/04/favicon.ico",
+    "url": "https://poskok.info/feed/"
+  },
+  {
+    "site": "Express Tabloid - Od nas ne mo\u017eete pobje\u0107i",
+    "favicon": "https://expresstabloid.ba/wp-content/uploads/2018/06/cropped-Zmaj-Favicon-192x192.png",
+    "url": "https://expresstabloid.ba/feed/"
+  },
+  {
+    "site": "Svi odgovori na jednom mjestu - pressrs.ba",
+    "favicon": "https://www.pressrs.ba/wp-content/uploads/2021/05/cropped-favicon-192x192.jpg",
+    "url": "https://www.pressrs.ba/feed/"
+  }
+]

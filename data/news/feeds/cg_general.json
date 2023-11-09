@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Information et de Conseils sur le Congo Brazzaville",
+    "favicon": "https://www.congo-site.com/favicon.ico",
+    "url": "https://www.congo-site.com/feed/"
+  },
+  {
+    "site": "Zenga-Mambu",
+    "favicon": "http://www.zenga-mambu.com/favicon.ico",
+    "url": "http://zenga-mambu.com/feed/"
+  },
+  {
+    "site": "Journal de Brazza - Toutes les infos du Congo en un clic",
+    "favicon": "https://www.journaldebrazza.com/wp-content/themes/jdbrazza/assets/favicons/favicon.ico",
+    "url": "https://www.journaldebrazza.com/feed/"
+  }
+]

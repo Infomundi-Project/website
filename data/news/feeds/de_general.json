@@ -1,0 +1,57 @@
+[
+  {
+    "site": "\r\n\tAktuelle Nachrichten  -\r\n\tBild.de",
+    "favicon": "https://bilder.bild.de/fotos/bild-de-28103320/Bild/8.bild.ico",
+    "url": "https://www.bild.de/rss-feeds/rss-16725492,feed=home.bild.html"
+  },
+  {
+    "site": "DER SPIEGEL | Online-Nachrichten",
+    "favicon": "https://cdn.prod.www.spiegel.de/public/spon/images/icons/favicon.ico",
+    "url": "https://www.spiegel.de/schlagzeilen/index.rss"
+  },
+  {
+    "site": "FOCUS Online - Nachrichten",
+    "favicon": "https://www.focus.de/favicon-16x16.png",
+    "url": "https://rss.focus.de/"
+  },
+  {
+    "site": "Instagram",
+    "favicon": "https://www.sueddeutsche.de/assets/img/ligatur.svg",
+    "url": "https://rss.sueddeutsche.de/rss/Topthemen"
+  },
+  {
+    "site": "Aktuelle Nachrichten online - FAZ.NET",
+    "favicon": "https://www.faz.net/favicon.ico",
+    "url": "https://www.faz.net/rss/aktuell/"
+  },
+  {
+    "site": "Aktuelle Nachrichten | RP ONLINE",
+    "favicon": "https://rp-online.de/assets/skins/rp-online/favicon.ico?v=1623298594",
+    "url": "https://rp-online.de/feed.rss"
+  },
+  {
+    "site": "Logo ARD",
+    "favicon": "https://www.tagesschau.de/res/assets/image/metatag-assets/favicon-16x16.png",
+    "url": "https://www.tagesschau.de/xml/rss2/"
+  },
+  {
+    "site": " Livesport | SPORT1",
+    "favicon": "https://www.sport1.de/favicon.ico",
+    "url": "https://sport1-generation-fussball.podigee.io/feed/mp3"
+  },
+  {
+    "site": "Aktuelle Sportnachrichten, Berichte, Liveticker, Videos, Ergebnisse, Tabellen, SPORTSCHAU | - sportschau.de",
+    "favicon": "https://www.sportschau.de/resources/img/favicon/favicon.ico",
+    "url": "https://www.sportschau.de/sportschauindex100.feed"
+  },
+  {
+    "site": "NDR Plus",
+    "favicon": "https://www.ndr.de/favicon-16x16.png",
+    "url": "https://www.ndr.de/homepage985-rss2.xml"
+  },
+  {
+    "site": "Handelsblatt - Nachrichten aus Finanzen, Wirtschaft und Politik",
+    "favicon": "https://www.handelsblatt.com/favicon.ico",
+    "url": "https://www.handelsblatt.com/contentexport/feed/top-themen/"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "site": "TAHITI INFOS, les informations de Tahiti",
+    "favicon": "https://www.tahiti-infos.com/favicon.ico?v=1570483631",
+    "url": "https://www.tahiti-infos.com/xml/syndication.rss"
+  },
+  {
+    "site": "actualit\u00e9 de la Polyn\u00e9sie Fran\u00e7aise",
+    "favicon": "https://www.tahitinews.co/wp-content/uploads/2018/12/favicon.png",
+    "url": "https://www.tahitinews.co/feed/"
+  },
+  {
+    "site": " Direct, Replay, Actualit\u00e9 de Polyn\u00e9sie",
+    "favicon": "https://www.tntv.pf/tntv/wp-content/uploads/2021/01/cropped-faviconTNTV2021-1-192x192.png",
+    "url": "https://www.tntv.pf/feed/"
+  },
+  {
+    "site": "Tahiti Pacifique",
+    "favicon": "https://www.tahiti-pacifique.com/favicon.ico?v=1566904005",
+    "url": "https://www.tahiti-pacifique.com/xml/syndication.rss"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "site": "Topky.sk | Online spravodajstvo",
+    "favicon": "https://zoznamstatic.sk/img/topky/favicon.ico",
+    "url": "https://www.topky.sk/rss/8/Topky"
+  },
+  {
+    "site": "Skry\u0165",
+    "favicon": "https://www.sme.sk/favicon.ico",
+    "url": "https://www.sme.sk/rss-title"
+  },
+  {
+    "site": "Skry\u0165",
+    "favicon": "https://korzar.sme.sk/favicon.ico",
+    "url": "https://korzar.sme.sk/rss"
+  },
+  {
+    "site": " Media holding.",
+    "favicon": "https://www1.pluska.sk/images/plus1/favicons/icon.svg",
+    "url": "https://www1.pluska.sk/rss.xml"
+  },
+  {
+    "site": "\u0160portov\u00e9 spravodajstvo - spr\u00e1vy, aktuality, v\u00fdsledky | Sportnet.sk",
+    "favicon": "https://sportnet.sme.sk/favicon.ico?v=2",
+    "url": "https://sportnet.sme.sk/rss/"
+  },
+  {
+    "site": "T\u00fd\u017edenn\u00edk o ekonomike a podnikan\u00ed - TREND.sk",
+    "favicon": "https://www.trend.sk/images/trend/favicons/icon.svg",
+    "url": "https://www.trend.sk/rss.xml"
+  },
+  {
+    "site": "oPeniazoch.sk - port\ufffdl o osobn\ufffdch financi\ufffdch",
+    "favicon": "https://cdn.openiazoch.zoznam.sk/img/shortcut.ico",
+    "url": "https://openiazoch.zoznam.sk/rss.asp"
+  },
+  {
+    "site": "Futbal - Pravda.sk",
+    "favicon": "https://ipravda.sk/res/favicon.ico",
+    "url": "https://futbal.pravda.sk/rss/xml/"
+  }
+]

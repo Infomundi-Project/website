@@ -1,0 +1,42 @@
+[
+  {
+    "site": "Home - \u062a\u0627\u0646\u062f",
+    "favicon": "https://i2.wp.com/taand.com/main/wp-content/uploads/2020/05/cropped-taa.jpg?fit=192%2C192&ssl=1",
+    "url": "https://taand.com/main/?feed=rss2"
+  },
+  {
+    "site": " Reflecting the Truth",
+    "favicon": "https://pajhwok.com/wp-content/themes/pajhwok/favicon.png",
+    "url": "https://pajhwok.com/feed/"
+  },
+  {
+    "site": "Kabul Press \u06a9\u0627\u0628\u0644 \u067e\u0631\u0633 - \u06a9\u0627\u0628\u0644 \u067e\u0631\u0633 \u0633\u0627\u0646\u0633\u0648\u0631 \u0646\u0645\u06cc \u06a9\u0646\u062f. \u06a9\u0627\u0628\u0644 \u067e\u0631\u0633 \u064a\u06a9 \u0631\u0633\u0627\u0646\u0647 \u06cc \u0622\u0632\u0627\u062f \u0627\u0633\u062a",
+    "favicon": "https://www.kabulpress.org/squelettes/favicon.ico",
+    "url": "https://www.kabulpress.org/spip.php?page=backend"
+  },
+  {
+    "site": "\u0635\u0641\u062d\u0647 \u0646\u062e\u0633\u062a \u0631\u0627\u062f\u06cc\u0648 \u0622\u0632\u0627\u062f\u06cc",
+    "favicon": "https://da.azadiradio.com/Content/responsive/RFE/img/webApp/ico-128x128.png",
+    "url": "https://da.azadiradio.com/api/"
+  },
+  {
+    "site": "\u062e\u0628\u0631\u06af\u0632\u0627\u0631\u06cc \u0628\u062e\u062f\u06cc",
+    "favicon": "https://bokhdinews.af/apple-touch-icon.png",
+    "url": "https://bokhdinews.af/feed/"
+  },
+  {
+    "site": "\u062f \u0627\u0632\u0627\u062f\u064a \u0631\u0627\u0689\u06cc\u0648 \u06a9\u0648\u0631\u067e\u0627\u06bc\u0647",
+    "favicon": "https://pa.azadiradio.com/Content/responsive/RFE/img/webApp/ico-128x128.png",
+    "url": "https://pa.azadiradio.com/api/"
+  },
+  {
+    "site": " \u062a\u0627\u0632\u0647 \u062e\u0628\u0631\u0648\u0646\u0647",
+    "favicon": "https://larawbar.net/data/image/news/cropped-larawbar-1-1-192x192.jpg",
+    "url": "https://larawbar.net/feed"
+  },
+  {
+    "site": "The Khaama Press News Agency - The reliable news source in Afghanistan",
+    "favicon": "https://t4w9r6m9.rocketcdn.me/wp-content/uploads/2019/12/cropped-Khaama-Press-Logo-192x192.jpg",
+    "url": "https://www.khaama.com/feed/"
+  }
+]

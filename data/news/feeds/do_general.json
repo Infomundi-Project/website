@@ -1,0 +1,47 @@
+[
+  {
+    "site": "Inicio | Hoy Digital",
+    "favicon": "https://hoy.com.do/wp-content/uploads/2016/06/cropped-Peri\u00f3dico-Hoy-Noticias-de-Rep\u00fablica-Dominicana-192x192.png",
+    "url": "https://hoy.com.do/feed/"
+  },
+  {
+    "site": "El Caribe",
+    "favicon": "https://storage.googleapis.com/mmc-elcaribe-bucket/uploads/2017/07/298a9c09-logoelcaribe_c-300x300.png",
+    "url": "https://www.elcaribe.com.do/feed/"
+  },
+  {
+    "site": "Remolacha - Noticias Republica Dominicana | El Blog #1 de los dominicanos",
+    "favicon": "https://i2.wp.com/remolacha.net/wp-content/uploads/2017/11/cropped-logoqqremo_r1_c1.png?fit=192%2C192&ssl=1",
+    "url": "https://remolacha.net/feed/"
+  },
+  {
+    "site": "El D\u00eda",
+    "favicon": "https://eldia.com.do/wp-content/uploads/2016/09/cropped-elDia_favicon-192x192.png",
+    "url": "https://eldia.com.do/feed/"
+  },
+  {
+    "site": "CDN - El Canal de Noticias de los Dominicanos",
+    "favicon": "https://storage.googleapis.com/mmc-cdn-bucket/favicon.ico",
+    "url": "https://cdn.com.do/feed/"
+  },
+  {
+    "site": "Ensegundos.do Rep\u00fablica Dominicana  Ensegundos Rep\u00fablica Dominicana",
+    "favicon": "https://i1.wp.com/ensegundos.do/wp-content/uploads/2013/08/cropped-ensegundos1.png?fit=192%2C192&ssl=1",
+    "url": "https://ensegundos.do/feed/"
+  },
+  {
+    "site": " DominicanosHOY",
+    "favicon": "https://dominicanoshoy.com/wp-content/uploads/2016/10/favicon.ico",
+    "url": "https://www.dominicanoshoy.com/feed/"
+  },
+  {
+    "site": "GenteTuya.com |",
+    "favicon": "https://www.gentetuya.com/wp-content/uploads/2020/07/favicon-1.ico",
+    "url": "https://www.gentetuya.com/feed/"
+  },
+  {
+    "site": "M\u00e1s Vip - ",
+    "favicon": "https://masvip.com.do/wp-content/themes/braxton/images/logos/favicon-masvip.png",
+    "url": "https://masvip.com.do/feed/"
+  }
+]

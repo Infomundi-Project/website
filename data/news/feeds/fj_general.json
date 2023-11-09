@@ -1,0 +1,17 @@
+[
+  {
+    "site": "\r\n            Fiji Sun | Leading Fiji newspaper for Fiji News, Sport and Pacific news        ",
+    "favicon": "https://fijisun.com.fj/wp-content/uploads/2014/08/favicon.ico",
+    "url": "https://fijisun.com.fj/feed/"
+  },
+  {
+    "site": " Latest Fiji News, Sports, and Weather.  Keeping Fijians Connected.",
+    "favicon": "https://www.fbcnews.com.fj/wp-content/themes/fbc2018/img/favicons/favicon-16x16.png",
+    "url": "https://www.fbcnews.com.fj/feed/"
+  },
+  {
+    "site": " Nadi Fiji News",
+    "favicon": "https://www.thejetnewspaper.com/wp-content/uploads/2018/12/cropped-Favicon-1-192x192.png",
+    "url": "https://www.thejetnewspaper.com/feed/"
+  }
+]

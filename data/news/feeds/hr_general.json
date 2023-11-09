@@ -1,0 +1,37 @@
+[
+  {
+    "site": "Premium sekcija",
+    "favicon": "https://www.vecernji.hr/static/img/favicons/vl/favicon-16x16.png",
+    "url": "https://www.vecernji.hr/feeds/latest"
+  },
+  {
+    "site": "Naslovnica - tportal",
+    "favicon": "https://www.tportal.hr/favicon.ico?v=00rl35Odp6",
+    "url": "https://www.tportal.hr/rss-najnovije.xml"
+  },
+  {
+    "site": "Novi list",
+    "favicon": "https://www.novilist.hr/wp-content/uploads/2020/05/cropped-nl-192x192.png",
+    "url": "https://www.novilist.hr/feed/"
+  },
+  {
+    "site": " on-line izdanje najutjecajnijeg politi\u010dkog tjednika",
+    "favicon": "https://www.nacional.hr/wp-content/uploads/fbrfg/favicon.ico",
+    "url": "https://www.nacional.hr/feed/"
+  },
+  {
+    "site": "\n\n        \n        RTL.hr - sve najva\u017enije vijesti na jednom mjestu - RTL\n\n    ",
+    "favicon": "https://d1497obqe27d0d.cloudfront.net/favicons/hub/favicon-96x96.png?v=2021041307",
+    "url": "https://www.rtl.hr/feed/"
+  },
+  {
+    "site": "Poslovni dnevnik",
+    "favicon": "https://www.poslovni.hr/wp-content/themes/poslovni/static/img/fav/favicon-16x16.png",
+    "url": "https://www.poslovni.hr/feed"
+  },
+  {
+    "site": "Nezavisne novine",
+    "favicon": "https://www.nezavisne.com/favicon-16x16.png",
+    "url": "https://feeds.feedburner.com/NezavisneNovine"
+  }
+]

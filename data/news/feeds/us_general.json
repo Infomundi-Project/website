@@ -1,0 +1,62 @@
+[
+  {
+    "site": " News Videos",
+    "favicon": "https://static.foxnews.com/static/orion/styles/img/fox-news/favicons/android-chrome-192x192.png",
+    "url": "https://feeds.feedburner.com/foxnews/latest"
+  },
+  {
+    "site": "The New York Times - Breaking News, US News, World News and Videos",
+    "favicon": "https://www.nytimes.com/vi-assets/static-assets/favicon-d2483f10ef688e6f89e23806b9700298.ico",
+    "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+  },
+  {
+    "site": "& Videos",
+    "favicon": "https://s.abcnews.com/favicon.ico",
+    "url": "http://feeds.abcnews.com/abcnews/topstories"
+  },
+  {
+    "site": "Gallery",
+    "favicon": "https://static.tmz.com/tmz-web/icons/android-chrome-512x512-v1.png",
+    "url": "https://www.tmz.com/rss.xml"
+  },
+  {
+    "site": "News from California, the nation and world  - Los Angeles Times",
+    "favicon": "https://www.latimes.com/favicon-16x16.png",
+    "url": "https://www.latimes.com/index.rss"
+  },
+  {
+    "site": " Arts : NPR",
+    "favicon": "https://static-assets.npr.org/static/images/favicon/favicon-16x16.png",
+    "url": "https://feeds.npr.org/1002/rss.xml"
+  },
+  {
+    "site": "Boston.com - Local breaking news, sports, and culture",
+    "favicon": "https://bdc2020.o0bc.com/wp-content/uploads/2021/05/BDC_Logo_2020_Social_WhiteBG-609c79a967eee-200x200.png",
+    "url": "https://www.boston.com/feed/"
+  },
+  {
+    "site": "Politics, Policy, Political News - POLITICO",
+    "favicon": "https://www.politico.com/favicon-16x16.png",
+    "url": "https://feeder-prod.ops.politico.com/feeds/rss/politicopicks.xml"
+  },
+  {
+    "site": " Startup and Technology News",
+    "favicon": "https://techcrunch.com/wp-content/uploads/2015/02/cropped-cropped-favicon-gradient.png?w=192",
+    "url": "https://techcrunch.com/feed/"
+  },
+  {
+    "site": "Breitbart News Network",
+    "favicon": "https://www.breitbart.com/favicon.png",
+    "url": "https://feeds.feedburner.com/breitbart"
+  },
+  {
+    "site": "WIRED",
+    "favicon": "https://wired.com/images/favicon.ico",
+    "url": "https://www.wired.com/feed/rss"
+  },
+  {
+    "site": " GossipNews",
+    "favicon": "https://perezhilton.com/wp-content/uploads/2020/07/favicon.ico",
+    "url": "https://perezhilton.com/feed/"
+  }
+]

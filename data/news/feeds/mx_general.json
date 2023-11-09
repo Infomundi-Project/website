@@ -1,0 +1,12 @@
+[
+  {
+    "site": "REFORMA | Periodismo independiente",
+    "favicon": "https://www.reforma.com/favicon.ico",
+    "url": "https://www.reforma.com/rss/portada.xml"
+  },
+  {
+    "site": "EL NORTE | Periodismo independiente",
+    "favicon": "https://www.elnorte.com/favicon.ico",
+    "url": "https://www.elnorte.com/rss/portada.xml"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "site": " Informer",
+    "favicon": "https://kolyoum.bdaia.com/main/wp-content/uploads/sites/2/2017/11/favicon.png",
+    "url": "http://www.tamtaminfo.com/feed/"
+  },
+  {
+    "site": "Niger Business -",
+    "favicon": "https://nigerdiaspora.info/wp-content/uploads/2020/10/cropped-nintendo-7801-192x192.png",
+    "url": "https://nigerdiaspora.info/feed/"
+  },
+  {
+    "site": "ORTN - T\u00e9l\u00e9 Sahel - Radio Voix du Sahel | site officiel de la radio t\u00e9l\u00e9vision du Niger, Informations, actualit\u00e9s",
+    "favicon": "https://i1.wp.com/www.ortn.ne/wp-content/uploads/2019/05/cropped-Logo-ORTN-512x512.png?fit=192%2C192",
+    "url": "http://www.ortn.ne/feed/"
+  },
+  {
+    "site": "Le Sahel",
+    "favicon": "https://www.lesahel.org/wp-content/uploads/2020/06/logo.png",
+    "url": "https://www.lesahel.org/feed/"
+  }
+]

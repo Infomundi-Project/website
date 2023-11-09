@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Panorama Home Page | Gibraltar Panorama",
+    "favicon": "http://www.gibraltarpanorama.gi/sites/default/files/n3674/favicon.ico",
+    "url": "http://www.gibraltarpanorama.gi/rss.xml"
+  },
+  {
+    "site": "VOX Gibraltar News - VOX Gibraltar News",
+    "favicon": "http://vox.gi/favicon.ico",
+    "url": "http://vox.gi/cms/?format=feed&type=rss"
+  },
+  {
+    "site": "Latest News | Gibraltar - Your Gibraltar TV (YGTV)",
+    "favicon": "https://www.yourgibraltartv.com/templates/yoo_sun/favicon.ico",
+    "url": "https://www.yourgibraltartv.com/?format=feed&type=rss"
+  },
+  {
+    "site": "The Gibraltar Magazine",
+    "favicon": "https://thegibraltarmagazine.com/wp-content/uploads/2019/11/magazine-logo-2019-01-page-001.jpg",
+    "url": "https://thegibraltarmagazine.com/feed/"
+  }
+]

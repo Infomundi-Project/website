@@ -1,0 +1,17 @@
+[
+  {
+    "site": "\r\n\t\tBBS | The Bhutanese Expression               \t\t\t\t\t\t",
+    "favicon": "http://www.bbs.bt/demo/wp-content/uploads/2014/12/favicon1.png",
+    "url": "http://www.bbs.bt/news/?feed=rss2"
+  },
+  {
+    "site": "Bhutan News Service - More than Just News...",
+    "favicon": "https://www.bhutannewsservice.org/media/2020/08/bns-favicon.png",
+    "url": "https://www.bhutannewsservice.org/feed/"
+  },
+  {
+    "site": " Leading the way.",
+    "favicon": "https://thebhutanese.bt/wp-content/uploads/2020/07/favicon-TB.png",
+    "url": "https://thebhutanese.bt/feed/"
+  }
+]

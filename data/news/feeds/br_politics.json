@@ -1,0 +1,6 @@
+[
+	{"site": "g1", "url": "https://g1.globo.com/rss/g1/politica/"},
+	{"site": "uol", "url": "https://rss.uol.com.br/feed/noticias.xml"},
+	{"site": "r7", "url": "https://noticias.r7.com/politica/feed.xml"},
+	{"site": "Folha", "url": "https://feeds.folha.uol.com.br/poder/rss091.xml"}
+]

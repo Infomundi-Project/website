@@ -1,0 +1,27 @@
+[
+  {
+    "site": "news.com.au \u2014 Australia\u2019s leading news site",
+    "favicon": "https://www.news.com.au/wp-content/themes/newscorpau-nca/assets/dist/img/common/favicon/favicon.ico",
+    "url": "https://www.news.com.au/feed/"
+  },
+  {
+    "site": "Loading 3rd party ad content",
+    "favicon": "https://www.smh.com.au/favicons/smh.ico",
+    "url": "https://www.smh.com.au/rss/feed.xml"
+  },
+  {
+    "site": "Loading 3rd party ad content",
+    "favicon": "https://www.theage.com.au/favicons/theage.ico",
+    "url": "https://www.theage.com.au/rss/feed.xml"
+  },
+  {
+    "site": "NoCookies | The Australian",
+    "favicon": "https://www.theaustralian.com.au/wp-content/themes/newscorpau-theaustralian-broadsheet/dist/images/favicons/favicon.ico",
+    "url": "https://www.theaustralian.com.au/feed/"
+  },
+  {
+    "site": "Loading 3rd party ad content",
+    "favicon": "https://www.brisbanetimes.com.au/favicons/brisbanetimes.ico",
+    "url": "https://www.brisbanetimes.com.au/rss/feed.xml"
+  }
+]

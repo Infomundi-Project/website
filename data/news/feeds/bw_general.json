@@ -1,0 +1,27 @@
+[
+  {
+    "site": "s Best selling Newspaper",
+    "favicon": "https://g4b9a7x7.stackpathcdn.com/wp-content/uploads/2020/03/cropped-voice-rasta-favicon2-192x192.png",
+    "url": "https://news.thevoicebw.com/feed/"
+  },
+  {
+    "site": "Home | Sunday Standard",
+    "favicon": "https://www.sundaystandard.info/wp-content/uploads/2019/11/SSfavicon.png",
+    "url": "https://www.sundaystandard.info/feed/"
+  },
+  {
+    "site": " Latest News | Political, Business, Financial, Sport, Style, Lifestyle and Northern Extra - Botswana Guardian",
+    "favicon": "http://www.botswanaguardian.co.bw/templates/acu/favicon.ico",
+    "url": "http://www.botswanaguardian.co.bw/?format=feed&type=rss"
+  },
+  {
+    "site": "Home - The Midweek Sun",
+    "favicon": "http://www.themidweeksun.co.bw/wp-content/uploads/2018/07/favicon.png",
+    "url": "http://www.themidweeksun.co.bw/feed/"
+  },
+  {
+    "site": "Home - Yarona FM",
+    "favicon": "https://yaronafm.co.bw/wp-content/uploads/2020/05/cropped-Yarona-FM-SIte-Logo-192x192.png",
+    "url": "https://yaronafm.co.bw/feed/"
+  }
+]

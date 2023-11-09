@@ -1,0 +1,17 @@
+[
+  {
+    "site": "Home | The St. Lucia STAR",
+    "favicon": "https://i0.wp.com/stluciastar.com/wp-content/uploads/2015/11/STAR-LOGO.jpeg?fit=192%2C192&ssl=1",
+    "url": "https://stluciastar.com/feed/"
+  },
+  {
+    "site": "St. Lucia News from The Voice \u2014 Breaking News, Sports, Features Daily",
+    "favicon": "https://thevoiceslu.com/wp-content/uploads/2016/02/cropped-Voice-fav-4-192x192.png",
+    "url": "https://thevoiceslu.com/feed/"
+  },
+  {
+    "site": "s #1 News Team",
+    "favicon": "https://www.htsstlucia.org/wp-content/uploads/2015/01/cropped-newsforcelogo-e1425687783159-300x300.png",
+    "url": "https://www.htsstlucia.org/feed/"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "site": "Jou Land. Jou Taal. Jou Koerant -  - Republikein",
+    "favicon": "https://www.republikein.com.na/images/favicon.jpg",
+    "url": "https://www.republikein.com.na/rss.xml"
+  },
+  {
+    "site": "Namibian Sun - Tells it All -  - Namibian Sun",
+    "favicon": "https://www.namibiansun.com/favicon.ico",
+    "url": "https://www.namibiansun.com/rss.xml"
+  },
+  {
+    "site": "Informant\u00e9 News firm but fair - Informant\u00e9",
+    "favicon": "https://i0.wp.com/informante.web.na/wp-content/uploads/2019/08/cropped-Informante-FAV-Logo-for-Website.png?fit=192%2C192&ssl=1",
+    "url": "https://informante.web.na/?feed=rss2"
+  },
+  {
+    "site": "Allgemeine Zeitung - Aktuell Mittendrin F\u00fcr Dich - Allgemeine Zeitung",
+    "favicon": "https://www.az.com.na/images/favicon.png",
+    "url": "https://www.az.com.na/rss.xml"
+  },
+  {
+    "site": "Namibia Economist | African Business News",
+    "favicon": "https://economist.com.na/wp-content/uploads/2017/01/Logo-2017.jpg",
+    "url": "https://economist.com.na/feed/"
+  }
+]

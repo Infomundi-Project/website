@@ -1,0 +1,12 @@
+[
+  {
+    "site": "Interaksyon",
+    "favicon": "https://media.interaksyon.com/wp-content/uploads/2020/07/favicon-16x16.png",
+    "url": "https://interaksyon.philstar.com/feed/"
+  },
+  {
+    "site": "Abante News Online | Una sa Balita",
+    "favicon": "https://abante-main.s3.amazonaws.com/wp-content/uploads/icon.png",
+    "url": "https://www.abante.com.ph/feed/"
+  }
+]

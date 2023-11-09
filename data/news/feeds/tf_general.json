@@ -1,0 +1,14 @@
+[
+  {
+    "site": "francetvinfo.fr",
+    "url": "https://www.francetvinfo.fr/rss/"
+  },
+  {
+    "site": "lefigaro.fr",
+    "url": "https://www.lefigaro.fr/rss"
+  },
+  {
+    "site": "lemonde.fr",
+    "url": "https://www.lemonde.fr/actualite-medias/article/2019/08/12/les-flux-rss-du-monde-fr_5498778_3236.html"
+  }
+]

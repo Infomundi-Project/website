@@ -1,0 +1,37 @@
+[
+  {
+    "site": " Your Source of Independent News",
+    "favicon": "https://www.malaysia-today.net/wp-content/uploads/2019/01/mt-logo-icon-20190109a-16.png",
+    "url": "https://www.malaysia-today.net/feed/"
+  },
+  {
+    "site": "Free Malaysia Today (FMT) | Free and Independent",
+    "favicon": "https://s3media.freemalaysiatoday.com/wp-content/uploads/2021/01/fmt-icon.png",
+    "url": "https://www.freemalaysiatoday.com/feed/"
+  },
+  {
+    "site": "Utama - Utusan Digital",
+    "favicon": "https://www.utusan.com.my/wp-content/uploads/cropped-fav-192x192.png",
+    "url": "https://www.utusan.com.my/feed/"
+  },
+  {
+    "site": "Utama - HarakahDaily",
+    "favicon": "https://harakahdaily.net/wp-content/uploads/2020/07/favicon.ico",
+    "url": "https://harakahdaily.net/index.php/feed/"
+  },
+  {
+    "site": "Malaysia Chronicle | A place to speak up on Politics, Business, Social",
+    "favicon": "https://www.malaysia-chronicle.com/wp-content/uploads/2020/08/cropped-MC-MOBILE-6-192x192.jpg",
+    "url": "https://www.malaysia-chronicle.com/?feed=rss2"
+  },
+  {
+    "site": "Utama - Kosmo Digital",
+    "favicon": "https://www.kosmo.com.my/wp-content/uploads/2020/07/cropped-kosmo-1-1-192x192.png",
+    "url": "https://www.kosmo.com.my/feed/"
+  },
+  {
+    "site": "eCentral",
+    "favicon": "https://ecentral.my/wp-content/uploads/2021/02/cropped-logo-ecentral-192x192.png",
+    "url": "https://ecentral.my/feed/"
+  }
+]

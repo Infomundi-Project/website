@@ -1,0 +1,42 @@
+[
+  {
+    "site": "\u0635\u062d\u0631\u0627\u0621 \u0645\u064a\u062f\u064a\u0627 .. \u0645\u0648\u0642\u0639 \u0627\u0644\u0623\u062e\u0628\u0627\u0631 \u0627\u0644\u0623\u0648\u0644 \u0641\u064a \u0645\u0648\u0631\u064a\u062a\u0627\u0646\u064a\u0627 \u0648\u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u0635\u062d\u0631\u0627\u0621 \u0627\u0644\u0643\u0628\u0631\u0649",
+    "favicon": "https://i1.wp.com/www.saharamedias.net/wp-content/uploads/2021/03/cropped-Fav-Ico.png?fit=192%2C192&ssl=1",
+    "url": "https://www.saharamedias.net/feed/"
+  },
+  {
+    "site": "Mauritanie : Accueil Actualite\u0301 a\u0300 la Une",
+    "favicon": "http://cridem.org/favicon.ico",
+    "url": "http://cridem.org/rss/actualites.xml"
+  },
+  {
+    "site": "Mauritanid Builders",
+    "favicon": "http://mauritanid.net/favicon.ico",
+    "url": "http://mauritanid.net/feed/"
+  },
+  {
+    "site": "\u0645\u0640\u0648\u0642\u0639 \u0627\u0644\u0637\u0640\u0648\u0627\u0631\u064a \u0627\u0644\u0623\u0644\u0643\u062a\u0640\u0631\u0648\u0646\u064a",
+    "favicon": "http://tawary.com/favicon.ico",
+    "url": "http://tawary.com/spip.php?page=backend"
+  },
+  {
+    "site": "\u0623\u0646\u0628\u0627\u0621 \u0625\u0646\u0641\u0648 - \u0635\u062d\u064a\u0641\u0629 \u062a\u062d\u0644\u064a\u0644\u064a\u0629 \u0645\u0633\u062a\u0642\u0644\u0629",
+    "favicon": "https://www.anbaa.info/wp-content/themes/anbaa-child/favicon.ico",
+    "url": "https://www.anbaa.info"
+  },
+  {
+    "site": " \u0623\u062e\u0628\u0627\u0631 \u0645\u0648\u0631\u064a\u062a\u0627\u0646\u064a\u0627 \u0648\u0627\u0644\u0639\u0627\u0644\u0645",
+    "favicon": "https://i2.wp.com/elhourriya.net/wp-content/uploads/2020/11/cropped-logo.png?fit=192%2C192&ssl=1",
+    "url": "https://elhourriya.net/feed/"
+  },
+  {
+    "site": " \u0648\u0643\u0627\u0644\u0629 \u0635\u062d\u0641\u064a \u0644\u0644\u0623\u0646\u0628\u0627\u0621",
+    "favicon": "https://souhoufi.com/wp-content/uploads/2020/10/cropped-llogo-1-192x192.jpg",
+    "url": "https://souhoufi.com/feed"
+  },
+  {
+    "site": "\u0627\u0644\u0648\u0637\u0646",
+    "favicon": "http://elwatan.info/misc/favicon.ico",
+    "url": "http://elwatan.info/rss.xml"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "site": "LNC.nc | Les Nouvelles Cal\u00e9doniennes, le Journal de Nouvelle Cal\u00e9donie",
+    "favicon": "https://www.lnc.nc/sites/all/themes/lnc2015/favicon.ico",
+    "url": "https://feeds.feedburner.com/LesNouvellesCaledoniennes"
+  },
+  {
+    "site": "\n\n\n\nDNC.NC | Journal Demain en Nouvelle-Cal\u00e9donie\n\n\n",
+    "favicon": "https://www.dnc.nc/favicon.ico",
+    "url": "https://www.dnc.nc/feed/"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "site": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043d\u0430 \u043d\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f, \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438 \u043c\u0438\u0440\u0430, \u0437\u0430\u043a\u043e\u043d\u043e\u0434\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u043e",
+    "favicon": "https://static.zakon.kz/static_zakon/www2018/img/favicon.ico",
+    "url": "https://www.zakon.kz/rss/google_last_feed_producer.xml"
+  },
+  {
+    "site": "\u0412\u0440\u0435\u043c\u044f \u2014 \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e-\u043f\u043e\u043b\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0433\u0430\u0437\u0435\u0442\u0430",
+    "favicon": "https://time.kz/favicon-16x16.png",
+    "url": "https://time.kz/rss"
+  },
+  {
+    "site": "Sputnik \u041a\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043d - \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u043d\u043e\u0432\u043e\u0441\u0442\u0435\u0439 \u043e\u043d\u043b\u0430\u0439\u043d 24 \u0447\u0430\u0441\u0430",
+    "favicon": "https://ru.sputnik.kz/favicon.ico?1",
+    "url": "https://ru.sputnik.kz/export/rss2/archive/index.xml"
+  },
+  {
+    "site": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043d\u0430 \u0438 \u043c\u0438\u0440\u0430 - \u0441\u0432\u0435\u0436\u0438\u0435 \u043d\u043e\u0432\u043e\u0441\u0442\u0438 \u0434\u043d\u044f \u043d\u0430 inform.kz \u261d",
+    "favicon": "https://www.inform.kz/favicon.ico?v=2",
+    "url": "https://www.inform.kz/rss/rus.xml"
+  },
+  {
+    "site": "\u0410\u0437\u0430\u0442\u0442\u044b\u049b \u0440\u0430\u0434\u0438\u043e\u0441\u044b",
+    "favicon": "https://www.azattyq.org/Content/responsive/RFE/img/webApp/ico-128x128.png",
+    "url": "https://www.azattyq.org/api/"
+  },
+  {
+    "site": "\u0418\u043d\u0442\u0435\u0440\u043d\u0435\u0442-\u0433\u0430\u0437\u0435\u0442\u0430 \u0417\u041e\u041d\u0410\u041a\u0417. \u041a\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043d.",
+    "favicon": "https://zonakz.net/favicon.ico",
+    "url": "https://zonakz.net/feed/"
+  },
+  {
+    "site": "i-news.kz | \u041d\u043e\u0432\u043e\u0441\u0442\u0438 \u041a\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043d\u0430",
+    "favicon": "https://i-news.kz/wp-content/uploads/2019/10/untitled-3.png",
+    "url": "https://i-news.kz/feed/"
+  },
+  {
+    "site": "\"",
+    "favicon": "https://1tv.kz/wp-content/uploads/2020/01/cropped-1TV_02-192x192.png",
+    "url": "https://1tv.kz/feed/"
+  },
+  {
+    "site": "\u0428\u043e\u0443, \u0436\u043e\u0431\u0430\u043b\u0430\u0440, \u049b\u0430\u0437\u0430\u049b\u0441\u0442\u0430\u043d\u0434\u044b\u049b \u0441\u0435\u0440\u0438\u0430\u043b\u0434\u0430\u0440 - \u0425\u0430\u0431\u0430\u0440 \u0441\u0430\u0439\u0442\u044b\u043d\u0430\u043d \u043a\u04e9\u0440\u0443",
+    "favicon": "https://cache-khabar.cdnvideo.ru/images/2020/favicon.png",
+    "url": "https://khabar.kz/kk/?format=feed&type=rss"
+  },
+  {
+    "site": "Kazakhstan Today | \u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0433\u0435\u043d\u0442\u0441\u0442\u0432\u043e",
+    "favicon": "https://www.kt.kz/favicon.ico",
+    "url": "https://www.kt.kz/rus/rss"
+  }
+]

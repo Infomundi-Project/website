@@ -1,0 +1,17 @@
+[
+  {
+    "site": "\n    \n       Malijet  Actualit\u00e9 malienne en continu Nord Mali web a Bamako Rebelles Islamistes Guerre Serval Misma News Infos Bamako\n    \n    \n    ",
+    "favicon": "http://malijet.com/images/favicon.ico",
+    "url": "http://malijet.com/feed/index.rss"
+  },
+  {
+    "site": "info du Mali",
+    "favicon": "https://www.journaldumali.com/wp-content/themes/jdm/assets/favicons/favicon.ico",
+    "url": "https://www.journaldumali.com/feed/"
+  },
+  {
+    "site": "\u2026",
+    "favicon": "http://bamanet.net/wp-content/themes/dw-focus/assets/img/favicon.ico",
+    "url": "http://bamanet.net/feed"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "site": "antarctica.gov.au",
+    "url": "https://www.antarctica.gov.au/news/rss/"
+  },
+  {
+    "site": "iceberg.co.nz",
+    "url": "https://www.iceberg.co.nz/rss/"
+  },
+  {
+    "site": "asoc.org",
+    "url": "https://www.asoc.org/feed/"
+  }
+]

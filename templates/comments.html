@@ -1,0 +1,118 @@
+{% extends "base.html" %} {% block title %}Comments{% endblock %}
+{% block styles %}
+<style type="text/css">
+  .comment p {
+  word-wrap: break-word;
+  padding-bottom: 8px;
+  }
+  #news {
+  text-align: center;
+  }
+  #comments {
+  margin-top: 20px;
+  }
+  #comments h2 {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  color: white;
+  }
+  .comment {
+  margin-bottom: 15px;
+  color: white;
+  }
+  .form-group {
+  padding: 5px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card mb-5 mt-4 bg-dark text-light border-light">
+    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image">
+    <div class="card-body">
+      <h5 class="card-title">{{ preview_data['title'] }}</h5>
+      <p class="card-text">{{ preview_data['description'] }}</p>
+      <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-3"><i class="fa-solid fa-eye"></i> View Full Story</a>
+      <a class="btn btn-sm btn-outline-secondary return" href="#" role="button"><i class="fa-solid fa-undo"></i> Return</a>
+    </div>
+  </div>
+</div>
+<div id="comments" class="container mt-4">
+  <div id="google_translate_element"></div>
+  <!-- Comment Form -->
+  <form action="{{ url_for('views.add_comment') }}" method="post" onsubmit="return validateForm()">
+    <div class="form-group">
+      <label for="name" style="color: white;">Name (default - random):</label>
+      <input type="text" id="name" name="name" class="form-control text-light bg-dark" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label for="comment" style="color: white;">Comment (max 300 characters):</label>
+      <textarea id="comment" name="comment" rows="4" class="form-control text-light bg-dark" maxlength="300" required></textarea>
+    </div>
+    <div class="form-group">
+      <input type="hidden" id="id" name="id" value="{{ id }}">
+    </div>
+    <div class="form-group">
+      <div class="h-captcha" data-sitekey="c88360d1-22a7-4320-9438-783d76455df2" required></div>
+    </div>
+    <button type="submit" class="btn btn-outline-primary mb-5">Comment</button>
+  </form>
+  <h2>Comments</h2>
+  {% if comments %}
+  {% for comment in comments %} 
+  <div class="comment">
+    <p>
+      {% if comment.random_name %}<span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle"></i> Randomly Generated Name</span> {% endif %}<strong>{{ comment.name }}:</strong> {{ comment.text }}
+    </p>
+  </div>
+  {% endfor %} 
+  {% else %}
+  <div class="comment pb-5">
+    <h5>There's nothing here yet.</h5>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+          {pageLanguage: '{{ country_code }}'},
+          'google_translate_element'
+      );
+  }
+</script>
+<script 
+  src="https://js.hcaptcha.com/1/api.js" 
+  async defer
+  ></script>
+<script 
+  type="text/javascript"
+  src= "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+  ></script>
+<script>
+  function validateForm() {
+    var comment = document.getElementById('comment').value;
+    var name = document.getElementById('name').value;
+    if (comment.length > 300) {
+      alert('Please limit your comment to 300 characters.');
+      return false;
+    }
+    if (name.length > 20) {
+      alert('Please limit your name to 20 characters.');
+      return false;
+    }
+    return true;
+  }
+  $('.return').on('click', function() {
+    history.go(-1);
+  });
+</script>
+<script type="text/javascript">
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+<script 
+  src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  ></script>
+{% endblock %}

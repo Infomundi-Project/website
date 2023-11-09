@@ -1,0 +1,82 @@
+[
+  {
+    "site": "Stiri, ultima ora, stiri locale, video, foto, comunitate | adevarul.ro",
+    "favicon": "https://adevarul.ro/android-icon-192x192.png",
+    "url": "https://adevarul.ro/rss/"
+  },
+  {
+    "site": "\u0218tiri de ultim\u0103 or\u0103 \u0219i ultimele \u0219tiri online | G\u00e2ndul",
+    "favicon": "https://www.gandul.ro/wp-content/uploads/2020/02/cropped-gandul-logo-large-512-192x192.png",
+    "url": "https://www.gandul.ro/feed"
+  },
+  {
+    "site": "Stiri de Ultima Ora - Stiri Online - Stirile Zilei | Realitatea.NET",
+    "favicon": "https://www.realitatea.net/favicon-32x32.png",
+    "url": "https://rss.realitatea.net/homepage.xml"
+  },
+  {
+    "site": "Ziar Online - Site cu \u0218tiri de Top din Rom\u00e2nia | Libertatea",
+    "favicon": "https://www.libertatea.ro/favicon.ico",
+    "url": "https://www.libertatea.ro/feed"
+  },
+  {
+    "site": "Cancan.ro - Stiri despre vedete, imagini de paparazzi si informatii exclusive din lumea mondena!",
+    "favicon": "https://www.cancan.ro/wp-content/uploads/2021/03/cropped-favicon-large-192x192.png",
+    "url": "https://www.cancan.ro/feed"
+  },
+  {
+    "site": "\u0218tiri de Ultima Or\u0103 - \u0218tirile zilei online, reportaje \u0219i exclusivit\u0103\u021bi din \u021bar\u0103 \u0219i din str\u0103in\u0103tate - Stirileprotv.ro",
+    "favicon": "https://static.stirileprotv.ro/static/ro/microsites/stirileprotv/img/favicon/48favicon.png",
+    "url": "https://rss.stirileprotv.ro/"
+  },
+  {
+    "site": "Ziare, Revista presei, Reviste, Stiri locale - Ziare.com",
+    "favicon": "https://ziare.com/favicon.ico",
+    "url": "https://ziare.com/rss/breaking_news.xml"
+  },
+  {
+    "site": "Antena 3 - Speciali\u0219ti \u00een \u0219tiri",
+    "favicon": "https://www.antena3.ro/favicon.ico",
+    "url": "https://www.antena3.ro/rss"
+  },
+  {
+    "site": "HotNews.ro - Actualitate",
+    "favicon": "https://hotnews.ro/favicon.ico",
+    "url": "https://feeds.feedburner.com/hotnews/yvoq"
+  },
+  {
+    "site": "Jurnalul National",
+    "favicon": "https://jurnalul.ro/favicon.ico",
+    "url": "https://jurnalul.ro/rss"
+  },
+  {
+    "site": "\u0218tiri sportive | Nout\u0103\u021bi din fotbal, tenis, handbal | \u0218tiri din sport \u0219i rezultate live online",
+    "favicon": "https://www.prosport.ro/wp-content/uploads/2019/09/cropped-prosport-site-icon-192x192.png",
+    "url": "https://www.prosport.ro/feed"
+  },
+  {
+    "site": "Gazeta Sporturilor - GSP - ultimele stiri din sport, rezultate live",
+    "favicon": "https://www.gsp.ro/favicon.ico",
+    "url": "https://www.gsp.ro/rss.xml"
+  },
+  {
+    "site": "SPORT.RO - Stiri din sport",
+    "favicon": "https://www.sport.ro/favicon.ico",
+    "url": "https://www.sport.ro/rss"
+  },
+  {
+    "site": "ROL.ro - \u0218tiri \u0219i divertisment \u00eentr-un singur loc!",
+    "favicon": "https://rol.ro/favicon.ico",
+    "url": "https://rol.ro/feed/"
+  },
+  {
+    "site": "Antena 1, platforma ta de video entertainment. \u0218tiri despre emisiunile \u0219i vedetele tale preferate | Antena 1",
+    "favicon": "https://a1.ro/templates/default/images/favicon/favicon-16x16.png?1",
+    "url": "https://a1.ro/rss/"
+  },
+  {
+    "site": "Romania TV - Noi d\u0103m \u0219tirea exact\u0103!",
+    "favicon": "https://www.romaniatv.net/wp-content/themes/romaniatv-nineteen/assets/images/favicon.ico",
+    "url": "https://www.romaniatv.net/feed"
+  }
+]

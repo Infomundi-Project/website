@@ -1,0 +1,52 @@
+[
+  {
+    "site": "Cameroun,Cameroon Camer.be, l'information claire et nette::Cameroon news - Actualit\u00e9 Cameroun",
+    "favicon": "https://www.camer.be/favicon.ico",
+    "url": "http://camer.be/rss"
+  },
+  {
+    "site": "Accueil - Cameroonvoice",
+    "favicon": "https://i1.wp.com/cameroonvoice.com/wp-content/uploads/2019/10/logo-flavicon-60x60.png?fit=192%2C192&ssl=1",
+    "url": "https://cameroonvoice.com/feed/"
+  },
+  {
+    "site": ", sport, musique",
+    "favicon": "https://www.bonaberi.com/favicon.ico",
+    "url": "https://www.bonaberi.com/syndication/rssfeed.php?rid=4&out=rss"
+  },
+  {
+    "site": "Cameroon -- Home - allAfrica.com",
+    "favicon": "https://cdn03.allafrica.com/static/images/structure/favicon.ico",
+    "url": "https://allafrica.com/tools/headlines/rdf/cameroon/headlines.rdf"
+  },
+  {
+    "site": "ouverture sur le Cameroun",
+    "favicon": "https://i2.wp.com/www.237online.com/wp-content/uploads/2018/10/favicon.png?fit=58%2C60&ssl=1",
+    "url": "https://www.237online.com/feed/"
+  },
+  {
+    "site": " My site",
+    "favicon": null,
+    "url": "http://africapresse.com/?feed=rss2"
+  },
+  {
+    "site": "Home - CameroonOnline.org",
+    "favicon": "https://www.cameroononline.org/favicon.ico",
+    "url": "https://www.cameroononline.org/feed/"
+  },
+  {
+    "site": "Cameroon Radio Television - Au Coeur de la Nation",
+    "favicon": "https://www.crtv.cm/wp-content/uploads/2017/10/cropped-cropped-A-01-1-192x192.png",
+    "url": "https://www.crtv.cm/feed/"
+  },
+  {
+    "site": " icicemac premier reseau de la zone cemac",
+    "favicon": "http://www.icicemac.com/favicon.ico",
+    "url": "http://www.icicemac.com/feed/"
+  },
+  {
+    "site": "Journal du Cameroun - Actualit\u00e9s et Infos en direct au Cameroun et dans le Monde",
+    "favicon": "https://www.journalducameroun.com/wp-content/themes/jdc/assets/favicons/favicon.ico",
+    "url": "https://www.journalducameroun.com/feed/"
+  }
+]

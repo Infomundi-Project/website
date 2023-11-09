@@ -1,0 +1,22 @@
+[
+  {
+    "site": "Caracol Radio | Noticias, deportes y opini\u00f3n en Colombia",
+    "favicon": "https://cr00.epimg.net/favicon.png",
+    "url": "https://caracol.com.co/rss/radio/portada.xml"
+  },
+  {
+    "site": "Noticias Caracol: Principales Noticias de Colombia y el Mundo",
+    "favicon": "https://noticias.caracoltv.com/favicon-16x16.png",
+    "url": "https://noticias.caracoltv.com/index.atom"
+  },
+  {
+    "site": "\r\n\tW Radio | Noticias en Colombia y el mundo\r\n",
+    "favicon": "https://www.wradio.com.co/favicondef.png",
+    "url": "https://www.wradio.com.co/feed.aspx?id=INICIO"
+  },
+  {
+    "site": "GOL Caracol: noticias del f\u00fatbol colombiano y f\u00fatbol mundial ",
+    "favicon": "https://gol.caracoltv.com/favicon-16x16.png",
+    "url": "https://gol.caracoltv.com/index.atom"
+  }
+]
