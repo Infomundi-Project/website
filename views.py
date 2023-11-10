@@ -35,7 +35,7 @@ def get_latest_feed():
     It reads the cache information from the respective cache file and renders the rss_template.html template."""
 
     # Get the 'filter' parameter from the request or use 'general' if not provided
-    page_num = request.args.get('page') if request.args.get('page') is not None else '1'
+    page_num = request.args.get('page') if request.args.get('page') is not None else 1
     country_filter = request.args.get('country').lower() if request.args.get('country') is not None else choice(['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])
     news_filter = request.args.get('section').lower() if request.args.get('section') is not None else 'general'
     
@@ -75,8 +75,9 @@ def get_latest_feed():
         else:
             news['total_comments'] = 0
     supported_categories = get_supported_categories(country_filter)
+    page_num = int(page_num)
     return render_template('rss_template.html', feeds=cache[f'page_{page_num}'], total_pages=total_pages, country_name=country_name, 
-        news_filter=news_filter.title(), page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News')
+        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News')
 
 @views.route('/get-country-code', methods=['GET'])
 def get_country_code():
@@ -130,7 +131,7 @@ def comments():
                     else:
                         preview_data = {}
                         preview_data['image'] = item['media_content']['url']
-                    preview_data['description'] = item['description']
+                    preview_data['description'] = remove_html_tags(item['description'])
                     preview_data['title'] = item['title']
     
     if news_link == '':

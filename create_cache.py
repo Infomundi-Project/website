@@ -9,7 +9,7 @@ from hashlib import md5
 from sys import exit
 
 from website_scripts.config import *
-from website_scripts.scripts import read_json, write_json
+from website_scripts.scripts import read_json, write_json, remove_html_tags
 
 def get_img(feed, item):
     """Extract image source from RSS item."""
@@ -70,7 +70,7 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
             'items': [
                 {
                     'title': item.title,
-                    'description': item.description if 'description' in item else 'No description provided',
+                    'description': remove_html_tags(item.description) if 'description' in item else 'No description provided',
                     'feed_icon': icon,
                     'id': f'{md5(item.title.encode()).hexdigest()}',
                     'publisher': feed.feed.title,

@@ -174,3 +174,8 @@ def is_strong_password(password):
 
     # If all checks pass, the password is strong
     return True
+
+def remove_html_tags(text_with_html):
+    soup = BeautifulSoup(text_with_html, 'html.parser')
+    text_without_tags = soup.get_text()
+    return text_without_tags

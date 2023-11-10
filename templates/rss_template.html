@@ -1,35 +1,15 @@
 {% extends "base.html" %} {% block title %}{{ country_name }} {{ news_filter }}{% endblock %}
 {% block styles %}
 <style type="text/css">
-  .centered {
-  padding: 20px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 30vh;
-  margin: 0;
-  }
-  .text-body-secondary {
-  padding-right: 10%
+  .pubdate {
+  padding-right: 5%
   }
   .card {
   min-height: 170px;
   max-height: 200px;
   }
-  .text-body-secondary {
-  padding-right: 30%;
-  }
-  @media (max-width: 1600px) {
-  .text-body-secondary {
-  padding-right: 0%
-  }
-  }
   /* Improved mobile compatibility */
   @media (max-width: 968px) {
-  .centered {
-  text-align: center;
-  }
   .pagination {
   margin-top: 20px;
   }
@@ -41,9 +21,6 @@
   max-width: 100%;
   max-height: 100%;
   }
-  .text-body-secondary {
-  padding-right: 0%;
-  }
   .card-img {
   max-width: 500px;
   max-height: 300px;
@@ -52,11 +29,26 @@
 </style>
 {% endblock %}
 {% block content %}
-<h1 class="centered" style="color: white;">
-  <img src="https://hatscripts.github.io/circle-flags/flags/{{ country_code }}.svg" style="max-width: 48px; padding-right: 5px" alt="Flag of {{ country_name }}"> {{ country_name }} {{ news_filter }} News - Page {{ page_num }}
-</h1>
-<div id="google_translate_element"></div>
-<ul class="nav nav-pills justify-content-center mb-2">
+<div class="row mt-4">
+  <div class="col mb-5 text-center">
+    <div class="d-flex">
+      <div class="card bg-dark text-light border-light">
+        <h5 class="card-header"><i class="fa-solid fa-language"></i></i> Translate <span class="badge rounded-pill text-bg-success">New!</span></h5>
+        <div class="card-body">
+          <div id="google_translate_element"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 text-center">
+    <p class="fs-1 fw-bold">
+      <img src="https://hatscripts.github.io/circle-flags/flags/{{ country_code }}.svg" style="max-width: 48px; padding-right: 5px" alt="{{ country_name }}'s flag"> {{ country_name }} Stories
+    </p>
+  </div>
+  <div class="col">
+  </div>
+</div>
+<ul class="nav nav-pills justify-content-center mb-2 mt-4">
   <li class="nav-item">
     <a class="nav-link text-light {{ 'active' if 'general' in selected_filter else '' }}" href="/news?country={{ country_code }}">General</a>
   </li>
@@ -74,10 +66,10 @@
   </li>
 </ul>
 <nav aria-label="Page navigation">
-  <ul class="pagination justify-content-center">
+  <ul class="pagination pagination-sm justify-content-center">
     {% for page in range(1, total_pages+1) %} 
-    <li class="page-item">
-      <a class="page-link" href="#" data-page="{{ page }}" style="color: black;">{{ page }}</a>
+    <li class="page-item {{ 'active' if page_num == page }}">
+      <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
     </li>
     {% endfor %} 
   </ul>
@@ -85,7 +77,7 @@
 <div class="row">
   {% for item in feeds %} 
   <div class="p-1 col-6 col-md-3">
-    <div class="card mb-1">
+    <div class="card mb-1 bg-dark text-light border-light">
       <div class="row g-0">
         <div class="col-md-4">
           <a href="{{ item['link'] }}" target="_blank">
@@ -95,18 +87,18 @@
         <div class="col-md-8">
           <div class="card-body">
             <a href="{{ item['link'] }}" style="text-decoration:none;" target="_blank">
-              <h6 class="card-title" style="color: black; overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
+              <h6 class="card-title" style="color: white; overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
             </a>
             <small>
               <p style="min-height: 45px; max-height: 46px; overflow: hidden;" class="card-text text-primary">{{ item['publisher'] }}</p>
             </small>
           </div>
           <div class="card-footer">
-            <a href="{{ item['publisher_link'] }}" target="_blank">
-            <img src="{{ item['feed_icon'] }}" class="object-fit-scale border rounded" style="min-height: 30px; min-width: 30px; max-height: 31px; max-width: 31px">
+            <a href="{{ item['publisher_link'] }}" target="_blank" style="text-decoration:none;">
+              <img src="{{ item['feed_icon'] }}" class="object-fit-scale border rounded" style="min-height: 30px; min-width: 30px; max-height: 31px; max-width: 31px">
             </a>
-            <small class="text-body-secondary">{{ item['pubDate'] }}</small>
-            <a class="btn btn-sm btn-dark" href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" role="button">{{ item['total_comments'] }}
+            <small class="text-light pubdate">{{ item['pubDate'] }}</small>
+            <a class="btn btn-sm btn-dark border-light" href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" role="button">{{ item['total_comments'] }}
             <i class="fa fa-comment"></i>
             </a>
           </div>
@@ -117,10 +109,10 @@
   {% endfor %} 
 </div>
 <nav aria-label="Page navigation">
-  <ul class="pagination justify-content-center">
+  <ul class="pagination pagination-sm justify-content-center">
     {% for page in range(1, total_pages+1) %} 
-    <li class="page-item">
-      <a class="page-link" href="#" data-page="{{ page }}" style="color: black;">{{ page }}</a>
+    <li class="page-item {{ 'active' if page_num == page }}">
+      <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
     </li>
     {% endfor %} 
   </ul>
@@ -139,30 +131,5 @@
           'google_translate_element'
       );
   }
-</script>
-<script>
-  $(document).ready(function() {
-      $('.filter').on('click', function() {
-          var activeUrl = window.location.href;
-          var filter = $(this).data('filter');
-          if (activeUrl.indexOf('country=') !== -1) {
-              var newUrl = activeUrl.replace(/&section=[^&]*/, '') + '&section=' + filter;
-          } else {
-              var newUrl = activeUrl + '&country=BR&section=' + filter;
-          }
-          window.location.href = newUrl;
-      });
-      $('.page-link').on('click', function() {
-          var activeUrl = window.location.href;
-          var page = $(this).data('page');
-          if (activeUrl.indexOf('&page=') !== -1) {
-              var newUrl = activeUrl.replace(/&page=[^&]*/, '') + '&page=' + page;
-          } else {
-              var newUrl = activeUrl + '&page=' + page;
-          }
-          window.location.href = newUrl;
-      });
-      $('#alertModal').modal('show');
-  });
 </script>
 {% endblock %}

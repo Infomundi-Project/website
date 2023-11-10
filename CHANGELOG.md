@@ -4,8 +4,33 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.1.1: 2023/11/10
+
+### Enhancements (3)
+- IME01: `register.html, admin.html and password_change.html` now extends from `base.html`.
+- IME02: Added a filter to prevent html tags from appearing in stories descriptions.
+- IME03: The navbar is now more professional.
+
+### Changed (5)
+- IMC01: `rss_template.html` pagination, now it turns into blue when the user is in the selected page.
+- IMC02: `static/js/validateCommentForm.js` created to enhance optimization (`comments.html`).
+- IMC03: Added a border to the Translate element on the news page.
+- IMC04: Changed the way the upper text is presented in the news page.
+- IMC05: News cards are now black-themed.
+
+### Removed (0)
+- IMR01: Removed `404.html` and `loading.html` as they were no longer needed.
+
+### Fixed (0)
+- IMF01:
+
+### Security (0)
+- IMS01:
 
 
 ## 1.1.0: 2023/11/08 (Major)
