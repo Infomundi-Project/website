@@ -72,16 +72,16 @@
   ],
   "da0107bea65784cd204e21c0bf8efcbc": [
     {
-      "name": "Sick Rebellious Names",
-      "random_name": true,
-      "text": "testetestetestetetetetete",
-      "id": "67c65dfd85ab9401e5b8cc444ac45a20"
-    },
-    {
       "name": "Sick Rebellious Name",
       "random_name": false,
       "text": "teste",
       "id": "f4dcdb1608ed7a7cb47f20a6e66ae66c"
+    },
+    {
+      "name": "Chasm Face",
+      "random_name": true,
+      "text": "teste",
+      "id": "2be9d21a1b3cd6753b0de9faa15159cc"
     }
   ],
   "a7d28057b2ef8430cc48f2934e10f891": [
@@ -96,6 +96,12 @@
       "random_name": true,
       "text": "s\u00e3o paulo tem que se fuder todinho mesmo",
       "id": "a3d86f678d13d9e8d0a6f1505bf295c9"
+    },
+    {
+      "name": "Gabriel",
+      "random_name": false,
+      "text": "S\u00f3 da petista aqui, bando de imundo que necessita de bolsa familia, ja cansei de falar que tem que ensinar a pescar.",
+      "id": "85a8f20b770eb439ed73a1680a31c31f"
     }
   ]
 }

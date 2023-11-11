@@ -1,5 +1,6 @@
 from time import time
 from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash
+from flask_login import current_user
 from random import choice
 from re import search as search_regex
 
@@ -12,7 +13,7 @@ views = Blueprint('views', __name__)
 def home():
     """Render the homepage."""
     statistics = get_statistics() # from website_scripts.scripts
-    return render_template('homepage.html', page='Home', statistics=statistics)
+    return render_template('homepage.html', page='Home', statistics=statistics, user=current_user)
 
 @views.route('/contact', methods=['GET'])
 def contact():
@@ -77,7 +78,7 @@ def get_latest_feed():
     supported_categories = get_supported_categories(country_filter)
     page_num = int(page_num)
     return render_template('rss_template.html', feeds=cache[f'page_{page_num}'], total_pages=total_pages, country_name=country_name, 
-        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News')
+        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News', user=current_user)
 
 @views.route('/get-country-code', methods=['GET'])
 def get_country_code():
@@ -145,7 +146,7 @@ def comments():
     else:
         post_comments = comments[news_id]
 
-    return render_template('comments.html', page='Comments', comments=post_comments, news_link=news_link, id=news_id, preview_data=preview_data)
+    return render_template('comments.html', page='Comments', comments=post_comments, news_link=news_link, id=news_id, preview_data=preview_data, user=current_user)
 
 @views.route('/add_comment', methods=['POST'])
 def add_comment():

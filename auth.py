@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, jsonify, url_fo
 from flask_login import login_user, login_required, current_user, logout_user, UserMixin
 from passlib.hash import argon2
 from flask_httpauth import HTTPBasicAuth
+
 from website_scripts.config import *
 from website_scripts.scripts import *
 
@@ -43,7 +44,7 @@ def verify_password(username, password):
 @auth_views.route('/admin')
 @login_required
 def admin():
-    return render_template('admin.html', username=current_user.id)
+    return render_template('admin.html', user=current_user)
 
 # Registration route
 @auth_views.route('/register', methods=['GET', 'POST'])
@@ -55,16 +56,16 @@ def register():
         confirm_password = request.form['confirm_password']
 
         if password != confirm_password:
-            flash('The passwords does not match.', 'danger')
-            return render_template('register.html')
+            flash("The passwords don't match.", 'error')
+            return redirect(url_for('auth.register'))
 
         if len(username) > 30:
-            flash('The length of your username should not be plus 30 characters long', 'danger')
-            return render_template('register.html')
+            flash('Your username should not have more than 30 characters', 'error')
+            return redirect(url_for('auth.register'))
 
         if not is_strong_password(password):
-            flash('Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 10 characters minimum and a maximum of 50 characters.', 'danger')
-            return render_template('register.html')
+            flash('Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 10 characters minimum and a maximum of 50 characters.', 'error')
+            return redirect(url_for('auth.register'))
 
         users = load_users()
         if username not in users:
@@ -72,13 +73,13 @@ def register():
             hashed_password = argon2.hash(password)
             users[username] = hashed_password
             save_users(users)
-            flash('Account created!', 'success')
+            flash('Account created!')
             return redirect(url_for('auth.login'))
 
-        flash('Username already exists', 'danger')
-        return render_template('register.html')
+        flash('Username already exists', 'error')
+        return redirect(url_for('auth.register'))
 
-    return render_template('register.html')
+    return render_template('register.html', user=current_user)
 
 # Login route
 @auth_views.route('/login', methods=['GET', 'POST'])
@@ -89,8 +90,8 @@ def login():
         token = request.form['h-captcha-response']
         
         if not valid_captcha(token):
-            flash('Invalid captcha', 'danger')
-            return render_template('login.html')
+            flash('Invalid captcha', 'error')
+            return redirect(url_for('auth.register'))
 
         users = load_users()
         if username in users:
@@ -99,8 +100,8 @@ def login():
                 user.id = username
                 login_user(user)
                 return redirect(url_for('auth.admin'))
-        flash('Invalid credentials', 'danger')
-    return render_template('login.html')
+        flash('Invalid credentials', 'error')
+    return render_template('login.html', user=current_user)
 
 # Get feed info
 @auth_views.route('/get_feed_info', methods=['POST'])
@@ -133,7 +134,7 @@ def get_feed_info():
         message = 'Could not find the country you are looking for. '
         if len(possibilities) >= 1:
             message += f"Here are some options based on your search: {', '.join(possibilities)}"
-        flash(message, "danger")
+        flash(message, "error")
         return redirect(url_for('auth.admin'))
     
     for file in listdir(FEEDS_PATH):
@@ -157,7 +158,7 @@ def get_feed_info():
             }
             data['feeds'][category_name].append(entry)
     if len(data['feeds']) == 0:
-        flash(f"There are no entries for {country_name}", "danger")
+        flash(f"There are no entries for {country_name}", "error")
         return redirect(url_for('auth.admin'))
     return data
 
@@ -172,7 +173,7 @@ def disable_comments():
     if request.form['flexSwitchCheckChecked'] == "false":
         comments['enabled'] = False
         status = 'disabled'
-        category = 'danger'
+        category = 'error'
     
     write_json(comments, COMMENTS_PATH)
     
@@ -208,7 +209,7 @@ def add_news():
             country_code = entry['code'].lower()
 
     if country_code == '':
-        flash('Could not find the country.', 'danger')
+        flash('Could not find the country.', 'error')
         return redirect(url_for('auth.admin'))
     filename = f"{FEEDS_PATH}/{country_code}_{category.lower()}.json"
     entry = {"site": site, "url": url}
@@ -222,7 +223,7 @@ def add_news():
     data.append(entry)
     with open(filename, 'w') as file:
         json.dump(data, file, indent=2)
-    flash('News entry added successfully', 'success')
+    flash('News entry added successfully')
     return redirect(url_for('auth.admin'))
 
 @auth_views.route('/password_change', methods=['GET', 'POST'])
@@ -234,18 +235,18 @@ def password_change():
         confirm_password = request.form['confirm_password']
         users = load_users()
         if not argon2.verify(old_password, users[current_user.id]):
-            flash('Incorrect old password', 'danger')
+            flash('Incorrect old password', 'error')
         elif new_password != confirm_password:
-            flash('New password and confirmation do not match', 'danger')
+            flash('New password and confirmation do not match', 'error')
         elif not is_strong_password(new_password):
-            flash('Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 10 characters minimum and a maximum of 50 characters.', 'danger')
+            flash('Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 10 characters minimum and a maximum of 50 characters.', 'error')
         else:
             # Update the user's password
             users[current_user.id] = argon2.hash(new_password)
             save_users(users)
-            flash('Password changed successfully', 'success')
+            flash('Password changed successfully')
             return redirect(url_for('auth.admin'))
-    return render_template('password_change.html')
+    return render_template('password_change.html', user=current_user)
 
 # Search Comments route
 @auth_views.route('/search_comments', methods=['POST'])
@@ -262,8 +263,8 @@ def search_comments():
                 search_results.append(comments[news_id][index])
             index += 1
     if len(search_results) == 0:
-        flash('No comments found with the provided filter', 'danger')
-    return render_template('admin.html', search_text=search_text, search_results=search_results)
+        flash('No comments found with the provided filter', 'error')
+    return render_template('admin.html', search_text=search_text, search_results=search_results, user=current_user)
 
 # Delete Comments route
 @auth_views.route('/delete_comment', methods=['POST'])
@@ -277,10 +278,8 @@ def delete_comment():
             if comment_id == comment['id']:
                 new_comments = comments
                 new_comments[news_id].remove(comment)
-                flash('Comment deleted successfully', 'success')
-                break
-    try:
-        write_json(new_comments, 'data/comments')
-    except:
-        flash('Comment not found.', 'danger')
-    return render_template('admin.html')
+                write_json(new_comments, COMMENTS_PATH)
+                flash('Comment deleted successfully')
+                return redirect(url_for('auth.admin'))
+    flash('Comment not found.', 'error')
+    return redirect(url_for('auth.admin'))

@@ -18,31 +18,6 @@
 </style>
 {% endblock %}
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="{{ url_for('auth.admin') }}">Admin Panel: Infomundi</a>
-  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item active">
-        <p class="nav-link mb-0">Welcome, {{ username }}! <span class="sr-only">(current)</span></p>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('auth.password_change') }}">Change Password</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('auth.register') }}">Register Admin User (dangerous)</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/">Return Home</a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
 <div class="container">
 <div class="row">
   <div class="col">
@@ -90,7 +65,7 @@
             <label for="search_text">Search Text</label>
             <input type="text" class="form-control bg-dark text-light" id="search_text" name="search_text" required>
           </div>
-          <button type="submit" class="btn btn-outline-primary">Search Comments</button>
+          <button type="submit" class="btn btn-outline-primary">Search</button>
         </form>
       </div>
     </div>
@@ -124,7 +99,7 @@
             <label for="comment_id">Comment ID</label>
             <input type="text" class="form-control bg-dark text-light" id="comment_id" name="comment_id" required>
           </div>
-          <button type="submit" class="btn btn-outline-danger">Delete Comment</button>
+          <button type="submit" class="btn btn-outline-danger">Delete</button>
         </form>
       </div>
     </div>

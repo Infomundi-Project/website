@@ -4,9 +4,30 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @behindsecurity |
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+## 1.1.2: 2023/11/11
+
+### Enhancements (2)
+- IME01: Improved the way the translator element shows up to the user (added "Maximus" toast on the right-down corner)
+- IME02: Navbar itens were added to `base.html` if the user is authenticated.
+
+### Changed (1)
+- IMC01: Changed stories card border to light with low opacity.
+
+### Removed (2)
+- IMR01: Removed translate box appearing on the top-left side of the news page.
+- IMR02: Removed admin-only navbar. Instead, the user information is passed through template rendering.
+
+### Fixed (3)
+- IMF01: Fixed flash error messages not showing in red on auth endpoints. Previous category was 'danger' instead of 'error', which is correct.
+- IMF02: Fixed comments not deleting via admin panel.
+
+### Security (0)
+- IMS01:
 
 
 ## 1.1.1: 2023/11/10

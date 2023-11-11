@@ -38,7 +38,6 @@
   </div>
 </div>
 <div id="comments" class="container mt-4">
-  <div id="google_translate_element"></div>
   <!-- Comment Form -->
   <form action="{{ url_for('views.add_comment') }}" method="post" onsubmit="return validateForm()">
     <div class="form-group">
@@ -74,21 +73,9 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script type="text/javascript">
-  function googleTranslateElementInit() {
-      new google.translate.TranslateElement(
-          {pageLanguage: '{{ country_code }}'},
-          'google_translate_element'
-      );
-  }
-</script>
 <script 
   src="https://js.hcaptcha.com/1/api.js" 
   async defer
-  ></script>
-<script 
-  type="text/javascript"
-  src= "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
   ></script>
 <script defer 
   src="{{ url_for('static', filename='js/validateCommentForm.js') }}"
