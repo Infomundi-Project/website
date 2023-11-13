@@ -1,34 +1,19 @@
-import json, requests
-from hashlib import md5
+from requests import get as get_request, post as post_request
+from datetime import datetime, timedelta
 from re import search as search_regex
 from difflib import SequenceMatcher
 from os import listdir, urandom
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+from hashlib import md5
+from json import loads
 
-from . import config
-
-def read_json(filepath):
-    """Takes only one argument, the path to the .json file on the system. Opens the requested file in a pythonic format (dictionary)"""
-    with open(f"{filepath}.json", encoding='utf-8') as f:
-        data = json.load(f)
-    return data
-
-def write_json(data, filepath):
-    """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is saved in a 'filepah' file in json format."""
-    with open(f"{filepath}.json", "w", encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-
-def append_json(data, filepath):
-    """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is added to 'filepath' in json format."""
-    with open(f"{filepath}.json", "a", encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
+from . import config, json_util
 
 def get_link_preview(url):
     """Takes a URL as input and returns a dictionary with link preview information."""
     try:
         # Send a GET request to the URL
-        response = requests.get(url, timeout=5)
+        response = get_request(url, timeout=5)
         response.raise_for_status()
         response.encoding = 'utf-8'
 
@@ -55,9 +40,7 @@ def get_link_preview(url):
         }
 
 def create_comment_id():
-    random = urandom(20)
-    comment_id = md5(random).hexdigest()
-    return comment_id
+    return md5(urandom(20)).hexdigest()
 
 def string_similarity(s1, s2):
     """Takes two strings and returns the percentage similarity between them."""
@@ -65,12 +48,11 @@ def string_similarity(s1, s2):
     return matcher.ratio() * 100 # Returns percentage of similarity
 
 def get_statistics():
-    statistics = read_json(config.STATISTICS_PATH)
+    statistics = json_util.read_json(config.STATISTICS_PATH)
+    saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
 
     current_timestamp = datetime.now()
     formatted_time = current_timestamp.strftime('%Y/%m/%d %H:%M') # Local Time 
-
-    saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
     
     time_difference = current_timestamp - saved_timestamp
     if time_difference < timedelta(minutes=15):
@@ -83,22 +65,22 @@ def get_statistics():
     total_news = 0 # Total news presented
     total_feeds = 0 # Total feeds
     for category in categories:
-        news_feeds = read_json(f'{config.FEEDS_PATH}/{category}')
+        news_feeds = json_util.read_json(f'{config.FEEDS_PATH}/{category}')
         total_feeds += len(news_feeds)
 
         try:
-            news_cache = read_json(f'{config.CACHE_PATH}/{category}')
+            news_cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
         except FileNotFoundError:
             continue
         
-        for item in news_cache:
-            if 'page' in item:
-                total_news += len(item)
+        for page in news_cache:
+            if 'page' in page: # because there's a timestamp key and we don't want to trigger a key error
+                total_news += len(page)
         timestamp = news_cache['created_at']
     
     last_updated = datetime.fromtimestamp(timestamp).strftime('%Y/%m/%d at %H:%M') # Last updated
     
-    comments = read_json(config.COMMENTS_PATH)
+    comments = json_util.read_json(config.COMMENTS_PATH)
     total_comments = 0 # Total comments
     for news_id in comments:
         if news_id != 'enabled':
@@ -115,7 +97,7 @@ def get_statistics():
         'last_updated': last_updated
     }
     
-    write_json(data, config.STATISTICS_PATH)
+    json_util.write_json(data, config.STATISTICS_PATH)
     return data
 
 def valid_category(category):
@@ -142,40 +124,20 @@ def valid_captcha(token):
     }
 
     # Make POST request with data payload to hCaptcha API endpoint.
-    response = requests.post(url=VERIFY_URL, data=data)
+    response = post_request(url=VERIFY_URL, data=data)
 
     # Parse JSON from response. Check for success or error codes.
-    response_json = json.loads(response.content)
+    response_json = loads(response.content)
     success = response_json['success']
     return success
 
 def is_strong_password(password):
-    """Takes a password and checks if it is a strong password based on certain criteria."""
-    
-    # Check for at least a total of ten characters
-    if len(password) < 10 or len(password) > 50:
-        return False
+    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, min 10 chacarters and max 50 characters."""
 
-    # Check for at least one lowercase character
-    if not search_regex(r'[a-z]', password):
+    if not search_regex(r'[a-z]', password) or not search_regex(r'[A-Z]', password) or not search_regex(r'\d', password) or not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password) or len(password) < 10 or len(password) > 50:
         return False
-
-    # Check for at least one uppercase character
-    if not search_regex(r'[A-Z]', password):
-        return False
-
-    # Check for at least one digit
-    if not search_regex(r'\d', password):
-        return False
-
-    # Check for at least one special character
-    if not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password):
-        return False
-
-    # If all checks pass, the password is strong
-    return True
+    else:
+        return True
 
 def remove_html_tags(text_with_html):
-    soup = BeautifulSoup(text_with_html, 'html.parser')
-    text_without_tags = soup.get_text()
-    return text_without_tags
+    return BeautifulSoup(text_with_html, 'html.parser').get_text()

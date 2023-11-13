@@ -1,11 +1,11 @@
-from flask import Flask
-from os import urandom
 from flask_login import LoginManager
 from flask_gzip import Gzip
+from flask import Flask
+from os import urandom
 
+from website_scripts import config
 from auth import auth_views, User
 from views import views
-from website_scripts import config
 
 app = Flask(__name__)
 gzip = Gzip(app)

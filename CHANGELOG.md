@@ -4,10 +4,34 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @behindsecurity |
 | 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @behindsecurity |
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.1.3: 2023/11/13
+
+### Enhancements (7)
+- IME01: Code refactoring. Better performance, logic and optimization.
+- IME02: Homepage's globe now fits to the user viewport.
+- IME03: When user is logged in, the name input on the comments page is set to disabled, showing the user id.
+- IME04: Added autocomplete to the admin dashboard.
+- IME05: Added a tag to indicate that the user is an admin.
+- IME06: Added a search bar to the news page.
+- IME07: Country name and flag are now both clickable, redirecting the user to the general page of the respective country.
+
+### Changed (2)
+- IMC01: Added a search icon on the left of the homepage's search input, changed it's background color to dark and added a label.
+- IMC02: Comments page's 'View Full Story' button is set to large.
+
+### Removed (0)
+
+### Fixed (0)
+
+### Security (0)
+
 
 ## 1.1.2: 2023/11/11
 

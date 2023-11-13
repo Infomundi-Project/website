@@ -33,9 +33,9 @@
   <div class="col">
   </div>
   <div class="col-sm-6 text-center">
-    <p class="fs-1 fw-bold">
+    <a class="fs-1 fw-bold text-decoration-none text-light" href="/news?country={{ country_code }}">
       <img src="https://hatscripts.github.io/circle-flags/flags/{{ country_code }}.svg" style="max-width: 48px" class="rounded-circle" alt="{{ country_name }}'s flag"> {{ country_name }}
-    </p>
+    </a>
   </div>
   <div class="col">
   </div>
@@ -56,9 +56,16 @@
   <li class="nav-item">
     <a class="nav-link {{ 'disabled text-secondary' if 'sports' not in supported_categories else '' }} {{ 'active' if 'sports' in selected_filter else '' }}" href="/news?country={{ country_code }}&section=sports">Sports</a>
   </li>
+  <li class="nav-item">
+    <div class="input-group mb-3">
+      <input class="form-control text-light bg-dark" type="text" id="query" name="query" aria-label="Example text with button addon" aria-describedby="search-button" required>
+      <button class="btn btn-outline-light" type="button" id="search-button" onclick="submitSearch()">Search</button>
+    </div>
+  </li>
 </ul>
+{% if total_pages %}
 <nav aria-label="Page navigation">
-  <ul class="pagination pagination-sm justify-content-center">
+  <ul class="pagination pagination-sm justify-content-center mt-2">
     {% for page in range(1, total_pages+1) %} 
     <li class="page-item {{ 'active' if page_num == page }}">
       <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
@@ -66,19 +73,20 @@
     {% endfor %} 
   </ul>
 </nav>
+{% endif %}
 <div class="row">
   {% for item in feeds %} 
   <div class="p-1 col-6 col-md-3">
     <div class="card mb-1 bg-dark text-light border-light border-opacity-10">
       <div class="row g-0">
         <div class="col-md-4">
-          <a href="{{ item['link'] }}" target="_blank">
+          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}">
           <img src="{{ item['media_content']['url'] }}" class="rounded-start img-fluid card-img" style="min-height: 190px; max-height: 195px" alt="News image">
           </a>
         </div>
         <div class="col-md-8">
           <div class="card-body">
-            <a href="{{ item['link'] }}" style="text-decoration:none;" target="_blank">
+            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}" style="text-decoration:none;">
               <h6 class="card-title" style="color: white; overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
             </a>
             <small>
@@ -90,7 +98,7 @@
             <img src="{{ item['feed_icon'] }}" class="object-fit-scale border rounded border-light border-opacity-10" style="min-height: 30px; min-width: 30px; max-height: 31px; max-width: 31px">
             </a>
             <small class="text-white-50 pubdate">{{ item['pubDate'] }}</small>
-            <a class="btn btn-sm btn-dark border-light border-opacity-50" href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" role="button">{{ item['total_comments'] }}
+            <a class="btn btn-sm btn-dark border-light border-opacity-50" href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}" role="button">{{ item['total_comments'] }}
             <i class="fa fa-comment"></i>
             </a>
           </div>
@@ -100,8 +108,9 @@
   </div>
   {% endfor %} 
 </div>
+{% if total_pages %}
 <nav aria-label="Page navigation">
-  <ul class="pagination pagination-sm justify-content-center">
+  <ul class="pagination pagination-sm justify-content-center mt-2">
     {% for page in range(1, total_pages+1) %} 
     <li class="page-item {{ 'active' if page_num == page }}">
       <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
@@ -109,4 +118,21 @@
     {% endfor %} 
   </ul>
 </nav>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+  function submitSearch() {
+      const query = document.getElementById('query').value;
+      // Get the current URL and parse its query parameters
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams(url.search);
+      // Add or update the 'query' parameter
+      params.set('query', query);
+      // Set the updated query parameters back to the URL
+      url.search = params.toString();
+      // Update the URL and trigger a page reload
+      window.location.href = url.toString();
+    }
+</script>
 {% endblock %}

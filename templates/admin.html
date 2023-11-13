@@ -29,7 +29,7 @@
         <form method="post" action="{{ url_for('auth.add_news') }}">
           <div class="form-group">
             <label for="country">Country</label>
-            <input type="text" class="form-control bg-dark text-light" id="country" name="country" required>
+            <input type="text" class="form-control bg-dark text-light autocomplete" id="country" name="country" required>
           </div>
           <div class="form-group">
             <label for="category">Category</label>
@@ -47,7 +47,7 @@
           </div>
           <div class="form-group">
             <label for="url">Feed URL</label>
-            <input type="url" class="form-control bg-dark text-light" id="url" name="url" required>
+            <input type="url" pattern="https?://.+" class="form-control bg-dark text-light" id="url" name="url" required>
           </div>
           <button type="submit" class="btn btn-outline-success">Add Entry</button>
         </form>
@@ -81,7 +81,7 @@
         <form method="post" action="{{ url_for('auth.get_feed_info') }}">
           <div class="form-group">
             <label for="country_name">Country Name</label>
-            <input type="text" class="form-control bg-dark text-light" id="country_name" name="country_name" required>
+            <input type="text" class="form-control bg-dark text-light autocomplete" id="country_name" name="country_name" required>
           </div>
           <button type="submit" class="btn btn-outline-primary">Search</button>
         </form>
@@ -138,6 +138,14 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script 
+  src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" 
+  integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" 
+  crossorigin="anonymous"
+  ></script>
+<script defer
+  src="{{ url_for('static', filename='js/autocompleteNoRedirect.js') }}"
+  ></script>
 <script>
   $(document).ready(function() {
       // Fetch the initial state from the server

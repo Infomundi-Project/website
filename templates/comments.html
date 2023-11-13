@@ -32,8 +32,8 @@
     <div class="card-body">
       <h5 class="card-title">{{ preview_data['title'] }}</h5>
       <p class="card-text">{{ preview_data['description'] }}</p>
-      <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-3"><i class="fa-solid fa-eye"></i> View Full Story</a>
-      <a href="#" class="btn btn-sm btn-outline-warning me-3 return"><i class="fa-solid fa-undo"></i> Return</a>
+      <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-2"><i class="fa-solid fa-eye"></i> View Full Story</a>
+      <a href="#" class="btn btn-sm btn-outline-warning return"><i class="fa-solid fa-undo"></i> Return</a>
     </div>
   </div>
 </div>
@@ -41,12 +41,18 @@
   <!-- Comment Form -->
   <form action="{{ url_for('views.add_comment') }}" method="post" onsubmit="return validateForm()">
     <div class="form-group">
-      <label for="name" style="color: white;">Name (default - random):</label>
-      <input type="text" id="name" name="name" class="form-control text-light bg-dark" maxlength="20">
+      <label for="name" class="form-label text-light">Name</label>
+      {% if user.is_authenticated %}
+      <input class="form-control" type="text" placeholder="{{ user.id }}" aria-label="User is logged in" disabled>
+      {% else %}
+      <input type="text" id="name" name="name" class="form-control text-light bg-dark" aria-describedby="nameHelp" maxlength="20">
+      <div id="nameHelp" class="form-text text-light">We'll generate one for you if you prefer not to choose a name and leave this field blank.</div>
+      {% endif %}
     </div>
     <div class="form-group">
-      <label for="comment" style="color: white;">Comment (max 300 characters):</label>
-      <textarea id="comment" name="comment" rows="4" class="form-control text-light bg-dark" maxlength="300" required></textarea>
+      <label for="comment" class="form-label text-light">Comment</label>
+      <textarea id="comment" name="comment" rows="4" class="form-control text-light bg-dark" maxlength="300" aria-describedby="commentHelp" required></textarea>
+      <div id="commentHelp" class="form-text text-light">Your comment must not exceed 300 characters.</div>
     </div>
     <div class="form-group">
       <input type="hidden" id="id" name="id" value="{{ id }}">
@@ -61,7 +67,7 @@
   {% for comment in comments %} 
   <div class="comment">
     <p>
-      {% if comment.random_name %}<span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle"></i> Randomly Generated Name</span> {% endif %}<strong>{{ comment.name }}</strong>: {{ comment.text }}
+      {% if comment.random_name %}<span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle"></i> Randomly Generated Name</span>{% endif %} {% if comment.is_admin %}<span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Behold, for in the vast digital realm, our esteemed commenter emerges as the sovereign guardian of the website, the virtuoso of all things admin! With a mere keystroke, they weave the intricate code that shapes the very fabric of our online sanctuary. A digital maestro, conducting the symphony of pixels with finesse and flair. In the kingdom of cybernetic wonders, our admin dons the cloak of authority, navigating the ones and zeros with the grace of a seasoned navigator. Behind the scenes, they are the puppeteer of plugins, the sorcerer of security, and the architect of a user-friendly utopia. As the pixels bow in reverence, and the algorithms hum in harmony, our website admin stands tall, a sentinel of the virtual gates. Their comments echo with the wisdom of one who holds the keys to the digital kingdom, a sovereign of the server rooms, and a ruler of the HTML hierarchy. All hail the maestro of the admin console, for theirs is the power to mold the webiverse with a stroke of brilliance! "><i class="fa-solid fa-crown"></i> Admin</span>{% endif %} <strong>{{ comment.name }}</strong>: {{ comment.text }}
     </p>
   </div>
   {% endfor %} 
