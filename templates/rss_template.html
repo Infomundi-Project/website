@@ -1,9 +1,6 @@
-{% extends "base.html" %} {% block title %}{{ country_name }} {{ news_filter }}{% endblock %}
+{% extends "base.html" %} {% block title %}{{ country_name }} {{ news_filter.title() }}{% endblock %}
 {% block styles %}
 <style type="text/css">
-  .pubdate {
-  padding-right: 5%
-  }
   .card {
   min-height: 170px;
   max-height: 200px;
@@ -42,25 +39,19 @@
 </div>
 <ul class="nav nav-pills justify-content-center mb-2 mt-4">
   <li class="nav-item">
-    <a class="nav-link {{ 'active' if 'general' in selected_filter else '' }}" href="/news?country={{ country_code }}">General</a>
+    <a class="nav-link {{ 'active' if 'general' in selected_filter }}" href="/news?country={{ country_code }}">General</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'economy' not in supported_categories else '' }} {{ 'active' if 'economy' in selected_filter else '' }}" href="/news?country={{ country_code }}&section=economy">Economy</a>
+    <a class="nav-link {{ 'disabled text-secondary' if 'economy' not in supported_categories }} {{ 'active' if 'economy' in selected_filter }}" href="/news?country={{ country_code }}&section=economy">Economy</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'politics' not in supported_categories else '' }} {{ 'active' if 'politics' in selected_filter else '' }}" href="/news?country={{ country_code }}&section=politics">Politics</a>
+    <a class="nav-link {{ 'disabled text-secondary' if 'politics' not in supported_categories }} {{ 'active' if 'politics' in selected_filter }}" href="/news?country={{ country_code }}&section=politics">Politics</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'technology' not in supported_categories else '' }} {{ 'active' if 'technology' in selected_filter else '' }}" href="/news?country={{ country_code }}&section=technology">Technology</a>
+    <a class="nav-link {{ 'disabled text-secondary' if 'technology' not in supported_categories }} {{ 'active' if 'technology' in selected_filter }}" href="/news?country={{ country_code }}&section=technology">Technology</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'sports' not in supported_categories else '' }} {{ 'active' if 'sports' in selected_filter else '' }}" href="/news?country={{ country_code }}&section=sports">Sports</a>
-  </li>
-  <li class="nav-item">
-    <div class="input-group mb-3">
-      <input class="form-control text-light bg-dark" type="text" id="query" name="query" aria-label="Example text with button addon" aria-describedby="search-button" required>
-      <button class="btn btn-outline-light" type="button" id="search-button" onclick="submitSearch()">Search</button>
-    </div>
+    <a class="nav-link {{ 'disabled text-secondary' if 'sports' not in supported_categories }} {{ 'active' if 'sports' in selected_filter }}" href="/news?country={{ country_code }}&section=sports">Sports</a>
   </li>
 </ul>
 {% if total_pages %}
@@ -76,31 +67,30 @@
 {% endif %}
 <div class="row">
   {% for item in feeds %} 
-  <div class="p-1 col-6 col-md-3">
+  <div class="p-1 col-6 col-xxl-3">
     <div class="card mb-1 bg-dark text-light border-light border-opacity-10">
       <div class="row g-0">
         <div class="col-md-4">
-          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}">
-          <img src="{{ item['media_content']['url'] }}" class="rounded-start img-fluid card-img" style="min-height: 190px; max-height: 195px" alt="News image">
+          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ item['on_page'] if 'on_page' in item else page_num }}">
+          <img src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" style="min-height: 190px; max-height: 190px" alt="News image">
           </a>
         </div>
         <div class="col-md-8">
           <div class="card-body">
-            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}" style="text-decoration:none;">
+            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ item['on_page'] if 'on_page' in item else page_num }}" style="text-decoration:none;">
               <h6 class="card-title" style="color: white; overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
             </a>
             <small>
-              <p style="min-height: 45px; max-height: 46px; overflow: hidden;" class="card-text text-primary">{{ item['publisher'] }}</p>
+              <p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text text-secondary"><i class="fa-solid fa-rss"></i> {{ item['publisher'] }}</p>
             </small>
           </div>
           <div class="card-footer">
             <a href="{{ item['publisher_link'] }}" target="_blank" style="text-decoration:none;">
             <img src="{{ item['feed_icon'] }}" class="object-fit-scale border rounded border-light border-opacity-10" style="min-height: 30px; min-width: 30px; max-height: 31px; max-width: 31px">
             </a>
-            <small class="text-white-50 pubdate">{{ item['pubDate'] }}</small>
-            <a class="btn btn-sm btn-dark border-light border-opacity-50" href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ page_num }}" role="button">{{ item['total_comments'] }}
-            <i class="fa fa-comment"></i>
-            </a>
+            <small class="text-white-50 ms-1 me-1">{{ item['pubDate'] }}</small>
+            <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
+            <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
           </div>
         </div>
       </div>
@@ -123,16 +113,16 @@
 {% block scripts %}
 <script>
   function submitSearch() {
-      const query = document.getElementById('query').value;
-      // Get the current URL and parse its query parameters
-      const url = new URL(window.location.href);
-      const params = new URLSearchParams(url.search);
-      // Add or update the 'query' parameter
-      params.set('query', query);
-      // Set the updated query parameters back to the URL
-      url.search = params.toString();
-      // Update the URL and trigger a page reload
-      window.location.href = url.toString();
-    }
+    const query = document.getElementById('query').value;
+    // Get the current URL and parse its query parameters
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    // Add or update the 'query' parameter
+    params.set('query', query);
+    // Set the updated query parameters back to the URL
+    url.search = params.toString();
+    // Update the URL and trigger a page reload
+    window.location.href = url.toString();
+  }
 </script>
 {% endblock %}

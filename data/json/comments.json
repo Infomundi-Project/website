@@ -41,5 +41,64 @@
       "id": "68f500797b1ffe617650412638b30f69"
     }
   ],
-  "4b15c90ae9df1dab2af3a9c871d659ad": []
+  "4b15c90ae9df1dab2af3a9c871d659ad": [],
+  "53cd25cc6f8a2579239f6b8b6566a8f6": [
+    {
+      "name": "Bug Fire",
+      "random_name": true,
+      "is_admin": false,
+      "text": "oi",
+      "id": "5b6aa6d48ecfcc28b1931d119de76bf9"
+    }
+  ],
+  "937fc7e01642303b6651f9284f45ec69": [
+    {
+      "name": "Nana",
+      "random_name": true,
+      "is_admin": false,
+      "text": "Eu concordo.",
+      "id": "3fd345fa4f38e705a035d43794ad07b1"
+    },
+    {
+      "name": "ABARROS",
+      "random_name": false,
+      "is_admin": false,
+      "text": "Eu concordo tamb\u00e9m.",
+      "id": "51a1e7e3042920b45020a6d6144cc512"
+    }
+  ],
+  "96e6ef4e697e012922677c6aecc1adf6": [
+    {
+      "name": "Candy Butcher",
+      "random_name": true,
+      "is_admin": false,
+      "text": "vai tomar nesse teu cu bolsonaro",
+      "id": "112c94b70a4cce031674365c86532ee3"
+    }
+  ],
+  "18777b1fdec0fc27ac1eeae40a4521db": [
+    {
+      "name": "valory",
+      "random_name": false,
+      "is_admin": true,
+      "text": "great",
+      "id": "4e1dfcdb742de81aff37dece1f27e8bc"
+    }
+  ],
+  "36d5e06e03f31c5e16a0c7235b44e6a8": [
+    {
+      "name": "Serenity",
+      "random_name": true,
+      "is_admin": false,
+      "text": "melhor pa\u00eds da \u00c1frica para se viver",
+      "id": "e2978311bc6730d60bec122fefd9ff26"
+    },
+    {
+      "name": "Artur Dias",
+      "random_name": false,
+      "is_admin": false,
+      "text": "\u00f3timo site",
+      "id": "09c22e5c08489fb653f3695fee185554"
+    }
+  ]
 }

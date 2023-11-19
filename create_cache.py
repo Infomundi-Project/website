@@ -1,15 +1,16 @@
 import time, threading
-from feedparser import parse
-from requests import get
-from datetime import datetime
-from random import shuffle
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from os import listdir
+from feedparser import parse
+from random import shuffle
+from requests import get
 from hashlib import md5
+from os import listdir
 from sys import exit
 
 from website_scripts.config import *
-from website_scripts.scripts import read_json, write_json, remove_html_tags
+from website_scripts.scripts import remove_html_tags
+from website_scripts import json_util
 
 def get_img(feed, item):
     """Extract image source from RSS item."""
@@ -30,7 +31,7 @@ def get_img(feed, item):
             if ".jpg" in entry['href']:
                 return entry['href']
     #src = get_link_preview(item.link)
-    src = 'static/img/infomundi2.png'
+    src = 'static/img/infomundi-white-darkbg-square.webp'
     return src
 
 def fetch_rss_feed(rss_url, news_filter, result_list):
@@ -43,24 +44,23 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
         if response.status_code == 200:
             feed = parse(response.content)
         else:
-            raise Exception
-    except KeyboardInterrupt:
-        exit()
-    except Exception as err:
-        print(f'[!] {rss_url} // {response.status_code}')
+            print(f"[!] {rss_url} // {response.status_code}")
+    except Exception:
         return {}
 
     icon = ''
     try:
         icon = feed.feed.image.href
-    except:
+    except UnboundLocalError:
+        pass
+    except Exception:
         if 'logo' in feed.feed.keys():
             icon = feed.feed.logo
 
     if icon == "":
-        feed = read_json(f'{FEEDS_PATH}/{news_filter}')
-        for entry in feed:
-            if entry['url'] == rss_url and 'favicon' in entry.keys():
+        feed_file = json_util.read_json(f'{FEEDS_PATH}/{news_filter}')
+        for entry in feed_file:
+            if entry['url'] == rss_url and 'favicon' in entry:
                 icon = entry['favicon']
 
     try:
@@ -70,13 +70,13 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
             'items': [
                 {
                     'title': item.title,
-                    'description': remove_html_tags(item.description) if 'description' in item else 'No description provided',
+                    'description': f'{remove_html_tags(item.description)[:500]}' if 'description' in item else 'No description provided',
                     'feed_icon': icon,
                     'id': f'{md5(item.title.encode()).hexdigest()}',
                     'publisher': feed.feed.title,
                     'publisher_link': feed.feed.link,
                     'link': item.link,
-                    'pubDate': item.published,
+                    'pubDate': format_date(item.published_parsed),
                     'media_content': {
                         'url': item.media_content[0]['url'] if 'media_content' in item else get_img(feed, item),
                     }
@@ -84,11 +84,27 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
                 for item in feed.entries
             ]
         }
-    except:
-        print(f"[!] Exception getting {rss_url} ({news_filter})")
+    except Exception as err:
+        print(f"[!] Exception getting {rss_url} ({news_filter}) // {err}")
         data = {}
 
     result_list.append(data)
+
+def format_date(date):
+    today = datetime.now().date()
+
+    if isinstance(date, tuple):
+        date = datetime(*date[:6]).date()
+    
+    if date == today:
+        return 'Today'
+
+    for day in range(1, 16):
+        comparison = today - timedelta(days=day)
+        if date == comparison:
+            return f"{day} day{'s' if day > 1 else ''} ago"
+
+    return date.strftime('%Y/%m/%d')
 
 def main():
     """Main function to fetch and cache RSS feeds."""
@@ -98,10 +114,9 @@ def main():
 
     for selected_filter in categories:
         now = time.time()
-        cache_exists = True
 
         try:
-            cache = read_json(f"{CACHE_PATH}/{selected_filter}")
+            cache = json_util.read_json(f"{CACHE_PATH}/{selected_filter}")
 
             if int(now - float(cache["created_at"])) < 21600 or selected_filter == '': # change time
                 print(f"[~] Skipping {selected_filter}")
@@ -110,7 +125,7 @@ def main():
             pass
 
         print(f"[~] Handling cache for {selected_filter}...")
-        rss_feeds = read_json(f"{FEEDS_PATH}/{selected_filter}")
+        rss_feeds = json_util.read_json(f"{FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
 
         # Use threads to fetch RSS feeds concurrently
@@ -128,34 +143,30 @@ def main():
         for rss_data in result_list:
             if len(rss_data) == 0:
                 continue
-            for item in rss_data["items"]:
-                title = item["title"]
-                if len(title) > 90:
-                    item["title"] = title[:85] + "..."
-                pubdate = item['pubDate']
-                if pubdate.startswith('2023'):
-                    pubdate = pubdate[:10]
-                elif pubdate[3] == ',':
-                    pubdate = pubdate[5:16]
-                else:
-                    pubdate = pubdate[:11]
-                item['pubDate'] = pubdate
+            
             rss_data["site"] = feed_info["site"]
             all_rss_data.append(rss_data)
-            # Merge articles from different feeds into a single list
-
+        
+        # Merge articles from different feeds into a single list
         merged_articles = []
         for rss_data in all_rss_data:
             merged_articles.extend(rss_data["items"])
 
+        if not merged_articles:
+            print(f"[-] Empty cache: {selected_filter}")
+            continue
+
         # Shuffle merged articles to mix them up
         shuffle(merged_articles)
+
         page_separated_articles = {}
         page_separated_articles["created_at"] = now
-        index = 0
+        
         total_pages = len(merged_articles) // 100
         if total_pages == 0:
             total_pages += 1
+        
+        index = 0
         for page in range(1, total_pages + 1):
             page_separated_articles[f"page_{str(page)}"] = []
             try:
@@ -163,11 +174,9 @@ def main():
                 index += 100
             except:
                 page_separated_articles[f"page_{str(page)}"].extend(merged_articles)
-        if len(merged_articles) != 0:
-            write_json(page_separated_articles, f"{CACHE_PATH}/{selected_filter}")
-            print(f"[{total_pages} pages // {len(merged_articles)} articles] Wrote json for {selected_filter}.")
-        else:
-            print(f"[-] Empty cache: {selected_filter}")
+
+        json_util.write_json(page_separated_articles, f"{CACHE_PATH}/{selected_filter}")
+        print(f"[{total_pages} pages // {len(merged_articles)} articles] Wrote json for {selected_filter}.")
 
 if __name__ == "__main__":
     main()

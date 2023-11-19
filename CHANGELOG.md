@@ -4,11 +4,35 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.4 | 2023/11/17 | Revamped homepage layout. Added click tracking, user session stats, icons in comments. Improved cache script and added view count badges. Changed search bar and subtitle colors. Adjusted news page layout for smaller screens. Fixed search bug. No removals or security changes.  | @behindsecurity |
 | 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @behindsecurity |
 | 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @behindsecurity |
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.1.4: 2023/11/19
+
+### Enhancements (6)
+- IME01: The homepage is now more well-looking. Entire layout changes.
+- IME02: Added clicks couting to the news. Every time somebody clicks on a story, it gets registered.
+- IME03: Statistics now show the amount of clicks, and information related to the user session (last visited news and last visited country)
+- IME04: Added icons to informative text in the comments page.
+- IME05: `create_cache.py` is now less error-prone.
+- IME06: Added informative badge to show view count on all news from the news page.
+
+### Changed (3)
+- IMC01: Changed the look of the search bar to a light blue, and changed the button from 'Search' to a magnifying glass icon.
+- IMC02: Changed subtitle colors in the comments page.
+- IMC03: Changed layout column configuration for the news page on smaller screens (col-xxl-3). 2 instead of 4 columns.
+
+### Removed (0)
+
+### Fixed (1)
+- IMF01: Fixed bug that redirects users to the wrong story's comment page (non-existing) after using the search functionality.
+
+### Security (0)
 
 
 ## 1.1.3: 2023/11/13

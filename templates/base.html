@@ -47,12 +47,7 @@
         <span class="navbar-toggler-icon text-light"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            {% if page == 'Comments' %}
-            <li class="nav-item">
-              <button type="button" class="btn btn-outline-warning return"><i class="fa-solid fa-undo"></i> Return</button>
-            </li>
-            {% endif %}
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('views.about') }}">About</a>
             </li>
@@ -80,6 +75,17 @@
             </li>
             {% endif %}
           </ul>
+          {% if page == 'Comments' %}
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-warning return"><i class="fa-solid fa-undo"></i> Return</button>
+          </div>
+          {% endif %}
+          {% if page == 'News' %}
+          <form class="d-flex justify-content-end" role="search" action="javascript:;" onsubmit="submitSearch()">
+            <input class="form-control text-light bg-dark me-2 border border-primary border-opacity-25" type="search" placeholder="Search" aria-label="Search" id="query" name="query">
+            <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -99,7 +105,7 @@
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="60000" aria-live="assertive" aria-atomic="true">
           <div class="toast-header bg-dark text-light">
-            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" style="max-width: 20%; max-height: 20%;">
+            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" style="max-width: 15%; max-height: 15%;">
             <strong class="me-auto">Maximus: "Would you like to translate?"</strong>
             <!-- <small>Now</small> -->
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -125,7 +131,6 @@
       ></script>
     <script type="text/javascript">
       const toastLiveExample = document.getElementById('liveToast')
-      
       const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
       toastBootstrap.show()
     </script>
@@ -135,11 +140,11 @@
       ></script>
     <script type="text/javascript">
       function googleTranslateElementInit() {
-          new google.translate.TranslateElement({
-                  pageLanguage: '{{ country_code }}'
-              },
-              'google_translate_element'
-          );
+        new google.translate.TranslateElement({
+          pageLanguage: '{{ country_code }}'
+        },
+        'google_translate_element'
+        );
       }
     </script>
     {% block scripts %} {% endblock %}
