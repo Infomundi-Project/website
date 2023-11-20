@@ -33,7 +33,7 @@
       <h5 class="card-title">{{ preview_data['title'] }}</h5>
       <p class="card-text">{{ preview_data['description'] }}</p>
       <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-2"><i class="fa-solid fa-eye"></i> View Full Story</a>
-      <a href="#" class="btn btn-sm btn-outline-warning return"><i class="fa-solid fa-undo"></i> Return</a>
+      <a href="{{ session_info['last_visited_country'] }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</a>
     </div>
   </div>
 </div>
@@ -66,7 +66,7 @@
   {% if comments %}
   {% for comment in comments %} 
   <div class="comment">
-    <p class="fw-semibold mb-3">
+    <p class="fw-semibold">
       {% if comment.random_name %}<span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle"></i> Randomly Generated Name</span>{% endif %} {% if comment.is_admin %}<span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Behold, for in the vast digital realm, our esteemed commenter emerges as the sovereign guardian of the website, the virtuoso of all things admin! With a mere keystroke, they weave the intricate code that shapes the very fabric of our online sanctuary. A digital maestro, conducting the symphony of pixels with finesse and flair. In the kingdom of cybernetic wonders, our admin dons the cloak of authority, navigating the ones and zeros with the grace of a seasoned navigator. Behind the scenes, they are the puppeteer of plugins, the sorcerer of security, and the architect of a user-friendly utopia. As the pixels bow in reverence, and the algorithms hum in harmony, our website admin stands tall, a sentinel of the virtual gates. Their comments echo with the wisdom of one who holds the keys to the digital kingdom, a sovereign of the server rooms, and a ruler of the HTML hierarchy. All hail the maestro of the admin console, for theirs is the power to mold the webiverse with a stroke of brilliance! "><i class="fa-solid fa-crown"></i> Admin</span>{% endif %} {{ comment.name }}: <span class="fw-light">{{ comment.text }}</span>
     </p>
   </div>

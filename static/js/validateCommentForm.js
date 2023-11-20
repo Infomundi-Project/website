@@ -11,6 +11,3 @@ function validateForm() {
   }
   return true;
 }
-$('.return').on('click', function() {
-  history.go(-1);
-});

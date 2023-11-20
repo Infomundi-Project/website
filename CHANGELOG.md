@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.5 | 2023/11/20 | Added error pages, code refactoring, email support, and comment blacklist. Changed theme color to black. Fixed return button on comments page. No removals or security changes.  | @behindsecurity |
 | 1.1.4 | 2023/11/17 | Revamped homepage layout. Added click tracking, user session stats, icons in comments. Improved cache script and added view count badges. Changed search bar and subtitle colors. Adjusted news page layout for smaller screens. Fixed search bug. No removals or security changes.  | @behindsecurity |
 | 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @behindsecurity |
 | 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @behindsecurity |
@@ -12,25 +13,44 @@
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
 
 
+## 1.1.5: 2023/11/20
+
+### Enhancements (4)
+- IME01: Added an error page to show up if the user triggers a not found page or an internal server error.
+- IME02: Code refactoring.
+- IME03: Added support for email. Contact form is planned to be launched soon.
+- IME04: A badlist was created to filter potentially harmful comments.
+
+### Changed (1)
+- IMC01: Changed theme color (color that appears on Discord preview link) from white to black.
+
+### Removed ()
+
+### Fixed (1)
+- IMF01: Fixed the return button on the comments page, now it redirects the user to the previous country they were viewing.
+
+### Security ()
+
+
 ## 1.1.4: 2023/11/19
 
-### Enhancements (6)
-- IME01: The homepage is now more well-looking. Entire layout changes.
-- IME02: Added clicks couting to the news. Every time somebody clicks on a story, it gets registered.
-- IME03: Statistics now show the amount of clicks, and information related to the user session (last visited news and last visited country)
-- IME04: Added icons to informative text in the comments page.
-- IME05: `create_cache.py` is now less error-prone.
-- IME06: Added informative badge to show view count on all news from the news page.
+### Enhancements (5)
+- IME01: The homepage has undergone a comprehensive aesthetic overhaul, resulting in a more refined appearance with significant layout modifications.
+- IME02: Implemented a click tracking feature for news articles, ensuring each user interaction is recorded when clicking on a story.
+- IME03: Enhanced statistical reporting to include click metrics and pertinent user session details such as the last visited news and country.
+- IME04: Augmented the comments page with iconography, affording a visually enriched experience for users interacting with informative text.
+- IME05: Introduced an informative badge to display view counts for all news articles directly on the news page.
 
 ### Changed (3)
-- IMC01: Changed the look of the search bar to a light blue, and changed the button from 'Search' to a magnifying glass icon.
-- IMC02: Changed subtitle colors in the comments page.
-- IMC03: Changed layout column configuration for the news page on smaller screens (col-xxl-3). 2 instead of 4 columns.
+- IMC01: Reconfigured the search bar with a light blue hue and replaced the 'Search' button with a magnifying glass icon for a more streamlined visual presentation.
+- IMC02: Altered subtitle color schemes within the comments page to enhance readability and visual coherence.
+- IMC03: Modified the layout column configuration for the news page on smaller screens, opting for a two-column structure (col-xxl-3) instead of the previous four.
 
 ### Removed (0)
 
-### Fixed (1)
-- IMF01: Fixed bug that redirects users to the wrong story's comment page (non-existing) after using the search functionality.
+### Fixed (2)
+- IMF01: Resolved a bug that erroneously redirected users to non-existent story comment pages after utilizing the search functionality. Additionally,
+- IMF02: Rectified script issues pertaining to cache creation, ensuring optimal functionality and system stability.
 
 ### Security (0)
 

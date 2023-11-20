@@ -124,13 +124,13 @@ def get_country_code():
 @views.route('/autocomplete', methods=['GET'])
 def autocomplete():
     """Autocomplete endpoint for country names."""
-    query = request.args.get('query', '')
+    query = request.args.get('query', '').lower()
     
     if len(query) < 2:
         return redirect(url_for('views.home'))
     
     countries = [x['name'] for x in config.COUNTRY_LIST]
-    results = [country for country in countries if query.lower() in country.lower()]
+    results = [country for country in countries if query in country.lower()]
     return jsonify(results)
 
 @views.route('/comments', methods=['GET'])
@@ -183,7 +183,7 @@ def comments():
 
     scripts.add_click(news_id)
     
-    response = make_response(render_template('comments.html', page='Comments', comments=comments[news_id] if news_id in comments else False, news_link=news_link, id=news_id, preview_data=preview_data, user=current_user))
+    response = make_response(render_template('comments.html', page='Comments', comments=comments[news_id] if news_id in comments else False, news_link=news_link, id=news_id, preview_data=preview_data, user=current_user, session_info=scripts.get_session_info(request)))
     
     FULL_URL = f'https://infomundi.net/comments?id={news_id}&category={category}&page={page_number}'
     response.set_cookie('last_visited_news', scripts.encode_base64(FULL_URL))
@@ -199,13 +199,13 @@ def add_comment():
         flash('We apologize, but comments are temporarily disabled. Please try again later.', 'error')
         return redirect(referer)
     
-    name = current_user.id if current_user.is_authenticated else request.form['name']
-    comment_text = request.form['comment']
     token = request.form['h-captcha-response'] # Retrieve token from post data with key 'h-captcha-response'
-
     if not scripts.valid_captcha(token):
         flash('Invalid captcha! Are you a robot?', 'error')
         return redirect(referer)
+
+    name = current_user.id if current_user.is_authenticated else request.form['name']
+    comment_text = request.form['comment']
 
     if len(comment_text) > 300 or len(name) > 20:
         flash('Please limit your input accordingly.', 'error')
@@ -233,6 +233,7 @@ def add_comment():
         'random_name': is_random_name,
         'is_admin': current_user.is_authenticated,
         'text': comment_text,
+        'link': scripts.get_session_info(request)['last_visited_news'],
         'id': scripts.create_comment_id()
     }
 
@@ -241,6 +242,8 @@ def add_comment():
 
     comments[news_id].append(new_comment)
     json_util.write_json(comments, f'{config.COMMENTS_PATH}') # Saving the comment
+    
+    scripts.check_in_badlist(new_comment)
     
     flash('Thank you for your comment! Sharing your opinion is safe with us.')
     return redirect(referer)

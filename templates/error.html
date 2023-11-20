@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/404.css') }}">
+  <title>Infomundi - Error {{ error_code }}</title>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="overlay"></div>
+  <div class="terminal">
+    <h1>Infomundi> Error <span class="errorcode">{{ error_code }}</span></h1>
+    <p class="output">{{ error_message }}</p>
+    <p class="output">Please try to <a href="{{ session_info['last_visited_news'] }}">go back to your last viewed news</a> or <a href="{{ url_for('views.home') }}">return to the homepage</a>.</p>
+    <p class="output">Good luck.</p>
+  </div>
+</body>
+</html>

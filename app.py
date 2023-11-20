@@ -1,16 +1,17 @@
+from flask import Flask, render_template, request
 from flask_login import LoginManager
 from flask_gzip import Gzip
-from flask import Flask
 from os import urandom
 
-from website_scripts import config
+from website_scripts.scripts import get_session_info
+from website_scripts.config import APP_SECRET_KEY
 from auth import auth_views, User
 from views import views
 
 app = Flask(__name__)
 gzip = Gzip(app)
 
-app.secret_key = config.APP_SECRET_KEY
+app.secret_key = APP_SECRET_KEY
 app.config['SESSION_COOKIE_DOMAIN'] = 'infomundi.net'
 app.config['SESSION_COOKIE_SECURE'] = True
 
@@ -26,6 +27,14 @@ def load_user(user_id):
     user = User()
     user.id = user_id
     return user
+
+@app.errorhandler(404)
+@app.errorhandler(500)
+def error_handler(error):
+    error_code = getattr(error, 'code', 500)
+
+    error_message = f"We apologize, but {'the page you are looking for might have been removed, had its name changed or is temporarily unavailable.' if error_code == 404 else 'the server encountered an error and could not finish your request. Feel free to send an email to <contact@infomundi.net> telling more details about the error.'}"
+    return render_template('error.html', session_info=get_session_info(request), error_code=error_code, error_message=error_message), error_code
 
 if __name__ == '__main__':
     app.run(debug=True)

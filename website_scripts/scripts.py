@@ -9,19 +9,21 @@ from bs4 import BeautifulSoup
 from hashlib import md5
 from json import loads
 
+from .notifications import post_webhook
 from . import config, json_util
 
-def encode_base64(input_string):
+def encode_base64(input_string: str) -> str:
     encoded_bytes = b64encode(input_string.encode('utf-8'))
     encoded_string = encoded_bytes.decode('utf-8')
     return encoded_string
 
-def decode_base64(encoded_string):
+def decode_base64(encoded_string: str) -> str:
     decoded_bytes = b64decode(encoded_string)
     decoded_string = decoded_bytes.decode('utf-8')
     return decoded_string
 
-def get_session_info(request):
+def get_session_info(request: str) -> dict:
+    """Takes request information and tries to return last_visited_country and last_visited_news cookies. Both are urls."""
     try:
         country = decode_base64(request.cookies.get('last_visited_country', ''))
         news = decode_base64(request.cookies.get('last_visited_news', ''))
@@ -31,19 +33,17 @@ def get_session_info(request):
     if not is_valid_url(country) or not is_valid_url(news):
         return {}
 
-    return {
-    'last_visited_country': country,
-    'last_visited_news': news
-    }
+    return {'last_visited_country': country, 'last_visited_news': news}
 
-def is_valid_url(url):
+def is_valid_url(url: str) -> bool:
+    """Takes a string and checks if it is a url."""
     try:
         result = urlparse(url)
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
 
-def is_url_or_domain(input_str):
+def is_url_or_domain(input_str: str) -> str:
     # Regular expression pattern for a simple URL
     url_pattern = re_compile(r'^https?://\S+')
 
@@ -57,7 +57,45 @@ def is_url_or_domain(input_str):
     else:
         return "Neither"
 
-def get_link_preview(url):
+def check_in_badlist(data: dict):
+    """Takes data related to a comment. Uses notifications.py's post_webhook to send information about the comment to the admins discord server.
+    
+    Arguments
+        data: dict
+            Data related to a comment. Should have the following keys:
+            {
+                'name': 'username',
+                'text': 'comment',
+                'link': 'https://infomundi.net/comments?id=something&category=something&page=1'
+            }
+    """
+    text_combined = data['name'] + ' ' + data['text']
+    suspicious_words = []
+    
+    in_badlist = False
+    for word in text_combined.lower().split(' '):
+        if word in config.BADLIST:
+            suspicious_words.append(word)
+            in_badlist = True
+
+    if in_badlist:
+        webhook_data = {
+            'embed': {
+                'title': '🔔 Suspicious Comment',
+                'description': f"{data['name']} posted a suspicious comment.",
+                    'color': 0xFF0000,
+                    'fields': [
+                        {"name": "👤 Username", "value": data['name'], "inline": True},
+                        {"name": "💬 Comment", "value": data['text'], "inline": True},
+                        {"name": "🔗 Link", "value": data['link'], "inline": False}
+                    ],
+                    'footer': {'text': f"Comment ID: {data['id']}! Suspicious word{'s' if len(suspicious_words) > 1 else ''}: {' // '.join(suspicious_words)}"}
+                },
+                'message': 'We got a suspicious comment @everyone'
+            }
+        post_webhook(webhook_data)
+
+def get_link_preview(url: str) -> dict:
     """Takes a URL as input and returns a dictionary with link preview information."""
     try:
         # Send a GET request to the URL
@@ -87,15 +125,16 @@ def get_link_preview(url):
             'title': 'No title was provided'
         }
 
-def create_comment_id():
+def create_comment_id() -> str:
+    """Simply uses os.urandom and md5 to generate a unique ID."""
     return md5(urandom(20)).hexdigest()
 
-def string_similarity(s1, s2):
+def string_similarity(s1: str, s2: str) -> float:
     """Takes two strings and returns the percentage similarity between them."""
     matcher = SequenceMatcher(None, s1, s2)
     return matcher.ratio() * 100 # Returns percentage of similarity
 
-def add_click(news_id):
+def add_click(news_id: str):
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     if news_id not in telemetry:
         telemetry[news_id] = {}
@@ -104,7 +143,8 @@ def add_click(news_id):
     telemetry[news_id]['clicks'] += 1
     json_util.write_json(telemetry, config.TELEMETRY_PATH)
 
-def get_statistics():
+def get_statistics() -> dict:
+    """Handles the statistics for Infomundi. Returns a dict with related information."""
     statistics = json_util.read_json(config.STATISTICS_PATH)
     saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
 
@@ -173,7 +213,7 @@ def get_statistics():
     json_util.write_json(data, config.STATISTICS_PATH)
     return data
 
-def valid_category(category):
+def valid_category(category: str) -> bool:
     """Takes a category and checks if it is a valid category based on existing JSON files."""
     categories = [file.replace('.json', '') for file in listdir(config.FEEDS_PATH)]
     
@@ -182,11 +222,12 @@ def valid_category(category):
     else:
         return True
 
-def get_supported_categories(country_code):
+def get_supported_categories(country_code: str) -> list:
+    """Returns a list of supported categories"""
     return [file.split('_')[1].replace('.json', '') for file in listdir(config.FEEDS_PATH) if file.startswith(country_code)]
 
-def valid_captcha(token):
-    """Takes a CAPTCHA token and checks if it is valid. Returns bool."""
+def valid_captcha(token: str) -> bool:
+    """Takes a CAPTCHA token and checks if it is valid."""
     VERIFY_URL = "https://api.hcaptcha.com/siteverify"
 
     # Build payload with secret key and token.
@@ -201,13 +242,13 @@ def valid_captcha(token):
     # Parse JSON from response and return if was a success (True or False).
     return loads(response.content)['success']
 
-def is_strong_password(password):
+def is_strong_password(password: str) -> bool:
     """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, min 10 chacarters and max 50 characters."""
 
     if not search_regex(r'[a-z]', password) or not search_regex(r'[A-Z]', password) or not search_regex(r'\d', password) or not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password) or len(password) < 10 or len(password) > 50:
         return False
-    else:
-        return True
+    
+    return True
 
-def remove_html_tags(text_with_html):
+def remove_html_tags(text_with_html: str) -> str:
     return BeautifulSoup(text_with_html, 'html.parser').get_text()
