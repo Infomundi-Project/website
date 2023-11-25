@@ -12,6 +12,14 @@ from json import loads
 from .notifications import post_webhook
 from . import config, json_util
 
+def detect_mobile(request):
+    user_agent = request.user_agent.string
+
+    if 'Mobile' in user_agent or 'Android' in user_agent:
+        return True
+    
+    return False
+
 def encode_base64(input_string: str) -> str:
     encoded_bytes = b64encode(input_string.encode('utf-8'))
     encoded_string = encoded_bytes.decode('utf-8')
@@ -37,6 +45,9 @@ def get_session_info(request: str) -> dict:
 
 def is_valid_url(url: str) -> bool:
     """Takes a string and checks if it is a url."""
+    if not url:
+        return True
+    
     try:
         result = urlparse(url)
         return all([result.scheme, result.netloc])

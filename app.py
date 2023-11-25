@@ -33,7 +33,7 @@ def load_user(user_id):
 def error_handler(error):
     error_code = getattr(error, 'code', 500)
 
-    error_message = f"We apologize, but {'the page you are looking for might have been removed, had its name changed or is temporarily unavailable.' if error_code == 404 else 'the server encountered an error and could not finish your request. Feel free to send an email to <contact@infomundi.net> telling more details about the error.'}"
+    error_message = f"We apologize, but {'the page you are looking for might have been removed, had its name changed or is temporarily unavailable.' if error_code == 404 else 'the server encountered an error and could not finish your request. Our team will work to address this issue as soon as possible. Meanwhile, feel free to send an email to <contact@infomundi.net> telling details about the error.'}"
     return render_template('error.html', session_info=get_session_info(request), error_code=error_code, error_message=error_message), error_code
 
 if __name__ == '__main__':

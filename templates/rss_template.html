@@ -17,6 +17,7 @@
   .card {
   max-width: 100%;
   max-height: 100%;
+  min-height: 100%;
   }
   .card-img {
   max-width: 500px;
@@ -33,6 +34,10 @@
     <a class="fs-1 fw-bold text-decoration-none text-light" href="/news?country={{ country_code }}">
       <img src="https://hatscripts.github.io/circle-flags/flags/{{ country_code }}.svg" style="max-width: 48px" class="rounded-circle" alt="{{ country_name }}'s flag"> {{ country_name }}
     </a>
+    <form class="d-flex mt-4" role="search" action="javascript:;" onsubmit="submitSearch()">
+      <input class="form-control text-light bg-dark me-2 border border-primary border-opacity-25" type="search" placeholder="Search" aria-label="Search" id="query" name="query">
+      <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
   </div>
   <div class="col">
   </div>
@@ -81,14 +86,11 @@
               <h6 class="card-title" style="color: white; overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
             </a>
             <small>
-              <p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text text-secondary"><i class="fa-solid fa-rss"></i> {{ item['publisher'] }}</p>
+              <a href="{{ item['publisher_link'] }}" class="text-decoration-none text-reset"><p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text good-blue"><i class="fa-solid fa-rss"></i> {{ item['publisher'] }}</p></a>
             </small>
           </div>
           <div class="card-footer">
-            <a href="{{ item['publisher_link'] }}" target="_blank" style="text-decoration:none;">
-            <img src="{{ item['feed_icon'] }}" class="object-fit-scale border rounded border-light border-opacity-10" style="min-height: 30px; min-width: 30px; max-height: 31px; max-width: 31px">
-            </a>
-            <small class="text-white-50 ms-1 me-1">{{ item['pubDate'] }}</small>
+            <small class="text-white-50 ms-1 me-1"><i class="fa-solid fa-calendar-days"></i> {{ item['pubDate'] }}</small>
             <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
             <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
           </div>

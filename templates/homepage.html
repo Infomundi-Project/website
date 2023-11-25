@@ -10,83 +10,105 @@
   color: #ffffff;
   }
   .infomundi-logo {
-  max-height: 100%; 
-  max-width: 100%;
   margin-bottom: 20px;
   }
   @media (max-width: 968px) {
-    #chartdiv {
-    height: 50vh;
-    }
-    .infomundi-logo {
-    max-height: 80%; 
-    max-width: 80%;
-    }
+  #chartdiv {
+  height: 50vh;
+  }
+  .infomundi-logo {
+  max-height: 80%; 
+  max-width: 80%;
+  }
+  }
+  .accordion {
+  --bs-accordion-btn-bg: #202429;
+  --bs-accordion-btn-color: #ffffff;
+  --bs-accordion-active-bg: #202429;
+  --bs-accordion-active-color: #ffffff;
+  --bs-accordion-bg: #131619;
+  --bs-accordion-color: #ffffff;
+  --bs-accordion-btn-focus-box-shadow: none;
+  }
+  .accordion-flush .accordion-button {
+  border-top: 1px solid #000000;
+  }
+  .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
+  .accordion-flush .accordion-item:last-child .accordion-body {
+  border-bottom: 1px solid #000000;
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="row">
   <div class="col-sm text-center mb-5">
-    <h1><img 
+    <h1 class="logo-text"><img 
       src="{{ url_for('static', filename='img/raw-infomundi-logo.webp') }}"
       class="infomundi-logo"
       alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact."
+      height="173"
+      width="120" 
       />InfoMundi</h1>
     <center>
-    <p class="fs-4"><label for="query">Search the country you want to view news</label></p>
-    <div class="input-group justify-content-center">
-      <span class="input-group-text bg-dark" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-      <input 
-        class="form-control bg-dark text-light autocomplete" 
-        aria-describedby="search-icon"
-        style="max-width: 360px;"
-        type="search" 
-        aria-label="Search Field" 
-        id="query" 
-        name="query"
-        />
+      <p class="fs-4"><label for="query">Search the country you want to view news</label></p>
+      <div class="input-group justify-content-center">
+        <span class="input-group-text bg-dark" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input 
+          class="form-control bg-dark text-light autocomplete" 
+          aria-describedby="search-icon"
+          style="max-width: 360px;"
+          type="search" 
+          aria-label="Search Field" 
+          id="query" 
+          name="query"
+          />
+      </div>
+    </center>
+    <p class="fs-4 mt-2 mb-2">or</p>
+    <div class="d-inline-flex">
+      <p class="fs-3">Use the Globe to Choose</p>
     </div>
-  </center>
-  <p class="fs-4 mt-2 mb-2">or</p>
-  <div class="d-inline-flex ps-5 pe-5 border-bottom border-light">
-    <p class="fs-3">Use the Globe to Choose</p>
-  </div>
-
-  <div class="card border bg-dark text-light mt-5">
-    <div class="card-body">
-      <h5 class="card-title text-start"><i class="fa-solid fa-chart-simple"></i> Statistics</h5>
-      <!--<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
-      <p class="card-text">
-        <div class="d-flex flex-row flex-wrap text-start justify-content-between">
-          <div class="p-2">
-            <p class="fs-4 border-bottom border-light pe-5"><i class="fa-solid fa-database"></i> Database</p>
-            <p class="fs-6"><i class="fa-solid fa-globe"></i> Countries: {{ statistics['total_countries_supported'] }}</p>
-            <p class="fs-6"><i class="fa-solid fa-newspaper"></i> News: {{ statistics['total_news'] }}</p>
-            <p class="fs-6"><i class="fa-solid fa-rss"></i> Sources: {{ statistics['total_feeds'] }}</p>
-            <p class="fs-6"><i class="fa-solid fa-arrows-rotate"></i> Updated: {{ statistics['last_updated_message'] }}</p>
+    <div class="accordion" id="accordionExample">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+            aria-expanded="true" aria-controls="collapseOne">
+          <i class="fa-solid fa-chart-simple"></i><span class="ms-2">Statistics</span>
+          </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile else ''}}" data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+            <div class="d-flex flex-row flex-wrap text-start justify-content-between">
+              <div class="p-2">
+                <p class="fs-4"><i class="fa-solid fa-database"></i> Database</p>
+                <p class="fs-6"><i class="fa-solid fa-globe"></i> Countries: {{ statistics['total_countries_supported'] }}</p>
+                <p class="fs-6"><i class="fa-solid fa-newspaper"></i> News: {{ statistics['total_news'] }}</p>
+                <p class="fs-6"><i class="fa-solid fa-rss"></i> Sources: {{ statistics['total_feeds'] }}</p>
+                <p class="fs-6"><i class="fa-solid fa-arrows-rotate"></i> Updated: {{ statistics['last_updated_message'] }}</p>
+              </div>
+              <div class="p-2">
+                <p class="fs-4"><i class="fa-solid fa-users-rectangle"></i> Community</p>
+                <p class="fs-6"><i class="fa-solid fa-comments"></i> Comments: {{ statistics['total_comments'] }}</p>
+                <p class="fs-6"><i class="fa-solid fa-eye"></i> Clicks: {{ statistics['total_clicks'] }}</p>
+                <p class="fs-6 good-blue"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-reset text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square" style="color: #3666ba;"></i> Latest changelog</a></p>
+              </div>
+              <div class="p-2">
+                <p class="fs-4"><i class="fa-solid fa-user"></i> Session</p>
+                {% if session_info['last_visited_country'] %}
+                <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_country'] }}" class="text-reset text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square" style="color: #3666ba;"></i> Last visited country</a></p>
+                {% endif %}
+                {% if session_info['last_visited_news']  %}
+                <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_news'] }}" class="text-reset text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square" style="color: #3666ba;"></i> Last visited news</a></p>
+                {% endif %}
+                {% if not session_info['last_visited_news'] and not session_info['last_visited_country'] %}
+                <p class="fs-6"><i class="fa-solid fa-circle-info"></i> There's nothing here yet...</p>
+                {% endif %}
+              </div>
+            </div>
           </div>
-          <div class="p-2">
-            <p class="fs-4 border-bottom border-light pe-5"><i class="fa-solid fa-users-rectangle"></i> Community</p>
-            <p class="fs-6"><i class="fa-solid fa-comments"></i> Comments: {{ statistics['total_comments'] }}</p>
-            <p class="fs-6"><i class="fa-solid fa-eye"></i> Clicks: {{ statistics['total_clicks'] }}</p>
-          </div>
-          {% if session_info %}
-          <div class="p-2">
-            <p class="fs-4 border-bottom border-light pe-5"><i class="fa-solid fa-user"></i> Session</p>
-            {% if session_info['last_visited_country'] %}
-            <p class="fs-6"><i class="fa-solid fa-arrow-up-right-from-square"></i> <a href="{{ session_info['last_visited_country'] }}" class="text-reset">Last visited country</a></p>
-            {% endif %}
-            {% if session_info['last_visited_news'] %}
-            <p class="fs-6"><i class="fa-solid fa-arrow-up-right-from-square"></i> <a href="{{ session_info['last_visited_news'] }}" class="text-reset">Last visited news</a></p>
-            {% endif %}
-          </div>
-          {% endif %}
         </div>
-      </p>
+      </div>
     </div>
-  </div>
-
   </div>
   <div class="col-sm">
     <div id="chartdiv"></div>

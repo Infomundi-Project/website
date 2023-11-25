@@ -28,10 +28,20 @@
 {% block content %}
 <div class="container">
   <div class="card mb-5 mt-4 bg-dark text-light border-light">
-    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image">
+    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image" width="1200" height="628">
     <div class="card-body">
       <h5 class="card-title">{{ preview_data['title'] }}</h5>
       <p class="card-text">{{ preview_data['description'] }}</p>
+      <small> 
+        <a href="{{ story_info['publisher_link'] }}" class="text-decoration-none text-reset"> 
+          <p style="overflow: hidden;" class="card-text good-blue mb-3"> 
+            <i class="fa-solid fa-rss"></i> {{ story_info['publisher'] }}</a> <span class="ms-4 text-white-50"><i class="fa-solid fa-calendar-days"></i> {{ story_info['pubDate'] }}</span>
+          </p>
+        </small>
+      <p>
+        <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ story_info['total_clicks'] }}</span> 
+        <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ story_info['total_comments'] }}</span>
+      </p>
       <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-2"><i class="fa-solid fa-eye"></i> View Full Story</a>
       <a href="{{ session_info['last_visited_country'] }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</a>
     </div>

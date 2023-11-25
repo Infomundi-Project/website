@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@1000&family=Spectral+SC:wght@600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
@@ -39,9 +40,7 @@
     {% if page != 'Home' %}
     <nav class="navbar navbar-expand-lg bg-dark text-light border-bottom border-body sticky-top" data-bs-theme="dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">
-        <img src="{{ url_for('static', filename='img/infomundi-dark-cropped.svg') }}" alt="Infomundi" width="150" height="70">
-        </a>
+        <a class="navbar-brand logo-text" href="/">Infomundi</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon text-light"></span>
         </button>
@@ -79,12 +78,6 @@
             <a href="{{ session_info['last_visited_country'] }}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</button></a>
           </div>
           {% endif %}
-          {% if page == 'News' %}
-          <form class="d-flex justify-content-end" role="search" action="javascript:;" onsubmit="submitSearch()">
-            <input class="form-control text-light bg-dark me-2 border border-primary border-opacity-25" type="search" placeholder="Search" aria-label="Search" id="query" name="query">
-            <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
-          </form>
-          {% endif %}
         </div>
       </div>
     </nav>
@@ -102,9 +95,9 @@
       </div>
       {% endif %} {% endfor %} {% endif %} {% endwith %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
-        <div id="liveToast" class="toast" role="alert" data-bs-delay="60000" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
           <div class="toast-header bg-dark text-light">
-            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" style="max-width: 15%; max-height: 15%;">
+            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" width="50" height="50">
             <strong class="me-auto">Maximus: "Would you like to translate?"</strong>
             <!-- <small>Now</small> -->
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>

@@ -8,9 +8,9 @@ from hashlib import md5
 from os import listdir
 from sys import exit
 
-from website_scripts.config import *
 from website_scripts.scripts import remove_html_tags
 from website_scripts import json_util
+from website_scripts import config
 
 def get_img(feed, item):
     """Extract image source from RSS item."""
@@ -58,7 +58,7 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
             icon = feed.feed.logo
 
     if icon == "":
-        feed_file = json_util.read_json(f'{FEEDS_PATH}/{news_filter}')
+        feed_file = json_util.read_json(f'{config.FEEDS_PATH}/{news_filter}')
         for entry in feed_file:
             if entry['url'] == rss_url and 'favicon' in entry:
                 icon = entry['favicon']
@@ -108,7 +108,7 @@ def format_date(date):
 
 def main():
     """Main function to fetch and cache RSS feeds."""
-    categories = [file.replace(".json", "") for file in listdir(f"{FEEDS_PATH}")]
+    categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
     month_text = time.strftime("%B")
     current_month = datetime.today().month
 
@@ -116,7 +116,7 @@ def main():
         now = time.time()
 
         try:
-            cache = json_util.read_json(f"{CACHE_PATH}/{selected_filter}")
+            cache = json_util.read_json(f"{config.CACHE_PATH}/{selected_filter}")
 
             if int(now - float(cache["created_at"])) < 21600 or selected_filter == '': # change time
                 print(f"[~] Skipping {selected_filter}")
@@ -125,7 +125,7 @@ def main():
             pass
 
         print(f"[~] Handling cache for {selected_filter}...")
-        rss_feeds = json_util.read_json(f"{FEEDS_PATH}/{selected_filter}")
+        rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
 
         # Use threads to fetch RSS feeds concurrently
@@ -175,7 +175,7 @@ def main():
             except:
                 page_separated_articles[f"page_{str(page)}"].extend(merged_articles)
 
-        json_util.write_json(page_separated_articles, f"{CACHE_PATH}/{selected_filter}")
+        json_util.write_json(page_separated_articles, f"{config.CACHE_PATH}/{selected_filter}")
         print(f"[{total_pages} pages // {len(merged_articles)} articles] Wrote json for {selected_filter}.")
 
 if __name__ == "__main__":

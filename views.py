@@ -13,7 +13,7 @@ def home():
     statistics = scripts.get_statistics()
     session_info = scripts.get_session_info(request)
     
-    return render_template('homepage.html', page='Home', statistics=statistics, user=current_user, session_info=session_info)
+    return render_template('homepage.html', page='Home', statistics=statistics, user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request))
 
 @views.route('/contact', methods=['GET'])
 def contact():
@@ -101,7 +101,7 @@ def get_latest_feed():
     total_pages = len(cache_pages) if not query else 0 # Else is 0 because rss_template.html should not render the pagination if the query is set
 
     response = make_response(render_template('rss_template.html', feeds=cache[f'page_{page_num}'], total_pages=total_pages, country_name=country_name, 
-        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News', user=current_user))
+        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News', user=current_user, is_mobile=scripts.detect_mobile(request)))
     
     FULL_URL = f'https://infomundi.net/news?country={country_filter}&section={news_filter}&page={page_num}'
     response.set_cookie('last_visited_country', scripts.encode_base64(FULL_URL))
@@ -160,6 +160,15 @@ def comments():
     for story in cache[f'page_{page_number}']:
         if story['id'] == news_id:
             news_link = story['link']
+
+            comments_file = json_util.read_json(config.COMMENTS_PATH)
+            telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
+            
+            story_info = story
+            
+            story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
+            story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
+            
             if 'infomundi' in story['media_content']['url']:
                 preview_data = scripts.get_link_preview(news_link)
                 
@@ -183,7 +192,7 @@ def comments():
 
     scripts.add_click(news_id)
     
-    response = make_response(render_template('comments.html', page='Comments', comments=comments[news_id] if news_id in comments else False, news_link=news_link, id=news_id, preview_data=preview_data, user=current_user, session_info=scripts.get_session_info(request)))
+    response = make_response(render_template('comments.html', page='Comments', comments=comments[news_id] if news_id in comments else False, news_link=news_link, id=news_id, story_info=story, preview_data=preview_data, user=current_user, session_info=scripts.get_session_info(request), is_mobile=scripts.detect_mobile(request)))
     
     FULL_URL = f'https://infomundi.net/comments?id={news_id}&category={category}&page={page_number}'
     response.set_cookie('last_visited_news', scripts.encode_base64(FULL_URL))

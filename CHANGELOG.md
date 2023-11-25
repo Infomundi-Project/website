@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.6| 2023/11/24 | Implemented sleek accordion design with mobile detection, enriched news item details on comments page, streamlined navbar, and improved CLS. Changed source color, added placeholder text, revamped logo font, and relocated search bar. Removed outdated images, and fixed card height for mobile users. | @behindsecurity |
 | 1.1.5 | 2023/11/20 | Added error pages, code refactoring, email support, and comment blacklist. Changed theme color to black. Fixed return button on comments page. No removals or security changes.  | @behindsecurity |
 | 1.1.4 | 2023/11/17 | Revamped homepage layout. Added click tracking, user session stats, icons in comments. Improved cache script and added view count badges. Changed search bar and subtitle colors. Adjusted news page layout for smaller screens. Fixed search bug. No removals or security changes.  | @behindsecurity |
 | 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @behindsecurity |
@@ -13,23 +14,46 @@
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
 
 
+## 1.1.6: 2023/11/24
+
+### Enhancements (4)
+- IME01: Implemented a sleek accordion design for statistics display. Added a script to detect mobile users and, if applicable, automatically closes the accordion for a quick view of the globe.
+- IME02: Enriched the comments page with additional details, including the publisher, publication date, total views, and comment count for each news item.
+- IME03: Streamlined and refined the navbar for a cleaner and more concise appearance.
+- IME04: Improved Cumulative Layout Shift (CLS) by setting explicit width and height for image elements on the home and comments pages.
+
+### Changed (4)
+- IMC01: Infused a vibrant touch by updating the source color from gray to a cool blue (news page).
+- IMC02: Introduced a placeholder text "There's nothing here yet..." in the session tab on the home page.
+- IMC03: Revamped the logo font for a fresh look.
+- IMC04: Relocated the search bar on the news page, now positioned just below the country's name.
+
+### Removed (1)
+- IMR01: Eliminated outdated images from static.
+
+### Fixed (1)
+- IMF01: Addressed mobile user experience by fixing card height on smaller screens.
+
+### Security (0)
+
+
 ## 1.1.5: 2023/11/20
 
 ### Enhancements (4)
-- IME01: Added an error page to show up if the user triggers a not found page or an internal server error.
-- IME02: Code refactoring.
-- IME03: Added support for email. Contact form is planned to be launched soon.
-- IME04: A badlist was created to filter potentially harmful comments.
+- IME01: Introduced a user-friendly error page for not found or internal server errors.
+- IME02: Conducted a thorough code refactoring for improved efficiency.
+- IME03: Enabled email support, gearing up for the upcoming launch of the contact form.
+- IME04: Implemented a badlist to filter out potentially harmful comments.
 
 ### Changed (1)
-- IMC01: Changed theme color (color that appears on Discord preview link) from white to black.
+- IMC01: Transformed the theme color (Discord preview link) from white to a sleek black.
 
-### Removed ()
+### Removed (0)
 
 ### Fixed (1)
-- IMF01: Fixed the return button on the comments page, now it redirects the user to the previous country they were viewing.
+- IMF01: Rectified the return button on the comments page, now smoothly redirects users to their previous country view.
 
-### Security ()
+### Security (0)
 
 
 ## 1.1.4: 2023/11/19

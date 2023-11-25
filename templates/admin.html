@@ -1,38 +1,26 @@
 {% extends "base.html" %} {% block title %}Admin Panel{% endblock %}
 {% block styles %}
 <style>
-  body {
-  padding: 25px;
-  }
   .form-group {
   padding-bottom: 10px;
-  }
-  .row {
-  padding-top: 25px;
-  }
-  @media (max-width: 968px) {
-  .col {
-  padding-top: 25px;
-  }
   }
 </style>
 {% endblock %}
 {% block content %}
-<div class="container">
-<div class="row">
-  <div class="col">
-    <div class="card bg-dark text-light" style="max-width: 30rem;">
+<div class="row mt-3">
+  <div class="col-md-4 mb-3">
+    <div class="card bg-dark text-light border border-success-subtle" style="max-width: 30rem;">
       <div class="card-header">
-        Add a News Feed
+        <i class="fa-solid fa-rss"></i> Add News Feed
       </div>
       <div class="card-body">
         <form method="post" action="{{ url_for('auth.add_news') }}">
           <div class="form-group">
-            <label for="country">Country</label>
+            <label for="country"><i class="fa-solid fa-earth-americas"></i> Country</label>
             <input type="text" class="form-control bg-dark text-light autocomplete" id="country" name="country" required>
           </div>
           <div class="form-group">
-            <label for="category">Category</label>
+            <label for="category"><i class="fa-solid fa-sitemap"></i> Category</label>
             <select class="form-control bg-dark text-light" id="category" name="category" required>
               <option value="general">General</option>
               <option value="politics">Politics</option>
@@ -42,22 +30,22 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="site">Feed Name</label>
+            <label for="site"><i class="fa-solid fa-satellite"></i> Feed Name</label>
             <input type="text" class="form-control bg-dark text-light" id="site" name="site" required>
           </div>
           <div class="form-group">
-            <label for="url">Feed URL</label>
+            <label for="url"><i class="fa-solid fa-link"></i> Feed URL</label>
             <input type="url" pattern="https?://.+" class="form-control bg-dark text-light" id="url" name="url" required>
           </div>
-          <button type="submit" class="btn btn-outline-success">Add Entry</button>
+          <button type="submit" class="btn btn-outline-success"><i class="fa-solid fa-plus"></i> Add</button>
         </form>
       </div>
     </div>
   </div>
-  <div class="col">
-    <div class="card bg-dark text-light" style="max-width: 30rem;">
+  <div class="col-md-4 ms-auto">
+    <div class="card bg-dark text-light border border-primary-subtle" style="max-width: 30rem;">
       <div class="card-header">
-        Search Comments
+        <i class="fa-solid fa-magnifying-glass"></i> Search Comments
       </div>
       <div class="card-body">
         <form method="post" action="{{ url_for('auth.search_comments') }}">
@@ -65,17 +53,17 @@
             <label for="search_text">Search Text</label>
             <input type="text" class="form-control bg-dark text-light" id="search_text" name="search_text" required>
           </div>
-          <button type="submit" class="btn btn-outline-primary">Search</button>
+          <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </form>
       </div>
     </div>
   </div>
 </div>
-<div class="row">
-  <div class="col">
-    <div class="card bg-dark text-light" style="max-width: 30rem;">
+<div class="row mt-3">
+  <div class="col-md-4 mb-3">
+    <div class="card bg-dark text-light border border-primary-subtle" style="max-width: 30rem;">
       <div class="card-header">
-        Search Info About a Country
+        <i class="fa-solid fa-magnifying-glass"></i> Search Info About a Country
       </div>
       <div class="card-body">
         <form method="post" action="{{ url_for('auth.get_feed_info') }}">
@@ -83,15 +71,15 @@
             <label for="country_name">Country Name</label>
             <input type="text" class="form-control bg-dark text-light autocomplete" id="country_name" name="country_name" required>
           </div>
-          <button type="submit" class="btn btn-outline-primary">Search</button>
+          <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </form>
       </div>
     </div>
   </div>
-  <div class="col">
-    <div class="card bg-dark text-light" style="max-width: 30rem;">
+  <div class="col-md-4 ms-auto">
+    <div class="card bg-dark text-light border border-danger-subtle" style="max-width: 30rem;">
       <div class="card-header">
-        Delete a Comment
+        <i class="fa-regular fa-trash-can"></i> Delete a Comment
       </div>
       <div class="card-body">
         <form method="post" action="{{ url_for('auth.delete_comment') }}">
@@ -99,25 +87,26 @@
             <label for="comment_id">Comment ID</label>
             <input type="text" class="form-control bg-dark text-light" id="comment_id" name="comment_id" required>
           </div>
-          <button type="submit" class="btn btn-outline-danger">Delete</button>
+          <button type="submit" class="btn btn-outline-danger"><i class="fa-regular fa-trash-can"></i> Delete</button>
         </form>
       </div>
     </div>
   </div>
   {% if search_results %}
-  <div class="col">
+  <div class="col-md-4 ms-auto mb-3">
     <!-- Display search results in a new card -->
-    <div class="card bg-dark text-light" style="max-width: 30rem;">
+    <div class="card bg-dark text-light border border-info-subtle" style="max-width: 30rem;">
       <div class="card-header">
-        Search Results
+        <i class="fa-solid fa-square-poll-horizontal"></i> Search Results
       </div>
       <div class="card-body">
         <ul class="list-group">
           {% for result in search_results %}
           <li class="list-group-item bg-dark text-light">
-            User: {{ result['name'] }}<br>
-            Comment Text: {{ result['text'] }}<br>
-            Comment ID: {{ result['id'] }}
+            <i class="fa-solid fa-user"></i> User: {{ result['name'] }}<br>
+            <i class="fa-solid fa-comment"></i> Comment: {{ result['text'] }}<br>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> <a class="text-reset" href="{{ result['link'] }}">Link</a><br>
+            <i class="fa-solid fa-fingerprint"></i> ID: {{ result['id'] }}
           </li>
           {% endfor %}
         </ul>
@@ -126,14 +115,11 @@
   </div>
   {% endif %}
 </div>
-<div class="row">
-<div class="col">
-  <div class="col">
-    <div class="form-check form-switch">
-      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" name="flexSwitchCheckChecked">
-      <label style="padding-right: 10px" class="form-check-label text-light" for="flexSwitchCheckChecked">Allow new comments</label>
-      <button type="button" class="btn btn-outline-primary btn-sm" id="applyButton">Apply</button>
-    </div>
+<div class="col mt-3">
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" name="flexSwitchCheckChecked">
+    <label style="padding-right: 10px" class="form-check-label text-light" for="flexSwitchCheckChecked">Allow new comments</label>
+    <button type="button" class="btn btn-outline-primary btn-sm" id="applyButton">Apply</button>
   </div>
 </div>
 {% endblock %}
