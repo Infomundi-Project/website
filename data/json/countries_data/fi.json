@@ -1,0 +1,219 @@
+{
+  "name": {
+    "common": "Finland",
+    "official": "Republic of Finland",
+    "nativeName": {
+      "fin": {
+        "official": "Suomen tasavalta",
+        "common": "Suomi"
+      },
+      "swe": {
+        "official": "Republiken Finland",
+        "common": "Finland"
+      }
+    }
+  },
+  "tld": [
+    ".fi"
+  ],
+  "cca2": "FI",
+  "ccn3": "246",
+  "cca3": "FIN",
+  "cioc": "FIN",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "EUR": {
+      "name": "Euro",
+      "symbol": "\u20ac"
+    }
+  },
+  "idd": {
+    "root": "+3",
+    "suffixes": [
+      "58"
+    ]
+  },
+  "capital": [
+    "Helsinki"
+  ],
+  "altSpellings": [
+    "FI",
+    "Suomi",
+    "Republic of Finland",
+    "Suomen tasavalta",
+    "Republiken Finland"
+  ],
+  "region": "Europe",
+  "subregion": "Northern Europe",
+  "languages": {
+    "fin": "Finnish",
+    "swe": "Swedish"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0641\u0646\u0644\u0646\u062f\u0627",
+      "common": "\u0641\u0646\u0644\u0646\u062f\u0627"
+    },
+    "bre": {
+      "official": "Republik Finland",
+      "common": "Finland"
+    },
+    "ces": {
+      "official": "Finsk\u00e1 republika",
+      "common": "Finsko"
+    },
+    "cym": {
+      "official": "Republic of Finland",
+      "common": "Finland"
+    },
+    "deu": {
+      "official": "Republik Finnland",
+      "common": "Finnland"
+    },
+    "est": {
+      "official": "Soome Vabariik",
+      "common": "Soome"
+    },
+    "fin": {
+      "official": "Suomen tasavalta",
+      "common": "Suomi"
+    },
+    "fra": {
+      "official": "R\u00e9publique de Finlande",
+      "common": "Finlande"
+    },
+    "hrv": {
+      "official": "Republika Finska",
+      "common": "Finska"
+    },
+    "hun": {
+      "official": "Finn K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Finnorsz\u00e1g"
+    },
+    "ita": {
+      "official": "Repubblica di Finlandia",
+      "common": "Finlandia"
+    },
+    "jpn": {
+      "official": "\u30d5\u30a3\u30f3\u30e9\u30f3\u30c9\u5171\u548c\u56fd",
+      "common": "\u30d5\u30a3\u30f3\u30e9\u30f3\u30c9"
+    },
+    "kor": {
+      "official": "\ud540\ub780\ub4dc \uacf5\ud654\uad6d",
+      "common": "\ud540\ub780\ub4dc"
+    },
+    "nld": {
+      "official": "Republiek Finland",
+      "common": "Finland"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0641\u0646\u0644\u0627\u0646\u062f",
+      "common": "\u0641\u0646\u0644\u0627\u0646\u062f"
+    },
+    "pol": {
+      "official": "Republika Finlandii",
+      "common": "Finlandia"
+    },
+    "por": {
+      "official": "Rep\u00fablica da Finl\u00e2ndia",
+      "common": "Finl\u00e2ndia"
+    },
+    "rus": {
+      "official": "\u0424\u0438\u043d\u043b\u044f\u043d\u0434\u0441\u043a\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+      "common": "\u0424\u0438\u043d\u043b\u044f\u043d\u0434\u0438\u044f"
+    },
+    "slk": {
+      "official": "F\u00ednska republika",
+      "common": "F\u00ednsko"
+    },
+    "spa": {
+      "official": "Rep\u00fablica de Finlandia",
+      "common": "Finlandia"
+    },
+    "srp": {
+      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0424\u0438\u043d\u0441\u043a\u0430",
+      "common": "\u0424\u0438\u043d\u0441\u043a\u0430"
+    },
+    "swe": {
+      "official": "Republiken Finland",
+      "common": "Finland"
+    },
+    "tur": {
+      "official": "Finlandiya Cumhuriyeti",
+      "common": "Finlandiya"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0641\u0646 \u0644\u06cc\u0646\u0688",
+      "common": "\u0641\u0646 \u0644\u06cc\u0646\u0688"
+    },
+    "zho": {
+      "official": "\u82ac\u5170\u5171\u548c\u56fd",
+      "common": "\u82ac\u5170"
+    }
+  },
+  "latlng": [
+    64.0,
+    26.0
+  ],
+  "landlocked": false,
+  "borders": [
+    "NOR",
+    "SWE",
+    "RUS"
+  ],
+  "area": 338424.0,
+  "demonyms": {
+    "eng": {
+      "f": "Finnish",
+      "m": "Finnish"
+    },
+    "fra": {
+      "f": "Finlandaise",
+      "m": "Finlandais"
+    }
+  },
+  "flag": "\ud83c\uddeb\ud83c\uddee",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/HjgWDCNKRAYHrkMn8",
+    "openStreetMaps": "openstreetmap.org/relation/54224"
+  },
+  "population": 5530719,
+  "gini": {
+    "2018": 27.3
+  },
+  "fifa": "FIN",
+  "car": {
+    "signs": [
+      "FIN"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC+02:00"
+  ],
+  "continents": [
+    "Europe"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/fi.png",
+    "svg": "https://flagcdn.com/fi.svg",
+    "alt": "The flag of Finland has a white field with a large blue cross that extend to the edges of the field. The vertical part of this cross is offset towards the hoist side."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/fi.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/fi.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      60.17,
+      24.93
+    ]
+  },
+  "postalCode": {
+    "format": "#####",
+    "regex": "^(?:FI)*(\\d{5})$"
+  }
+}

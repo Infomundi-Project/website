@@ -1,0 +1,965 @@
+[
+  {
+    "symbol": "VALE3:BZ",
+    "name": "Vale",
+    "price": "73.35",
+    "day_change": "-2.49%",
+    "year_change": "-15.41%",
+    "date": "Dec/04",
+    "market_cap": "65.37B"
+  },
+  {
+    "symbol": "PETR3:BS",
+    "name": "Petrobras",
+    "price": "36.51",
+    "day_change": "-1.85%",
+    "year_change": "24.91%",
+    "date": "Dec/04",
+    "market_cap": "56.55B"
+  },
+  {
+    "symbol": "ABEV3:BS",
+    "name": "Ambev",
+    "price": "14.06",
+    "day_change": "-0.14%",
+    "year_change": "-12.23%",
+    "date": "Dec/04",
+    "market_cap": "45.2B"
+  },
+  {
+    "symbol": "BBAS3:BS",
+    "name": "Banco Do Brasil",
+    "price": "54.12",
+    "day_change": "-0.48%",
+    "year_change": "53.75%",
+    "date": "Dec/04",
+    "market_cap": "31.91B"
+  },
+  {
+    "symbol": "WEGE3:BZ",
+    "name": "WEG",
+    "price": "35.03",
+    "day_change": "0.72%",
+    "year_change": "-6.84%",
+    "date": "Dec/04",
+    "market_cap": "30.11B"
+  },
+  {
+    "symbol": "SANB11:BZ",
+    "name": "Banco Santander Brazil",
+    "price": "31.00",
+    "day_change": "1.08%",
+    "year_change": "13.80%",
+    "date": "Dec/04",
+    "market_cap": "20.65B"
+  },
+  {
+    "symbol": "ELET3:BS",
+    "name": "Centrais Eletricas Brasileiras",
+    "price": "40.76",
+    "day_change": "-0.85%",
+    "year_change": "-5.21%",
+    "date": "Dec/04",
+    "market_cap": "17.05B"
+  },
+  {
+    "symbol": "BVMF3:BS",
+    "name": "B3 Sa Brasil Bolsa Balcao",
+    "price": "13.54",
+    "day_change": "0.07%",
+    "year_change": "11.44%",
+    "date": "Dec/04",
+    "market_cap": "15.89B"
+  },
+  {
+    "symbol": "BBDC3:BZ",
+    "name": "Banco Bradesco",
+    "price": "14.29",
+    "day_change": "-0.37%",
+    "year_change": "9.75%",
+    "date": "Dec/04",
+    "market_cap": "15.73B"
+  },
+  {
+    "symbol": "SUZB3:BZ",
+    "name": "Suzano Papel e Celulose",
+    "price": "52.17",
+    "day_change": "0.79%",
+    "year_change": "-0.65%",
+    "date": "Dec/04",
+    "market_cap": "13.75B"
+  },
+  {
+    "symbol": "RENT3:BZ",
+    "name": "Localiza Rent",
+    "price": "60.78",
+    "day_change": "0.07%",
+    "year_change": "7.90%",
+    "date": "Dec/04",
+    "market_cap": "13.27B"
+  },
+  {
+    "symbol": "ITSA4:BS",
+    "name": "Ita\u00fasa",
+    "price": "9.73",
+    "day_change": "-0.21%",
+    "year_change": "13.40%",
+    "date": "Dec/04",
+    "market_cap": "12.91B"
+  },
+  {
+    "symbol": "BBSE3:BS",
+    "name": "BB Seguridade",
+    "price": "30.91",
+    "day_change": "0.03%",
+    "year_change": "-2.89%",
+    "date": "Dec/04",
+    "market_cap": "12.69B"
+  },
+  {
+    "symbol": "RDOR3:BZ",
+    "name": "Rede D'Or Sao Luiz",
+    "price": "26.66",
+    "day_change": "-1.77%",
+    "year_change": "-8.60%",
+    "date": "Dec/04",
+    "market_cap": "12.46B"
+  },
+  {
+    "symbol": "JBSS3:BS",
+    "name": "JBS",
+    "price": "23.63",
+    "day_change": "-0.96%",
+    "year_change": "10.68%",
+    "date": "Dec/04",
+    "market_cap": "10.84B"
+  },
+  {
+    "symbol": "RADL3:BZ",
+    "name": "Raia Drogasil",
+    "price": "28.29",
+    "day_change": "0.86%",
+    "year_change": "20.43%",
+    "date": "Dec/04",
+    "market_cap": "9.94B"
+  },
+  {
+    "symbol": "SBSP3:BZ",
+    "name": "Compania Sanea",
+    "price": "68.18",
+    "day_change": "-0.70%",
+    "year_change": "15.11%",
+    "date": "Dec/04",
+    "market_cap": "9.64B"
+  },
+  {
+    "symbol": "CPFE3:BS",
+    "name": "CPFL Energia",
+    "price": "37.19",
+    "day_change": "0.19%",
+    "year_change": "16.18%",
+    "date": "Dec/04",
+    "market_cap": "8.82B"
+  },
+  {
+    "symbol": "RUMO3:BS",
+    "name": "Rumo Logistica",
+    "price": "22.65",
+    "day_change": "-0.53%",
+    "year_change": "20.48%",
+    "date": "Dec/04",
+    "market_cap": "8.64B"
+  },
+  {
+    "symbol": "EQTL3:BZ",
+    "name": "Equatorial Energia",
+    "price": "33.77",
+    "day_change": "-1.17%",
+    "year_change": "27.58%",
+    "date": "Dec/04",
+    "market_cap": "7.96B"
+  },
+  {
+    "symbol": "EGIE3:BZ",
+    "name": "Engie Brasil Energia",
+    "price": "44.06",
+    "day_change": "0.92%",
+    "year_change": "11.66%",
+    "date": "Dec/04",
+    "market_cap": "7.26B"
+  },
+  {
+    "symbol": "CSAN3:BS",
+    "name": "Cosan USA",
+    "price": "17.74",
+    "day_change": "-0.22%",
+    "year_change": "3.32%",
+    "date": "Dec/04",
+    "market_cap": "6.8B"
+  },
+  {
+    "symbol": "HAPV3:BZ",
+    "name": "Hapvida",
+    "price": "4.31",
+    "day_change": "-2.49%",
+    "year_change": "-13.63%",
+    "date": "Dec/04",
+    "market_cap": "6.71B"
+  },
+  {
+    "symbol": "CCRO3:BS",
+    "name": "CCR",
+    "price": "13.79",
+    "day_change": "-0.36%",
+    "year_change": "25.02%",
+    "date": "Dec/04",
+    "market_cap": "5.72B"
+  },
+  {
+    "symbol": "UGPA3:BZ",
+    "name": "Ultrapar Participaco",
+    "price": "25.38",
+    "day_change": "-0.82%",
+    "year_change": "87.72%",
+    "date": "Dec/04",
+    "market_cap": "5.69B"
+  },
+  {
+    "symbol": "BRDT3:BZ",
+    "name": "Vibra Energia",
+    "price": "23.16",
+    "day_change": "-4.10%",
+    "year_change": "48.27%",
+    "date": "Dec/04",
+    "market_cap": "5.39B"
+  },
+  {
+    "symbol": "GGBR4:BS",
+    "name": "Gerdau",
+    "price": "22.16",
+    "day_change": "0.05%",
+    "year_change": "-27.70%",
+    "date": "Dec/04",
+    "market_cap": "5.17B"
+  },
+  {
+    "symbol": "BRFS3:BS",
+    "name": "BRF",
+    "price": "15.19",
+    "day_change": "0.07%",
+    "year_change": "87.53%",
+    "date": "Dec/04",
+    "market_cap": "5.15B"
+  },
+  {
+    "symbol": "CRFB3:BZ",
+    "name": "Atacadao",
+    "price": "11.31",
+    "day_change": "-1.39%",
+    "year_change": "-24.99%",
+    "date": "Dec/04",
+    "market_cap": "4.94B"
+  },
+  {
+    "symbol": "NTCO3:BZ",
+    "name": "Natura",
+    "price": "16.75",
+    "day_change": "-1.06%",
+    "year_change": "38.89%",
+    "date": "Dec/04",
+    "market_cap": "4.67B"
+  },
+  {
+    "symbol": "CSNA3:BS",
+    "name": "Companhia Siderurgica Nacional",
+    "price": "17.06",
+    "day_change": "-0.58%",
+    "year_change": "17.41%",
+    "date": "Dec/04",
+    "market_cap": "4.64B"
+  },
+  {
+    "symbol": "HYPE3:BS",
+    "name": "Hypermarcas",
+    "price": "34.05",
+    "day_change": "-0.44%",
+    "year_change": "-21.27%",
+    "date": "Dec/04",
+    "market_cap": "4.43B"
+  },
+  {
+    "symbol": "TOTS3:BZ",
+    "name": "TOTVS",
+    "price": "33.93",
+    "day_change": "0.27%",
+    "year_change": "22.14%",
+    "date": "Dec/04",
+    "market_cap": "4.23B"
+  },
+  {
+    "symbol": "KLBN11:BZ",
+    "name": "Klabin",
+    "price": "21.15",
+    "day_change": "-0.05%",
+    "year_change": "4.39%",
+    "date": "Dec/04",
+    "market_cap": "4.02B"
+  },
+  {
+    "symbol": "GOLL4:BZ",
+    "name": "Gol Linhas Aereas Inteligentes",
+    "price": "8.38",
+    "day_change": "-8.32%",
+    "year_change": "10.85%",
+    "date": "Dec/04",
+    "market_cap": "4.02B"
+  },
+  {
+    "symbol": "ENGI11:BZ",
+    "name": "Energisa",
+    "price": "52.65",
+    "day_change": "-0.79%",
+    "year_change": "28.10%",
+    "date": "Dec/04",
+    "market_cap": "3.93B"
+  },
+  {
+    "symbol": "EMBR3:BS",
+    "name": "Embraer",
+    "price": "23.05",
+    "day_change": "0.92%",
+    "year_change": "70.24%",
+    "date": "Dec/04",
+    "market_cap": "3.5B"
+  },
+  {
+    "symbol": "CMIG4:BZ",
+    "name": "CEMIG",
+    "price": "11.05",
+    "day_change": "0.45%",
+    "year_change": "0.55%",
+    "date": "Dec/04",
+    "market_cap": "3.31B"
+  },
+  {
+    "symbol": "MULT3:BZ",
+    "name": "Multiplan",
+    "price": "27.62",
+    "day_change": "-0.40%",
+    "year_change": "26.12%",
+    "date": "Dec/04",
+    "market_cap": "3.29B"
+  },
+  {
+    "symbol": "LREN3:BS",
+    "name": "Lojas Renner",
+    "price": "16.03",
+    "day_change": "-2.14%",
+    "year_change": "-22.07%",
+    "date": "Dec/04",
+    "market_cap": "3.18B"
+  },
+  {
+    "symbol": "MGLU3:BZ",
+    "name": "Magazine Luiza",
+    "price": "2.05",
+    "day_change": "-5.53%",
+    "year_change": "-33.44%",
+    "date": "Dec/04",
+    "market_cap": "2.88B"
+  },
+  {
+    "symbol": "TAEE11:BZ",
+    "name": "Taesa",
+    "price": "36.38",
+    "day_change": "-0.30%",
+    "year_change": "4.87%",
+    "date": "Dec/04",
+    "market_cap": "2.58B"
+  },
+  {
+    "symbol": "GGPS3:BZ",
+    "name": "GPS Participacoes e Empreendimentos",
+    "price": "17.74",
+    "day_change": "-1.66%",
+    "year_change": "48.95%",
+    "date": "Dec/04",
+    "market_cap": "2.47B"
+  },
+  {
+    "symbol": "CIEL3:BS",
+    "name": "Cielo",
+    "price": "4.31",
+    "day_change": "-0.69%",
+    "year_change": "-1.82%",
+    "date": "Dec/04",
+    "market_cap": "2.41B"
+  },
+  {
+    "symbol": "FLRY3:BZ",
+    "name": "Fleury",
+    "price": "17.29",
+    "day_change": "-0.97%",
+    "year_change": "0.46%",
+    "date": "Dec/04",
+    "market_cap": "1.94B"
+  },
+  {
+    "symbol": "MRFG3:BZ",
+    "name": "Marfrig",
+    "price": "9.97",
+    "day_change": "-0.70%",
+    "year_change": "27.82%",
+    "date": "Dec/04",
+    "market_cap": "1.92B"
+  },
+  {
+    "symbol": "SLCE3:BZ",
+    "name": "SLC Agr\u00edcola",
+    "price": "38.36",
+    "day_change": "1.59%",
+    "year_change": "-11.65%",
+    "date": "Dec/04",
+    "market_cap": "1.73B"
+  },
+  {
+    "symbol": "CYRE3:BZ",
+    "name": "Cyrela Brazil Realty S/A",
+    "price": "21.59",
+    "day_change": "-2.79%",
+    "year_change": "58.63%",
+    "date": "Dec/04",
+    "market_cap": "1.67B"
+  },
+  {
+    "symbol": "SAPR11:BZ",
+    "name": "Sanepar",
+    "price": "26.72",
+    "day_change": "0.64%",
+    "year_change": "49.02%",
+    "date": "Dec/04",
+    "market_cap": "1.64B"
+  },
+  {
+    "symbol": "CSMG3:BZ",
+    "name": "Companhia de Saneamento de Minas Gerais",
+    "price": "20.00",
+    "day_change": "4.00%",
+    "year_change": "28.62%",
+    "date": "Dec/04",
+    "market_cap": "1.49B"
+  },
+  {
+    "symbol": "GOAU4:BZ",
+    "name": "Metalurgica Gerdau",
+    "price": "10.35",
+    "day_change": "-0.48%",
+    "year_change": "-22.41%",
+    "date": "Dec/04",
+    "market_cap": "1.42B"
+  },
+  {
+    "symbol": "BRAP4:BS",
+    "name": "Bradespar",
+    "price": "24.43",
+    "day_change": "-1.17%",
+    "year_change": "-16.05%",
+    "date": "Dec/04",
+    "market_cap": "1.28B"
+  },
+  {
+    "symbol": "ECOR3:BZ",
+    "name": "Ecorodovias Infrastutura e Logistica",
+    "price": "9.35",
+    "day_change": "3.31%",
+    "year_change": "134.20%",
+    "date": "Dec/04",
+    "market_cap": "1.28B"
+  },
+  {
+    "symbol": "BRKM5:BS",
+    "name": "Braskem",
+    "price": "18.05",
+    "day_change": "0.22%",
+    "year_change": "-32.62%",
+    "date": "Dec/04",
+    "market_cap": "1.27B"
+  },
+  {
+    "symbol": "COGN3:BZ",
+    "name": "Cogna Educacao",
+    "price": "3.20",
+    "day_change": "-2.74%",
+    "year_change": "50.94%",
+    "date": "Dec/04",
+    "market_cap": "1.24B"
+  },
+  {
+    "symbol": "OMGE3:BZ",
+    "name": "Omega Gera\u00e7ao",
+    "price": "9.62",
+    "day_change": "1.48%",
+    "year_change": "-4.18%",
+    "date": "Dec/01",
+    "market_cap": "1.23B"
+  },
+  {
+    "symbol": "YDUQ3:BZ",
+    "name": "YDUQS Participacoes",
+    "price": "19.99",
+    "day_change": "-3.29%",
+    "year_change": "86.30%",
+    "date": "Dec/04",
+    "market_cap": "1.21B"
+  },
+  {
+    "symbol": "DXCO3:BZ",
+    "name": "Dexco",
+    "price": "7.24",
+    "day_change": "-2.56%",
+    "year_change": "-5.97%",
+    "date": "Dec/04",
+    "market_cap": "1.2B"
+  },
+  {
+    "symbol": "MRVE3:BZ",
+    "name": "MRV Engenharia e Participacoes",
+    "price": "9.13",
+    "day_change": "-4.80%",
+    "year_change": "13.42%",
+    "date": "Dec/04",
+    "market_cap": "1.07B"
+  },
+  {
+    "symbol": "RAIZ4:BZ",
+    "name": "Raizen",
+    "price": "3.67",
+    "day_change": "0.27%",
+    "year_change": "-1.61%",
+    "date": "Dec/04",
+    "market_cap": "1.02B"
+  },
+  {
+    "symbol": "BPAN4:BZ",
+    "name": "Banco Panamericano",
+    "price": "7.89",
+    "day_change": "-1.50%",
+    "year_change": "16.89%",
+    "date": "Dec/04",
+    "market_cap": "1B"
+  },
+  {
+    "symbol": "BEEF3:BZ",
+    "name": "Minerva",
+    "price": "7.43",
+    "day_change": "-0.54%",
+    "year_change": "-37.30%",
+    "date": "Dec/04",
+    "market_cap": "897.02M"
+  },
+  {
+    "symbol": "IRBR3:BZ",
+    "name": "Brasil RE (Instituto de Resseguros do Brasil",
+    "price": "52.45",
+    "day_change": "-2.20%",
+    "year_change": "164.63%",
+    "date": "Dec/04",
+    "market_cap": "891.15M"
+  },
+  {
+    "symbol": "USIM5:BZ",
+    "name": "Usinas Siderurgicas de Minas Gerais - Usiminas",
+    "price": "8.24",
+    "day_change": "0.24%",
+    "year_change": "8.56%",
+    "date": "Dec/04",
+    "market_cap": "882.02M"
+  },
+  {
+    "symbol": "ALPA4:BZ",
+    "name": "Alpargatas",
+    "price": "9.18",
+    "day_change": "-4.57%",
+    "year_change": "-38.76%",
+    "date": "Dec/04",
+    "market_cap": "634.7M"
+  },
+  {
+    "symbol": "PETZ3:BZ",
+    "name": "Pet Center Comercio e Participacoes",
+    "price": "4.23",
+    "day_change": "-2.08%",
+    "year_change": "-38.52%",
+    "date": "Dec/04",
+    "market_cap": "394.55M"
+  },
+  {
+    "symbol": "CVCB3:BZ",
+    "name": "CVC Brasil Operadora e Agencia de Viagens",
+    "price": "3.33",
+    "day_change": "-4.86%",
+    "year_change": "-28.23%",
+    "date": "Dec/04",
+    "market_cap": "307.45M"
+  },
+  {
+    "symbol": "VITT3:BS",
+    "name": "Vittia Fertilizantes E Biologicos",
+    "price": "10.06",
+    "day_change": "-2.14%",
+    "year_change": "-25.09%",
+    "date": "Dec/04",
+    "market_cap": "298.67M"
+  },
+  {
+    "symbol": "VVAR3:BZ",
+    "name": "Via Varejo",
+    "price": "0.52",
+    "day_change": "-5.45%",
+    "year_change": "-74.51%",
+    "date": "Dec/04",
+    "market_cap": "261.69M"
+  },
+  {
+    "symbol": "PCAR3:BZ",
+    "name": "GPA",
+    "price": "3.44",
+    "day_change": "-2.27%",
+    "year_change": "-81.70%",
+    "date": "Dec/04",
+    "market_cap": "195.84M"
+  },
+  {
+    "symbol": "KRSA3:BZ",
+    "name": "Kora Saude",
+    "price": "1.16",
+    "day_change": "3.57%",
+    "year_change": "-16.55%",
+    "date": "Dec/04",
+    "market_cap": "174.79M"
+  },
+  {
+    "symbol": "BTOW3:BZ",
+    "name": "Americanas",
+    "price": "0.92",
+    "day_change": "-1.08%",
+    "year_change": "-89.78%",
+    "date": "Dec/04",
+    "market_cap": "171.99M"
+  },
+  {
+    "symbol": "QUAL3:BZ",
+    "name": "Qualicorp Consultoria e Corretora de Seguros",
+    "price": "2.94",
+    "day_change": "1.03%",
+    "year_change": "-49.66%",
+    "date": "Dec/04",
+    "market_cap": "165.66M"
+  },
+  {
+    "symbol": "CASH3:BZ",
+    "name": "Meliuz",
+    "price": "7.39",
+    "day_change": "-2.12%",
+    "year_change": "-36.84%",
+    "date": "Dec/04",
+    "market_cap": "131.61M"
+  },
+  {
+    "symbol": "XAUUSD:CUR",
+    "name": null,
+    "price": "2031.31",
+    "day_change": "-1.91%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "S 1:COM",
+    "name": null,
+    "price": "1305.25",
+    "day_change": "-1.49%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "W 1:COM",
+    "name": null,
+    "price": "583.00",
+    "day_change": "1.04%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XAL1:COM",
+    "name": null,
+    "price": "135.00",
+    "day_change": "1.12%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JBP:COM",
+    "name": null,
+    "price": "3897.00",
+    "day_change": "-0.51%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SCO:COM",
+    "name": null,
+    "price": "133.00",
+    "day_change": "0.38%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NGEU:COM",
+    "name": null,
+    "price": "40.10",
+    "day_change": "-7.80%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "LB1:COM",
+    "name": null,
+    "price": "524.62",
+    "day_change": "-0.17%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "USDKRW:CUR",
+    "name": null,
+    "price": "1310.52",
+    "day_change": "1.32%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SPX:IND",
+    "name": null,
+    "price": "4561.08",
+    "day_change": "-0.73%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AAPL:US",
+    "name": null,
+    "price": "188.88",
+    "day_change": "-1.23%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "TSLA:US",
+    "name": null,
+    "price": "236.48",
+    "day_change": "-0.98%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MSFT:US",
+    "name": null,
+    "price": "368.09",
+    "day_change": "-1.71%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AMZN:US",
+    "name": null,
+    "price": "144.23",
+    "day_change": "-1.90%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "FB:US",
+    "name": null,
+    "price": "318.51",
+    "day_change": "-1.94%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NVDA:US",
+    "name": null,
+    "price": "452.18",
+    "day_change": "-3.31%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "V:US",
+    "name": null,
+    "price": "255.53",
+    "day_change": "-0.36%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JPM:US",
+    "name": null,
+    "price": "157.71",
+    "day_change": "0.55%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "INTC:US",
+    "name": null,
+    "price": "42.10",
+    "day_change": "-3.75%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JNJ:US",
+    "name": null,
+    "price": "158.88",
+    "day_change": "0.32%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "PG:US",
+    "name": null,
+    "price": "151.97",
+    "day_change": "-0.45%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XOM:US",
+    "name": null,
+    "price": "102.60",
+    "day_change": "-0.38%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MMM:US",
+    "name": null,
+    "price": "103.51",
+    "day_change": "3.67%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "GS:US",
+    "name": null,
+    "price": "349.34",
+    "day_change": "0.26%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "CAT:US",
+    "name": null,
+    "price": "254.47",
+    "day_change": "-0.89%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ETHUSD:CUR",
+    "name": null,
+    "price": "2230.20",
+    "day_change": "2.11%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "DOTUSD:CUR",
+    "name": null,
+    "price": "5.56",
+    "day_change": "0.54%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AVXUSD:CUR",
+    "name": null,
+    "price": "21.78",
+    "day_change": "-0.77%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MTCUSD:CUR",
+    "name": null,
+    "price": "0.80",
+    "day_change": "-1.17%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ATMUSD:CUR",
+    "name": null,
+    "price": "9.65",
+    "day_change": "1.14%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "UNIUSD:CUR",
+    "name": null,
+    "price": "6.04",
+    "day_change": "-0.27%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ALGUSD:CUR",
+    "name": null,
+    "price": "0.15",
+    "day_change": "0.03%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "BCHUSD:CUR",
+    "name": null,
+    "price": "249.10",
+    "day_change": "8.47%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  }
+]

@@ -1,0 +1,215 @@
+{
+  "name": {
+    "common": "Belize",
+    "official": "Belize",
+    "nativeName": {
+      "bjz": {
+        "official": "Belize",
+        "common": "Belize"
+      },
+      "eng": {
+        "official": "Belize",
+        "common": "Belize"
+      },
+      "spa": {
+        "official": "Belice",
+        "common": "Belice"
+      }
+    }
+  },
+  "tld": [
+    ".bz"
+  ],
+  "cca2": "BZ",
+  "ccn3": "084",
+  "cca3": "BLZ",
+  "cioc": "BIZ",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "BZD": {
+      "name": "Belize dollar",
+      "symbol": "$"
+    }
+  },
+  "idd": {
+    "root": "+5",
+    "suffixes": [
+      "01"
+    ]
+  },
+  "capital": [
+    "Belmopan"
+  ],
+  "altSpellings": [
+    "BZ"
+  ],
+  "region": "Americas",
+  "subregion": "Central America",
+  "languages": {
+    "bjz": "Belizean Creole",
+    "eng": "English",
+    "spa": "Spanish"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u0628\u0644\u064a\u0632",
+      "common": "\u0628\u0644\u064a\u0632"
+    },
+    "bre": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "ces": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "cym": {
+      "official": "Bel\u00ees",
+      "common": "Bel\u00ees"
+    },
+    "deu": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "est": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "fin": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "fra": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "hrv": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "hun": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "ita": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "jpn": {
+      "official": "\u30d9\u30ea\u30fc\u30ba",
+      "common": "\u30d9\u30ea\u30fc\u30ba"
+    },
+    "kor": {
+      "official": "\ubca8\ub9ac\uc988",
+      "common": "\ubca8\ub9ac\uc988"
+    },
+    "nld": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "per": {
+      "official": "\u0628\u0644\u06cc\u0632",
+      "common": "\u0628\u0644\u06cc\u0632"
+    },
+    "pol": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "por": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "rus": {
+      "official": "\u0411\u0435\u043b\u0438\u0437",
+      "common": "\u0411\u0435\u043b\u0438\u0437"
+    },
+    "slk": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "spa": {
+      "official": "Belice",
+      "common": "Belice"
+    },
+    "srp": {
+      "official": "\u0411\u0435\u043b\u0438\u0437\u0435",
+      "common": "\u0411\u0435\u043b\u0438\u0437\u0435"
+    },
+    "swe": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "tur": {
+      "official": "Belize",
+      "common": "Belize"
+    },
+    "urd": {
+      "official": "\u0628\u06cc\u0644\u06cc\u0632",
+      "common": "\u0628\u06cc\u0644\u06cc\u0632"
+    },
+    "zho": {
+      "official": "\u4f2f\u5229\u5179",
+      "common": "\u4f2f\u5229\u5179"
+    }
+  },
+  "latlng": [
+    17.25,
+    -88.75
+  ],
+  "landlocked": false,
+  "borders": [
+    "GTM",
+    "MEX"
+  ],
+  "area": 22966.0,
+  "demonyms": {
+    "eng": {
+      "f": "Belizean",
+      "m": "Belizean"
+    },
+    "fra": {
+      "f": "B\u00e9lizienne",
+      "m": "B\u00e9lizien"
+    }
+  },
+  "flag": "\ud83c\udde7\ud83c\uddff",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/jdCccpdLodm1uTmo9",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/287827"
+  },
+  "population": 397621,
+  "gini": {
+    "1999": 53.3
+  },
+  "fifa": "BLZ",
+  "car": {
+    "signs": [
+      "BH"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC-06:00"
+  ],
+  "continents": [
+    "North America"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/bz.png",
+    "svg": "https://flagcdn.com/bz.svg",
+    "alt": "The flag of Belize has a royal blue field with a thin red horizontal band at the top and bottom of the field and the national coat of arms in the center."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/bz.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/bz.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      17.25,
+      -88.77
+    ]
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "name": {
+    "common": "Haiti",
+    "official": "Republic of Haiti",
+    "nativeName": {
+      "fra": {
+        "official": "R\u00e9publique d'Ha\u00efti",
+        "common": "Ha\u00efti"
+      },
+      "hat": {
+        "official": "Repiblik Ayiti",
+        "common": "Ayiti"
+      }
+    }
+  },
+  "tld": [
+    ".ht"
+  ],
+  "cca2": "HT",
+  "ccn3": "332",
+  "cca3": "HTI",
+  "cioc": "HAI",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "HTG": {
+      "name": "Haitian gourde",
+      "symbol": "G"
+    }
+  },
+  "idd": {
+    "root": "+5",
+    "suffixes": [
+      "09"
+    ]
+  },
+  "capital": [
+    "Port-au-Prince"
+  ],
+  "altSpellings": [
+    "HT",
+    "Republic of Haiti",
+    "R\u00e9publique d'Ha\u00efti",
+    "Repiblik Ayiti"
+  ],
+  "region": "Americas",
+  "subregion": "Caribbean",
+  "languages": {
+    "fra": "French",
+    "hat": "Haitian Creole"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0647\u0627\u064a\u062a\u064a",
+      "common": "\u0647\u0627\u064a\u062a\u064a"
+    },
+    "bre": {
+      "official": "Republik Haiti",
+      "common": "Haiti"
+    },
+    "ces": {
+      "official": "Republika Haiti",
+      "common": "Haiti"
+    },
+    "cym": {
+      "official": "Republic of Haiti",
+      "common": "Haiti"
+    },
+    "deu": {
+      "official": "Republik Haiti",
+      "common": "Haiti"
+    },
+    "est": {
+      "official": "Haiti Vabariik",
+      "common": "Haiti"
+    },
+    "fin": {
+      "official": "Haitin tasavalta",
+      "common": "Haiti"
+    },
+    "fra": {
+      "official": "R\u00e9publique d'Ha\u00efti",
+      "common": "Ha\u00efti"
+    },
+    "hrv": {
+      "official": "Republika Haiti",
+      "common": "Haiti"
+    },
+    "hun": {
+      "official": "Haiti K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Haiti"
+    },
+    "ita": {
+      "official": "Repubblica di Haiti",
+      "common": "Haiti"
+    },
+    "jpn": {
+      "official": "\u30cf\u30a4\u30c1\u5171\u548c\u56fd",
+      "common": "\u30cf\u30a4\u30c1"
+    },
+    "kor": {
+      "official": "\uc544\uc774\ud2f0 \uacf5\ud654\uad6d",
+      "common": "\uc544\uc774\ud2f0"
+    },
+    "nld": {
+      "official": "Republiek Ha\u00efti",
+      "common": "Ha\u00efti"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0647\u0627\u0626\u06cc\u062a\u06cc",
+      "common": "\u0647\u0627\u0626\u06cc\u062a\u06cc"
+    },
+    "pol": {
+      "official": "Republika Haiti",
+      "common": "Haiti"
+    },
+    "por": {
+      "official": "Rep\u00fablica do Haiti",
+      "common": "Haiti"
+    },
+    "rus": {
+      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0430\u0438\u0442\u0438",
+      "common": "\u0413\u0430\u0438\u0442\u0438"
+    },
+    "slk": {
+      "official": "Haitsk\u00e1 republika",
+      "common": "Haiti"
+    },
+    "spa": {
+      "official": "Rep\u00fablica de Hait\u00ed",
+      "common": "Hait\u00ed"
+    },
+    "srp": {
+      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0425\u0430\u0438\u0442\u0438",
+      "common": "\u0425\u0430\u0438\u0442\u0438"
+    },
+    "swe": {
+      "official": "Republiken Haiti",
+      "common": "Haiti"
+    },
+    "tur": {
+      "official": "Haiti Cumhuriyeti",
+      "common": "Haiti"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u06c1\u06cc\u0679\u06cc",
+      "common": "\u06c1\u06cc\u0679\u06cc"
+    },
+    "zho": {
+      "official": "\u6d77\u5730\u5171\u548c\u56fd",
+      "common": "\u6d77\u5730"
+    }
+  },
+  "latlng": [
+    19.0,
+    -72.41666666
+  ],
+  "landlocked": false,
+  "borders": [
+    "DOM"
+  ],
+  "area": 27750.0,
+  "demonyms": {
+    "eng": {
+      "f": "Haitian",
+      "m": "Haitian"
+    },
+    "fra": {
+      "f": "Ha\u00eftienne",
+      "m": "Ha\u00eftien"
+    }
+  },
+  "flag": "\ud83c\udded\ud83c\uddf9",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/9o13xtjuUdqFnHbn9",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/307829"
+  },
+  "population": 11402533,
+  "gini": {
+    "2012": 41.1
+  },
+  "fifa": "HAI",
+  "car": {
+    "signs": [
+      "RH"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC-05:00"
+  ],
+  "continents": [
+    "North America"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/ht.png",
+    "svg": "https://flagcdn.com/ht.svg",
+    "alt": "The flag of Haiti is composed of two equal horizontal bands of blue and red. A white square bearing the national coat of arms is superimposed at the center of the field."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/ht.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/ht.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      18.53,
+      -72.33
+    ]
+  },
+  "postalCode": {
+    "format": "HT####",
+    "regex": "^(?:HT)*(\\d{4})$"
+  }
+}

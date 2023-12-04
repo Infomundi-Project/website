@@ -7,6 +7,7 @@ from website_scripts import scripts, config, json_util
 
 views = Blueprint('views', __name__)
 
+
 @views.route('/', methods=['GET'])
 def home():
     """Render the homepage."""
@@ -14,6 +15,7 @@ def home():
     session_info = scripts.get_session_info(request)
     
     return render_template('homepage.html', page='Home', statistics=statistics, user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request))
+
 
 @views.route('/contact', methods=['GET'])
 def contact():
@@ -23,6 +25,7 @@ def contact():
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
     return redirect(referer)
 
+
 @views.route('/about', methods=['GET'])
 def about():
     """Render the about page."""
@@ -31,6 +34,7 @@ def about():
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
     return redirect(referer)
 
+
 @views.route('/donate', methods=['GET'])
 def donate():
     """Render the donate page."""
@@ -38,6 +42,7 @@ def donate():
     
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
     return redirect(referer)
+
 
 # Endpoint to return multiple RSS feeds as json
 @views.route('/news', methods=['GET'])
@@ -100,13 +105,31 @@ def get_latest_feed():
     page_num = int(page_num) # Set the page to integer to work properly with rss_template.html
     total_pages = len(cache_pages) if not query else 0 # Else is 0 because rss_template.html should not render the pagination if the query is set
 
-    response = make_response(render_template('rss_template.html', feeds=cache[f'page_{page_num}'], total_pages=total_pages, country_name=country_name, 
-        news_filter=news_filter, page_num=page_num, selected_filter=selected_filter, country_code=country_filter, supported_categories=supported_categories, page='News', user=current_user, is_mobile=scripts.detect_mobile(request)))
+    response = make_response(render_template('rss_template.html', 
+        feeds=cache[f'page_{page_num}'], 
+        total_pages=total_pages, 
+        country_name=country_name, 
+        news_filter=news_filter, 
+        page_num=page_num, 
+        selected_filter=selected_filter, 
+        country_code=country_filter, 
+        supported_categories=supported_categories, 
+        page='News', 
+        user=current_user, 
+        is_mobile=scripts.detect_mobile(request),
+        nation_data=scripts.get_nation_data(country_filter),
+        gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
+        gdp=scripts.get_gdp(country_name),
+        current_time=scripts.get_current_time_in_timezone(country_filter),
+        stock_data=scripts.scrape_stock_data(country_name)
+        )
+    )
     
     FULL_URL = f'https://infomundi.net/news?country={country_filter}&section={news_filter}&page={page_num}'
     response.set_cookie('last_visited_country', scripts.encode_base64(FULL_URL))
     
     return response
+
 
 @views.route('/get-country-code', methods=['GET'])
 def get_country_code():
@@ -121,6 +144,7 @@ def get_country_code():
     # Return the country code as JSON
     return jsonify({"countryCode": code[0]})
 
+
 @views.route('/autocomplete', methods=['GET'])
 def autocomplete():
     """Autocomplete endpoint for country names."""
@@ -132,6 +156,7 @@ def autocomplete():
     countries = [x['name'] for x in config.COUNTRY_LIST]
     results = [country for country in countries if query in country.lower()]
     return jsonify(results)
+
 
 @views.route('/comments', methods=['GET'])
 def comments():
@@ -198,6 +223,7 @@ def comments():
     response.set_cookie('last_visited_news', scripts.encode_base64(FULL_URL))
     return response
 
+
 @views.route('/add_comment', methods=['POST'])
 def add_comment():
     """Add a new comment."""
@@ -208,7 +234,7 @@ def add_comment():
         flash('We apologize, but comments are temporarily disabled. Please try again later.', 'error')
         return redirect(referer)
     
-    token = request.form['h-captcha-response'] # Retrieve token from post data with key 'h-captcha-response'
+    token = request.form['cf-turnstile-response'] # Retrieve token from post data with key 'cf-turnstile-response'
     if not scripts.valid_captcha(token):
         flash('Invalid captcha! Are you a robot?', 'error')
         return redirect(referer)

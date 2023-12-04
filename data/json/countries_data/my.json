@@ -1,0 +1,215 @@
+{
+  "name": {
+    "common": "Malaysia",
+    "official": "Malaysia",
+    "nativeName": {
+      "eng": {
+        "official": "Malaysia",
+        "common": "Malaysia"
+      },
+      "msa": {
+        "official": "\u0645\u0644\u064a\u0633\u064a\u0627",
+        "common": "\u0645\u0644\u064a\u0633\u064a\u0627"
+      }
+    }
+  },
+  "tld": [
+    ".my"
+  ],
+  "cca2": "MY",
+  "ccn3": "458",
+  "cca3": "MYS",
+  "cioc": "MAS",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "MYR": {
+      "name": "Malaysian ringgit",
+      "symbol": "RM"
+    }
+  },
+  "idd": {
+    "root": "+6",
+    "suffixes": [
+      "0"
+    ]
+  },
+  "capital": [
+    "Kuala Lumpur"
+  ],
+  "altSpellings": [
+    "MY"
+  ],
+  "region": "Asia",
+  "subregion": "South-Eastern Asia",
+  "languages": {
+    "eng": "English",
+    "msa": "Malay"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u0645\u0627\u0644\u064a\u0632\u064a\u0627",
+      "common": "\u0645\u0627\u0644\u064a\u0632\u064a\u0627"
+    },
+    "bre": {
+      "official": "Malaysia",
+      "common": "Malaysia"
+    },
+    "ces": {
+      "official": "Malajsie",
+      "common": "Malajsie"
+    },
+    "cym": {
+      "official": "Malaysia",
+      "common": "Malaysia"
+    },
+    "deu": {
+      "official": "Malaysia",
+      "common": "Malaysia"
+    },
+    "est": {
+      "official": "Malaisia",
+      "common": "Malaisia"
+    },
+    "fin": {
+      "official": "Malesia",
+      "common": "Malesia"
+    },
+    "fra": {
+      "official": "F\u00e9d\u00e9ration de Malaisie",
+      "common": "Malaisie"
+    },
+    "hrv": {
+      "official": "Malezija",
+      "common": "Malezija"
+    },
+    "hun": {
+      "official": "Malajzia",
+      "common": "Malajzia"
+    },
+    "ita": {
+      "official": "Malaysia",
+      "common": "Malesia"
+    },
+    "jpn": {
+      "official": "\u30de\u30ec\u30fc\u30b7\u30a2",
+      "common": "\u30de\u30ec\u30fc\u30b7\u30a2"
+    },
+    "kor": {
+      "official": "\ub9d0\ub808\uc774\uc2dc\uc544",
+      "common": "\ub9d0\ub808\uc774\uc2dc\uc544"
+    },
+    "nld": {
+      "official": "Maleisi\u00eb",
+      "common": "Maleisi\u00eb"
+    },
+    "per": {
+      "official": "\u0641\u062f\u0631\u0627\u0633\u06cc\u0648\u0646 \u0645\u0627\u0644\u0632\u06cc",
+      "common": "\u0645\u0627\u0644\u0632\u06cc"
+    },
+    "pol": {
+      "official": "Malezja",
+      "common": "Malezja"
+    },
+    "por": {
+      "official": "Mal\u00e1sia",
+      "common": "Mal\u00e1sia"
+    },
+    "rus": {
+      "official": "\u041c\u0430\u043b\u0430\u0439\u0437\u0438\u044f",
+      "common": "\u041c\u0430\u043b\u0430\u0439\u0437\u0438\u044f"
+    },
+    "slk": {
+      "official": "Malajzia",
+      "common": "Malajzia"
+    },
+    "spa": {
+      "official": "Malasia",
+      "common": "Malasia"
+    },
+    "srp": {
+      "official": "\u041c\u0430\u043b\u0435\u0437\u0438\u0458\u0430",
+      "common": "\u041c\u0430\u043b\u0435\u0437\u0438\u0458\u0430"
+    },
+    "swe": {
+      "official": "Malaysia",
+      "common": "Malaysia"
+    },
+    "tur": {
+      "official": "Malezya",
+      "common": "Malezya"
+    },
+    "urd": {
+      "official": "\u0645\u0644\u0627\u0626\u06cc\u0634\u06cc\u0627",
+      "common": "\u0645\u0644\u0627\u0626\u06cc\u0634\u06cc\u0627"
+    },
+    "zho": {
+      "official": "\u9a6c\u6765\u897f\u4e9a",
+      "common": "\u9a6c\u6765\u897f\u4e9a"
+    }
+  },
+  "latlng": [
+    2.5,
+    112.5
+  ],
+  "landlocked": false,
+  "borders": [
+    "BRN",
+    "IDN",
+    "THA"
+  ],
+  "area": 330803.0,
+  "demonyms": {
+    "eng": {
+      "f": "Malaysian",
+      "m": "Malaysian"
+    },
+    "fra": {
+      "f": "Malaisienne",
+      "m": "Malaisien"
+    }
+  },
+  "flag": "\ud83c\uddf2\ud83c\uddfe",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/qrY1PNeUXGyXDcPy6",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/2108121"
+  },
+  "population": 32365998,
+  "gini": {
+    "2015": 41.1
+  },
+  "fifa": "MAS",
+  "car": {
+    "signs": [
+      "MAL"
+    ],
+    "side": "left"
+  },
+  "timezones": [
+    "UTC+08:00"
+  ],
+  "continents": [
+    "Asia"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/my.png",
+    "svg": "https://flagcdn.com/my.svg",
+    "alt": "The flag of Malaysia is composed of fourteen equal horizontal bands of red alternating with white. A blue rectangle, bearing a fly-side facing yellow crescent and a fourteen-pointed yellow star placed just outside the crescent opening, is superimposed in the canton."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/my.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/my.svg"
+  },
+  "startOfWeek": "sunday",
+  "capitalInfo": {
+    "latlng": [
+      3.17,
+      101.7
+    ]
+  },
+  "postalCode": {
+    "format": "#####",
+    "regex": "^(\\d{5})$"
+  }
+}

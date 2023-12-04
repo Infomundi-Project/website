@@ -28,7 +28,7 @@
 {% block content %}
 <div class="container">
   <div class="card mb-5 mt-4 bg-dark text-light border-light">
-    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image" width="1200" height="628">
+    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image" {% if not is_mobile %} width="1200" height="628" {% endif %}>
     <div class="card-body">
       <h5 class="card-title">{{ preview_data['title'] }}</h5>
       <p class="card-text">{{ preview_data['description'] }}</p>
@@ -68,7 +68,7 @@
       <input type="hidden" id="id" name="id" value="{{ id }}">
     </div>
     <div class="form-group">
-      <div class="h-captcha" data-sitekey="c88360d1-22a7-4320-9438-783d76455df2" required></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
     </div>
     <button type="submit" class="btn btn-outline-primary mb-5">Comment</button>
   </form>
@@ -90,9 +90,9 @@
 {% endblock %}
 {% block scripts %}
 <script 
-  src="https://js.hcaptcha.com/1/api.js" 
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
   async defer
-  ></script>
+></script>
 <script defer 
   src="{{ url_for('static', filename='js/validateCommentForm.js') }}"
   ></script>

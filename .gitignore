@@ -1,9 +1,8 @@
+local/
 cache/
 .venv/
 __pycache__/
 website_scripts/config.py
 logs/
 infomundi.wsgi
-comments.json
-telemetry.json
-users.json
+json/website/

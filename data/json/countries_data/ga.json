@@ -1,0 +1,208 @@
+{
+  "name": {
+    "common": "Gabon",
+    "official": "Gabonese Republic",
+    "nativeName": {
+      "fra": {
+        "official": "R\u00e9publique gabonaise",
+        "common": "Gabon"
+      }
+    }
+  },
+  "tld": [
+    ".ga"
+  ],
+  "cca2": "GA",
+  "ccn3": "266",
+  "cca3": "GAB",
+  "cioc": "GAB",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "XAF": {
+      "name": "Central African CFA franc",
+      "symbol": "Fr"
+    }
+  },
+  "idd": {
+    "root": "+2",
+    "suffixes": [
+      "41"
+    ]
+  },
+  "capital": [
+    "Libreville"
+  ],
+  "altSpellings": [
+    "GA",
+    "Gabonese Republic",
+    "R\u00e9publique Gabonaise"
+  ],
+  "region": "Africa",
+  "subregion": "Middle Africa",
+  "languages": {
+    "fra": "French"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u063a\u0627\u0628\u0648\u0646",
+      "common": "\u0627\u0644\u063a\u0627\u0628\u0648\u0646"
+    },
+    "bre": {
+      "official": "Republik Gabonat",
+      "common": "Gabon"
+    },
+    "ces": {
+      "official": "Gabonsk\u00e1 republika",
+      "common": "Gabon"
+    },
+    "cym": {
+      "official": "Gabonese Republic",
+      "common": "Gabon"
+    },
+    "deu": {
+      "official": "Gabunische Republik",
+      "common": "Gabun"
+    },
+    "est": {
+      "official": "Gaboni Vabariik",
+      "common": "Gabon"
+    },
+    "fin": {
+      "official": "Gabonin tasavalta",
+      "common": "Gabon"
+    },
+    "fra": {
+      "official": "R\u00e9publique gabonaise",
+      "common": "Gabon"
+    },
+    "hrv": {
+      "official": "Gabon Republika",
+      "common": "Gabon"
+    },
+    "hun": {
+      "official": "Gaboni K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Gabon"
+    },
+    "ita": {
+      "official": "Repubblica gabonese",
+      "common": "Gabon"
+    },
+    "jpn": {
+      "official": "\u30ac\u30dc\u30f3\u5171\u548c\u56fd",
+      "common": "\u30ac\u30dc\u30f3"
+    },
+    "kor": {
+      "official": "\uac00\ubd09 \uacf5\ud654\uad6d",
+      "common": "\uac00\ubd09"
+    },
+    "nld": {
+      "official": "Republiek Gabon",
+      "common": "Gabon"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u06af\u0627\u0628\u064f\u0646",
+      "common": "\u06af\u0627\u0628\u0646"
+    },
+    "pol": {
+      "official": "Republika Gabo\u0144ska",
+      "common": "Gabon"
+    },
+    "por": {
+      "official": "Rep\u00fablica do Gab\u00e3o",
+      "common": "Gab\u00e3o"
+    },
+    "rus": {
+      "official": "\u0413\u0430\u0431\u043e\u043d\u0430 \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+      "common": "\u0413\u0430\u0431\u043e\u043d"
+    },
+    "slk": {
+      "official": "Gabonsk\u00e1 republika",
+      "common": "Gabon"
+    },
+    "spa": {
+      "official": "Rep\u00fablica de Gab\u00f3n",
+      "common": "Gab\u00f3n"
+    },
+    "srp": {
+      "official": "\u0413\u0430\u0431\u043e\u043d\u0441\u043a\u0430 \u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+      "common": "\u0413\u0430\u0431\u043e\u043d"
+    },
+    "swe": {
+      "official": "Republiken Gabon",
+      "common": "Gabon"
+    },
+    "tur": {
+      "official": "Gabon Cumhuriyeti",
+      "common": "Gabon"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u06af\u06cc\u0628\u0648\u0646",
+      "common": "\u06af\u06cc\u0628\u0648\u0646"
+    },
+    "zho": {
+      "official": "\u52a0\u84ec\u5171\u548c\u56fd",
+      "common": "\u52a0\u84ec"
+    }
+  },
+  "latlng": [
+    -1.0,
+    11.75
+  ],
+  "landlocked": false,
+  "borders": [
+    "CMR",
+    "COG",
+    "GNQ"
+  ],
+  "area": 267668.0,
+  "demonyms": {
+    "eng": {
+      "f": "Gabonese",
+      "m": "Gabonese"
+    },
+    "fra": {
+      "f": "Gabonaise",
+      "m": "Gabonais"
+    }
+  },
+  "flag": "\ud83c\uddec\ud83c\udde6",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/vyRSkqw1H1fnq4ry6",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/192793"
+  },
+  "population": 2225728,
+  "gini": {
+    "2017": 38.0
+  },
+  "fifa": "GAB",
+  "car": {
+    "signs": [
+      "G"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC+01:00"
+  ],
+  "continents": [
+    "Africa"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/ga.png",
+    "svg": "https://flagcdn.com/ga.svg",
+    "alt": "The flag of Gabon is composed of three equal horizontal bands of green, yellow and blue."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/ga.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/ga.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      0.38,
+      9.45
+    ]
+  }
+}

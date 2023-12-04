@@ -1,0 +1,211 @@
+{
+  "name": {
+    "common": "Tunisia",
+    "official": "Tunisian Republic",
+    "nativeName": {
+      "ara": {
+        "official": "\u0627\u0644\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u062a\u0648\u0646\u0633\u064a\u0629",
+        "common": "\u062a\u0648\u0646\u0633"
+      }
+    }
+  },
+  "tld": [
+    ".tn"
+  ],
+  "cca2": "TN",
+  "ccn3": "788",
+  "cca3": "TUN",
+  "cioc": "TUN",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "TND": {
+      "name": "Tunisian dinar",
+      "symbol": "\u062f.\u062a"
+    }
+  },
+  "idd": {
+    "root": "+2",
+    "suffixes": [
+      "16"
+    ]
+  },
+  "capital": [
+    "Tunis"
+  ],
+  "altSpellings": [
+    "TN",
+    "Republic of Tunisia",
+    "al-Jumh\u016briyyah at-T\u016bnisiyyah"
+  ],
+  "region": "Africa",
+  "subregion": "Northern Africa",
+  "languages": {
+    "ara": "Arabic"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u0627\u0644\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u062a\u0648\u0646\u0633\u064a\u0629",
+      "common": "\u062a\u0648\u0646\u0633"
+    },
+    "bre": {
+      "official": "Republik Tunizian",
+      "common": "Tunizia"
+    },
+    "ces": {
+      "official": "Tunisk\u00e1 republika",
+      "common": "Tunisko"
+    },
+    "cym": {
+      "official": "Tunisian Republic",
+      "common": "Tunisia"
+    },
+    "deu": {
+      "official": "Tunesische Republik",
+      "common": "Tunesien"
+    },
+    "est": {
+      "official": "Tuneesia Vabariik",
+      "common": "Tuneesia"
+    },
+    "fin": {
+      "official": "Tunisian tasavalta",
+      "common": "Tunisia"
+    },
+    "fra": {
+      "official": "R\u00e9publique tunisienne",
+      "common": "Tunisie"
+    },
+    "hrv": {
+      "official": "Tuniski Republika",
+      "common": "Tunis"
+    },
+    "hun": {
+      "official": "Tun\u00e9ziai K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Tun\u00e9zia"
+    },
+    "ita": {
+      "official": "Repubblica tunisina",
+      "common": "Tunisia"
+    },
+    "jpn": {
+      "official": "\u30c1\u30e5\u30cb\u30b8\u30a2\u5171\u548c\u56fd",
+      "common": "\u30c1\u30e5\u30cb\u30b8\u30a2"
+    },
+    "kor": {
+      "official": "\ud280\ub2c8\uc9c0 \uacf5\ud654\uad6d",
+      "common": "\ud280\ub2c8\uc9c0"
+    },
+    "nld": {
+      "official": "Republiek Tunesi\u00eb",
+      "common": "Tunesi\u00eb"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u062a\u0648\u0646\u0633",
+      "common": "\u062a\u0648\u0646\u0633"
+    },
+    "pol": {
+      "official": "Republika Tunezyjska",
+      "common": "Tunezja"
+    },
+    "por": {
+      "official": "Rep\u00fablica da Tun\u00edsia",
+      "common": "Tun\u00edsia"
+    },
+    "rus": {
+      "official": "\u0422\u0443\u043d\u0438\u0441\u0441\u043a\u043e\u0439 \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0438",
+      "common": "\u0422\u0443\u043d\u0438\u0441"
+    },
+    "slk": {
+      "official": "Tunisk\u00e1 republika",
+      "common": "Tunisko"
+    },
+    "spa": {
+      "official": "Rep\u00fablica de T\u00fanez",
+      "common": "T\u00fanez"
+    },
+    "srp": {
+      "official": "\u0422\u0443\u043d\u0438\u0448\u0430\u043d\u0441\u043a\u0430 \u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+      "common": "\u0422\u0443\u043d\u0438\u0441"
+    },
+    "swe": {
+      "official": "Republiken Tunisien",
+      "common": "Tunisien"
+    },
+    "tur": {
+      "official": "Tunus Cumhuriyeti",
+      "common": "Tunus"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u062a\u0648\u0646\u0633",
+      "common": "\u062a\u0648\u0646\u0633"
+    },
+    "zho": {
+      "official": "\u7a81\u5c3c\u65af\u5171\u548c\u56fd",
+      "common": "\u7a81\u5c3c\u65af"
+    }
+  },
+  "latlng": [
+    34.0,
+    9.0
+  ],
+  "landlocked": false,
+  "borders": [
+    "DZA",
+    "LBY"
+  ],
+  "area": 163610.0,
+  "demonyms": {
+    "eng": {
+      "f": "Tunisian",
+      "m": "Tunisian"
+    },
+    "fra": {
+      "f": "Tunisienne",
+      "m": "Tunisien"
+    }
+  },
+  "flag": "\ud83c\uddf9\ud83c\uddf3",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/KgUmpZdUuNRaougs8",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/192757"
+  },
+  "population": 11818618,
+  "gini": {
+    "2015": 32.8
+  },
+  "fifa": "TUN",
+  "car": {
+    "signs": [
+      "TN"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC+01:00"
+  ],
+  "continents": [
+    "Africa"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/tn.png",
+    "svg": "https://flagcdn.com/tn.svg",
+    "alt": "The flag of Tunisia has a red field. A white circle bearing a five-pointed red star within a fly-side facing red crescent is situated at the center of the field."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/tn.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/tn.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      36.8,
+      10.18
+    ]
+  },
+  "postalCode": {
+    "format": "####",
+    "regex": "^(\\d{4})$"
+  }
+}

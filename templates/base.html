@@ -25,19 +25,24 @@
     <link rel="manifest" href="{{ url_for('static', filename='img/favicon/site.webmanifest') }}">
     <link rel="mask-icon" href="{{ url_for('static', filename='img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
+    <!-- Stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css" integrity="sha384-Wh/opNnCPQdVc7YXIh18hoqN6NYg40GBaO/GwQSwrIbAIo8uCeYri2DX2IisvVP6" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% if page == 'News' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticker.css') }}">
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@1000&family=Spectral+SC:wght@600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <!-- End -->
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
     {% block styles %} {% endblock %}
   </head>
   <body class="bg-dark text-light">
-    {% if page != 'Home' %}
+    {% if page not in ['Home', 'Error'] %}
     <nav class="navbar navbar-expand-lg bg-dark text-light border-bottom border-body sticky-top" data-bs-theme="dark">
       <div class="container-fluid">
         <a class="navbar-brand logo-text" href="/">Infomundi</a>
@@ -82,6 +87,15 @@
       </div>
     </nav>
     {% endif %}
+    {% if page == 'News' %}
+    <div id="news-ticker">
+      <div id="news-content">
+        {% for stock_info in stock_data %}
+        <span>{{ stock_info['symbol'] }} {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %}<i class="fa-solid fa-caret-down"></i>{% else %}<i class="fa-solid fa-caret-up"></i>{% endif %} ({{ stock_info['market_cap'] }}) <i class="fa-solid fa-coins"></i></span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
     <div class="container-fluid">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %} {% if category ==
@@ -110,7 +124,9 @@
       {% block content %} {% endblock %}
     </div>
     <script 
-      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      src="https://code.jquery.com/jquery-3.6.4.min.js" 
+      integrity="sha384-UG8ao2jwOWB7/oDdObZc6ItJmwUkR/PfMyt9Qs5AwX7PsnYn1CRKCTWyncPTWvaS" 
+      crossorigin="anonymous"
       ></script>
     <script 
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 

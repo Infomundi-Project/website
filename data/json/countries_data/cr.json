@@ -1,0 +1,211 @@
+{
+  "name": {
+    "common": "Costa Rica",
+    "official": "Republic of Costa Rica",
+    "nativeName": {
+      "spa": {
+        "official": "Rep\u00fablica de Costa Rica",
+        "common": "Costa Rica"
+      }
+    }
+  },
+  "tld": [
+    ".cr"
+  ],
+  "cca2": "CR",
+  "ccn3": "188",
+  "cca3": "CRI",
+  "cioc": "CRC",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "CRC": {
+      "name": "Costa Rican col\u00f3n",
+      "symbol": "\u20a1"
+    }
+  },
+  "idd": {
+    "root": "+5",
+    "suffixes": [
+      "06"
+    ]
+  },
+  "capital": [
+    "San Jos\u00e9"
+  ],
+  "altSpellings": [
+    "CR",
+    "Republic of Costa Rica",
+    "Rep\u00fablica de Costa Rica"
+  ],
+  "region": "Americas",
+  "subregion": "Central America",
+  "languages": {
+    "spa": "Spanish"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0643\u0648\u0633\u062a\u0627\u0631\u064a\u0643\u0627",
+      "common": "\u0643\u0648\u0633\u062a\u0627\u0631\u064a\u0643\u0627"
+    },
+    "bre": {
+      "official": "Republik Costa Rica",
+      "common": "Costa Rica"
+    },
+    "ces": {
+      "official": "Kostarick\u00e1 republika",
+      "common": "Kostarika"
+    },
+    "cym": {
+      "official": "Gweriniaeth Costa Rica",
+      "common": "Costa Rica"
+    },
+    "deu": {
+      "official": "Republik Costa Rica",
+      "common": "Costa Rica"
+    },
+    "est": {
+      "official": "Costa Rica Vabariik",
+      "common": "Costa Rica"
+    },
+    "fin": {
+      "official": "Costa Rican tasavalta",
+      "common": "Costa Rica"
+    },
+    "fra": {
+      "official": "R\u00e9publique du Costa Rica",
+      "common": "Costa Rica"
+    },
+    "hrv": {
+      "official": "Republika Kostarika",
+      "common": "Kostarika"
+    },
+    "hun": {
+      "official": "Costa Rica-i K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Costa Rica"
+    },
+    "ita": {
+      "official": "Repubblica di Costa Rica",
+      "common": "Costa Rica"
+    },
+    "jpn": {
+      "official": "\u30b3\u30b9\u30bf\u30ea\u30ab\u5171\u548c\u56fd",
+      "common": "\u30b3\u30b9\u30bf\u30ea\u30ab"
+    },
+    "kor": {
+      "official": "\ucf54\uc2a4\ud0c0\ub9ac\uce74 \uacf5\ud654\uad6d",
+      "common": "\ucf54\uc2a4\ud0c0\ub9ac\uce74"
+    },
+    "nld": {
+      "official": "Republiek Costa Rica",
+      "common": "Costa Rica"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u06a9\u0627\u0633\u062a\u0627\u0631\u06cc\u06a9\u0627",
+      "common": "\u06a9\u0627\u0633\u062a\u0627\u0631\u06cc\u06a9\u0627"
+    },
+    "pol": {
+      "official": "Republika Kostaryki",
+      "common": "Kostaryka"
+    },
+    "por": {
+      "official": "Rep\u00fablica da Costa Rica",
+      "common": "Costa Rica"
+    },
+    "rus": {
+      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041a\u043e\u0441\u0442\u0430-\u0420\u0438\u043a\u0430",
+      "common": "\u041a\u043e\u0441\u0442\u0430-\u0420\u0438\u043a\u0430"
+    },
+    "slk": {
+      "official": "Kostarick\u00e1 republika",
+      "common": "Kostarika"
+    },
+    "spa": {
+      "official": "Rep\u00fablica de Costa Rica",
+      "common": "Costa Rica"
+    },
+    "srp": {
+      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041a\u043e\u0441\u0442\u0430\u0440\u0438\u043a\u0430",
+      "common": "\u041a\u043e\u0441\u0442\u0430\u0440\u0438\u043a\u0430"
+    },
+    "swe": {
+      "official": "Republiken Costa Rica",
+      "common": "Costa Rica"
+    },
+    "tur": {
+      "official": "Kosta Rika Cumhuriyeti",
+      "common": "Kosta Rika"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u06a9\u0648\u0633\u0679\u0627\u0631\u06cc\u06a9\u0627",
+      "common": "\u06a9\u0648\u0633\u0679\u0627\u0631\u06cc\u06a9\u0627"
+    },
+    "zho": {
+      "official": "\u54e5\u65af\u8fbe\u9ece\u52a0\u5171\u548c\u56fd",
+      "common": "\u54e5\u65af\u8fbe\u9ece\u52a0"
+    }
+  },
+  "latlng": [
+    10.0,
+    -84.0
+  ],
+  "landlocked": false,
+  "borders": [
+    "NIC",
+    "PAN"
+  ],
+  "area": 51100.0,
+  "demonyms": {
+    "eng": {
+      "f": "Costa Rican",
+      "m": "Costa Rican"
+    },
+    "fra": {
+      "f": "Costaricaine",
+      "m": "Costaricain"
+    }
+  },
+  "flag": "\ud83c\udde8\ud83c\uddf7",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/RFiwytjvNrpfKN7k6",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/287667"
+  },
+  "population": 5094114,
+  "gini": {
+    "2019": 48.2
+  },
+  "fifa": "CRC",
+  "car": {
+    "signs": [
+      "CR"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC-06:00"
+  ],
+  "continents": [
+    "North America"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/cr.png",
+    "svg": "https://flagcdn.com/cr.svg",
+    "alt": "The flag of Costa Rica is composed of five horizontal bands of blue, white, red, white and blue. The central red band is twice the height of the other four bands."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/cr.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/cr.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      9.93,
+      -84.09
+    ]
+  },
+  "postalCode": {
+    "format": "####",
+    "regex": "^(\\d{4})$"
+  }
+}

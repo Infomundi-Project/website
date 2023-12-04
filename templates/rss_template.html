@@ -5,7 +5,6 @@
   min-height: 170px;
   max-height: 200px;
   }
-  /* Improved mobile compatibility */
   @media (max-width: 968px) {
   .pagination {
   margin-top: 20px;
@@ -29,17 +28,44 @@
 {% block content %}
 <div class="row mt-4">
   <div class="col">
+  
   </div>
   <div class="col-sm-6 text-center">
     <a class="fs-1 fw-bold text-decoration-none text-light" href="/news?country={{ country_code }}">
       <img src="https://hatscripts.github.io/circle-flags/flags/{{ country_code }}.svg" style="max-width: 48px" class="rounded-circle" alt="{{ country_name }}'s flag"> {{ country_name }}
-    </a>
+    </a><br>
+    {% if nation_data %}
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Area</strong>: {{ nation_data['area'] }}<br><strong>Borders</strong>: {{ nation_data['borders'] }}"
+    ><i class="fa-solid fa-chart-area"></i></span>
+    
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Population</strong>: {{ nation_data['population'] }}<br><strong>HDI</strong>: {{ nation_data['hdi'] }}<br><strong>GDP Per Capita</strong>: ${{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}"
+    ><i class="fa-solid fa-users"></i></span>
+    
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Capital</strong>: {{ nation_data['capital'] }}<br><strong>Leader</strong>: {{ nation_data['leader'] }}<br><strong>Member of the United Nations</strong>: {{ nation_data['united_nations_member'] }}"
+    ><i class="fa-solid fa-landmark-flag"></i></span>
+    
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Languages</strong>: {{ nation_data['languages'] }}<br><strong>Top Level Domain</strong>: {{ nation_data['top_level_domain'] }}"
+    ><i class="fa-solid fa-language"></i></span>
+    
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Currency</strong>: {{ nation_data['currency'] }}<br><strong>GDP</strong>: ${{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}"
+    ><i class="fa-solid fa-dollar-sign"></i></span>
+    
+    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
+    data-bs-title="<strong>Current Time</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
+    ><i class="fa-solid fa-clock"></i></span>
+    {% endif %}
     <form class="d-flex mt-4" role="search" action="javascript:;" onsubmit="submitSearch()">
       <input class="form-control text-light bg-dark me-2 border border-primary border-opacity-25" type="search" placeholder="Search" aria-label="Search" id="query" name="query">
       <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
     </form>
   </div>
   <div class="col">
+  
   </div>
 </div>
 <ul class="nav nav-pills justify-content-center mb-2 mt-4">
@@ -114,17 +140,10 @@
 {% endblock %}
 {% block scripts %}
 <script>
-  function submitSearch() {
-    const query = document.getElementById('query').value;
-    // Get the current URL and parse its query parameters
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams(url.search);
-    // Add or update the 'query' parameter
-    params.set('query', query);
-    // Set the updated query parameters back to the URL
-    url.search = params.toString();
-    // Update the URL and trigger a page reload
-    window.location.href = url.toString();
-  }
+  function submitSearch(){const e=document.getElementById("query").value,n=new URL(window.location.href),t=new URLSearchParams(n.search);t.set("query",e),n.search=t.toString(),window.location.href=n.toString()}
+</script>
+<script type="text/javascript">
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
 {% endblock %}

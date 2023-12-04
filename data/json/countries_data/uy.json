@@ -1,0 +1,211 @@
+{
+  "name": {
+    "common": "Uruguay",
+    "official": "Oriental Republic of Uruguay",
+    "nativeName": {
+      "spa": {
+        "official": "Rep\u00fablica Oriental del Uruguay",
+        "common": "Uruguay"
+      }
+    }
+  },
+  "tld": [
+    ".uy"
+  ],
+  "cca2": "UY",
+  "ccn3": "858",
+  "cca3": "URY",
+  "cioc": "URU",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "UYU": {
+      "name": "Uruguayan peso",
+      "symbol": "$"
+    }
+  },
+  "idd": {
+    "root": "+5",
+    "suffixes": [
+      "98"
+    ]
+  },
+  "capital": [
+    "Montevideo"
+  ],
+  "altSpellings": [
+    "UY",
+    "Oriental Republic of Uruguay",
+    "Rep\u00fablica Oriental del Uruguay"
+  ],
+  "region": "Americas",
+  "subregion": "South America",
+  "languages": {
+    "spa": "Spanish"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0623\u0648\u0631\u0648\u063a\u0648\u0627\u064a \u0627\u0644\u0634\u0631\u0642\u064a\u0629",
+      "common": "\u0627\u0644\u0623\u0648\u0631\u0648\u063a\u0648\u0627\u064a"
+    },
+    "bre": {
+      "official": "Republik Reter Uruguay",
+      "common": "Uruguay"
+    },
+    "ces": {
+      "official": "Uruguaysk\u00e1 v\u00fdchodn\u00ed republika",
+      "common": "Uruguay"
+    },
+    "cym": {
+      "official": "Oriental Republic of Uruguay",
+      "common": "Uruguay"
+    },
+    "deu": {
+      "official": "Republik \u00d6stlich des Uruguay",
+      "common": "Uruguay"
+    },
+    "est": {
+      "official": "Uruguay Idavabariik",
+      "common": "Uruguay"
+    },
+    "fin": {
+      "official": "Uruguayn it\u00e4inen tasavalta",
+      "common": "Uruguay"
+    },
+    "fra": {
+      "official": "R\u00e9publique orientale de l'Uruguay",
+      "common": "Uruguay"
+    },
+    "hrv": {
+      "official": "Orijentalna Republika Urugvaj",
+      "common": "Urugvaj"
+    },
+    "hun": {
+      "official": "Uruguayi Keleti K\u00f6zt\u00e1rsas\u00e1g",
+      "common": "Uruguay"
+    },
+    "ita": {
+      "official": "Repubblica Orientale dell'Uruguay",
+      "common": "Uruguay"
+    },
+    "jpn": {
+      "official": "\u30a6\u30eb\u30b0\u30a2\u30a4\u6771\u65b9\u5171\u548c\u56fd",
+      "common": "\u30a6\u30eb\u30b0\u30a2\u30a4"
+    },
+    "kor": {
+      "official": "\uc6b0\ub8e8\uacfc\uc774 \ub3d9\ubc29 \uacf5\ud654\uad6d",
+      "common": "\uc6b0\ub8e8\uacfc\uc774"
+    },
+    "nld": {
+      "official": "Oosterse Republiek Uruguay",
+      "common": "Uruguay"
+    },
+    "per": {
+      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0627\u0631\u0648\u06af\u0648\u0626\u0647",
+      "common": "\u0627\u0631\u0648\u06af\u0648\u0626\u0647"
+    },
+    "pol": {
+      "official": "Wschodnia Republika Urugwaju",
+      "common": "Urugwaj"
+    },
+    "por": {
+      "official": "Rep\u00fablica Oriental do Uruguai",
+      "common": "Uruguai"
+    },
+    "rus": {
+      "official": "\u0412\u043e\u0441\u0442\u043e\u0447\u043d\u043e\u0439 \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0438 \u0423\u0440\u0443\u0433\u0432\u0430\u0439",
+      "common": "\u0423\u0440\u0443\u0433\u0432\u0430\u0439"
+    },
+    "slk": {
+      "official": "Uruguajsk\u00e1 v\u00fdchodn\u00e1 republika",
+      "common": "Uruguaj"
+    },
+    "spa": {
+      "official": "Rep\u00fablica Oriental del Uruguay",
+      "common": "Uruguay"
+    },
+    "srp": {
+      "official": "\u0418\u0441\u0442\u043e\u0447\u043d\u0430 \u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0423\u0440\u0443\u0433\u0432\u0430\u0458",
+      "common": "\u0423\u0440\u0443\u0433\u0432\u0430\u0458"
+    },
+    "swe": {
+      "official": "Republiken Uruguay",
+      "common": "Uruguay"
+    },
+    "tur": {
+      "official": "Uruguay Do\u011fu Cumhuriyeti",
+      "common": "Uruguay"
+    },
+    "urd": {
+      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0634\u0631\u0642\u06cc\u06c1 \u06cc\u0648\u0631\u0627\u06af\u0648\u0626\u06d2",
+      "common": "\u06cc\u0648\u0631\u0627\u06af\u0648\u0626\u06d2"
+    },
+    "zho": {
+      "official": "\u4e4c\u62c9\u572d\u4e1c\u5cb8\u5171\u548c\u56fd",
+      "common": "\u4e4c\u62c9\u572d"
+    }
+  },
+  "latlng": [
+    -33.0,
+    -56.0
+  ],
+  "landlocked": false,
+  "borders": [
+    "ARG",
+    "BRA"
+  ],
+  "area": 181034.0,
+  "demonyms": {
+    "eng": {
+      "f": "Uruguayan",
+      "m": "Uruguayan"
+    },
+    "fra": {
+      "f": "Uruguayenne",
+      "m": "Uruguayen"
+    }
+  },
+  "flag": "\ud83c\uddfa\ud83c\uddfe",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/tiQ9Baekb1jQtDSD9",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/287072"
+  },
+  "population": 3473727,
+  "gini": {
+    "2019": 39.7
+  },
+  "fifa": "URU",
+  "car": {
+    "signs": [
+      "ROU"
+    ],
+    "side": "right"
+  },
+  "timezones": [
+    "UTC-03:00"
+  ],
+  "continents": [
+    "South America"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/uy.png",
+    "svg": "https://flagcdn.com/uy.svg",
+    "alt": "The flag of Uruguay is composed of nine equal horizontal bands of white alternating with blue, with a white square superimposed in the canton. In the white square is a yellow sun bearing a human face \u2014 the Sun of May \u2014 from which sixteen rays extend. The sun's rays alternate between triangular and wavy."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/uy.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/uy.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      -34.85,
+      -56.17
+    ]
+  },
+  "postalCode": {
+    "format": "#####",
+    "regex": "^(\\d{5})$"
+  }
+}

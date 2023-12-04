@@ -12,8 +12,8 @@ from website_scripts.scripts import remove_html_tags
 from website_scripts import json_util
 from website_scripts import config
 
-def get_img(feed, item):
-    """Extract image source from RSS item."""
+def get_img(feed, item) -> str:
+    """Returns img url associated with the RSS item."""
     src = ""
     try:
         src = item.contributors[0]['href']
@@ -28,40 +28,28 @@ def get_img(feed, item):
             return src
     for entry in item.links:
         if "href" in entry.keys():
-            if ".jpg" in entry['href']:
+            if ".jpg" in entry['href'] or ".png" in entry['href'] or ".webp" in entry['href']:
                 return entry['href']
     #src = get_link_preview(item.link)
     src = 'static/img/infomundi-white-darkbg-square.webp'
     return src
 
-def fetch_rss_feed(rss_url, news_filter, result_list):
+def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     """Fetch RSS feed and store relevant information in a result list."""
     headers = {
         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
     }
-    try:
-        response = get(rss_url, timeout=7, headers=headers)
-        if response.status_code == 200:
-            feed = parse(response.content)
-        else:
-            print(f"[!] {rss_url} // {response.status_code}")
-    except Exception:
+    
+    response = get(rss_url, timeout=7, headers=headers)
+    if response.status_code != 200:
+        print(f"[!] {rss_url} // {response.status_code}")
         return {}
 
-    icon = ''
+    # Tries to parse the content
     try:
-        icon = feed.feed.image.href
-    except UnboundLocalError:
-        pass
+        feed = parse(response.content)
     except Exception:
-        if 'logo' in feed.feed.keys():
-            icon = feed.feed.logo
-
-    if icon == "":
-        feed_file = json_util.read_json(f'{config.FEEDS_PATH}/{news_filter}')
-        for entry in feed_file:
-            if entry['url'] == rss_url and 'favicon' in entry:
-                icon = entry['favicon']
+        return {}
 
     try:
         data = {
@@ -71,7 +59,6 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
                 {
                     'title': item.title,
                     'description': f'{remove_html_tags(item.description)[:500]}' if 'description' in item else 'No description provided',
-                    'feed_icon': icon,
                     'id': f'{md5(item.title.encode()).hexdigest()}',
                     'publisher': feed.feed.title,
                     'publisher_link': feed.feed.link,
@@ -90,7 +77,8 @@ def fetch_rss_feed(rss_url, news_filter, result_list):
 
     result_list.append(data)
 
-def format_date(date):
+def format_date(date) -> str:
+    """Takes a pythonic date object and converts into a string to show in the news page"""
     today = datetime.now().date()
 
     if isinstance(date, tuple):
@@ -108,23 +96,13 @@ def format_date(date):
 
 def main():
     """Main function to fetch and cache RSS feeds."""
-    categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
-    month_text = time.strftime("%B")
     current_month = datetime.today().month
 
+    categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
+    now = time.time()
     for selected_filter in categories:
-        now = time.time()
-
-        try:
-            cache = json_util.read_json(f"{config.CACHE_PATH}/{selected_filter}")
-
-            if int(now - float(cache["created_at"])) < 21600 or selected_filter == '': # change time
-                print(f"[~] Skipping {selected_filter}")
-                continue
-        except:
-            pass
-
         print(f"[~] Handling cache for {selected_filter}...")
+        
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
 
@@ -160,7 +138,7 @@ def main():
         shuffle(merged_articles)
 
         page_separated_articles = {}
-        page_separated_articles["created_at"] = now
+        page_separated_articles['created_at'] = now
         
         total_pages = len(merged_articles) // 100
         if total_pages == 0:

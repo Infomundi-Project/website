@@ -8,7 +8,6 @@
           Login
         </div>
         <div class="card-body text-light">
-          <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
           <form method="post" action="{{ url_for('auth.login') }}">
             <div class="mb-3">
               <label for="username" class="form-label">Username</label>
@@ -19,7 +18,7 @@
               <input type="password" class="form-control bg-dark text-light" id="password" name="password" required>
             </div>
             <div class="mb-3">
-              <div class="h-captcha" data-sitekey="c88360d1-22a7-4320-9438-783d76455df2"></div>
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
           </form>
@@ -28,4 +27,10 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script 
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+  async defer
+></script>
 {% endblock %}

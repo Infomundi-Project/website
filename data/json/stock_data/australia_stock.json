@@ -1,0 +1,1865 @@
+[
+  {
+    "symbol": "BHP:AU",
+    "name": "BHP Group",
+    "price": "47.14",
+    "day_change": "1.73%",
+    "year_change": "0.71%",
+    "date": "Dec/04",
+    "market_cap": "158.49B"
+  },
+  {
+    "symbol": "CBA:AU",
+    "name": "Commonwealth Bank",
+    "price": "105.12",
+    "day_change": "0.89%",
+    "year_change": "-1.70%",
+    "date": "Dec/04",
+    "market_cap": "116.74B"
+  },
+  {
+    "symbol": "CSL:AU",
+    "name": "CSL",
+    "price": "264.17",
+    "day_change": "0.50%",
+    "year_change": "-11.94%",
+    "date": "Dec/04",
+    "market_cap": "84.67B"
+  },
+  {
+    "symbol": "NAB:AU",
+    "name": "National Australia Bank",
+    "price": "28.65",
+    "day_change": "0.77%",
+    "year_change": "-8.35%",
+    "date": "Dec/04",
+    "market_cap": "59.16B"
+  },
+  {
+    "symbol": "FMG:AU",
+    "name": "Fortescue Metals",
+    "price": "25.29",
+    "day_change": "0.36%",
+    "year_change": "20.26%",
+    "date": "Dec/04",
+    "market_cap": "51.61B"
+  },
+  {
+    "symbol": "WBC:AU",
+    "name": "Westpac Banking",
+    "price": "21.39",
+    "day_change": "0.56%",
+    "year_change": "-9.82%",
+    "date": "Dec/04",
+    "market_cap": "49.75B"
+  },
+  {
+    "symbol": "ANZ:AU",
+    "name": "ANZ Banking",
+    "price": "24.45",
+    "day_change": "0.08%",
+    "year_change": "-0.49%",
+    "date": "Dec/04",
+    "market_cap": "48.68B"
+  },
+  {
+    "symbol": "MQG:AU",
+    "name": "Macquarie",
+    "price": "169.03",
+    "day_change": "0.74%",
+    "year_change": "-6.34%",
+    "date": "Dec/04",
+    "market_cap": "41.47B"
+  },
+  {
+    "symbol": "WES:AU",
+    "name": "Wesfarmers",
+    "price": "52.74",
+    "day_change": "1.02%",
+    "year_change": "8.54%",
+    "date": "Dec/04",
+    "market_cap": "39.7B"
+  },
+  {
+    "symbol": "WPL:AU",
+    "name": "Woodside Energy",
+    "price": "30.35",
+    "day_change": "-1.59%",
+    "year_change": "-16.64%",
+    "date": "Dec/04",
+    "market_cap": "38.23B"
+  },
+  {
+    "symbol": "RIO:AU",
+    "name": "Rio Tinto",
+    "price": "126.92",
+    "day_change": "1.61%",
+    "year_change": "9.29%",
+    "date": "Dec/04",
+    "market_cap": "31.26B"
+  },
+  {
+    "symbol": "GMG:AU",
+    "name": "Goodman",
+    "price": "23.38",
+    "day_change": "1.43%",
+    "year_change": "24.83%",
+    "date": "Dec/04",
+    "market_cap": "29.46B"
+  },
+  {
+    "symbol": "TLS:AU",
+    "name": "Telstra",
+    "price": "3.79",
+    "day_change": "0%",
+    "year_change": "-5.49%",
+    "date": "Dec/04",
+    "market_cap": "29.05B"
+  },
+  {
+    "symbol": "WOW:AU",
+    "name": "Woolworths",
+    "price": "34.85",
+    "day_change": "0.84%",
+    "year_change": "0.52%",
+    "date": "Dec/04",
+    "market_cap": "28.25B"
+  },
+  {
+    "symbol": "TCL:AU",
+    "name": "Transurban",
+    "price": "12.97",
+    "day_change": "0.39%",
+    "year_change": "-7.16%",
+    "date": "Dec/04",
+    "market_cap": "26.58B"
+  },
+  {
+    "symbol": "RMD:AU",
+    "name": "ResMed",
+    "price": "24.29",
+    "day_change": "1.46%",
+    "year_change": "-27.73%",
+    "date": "Dec/04",
+    "market_cap": "23.71B"
+  },
+  {
+    "symbol": "ALL:AU",
+    "name": "Aristocrat Leisure",
+    "price": "40.44",
+    "day_change": "1.15%",
+    "year_change": "14.69%",
+    "date": "Dec/04",
+    "market_cap": "17.4B"
+  },
+  {
+    "symbol": "WTC:AU",
+    "name": "WiseTech Global",
+    "price": "67.43",
+    "day_change": "1.92%",
+    "year_change": "17.17%",
+    "date": "Dec/04",
+    "market_cap": "14.91B"
+  },
+  {
+    "symbol": "QBE:AU",
+    "name": "QBE",
+    "price": "14.84",
+    "day_change": "-3.20%",
+    "year_change": "14.95%",
+    "date": "Dec/04",
+    "market_cap": "14.71B"
+  },
+  {
+    "symbol": "STO:AU",
+    "name": "Santos",
+    "price": "6.82",
+    "day_change": "-1.16%",
+    "year_change": "-7.08%",
+    "date": "Dec/04",
+    "market_cap": "14.7B"
+  },
+  {
+    "symbol": "JHX:AU",
+    "name": "James Hardie",
+    "price": "49.72",
+    "day_change": "2.33%",
+    "year_change": "62.27%",
+    "date": "Dec/04",
+    "market_cap": "14.44B"
+  },
+  {
+    "symbol": "REA:AU",
+    "name": "REA",
+    "price": "159.52",
+    "day_change": "2.36%",
+    "year_change": "24.65%",
+    "date": "Dec/04",
+    "market_cap": "13.98B"
+  },
+  {
+    "symbol": "AMC:AU",
+    "name": "Amcor",
+    "price": "14.29",
+    "day_change": "0.35%",
+    "year_change": "-21.53%",
+    "date": "Dec/04",
+    "market_cap": "13.7B"
+  },
+  {
+    "symbol": "COL:AU",
+    "name": "Coles",
+    "price": "15.27",
+    "day_change": "0.66%",
+    "year_change": "-9.27%",
+    "date": "Dec/04",
+    "market_cap": "13.56B"
+  },
+  {
+    "symbol": "BXB:AU",
+    "name": "Brambles",
+    "price": "13.27",
+    "day_change": "-1.48%",
+    "year_change": "10.31%",
+    "date": "Dec/04",
+    "market_cap": "12.25B"
+  },
+  {
+    "symbol": "COH:AU",
+    "name": "Cochlear",
+    "price": "273.20",
+    "day_change": "0.33%",
+    "year_change": "28.87%",
+    "date": "Dec/04",
+    "market_cap": "11.88B"
+  },
+  {
+    "symbol": "SUN:AU",
+    "name": "Suncorp",
+    "price": "14.05",
+    "day_change": "0.36%",
+    "year_change": "21.02%",
+    "date": "Dec/04",
+    "market_cap": "11.84B"
+  },
+  {
+    "symbol": "XRO:AU",
+    "name": "Xero",
+    "price": "102.80",
+    "day_change": "1.65%",
+    "year_change": "37.47%",
+    "date": "Dec/04",
+    "market_cap": "10.33B"
+  },
+  {
+    "symbol": "NST:AU",
+    "name": "Northern Star Resources",
+    "price": "12.90",
+    "day_change": "3.70%",
+    "year_change": "18.13%",
+    "date": "Dec/04",
+    "market_cap": "9.84B"
+  },
+  {
+    "symbol": "IAG:AU",
+    "name": "Insurance Australia",
+    "price": "5.83",
+    "day_change": "-1.85%",
+    "year_change": "23.78%",
+    "date": "Dec/04",
+    "market_cap": "9.39B"
+  },
+  {
+    "symbol": "CPU:AU",
+    "name": "Computershare",
+    "price": "23.36",
+    "day_change": "-0.34%",
+    "year_change": "-13.32%",
+    "date": "Dec/04",
+    "market_cap": "9.36B"
+  },
+  {
+    "symbol": "S32:AU",
+    "name": "South32",
+    "price": "3.12",
+    "day_change": "0.97%",
+    "year_change": "-28.11%",
+    "date": "Dec/04",
+    "market_cap": "9.34B"
+  },
+  {
+    "symbol": "SCG:AU",
+    "name": "Scentre",
+    "price": "2.71",
+    "day_change": "1.50%",
+    "year_change": "-8.45%",
+    "date": "Dec/04",
+    "market_cap": "9.33B"
+  },
+  {
+    "symbol": "SHL:AU",
+    "name": "Sonic Healthcare",
+    "price": "28.91",
+    "day_change": "-0.72%",
+    "year_change": "-9.63%",
+    "date": "Dec/04",
+    "market_cap": "9.1B"
+  },
+  {
+    "symbol": "ORG:AU",
+    "name": "Origin Energy",
+    "price": "7.86",
+    "day_change": "-3.91%",
+    "year_change": "0.26%",
+    "date": "Dec/04",
+    "market_cap": "8.97B"
+  },
+  {
+    "symbol": "REH:AU",
+    "name": "Reece",
+    "price": "19.64",
+    "day_change": "1.45%",
+    "year_change": "26.38%",
+    "date": "Dec/04",
+    "market_cap": "8.42B"
+  },
+  {
+    "symbol": "FPH:AU",
+    "name": "Fisher & Paykel Healthcare",
+    "price": "21.72",
+    "day_change": "-2.25%",
+    "year_change": "-5.40%",
+    "date": "Dec/04",
+    "market_cap": "8.39B"
+  },
+  {
+    "symbol": "SOL:AU",
+    "name": "Washington H Soul",
+    "price": "33.65",
+    "day_change": "-0.18%",
+    "year_change": "18.44%",
+    "date": "Dec/04",
+    "market_cap": "8.05B"
+  },
+  {
+    "symbol": "SVW:AU",
+    "name": "Seven",
+    "price": "32.42",
+    "day_change": "-0.09%",
+    "year_change": "55.34%",
+    "date": "Dec/04",
+    "market_cap": "7.81B"
+  },
+  {
+    "symbol": "MIN:AU",
+    "name": "Mineral Resources",
+    "price": "59.92",
+    "day_change": "-1.12%",
+    "year_change": "-33.89%",
+    "date": "Dec/04",
+    "market_cap": "7.7B"
+  },
+  {
+    "symbol": "ASX:AU",
+    "name": "ASX",
+    "price": "58.30",
+    "day_change": "0.60%",
+    "year_change": "-16.94%",
+    "date": "Dec/04",
+    "market_cap": "7.49B"
+  },
+  {
+    "symbol": "RHC:AU",
+    "name": "Ramsay Health Care",
+    "price": "48.28",
+    "day_change": "-0.64%",
+    "year_change": "-26.89%",
+    "date": "Dec/04",
+    "market_cap": "7.32B"
+  },
+  {
+    "symbol": "APA:AU",
+    "name": "APA",
+    "price": "8.51",
+    "day_change": "-0.35%",
+    "year_change": "-23.06%",
+    "date": "Dec/04",
+    "market_cap": "7.24B"
+  },
+  {
+    "symbol": "CAR:AU",
+    "name": "carsales.com",
+    "price": "28.33",
+    "day_change": "0.82%",
+    "year_change": "22.85%",
+    "date": "Dec/04",
+    "market_cap": "7.09B"
+  },
+  {
+    "symbol": "PLS:AU",
+    "name": "Pilbara Minerals",
+    "price": "3.53",
+    "day_change": "-2.22%",
+    "year_change": "-23.43%",
+    "date": "Dec/04",
+    "market_cap": "7.05B"
+  },
+  {
+    "symbol": "SGP:AU",
+    "name": "Stockland",
+    "price": "4.11",
+    "day_change": "0.98%",
+    "year_change": "5.38%",
+    "date": "Dec/04",
+    "market_cap": "6.5B"
+  },
+  {
+    "symbol": "BSL:AU",
+    "name": "BlueScope Steel",
+    "price": "21.38",
+    "day_change": "1.18%",
+    "year_change": "17.28%",
+    "date": "Dec/04",
+    "market_cap": "6.34B"
+  },
+  {
+    "symbol": "QAN:AU",
+    "name": "Qantas Airways",
+    "price": "5.47",
+    "day_change": "2.24%",
+    "year_change": "-11.63%",
+    "date": "Dec/04",
+    "market_cap": "6.26B"
+  },
+  {
+    "symbol": "PME:AU",
+    "name": "Pro Medicus",
+    "price": "88.18",
+    "day_change": "0.14%",
+    "year_change": "44.39%",
+    "date": "Dec/04",
+    "market_cap": "6.11B"
+  },
+  {
+    "symbol": "EDV:AU",
+    "name": "Endeavour",
+    "price": "5.09",
+    "day_change": "1.80%",
+    "year_change": "-28.01%",
+    "date": "Dec/04",
+    "market_cap": "6.05B"
+  },
+  {
+    "symbol": "WOR:AU",
+    "name": "WorleyParsons",
+    "price": "16.90",
+    "day_change": "-0.30%",
+    "year_change": "15.60%",
+    "date": "Dec/04",
+    "market_cap": "5.91B"
+  },
+  {
+    "symbol": "TPG:AU",
+    "name": "TPG Telecom",
+    "price": "4.73",
+    "day_change": "0.42%",
+    "year_change": "-5.40%",
+    "date": "Dec/04",
+    "market_cap": "5.84B"
+  },
+  {
+    "symbol": "SPK:AU",
+    "name": "Spark New Zealand",
+    "price": "4.77",
+    "day_change": "0%",
+    "year_change": "-1.45%",
+    "date": "Dec/04",
+    "market_cap": "5.79B"
+  },
+  {
+    "symbol": "VCX:AU",
+    "name": "Vicinity Centres",
+    "price": "1.89",
+    "day_change": "1.62%",
+    "year_change": "-6.22%",
+    "date": "Dec/04",
+    "market_cap": "5.69B"
+  },
+  {
+    "symbol": "SEK:AU",
+    "name": "SEEK",
+    "price": "24.18",
+    "day_change": "1.47%",
+    "year_change": "4.86%",
+    "date": "Dec/04",
+    "market_cap": "5.68B"
+  },
+  {
+    "symbol": "TWE:AU",
+    "name": "Treasury Wine Estates",
+    "price": "10.66",
+    "day_change": "0.47%",
+    "year_change": "-24.24%",
+    "date": "Dec/04",
+    "market_cap": "5.65B"
+  },
+  {
+    "symbol": "MQA:AU",
+    "name": "Atlas Arteria",
+    "price": "5.69",
+    "day_change": "0%",
+    "year_change": "-16.57%",
+    "date": "Dec/04",
+    "market_cap": "5.48B"
+  },
+  {
+    "symbol": "ALD:AU",
+    "name": "Ampol",
+    "price": "34.42",
+    "day_change": "-0.46%",
+    "year_change": "22.67%",
+    "date": "Dec/04",
+    "market_cap": "5.44B"
+  },
+  {
+    "symbol": "MGR:AU",
+    "name": "Mirvac",
+    "price": "2.05",
+    "day_change": "0.49%",
+    "year_change": "-7.66%",
+    "date": "Dec/04",
+    "market_cap": "5.37B"
+  },
+  {
+    "symbol": "GPT:AU",
+    "name": "GPT",
+    "price": "4.20",
+    "day_change": "2.44%",
+    "year_change": "-4.33%",
+    "date": "Dec/04",
+    "market_cap": "5.34B"
+  },
+  {
+    "symbol": "DXS:AU",
+    "name": "Dexus Property",
+    "price": "7.12",
+    "day_change": "2.45%",
+    "year_change": "-11.44%",
+    "date": "Dec/04",
+    "market_cap": "5.08B"
+  },
+  {
+    "symbol": "EVN:AU",
+    "name": "Evolution Mining",
+    "price": "4.14",
+    "day_change": "2.48%",
+    "year_change": "44.76%",
+    "date": "Dec/04",
+    "market_cap": "5.05B"
+  },
+  {
+    "symbol": "ORI:AU",
+    "name": "Orica",
+    "price": "15.65",
+    "day_change": "0.38%",
+    "year_change": "7.34%",
+    "date": "Dec/04",
+    "market_cap": "4.73B"
+  },
+  {
+    "symbol": "NXT:AU",
+    "name": "NEXTDC",
+    "price": "13.42",
+    "day_change": "3.15%",
+    "year_change": "42.31%",
+    "date": "Dec/04",
+    "market_cap": "4.58B"
+  },
+  {
+    "symbol": "JHG:AU",
+    "name": "Janus Henderson",
+    "price": "39.49",
+    "day_change": "0.33%",
+    "year_change": "4.47%",
+    "date": "Dec/04",
+    "market_cap": "4.58B"
+  },
+  {
+    "symbol": "AZJ:AU",
+    "name": "Aurizon",
+    "price": "3.61",
+    "day_change": "1.98%",
+    "year_change": "-1.37%",
+    "date": "Dec/04",
+    "market_cap": "4.41B"
+  },
+  {
+    "symbol": "NWS:AU",
+    "name": "News",
+    "price": "34.55",
+    "day_change": "-0.66%",
+    "year_change": "22.56%",
+    "date": "Dec/04",
+    "market_cap": "4.39B"
+  },
+  {
+    "symbol": "IEL:AU",
+    "name": "IDP Education",
+    "price": "23.20",
+    "day_change": "1.49%",
+    "year_change": "-17.67%",
+    "date": "Dec/04",
+    "market_cap": "4.28B"
+  },
+  {
+    "symbol": "AGL:AU",
+    "name": "AGL Energy",
+    "price": "9.13",
+    "day_change": "-3.18%",
+    "year_change": "12.86%",
+    "date": "Dec/04",
+    "market_cap": "4.08B"
+  },
+  {
+    "symbol": "IGO:AU",
+    "name": "Independence",
+    "price": "8.03",
+    "day_change": "-3.72%",
+    "year_change": "-48.33%",
+    "date": "Dec/04",
+    "market_cap": "4.03B"
+  },
+  {
+    "symbol": "WHC:AU",
+    "name": "Whitehaven Coal",
+    "price": "7.20",
+    "day_change": "-0.83%",
+    "year_change": "-24.61%",
+    "date": "Dec/04",
+    "market_cap": "4B"
+  },
+  {
+    "symbol": "LYC:AU",
+    "name": "Lynas Corporation",
+    "price": "6.44",
+    "day_change": "1.42%",
+    "year_change": "-25.46%",
+    "date": "Dec/04",
+    "market_cap": "3.99B"
+  },
+  {
+    "symbol": "ALQ:AU",
+    "name": "ALS",
+    "price": "12.40",
+    "day_change": "0.90%",
+    "year_change": "0.90%",
+    "date": "Dec/04",
+    "market_cap": "3.98B"
+  },
+  {
+    "symbol": "ALU:AU",
+    "name": "Altium",
+    "price": "45.32",
+    "day_change": "1.46%",
+    "year_change": "16.35%",
+    "date": "Dec/04",
+    "market_cap": "3.97B"
+  },
+  {
+    "symbol": "SDF:AU",
+    "name": "Steadfast",
+    "price": "5.67",
+    "day_change": "0.18%",
+    "year_change": "5.00%",
+    "date": "Dec/04",
+    "market_cap": "3.89B"
+  },
+  {
+    "symbol": "CWY:AU",
+    "name": "Cleanaway Waste Management",
+    "price": "2.52",
+    "day_change": "2.02%",
+    "year_change": "-8.36%",
+    "date": "Dec/04",
+    "market_cap": "3.72B"
+  },
+  {
+    "symbol": "IPL:AU",
+    "name": "Incitec Pivot",
+    "price": "2.87",
+    "day_change": "-1.37%",
+    "year_change": "-25.26%",
+    "date": "Dec/04",
+    "market_cap": "3.7B"
+  },
+  {
+    "symbol": "BLD:AU",
+    "name": "Boral",
+    "price": "4.98",
+    "day_change": "0.40%",
+    "year_change": "59.62%",
+    "date": "Dec/04",
+    "market_cap": "3.64B"
+  },
+  {
+    "symbol": "JBH:AU",
+    "name": "JB Hi-Fi",
+    "price": "48.27",
+    "day_change": "1.07%",
+    "year_change": "6.65%",
+    "date": "Dec/04",
+    "market_cap": "3.5B"
+  },
+  {
+    "symbol": "QUB:AU",
+    "name": "Qube Holdings",
+    "price": "2.96",
+    "day_change": "1.37%",
+    "year_change": "6.09%",
+    "date": "Dec/04",
+    "market_cap": "3.47B"
+  },
+  {
+    "symbol": "BEN:AU",
+    "name": "Bendigo And Adelaide Bank",
+    "price": "9.14",
+    "day_change": "1.33%",
+    "year_change": "0.77%",
+    "date": "Dec/04",
+    "market_cap": "3.43B"
+  },
+  {
+    "symbol": "TNE:AU",
+    "name": "Technology One",
+    "price": "15.36",
+    "day_change": "0.72%",
+    "year_change": "7.19%",
+    "date": "Dec/04",
+    "market_cap": "3.31B"
+  },
+  {
+    "symbol": "CHC:AU",
+    "name": "Charter Hall",
+    "price": "10.39",
+    "day_change": "1.66%",
+    "year_change": "-22.35%",
+    "date": "Dec/04",
+    "market_cap": "3.26B"
+  },
+  {
+    "symbol": "VEA:AU",
+    "name": "Viva Energy",
+    "price": "3.12",
+    "day_change": "-0.64%",
+    "year_change": "15.56%",
+    "date": "Dec/04",
+    "market_cap": "3.19B"
+  },
+  {
+    "symbol": "DMP:AU",
+    "name": "Domino's Pizza Enterprises",
+    "price": "53.00",
+    "day_change": "0.61%",
+    "year_change": "-20.99%",
+    "date": "Dec/04",
+    "market_cap": "3.16B"
+  },
+  {
+    "symbol": "HVN:AU",
+    "name": "Harvey Norman",
+    "price": "3.81",
+    "day_change": "0.79%",
+    "year_change": "-12.61%",
+    "date": "Dec/04",
+    "market_cap": "3.15B"
+  },
+  {
+    "symbol": "LLC:AU",
+    "name": "Lend Lease",
+    "price": "6.72",
+    "day_change": "1.66%",
+    "year_change": "-10.16%",
+    "date": "Dec/04",
+    "market_cap": "3.05B"
+  },
+  {
+    "symbol": "PMV:AU",
+    "name": "Premier Investments",
+    "price": "26.20",
+    "day_change": "4.34%",
+    "year_change": "2.91%",
+    "date": "Dec/04",
+    "market_cap": "2.77B"
+  },
+  {
+    "symbol": "CIA:AU",
+    "name": "Champion Iron",
+    "price": "6.85",
+    "day_change": "-3.11%",
+    "year_change": "11.38%",
+    "date": "Dec/04",
+    "market_cap": "2.7B"
+  },
+  {
+    "symbol": "FLT:AU",
+    "name": "Flight Centre Travel",
+    "price": "18.53",
+    "day_change": "1.70%",
+    "year_change": "17.43%",
+    "date": "Dec/04",
+    "market_cap": "2.7B"
+  },
+  {
+    "symbol": "CGF:AU",
+    "name": "Challenger",
+    "price": "5.89",
+    "day_change": "-0.51%",
+    "year_change": "-17.51%",
+    "date": "Dec/04",
+    "market_cap": "2.68B"
+  },
+  {
+    "symbol": "BKW:AU",
+    "name": "BRICKWORKS",
+    "price": "25.29",
+    "day_change": "0.04%",
+    "year_change": "12.00%",
+    "date": "Dec/04",
+    "market_cap": "2.55B"
+  },
+  {
+    "symbol": "CYB:AU",
+    "name": "Virgin Money UK",
+    "price": "2.79",
+    "day_change": "-0.71%",
+    "year_change": "-12.26%",
+    "date": "Dec/04",
+    "market_cap": "2.48B"
+  },
+  {
+    "symbol": "NHF:AU",
+    "name": "NIB Holdings",
+    "price": "7.66",
+    "day_change": "-0.65%",
+    "year_change": "8.19%",
+    "date": "Dec/04",
+    "market_cap": "2.46B"
+  },
+  {
+    "symbol": "BOQ:AU",
+    "name": "Bank Of Queensland",
+    "price": "5.64",
+    "day_change": "1.44%",
+    "year_change": "-21.45%",
+    "date": "Dec/04",
+    "market_cap": "2.45B"
+  },
+  {
+    "symbol": "NWL:AU",
+    "name": "Netwealth",
+    "price": "14.83",
+    "day_change": "0.82%",
+    "year_change": "3.63%",
+    "date": "Dec/04",
+    "market_cap": "2.4B"
+  },
+  {
+    "symbol": "MTS:AU",
+    "name": "Metcash",
+    "price": "3.59",
+    "day_change": "1.13%",
+    "year_change": "-15.33%",
+    "date": "Dec/04",
+    "market_cap": "2.33B"
+  },
+  {
+    "symbol": "BRG:AU",
+    "name": "Breville",
+    "price": "24.19",
+    "day_change": "1.72%",
+    "year_change": "19.75%",
+    "date": "Dec/04",
+    "market_cap": "2.3B"
+  },
+  {
+    "symbol": "APE:AU",
+    "name": "Eagers Automotive",
+    "price": "13.37",
+    "day_change": "0.83%",
+    "year_change": "8.70%",
+    "date": "Dec/04",
+    "market_cap": "2.28B"
+  },
+  {
+    "symbol": "FBU:AU",
+    "name": "Fletcher Building",
+    "price": "4.38",
+    "day_change": "1.15%",
+    "year_change": "-5.81%",
+    "date": "Dec/04",
+    "market_cap": "2.26B"
+  },
+  {
+    "symbol": "BPT:AU",
+    "name": "Beach Energy",
+    "price": "1.47",
+    "day_change": "-1.35%",
+    "year_change": "-22.69%",
+    "date": "Dec/04",
+    "market_cap": "2.24B"
+  },
+  {
+    "symbol": "SUL:AU",
+    "name": "Super Retail",
+    "price": "14.44",
+    "day_change": "2.34%",
+    "year_change": "30.09%",
+    "date": "Dec/04",
+    "market_cap": "2.16B"
+  },
+  {
+    "symbol": "NEC:AU",
+    "name": "Nine Entertainment",
+    "price": "1.94",
+    "day_change": "2.11%",
+    "year_change": "-13.00%",
+    "date": "Dec/04",
+    "market_cap": "2.09B"
+  },
+  {
+    "symbol": "RWC:AU",
+    "name": "Reliance Worldwide Corporation",
+    "price": "3.96",
+    "day_change": "2.06%",
+    "year_change": "29.41%",
+    "date": "Dec/04",
+    "market_cap": "2.08B"
+  },
+  {
+    "symbol": "AUB:AU",
+    "name": "AUB",
+    "price": "28.86",
+    "day_change": "1.16%",
+    "year_change": "24.45%",
+    "date": "Dec/04",
+    "market_cap": "2.08B"
+  },
+  {
+    "symbol": "CNU:AU",
+    "name": "Chorus",
+    "price": "7.18",
+    "day_change": "0.42%",
+    "year_change": "-5.28%",
+    "date": "Dec/04",
+    "market_cap": "2.07B"
+  },
+  {
+    "symbol": "NIC:AU",
+    "name": "Nickel Mines",
+    "price": "0.71",
+    "day_change": "0%",
+    "year_change": "-29.35%",
+    "date": "Dec/04",
+    "market_cap": "2.02B"
+  },
+  {
+    "symbol": "ILU:AU",
+    "name": "Iluka Resources",
+    "price": "7.04",
+    "day_change": "3.07%",
+    "year_change": "-32.63%",
+    "date": "Dec/04",
+    "market_cap": "1.99B"
+  },
+  {
+    "symbol": "ANN:AU",
+    "name": "Ansell",
+    "price": "23.65",
+    "day_change": "0.47%",
+    "year_change": "-16.64%",
+    "date": "Dec/04",
+    "market_cap": "1.96B"
+  },
+  {
+    "symbol": "A2M:AU",
+    "name": "a2 Milk Company",
+    "price": "3.97",
+    "day_change": "2.32%",
+    "year_change": "-36.88%",
+    "date": "Dec/04",
+    "market_cap": "1.9B"
+  },
+  {
+    "symbol": "CSR:AU",
+    "name": "CSR",
+    "price": "5.93",
+    "day_change": "0.68%",
+    "year_change": "19.80%",
+    "date": "Dec/04",
+    "market_cap": "1.88B"
+  },
+  {
+    "symbol": "PRU:AU",
+    "name": "Perseus Mining",
+    "price": "2.03",
+    "day_change": "4.64%",
+    "year_change": "-10.96%",
+    "date": "Dec/04",
+    "market_cap": "1.85B"
+  },
+  {
+    "symbol": "DOW:AU",
+    "name": "Downer",
+    "price": "4.14",
+    "day_change": "-0.48%",
+    "year_change": "-15.51%",
+    "date": "Dec/04",
+    "market_cap": "1.84B"
+  },
+  {
+    "symbol": "CTD:AU",
+    "name": "Corporate Travel Management",
+    "price": "18.73",
+    "day_change": "2.91%",
+    "year_change": "22.34%",
+    "date": "Dec/04",
+    "market_cap": "1.82B"
+  },
+  {
+    "symbol": "HUB:AU",
+    "name": "Hub24",
+    "price": "33.69",
+    "day_change": "1.78%",
+    "year_change": "21.98%",
+    "date": "Dec/04",
+    "market_cap": "1.81B"
+  },
+  {
+    "symbol": "SGM:AU",
+    "name": "Sims Metal Management",
+    "price": "13.84",
+    "day_change": "1.62%",
+    "year_change": "2.14%",
+    "date": "Dec/04",
+    "market_cap": "1.77B"
+  },
+  {
+    "symbol": "ARB:AU",
+    "name": "ARB",
+    "price": "32.34",
+    "day_change": "2.31%",
+    "year_change": "9.59%",
+    "date": "Dec/04",
+    "market_cap": "1.76B"
+  },
+  {
+    "symbol": "DRR:AU",
+    "name": "Deterra Royalties",
+    "price": "5.00",
+    "day_change": "0.20%",
+    "year_change": "5.04%",
+    "date": "Dec/04",
+    "market_cap": "1.75B"
+  },
+  {
+    "symbol": "AMP:AU",
+    "name": "AMP",
+    "price": "0.95",
+    "day_change": "1.61%",
+    "year_change": "-29.21%",
+    "date": "Dec/04",
+    "market_cap": "1.72B"
+  },
+  {
+    "symbol": "WEB:AU",
+    "name": "Webjet",
+    "price": "6.67",
+    "day_change": "1.37%",
+    "year_change": "4.22%",
+    "date": "Dec/04",
+    "market_cap": "1.71B"
+  },
+  {
+    "symbol": "PPT:AU",
+    "name": "Perpetual",
+    "price": "22.75",
+    "day_change": "0.93%",
+    "year_change": "-9.25%",
+    "date": "Dec/04",
+    "market_cap": "1.69B"
+  },
+  {
+    "symbol": "SCP:AU",
+    "name": "Region Re",
+    "price": "2.10",
+    "day_change": "1.45%",
+    "year_change": "-22.51%",
+    "date": "Dec/04",
+    "market_cap": "1.62B"
+  },
+  {
+    "symbol": "BWP:AU",
+    "name": "BWP",
+    "price": "3.47",
+    "day_change": "0.58%",
+    "year_change": "-15.16%",
+    "date": "Dec/04",
+    "market_cap": "1.48B"
+  },
+  {
+    "symbol": "AWC:AU",
+    "name": "Alumina",
+    "price": "0.75",
+    "day_change": "4.93%",
+    "year_change": "-53.14%",
+    "date": "Dec/04",
+    "market_cap": "1.43B"
+  },
+  {
+    "symbol": "DHG:AU",
+    "name": "Domain Holdings Australia",
+    "price": "3.42",
+    "day_change": "0%",
+    "year_change": "8.92%",
+    "date": "Dec/04",
+    "market_cap": "1.43B"
+  },
+  {
+    "symbol": "GOR:AU",
+    "name": "Gold Road Resources",
+    "price": "1.98",
+    "day_change": "2.86%",
+    "year_change": "11.58%",
+    "date": "Dec/04",
+    "market_cap": "1.41B"
+  },
+  {
+    "symbol": "RMS:AU",
+    "name": "Ramelius Resources",
+    "price": "1.75",
+    "day_change": "2.04%",
+    "year_change": "71.57%",
+    "date": "Dec/04",
+    "market_cap": "1.32B"
+  },
+  {
+    "symbol": "PNI:AU",
+    "name": "Pinnacle Investment Management",
+    "price": "9.12",
+    "day_change": "2.24%",
+    "year_change": "-2.67%",
+    "date": "Dec/04",
+    "market_cap": "1.23B"
+  },
+  {
+    "symbol": "BAP:AU",
+    "name": "Burson Auto Parts",
+    "price": "5.44",
+    "day_change": "1.87%",
+    "year_change": "-20.82%",
+    "date": "Dec/04",
+    "market_cap": "1.23B"
+  },
+  {
+    "symbol": "NUF:AU",
+    "name": "Nufarm",
+    "price": "4.74",
+    "day_change": "1.50%",
+    "year_change": "-21.65%",
+    "date": "Dec/04",
+    "market_cap": "1.2B"
+  },
+  {
+    "symbol": "SLK:AU",
+    "name": "Kelsian",
+    "price": "6.63",
+    "day_change": "2.00%",
+    "year_change": "22.32%",
+    "date": "Dec/04",
+    "market_cap": "1.18B"
+  },
+  {
+    "symbol": "GOZ:AU",
+    "name": "Growthpoint",
+    "price": "2.35",
+    "day_change": "0.86%",
+    "year_change": "-27.02%",
+    "date": "Dec/04",
+    "market_cap": "1.18B"
+  },
+  {
+    "symbol": "LIC:AU",
+    "name": "Lifestyle Communities",
+    "price": "16.66",
+    "day_change": "-0.89%",
+    "year_change": "-12.82%",
+    "date": "Dec/04",
+    "market_cap": "1.15B"
+  },
+  {
+    "symbol": "INA:AU",
+    "name": "Ingenia Communities",
+    "price": "4.15",
+    "day_change": "2.22%",
+    "year_change": "-5.68%",
+    "date": "Dec/04",
+    "market_cap": "1.12B"
+  },
+  {
+    "symbol": "GNC:AU",
+    "name": "GrainCorp",
+    "price": "7.56",
+    "day_change": "0.93%",
+    "year_change": "-4.30%",
+    "date": "Dec/04",
+    "market_cap": "1.12B"
+  },
+  {
+    "symbol": "TAH:AU",
+    "name": "Tabcorp",
+    "price": "0.71",
+    "day_change": "2.16%",
+    "year_change": "-33.33%",
+    "date": "Dec/04",
+    "market_cap": "1.08B"
+  },
+  {
+    "symbol": "IPH:AU",
+    "name": "IPH",
+    "price": "6.75",
+    "day_change": "-0.44%",
+    "year_change": "-21.51%",
+    "date": "Dec/04",
+    "market_cap": "1.07B"
+  },
+  {
+    "symbol": "MP1:AU",
+    "name": "Megaport",
+    "price": "10.00",
+    "day_change": "4.28%",
+    "year_change": "42.45%",
+    "date": "Dec/04",
+    "market_cap": "1.06B"
+  },
+  {
+    "symbol": "GUD:AU",
+    "name": "GUD",
+    "price": "11.24",
+    "day_change": "1.54%",
+    "year_change": "37.07%",
+    "date": "Dec/04",
+    "market_cap": "1.05B"
+  },
+  {
+    "symbol": "SGR:AU",
+    "name": "Star Entertainment",
+    "price": "0.55",
+    "day_change": "6.86%",
+    "year_change": "-79.04%",
+    "date": "Dec/04",
+    "market_cap": "1.04B"
+  },
+  {
+    "symbol": "CDA:AU",
+    "name": "Codan",
+    "price": "8.55",
+    "day_change": "-3.93%",
+    "year_change": "112.69%",
+    "date": "Dec/04",
+    "market_cap": "1.03B"
+  },
+  {
+    "symbol": "RRL:AU",
+    "name": "Regis Resources",
+    "price": "1.98",
+    "day_change": "1.80%",
+    "year_change": "-1.98%",
+    "date": "Dec/04",
+    "market_cap": "992.28M"
+  },
+  {
+    "symbol": "CGC:AU",
+    "name": "Costa",
+    "price": "3.11",
+    "day_change": "0%",
+    "year_change": "20.08%",
+    "date": "Dec/04",
+    "market_cap": "958.89M"
+  },
+  {
+    "symbol": "IFL:AU",
+    "name": "IOOF",
+    "price": "2.17",
+    "day_change": "3.33%",
+    "year_change": "-34.24%",
+    "date": "Dec/04",
+    "market_cap": "956.93M"
+  },
+  {
+    "symbol": "ING:AU",
+    "name": "Inghams",
+    "price": "3.87",
+    "day_change": "0.26%",
+    "year_change": "31.19%",
+    "date": "Dec/04",
+    "market_cap": "954.35M"
+  },
+  {
+    "symbol": "IRE:AU",
+    "name": "IRESS",
+    "price": "7.71",
+    "day_change": "4.76%",
+    "year_change": "-20.60%",
+    "date": "Dec/04",
+    "market_cap": "938.42M"
+  },
+  {
+    "symbol": "MFG:AU",
+    "name": "Magellan Financial",
+    "price": "7.67",
+    "day_change": "2.27%",
+    "year_change": "-19.35%",
+    "date": "Dec/04",
+    "market_cap": "923.3M"
+  },
+  {
+    "symbol": "ABC:AU",
+    "name": "Adelaide Brighton",
+    "price": "2.12",
+    "day_change": "3.92%",
+    "year_change": "18.77%",
+    "date": "Dec/04",
+    "market_cap": "918.96M"
+  },
+  {
+    "symbol": "MND:AU",
+    "name": "Monadelphous",
+    "price": "14.24",
+    "day_change": "1.06%",
+    "year_change": "5.33%",
+    "date": "Dec/04",
+    "market_cap": "915.64M"
+  },
+  {
+    "symbol": "SKC:AU",
+    "name": "SKYCITY",
+    "price": "1.75",
+    "day_change": "-0.57%",
+    "year_change": "-31.91%",
+    "date": "Dec/04",
+    "market_cap": "880.24M"
+  },
+  {
+    "symbol": "CKF:AU",
+    "name": "Collins Foods",
+    "price": "11.13",
+    "day_change": "-0.98%",
+    "year_change": "38.78%",
+    "date": "Dec/04",
+    "market_cap": "867.61M"
+  },
+  {
+    "symbol": "NAN:AU",
+    "name": "Nanosonics",
+    "price": "4.17",
+    "day_change": "1.46%",
+    "year_change": "-14.72%",
+    "date": "Dec/04",
+    "market_cap": "837.23M"
+  },
+  {
+    "symbol": "CNI:AU",
+    "name": "Centuria Capital",
+    "price": "1.48",
+    "day_change": "2.79%",
+    "year_change": "-19.18%",
+    "date": "Dec/04",
+    "market_cap": "787.87M"
+  },
+  {
+    "symbol": "ELD:AU",
+    "name": "Elders",
+    "price": "7.35",
+    "day_change": "1.38%",
+    "year_change": "-25.91%",
+    "date": "Dec/04",
+    "market_cap": "763.07M"
+  },
+  {
+    "symbol": "CMW:AU",
+    "name": "Cromwell",
+    "price": "0.44",
+    "day_change": "1.16%",
+    "year_change": "-39.58%",
+    "date": "Dec/04",
+    "market_cap": "755.84M"
+  },
+  {
+    "symbol": "SLR:AU",
+    "name": "Silver Lake Resources",
+    "price": "1.15",
+    "day_change": "3.60%",
+    "year_change": "-14.18%",
+    "date": "Dec/04",
+    "market_cap": "713.21M"
+  },
+  {
+    "symbol": "PNV:AU",
+    "name": "Polynovo",
+    "price": "1.40",
+    "day_change": "0.72%",
+    "year_change": "-27.65%",
+    "date": "Dec/04",
+    "market_cap": "641.14M"
+  },
+  {
+    "symbol": "BGA:AU",
+    "name": "Bega Cheese",
+    "price": "3.10",
+    "day_change": "0.98%",
+    "year_change": "-13.17%",
+    "date": "Dec/04",
+    "market_cap": "626.33M"
+  },
+  {
+    "symbol": "CCP:AU",
+    "name": "Credit",
+    "price": "13.06",
+    "day_change": "-0.23%",
+    "year_change": "-35.70%",
+    "date": "Dec/04",
+    "market_cap": "589.8M"
+  },
+  {
+    "symbol": "CUV:AU",
+    "name": "Clinuvel Pharmaceuticals",
+    "price": "17.58",
+    "day_change": "-1.07%",
+    "year_change": "-12.97%",
+    "date": "Dec/04",
+    "market_cap": "576.32M"
+  },
+  {
+    "symbol": "HLS:AU",
+    "name": "Healius",
+    "price": "1.52",
+    "day_change": "-4.40%",
+    "year_change": "-49.50%",
+    "date": "Dec/04",
+    "market_cap": "574.6M"
+  },
+  {
+    "symbol": "LNK:AU",
+    "name": "Link Administration Holdings",
+    "price": "1.44",
+    "day_change": "4.74%",
+    "year_change": "-59.00%",
+    "date": "Dec/04",
+    "market_cap": "489.75M"
+  },
+  {
+    "symbol": "PTM:AU",
+    "name": "Platinum Asset Management",
+    "price": "1.23",
+    "day_change": "1.24%",
+    "year_change": "-31.18%",
+    "date": "Dec/04",
+    "market_cap": "462.24M"
+  },
+  {
+    "symbol": "CHN:AU",
+    "name": "Chalice Gold Mines",
+    "price": "1.56",
+    "day_change": "11.47%",
+    "year_change": "-73.28%",
+    "date": "Dec/04",
+    "market_cap": "401.3M"
+  },
+  {
+    "symbol": "KGN:AU",
+    "name": "Kogan.com",
+    "price": "5.36",
+    "day_change": "4.69%",
+    "year_change": "60.48%",
+    "date": "Dec/04",
+    "market_cap": "366.42M"
+  },
+  {
+    "symbol": "TYR:AU",
+    "name": "Tyro Payments",
+    "price": "1.05",
+    "day_change": "0.48%",
+    "year_change": "-34.07%",
+    "date": "Dec/04",
+    "market_cap": "362.1M"
+  },
+  {
+    "symbol": "1811094D:AU",
+    "name": "Avita Medical",
+    "price": "3.39",
+    "day_change": "5.61%",
+    "year_change": "71.21%",
+    "date": "Dec/04",
+    "market_cap": "287.34M"
+  },
+  {
+    "symbol": "OBL:AU",
+    "name": "Omni Bridgeway",
+    "price": "1.44",
+    "day_change": "-2.04%",
+    "year_change": "-62.98%",
+    "date": "Dec/04",
+    "market_cap": "267.97M"
+  },
+  {
+    "symbol": "Z1P:AU",
+    "name": "Zip",
+    "price": "0.42",
+    "day_change": "1.22%",
+    "year_change": "-44.30%",
+    "date": "Dec/04",
+    "market_cap": "245.67M"
+  },
+  {
+    "symbol": "EML:AU",
+    "name": "EML Payments",
+    "price": "0.87",
+    "day_change": "1.76%",
+    "year_change": "28.15%",
+    "date": "Dec/04",
+    "market_cap": "214.99M"
+  },
+  {
+    "symbol": "MSB:AU",
+    "name": "Mesoblast",
+    "price": "0.38",
+    "day_change": "-2.41%",
+    "year_change": "-65.25%",
+    "date": "Nov/30",
+    "market_cap": "207.3M"
+  },
+  {
+    "symbol": "PBH:AU",
+    "name": "Pointsbet Holdings",
+    "price": "0.75",
+    "day_change": "-3.23%",
+    "year_change": "-61.34%",
+    "date": "Dec/04",
+    "market_cap": "157.37M"
+  },
+  {
+    "symbol": "RBL:AU",
+    "name": "Redbubble",
+    "price": "0.43",
+    "day_change": "-6.59%",
+    "year_change": "-29.75%",
+    "date": "Dec/04",
+    "market_cap": "79.72M"
+  },
+  {
+    "symbol": "APX:AU",
+    "name": "Appen",
+    "price": "0.60",
+    "day_change": "1.69%",
+    "year_change": "-80.33%",
+    "date": "Dec/04",
+    "market_cap": "62.47M"
+  },
+  {
+    "symbol": "XAUUSD:CUR",
+    "name": null,
+    "price": "2029.57",
+    "day_change": "-2.00%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "S 1:COM",
+    "name": null,
+    "price": "1305.25",
+    "day_change": "-1.49%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "W 1:COM",
+    "name": null,
+    "price": "583.00",
+    "day_change": "1.04%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XAL1:COM",
+    "name": null,
+    "price": "135.00",
+    "day_change": "1.12%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JBP:COM",
+    "name": null,
+    "price": "3897.00",
+    "day_change": "-0.51%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SCO:COM",
+    "name": null,
+    "price": "133.00",
+    "day_change": "0.38%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NGEU:COM",
+    "name": null,
+    "price": "40.10",
+    "day_change": "-7.80%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "LB1:COM",
+    "name": null,
+    "price": "524.58",
+    "day_change": "-0.17%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "USDKRW:CUR",
+    "name": null,
+    "price": "1309.73",
+    "day_change": "1.26%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SPX:IND",
+    "name": null,
+    "price": "4566.82",
+    "day_change": "-0.61%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AAPL:US",
+    "name": null,
+    "price": "189.48",
+    "day_change": "-0.92%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "TSLA:US",
+    "name": null,
+    "price": "235.57",
+    "day_change": "-1.37%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MSFT:US",
+    "name": null,
+    "price": "369.12",
+    "day_change": "-1.44%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AMZN:US",
+    "name": null,
+    "price": "144.86",
+    "day_change": "-1.48%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "FB:US",
+    "name": null,
+    "price": "320.02",
+    "day_change": "-1.48%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NVDA:US",
+    "name": null,
+    "price": "455.56",
+    "day_change": "-2.59%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "V:US",
+    "name": null,
+    "price": "254.38",
+    "day_change": "-0.81%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JPM:US",
+    "name": null,
+    "price": "158.01",
+    "day_change": "0.75%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "INTC:US",
+    "name": null,
+    "price": "42.37",
+    "day_change": "-3.13%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JNJ:US",
+    "name": null,
+    "price": "159.01",
+    "day_change": "0.40%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "PG:US",
+    "name": null,
+    "price": "151.90",
+    "day_change": "-0.50%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XOM:US",
+    "name": null,
+    "price": "102.58",
+    "day_change": "-0.40%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MMM:US",
+    "name": null,
+    "price": "103.51",
+    "day_change": "3.67%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "GS:US",
+    "name": null,
+    "price": "349.50",
+    "day_change": "0.31%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "CAT:US",
+    "name": null,
+    "price": "254.78",
+    "day_change": "-0.77%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ETHUSD:CUR",
+    "name": null,
+    "price": "2229.58",
+    "day_change": "2.08%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "DOTUSD:CUR",
+    "name": null,
+    "price": "5.58",
+    "day_change": "0.77%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AVXUSD:CUR",
+    "name": null,
+    "price": "22.04",
+    "day_change": "0.41%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MTCUSD:CUR",
+    "name": null,
+    "price": "0.80",
+    "day_change": "-1.22%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ATMUSD:CUR",
+    "name": null,
+    "price": "9.60",
+    "day_change": "0.66%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "UNIUSD:CUR",
+    "name": null,
+    "price": "6.04",
+    "day_change": "-0.40%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ALGUSD:CUR",
+    "name": null,
+    "price": "0.15",
+    "day_change": "0.07%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "BCHUSD:CUR",
+    "name": null,
+    "price": "248.17",
+    "day_change": "8.07%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  }
+]

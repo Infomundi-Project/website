@@ -1,0 +1,196 @@
+{
+  "name": {
+    "common": "Anguilla",
+    "official": "Anguilla",
+    "nativeName": {
+      "eng": {
+        "official": "Anguilla",
+        "common": "Anguilla"
+      }
+    }
+  },
+  "tld": [
+    ".ai"
+  ],
+  "cca2": "AI",
+  "ccn3": "660",
+  "cca3": "AIA",
+  "independent": false,
+  "status": "officially-assigned",
+  "unMember": false,
+  "currencies": {
+    "XCD": {
+      "name": "Eastern Caribbean dollar",
+      "symbol": "$"
+    }
+  },
+  "idd": {
+    "root": "+1",
+    "suffixes": [
+      "264"
+    ]
+  },
+  "capital": [
+    "The Valley"
+  ],
+  "altSpellings": [
+    "AI"
+  ],
+  "region": "Americas",
+  "subregion": "Caribbean",
+  "languages": {
+    "eng": "English"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u0623\u0646\u063a\u0648\u064a\u0644\u0627",
+      "common": "\u0623\u0646\u063a\u0648\u064a\u0644\u0627"
+    },
+    "bre": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "ces": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "cym": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "deu": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "est": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "fin": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "fra": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "hrv": {
+      "official": "Anguilla",
+      "common": "Angvila"
+    },
+    "hun": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "ita": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "jpn": {
+      "official": "\u30a2\u30f3\u30b0\u30a3\u30e9",
+      "common": "\u30a2\u30f3\u30ae\u30e9"
+    },
+    "kor": {
+      "official": "\uc575\uadc8\ub77c",
+      "common": "\uc575\uadc8\ub77c"
+    },
+    "nld": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "per": {
+      "official": "\u0622\u0646\u06af\u0648\u06cc\u0644\u0627",
+      "common": "\u0622\u0646\u06af\u0648\u06cc\u0644\u0627"
+    },
+    "pol": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "por": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "rus": {
+      "official": "\u0410\u043d\u0433\u0438\u043b\u044c\u044f",
+      "common": "\u0410\u043d\u0433\u0438\u043b\u044c\u044f"
+    },
+    "slk": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "spa": {
+      "official": "Anguila",
+      "common": "Anguilla"
+    },
+    "srp": {
+      "official": "\u0410\u043d\u0433\u0432\u0438\u043b\u0430",
+      "common": "\u0410\u043d\u0433\u0432\u0438\u043b\u0430"
+    },
+    "swe": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "tur": {
+      "official": "Anguilla",
+      "common": "Anguilla"
+    },
+    "urd": {
+      "official": "\u0627\u06cc\u0646\u06af\u0648\u06cc\u0644\u0627",
+      "common": "\u0627\u06cc\u0646\u06af\u0648\u06cc\u0644\u0627"
+    },
+    "zho": {
+      "official": "\u5b89\u572d\u62c9",
+      "common": "\u5b89\u572d\u62c9"
+    }
+  },
+  "latlng": [
+    18.25,
+    -63.16666666
+  ],
+  "landlocked": false,
+  "area": 91.0,
+  "demonyms": {
+    "eng": {
+      "f": "Anguillian",
+      "m": "Anguillian"
+    },
+    "fra": {
+      "f": "Anguillane",
+      "m": "Anguillan"
+    }
+  },
+  "flag": "\ud83c\udde6\ud83c\uddee",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/3KgLnEyN7amdno2p9",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/2177161"
+  },
+  "population": 13452,
+  "fifa": "AIA",
+  "car": {
+    "signs": [
+      "GB"
+    ],
+    "side": "left"
+  },
+  "timezones": [
+    "UTC-04:00"
+  ],
+  "continents": [
+    "North America"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/ai.png",
+    "svg": "https://flagcdn.com/ai.svg"
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/ai.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/ai.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      18.22,
+      -63.05
+    ]
+  }
+}

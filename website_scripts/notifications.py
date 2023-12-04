@@ -22,15 +22,19 @@ def post_webhook(data: dict) -> bool:
                     ],
                     'footer': {'text': 'footer_text'}
                 },
-                'message': 'optional message to send along with the embed'
+                'message': 'any message'
             }
     """
 
-    # Create a dictionary with the message content
-    payload = {
-        'content': data['message'],
-        "embeds": [data['embed']]
-    }
+    try:
+        payload = {
+            'content': data['message'],
+            'embeds': [data['embed']]
+        }
+    except Exception:
+        payload = {
+            'content': data['message']
+        }
 
     # Make the HTTP POST request to the Discord webhook URL
     response = post_request(config.WEBHOOK_URL, json=payload)

@@ -1,0 +1,209 @@
+{
+  "name": {
+    "common": "Tuvalu",
+    "official": "Tuvalu",
+    "nativeName": {
+      "eng": {
+        "official": "Tuvalu",
+        "common": "Tuvalu"
+      },
+      "tvl": {
+        "official": "Tuvalu",
+        "common": "Tuvalu"
+      }
+    }
+  },
+  "tld": [
+    ".tv"
+  ],
+  "cca2": "TV",
+  "ccn3": "798",
+  "cca3": "TUV",
+  "cioc": "TUV",
+  "independent": true,
+  "status": "officially-assigned",
+  "unMember": true,
+  "currencies": {
+    "AUD": {
+      "name": "Australian dollar",
+      "symbol": "$"
+    },
+    "TVD": {
+      "name": "Tuvaluan dollar",
+      "symbol": "$"
+    }
+  },
+  "idd": {
+    "root": "+6",
+    "suffixes": [
+      "88"
+    ]
+  },
+  "capital": [
+    "Funafuti"
+  ],
+  "altSpellings": [
+    "TV"
+  ],
+  "region": "Oceania",
+  "subregion": "Polynesia",
+  "languages": {
+    "eng": "English",
+    "tvl": "Tuvaluan"
+  },
+  "translations": {
+    "ara": {
+      "official": "\u062a\u0648\u0641\u0627\u0644\u0648",
+      "common": "\u062a\u0648\u0641\u0627\u0644\u0648"
+    },
+    "bre": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "ces": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "cym": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "deu": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "est": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "fin": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "fra": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "hrv": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "hun": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "ita": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "jpn": {
+      "official": "\u30c4\u30d0\u30eb",
+      "common": "\u30c4\u30d0\u30eb"
+    },
+    "kor": {
+      "official": "\ud22c\ubc1c\ub8e8",
+      "common": "\ud22c\ubc1c\ub8e8"
+    },
+    "nld": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "per": {
+      "official": "\u062a\u0648\u0648\u0627\u0644\u0648",
+      "common": "\u062a\u0648\u0648\u0627\u0644\u0648"
+    },
+    "pol": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "por": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "rus": {
+      "official": "\u0422\u0443\u0432\u0430\u043b\u0443",
+      "common": "\u0422\u0443\u0432\u0430\u043b\u0443"
+    },
+    "slk": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "spa": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "srp": {
+      "official": "\u0422\u0443\u0432\u0430\u043b\u0443",
+      "common": "\u0422\u0443\u0432\u0430\u043b\u0443"
+    },
+    "swe": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "tur": {
+      "official": "Tuvalu",
+      "common": "Tuvalu"
+    },
+    "urd": {
+      "official": "\u062a\u0648\u0648\u0627\u0644\u0648",
+      "common": "\u062a\u0648\u0648\u0627\u0644\u0648"
+    },
+    "zho": {
+      "official": "\u56fe\u74e6\u5362",
+      "common": "\u56fe\u74e6\u5362"
+    }
+  },
+  "latlng": [
+    -8.0,
+    178.0
+  ],
+  "landlocked": false,
+  "area": 26.0,
+  "demonyms": {
+    "eng": {
+      "f": "Tuvaluan",
+      "m": "Tuvaluan"
+    },
+    "fra": {
+      "f": "Tuvaluane",
+      "m": "Tuvaluan"
+    }
+  },
+  "flag": "\ud83c\uddf9\ud83c\uddfb",
+  "maps": {
+    "googleMaps": "https://goo.gl/maps/LbuUxtkgm1dfN1Pn6",
+    "openStreetMaps": "https://www.openstreetmap.org/relation/2177266"
+  },
+  "population": 11792,
+  "gini": {
+    "2010": 39.1
+  },
+  "car": {
+    "signs": [
+      "TUV"
+    ],
+    "side": "left"
+  },
+  "timezones": [
+    "UTC+12:00"
+  ],
+  "continents": [
+    "Oceania"
+  ],
+  "flags": {
+    "png": "https://flagcdn.com/w320/tv.png",
+    "svg": "https://flagcdn.com/tv.svg",
+    "alt": "The flag of Tuvalu has a light blue field with the flag of the United Kingdom \u2014 the Union Jack \u2014 in the canton. A representation of the country's nine Islands using nine five-pointed yellow stars is situated in the fly half of the field."
+  },
+  "coatOfArms": {
+    "png": "https://mainfacts.com/media/images/coats_of_arms/tv.png",
+    "svg": "https://mainfacts.com/media/images/coats_of_arms/tv.svg"
+  },
+  "startOfWeek": "monday",
+  "capitalInfo": {
+    "latlng": [
+      -8.52,
+      179.22
+    ]
+  }
+}
