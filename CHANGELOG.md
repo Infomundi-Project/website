@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.1.8 | 2023/12/05 | Added login system. Fixed news ticker. No other changes or security updates. | @behindsecurity |
 | 1.1.7 | 2023/12/04 | Added nation statistics, click removal for inactive news, and main stock display. Removed unnecessary scripts. Fixed error page and UTC-related bug. Improved captcha security. No other changes. | @behindsecurity |
 | 1.1.6 | 2023/11/24 | Implemented sleek accordion design with mobile detection, enriched news item details on comments page, streamlined navbar, and improved CLS. Changed source color, added placeholder text, revamped logo font, and relocated search bar. Removed outdated images, and fixed card height for mobile users. | @behindsecurity |
 | 1.1.5 | 2023/11/20 | Added error pages, code refactoring, email support, and comment blacklist. Changed theme color to black. Fixed return button on comments page. No removals or security changes.  | @behindsecurity |
@@ -13,6 +14,21 @@
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.1.8: 2023/12/05
+
+### Enhancements (1)
+- IME01: Introducing: Login System!
+
+### Changed (0)
+
+### Removed (0)
+
+### Fixed (1)
+- IMF01: Fixed news ticker
+
+### Security (0)
 
 
 ## 1.1.7: 2023/12/04

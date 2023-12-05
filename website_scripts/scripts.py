@@ -12,15 +12,20 @@ from hashlib import md5
 
 from . import config, json_util, immutable, notifications
 
-def scrape_stock_data(country_name):
-    country_name = country_name.lower()
 
+def scrape_stock_data(country_name: str) -> list:
+    """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
+    country_name = country_name.lower().replace(' ', '-')
+
+    # Checks if cache is old enough (24 hours)
     filepath = f'{config.STOCK_PATH}/{country_name}_stock'
     if not is_cache_old(f'{filepath}.json'):
         stock_data = json_util.read_json(filepath)
         return stock_data
 
     url = f"https://tradingeconomics.com/{country_name}/stock-market"
+    
+    # We need to use a fake header, otherwise we'll get blocked (code 403)
     headers = {
         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
     }
@@ -96,7 +101,6 @@ def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
 
 def get_nation_data(cca2: str) -> dict:
     """Takes cca2 (country code) and returns a bunch of data about the specified country"""
-    
     config_filepath = f'{config.COUNTRIES_DATA_PATH}/{cca2}'
     
     # 720 hours = 30 days (just for convencience)
@@ -161,6 +165,42 @@ def get_nation_data(cca2: str) -> dict:
         return {}
 
 
+def send_verification_token(email: str) -> bool:
+    try:
+        tokens = json_util.read_json(config.TOKENS_PATH)
+    except Exception:
+        tokens = {}
+    
+    if email in tokens:
+        return False
+
+    verification_token = md5(urandom(20)).hexdigest()
+    
+    tokens[email] = verification_token
+    json_util.write_json(tokens, config.TOKENS_PATH)
+
+    message = f'Hello and welcome to Infomundi. To verify your account, please click here: https://infomundi.net/auth/verify?token={verification_token}'
+    subject = 'Infomundi - Activate Your Account'
+    notifications.send_email(email, subject, message)
+    return True
+
+
+def check_verification_token(token: str) -> bool:
+    tokens = json_util.read_json(config.TOKENS_PATH)
+    for email in tokens:
+        if tokens[email] == token:
+            delete_token = email
+            break
+    else:
+        delete_token = ''
+
+    if delete_token:
+        del tokens[delete_token]
+        json_util.write_json(tokens, config.TOKENS_PATH)
+
+    return bool(delete_token)
+
+
 def parse_utc_offset(offset_str: str):
     """Takes an offset string (i.e UTC-04:00) and converts to a valid format in order to get the current time on the time zone."""
     sign = offset_str[3]
@@ -173,7 +213,6 @@ def parse_utc_offset(offset_str: str):
         total_minutes = -total_minutes
 
     utc_offset = timedelta(minutes=total_minutes)
-
     return utc_offset
 
 
@@ -189,7 +228,6 @@ def get_current_time_in_timezone(cca2: str) -> str:
         current_time = current_utc_time
     
     formatted_time = current_time.strftime("%Y/%m/%d - %H:%M:%S")
-    
     return formatted_time
 
 
@@ -273,17 +311,11 @@ def detect_mobile(request) -> bool:
 
 
 def encode_base64(input_string: str) -> str:
-    encoded_bytes = b64encode(input_string.encode('utf-8'))
-    encoded_string = encoded_bytes.decode('utf-8')
-    
-    return encoded_string
+    return b64encode(input_string.encode('utf-8')).decode('utf-8')
 
 
 def decode_base64(encoded_string: str) -> str:
-    decoded_bytes = b64decode(encoded_string)
-    decoded_string = decoded_bytes.decode('utf-8')
-    
-    return decoded_string
+    return b64decode(encoded_string).decode('utf-8')
 
 
 def get_session_info(request: str) -> dict:
@@ -291,7 +323,7 @@ def get_session_info(request: str) -> dict:
     try:
         country = decode_base64(request.cookies.get('last_visited_country', ''))
         news = decode_base64(request.cookies.get('last_visited_news', ''))
-    except:
+    except Exception:
         return {}
     
     if not is_valid_url(country) or not is_valid_url(news):
@@ -371,10 +403,13 @@ def check_in_badlist(data: dict):
 
 
 def get_link_preview(url: str) -> dict:
-    """Takes a URL as input and returns a dictionary with link preview information."""
+    """Takes an URL as input and returns a dictionary with link preview information such as image, description and title."""
     try:
+        headers = {
+            'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+        }
         # Send a GET request to the URL
-        response = get_request(url, timeout=5)
+        response = get_request(url, timeout=5, headers=headers)
         response.raise_for_status()
         response.encoding = 'utf-8'
 
@@ -407,7 +442,7 @@ def create_comment_id() -> str:
 
 
 def string_similarity(s1: str, s2: str) -> float:
-    """Takes two strings and returns the percentage similarity between them."""
+    """Takes two strings and returns the similarity percentage between them."""
     matcher = SequenceMatcher(None, s1, s2)
     return matcher.ratio() * 100 # Returns percentage of similarity
 
@@ -416,10 +451,12 @@ def add_click(news_id: str):
     """Takes the news id and add a click to the specified news in the telemetry file."""
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     current_timestamp = datetime.now()
+    timestamp_string = current_timestamp.isoformat()
     
     if news_id not in telemetry:
         telemetry[news_id] = {}
         telemetry[news_id]['clicks'] = 0
+        telemetry[news_id]['timestamp'] = timestamp_string
 
     to_remove = []
     for item in list(telemetry.keys()):
@@ -435,8 +472,6 @@ def add_click(news_id: str):
         del telemetry[key]
     
     telemetry[news_id]['clicks'] += 1
-
-    timestamp_string = current_timestamp.isoformat()
     telemetry[news_id]['timestamp'] = timestamp_string
     
     json_util.write_json(telemetry, config.TELEMETRY_PATH)

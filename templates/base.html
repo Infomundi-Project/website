@@ -51,6 +51,14 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if not user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+            </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('views.about') }}">About</a>
             </li>
@@ -61,21 +69,20 @@
               <a class="nav-link disabled" href="#">Donate</a>
             </li>
             {% if user.is_authenticated %}
-            <li class="nav-item active">
-              <p class="nav-link mb-0">Welcome, {{ user.id }}!</p>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.admin') }}">Admin Panel</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.password_change') }}">Change Password</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.register') }}">Register Admin User (dangerous)</a>
-            </li>
-            <li class="nav-item">
-              <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
-            </li>
+              <li class="nav-item active">
+                <p class="nav-link mb-0">Welcome, {{ user.username }}!</p>
+              </li>
+              {% if user.role == 'admin' %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('auth.admin') }}">Admin Panel</a>
+                </li>
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('auth.password_change') }}">Change Password</a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
+              </li>
             {% endif %}
           </ul>
           {% if page == 'Comments' %}
@@ -88,10 +95,12 @@
     </nav>
     {% endif %}
     {% if page == 'News' %}
-    <div id="news-ticker">
-      <div id="news-content">
+    <div class="hwrap">
+      <div class="hmove">
         {% for stock_info in stock_data %}
-        <span>{{ stock_info['symbol'] }} {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %}<i class="fa-solid fa-caret-down"></i>{% else %}<i class="fa-solid fa-caret-up"></i>{% endif %} ({{ stock_info['market_cap'] }}) <i class="fa-solid fa-coins"></i></span>
+
+        <div class="hitem" {% if '-' in stock_info['day_change'] %} style="color: red" {% else %} style="color: green" {% endif %}>{{ stock_info['symbol'] }} {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %}<i class="fa-solid fa-caret-down"></i>{% else %}<i class="fa-solid fa-caret-up"></i>{% endif %} ({{ stock_info['market_cap'] }} <i class="fa-solid fa-coins"></i>)</div>
+        
         {% endfor %}
       </div>
     </div>

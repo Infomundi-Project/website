@@ -1,25 +1,38 @@
-from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash
+from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, session
 from flask_login import login_user, login_required, current_user, logout_user, UserMixin
 from flask_httpauth import HTTPBasicAuth
 from passlib.hash import argon2
+from functools import wraps
 from os import listdir
 
-from website_scripts import config, json_util, scripts
+from website_scripts import config, json_util, scripts, immutable
 
 auth_views = Blueprint('auth', __name__)
 auth = HTTPBasicAuth()
 
 
 class User(UserMixin):
-    pass
+    def __init__(self, email, username, password, role):
+        self.email = email
+        self.username = username
+        self.password = password
+        self.role = role
+
+    def get_id(self):
+        return self.email
 
 
 def load_users():
     try:
-        users = json_util.read_json(config.USERS_PATH)
-    except FileNotFoundError:
-        users = {}
-    
+        users_data = json_util.read_json(config.USERS_PATH)
+    except Exception:
+        return {}
+
+    users = {}
+    for email, data in users_data.items():
+        user = User(email=email, username=data['username'], password=data['password'], role=data['role'])
+        users[email] = user
+
     return users
 
 
@@ -27,35 +40,59 @@ def save_users(users):
     json_util.write_json(users, config.USERS_PATH)
 
 
-def verify_password(username, password):
+def verify_password(email: str, password: str):
     users = load_users()
-    if username in users:
-        if argon2.verify(password, users[username]):
-            user = User()
-            user.id = username
+    if email in users:
+        user = users[email]
+        if argon2.verify(password, user.password):
             login_user(user)
-            flash('Logged in.')
+            
+            flash(f'Welcome back, {current_user.username}.')
             return True
 
     return False
 
 
+# Decorator to check if the user is an admin
+def admin_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('You are not authenticated.', 'error')
+            return redirect(url_for('views.home'))
+
+        # Check if the user is an admin based on the role
+        if current_user.role == 'admin':
+            return func(*args, **kwargs)
+        
+        flash('This page is restricted.', 'error')
+        return redirect(url_for('views.home'))
+
+    return decorated_function
+
+
 @auth_views.route('/admin')
-@login_required
+@admin_required
 def admin():
     return render_template('admin.html', user=current_user)
 
 
 @auth_views.route('/register', methods=['GET', 'POST'])
-@login_required
 def register():
     if request.method == 'POST':
+        token = request.form['cf-turnstile-response']
+        if not scripts.valid_captcha(token):
+            flash('Invalid captcha. Are you a robot?', 'error')
+            return redirect(url_for('auth.register'))
+        
+        email = request.form['email']
         username = request.form['username'].replace(' ', '')
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
         for character in immutable.SPECIAL_CHARACTERS:
             username.replace(character, '')
+            email.replace(character, '')
 
         users = load_users()
         if password != confirm_password:
@@ -64,8 +101,10 @@ def register():
             message = 'Your username should not have more than 30 characters'
         elif not scripts.is_strong_password(password):
             message = 'Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 12 characters minimum and a maximum of 50 characters.'
-        elif username in users:
-            message = 'Username already exists.'
+        elif email in users:
+            message = 'Email already exists.'
+        elif any(user.username == username for user in users.values()):
+            message = 'Username already exists'
         else:
             message = ''
         
@@ -73,13 +112,48 @@ def register():
             flash(message, 'error')
             return redirect(url_for('auth.register'))
 
-        # Hash the password using Argon2 before saving
-        users[username] = argon2.hash(password)
-        save_users(users)
-        
-        flash('Account created!')
+        send_token = scripts.send_verification_token(email)
+        if not send_token:
+            flash('Something went wrong. Please, try again later.')
+
+        session['email'] = email
+        session['username'] = username
+        session['password'] = password
+
+        flash(f'We sent an email to {email}. Please, activate your account by clicking on the provided link.')
     
     return render_template('register.html', user=current_user)
+
+
+@auth_views.route('/verify', methods=['GET'])
+def verify():
+    token = request.args.get('token', '')
+    if not token:
+        return redirect(url_for('views.home'))
+    
+    if not scripts.check_verification_token(token):
+        flash('Invalid token.', 'error')
+        return redirect(url_for('views.home'))
+
+    email = session.get('email', '')
+    username = session.get('username', '')
+    password = session.get('password', '')
+    
+    if not email or not username or not password:
+        flash('Something went wrong. If you have cookies disabled, please enable it in order to verify your account.', 'error')
+        return redirect(url_for('views.home'))
+    
+    users = load_users()
+
+    hashed_password = argon2.hash(password)
+    new_user = User(email=email, username=username, password=hashed_password, role='user')
+    
+    users[email] = new_user
+
+    json_util.write_json({user.email: {'username': user.username, 'password': user.password, 'role': user.role} for user in users.values()}, config.USERS_PATH)
+
+    flash(f'Your account has been verified. Now, you can log in.')
+    return redirect(url_for('auth.login'))
 
 
 @auth_views.route('/login', methods=['GET', 'POST'])
@@ -87,22 +161,24 @@ def login():
     if request.method == 'POST':
         token = request.form['cf-turnstile-response']
         if not scripts.valid_captcha(token):
-            flash('Invalid captcha', 'error')
+            flash('Invalid captcha. Are you a robot?', 'error')
             return redirect(url_for('auth.register'))
 
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
 
-        if verify_password(username, password):
+        if verify_password(email, password):
+            if current_user.role != 'admin':
+                return redirect(url_for('views.home'))
             return redirect(url_for('auth.admin'))
 
-        flash('Invalid credentials', 'error')
+        flash('Invalid credentials!', 'error')
     
     return render_template('login.html', user=current_user)
 
 
 @auth_views.route('/get_feed_info', methods=['POST'])
-@login_required
+@admin_required
 def get_feed_info():
     country_name = request.form['country_name'].lower()
     
@@ -166,7 +242,7 @@ def get_feed_info():
 
 
 @auth_views.route('/disable_comments', methods=['POST'])
-@login_required
+@admin_required
 def disable_comments():
     comments = json_util.read_json(config.COMMENTS_PATH)
     comments['enabled'] = False if request.form['flexSwitchCheckChecked'] == "false" else True
@@ -176,15 +252,15 @@ def disable_comments():
 
 
 @auth_views.route('/get_comments_status', methods=['GET'])
-@login_required
+@admin_required
 def get_comments_status():
     comments = json_util.read_json(config.COMMENTS_PATH)
+
     return jsonify({'enabled': comments['enabled']})
 
 
-
 @auth_views.route('/add_news', methods=['POST'])
-@login_required
+@admin_required
 def add_news():
     country = request.form['country'].lower()
     category = request.form['category']
@@ -218,34 +294,40 @@ def add_news():
 @login_required
 def password_change():
     if request.method == 'POST':
-        old_password = request.form['old_password']
-        new_password = request.form['new_password']
-        confirm_password = request.form['confirm_password']
+        try:
+            old_password = request.form['old_password']
+            
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+        except Exception:
+            flash('Something went wrong.')
+            return redirect(url_for('auth.password_change'))
         
         users = load_users()
-        if not argon2.verify(old_password, users[current_user.id]):
+        if not argon2.verify(old_password, users[current_user.email]['password']):
             message = 'Incorrect old password.'
         elif new_password != confirm_password:
             message = 'New password and confirmation do not match.'
         elif not scripts.is_strong_password(new_password):
-            message = 'Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 10 characters minimum and a maximum of 50 characters.'
+            message = 'Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 12 characters minimum and a maximum of 50 characters.'
         else:
             message = ''
 
-        if not message:
+        if message:
             flash(message, 'error')
             return redirect(url_for('auth.password_change'))
         
         # Update the user's password
-        users[current_user.id] = argon2.hash(new_password)
+        users[current_user.email]['password'] = argon2.hash(new_password)
         save_users(users)
         
         flash('Password changed successfully.')
+    
     return render_template('password_change.html', user=current_user)
 
 
 @auth_views.route('/search_comments', methods=['POST'])
-@login_required
+@admin_required
 def search_comments():
     search_text = request.form['search_text']
     
@@ -259,13 +341,14 @@ def search_comments():
     
     if not search_results:
         flash('No comments found with the provided filter.', 'error')
+        
         return redirect(url_for('auth.admin'))
     
     return render_template('admin.html', search_text=search_text, search_results=search_results, user=current_user)
 
 
 @auth_views.route('/delete_comment', methods=['POST'])
-@login_required
+@admin_required
 def delete_comment():
     comment_id = request.form['comment_id']
     
@@ -277,6 +360,7 @@ def delete_comment():
                 new_comments = comments
                 new_comments[news_id].remove(comment)
                 json_util.write_json(new_comments, config.COMMENTS_PATH)
+                
                 flash('Comment deleted successfully.')
                 return redirect(url_for('auth.admin'))
     
@@ -288,5 +372,6 @@ def delete_comment():
 @login_required
 def logout():
     logout_user()
+
     flash('Logged out.')
     return redirect(url_for('views.home'))

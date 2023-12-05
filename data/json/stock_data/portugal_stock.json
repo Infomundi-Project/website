@@ -1,0 +1,461 @@
+[
+  {
+    "symbol": "EDP:PL",
+    "name": "EDP",
+    "price": "4.44",
+    "day_change": "0.82%",
+    "year_change": "-3.52%",
+    "date": "Dec/04",
+    "market_cap": "20.01B"
+  },
+  {
+    "symbol": "EDPR:PL",
+    "name": "EDP Renovaveis",
+    "price": "16.60",
+    "day_change": "-0.72%",
+    "year_change": "-25.01%",
+    "date": "Dec/04",
+    "market_cap": "18.34B"
+  },
+  {
+    "symbol": "JMT:PL",
+    "name": "Jeronimo Martins",
+    "price": "23.52",
+    "day_change": "3.70%",
+    "year_change": "12.97%",
+    "date": "Dec/04",
+    "market_cap": "16.17B"
+  },
+  {
+    "symbol": "GALP:PL",
+    "name": "Galp",
+    "price": "13.51",
+    "day_change": "-2.45%",
+    "year_change": "11.84%",
+    "date": "Dec/04",
+    "market_cap": "11.09B"
+  },
+  {
+    "symbol": "BCP:PL",
+    "name": "BCP",
+    "price": "0.33",
+    "day_change": "4.42%",
+    "year_change": "123.73%",
+    "date": "Dec/04",
+    "market_cap": "5.37B"
+  },
+  {
+    "symbol": "PTI:PL",
+    "name": "Navigator",
+    "price": "3.72",
+    "day_change": "-0.27%",
+    "year_change": "-4.66%",
+    "date": "Dec/04",
+    "market_cap": "2.88B"
+  },
+  {
+    "symbol": "SON:PL",
+    "name": "Sonae",
+    "price": "0.92",
+    "day_change": "0.22%",
+    "year_change": "-2.48%",
+    "date": "Dec/04",
+    "market_cap": "1.93B"
+  },
+  {
+    "symbol": "NOS:PL",
+    "name": "NOS",
+    "price": "3.38",
+    "day_change": "-0.41%",
+    "year_change": "-11.84%",
+    "date": "Dec/04",
+    "market_cap": "1.88B"
+  },
+  {
+    "symbol": "RENE:PL",
+    "name": "REN",
+    "price": "2.46",
+    "day_change": "0.41%",
+    "year_change": "-4.47%",
+    "date": "Dec/04",
+    "market_cap": "1.76B"
+  },
+  {
+    "symbol": "COR:PL",
+    "name": "Corticeira Amorim",
+    "price": "9.08",
+    "day_change": "-0.55%",
+    "year_change": "2.02%",
+    "date": "Dec/04",
+    "market_cap": "1.31B"
+  },
+  {
+    "symbol": "EGL:PL",
+    "name": "Mota Engil",
+    "price": "3.88",
+    "day_change": "-1.02%",
+    "year_change": "217.10%",
+    "date": "Dec/04",
+    "market_cap": "1.27B"
+  },
+  {
+    "symbol": "SEM:PL",
+    "name": "Semapa",
+    "price": "13.48",
+    "day_change": "0%",
+    "year_change": "-3.58%",
+    "date": "Dec/04",
+    "market_cap": "1.17B"
+  },
+  {
+    "symbol": "ALTR:PL",
+    "name": "Altri",
+    "price": "4.78",
+    "day_change": "-0.95%",
+    "year_change": "-11.06%",
+    "date": "Dec/04",
+    "market_cap": "1.06B"
+  },
+  {
+    "symbol": "CTT:PL",
+    "name": "CTT",
+    "price": "3.55",
+    "day_change": "-1.25%",
+    "year_change": "7.91%",
+    "date": "Dec/04",
+    "market_cap": "538.54M"
+  },
+  {
+    "symbol": "IBS:PL",
+    "name": "Ibersol",
+    "price": "6.74",
+    "day_change": "-0.59%",
+    "year_change": "18.25%",
+    "date": "Dec/04",
+    "market_cap": "305.62M"
+  },
+  {
+    "symbol": "RAM:PL",
+    "name": "Ramada Investimentos E Industria",
+    "price": "6.42",
+    "day_change": "-0.31%",
+    "year_change": "-5.59%",
+    "date": "Dec/04",
+    "market_cap": "178.44M"
+  },
+  {
+    "symbol": "NBA:PL",
+    "name": "Novabase",
+    "price": "5.30",
+    "day_change": "0%",
+    "year_change": "30.86%",
+    "date": "Dec/04",
+    "market_cap": "148.09M"
+  },
+  {
+    "symbol": "PHR:PL",
+    "name": "Pharol",
+    "price": "0.04",
+    "day_change": "-0.96%",
+    "year_change": "-23.99%",
+    "date": "Dec/04",
+    "market_cap": "37.06M"
+  },
+  {
+    "symbol": "XAUUSD:CUR",
+    "name": null,
+    "price": "2029.61",
+    "day_change": "-1.99%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "S 1:COM",
+    "name": null,
+    "price": "1306.50",
+    "day_change": "-1.40%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "W 1:COM",
+    "name": null,
+    "price": "583.00",
+    "day_change": "1.04%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XAL1:COM",
+    "name": null,
+    "price": "135.00",
+    "day_change": "1.12%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JBP:COM",
+    "name": null,
+    "price": "3897.00",
+    "day_change": "-0.51%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SCO:COM",
+    "name": null,
+    "price": "133.00",
+    "day_change": "0.38%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NGEU:COM",
+    "name": null,
+    "price": "40.10",
+    "day_change": "-7.80%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "LB1:COM",
+    "name": null,
+    "price": "524.10",
+    "day_change": "-0.27%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "USDKRW:CUR",
+    "name": null,
+    "price": "1309.71",
+    "day_change": "1.26%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SPX:IND",
+    "name": null,
+    "price": "4564.58",
+    "day_change": "-0.65%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AAPL:US",
+    "name": null,
+    "price": "189.43",
+    "day_change": "-0.95%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "TSLA:US",
+    "name": null,
+    "price": "235.58",
+    "day_change": "-1.36%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MSFT:US",
+    "name": null,
+    "price": "369.14",
+    "day_change": "-1.43%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AMZN:US",
+    "name": null,
+    "price": "144.84",
+    "day_change": "-1.49%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "FB:US",
+    "name": null,
+    "price": "320.02",
+    "day_change": "-1.48%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NVDA:US",
+    "name": null,
+    "price": "455.10",
+    "day_change": "-2.68%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "V:US",
+    "name": null,
+    "price": "254.44",
+    "day_change": "-0.78%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JPM:US",
+    "name": null,
+    "price": "157.99",
+    "day_change": "0.73%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "INTC:US",
+    "name": null,
+    "price": "42.35",
+    "day_change": "-3.18%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JNJ:US",
+    "name": null,
+    "price": "158.88",
+    "day_change": "0.32%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "PG:US",
+    "name": null,
+    "price": "152.06",
+    "day_change": "-0.39%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XOM:US",
+    "name": null,
+    "price": "102.43",
+    "day_change": "-0.54%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MMM:US",
+    "name": null,
+    "price": "103.44",
+    "day_change": "3.60%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "GS:US",
+    "name": null,
+    "price": "349.39",
+    "day_change": "0.28%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "CAT:US",
+    "name": null,
+    "price": "254.75",
+    "day_change": "-0.78%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ETHUSD:CUR",
+    "name": null,
+    "price": "2227.08",
+    "day_change": "1.96%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "DOTUSD:CUR",
+    "name": null,
+    "price": "5.57",
+    "day_change": "0.61%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AVXUSD:CUR",
+    "name": null,
+    "price": "22.21",
+    "day_change": "1.18%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MTCUSD:CUR",
+    "name": null,
+    "price": "0.80",
+    "day_change": "-1.45%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ATMUSD:CUR",
+    "name": null,
+    "price": "9.61",
+    "day_change": "0.69%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "UNIUSD:CUR",
+    "name": null,
+    "price": "6.01",
+    "day_change": "-0.91%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ALGUSD:CUR",
+    "name": null,
+    "price": "0.15",
+    "day_change": "0.48%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "BCHUSD:CUR",
+    "name": null,
+    "price": "249.16",
+    "day_change": "8.50%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  }
+]

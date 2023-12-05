@@ -1,4 +1,17 @@
 {
-  "valory": "$argon2id$v=19$m=65536,t=3,p=4$0hqDsHaulZKyVqoVojTGOA$cJsAWBFTlh9NokdhhbdQyX8sbYuSPJn4OeC4KZ+XzA0",
-  "barros": "$argon2id$v=19$m=65536,t=3,p=4$1Np7by1lTOmds1YqRUjJuQ$ljnPfcEzTqW/LEzX6w5iDdkYjZ6xEI/o7f8uu8YdkMs"
+  "valory@infomundi.net": {
+    "username": "valory",
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$0hqDsHaulZKyVqoVojTGOA$cJsAWBFTlh9NokdhhbdQyX8sbYuSPJn4OeC4KZ+XzA0",
+    "role": "admin"
+  },
+  "barros@infomundi.net": {
+    "username": "barros",
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$1Np7by1lTOmds1YqRUjJuQ$ljnPfcEzTqW/LEzX6w5iDdkYjZ6xEI/o7f8uu8YdkMs",
+    "role": "admin"
+  },
+  "behind_leet@protonmail.ch": {
+    "username": "behind",
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$cg5BSCmFkNLaOyfE+N97rw$OmI/QqA2gC5V+Xm646pc16bb8icpKkuPxbpp612aa5w",
+    "role": "user"
+  }
 }

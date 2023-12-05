@@ -50,8 +50,7 @@ def send_email(recipient_email: str, subject: str, body: str) -> bool:
     """Takes the recipient email, the subject and the body of the email and sends it. Returns bool."""
     
     # Email credentials
-    sender_email = "forms@infomundi.net"
-    sender_password = config.EMAIL_PASSWORD
+    sender_email = "contact@infomundi.net"
 
     # Server information
     smtp_server = config.SMTP_SERVER
@@ -67,7 +66,7 @@ def send_email(recipient_email: str, subject: str, body: str) -> bool:
     # Establish a connection to the server
     with SMTP_SSL(smtp_server, smtp_port) as server:
         # Log in to the email account
-        server.login(sender_email, sender_password)
+        server.login(sender_email, config.EMAIL_PASSWORD)
 
         # Send the email
         server.sendmail(sender_email, recipient_email, message.as_string())

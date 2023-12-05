@@ -5,7 +5,7 @@ from os import urandom
 
 from website_scripts.scripts import get_session_info
 from website_scripts.config import APP_SECRET_KEY
-from auth import auth_views, User
+from auth import auth_views, load_users
 from views import views
 
 app = Flask(__name__)
@@ -24,9 +24,8 @@ login_manager.login_view = 'auth.login'
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    user = User()
-    user.id = user_id
-    return user
+    users = load_users()
+    return users.get(user_id)
 
 @app.errorhandler(404)
 @app.errorhandler(500)

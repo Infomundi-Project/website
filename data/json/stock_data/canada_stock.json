@@ -1,0 +1,2243 @@
+[
+  {
+    "symbol": "RY:CN",
+    "name": "Royal Bank of Canada",
+    "price": "123.80",
+    "day_change": "0.45%",
+    "year_change": "-6.41%",
+    "date": "Dec/05",
+    "market_cap": "128.31B"
+  },
+  {
+    "symbol": "TD:CN",
+    "name": "TD Bank",
+    "price": "82.24",
+    "day_change": "-0.01%",
+    "year_change": "-8.79%",
+    "date": "Dec/05",
+    "market_cap": "110.05B"
+  },
+  {
+    "symbol": "SHOP:CN",
+    "name": "Shopify",
+    "price": "101.81",
+    "day_change": "3.68%",
+    "year_change": "91.34%",
+    "date": "Dec/05",
+    "market_cap": "92.39B"
+  },
+  {
+    "symbol": "CNR:CN",
+    "name": "Canadian National Railway",
+    "price": "159.39",
+    "day_change": "-0.76%",
+    "year_change": "-6.95%",
+    "date": "Dec/05",
+    "market_cap": "76.47B"
+  },
+  {
+    "symbol": "ENB:CN",
+    "name": "Enbridge",
+    "price": "47.75",
+    "day_change": "0.29%",
+    "year_change": "-11.23%",
+    "date": "Dec/05",
+    "market_cap": "75.15B"
+  },
+  {
+    "symbol": "CNQ:CN",
+    "name": "Canadian Natural Resources",
+    "price": "90.55",
+    "day_change": "0.25%",
+    "year_change": "19.79%",
+    "date": "Dec/05",
+    "market_cap": "72.87B"
+  },
+  {
+    "symbol": "CP:CN",
+    "name": "Canadian Pacific Railway",
+    "price": "100.34",
+    "day_change": "-0.67%",
+    "year_change": "-6.87%",
+    "date": "Dec/05",
+    "market_cap": "69.22B"
+  },
+  {
+    "symbol": "TRI:CN",
+    "name": "Thomson Reuters",
+    "price": "194.19",
+    "day_change": "1.45%",
+    "year_change": "24.58%",
+    "date": "Dec/05",
+    "market_cap": "64.74B"
+  },
+  {
+    "symbol": "BMO:CN",
+    "name": "Bank Of Montreal",
+    "price": "115.99",
+    "day_change": "1.54%",
+    "year_change": "-10.16%",
+    "date": "Dec/05",
+    "market_cap": "61.34B"
+  },
+  {
+    "symbol": "BAMA:CN",
+    "name": "Brookfield",
+    "price": "48.63",
+    "day_change": "-0.63%",
+    "year_change": "1.66%",
+    "date": "Dec/05",
+    "market_cap": "59.23B"
+  },
+  {
+    "symbol": "BNS:CN",
+    "name": "Bank of Nova Scotia",
+    "price": "60.32",
+    "day_change": "-0.71%",
+    "year_change": "-11.74%",
+    "date": "Dec/05",
+    "market_cap": "53.37B"
+  },
+  {
+    "symbol": "CSU:CN",
+    "name": "Constellation Software",
+    "price": "3,279.60",
+    "day_change": "1.35%",
+    "year_change": "57.11%",
+    "date": "Dec/05",
+    "market_cap": "50.74B"
+  },
+  {
+    "symbol": "SU:CN",
+    "name": "Suncor Energy",
+    "price": "43.64",
+    "day_change": "-1.09%",
+    "year_change": "6.62%",
+    "date": "Dec/05",
+    "market_cap": "42.17B"
+  },
+  {
+    "symbol": "TRP:CN",
+    "name": "TransCanada",
+    "price": "51.64",
+    "day_change": "0.04%",
+    "year_change": "-11.10%",
+    "date": "Dec/05",
+    "market_cap": "39.68B"
+  },
+  {
+    "symbol": "CM:CN",
+    "name": "CIBC",
+    "price": "57.35",
+    "day_change": "0.72%",
+    "year_change": "-2.58%",
+    "date": "Dec/05",
+    "market_cap": "38.96B"
+  },
+  {
+    "symbol": "BCE:CN",
+    "name": "BCE",
+    "price": "55.04",
+    "day_change": "0.13%",
+    "year_change": "-13.64%",
+    "date": "Dec/05",
+    "market_cap": "37.13B"
+  },
+  {
+    "symbol": "WCN:CN",
+    "name": "Waste Connections",
+    "price": "190.55",
+    "day_change": "0.62%",
+    "year_change": "-0.96%",
+    "date": "Dec/05",
+    "market_cap": "36.03B"
+  },
+  {
+    "symbol": "MFC:CN",
+    "name": "Manulife Financial",
+    "price": "26.97",
+    "day_change": "0.41%",
+    "year_change": "11.63%",
+    "date": "Dec/05",
+    "market_cap": "35.96B"
+  },
+  {
+    "symbol": "CVE:CN",
+    "name": "Cenovus Energy",
+    "price": "22.87",
+    "day_change": "-1.61%",
+    "year_change": "-9.05%",
+    "date": "Dec/05",
+    "market_cap": "32.41B"
+  },
+  {
+    "symbol": "IMO:CN",
+    "name": "Imperial Oil",
+    "price": "77.57",
+    "day_change": "0.58%",
+    "year_change": "9.78%",
+    "date": "Dec/05",
+    "market_cap": "31.66B"
+  },
+  {
+    "symbol": "ABX:CN",
+    "name": "Barrick Gold",
+    "price": "23.80",
+    "day_change": "0.34%",
+    "year_change": "5.92%",
+    "date": "Dec/05",
+    "market_cap": "30.37B"
+  },
+  {
+    "symbol": "SLF:CN",
+    "name": "Sun Life Financial",
+    "price": "69.73",
+    "day_change": "0.52%",
+    "year_change": "10.23%",
+    "date": "Dec/05",
+    "market_cap": "29.95B"
+  },
+  {
+    "symbol": "GWO:CN",
+    "name": "Great West Lifeco",
+    "price": "43.85",
+    "day_change": "0.78%",
+    "year_change": "40.45%",
+    "date": "Dec/05",
+    "market_cap": "29.92B"
+  },
+  {
+    "symbol": "IFC:CN",
+    "name": "Intact",
+    "price": "212.95",
+    "day_change": "0.88%",
+    "year_change": "5.75%",
+    "date": "Dec/05",
+    "market_cap": "27.97B"
+  },
+  {
+    "symbol": "L:CN",
+    "name": "Loblaw Companies",
+    "price": "121.34",
+    "day_change": "2.16%",
+    "year_change": "0.24%",
+    "date": "Dec/05",
+    "market_cap": "27.93B"
+  },
+  {
+    "symbol": "T:CN",
+    "name": "Telus",
+    "price": "25.35",
+    "day_change": "0.48%",
+    "year_change": "-11.49%",
+    "date": "Dec/05",
+    "market_cap": "27.2B"
+  },
+  {
+    "symbol": "NTR:CN",
+    "name": "Nutrien",
+    "price": "73.22",
+    "day_change": "-0.37%",
+    "year_change": "-30.70%",
+    "date": "Dec/05",
+    "market_cap": "26.51B"
+  },
+  {
+    "symbol": "AEM:CN",
+    "name": "Agnico Eagle Mines",
+    "price": "72.34",
+    "day_change": "-0.12%",
+    "year_change": "4.37%",
+    "date": "Dec/05",
+    "market_cap": "26.22B"
+  },
+  {
+    "symbol": "NA:CN",
+    "name": "National Bank Of Canada",
+    "price": "94.02",
+    "day_change": "0.59%",
+    "year_change": "-0.53%",
+    "date": "Dec/05",
+    "market_cap": "23.44B"
+  },
+  {
+    "symbol": "QSR:CN",
+    "name": "Restaurant Brands International",
+    "price": "99.16",
+    "day_change": "0.05%",
+    "year_change": "10.95%",
+    "date": "Dec/05",
+    "market_cap": "22.94B"
+  },
+  {
+    "symbol": "WPM:CN",
+    "name": "Wheaton Precious Metals",
+    "price": "65.74",
+    "day_change": "-0.71%",
+    "year_change": "24.06%",
+    "date": "Dec/05",
+    "market_cap": "21.98B"
+  },
+  {
+    "symbol": "FFHU:CN",
+    "name": "Fairfax Financial",
+    "price": "1,212.80",
+    "day_change": "-0.45%",
+    "year_change": "56.98%",
+    "date": "Dec/05",
+    "market_cap": "21.97B"
+  },
+  {
+    "symbol": "GIBA:CN",
+    "name": "CGI",
+    "price": "140.53",
+    "day_change": "0.38%",
+    "year_change": "21.12%",
+    "date": "Dec/05",
+    "market_cap": "21.43B"
+  },
+  {
+    "symbol": "DOL:CN",
+    "name": "Dollarama",
+    "price": "100.24",
+    "day_change": "0.59%",
+    "year_change": "25.55%",
+    "date": "Dec/05",
+    "market_cap": "20.9B"
+  },
+  {
+    "symbol": "FNV:CN",
+    "name": "Franco-Nevada",
+    "price": "146.56",
+    "day_change": "-1.67%",
+    "year_change": "-24.32%",
+    "date": "Dec/05",
+    "market_cap": "20.89B"
+  },
+  {
+    "symbol": "FTS:CN",
+    "name": "Fortis",
+    "price": "55.02",
+    "day_change": "-0.04%",
+    "year_change": "0.82%",
+    "date": "Dec/05",
+    "market_cap": "19.91B"
+  },
+  {
+    "symbol": "CCO:CN",
+    "name": "Cameco",
+    "price": "62.25",
+    "day_change": "-0.02%",
+    "year_change": "109.53%",
+    "date": "Dec/05",
+    "market_cap": "19.86B"
+  },
+  {
+    "symbol": "TCKB:CN",
+    "name": "Teck Resources",
+    "price": "49.82",
+    "day_change": "-1.76%",
+    "year_change": "-0.68%",
+    "date": "Dec/05",
+    "market_cap": "18.9B"
+  },
+  {
+    "symbol": "RCIB:CN",
+    "name": "Rogers Communications",
+    "price": "61.23",
+    "day_change": "0.89%",
+    "year_change": "-6.87%",
+    "date": "Dec/05",
+    "market_cap": "18.87B"
+  },
+  {
+    "symbol": "PPL:CN",
+    "name": "Pembina Pipeline",
+    "price": "45.77",
+    "day_change": "-0.26%",
+    "year_change": "-2.39%",
+    "date": "Dec/05",
+    "market_cap": "18.56B"
+  },
+  {
+    "symbol": "WSP:CN",
+    "name": "WSP Global",
+    "price": "188.06",
+    "day_change": "0.79%",
+    "year_change": "17.41%",
+    "date": "Dec/05",
+    "market_cap": "17.28B"
+  },
+  {
+    "symbol": "H:CN",
+    "name": "Hydro One",
+    "price": "38.05",
+    "day_change": "-0.08%",
+    "year_change": "1.41%",
+    "date": "Dec/05",
+    "market_cap": "16.89B"
+  },
+  {
+    "symbol": "POW:CN",
+    "name": "Power Of Canada",
+    "price": "37.98",
+    "day_change": "0.16%",
+    "year_change": "12.90%",
+    "date": "Dec/05",
+    "market_cap": "16.86B"
+  },
+  {
+    "symbol": "TOU:CN",
+    "name": "Tourmaline Oil",
+    "price": "64.24",
+    "day_change": "-0.85%",
+    "year_change": "-13.69%",
+    "date": "Dec/05",
+    "market_cap": "16.76B"
+  },
+  {
+    "symbol": "WN:CN",
+    "name": "George Weston",
+    "price": "160.30",
+    "day_change": "1.40%",
+    "year_change": "-5.98%",
+    "date": "Dec/05",
+    "market_cap": "16.07B"
+  },
+  {
+    "symbol": "MG:CN",
+    "name": "Magna International",
+    "price": "74.96",
+    "day_change": "-1.19%",
+    "year_change": "-6.48%",
+    "date": "Dec/05",
+    "market_cap": "16.02B"
+  },
+  {
+    "symbol": "BIP-U:CN",
+    "name": "Brookfield Infrastructure Partners LP",
+    "price": "36.78",
+    "day_change": "-0.57%",
+    "year_change": "-20.54%",
+    "date": "Dec/05",
+    "market_cap": "12.65B"
+  },
+  {
+    "symbol": "ECA:CN",
+    "name": "Ovintiv",
+    "price": "58.06",
+    "day_change": "-1.81%",
+    "year_change": "-15.87%",
+    "date": "Dec/05",
+    "market_cap": "11.87B"
+  },
+  {
+    "symbol": "RBA:CN",
+    "name": "Ritchie Bros Auctioneers",
+    "price": "86.34",
+    "day_change": "-1.45%",
+    "year_change": "15.80%",
+    "date": "Dec/05",
+    "market_cap": "11.78B"
+  },
+  {
+    "symbol": "MRU:CN",
+    "name": "Metro",
+    "price": "68.80",
+    "day_change": "0.39%",
+    "year_change": "-11.27%",
+    "date": "Dec/05",
+    "market_cap": "11.63B"
+  },
+  {
+    "symbol": "OTC:CN",
+    "name": "Open Text",
+    "price": "54.86",
+    "day_change": "0.61%",
+    "year_change": "44.07%",
+    "date": "Dec/05",
+    "market_cap": "10.9B"
+  },
+  {
+    "symbol": "IVN:CN",
+    "name": "Ivanhoe Mines",
+    "price": "12.02",
+    "day_change": "-2.63%",
+    "year_change": "1.05%",
+    "date": "Dec/05",
+    "market_cap": "10.9B"
+  },
+  {
+    "symbol": "TFII:CN",
+    "name": "TFI International",
+    "price": "161.31",
+    "day_change": "-2.26%",
+    "year_change": "16.90%",
+    "date": "Dec/05",
+    "market_cap": "10.31B"
+  },
+  {
+    "symbol": "EMA:CN",
+    "name": "Emera",
+    "price": "48.04",
+    "day_change": "-0.52%",
+    "year_change": "-9.31%",
+    "date": "Dec/05",
+    "market_cap": "9.79B"
+  },
+  {
+    "symbol": "ARX:CN",
+    "name": "Arc Resources",
+    "price": "21.20",
+    "day_change": "-1.03%",
+    "year_change": "18.57%",
+    "date": "Dec/05",
+    "market_cap": "9.55B"
+  },
+  {
+    "symbol": "STN:CN",
+    "name": "Stantec",
+    "price": "102.82",
+    "day_change": "1.57%",
+    "year_change": "56.02%",
+    "date": "Dec/05",
+    "market_cap": "8.54B"
+  },
+  {
+    "symbol": "SAP:CN",
+    "name": "Saputo",
+    "price": "26.33",
+    "day_change": "0.61%",
+    "year_change": "-21.05%",
+    "date": "Dec/05",
+    "market_cap": "8.23B"
+  },
+  {
+    "symbol": "BEP-U:CN",
+    "name": "Brookfield Renewable",
+    "price": "33.79",
+    "day_change": "-1.83%",
+    "year_change": "-9.99%",
+    "date": "Dec/05",
+    "market_cap": "7.34B"
+  },
+  {
+    "symbol": "K:CN",
+    "name": "Kinross",
+    "price": "7.94",
+    "day_change": "-0.19%",
+    "year_change": "40.44%",
+    "date": "Dec/05",
+    "market_cap": "7.14B"
+  },
+  {
+    "symbol": "FSV:CN",
+    "name": "FirstService",
+    "price": "218.94",
+    "day_change": "1.92%",
+    "year_change": "32.80%",
+    "date": "Dec/05",
+    "market_cap": "7.07B"
+  },
+  {
+    "symbol": "CCLB:CN",
+    "name": "CCL Industries",
+    "price": "56.04",
+    "day_change": "-1.80%",
+    "year_change": "-10.39%",
+    "date": "Dec/05",
+    "market_cap": "6.95B"
+  },
+  {
+    "symbol": "DSG:CN",
+    "name": "Descartes Systems",
+    "price": "110.92",
+    "day_change": "0.47%",
+    "year_change": "21.68%",
+    "date": "Dec/05",
+    "market_cap": "6.92B"
+  },
+  {
+    "symbol": "EMPA:CN",
+    "name": "Empire Company",
+    "price": "37.88",
+    "day_change": "1.34%",
+    "year_change": "5.75%",
+    "date": "Dec/05",
+    "market_cap": "6.91B"
+  },
+  {
+    "symbol": "TIH:CN",
+    "name": "Toromont Industries",
+    "price": "111.66",
+    "day_change": "0.16%",
+    "year_change": "9.11%",
+    "date": "Dec/05",
+    "market_cap": "6.78B"
+  },
+  {
+    "symbol": "IAG:CN",
+    "name": "Industrial Alliance",
+    "price": "90.57",
+    "day_change": "-0.52%",
+    "year_change": "19.79%",
+    "date": "Dec/05",
+    "market_cap": "6.74B"
+  },
+  {
+    "symbol": "CAE:CN",
+    "name": "CAE",
+    "price": "27.50",
+    "day_change": "-0.79%",
+    "year_change": "-2.24%",
+    "date": "Dec/05",
+    "market_cap": "6.57B"
+  },
+  {
+    "symbol": "WFT:CN",
+    "name": "West Fraser Timber",
+    "price": "106.09",
+    "day_change": "-0.71%",
+    "year_change": "3.81%",
+    "date": "Dec/05",
+    "market_cap": "6.47B"
+  },
+  {
+    "symbol": "GIL:CN",
+    "name": "Gildan Activewear",
+    "price": "50.90",
+    "day_change": "0.87%",
+    "year_change": "30.21%",
+    "date": "Dec/05",
+    "market_cap": "6.43B"
+  },
+  {
+    "symbol": "EFN:CN",
+    "name": "Element Financial",
+    "price": "22.14",
+    "day_change": "0.82%",
+    "year_change": "18.78%",
+    "date": "Dec/05",
+    "market_cap": "6.38B"
+  },
+  {
+    "symbol": "IGM:CN",
+    "name": "IGM Financial",
+    "price": "33.92",
+    "day_change": "-0.47%",
+    "year_change": "-12.44%",
+    "date": "Dec/05",
+    "market_cap": "6B"
+  },
+  {
+    "symbol": "PKI:CN",
+    "name": "Parkland Fuel",
+    "price": "44.30",
+    "day_change": "-0.85%",
+    "year_change": "56.70%",
+    "date": "Dec/05",
+    "market_cap": "5.79B"
+  },
+  {
+    "symbol": "AGI:CN",
+    "name": "Alamos Gold",
+    "price": "19.52",
+    "day_change": "-0.71%",
+    "year_change": "47.77%",
+    "date": "Dec/05",
+    "market_cap": "5.76B"
+  },
+  {
+    "symbol": "KEY:CN",
+    "name": "Keyera",
+    "price": "33.48",
+    "day_change": "-0.65%",
+    "year_change": "7.55%",
+    "date": "Dec/05",
+    "market_cap": "5.71B"
+  },
+  {
+    "symbol": "ALA:CN",
+    "name": "Altagas",
+    "price": "27.20",
+    "day_change": "-0.48%",
+    "year_change": "14.29%",
+    "date": "Dec/05",
+    "market_cap": "5.7B"
+  },
+  {
+    "symbol": "PAAS:CN",
+    "name": "Pan American Silver",
+    "price": "21.00",
+    "day_change": "-2.51%",
+    "year_change": "-6.08%",
+    "date": "Dec/05",
+    "market_cap": "5.65B"
+  },
+  {
+    "symbol": "EDV:CN",
+    "name": "Endeavour Mining",
+    "price": "30.82",
+    "day_change": "-2.13%",
+    "year_change": "9.06%",
+    "date": "Dec/05",
+    "market_cap": "5.62B"
+  },
+  {
+    "symbol": "FM:CN",
+    "name": "First Quantum Minerals",
+    "price": "10.94",
+    "day_change": "-0.82%",
+    "year_change": "-65.59%",
+    "date": "Dec/05",
+    "market_cap": "5.58B"
+  },
+  {
+    "symbol": "CTCA:CN",
+    "name": "Canadian Tire",
+    "price": "140.99",
+    "day_change": "-1.04%",
+    "year_change": "-4.94%",
+    "date": "Dec/05",
+    "market_cap": "5.46B"
+  },
+  {
+    "symbol": "SNC:CN",
+    "name": "SNC Lavalin",
+    "price": "41.58",
+    "day_change": "-0.78%",
+    "year_change": "71.58%",
+    "date": "Dec/05",
+    "market_cap": "5.46B"
+  },
+  {
+    "symbol": "LUN:CN",
+    "name": "Lundin Mining",
+    "price": "9.39",
+    "day_change": "-1.83%",
+    "year_change": "11.46%",
+    "date": "Dec/05",
+    "market_cap": "5.39B"
+  },
+  {
+    "symbol": "ONEX:CN",
+    "name": "Onex",
+    "price": "91.34",
+    "day_change": "-0.48%",
+    "year_change": "38.98%",
+    "date": "Dec/05",
+    "market_cap": "5.31B"
+  },
+  {
+    "symbol": "MEG:CN",
+    "name": "MEG Energy",
+    "price": "24.46",
+    "day_change": "-2.41%",
+    "year_change": "36.93%",
+    "date": "Dec/05",
+    "market_cap": "5.2B"
+  },
+  {
+    "symbol": "CIG:CN",
+    "name": "Colliers International Group",
+    "price": "144.01",
+    "day_change": "-0.46%",
+    "year_change": "17.28%",
+    "date": "Dec/05",
+    "market_cap": "4.87B"
+  },
+  {
+    "symbol": "AC:CN",
+    "name": "Air Canada",
+    "price": "17.60",
+    "day_change": "-0.54%",
+    "year_change": "-9.58%",
+    "date": "Dec/05",
+    "market_cap": "4.7B"
+  },
+  {
+    "symbol": "DOO:CN",
+    "name": "BRP",
+    "price": "81.61",
+    "day_change": "-1.03%",
+    "year_change": "-21.78%",
+    "date": "Dec/05",
+    "market_cap": "4.66B"
+  },
+  {
+    "symbol": "CU:CN",
+    "name": "Canadian Utilities",
+    "price": "30.48",
+    "day_change": "-1.30%",
+    "year_change": "-17.33%",
+    "date": "Dec/05",
+    "market_cap": "4.6B"
+  },
+  {
+    "symbol": "AQN:CN",
+    "name": "Algonquin Power & Utilities",
+    "price": "8.37",
+    "day_change": "-2.67%",
+    "year_change": "-15.11%",
+    "date": "Dec/05",
+    "market_cap": "4.36B"
+  },
+  {
+    "symbol": "PSK:CN",
+    "name": "PrairieSky Royalty",
+    "price": "24.75",
+    "day_change": "0.20%",
+    "year_change": "19.91%",
+    "date": "Dec/05",
+    "market_cap": "4.35B"
+  },
+  {
+    "symbol": "NPI:CN",
+    "name": "Northland Power",
+    "price": "22.17",
+    "day_change": "-1.82%",
+    "year_change": "-40.61%",
+    "date": "Dec/05",
+    "market_cap": "4.22B"
+  },
+  {
+    "symbol": "BTO:CN",
+    "name": "B2Gold",
+    "price": "4.38",
+    "day_change": "-1.02%",
+    "year_change": "-2.99%",
+    "date": "Dec/05",
+    "market_cap": "4.19B"
+  },
+  {
+    "symbol": "WCP:CN",
+    "name": "Whitecap Resources",
+    "price": "9.18",
+    "day_change": "-1.18%",
+    "year_change": "-8.38%",
+    "date": "Dec/05",
+    "market_cap": "4.14B"
+  },
+  {
+    "symbol": "BYD-U:CN",
+    "name": "Boyd Services",
+    "price": "259.94",
+    "day_change": "0.25%",
+    "year_change": "23.15%",
+    "date": "Dec/05",
+    "market_cap": "4.11B"
+  },
+  {
+    "symbol": "CPG:CN",
+    "name": "Crescent Point Energy",
+    "price": "9.29",
+    "day_change": "-1.07%",
+    "year_change": "-1.07%",
+    "date": "Dec/05",
+    "market_cap": "3.96B"
+  },
+  {
+    "symbol": "ATA:CN",
+    "name": "ATS Automation Tooling Systems",
+    "price": "53.17",
+    "day_change": "-2.33%",
+    "year_change": "22.88%",
+    "date": "Dec/05",
+    "market_cap": "3.93B"
+  },
+  {
+    "symbol": "FTT:CN",
+    "name": "Finning International",
+    "price": "34.71",
+    "day_change": "-0.76%",
+    "year_change": "6.82%",
+    "date": "Dec/05",
+    "market_cap": "3.74B"
+  },
+  {
+    "symbol": "QBRB:CN",
+    "name": "Quebecor",
+    "price": "31.01",
+    "day_change": "-0.35%",
+    "year_change": "9.69%",
+    "date": "Dec/05",
+    "market_cap": "3.53B"
+  },
+  {
+    "symbol": "NXE:CN",
+    "name": "NexGen Energy",
+    "price": "9.05",
+    "day_change": "-0.11%",
+    "year_change": "63.95%",
+    "date": "Dec/05",
+    "market_cap": "3.48B"
+  },
+  {
+    "symbol": "SJ:CN",
+    "name": "Stella-Jones",
+    "price": "78.84",
+    "day_change": "-0.04%",
+    "year_change": "62.76%",
+    "date": "Dec/05",
+    "market_cap": "3.32B"
+  },
+  {
+    "symbol": "CPX:CN",
+    "name": "Capital Power",
+    "price": "37.37",
+    "day_change": "-1.19%",
+    "year_change": "-21.87%",
+    "date": "Dec/05",
+    "market_cap": "3.28B"
+  },
+  {
+    "symbol": "CHP-U:CN",
+    "name": "Choice Properties",
+    "price": "13.40",
+    "day_change": "-0.37%",
+    "year_change": "-8.09%",
+    "date": "Dec/05",
+    "market_cap": "3.27B"
+  },
+  {
+    "symbol": "KXS:CN",
+    "name": "KINAXIS",
+    "price": "153.39",
+    "day_change": "0.42%",
+    "year_change": "0.74%",
+    "date": "Dec/05",
+    "market_cap": "3.23B"
+  },
+  {
+    "symbol": "ERF:CN",
+    "name": "Enerplus",
+    "price": "20.90",
+    "day_change": "-1.09%",
+    "year_change": "-8.57%",
+    "date": "Dec/05",
+    "market_cap": "3.21B"
+  },
+  {
+    "symbol": "CLS:CN",
+    "name": "Celestica",
+    "price": "36.65",
+    "day_change": "0.77%",
+    "year_change": "149.66%",
+    "date": "Dec/05",
+    "market_cap": "3.2B"
+  },
+  {
+    "symbol": "BBDB:CN",
+    "name": "Bombardier",
+    "price": "48.23",
+    "day_change": "-0.35%",
+    "year_change": "-5.13%",
+    "date": "Dec/05",
+    "market_cap": "3.1B"
+  },
+  {
+    "symbol": "BTE:CN",
+    "name": "Baytex Energy",
+    "price": "4.78",
+    "day_change": "-3.04%",
+    "year_change": "-22.90%",
+    "date": "Dec/05",
+    "market_cap": "3.09B"
+  },
+  {
+    "symbol": "PBH:CN",
+    "name": "Premium Brands",
+    "price": "88.31",
+    "day_change": "-0.08%",
+    "year_change": "6.24%",
+    "date": "Dec/05",
+    "market_cap": "2.91B"
+  },
+  {
+    "symbol": "LUG:CN",
+    "name": "Lundin Gold",
+    "price": "16.68",
+    "day_change": "1.83%",
+    "year_change": "23.37%",
+    "date": "Dec/05",
+    "market_cap": "2.88B"
+  },
+  {
+    "symbol": "MX:CN",
+    "name": "Methanex",
+    "price": "57.61",
+    "day_change": "-1.64%",
+    "year_change": "11.91%",
+    "date": "Dec/05",
+    "market_cap": "2.88B"
+  },
+  {
+    "symbol": "ACOX:CN",
+    "name": "ATCO",
+    "price": "37.82",
+    "day_change": "0.42%",
+    "year_change": "-11.47%",
+    "date": "Dec/05",
+    "market_cap": "2.8B"
+  },
+  {
+    "symbol": "POU:CN",
+    "name": "Paramount Resources",
+    "price": "25.50",
+    "day_change": "-1.79%",
+    "year_change": "-6.68%",
+    "date": "Dec/05",
+    "market_cap": "2.76B"
+  },
+  {
+    "symbol": "VRX:CN",
+    "name": "Bausch Health Companies",
+    "price": "9.88",
+    "day_change": "-2.47%",
+    "year_change": "-2.37%",
+    "date": "Dec/05",
+    "market_cap": "2.7B"
+  },
+  {
+    "symbol": "LNR:CN",
+    "name": "Linamar",
+    "price": "58.01",
+    "day_change": "-1.88%",
+    "year_change": "-8.63%",
+    "date": "Dec/05",
+    "market_cap": "2.65B"
+  },
+  {
+    "symbol": "OR:CN",
+    "name": "Osisko Gold Royalties",
+    "price": "19.28",
+    "day_change": "-0.26%",
+    "year_change": "14.35%",
+    "date": "Dec/05",
+    "market_cap": "2.63B"
+  },
+  {
+    "symbol": "ELD:CN",
+    "name": "Eldorado Gold",
+    "price": "17.59",
+    "day_change": "-0.54%",
+    "year_change": "60.59%",
+    "date": "Dec/05",
+    "market_cap": "2.62B"
+  },
+  {
+    "symbol": "SRU-U:CN",
+    "name": "Calloway Real Estate Investment To",
+    "price": "23.99",
+    "day_change": "0.80%",
+    "year_change": "-11.54%",
+    "date": "Dec/05",
+    "market_cap": "2.55B"
+  },
+  {
+    "symbol": "TA:CN",
+    "name": "TransAlta",
+    "price": "11.02",
+    "day_change": "-0.27%",
+    "year_change": "-12.61%",
+    "date": "Dec/05",
+    "market_cap": "2.54B"
+  },
+  {
+    "symbol": "TOY:CN",
+    "name": "Spin Master",
+    "price": "32.81",
+    "day_change": "-1.09%",
+    "year_change": "-1.23%",
+    "date": "Dec/05",
+    "market_cap": "2.53B"
+  },
+  {
+    "symbol": "LSPD:CN",
+    "name": "Lightspeed POS",
+    "price": "22.60",
+    "day_change": "0.09%",
+    "year_change": "8.19%",
+    "date": "Dec/05",
+    "market_cap": "2.52B"
+  },
+  {
+    "symbol": "BBU-U:CN",
+    "name": "Brookfield Business Partners LP",
+    "price": "22.94",
+    "day_change": "0.61%",
+    "year_change": "-4.93%",
+    "date": "Dec/05",
+    "market_cap": "2.42B"
+  },
+  {
+    "symbol": "BLX:CN",
+    "name": "Boralex",
+    "price": "31.04",
+    "day_change": "-2.33%",
+    "year_change": "-18.10%",
+    "date": "Dec/05",
+    "market_cap": "2.41B"
+  },
+  {
+    "symbol": "BCB:CN",
+    "name": "Primo Water Corporation",
+    "price": "20.03",
+    "day_change": "0.60%",
+    "year_change": "-4.39%",
+    "date": "Dec/05",
+    "market_cap": "2.36B"
+  },
+  {
+    "symbol": "SSRM:CN",
+    "name": "SSR Mining",
+    "price": "15.64",
+    "day_change": "-0.98%",
+    "year_change": "-24.32%",
+    "date": "Dec/05",
+    "market_cap": "2.35B"
+  },
+  {
+    "symbol": "FCR:CN",
+    "name": "First Capital Realty",
+    "price": "14.49",
+    "day_change": "0.42%",
+    "year_change": "-15.11%",
+    "date": "Dec/05",
+    "market_cap": "2.27B"
+  },
+  {
+    "symbol": "MFI:CN",
+    "name": "Maple Leaf Foods",
+    "price": "24.43",
+    "day_change": "-0.93%",
+    "year_change": "0.87%",
+    "date": "Dec/05",
+    "market_cap": "2.24B"
+  },
+  {
+    "symbol": "BB:CN",
+    "name": "Blackberry",
+    "price": "5.40",
+    "day_change": "2.47%",
+    "year_change": "-13.60%",
+    "date": "Dec/05",
+    "market_cap": "2.23B"
+  },
+  {
+    "symbol": "TCN:CN",
+    "name": "Tricon Capital",
+    "price": "10.90",
+    "day_change": "-0.82%",
+    "year_change": "-2.33%",
+    "date": "Dec/05",
+    "market_cap": "2.21B"
+  },
+  {
+    "symbol": "EQB:CN",
+    "name": "EQB",
+    "price": "78.86",
+    "day_change": "0.75%",
+    "year_change": "32.09%",
+    "date": "Dec/05",
+    "market_cap": "2.2B"
+  },
+  {
+    "symbol": "GEI:CN",
+    "name": "Gibson Energy",
+    "price": "20.68",
+    "day_change": "-0.05%",
+    "year_change": "-12.85%",
+    "date": "Dec/05",
+    "market_cap": "2.17B"
+  },
+  {
+    "symbol": "CWB:CN",
+    "name": "Canadian Western Bank",
+    "price": "30.30",
+    "day_change": "0.60%",
+    "year_change": "25.31%",
+    "date": "Dec/05",
+    "market_cap": "2.16B"
+  },
+  {
+    "symbol": "ATZ:CN",
+    "name": "Aritzia",
+    "price": "24.72",
+    "day_change": "-2.91%",
+    "year_change": "-49.74%",
+    "date": "Dec/05",
+    "market_cap": "2.08B"
+  },
+  {
+    "symbol": "PXT:CN",
+    "name": "Parex Resources",
+    "price": "26.26",
+    "day_change": "-0.27%",
+    "year_change": "43.58%",
+    "date": "Dec/05",
+    "market_cap": "2.05B"
+  },
+  {
+    "symbol": "VET:CN",
+    "name": "Vermilion Energy",
+    "price": "15.95",
+    "day_change": "-1.97%",
+    "year_change": "-34.60%",
+    "date": "Dec/05",
+    "market_cap": "1.97B"
+  },
+  {
+    "symbol": "CSH-U:CN",
+    "name": "Chartwell Retirement Residences",
+    "price": "11.05",
+    "day_change": "0.59%",
+    "year_change": "33.88%",
+    "date": "Dec/05",
+    "market_cap": "1.95B"
+  },
+  {
+    "symbol": "WPK:CN",
+    "name": "WINPAK",
+    "price": "39.16",
+    "day_change": "-0.23%",
+    "year_change": "-6.87%",
+    "date": "Dec/05",
+    "market_cap": "1.88B"
+  },
+  {
+    "symbol": "RUS:CN",
+    "name": "Russel Metals",
+    "price": "41.64",
+    "day_change": "1.17%",
+    "year_change": "47.50%",
+    "date": "Dec/05",
+    "market_cap": "1.85B"
+  },
+  {
+    "symbol": "CCA:CN",
+    "name": "Cogeco Cable",
+    "price": "55.54",
+    "day_change": "-0.31%",
+    "year_change": "-27.77%",
+    "date": "Dec/05",
+    "market_cap": "1.84B"
+  },
+  {
+    "symbol": "SPB:CN",
+    "name": "Superior Plus",
+    "price": "9.72",
+    "day_change": "-2.11%",
+    "year_change": "-1.02%",
+    "date": "Dec/05",
+    "market_cap": "1.82B"
+  },
+  {
+    "symbol": "NVA:CN",
+    "name": "NuVista Energy",
+    "price": "11.29",
+    "day_change": "-2.46%",
+    "year_change": "-9.58%",
+    "date": "Dec/05",
+    "market_cap": "1.81B"
+  },
+  {
+    "symbol": "HR-U:CN",
+    "name": "H&R Real Estate Investment",
+    "price": "9.36",
+    "day_change": "0.86%",
+    "year_change": "-23.53%",
+    "date": "Dec/05",
+    "market_cap": "1.81B"
+  },
+  {
+    "symbol": "PEY:CN",
+    "name": "PEYTO",
+    "price": "12.23",
+    "day_change": "0.08%",
+    "year_change": "-9.54%",
+    "date": "Dec/05",
+    "market_cap": "1.76B"
+  },
+  {
+    "symbol": "RCH:CN",
+    "name": "Richelieu Hardware",
+    "price": "41.69",
+    "day_change": "-1.42%",
+    "year_change": "14.47%",
+    "date": "Dec/05",
+    "market_cap": "1.75B"
+  },
+  {
+    "symbol": "SES:CN",
+    "name": "Secure Energy Services",
+    "price": "8.06",
+    "day_change": "-1.23%",
+    "year_change": "14.49%",
+    "date": "Dec/05",
+    "market_cap": "1.74B"
+  },
+  {
+    "symbol": "FR:CN",
+    "name": "First Majestic Silver",
+    "price": "8.20",
+    "day_change": "-0.61%",
+    "year_change": "-32.34%",
+    "date": "Dec/05",
+    "market_cap": "1.71B"
+  },
+  {
+    "symbol": "CIX:CN",
+    "name": "CI Financial",
+    "price": "14.30",
+    "day_change": "-0.07%",
+    "year_change": "3.62%",
+    "date": "Dec/05",
+    "market_cap": "1.71B"
+  },
+  {
+    "symbol": "EQX:CN",
+    "name": "Equinox Gold",
+    "price": "7.12",
+    "day_change": "-3.00%",
+    "year_change": "48.64%",
+    "date": "Dec/05",
+    "market_cap": "1.7B"
+  },
+  {
+    "symbol": "HBM:CN",
+    "name": "HudBay Minerals",
+    "price": "6.22",
+    "day_change": "-1.97%",
+    "year_change": "-16.80%",
+    "date": "Dec/05",
+    "market_cap": "1.59B"
+  },
+  {
+    "symbol": "EIF:CN",
+    "name": "Exchange Income",
+    "price": "45.55",
+    "day_change": "-0.15%",
+    "year_change": "-5.40%",
+    "date": "Dec/05",
+    "market_cap": "1.58B"
+  },
+  {
+    "symbol": "FRU:CN",
+    "name": "Freehold Royalties",
+    "price": "13.77",
+    "day_change": "0.25%",
+    "year_change": "-11.76%",
+    "date": "Dec/05",
+    "market_cap": "1.53B"
+  },
+  {
+    "symbol": "CFP:CN",
+    "name": "Canfor",
+    "price": "16.81",
+    "day_change": "-2.15%",
+    "year_change": "-27.39%",
+    "date": "Dec/05",
+    "market_cap": "1.49B"
+  },
+  {
+    "symbol": "TRLY:CN",
+    "name": "Tilray",
+    "price": "2.54",
+    "day_change": "-7.97%",
+    "year_change": "-53.99%",
+    "date": "Dec/05",
+    "market_cap": "1.49B"
+  },
+  {
+    "symbol": "LIF:CN",
+    "name": "Labrador Iron Ore",
+    "price": "31.14",
+    "day_change": "-1.13%",
+    "year_change": "-7.28%",
+    "date": "Dec/05",
+    "market_cap": "1.48B"
+  },
+  {
+    "symbol": "SSL:CN",
+    "name": "Sandstorm Gold",
+    "price": "6.70",
+    "day_change": "-1.03%",
+    "year_change": "-5.37%",
+    "date": "Dec/05",
+    "market_cap": "1.47B"
+  },
+  {
+    "symbol": "INE:CN",
+    "name": "Innergex Renewable Energy",
+    "price": "9.15",
+    "day_change": "-4.79%",
+    "year_change": "-45.44%",
+    "date": "Dec/05",
+    "market_cap": "1.44B"
+  },
+  {
+    "symbol": "ENGH:CN",
+    "name": "Enghouse Systems",
+    "price": "33.77",
+    "day_change": "-0.79%",
+    "year_change": "7.89%",
+    "date": "Dec/05",
+    "market_cap": "1.39B"
+  },
+  {
+    "symbol": "NG:CN",
+    "name": "NovaGold Resources",
+    "price": "5.59",
+    "day_change": "-1.76%",
+    "year_change": "-29.60%",
+    "date": "Dec/05",
+    "market_cap": "1.39B"
+  },
+  {
+    "symbol": "ERO:CN",
+    "name": "Ero Copper",
+    "price": "17.27",
+    "day_change": "-4.90%",
+    "year_change": "3.66%",
+    "date": "Dec/05",
+    "market_cap": "1.37B"
+  },
+  {
+    "symbol": "AIF:CN",
+    "name": "Altus",
+    "price": "39.28",
+    "day_change": "-1.31%",
+    "year_change": "-24.68%",
+    "date": "Dec/05",
+    "market_cap": "1.35B"
+  },
+  {
+    "symbol": "DPM:CN",
+    "name": "Dundee Precious Metals",
+    "price": "9.70",
+    "day_change": "-0.51%",
+    "year_change": "58.24%",
+    "date": "Dec/05",
+    "market_cap": "1.32B"
+  },
+  {
+    "symbol": "CJT:CN",
+    "name": "Cargojet",
+    "price": "103.87",
+    "day_change": "0.47%",
+    "year_change": "-18.08%",
+    "date": "Dec/05",
+    "market_cap": "1.31B"
+  },
+  {
+    "symbol": "NWC:CN",
+    "name": "North West Company",
+    "price": "37.13",
+    "day_change": "3.72%",
+    "year_change": "3.28%",
+    "date": "Dec/05",
+    "market_cap": "1.3B"
+  },
+  {
+    "symbol": "BIR:CN",
+    "name": "Birchcliff Energy",
+    "price": "6.52",
+    "day_change": "0.31%",
+    "year_change": "-31.94%",
+    "date": "Dec/05",
+    "market_cap": "1.29B"
+  },
+  {
+    "symbol": "CG:CN",
+    "name": "Centerra Gold",
+    "price": "8.00",
+    "day_change": "-1.78%",
+    "year_change": "15.04%",
+    "date": "Dec/05",
+    "market_cap": "1.28B"
+  },
+  {
+    "symbol": "NFI:CN",
+    "name": "New Flyer Industries",
+    "price": "13.91",
+    "day_change": "-2.39%",
+    "year_change": "43.25%",
+    "date": "Dec/05",
+    "market_cap": "1.25B"
+  },
+  {
+    "symbol": "OGC:CN",
+    "name": "OceanaGold",
+    "price": "2.35",
+    "day_change": "-2.08%",
+    "year_change": "-4.86%",
+    "date": "Dec/05",
+    "market_cap": "1.25B"
+  },
+  {
+    "symbol": "WTE:CN",
+    "name": "Westshore Terminals",
+    "price": "26.42",
+    "day_change": "0.19%",
+    "year_change": "17.16%",
+    "date": "Dec/05",
+    "market_cap": "1.21B"
+  },
+  {
+    "symbol": "IMG:CN",
+    "name": "Iamgold",
+    "price": "3.26",
+    "day_change": "-4.40%",
+    "year_change": "16.43%",
+    "date": "Dec/05",
+    "market_cap": "1.18B"
+  },
+  {
+    "symbol": "MAG:CN",
+    "name": "MAG Silver",
+    "price": "15.58",
+    "day_change": "-1.70%",
+    "year_change": "-24.44%",
+    "date": "Dec/05",
+    "market_cap": "1.18B"
+  },
+  {
+    "symbol": "FVI:CN",
+    "name": "Fortuna Silver Mines",
+    "price": "5.18",
+    "day_change": "-2.26%",
+    "year_change": "0.78%",
+    "date": "Dec/05",
+    "market_cap": "1.17B"
+  },
+  {
+    "symbol": "GOOS:CN",
+    "name": "Canada Goose Holdings",
+    "price": "15.68",
+    "day_change": "-0.51%",
+    "year_change": "-36.44%",
+    "date": "Dec/05",
+    "market_cap": "1.17B"
+  },
+  {
+    "symbol": "BLDP:CN",
+    "name": "Ballard Power Systems",
+    "price": "5.02",
+    "day_change": "-2.71%",
+    "year_change": "-33.24%",
+    "date": "Dec/05",
+    "market_cap": "1.14B"
+  },
+  {
+    "symbol": "CRT-U:CN",
+    "name": "CT Real Estate",
+    "price": "13.94",
+    "day_change": "-0.36%",
+    "year_change": "-9.42%",
+    "date": "Dec/05",
+    "market_cap": "1.12B"
+  },
+  {
+    "symbol": "AAV:CN",
+    "name": "Advantage Oil & Gas",
+    "price": "8.99",
+    "day_change": "-1.43%",
+    "year_change": "-18.57%",
+    "date": "Dec/05",
+    "market_cap": "1.11B"
+  },
+  {
+    "symbol": "BAD:CN",
+    "name": "Badger Infrastructure Solutions",
+    "price": "41.00",
+    "day_change": "0.59%",
+    "year_change": "52.87%",
+    "date": "Dec/05",
+    "market_cap": "1.04B"
+  },
+  {
+    "symbol": "SEA:CN",
+    "name": "Seabridge Gold",
+    "price": "15.79",
+    "day_change": "-5.28%",
+    "year_change": "-5.05%",
+    "date": "Dec/05",
+    "market_cap": "1.03B"
+  },
+  {
+    "symbol": "NGD:CN",
+    "name": "New Gold",
+    "price": "1.88",
+    "day_change": "-1.32%",
+    "year_change": "29.31%",
+    "date": "Dec/05",
+    "market_cap": "972.31M"
+  },
+  {
+    "symbol": "SIL:CN",
+    "name": "Silvercrest Metals",
+    "price": "8.92",
+    "day_change": "-1.87%",
+    "year_change": "-0.78%",
+    "date": "Dec/05",
+    "market_cap": "967.26M"
+  },
+  {
+    "symbol": "WDO:CN",
+    "name": "Wesdome Gold Mines",
+    "price": "8.40",
+    "day_change": "-3.78%",
+    "year_change": "3.32%",
+    "date": "Dec/05",
+    "market_cap": "967.23M"
+  },
+  {
+    "symbol": "CAS:CN",
+    "name": "Cascades",
+    "price": "12.74",
+    "day_change": "0.31%",
+    "year_change": "54.99%",
+    "date": "Dec/05",
+    "market_cap": "948.72M"
+  },
+  {
+    "symbol": "TXG:CN",
+    "name": "Torex Gold Resources",
+    "price": "14.40",
+    "day_change": "-5.88%",
+    "year_change": "9.92%",
+    "date": "Dec/05",
+    "market_cap": "944.92M"
+  },
+  {
+    "symbol": "JWEL:CN",
+    "name": "Jamieson Wellness",
+    "price": "30.30",
+    "day_change": "0.33%",
+    "year_change": "-8.49%",
+    "date": "Dec/05",
+    "market_cap": "937.59M"
+  },
+  {
+    "symbol": "KEL:CN",
+    "name": "Kelt Exploration",
+    "price": "6.23",
+    "day_change": "-3.56%",
+    "year_change": "19.81%",
+    "date": "Dec/05",
+    "market_cap": "921.91M"
+  },
+  {
+    "symbol": "MTL:CN",
+    "name": "Mullen",
+    "price": "13.16",
+    "day_change": "-1.79%",
+    "year_change": "-11.02%",
+    "date": "Dec/05",
+    "market_cap": "866.97M"
+  },
+  {
+    "symbol": "LB:CN",
+    "name": "Laurentian Bank Of Canada",
+    "price": "26.10",
+    "day_change": "-1.32%",
+    "year_change": "-18.72%",
+    "date": "Dec/05",
+    "market_cap": "854.7M"
+  },
+  {
+    "symbol": "PSI:CN",
+    "name": "Pason Systems",
+    "price": "14.31",
+    "day_change": "-1.92%",
+    "year_change": "-8.50%",
+    "date": "Dec/05",
+    "market_cap": "842.88M"
+  },
+  {
+    "symbol": "CRON:CN",
+    "name": "Cronos Group",
+    "price": "2.83",
+    "day_change": "-4.56%",
+    "year_change": "-31.27%",
+    "date": "Dec/05",
+    "market_cap": "832.43M"
+  },
+  {
+    "symbol": "IFP:CN",
+    "name": "Interfor",
+    "price": "22.17",
+    "day_change": "0.73%",
+    "year_change": "-5.86%",
+    "date": "Dec/05",
+    "market_cap": "832.11M"
+  },
+  {
+    "symbol": "PD:CN",
+    "name": "Precision Drilling",
+    "price": "74.96",
+    "day_change": "-3.19%",
+    "year_change": "-26.08%",
+    "date": "Dec/05",
+    "market_cap": "823.05M"
+  },
+  {
+    "symbol": "CHE-U:CN",
+    "name": "Chemtrade Logistics",
+    "price": "8.57",
+    "day_change": "-1.27%",
+    "year_change": "-10.07%",
+    "date": "Dec/05",
+    "market_cap": "745.35M"
+  },
+  {
+    "symbol": "MRE:CN",
+    "name": "Martinrea International",
+    "price": "12.61",
+    "day_change": "1.61%",
+    "year_change": "6.77%",
+    "date": "Dec/05",
+    "market_cap": "720.37M"
+  },
+  {
+    "symbol": "SCL:CN",
+    "name": "ShawCor",
+    "price": "14.25",
+    "day_change": "0.11%",
+    "year_change": "11.46%",
+    "date": "Dec/05",
+    "market_cap": "715.77M"
+  },
+  {
+    "symbol": "TCW:CN",
+    "name": "Trican Well Service",
+    "price": "4.07",
+    "day_change": "-0.12%",
+    "year_change": "8.11%",
+    "date": "Dec/05",
+    "market_cap": "637.49M"
+  },
+  {
+    "symbol": "ZZZ:CN",
+    "name": "Sleep Country Canada Holdings",
+    "price": "25.25",
+    "day_change": "2.48%",
+    "year_change": "10.50%",
+    "date": "Dec/05",
+    "market_cap": "637.16M"
+  },
+  {
+    "symbol": "TCLA:CN",
+    "name": "Transcontinental",
+    "price": "11.38",
+    "day_change": "-1.47%",
+    "year_change": "-30.53%",
+    "date": "Dec/05",
+    "market_cap": "621.67M"
+  },
+  {
+    "symbol": "CMG:CN",
+    "name": "Computer Modelling",
+    "price": "10.30",
+    "day_change": "0.49%",
+    "year_change": "82.30%",
+    "date": "Dec/05",
+    "market_cap": "610.89M"
+  },
+  {
+    "symbol": "CEU:CN",
+    "name": "Canadian Energy Services",
+    "price": "3.40",
+    "day_change": "-0.87%",
+    "year_change": "24.54%",
+    "date": "Dec/05",
+    "market_cap": "607.36M"
+  },
+  {
+    "symbol": "SIA:CN",
+    "name": "Sienna Senior Living",
+    "price": "10.92",
+    "day_change": "-0.18%",
+    "year_change": "-1.27%",
+    "date": "Dec/05",
+    "market_cap": "589.58M"
+  },
+  {
+    "symbol": "CR:CN",
+    "name": "Crew Energy",
+    "price": "4.78",
+    "day_change": "-0.62%",
+    "year_change": "-23.03%",
+    "date": "Dec/05",
+    "market_cap": "561.61M"
+  },
+  {
+    "symbol": "WEED:CN",
+    "name": "Canopy Growth",
+    "price": "0.89",
+    "day_change": "-11.88%",
+    "year_change": "-81.84%",
+    "date": "Dec/05",
+    "market_cap": "551.31M"
+  },
+  {
+    "symbol": "ARE:CN",
+    "name": "Aecon",
+    "price": "11.76",
+    "day_change": "0.60%",
+    "year_change": "25.37%",
+    "date": "Dec/05",
+    "market_cap": "535.72M"
+  },
+  {
+    "symbol": "ECN:CN",
+    "name": "ECN Capital",
+    "price": "2.57",
+    "day_change": "4.69%",
+    "year_change": "-9.04%",
+    "date": "Dec/05",
+    "market_cap": "522.63M"
+  },
+  {
+    "symbol": "EFX:CN",
+    "name": "Enerflex",
+    "price": "5.68",
+    "day_change": "-0.53%",
+    "year_change": "-31.40%",
+    "date": "Dec/05",
+    "market_cap": "519.42M"
+  },
+  {
+    "symbol": "SVM:CN",
+    "name": "Silvercorp Metals",
+    "price": "3.71",
+    "day_change": "-2.37%",
+    "year_change": "-4.63%",
+    "date": "Dec/05",
+    "market_cap": "493.2M"
+  },
+  {
+    "symbol": "EXE:CN",
+    "name": "Extendicare",
+    "price": "7.11",
+    "day_change": "0.85%",
+    "year_change": "6.92%",
+    "date": "Dec/05",
+    "market_cap": "436.53M"
+  },
+  {
+    "symbol": "GUD:CN",
+    "name": "Knight Therapeutics",
+    "price": "5.12",
+    "day_change": "-2.85%",
+    "year_change": "-2.48%",
+    "date": "Dec/05",
+    "market_cap": "401.98M"
+  },
+  {
+    "symbol": "CGX:CN",
+    "name": "Cineplex",
+    "price": "8.25",
+    "day_change": "0.24%",
+    "year_change": "-17.09%",
+    "date": "Dec/05",
+    "market_cap": "385.82M"
+  },
+  {
+    "symbol": "CHR:CN",
+    "name": "Chorus Aviation",
+    "price": "2.15",
+    "day_change": "-2.27%",
+    "year_change": "-31.96%",
+    "date": "Dec/05",
+    "market_cap": "316.16M"
+  },
+  {
+    "symbol": "REAL:CN",
+    "name": "Real Matters",
+    "price": "5.60",
+    "day_change": "-1.23%",
+    "year_change": "37.25%",
+    "date": "Dec/05",
+    "market_cap": "305.73M"
+  },
+  {
+    "symbol": "ESI:CN",
+    "name": "Ensign Energy Services",
+    "price": "2.03",
+    "day_change": "-0.74%",
+    "year_change": "-43.75%",
+    "date": "Dec/05",
+    "market_cap": "276.17M"
+  },
+  {
+    "symbol": "ACB:CN",
+    "name": "Aurora Cannabis",
+    "price": "0.65",
+    "day_change": "-5.80%",
+    "year_change": "-60.37%",
+    "date": "Dec/05",
+    "market_cap": "241.87M"
+  },
+  {
+    "symbol": "GTE:CN",
+    "name": "Gran Tierra Energy",
+    "price": "8.30",
+    "day_change": "-1.31%",
+    "year_change": "-43.15%",
+    "date": "Dec/05",
+    "market_cap": "204.01M"
+  },
+  {
+    "symbol": "AIM:CN",
+    "name": "Aimia",
+    "price": "2.96",
+    "day_change": "-1.33%",
+    "year_change": "-15.91%",
+    "date": "Dec/05",
+    "market_cap": "186.94M"
+  },
+  {
+    "symbol": "WEF:CN",
+    "name": "Western Forest Products",
+    "price": "0.66",
+    "day_change": "-1.49%",
+    "year_change": "-40.00%",
+    "date": "Dec/05",
+    "market_cap": "156.6M"
+  },
+  {
+    "symbol": "LUC:CN",
+    "name": "Lucara Diamond",
+    "price": "0.36",
+    "day_change": "1.43%",
+    "year_change": "-27.55%",
+    "date": "Dec/05",
+    "market_cap": "116.1M"
+  },
+  {
+    "symbol": "OGI:CN",
+    "name": "Organigram Holdings",
+    "price": "1.84",
+    "day_change": "-5.64%",
+    "year_change": "33.33%",
+    "date": "Dec/05",
+    "market_cap": "113.79M"
+  },
+  {
+    "symbol": "DIIB:CN",
+    "name": "Dorel Industries",
+    "price": "4.89",
+    "day_change": "-1.41%",
+    "year_change": "-16.41%",
+    "date": "Dec/05",
+    "market_cap": "103.95M"
+  },
+  {
+    "symbol": "CJRB:CN",
+    "name": "Corus Entertainment",
+    "price": "0.62",
+    "day_change": "0%",
+    "year_change": "-72.44%",
+    "date": "Dec/05",
+    "market_cap": "89.7M"
+  },
+  {
+    "symbol": "XAUUSD:CUR",
+    "name": null,
+    "price": "2019.42",
+    "day_change": "-0.51%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "S 1:COM",
+    "name": null,
+    "price": "1308.25",
+    "day_change": "0.15%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "W 1:COM",
+    "name": null,
+    "price": "615.76",
+    "day_change": "5.62%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XAL1:COM",
+    "name": null,
+    "price": "135.00",
+    "day_change": "1.12%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JBP:COM",
+    "name": null,
+    "price": "3874.00",
+    "day_change": "-0.59%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SCO:COM",
+    "name": null,
+    "price": "131.50",
+    "day_change": "-1.13%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NGEU:COM",
+    "name": null,
+    "price": "38.13",
+    "day_change": "-4.91%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "LB1:COM",
+    "name": null,
+    "price": "524.61",
+    "day_change": "0.02%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "USDKRW:CUR",
+    "name": null,
+    "price": "1314.47",
+    "day_change": "0.36%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "SPX:IND",
+    "name": null,
+    "price": "4569.09",
+    "day_change": "-0.01%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AAPL:US",
+    "name": null,
+    "price": "193.38",
+    "day_change": "2.09%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "TSLA:US",
+    "name": null,
+    "price": "240.01",
+    "day_change": "1.88%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MSFT:US",
+    "name": null,
+    "price": "372.36",
+    "day_change": "0.87%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AMZN:US",
+    "name": null,
+    "price": "147.11",
+    "day_change": "1.57%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "FB:US",
+    "name": null,
+    "price": "318.32",
+    "day_change": "-0.53%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "NVDA:US",
+    "name": null,
+    "price": "463.95",
+    "day_change": "1.94%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "V:US",
+    "name": null,
+    "price": "254.25",
+    "day_change": "-0.07%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JPM:US",
+    "name": null,
+    "price": "158.23",
+    "day_change": "0.15%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "INTC:US",
+    "name": null,
+    "price": "42.06",
+    "day_change": "-0.68%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "JNJ:US",
+    "name": null,
+    "price": "158.67",
+    "day_change": "-0.13%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "PG:US",
+    "name": null,
+    "price": "146.28",
+    "day_change": "-3.80%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "XOM:US",
+    "name": null,
+    "price": "100.68",
+    "day_change": "-1.71%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MMM:US",
+    "name": null,
+    "price": "102.20",
+    "day_change": "-1.20%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "GS:US",
+    "name": null,
+    "price": "342.38",
+    "day_change": "-2.01%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "CAT:US",
+    "name": null,
+    "price": "254.94",
+    "day_change": "0.07%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ETHUSD:CUR",
+    "name": null,
+    "price": "2265.76",
+    "day_change": "1.39%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "DOTUSD:CUR",
+    "name": null,
+    "price": "5.77",
+    "day_change": "2.74%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "AVXUSD:CUR",
+    "name": null,
+    "price": "23.77",
+    "day_change": "6.12%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "MTCUSD:CUR",
+    "name": null,
+    "price": "0.81",
+    "day_change": "-0.11%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ATMUSD:CUR",
+    "name": null,
+    "price": "9.84",
+    "day_change": "1.28%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "UNIUSD:CUR",
+    "name": null,
+    "price": "6.24",
+    "day_change": "2.31%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "ALGUSD:CUR",
+    "name": null,
+    "price": "0.15",
+    "day_change": "0.92%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  },
+  {
+    "symbol": "BCHUSD:CUR",
+    "name": null,
+    "price": "250.02",
+    "day_change": "-0.43%",
+    "year_change": null,
+    "date": null,
+    "market_cap": null
+  }
+]

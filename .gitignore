@@ -5,4 +5,4 @@ __pycache__/
 website_scripts/config.py
 logs/
 infomundi.wsgi
-json/website/
+data/json/website/
