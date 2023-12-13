@@ -2,8 +2,8 @@
   {
     "symbol": "XAUUSD:CUR",
     "name": null,
-    "price": "2019.59",
-    "day_change": "-0.50%",
+    "price": "2004.34",
+    "day_change": "-1.18%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -11,8 +11,8 @@
   {
     "symbol": "S 1:COM",
     "name": null,
-    "price": "1308.25",
-    "day_change": "0.15%",
+    "price": "1301.25",
+    "day_change": "-0.80%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -20,8 +20,8 @@
   {
     "symbol": "W 1:COM",
     "name": null,
-    "price": "615.76",
-    "day_change": "5.62%",
+    "price": "618.50",
+    "day_change": "-0.68%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -29,8 +29,8 @@
   {
     "symbol": "XAL1:COM",
     "name": null,
-    "price": "135.00",
-    "day_change": "1.12%",
+    "price": "148.75",
+    "day_change": "5.91%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -38,8 +38,8 @@
   {
     "symbol": "JBP:COM",
     "name": null,
-    "price": "3874.00",
-    "day_change": "-0.59%",
+    "price": "3985.00",
+    "day_change": "1.04%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -47,8 +47,8 @@
   {
     "symbol": "SCO:COM",
     "name": null,
-    "price": "131.50",
-    "day_change": "-1.13%",
+    "price": "136.00",
+    "day_change": "1.87%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -56,8 +56,8 @@
   {
     "symbol": "NGEU:COM",
     "name": null,
-    "price": "38.13",
-    "day_change": "-4.91%",
+    "price": "38.60",
+    "day_change": "-3.43%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -65,8 +65,8 @@
   {
     "symbol": "LB1:COM",
     "name": null,
-    "price": "524.61",
-    "day_change": "0.02%",
+    "price": "529.42",
+    "day_change": "-0.20%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -74,8 +74,8 @@
   {
     "symbol": "USDKRW:CUR",
     "name": null,
-    "price": "1314.39",
-    "day_change": "0.35%",
+    "price": "1316.40",
+    "day_change": "0.26%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -83,8 +83,8 @@
   {
     "symbol": "SPX:IND",
     "name": null,
-    "price": "4569.59",
-    "day_change": "0.00%",
+    "price": "4604.37",
+    "day_change": "0.41%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -92,8 +92,8 @@
   {
     "symbol": "AAPL:US",
     "name": null,
-    "price": "193.35",
-    "day_change": "2.07%",
+    "price": "195.71",
+    "day_change": "0.74%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -101,8 +101,8 @@
   {
     "symbol": "TSLA:US",
     "name": null,
-    "price": "239.79",
-    "day_change": "1.79%",
+    "price": "243.84",
+    "day_change": "0.49%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -110,8 +110,8 @@
   {
     "symbol": "MSFT:US",
     "name": null,
-    "price": "372.41",
-    "day_change": "0.89%",
+    "price": "374.23",
+    "day_change": "0.88%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -119,8 +119,8 @@
   {
     "symbol": "AMZN:US",
     "name": null,
-    "price": "147.16",
-    "day_change": "1.60%",
+    "price": "147.42",
+    "day_change": "0.37%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -128,8 +128,8 @@
   {
     "symbol": "FB:US",
     "name": null,
-    "price": "318.42",
-    "day_change": "-0.50%",
+    "price": "332.75",
+    "day_change": "1.89%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -137,8 +137,8 @@
   {
     "symbol": "NVDA:US",
     "name": null,
-    "price": "463.91",
-    "day_change": "1.94%",
+    "price": "475.06",
+    "day_change": "1.95%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -146,8 +146,8 @@
   {
     "symbol": "V:US",
     "name": null,
-    "price": "254.19",
-    "day_change": "-0.10%",
+    "price": "255.74",
+    "day_change": "-0.03%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -155,8 +155,8 @@
   {
     "symbol": "JPM:US",
     "name": null,
-    "price": "158.20",
-    "day_change": "0.13%",
+    "price": "158.52",
+    "day_change": "1.10%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -164,8 +164,8 @@
   {
     "symbol": "INTC:US",
     "name": null,
-    "price": "42.05",
-    "day_change": "-0.71%",
+    "price": "42.70",
+    "day_change": "1.30%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -173,8 +173,8 @@
   {
     "symbol": "JNJ:US",
     "name": null,
-    "price": "158.72",
-    "day_change": "-0.10%",
+    "price": "154.42",
+    "day_change": "-0.63%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -182,8 +182,8 @@
   {
     "symbol": "PG:US",
     "name": null,
-    "price": "146.29",
-    "day_change": "-3.79%",
+    "price": "145.15",
+    "day_change": "-0.92%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -191,8 +191,8 @@
   {
     "symbol": "XOM:US",
     "name": null,
-    "price": "100.67",
-    "day_change": "-1.72%",
+    "price": "99.55",
+    "day_change": "1.15%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -200,8 +200,8 @@
   {
     "symbol": "MMM:US",
     "name": null,
-    "price": "102.18",
-    "day_change": "-1.22%",
+    "price": "103.37",
+    "day_change": "0.09%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -209,8 +209,8 @@
   {
     "symbol": "GS:US",
     "name": null,
-    "price": "342.08",
-    "day_change": "-2.09%",
+    "price": "350.83",
+    "day_change": "1.80%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -218,8 +218,8 @@
   {
     "symbol": "CAT:US",
     "name": null,
-    "price": "254.80",
-    "day_change": "0.02%",
+    "price": "259.50",
+    "day_change": "0.81%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -227,8 +227,8 @@
   {
     "symbol": "ETHUSD:CUR",
     "name": null,
-    "price": "2268.07",
-    "day_change": "1.49%",
+    "price": "2358.43",
+    "day_change": "0.11%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -236,8 +236,8 @@
   {
     "symbol": "DOTUSD:CUR",
     "name": null,
-    "price": "5.78",
-    "day_change": "2.92%",
+    "price": "7.28",
+    "day_change": "5.92%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -245,8 +245,8 @@
   {
     "symbol": "AVXUSD:CUR",
     "name": null,
-    "price": "23.83",
-    "day_change": "6.37%",
+    "price": "32.17",
+    "day_change": "4.95%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -254,8 +254,8 @@
   {
     "symbol": "MTCUSD:CUR",
     "name": null,
-    "price": "0.81",
-    "day_change": "0.46%",
+    "price": "0.90",
+    "day_change": "-0.96%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -263,8 +263,8 @@
   {
     "symbol": "ATMUSD:CUR",
     "name": null,
-    "price": "9.84",
-    "day_change": "1.28%",
+    "price": "10.76",
+    "day_change": "3.37%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -272,8 +272,8 @@
   {
     "symbol": "UNIUSD:CUR",
     "name": null,
-    "price": "6.24",
-    "day_change": "2.31%",
+    "price": "6.77",
+    "day_change": "3.61%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -281,8 +281,8 @@
   {
     "symbol": "ALGUSD:CUR",
     "name": null,
-    "price": "0.15",
-    "day_change": "0.92%",
+    "price": "0.21",
+    "day_change": "12.05%",
     "year_change": null,
     "date": null,
     "market_cap": null
@@ -290,8 +290,8 @@
   {
     "symbol": "BCHUSD:CUR",
     "name": null,
-    "price": "250.28",
-    "day_change": "-0.33%",
+    "price": "255.79",
+    "day_change": "0.83%",
     "year_change": null,
     "date": null,
     "market_cap": null

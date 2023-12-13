@@ -6,3 +6,4 @@ website_scripts/config.py
 logs/
 infomundi.wsgi
 data/json/website/
+data/json/stock_data/

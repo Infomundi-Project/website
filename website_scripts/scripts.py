@@ -13,6 +13,124 @@ from hashlib import md5
 from . import config, json_util, immutable, notifications
 
 
+def scrape_world_stock_data() -> dict:
+    filepath = f'{config.STOCK_PATH}/world_stock'
+    if not is_cache_old(f'{filepath}.json'):
+        stock_data = json_util.read_json(filepath)
+        return stock_data
+
+    url = "https://tradingeconomics.com/stocks" 
+    headers = {
+        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+    }
+    response = get_request(url, headers=headers)
+
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
+
+    data_by_continent = {}
+
+    # Loop through each continent's data
+    for continent_table in soup.select('.card table.table'):
+        continent_name = continent_table.select_one('th.te-sort').text.strip()
+        continent_data = []
+
+        # Extracting data from each row in the continent's table
+        for row in continent_table.select('.datatable-row'):
+            symbol = row['data-symbol']
+            name = row.select_one('.datatable-item-first a b').text.strip()
+            price = row.select_one('#p').text.strip()
+            day_change = row.select_one('#nch').text.strip()
+            percent_change = row.select_one('#pch').text.strip()
+            weekly_change = row.select('.datatable-heatmap')[0].text.strip()
+            monthly_change = row.select('.datatable-heatmap')[1].text.strip()
+            yoy_change = row.select('.datatable-heatmap')[2].text.strip()
+            date = row.select_one('#date').text.strip()
+
+            # Check if the trading session is open or closed
+            session_icon = row.select_one('#session span')
+            session_status = "Closed" if session_icon and 'color: darkred' in session_icon.get('style', '') else "Open"
+
+            data = {
+                'symbol': symbol,
+                'name': name,
+                'price': price,
+                'day_change': day_change,
+                'percent_change': percent_change,
+                'weekly_change': weekly_change,
+                'monthly_change': monthly_change,
+                'yoy_change': yoy_change,
+                'date': date,
+                'session_status': session_status,
+            }
+
+            continent_data.append(data)
+
+        for row in continent_table.select('.datatable-row-alternating'):
+            symbol = row['data-symbol']
+            name = row.select_one('.datatable-item-first a b').text.strip()
+            price = row.select_one('#p').text.strip()
+            day_change = row.select_one('#nch').text.strip()
+            percent_change = row.select_one('#pch').text.strip()
+            weekly_change = row.select('.datatable-heatmap')[0].text.strip()
+            monthly_change = row.select('.datatable-heatmap')[1].text.strip()
+            yoy_change = row.select('.datatable-heatmap')[2].text.strip()
+            date = row.select_one('#date').text.strip()
+
+            # Check if the trading session is open or closed
+            session_icon = row.select_one('#session span')
+            session_status = "Closed" if session_icon and 'color: darkred' in session_icon.get('style', '') else "Open"
+
+            data = {
+                'symbol': symbol,
+                'name': name,
+                'price': price,
+                'day_change': day_change,
+                'percent_change': percent_change,
+                'weekly_change': weekly_change,
+                'monthly_change': monthly_change,
+                'yoy_change': yoy_change,
+                'date': date,
+                'session_status': session_status,
+            }
+
+            continent_data.append(data)
+
+        data_by_continent[continent_name] = continent_data
+
+    flags = json_util.read_json(f'{config.STOCK_PATH}/stock_to_flag')
+    countries = config.COUNTRY_LIST
+    for continent, stock_info in data_by_continent.items():
+        for item in stock_info:
+            for flag in flags:
+                for stock_name, flag in flag.items():
+                    if stock_name.lower() == item['name'].lower().replace(' ', ''):
+                        item['flag'] = flag
+
+
+            for country in countries:
+                try:
+                    if item['flag'].split('-')[1].lower() == country['code'].lower():
+                        country_name = country['name']
+                        if country_name == 'Bosnia and Herzegovina':
+                            country_name = 'BEH'
+                            break
+                        
+                        # Splits the country name by space and checks if the country name has more than or is equal to 3 words
+                        cname_split = country_name.split(' ')
+                        if len(cname_split) >= 3:
+                            first_characters = [word[0].title() for word in cname_split]
+                            country_name = ''.join(first_characters) # Uses a combination of the first character from each word (example: Bosnia and Herzegovina would become BAH)
+                        
+                        item['country'] = country_name
+                        break
+                except Exception:
+                    pass
+
+    json_util.write_json(data_by_continent, filepath)
+    return data_by_continent
+
+
 def scrape_stock_data(country_name: str) -> list:
     """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
     country_name = country_name.lower().replace(' ', '-')
@@ -73,6 +191,20 @@ def scrape_stock_data(country_name: str) -> list:
 
     json_util.write_json(stock_data, filepath)
     return stock_data
+
+
+def log(text: str, log_type: str='exception') -> bool:
+    """Receives text and log_type. Both are required, but log_type has a default value set to 'Exception'. It writes to different log files based on the type of the log."""
+    log_type = log_type.lower()
+    if log_type not in ['exception', 'mail']:
+        return False
+
+    log_file = f'{config.LOGS_PATH}/{log_type}.log'
+    with open(log_file, 'a') as f:
+        f.write(f'{text}\n')
+
+    return True
+
 
 def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
     """Checks the modification date of a desired file and compares it with a default threshold of 24 hours. If lower than 24 hours since last modification, return False. Else, return True.
@@ -165,7 +297,7 @@ def get_nation_data(cca2: str) -> dict:
         return {}
 
 
-def send_verification_token(email: str) -> bool:
+def send_verification_token(email: str, username: str) -> bool:
     try:
         tokens = json_util.read_json(config.TOKENS_PATH)
     except Exception:
@@ -179,8 +311,18 @@ def send_verification_token(email: str) -> bool:
     tokens[email] = verification_token
     json_util.write_json(tokens, config.TOKENS_PATH)
 
-    message = f'Hello and welcome to Infomundi. To verify your account, please click here: https://infomundi.net/auth/verify?token={verification_token}'
-    subject = 'Infomundi - Activate Your Account'
+    message = f"""Hello {username}, 
+
+Welcome to Infomundi! If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, we've made it quick and easy for you. Simply click on the following link to complete the verification process: 
+
+https://infomundi.net/auth/verify?token={verification_token}
+
+Looking forward to seeing you explore our platform!
+
+Best regards,
+The Infomundi Team"""
+
+    subject = 'Infomundi - Verify Your Account'
     notifications.send_email(email, subject, message)
     return True
 
@@ -261,7 +403,7 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
                 return cache_data[index]
 
     url = f"https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal){'_per_capita' if is_per_capita else ''}"
-    response = requests.get(url)
+    response = get_request(url)
 
     if response.status_code != 200:
         return []
@@ -342,6 +484,17 @@ def is_valid_url(url: str) -> bool:
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
+
+
+def is_valid_email(email: str) -> bool:
+    if len(email) < 10 or '@' not in email or len(email) > 60:
+        return False
+
+    domain = email.split('@')[1]
+    if domain not in immutable.EMAIL_DOMAINS:
+        return False
+    
+    return True
 
 
 def is_url_or_domain(input_str: str) -> str:
@@ -586,9 +739,12 @@ def valid_captcha(token: str) -> bool:
 
 
 def is_strong_password(password: str) -> bool:
-    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, min 10 chacarters and max 50 characters."""
+    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 1 number, and 8 characters"""
 
-    if not search_regex(r'[a-z]', password) or not search_regex(r'[A-Z]', password) or not search_regex(r'\d', password) or not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password) or len(password) < 12 or len(password) > 50:
+    #if not search_regex(r'[a-z]', password) or not search_regex(r'[A-Z]', password) or not search_regex(r'\d', password) or not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password) or len(password) < 12 or len(password) > 50:
+        #return False
+
+    if not search_regex(r'\d', password) or len(password) < 8 or len(password) > 50:
         return False
     
     return True

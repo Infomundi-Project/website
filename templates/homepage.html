@@ -5,6 +5,7 @@
   width: 100%;
   height: 100vh;
   max-width: 100%;
+  margin-top: -1.5vh;
   }
   .fa-solid {
   color: #ffffff;
@@ -14,7 +15,8 @@
   }
   @media (max-width: 968px) {
   #chartdiv {
-  height: 50vh;
+  height: 40vh;
+  margin-top: 0vh;
   }
   .infomundi-logo {
   max-height: 80%; 
@@ -29,6 +31,7 @@
   --bs-accordion-bg: #131619;
   --bs-accordion-color: #ffffff;
   --bs-accordion-btn-focus-box-shadow: none;
+  --bs-accordion-btn-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>");
   }
   .accordion-flush .accordion-button {
   border-top: 1px solid #000000;
@@ -41,7 +44,7 @@
 {% endblock %}
 {% block content %}
 <div class="row">
-  <div class="col-sm text-center mb-5">
+  <div class="col-sm text-center mb-5 mt-4">
     <h1 class="logo-text"><img 
       src="{{ url_for('static', filename='img/raw-infomundi-logo.webp') }}"
       class="infomundi-logo"
@@ -95,14 +98,19 @@
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid fa-user"></i> Session</p>
+                
+                {% if user.is_authenticated %}
+                <p class="fs-6"><i class="fa-solid fa-circle-user"></i> Welcome, {{ user.username }}.</p>
+                {% else %}
+                <p class="fs-6 good-blue"><a href="{{ url_for('auth.register') }}" class="text-reset text-decoration-none"><i class="fa-solid fa-user-pen" style="color: #3666ba;"></i> Register</a></p>
+                <p class="fs-6 good-blue"><a href="{{ url_for('auth.login') }}" class="text-reset text-decoration-none"><i class="fa-solid fa-user-tag" style="color: #3666ba;"></i> Log in</a></p>
+                {% endif %}
+                
                 {% if session_info['last_visited_country'] %}
                 <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_country'] }}" class="text-reset text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square" style="color: #3666ba;"></i> Last visited country</a></p>
                 {% endif %}
                 {% if session_info['last_visited_news']  %}
                 <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_news'] }}" class="text-reset text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square" style="color: #3666ba;"></i> Last visited news</a></p>
-                {% endif %}
-                {% if not session_info['last_visited_news'] and not session_info['last_visited_country'] %}
-                <p class="fs-6"><i class="fa-solid fa-circle-info"></i> There's nothing here yet...</p>
                 {% endif %}
               </div>
             </div>
@@ -111,7 +119,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm">
+  <div class="col-sm p-3">
     <div id="chartdiv"></div>
   </div>
 </div>

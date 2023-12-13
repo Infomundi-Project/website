@@ -37,7 +37,7 @@ def load_users():
 
 
 def save_users(users):
-    json_util.write_json(users, config.USERS_PATH)
+    json_util.write_json({user.email: {'username': user.username, 'password': user.password, 'role': user.role} for user in users.values()}, config.USERS_PATH)
 
 
 def verify_password(email: str, password: str):
@@ -71,12 +71,6 @@ def admin_required(func):
     return decorated_function
 
 
-@auth_views.route('/admin')
-@admin_required
-def admin():
-    return render_template('admin.html', user=current_user)
-
-
 @auth_views.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -86,13 +80,16 @@ def register():
             return redirect(url_for('auth.register'))
         
         email = request.form['email']
+        if not scripts.is_valid_email(email):
+            flash('Invalid email.', 'error')
+            return redirect(url_for('auth.register'))
+
         username = request.form['username'].replace(' ', '')
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
         for character in immutable.SPECIAL_CHARACTERS:
             username.replace(character, '')
-            email.replace(character, '')
 
         users = load_users()
         if password != confirm_password:
@@ -100,7 +97,7 @@ def register():
         elif len(username) > 30:
             message = 'Your username should not have more than 30 characters'
         elif not scripts.is_strong_password(password):
-            message = 'Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 12 characters minimum and a maximum of 50 characters.'
+            message = 'Password Policy: The password must have at least 1 number, 8 characters minimum and a maximum of 50 characters.'
         elif email in users:
             message = 'Email already exists.'
         elif any(user.username == username for user in users.values()):
@@ -112,9 +109,10 @@ def register():
             flash(message, 'error')
             return redirect(url_for('auth.register'))
 
-        send_token = scripts.send_verification_token(email)
+        send_token = scripts.send_verification_token(email, username)
         if not send_token:
             flash('Something went wrong. Please, try again later.')
+            return redirect(url_for('auth.register'))
 
         session['email'] = email
         session['username'] = username
@@ -130,17 +128,17 @@ def verify():
     token = request.args.get('token', '')
     if not token:
         return redirect(url_for('views.home'))
-    
-    if not scripts.check_verification_token(token):
-        flash('Invalid token.', 'error')
-        return redirect(url_for('views.home'))
 
     email = session.get('email', '')
     username = session.get('username', '')
     password = session.get('password', '')
-    
+
     if not email or not username or not password:
-        flash('Something went wrong. If you have cookies disabled, please enable it in order to verify your account.', 'error')
+        flash('For security reasons, you must use the same browser to register and verify your account. If you have cookies disabled, please enable it in order to verify your account.', 'error')
+        return redirect(url_for('views.home'))
+    
+    if not scripts.check_verification_token(token):
+        flash('Invalid or expired token.', 'error')
         return redirect(url_for('views.home'))
     
     users = load_users()
@@ -150,9 +148,9 @@ def verify():
     
     users[email] = new_user
 
-    json_util.write_json({user.email: {'username': user.username, 'password': user.password, 'role': user.role} for user in users.values()}, config.USERS_PATH)
+    save_users(users)
 
-    flash(f'Your account has been verified. Now, you can log in.')
+    flash(f'Your account has been verified.')
     return redirect(url_for('auth.login'))
 
 
@@ -162,7 +160,7 @@ def login():
         token = request.form['cf-turnstile-response']
         if not scripts.valid_captcha(token):
             flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(url_for('auth.register'))
+            return redirect(url_for('auth.login'))
 
         email = request.form['email']
         password = request.form['password']
@@ -175,6 +173,48 @@ def login():
         flash('Invalid credentials!', 'error')
     
     return render_template('login.html', user=current_user)
+
+
+@auth_views.route('/password_change', methods=['GET', 'POST'])
+@login_required
+def password_change():
+    if request.method == 'POST':
+        try:
+            old_password = request.form['old_password']
+            
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+        except Exception:
+            flash('Something went wrong.')
+            return redirect(url_for('auth.password_change'))
+        
+        users = load_users()
+        if not argon2.verify(old_password, users[current_user.email].password):
+            message = 'Incorrect old password.'
+        elif new_password != confirm_password:
+            message = 'New password and confirmation do not match.'
+        elif not scripts.is_strong_password(new_password):
+            message = 'Password Policy: The password must have at least 1 number, 8 characters minimum and a maximum of 50 characters.'
+        else:
+            message = ''
+
+        if message:
+            flash(message, 'error')
+            return redirect(url_for('auth.password_change'))
+        
+        # Update the user's password
+        users[current_user.email].password = argon2.hash(new_password)
+        save_users(users)
+        
+        flash('Password changed successfully.')
+    
+    return render_template('password_change.html', user=current_user)
+
+
+@auth_views.route('/admin')
+@admin_required
+def admin():
+    return render_template('admin.html', user=current_user)
 
 
 @auth_views.route('/get_feed_info', methods=['POST'])
@@ -288,42 +328,6 @@ def add_news():
 
     flash(f'Success! Added {url} feed to {country}!')
     return redirect(url_for('auth.admin'))
-
-
-@auth_views.route('/password_change', methods=['GET', 'POST'])
-@login_required
-def password_change():
-    if request.method == 'POST':
-        try:
-            old_password = request.form['old_password']
-            
-            new_password = request.form['new_password']
-            confirm_password = request.form['confirm_password']
-        except Exception:
-            flash('Something went wrong.')
-            return redirect(url_for('auth.password_change'))
-        
-        users = load_users()
-        if not argon2.verify(old_password, users[current_user.email]['password']):
-            message = 'Incorrect old password.'
-        elif new_password != confirm_password:
-            message = 'New password and confirmation do not match.'
-        elif not scripts.is_strong_password(new_password):
-            message = 'Password Policy: The password must have at least 1 lowercase character, 1 uppercase character, 1 digit, 1 special character, 12 characters minimum and a maximum of 50 characters.'
-        else:
-            message = ''
-
-        if message:
-            flash(message, 'error')
-            return redirect(url_for('auth.password_change'))
-        
-        # Update the user's password
-        users[current_user.email]['password'] = argon2.hash(new_password)
-        save_users(users)
-        
-        flash('Password changed successfully.')
-    
-    return render_template('password_change.html', user=current_user)
 
 
 @auth_views.route('/search_comments', methods=['POST'])

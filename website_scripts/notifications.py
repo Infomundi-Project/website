@@ -1,9 +1,10 @@
 from email.mime.multipart import MIMEMultipart
+from smtplib import SMTP_SSL, SMTPException
 from requests import post as post_request
 from email.mime.text import MIMEText
-from smtplib import SMTP_SSL
 
 from . import config
+
 
 def post_webhook(data: dict) -> bool:
     """
@@ -46,6 +47,7 @@ def post_webhook(data: dict) -> bool:
     else:
         return True
 
+
 def send_email(recipient_email: str, subject: str, body: str) -> bool:
     """Takes the recipient email, the subject and the body of the email and sends it. Returns bool."""
     
@@ -58,17 +60,20 @@ def send_email(recipient_email: str, subject: str, body: str) -> bool:
 
     # Create a message
     message = MIMEMultipart()
-    message['From'] = sender_email
+    message['From'] = 'Infomundi Accounts <noreply@infomundi.net>'
     message['To'] = recipient_email
     message['Subject'] = subject
+    message['Reply-To'] = 'noreply@infomundi.net'
     message.attach(MIMEText(body, 'plain'))
 
-    # Establish a connection to the server
-    with SMTP_SSL(smtp_server, smtp_port) as server:
-        # Log in to the email account
-        server.login(sender_email, config.EMAIL_PASSWORD)
+    try:
+        with SMTP_SSL(smtp_server, smtp_port) as server:
+            # Log in to the email account
+            server.login(sender_email, config.EMAIL_PASSWORD)
 
-        # Send the email
-        server.sendmail(sender_email, recipient_email, message.as_string())
+            # Send the email
+            server.sendmail(sender_email, recipient_email, message.as_string())
+    except SMTPException as e:
+        return False
 
     return True

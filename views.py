@@ -13,8 +13,26 @@ def home():
     """Render the homepage."""
     statistics = scripts.get_statistics()
     session_info = scripts.get_session_info(request)
+
+    crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
+    world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+
+    # Assign currency information to the respective country
+    for stock in world_stocks:
+        for currency in currencies:
+            if currency['country_name'].replace('-', ' ').lower() == stock.get('country', '').lower():
+                stock['currency'] = currency
+                break
     
-    return render_template('homepage.html', page='Home', statistics=statistics, user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request))
+    i = 1
+    for item in crypto_data:
+        world_stocks.insert(i, item)
+        i += 2
+    
+    return render_template('homepage.html', page='Home', world_stocks=world_stocks, statistics=statistics, 
+        user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request)
+        )
 
 
 @views.route('/contact', methods=['GET'])
@@ -44,7 +62,6 @@ def donate():
     return redirect(referer)
 
 
-# Endpoint to return multiple RSS feeds as json
 @views.route('/news', methods=['GET'])
 def get_latest_feed():
     """Serving the /news endpoint. This function allows three GET parameters and uses them to filter by country, news category, and page number. It reads the cache information from the respective cache file and renders the rss_template.html template."""
@@ -105,6 +122,12 @@ def get_latest_feed():
     page_num = int(page_num) # Set the page to integer to work properly with rss_template.html
     total_pages = len(cache_pages) if not query else 0 # Else is 0 because rss_template.html should not render the pagination if the query is set
 
+    stock_data = scripts.scrape_stock_data(country_name)
+    country_stock = [x for x in stock_data if x['market_cap'] != None]
+    global_stocks = [x for x in stock_data if x['market_cap'] == None]
+    
+    stock_date = country_stock[0]['date'] if len(country_stock) > 0 else ''
+    
     response = make_response(render_template('rss_template.html', 
         feeds=cache[f'page_{page_num}'], 
         total_pages=total_pages, 
@@ -121,7 +144,9 @@ def get_latest_feed():
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
         gdp=scripts.get_gdp(country_name),
         current_time=scripts.get_current_time_in_timezone(country_filter),
-        stock_data=scripts.scrape_stock_data(country_name)
+        stock_data={} if not country_stock else country_stock,
+        stock_date=stock_date,
+        global_stocks=global_stocks
         )
     )
     
@@ -153,15 +178,13 @@ def autocomplete():
     if len(query) < 2:
         return redirect(url_for('views.home'))
     
-    countries = [x['name'] for x in config.COUNTRY_LIST]
-    results = [country for country in countries if query in country.lower()]
+    results = [x['name'] for x in config.COUNTRY_LIST if query in x['name'].lower()]
     return jsonify(results)
 
 
 @views.route('/comments', methods=['GET'])
 def comments():
     """Render comments for a specific news item."""
-
     news_id = request.args.get('id', '').lower()
     category = request.args.get('category', '').lower()
     page_number = request.args.get('page', '1')
@@ -239,10 +262,10 @@ def add_comment():
         flash('Invalid captcha! Are you a robot?', 'error')
         return redirect(referer)
 
-    name = current_user.id if current_user.is_authenticated else request.form['name']
+    name = current_user.username if current_user.is_authenticated else request.form['name']
     comment_text = request.form['comment']
 
-    if len(comment_text) > 300 or len(name) > 20:
+    if len(comment_text) > 300 or len(name) > 30:
         flash('Please limit your input accordingly.', 'error')
         return redirect(referer)
 
@@ -252,21 +275,15 @@ def add_comment():
         name = choice(config.NICKNAME_LIST)
         is_random_name = True
     
-    # Remove blacklisted
-    blacklist = {'~', '+', '[', '\\', '@', '{', '|', '&', '<', '`', '}', '_', '=', ']', '>'}
-    for i in blacklist:
-        comment_text = comment_text.replace(i, '')
-        name = name.replace(i, '')
-    
     # Checks if news_id is a valid md5 hash
     news_id = request.form['id']
     if len(news_id) != 32 or not (all(c.isdigit() or c.lower() in 'abcdef' for c in news_id)):
-        return "<center><h1>Blocked by InfoMundi</h1></center> <br> <center><h3>Message from the Admin: What is hidden must remain hidden.</h3></center>"
+        return "<center><h1>Blocked by Infomundi</h1></center> <br> <center><h3>Message from the Admin: What is hidden must remain hidden.</h3></center>"
 
     new_comment = {
         'name': name,
         'random_name': is_random_name,
-        'is_admin': current_user.is_authenticated,
+        'is_admin': True if current_user.role == 'admin' else False,
         'text': comment_text,
         'link': scripts.get_session_info(request)['last_visited_news'],
         'id': scripts.create_comment_id()

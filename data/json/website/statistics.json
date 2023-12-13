@@ -1,11 +1,11 @@
 {
-  "current_time": "2023/12/05 20:25",
-  "timestamp": "2023-12-05T20:25:31.725960",
+  "current_time": "2023/12/13 21:59",
+  "timestamp": "2023-12-13T21:59:25.763284",
   "total_countries_supported": 223,
-  "total_news": 1753,
+  "total_news": 1759,
   "total_feeds": 1066,
-  "total_comments": 5,
-  "last_updated": "2023/12/05 at 12:00",
-  "last_updated_message": "8 hours ago",
-  "total_clicks": 27
+  "total_comments": 9,
+  "last_updated": "2023/12/13 at 12:00",
+  "last_updated_message": "9 hours ago",
+  "total_clicks": 135
 }

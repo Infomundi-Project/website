@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@900&display=swap');
+
 .hwrap {
   overflow: hidden;
   background: #000;
@@ -8,17 +9,40 @@
 
 .hitem {
   flex-shrink: 0;
-  width: 100%;
-  font-size: 18px;
+  width: 25%;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: 'Source Code Pro', monospace;
   box-sizing: border-box;
-  padding: 10px;
+  padding: 5px;
   text-align: center;
 }
  
 @keyframes tickerh {
   0% { transform: translate3d(100%, 0, 0); }
-  100% { transform: translate3d(-5000%, 0, 0); }
+  100% { transform: translate3d(-1800%, 0, 0); }
 }
-.hmove { animation: tickerh linear 120s infinite; }
+.hmove { animation: tickerh linear 330s infinite; }
 .hmove:hover { animation-play-state: paused; }
+
+@media (max-width: 900px) {
+  .hitem {
+  flex-shrink: 0;
+  width: 100%;
+  font-size: 14px;
+  font-family: 'Source Code Pro', monospace;
+  box-sizing: border-box;
+  padding: 5px;
+  text-align: center;
+  }
+
+  @keyframes tickerh {
+  0% { transform: translate3d(100%, 0, 0); }
+  100% { transform: translate3d(-5000%, 0, 0); }
+  }
+
+  .hmove { animation: tickerh linear 340s infinite; }
+  .hmove:hover { animation-play-state: paused; }
+}

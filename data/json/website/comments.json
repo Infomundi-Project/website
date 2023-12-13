@@ -49,5 +49,43 @@
       "link": "https://infomundi.net/comments?id=206037584062bbfd7a08f2aa2d3e0591&category=br_general&page=1",
       "id": "ca822671cb6497b5a9f4f64717ca0d03"
     }
+  ],
+  "840cf6635c82a8f21a8189a57479460a": [
+    {
+      "name": "valory",
+      "random_name": false,
+      "is_admin": true,
+      "text": "yo",
+      "link": "https://infomundi.net/comments?id=840cf6635c82a8f21a8189a57479460a&category=br_general&page=1",
+      "id": "7f47362399fec69ac75993be70506217"
+    }
+  ],
+  "280a0b4e0f6e1617938afa88e3d670ea": [
+    {
+      "name": "Lucius",
+      "random_name": false,
+      "is_admin": false,
+      "text": "teste",
+      "link": "https://infomundi.net/comments?id=280a0b4e0f6e1617938afa88e3d670ea&category=br_general&page=1",
+      "id": "e638d1e707dc7f9f5d1dc05fbac23430"
+    },
+    {
+      "name": "barros",
+      "random_name": false,
+      "is_admin": true,
+      "text": "testando",
+      "link": "https://infomundi.net/comments?id=280a0b4e0f6e1617938afa88e3d670ea&category=br_general&page=1",
+      "id": "12f773aa42af7cc1a19b268aa8b00780"
+    }
+  ],
+  "3135323948f440b6b427711ee068d5a3": [
+    {
+      "name": "MHelena123",
+      "random_name": false,
+      "is_admin": false,
+      "text": "Massa",
+      "link": "https://infomundi.net/comments?id=3135323948f440b6b427711ee068d5a3&category=it_general&page=1",
+      "id": "ef9b981a54901df3046093b523596d3d"
+    }
   ]
 }
