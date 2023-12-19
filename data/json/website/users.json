@@ -28,5 +28,10 @@
     "username": "behind",
     "password": "$argon2id$v=19$m=65536,t=3,p=4$jdHaW2uNMea8F+K8V2qtFQ$OGJ96G49o3W9xMAKYZG6Qi2Q1mhuNeqn5v9kpSuEgGs",
     "role": "user"
+  },
+  "guifilho@proton.me": {
+    "username": "{{7*7}}",
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$IaQUotR67x3jnJPS2ttbyw$cjERq7hOD0M6g5ndZHhn7Awbv/8P6SjwNSVNL7kO6zE",
+    "role": "user"
   }
 }

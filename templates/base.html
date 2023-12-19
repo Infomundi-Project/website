@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'light' and page != 'Home' %}light{% else %}dark{% endif %}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -42,13 +42,18 @@
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
     {% block styles %} {% endblock %}
   </head>
-  <body class="bg-dark text-light">
+  <body>
     {% if page not in ['Home', 'Error'] %}
-    <nav class="navbar navbar-expand-lg bg-dark text-light border-bottom border-body sticky-top" data-bs-theme="dark">
+    <nav class="navbar bg-body-tertiary navbar-expand-lg border-bottom border-body sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand logo-text" href="/">Infomundi</a>
+        {% if is_mobile %}
+        <div class="d-flex justify-content-end">
+          <button id="themeToggleBtn" class="btn btn-outline-primary btn-sm"><i id="themeIcon" class="fa-solid fa-{% if request.cookies.get('theme') == 'light' %}sun{% else %}moon{% endif %}"></i></button>
+        </div>
+        {% endif %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon text-light"></span>
+        <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -75,7 +80,7 @@
               </li>
               {% if user.role == 'admin' %}
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('auth.admin') }}">Admin Panel</a>
+                  <a class="nav-link" href="{{ url_for('auth.admin') }}">Admin Dashboard</a>
                 </li>
               {% endif %}
               <li class="nav-item">
@@ -86,8 +91,13 @@
               </li>
             {% endif %}
           </ul>
+          {% if not is_mobile %}
+          <div class="d-flex justify-content-end me-2">
+            <button id="themeToggleBtn" class="btn btn-outline-primary btn-sm"><i id="themeIcon" class="fa-solid fa-{% if request.cookies.get('theme') == 'light' %}sun{% else %}moon{% endif %}"></i></button>
+          </div>
+          {% endif %}
           {% if page == 'Comments' and not is_mobile %}
-          <div class="d-flex justify-content-end">
+          <div class="d-flex justify-content-end ms-2">
             <a href="{{ session_info['last_visited_country'] }}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</button></a>
           </div>
           {% endif %}
@@ -98,66 +108,154 @@
 
     
     {% if page == 'Home' %}
-    <div class="hwrap">
+    <div class="hwrap" id="ticker">
       <div class="hmove">
-        <div class="hitem" style="width: 35%"><i class="fa-solid fa-globe"></i> World Indexes, <i class="fa-solid fa-money-bill"></i> World Currencies and <i class="fa-brands fa-bitcoin"></i> Cryptocoins - {{ world_stocks[0]['date'] }} <i class="fa-solid fa-arrow-right"></i></div>
-        
+        <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies and<i class="fa-brands fa-bitcoin me-2 ms-2"></i>Cryptocoins - {{ world_stocks[0]['date'] }}<i class="fa-solid fa-arrow-right ms-2"></i></div>
+
         {% for entry in world_stocks %}
-    <div class="hitem" style="color: {% if '-' in entry['percent_change'] %}red; {% else %}green; {% endif %}{% if 'currency' in entry.keys() %} width:35%; {% endif %}">
+    <div class="hitem" style="color: {% if '-' in entry['percent_change'] %}red; {% else %}green; {% endif %}">
         {% if ':cur' not in entry['country_name'] %}
-            <span class='fi fi-{{ entry['flag'].split('-')[1] }}'></span>
+            <span class="fi fi-{% if 'flag' in entry.keys() %}{{ entry['flag'].split('-')[1] }}{% endif %} me-1"></span>
         {% else %}
-            <span style="color: white"><i class="fa-brands fa-bitcoin"></i></span>
+            <span style="color: white"><i class="fa-brands fa-bitcoin me-1"></i></span>
         {% endif %}
-        <span style="color: white">
+        <span style="color: white"> 
             {% if ':cur' not in entry['country_name'] %}
-                {{ entry['country'] }}
-                {% if 'currency' in entry.keys() %}
-                    [<i class="fa-solid fa-money-bill"></i>
-                    {% if entry['currency']['name'].startswith('USD') %}
-                        $1 = {{ entry['currency']['price'] }} {{ entry['currency']['currency_symbol'] }}
+                {{ entry['country'] }}<i class="ms-1 fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
+                {% if entry['country'] == 'United States' %}
+                  {% for index, us_info in us_indexes %}
+                    <span style="color:{% if '-' in us_info['percent_change'] %}red;{% else %}green;{% endif %}">{{ us_info['name'] }} {{ us_info['percent_change'] }}</span>
+                    {% if '-' in us_info['percent_change'] %}
+                        <i class="fa-solid fa-caret-down" style="color: red"></i>
                     {% else %}
-                        {{ entry['currency']['currency_symbol'] }}1 = ${{ entry['currency']['price'] }}
-                    {% endif %}]
+                        <i class="fa-solid fa-caret-up" style="color: green"></i>
+                    {% endif %}
+                    {% if index != 2 %}
+                      <span style="color: white">;</span>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <span style="color:{% if '-' in entry['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['name'] }} {{ entry['percent_change'] }}</span>
+                  {% if '-' in entry['percent_change'] %}
+                    <i class="ms-1 fa-solid fa-caret-down" style="color: red"></i>
+                  {% else %}
+                    <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
+                  {% endif %}
+                {% endif %}
+                {% if 'currency' in entry.keys() %}
+                    |<i class="ms-2 fa-solid fa-money-bill-trend-up me-1"></i>{{ entry['currency']['currency_name_plural'].title() }} ({% if  entry['country'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
+                    <span style="color:{% if '-' in entry['currency']['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['currency']['percent_change'] }}<i class="ms-1 fa-solid fa-caret-{% if '-' in entry['currency']['percent_change'] %}down{% else %}up{% endif %}"></i></span> | 
+                    {% if entry['currency']['name'].startswith('USD') %}
+                        1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-2"></i>{{ entry['currency']['price'] }} {{ entry['currency']['currency_symbol'] }}
+                    {% else %}
+                        {{ entry['currency']['currency_symbol'] }}1<i class="fa-solid fa-arrow-right-arrow-left me-2 ms-2"></i>${{ entry['currency']['price'] }}
+                    {% endif %}
                 {% endif %}
             {% else %}
                 {{ entry['name'] }}
+                <i class="fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
+                <span style="color:{% if '-' in entry['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['symbol'] }} {{ entry['percent_change'] }}</span>
+                {% if '-' in entry['percent_change'] %}
+                  <i class="ms-1fa-solid fa-caret-down" style="color: red"></i>
+                {% else %}
+                  <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
+                {% endif %}
             {% endif %}
         </span>
-        {{ entry['symbol'] }} {{ entry['percent_change'] }}
-        {% if '-' in entry['percent_change'] %}
-            <i class="fa-solid fa-caret-down" style="color: red"></i>
-        {% else %}
-            <i class="fa-solid fa-caret-up" style="color: green"></i>
-        {% endif %}
     </div>
 {% endfor %}
-
       </div>
     </div>
     {% endif %}
 
 
-    {% if page == 'News' %}
-    <div class="hwrap">
-      <div class="hmove">
-        {% if stock_date %}
-        <div class="hitem"><i class="fa-solid fa-arrow-trend-up"></i> Stocks (<i class="fa-solid fa-calendar-days"></i> {{ stock_date }}) <i class="fa-solid fa-arrow-right"></i></div>
+{% if page == 'News' %}
+  <div class="hwrap" id="ticker">
+    <div class="hmove">
+
+      {% if stock_date and not is_global %}
+        {% if country_index %}
+          <div class="hitem" style="color: white">
+            <span class='fi fi-{% if 'flag' in country_index.keys() %}{{ country_index['flag'].split('-')[1] }}{% endif %}'></span>
+            <span style="color: white">{{ country_index['country'] }}</span> 
+            <i class="fa-solid fa-arrow-trend-up" style="color: white"></i> 
+            <span style="color:{% if '-' in country_index['percent_change'] %}red;{% else %}green;{% endif %}">
+              {{ country_index['name'] }} {{ country_index['percent_change'] }}
+            </span>
+
+            {% if '-' in country_index['percent_change'] %}
+              <i class="fa-solid fa-caret-down" style="color: red"></i>
+            {% else %}
+              <i class="fa-solid fa-caret-up" style="color: green"></i>
+            {% endif %}
+
+            {% if 'currency' in country_index.keys() %}
+              | <i class="fa-solid fa-money-bill-trend-up" style="color: white"></i> 
+              <span style="color: white">{{ country_index['currency']['currency_name_plural'].title() }} ({{ country_index['currency']['name'].replace('USD', '') }})</span> 
+
+              <span style="color:{% if '-' in country_index['currency']['percent_change'] %}red;{% else %}green;{% endif %}">
+                {{ country_index['currency']['percent_change'] }} 
+                <i class="fa-solid fa-caret-{% if '-' in country_index['currency']['percent_change'] %}down{% else %}up{% endif %}"></i>
+              </span> | 
+
+              <span style="color: white">
+              {% if country_index['currency']['name'].startswith('USD') %}
+                1 USD<i class="ms-1 fa-solid fa-arrow-right-arrow-left me-1"></i>
+                {{ country_index['currency']['price'] }} {{ country_index['currency']['currency_symbol'] }}
+              {% else %}
+                {{ country_index['currency']['currency_symbol'] }}1
+                <i class="fa-solid fa-arrow-right-arrow-left me-1 ms-1"></i>
+                ${{ country_index['currency']['price'] }}
+              {% endif %}
+              </span>
+            {% endif %}
+          </div>
         {% endif %}
-        {% if not stock_data %}
-          <div class="hitem"><i class="fa-solid fa-circle-info"></i> No national stock data available</div>
-          <div class="hitem"><i class="fa-solid fa-globe"></i> Main world stocks <i class="fa-solid fa-arrow-right"></i></div>
-          {% for stock_info in global_stocks %}
-            <div class="hitem" {% if '-' in stock_info['day_change'] %} style="color: red" {% else %} style="color: green" {% endif %}>{{ stock_info['symbol'] }} {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %}<i class="fa-solid fa-caret-down"></i>{% else %}<i class="fa-solid fa-caret-up"></i>{% endif %}</div>
-          {% endfor %}
-        {% else %}
-          {% for stock_info in stock_data %}
-          <div class="hitem" style="color:{% if '-' in stock_info['day_change'] %} red;{% else %} green;{% endif %} {% if stock_info['name']|length > 20 and not is_mobile %} width: 35%;{% endif %}{% if stock_info['name']|length > 20 and is_mobile %} width: 120%;{% endif %}"><span style="color: white">{{ stock_info['name'] }}</span> {{ stock_info['symbol'] }} {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %}<i class="fa-solid fa-caret-down"></i>{% else %}<i class="fa-solid fa-caret-up"></i>{% endif %} {% if stock_info['market_cap'] != None %}<span style="color: white">({{ stock_info['market_cap'] }} <i class="fa-solid fa-shop-lock"></i>)</span>{% endif %}</div>
-          {% endfor %}
-        {% endif %}
+      {% endif %}
+
+      {% if not is_global %}
+      <div class="hitem" style="color: white">
+        <i class="fa-solid fa-arrow-trend-up me-1"></i>
+        Stocks (<i class="fa-solid fa-calendar-days me-1"></i>{{ stock_date }})
+        <i class="fa-solid fa-arrow-right ms-1"></i>
       </div>
+      {% endif %}
+
+      {% if is_global %}
+        <div class="hitem" style="color: white">
+          <i class="fa-solid fa-circle-info me-1"></i>
+          No national stock data available
+        </div>
+        <div class="hitem" style="color: white">
+          <i class="fa-solid fa-globe me-1"></i>
+          Main world stocks
+          <i class="fa-solid fa-arrow-right ms-1"></i>
+        </div>
+      {% endif %}
+
+      {% for stock_info in stock_data %}
+        <div class="hitem" style="color:{% if '-' in stock_info['day_change'] %} red;{% else %} green;{% endif %}">
+          <span style="color: white">{{ stock_info['name'] }}</span>
+          {{ stock_info['symbol'] }}
+          {{ stock_info['day_change'] }}
+          {% if '-' in stock_info['day_change'] %}
+            <i class="fa-solid fa-caret-down"></i>
+          {% else %}
+            <i class="fa-solid fa-caret-up"></i>
+          {% endif %}
+          {% if stock_info['market_cap'] != None %}
+            <span style="color: white">
+              ({{ stock_info['market_cap'] }} <i class="fa-solid fa-shop-lock"></i>)
+            </span>
+          {% endif %}
+        </div>
+      {% endfor %}
+
     </div>
-    {% endif %}
+  </div>
+{% endif %}
+
+
     <div class="container-fluid">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %} {% if category ==
@@ -172,13 +270,12 @@
       {% endif %} {% endfor %} {% endif %} {% endwith %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header bg-dark text-light">
+          <div class="toast-header">
             <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" width="50" height="50">
-            <strong class="me-auto">Maximus: "Would you like to translate?"</strong>
-            <!-- <small>Now</small> -->
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            <strong class="me-auto"><i class="fa-solid fa-language me-1"></i>Maximus says: Would you like to translate this page?</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
-          <div class="toast-body bg-dark text-light">
+          <div class="toast-body">
             <div id="google_translate_element"></div>
           </div>
         </div>
@@ -217,6 +314,52 @@
         );
       }
     </script>
+    <script>
+    const setCookie = (name, value, daysToExpire) => {
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + daysToExpire);
+
+      const cookieString = `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
+
+      document.cookie = cookieString;
+    };
+
+    const toggleTheme = () => {
+      const htmlElement = document.querySelector('html');
+      const currentTheme = htmlElement.getAttribute('data-bs-theme');
+
+      // Toggle between 'dark' and 'light'
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      // Set the new theme value
+      htmlElement.setAttribute('data-bs-theme', newTheme);
+
+      // Set a cookie indicating the current theme
+      setCookie('theme', newTheme, 7);
+
+      // Change the icon based on the theme
+      const themeIcon = document.getElementById('themeIcon');
+      themeIcon.classList.toggle('fa-sun', newTheme === 'light');
+      themeIcon.classList.toggle('fa-moon', newTheme === 'dark');
+    };
+
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+  </script>
+  <script>
+  const container = document.getElementById('ticker');
+
+  let scrollInterval;
+
+  container.addEventListener('mouseover', () => {
+    scrollInterval = setInterval(() => {
+      container.scrollLeft += 2; // Scroll speed
+    }, 10); // Interval
+  });
+
+  container.addEventListener('mouseout', () => {
+    clearInterval(scrollInterval);
+  });
+  </script>
     {% block scripts %} {% endblock %}
   </body>
 </html>

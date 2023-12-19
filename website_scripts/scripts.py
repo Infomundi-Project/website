@@ -13,131 +13,13 @@ from hashlib import md5
 from . import config, json_util, immutable, notifications
 
 
-def scrape_world_stock_data() -> dict:
-    filepath = f'{config.STOCK_PATH}/world_stock'
-    if not is_cache_old(f'{filepath}.json'):
-        stock_data = json_util.read_json(filepath)
-        return stock_data
-
-    url = "https://tradingeconomics.com/stocks" 
-    headers = {
-        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-    }
-    response = get_request(url, headers=headers)
-
-    html = response.text
-    soup = BeautifulSoup(html, 'html.parser')
-
-    data_by_continent = {}
-
-    # Loop through each continent's data
-    for continent_table in soup.select('.card table.table'):
-        continent_name = continent_table.select_one('th.te-sort').text.strip()
-        continent_data = []
-
-        # Extracting data from each row in the continent's table
-        for row in continent_table.select('.datatable-row'):
-            symbol = row['data-symbol']
-            name = row.select_one('.datatable-item-first a b').text.strip()
-            price = row.select_one('#p').text.strip()
-            day_change = row.select_one('#nch').text.strip()
-            percent_change = row.select_one('#pch').text.strip()
-            weekly_change = row.select('.datatable-heatmap')[0].text.strip()
-            monthly_change = row.select('.datatable-heatmap')[1].text.strip()
-            yoy_change = row.select('.datatable-heatmap')[2].text.strip()
-            date = row.select_one('#date').text.strip()
-
-            # Check if the trading session is open or closed
-            session_icon = row.select_one('#session span')
-            session_status = "Closed" if session_icon and 'color: darkred' in session_icon.get('style', '') else "Open"
-
-            data = {
-                'symbol': symbol,
-                'name': name,
-                'price': price,
-                'day_change': day_change,
-                'percent_change': percent_change,
-                'weekly_change': weekly_change,
-                'monthly_change': monthly_change,
-                'yoy_change': yoy_change,
-                'date': date,
-                'session_status': session_status,
-            }
-
-            continent_data.append(data)
-
-        for row in continent_table.select('.datatable-row-alternating'):
-            symbol = row['data-symbol']
-            name = row.select_one('.datatable-item-first a b').text.strip()
-            price = row.select_one('#p').text.strip()
-            day_change = row.select_one('#nch').text.strip()
-            percent_change = row.select_one('#pch').text.strip()
-            weekly_change = row.select('.datatable-heatmap')[0].text.strip()
-            monthly_change = row.select('.datatable-heatmap')[1].text.strip()
-            yoy_change = row.select('.datatable-heatmap')[2].text.strip()
-            date = row.select_one('#date').text.strip()
-
-            # Check if the trading session is open or closed
-            session_icon = row.select_one('#session span')
-            session_status = "Closed" if session_icon and 'color: darkred' in session_icon.get('style', '') else "Open"
-
-            data = {
-                'symbol': symbol,
-                'name': name,
-                'price': price,
-                'day_change': day_change,
-                'percent_change': percent_change,
-                'weekly_change': weekly_change,
-                'monthly_change': monthly_change,
-                'yoy_change': yoy_change,
-                'date': date,
-                'session_status': session_status,
-            }
-
-            continent_data.append(data)
-
-        data_by_continent[continent_name] = continent_data
-
-    flags = json_util.read_json(f'{config.STOCK_PATH}/stock_to_flag')
-    countries = config.COUNTRY_LIST
-    for continent, stock_info in data_by_continent.items():
-        for item in stock_info:
-            for flag in flags:
-                for stock_name, flag in flag.items():
-                    if stock_name.lower() == item['name'].lower().replace(' ', ''):
-                        item['flag'] = flag
-
-
-            for country in countries:
-                try:
-                    if item['flag'].split('-')[1].lower() == country['code'].lower():
-                        country_name = country['name']
-                        if country_name == 'Bosnia and Herzegovina':
-                            country_name = 'BEH'
-                            break
-                        
-                        # Splits the country name by space and checks if the country name has more than or is equal to 3 words
-                        cname_split = country_name.split(' ')
-                        if len(cname_split) >= 3:
-                            first_characters = [word[0].title() for word in cname_split]
-                            country_name = ''.join(first_characters) # Uses a combination of the first character from each word (example: Bosnia and Herzegovina would become BAH)
-                        
-                        item['country'] = country_name
-                        break
-                except Exception:
-                    pass
-
-    json_util.write_json(data_by_continent, filepath)
-    return data_by_continent
-
-
 def scrape_stock_data(country_name: str) -> list:
     """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
     country_name = country_name.lower().replace(' ', '-')
 
-    # Checks if cache is old enough (24 hours)
+    # Checks if cache is old enough (12 hours)
     filepath = f'{config.STOCK_PATH}/{country_name}_stock'
-    if not is_cache_old(f'{filepath}.json'):
+    if not is_cache_old(f'{filepath}.json', 12):
         stock_data = json_util.read_json(filepath)
         return stock_data
 
@@ -200,8 +82,11 @@ def log(text: str, log_type: str='exception') -> bool:
         return False
 
     log_file = f'{config.LOGS_PATH}/{log_type}.log'
-    with open(log_file, 'a') as f:
-        f.write(f'{text}\n')
+    try:
+        with open(log_file, 'a') as f:
+            f.write(f'{text}\n')
+    except Exception:
+        return False
 
     return True
 
@@ -423,17 +308,28 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
             save = {}
             
             # Primarily collects GDP from IMF (International Monetary Fund)
-            imf = f'{row[2]} (IMF)' if len(row) > 2 else "N/A"
-            imf_date = row[3] if len(row) > 3 else "N/A"
+            
+            gdp = row[2] if len(row) > 2 else "N/A"
+            gdp_date = row[3] if len(row) > 3 else "N/A"
+            gdp_publisher = 'IMF'
             
             # If there's no data from the IMF, use World Bank instead.
-            if ',' in imf_date:
-                imf = f'{row[3]} (World Bank)' if len(row) > 3 else "N/A" 
-                imf_date = row[4] if len(row) > 4 else "N/A"
-            
+            if ',' in gdp_date:
+                gdp = row[3] if len(row) > 3 else "N/A" 
+                gdp_date = row[4] if len(row) > 4 else "N/A"
+                gdp_publisher = 'World Bank'
+        
+            if not is_per_capita:
+                # Removes ',' and multiplies by one million
+                try:
+                    gdp = int(gdp.replace(',', '')) * 1000000
+                    gdp = '{:,}'.format(gdp)
+                except ValueError as err:
+                    pass
+
             save[country] = {}
-            save[country]['gdp'] = imf 
-            save[country]['date'] = imf_date 
+            save[country]['gdp'] = f'${gdp} ({gdp_publisher})'
+            save[country]['date'] = gdp_date
             save_list.append(save)
 
     json_util.write_json(save_list[2:], cache_filepath)

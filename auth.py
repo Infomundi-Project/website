@@ -120,7 +120,7 @@ def register():
 
         flash(f'We sent an email to {email}. Please, activate your account by clicking on the provided link.')
     
-    return render_template('register.html', user=current_user)
+    return render_template('register.html', user=current_user, is_mobile=scripts.detect_mobile(request))
 
 
 @auth_views.route('/verify', methods=['GET'])
@@ -172,13 +172,18 @@ def login():
 
         flash('Invalid credentials!', 'error')
     
-    return render_template('login.html', user=current_user)
+    return render_template('login.html', user=current_user, is_mobile=scripts.detect_mobile(request))
 
 
 @auth_views.route('/password_change', methods=['GET', 'POST'])
 @login_required
 def password_change():
     if request.method == 'POST':
+        token = request.form['cf-turnstile-response']
+        if not scripts.valid_captcha(token):
+            flash('Invalid captcha. Are you a robot?', 'error')
+            return redirect(url_for('auth.login'))
+        
         try:
             old_password = request.form['old_password']
             
@@ -208,13 +213,13 @@ def password_change():
         
         flash('Password changed successfully.')
     
-    return render_template('password_change.html', user=current_user)
+    return render_template('password_change.html', user=current_user, is_mobile=scripts.detect_mobile(request))
 
 
 @auth_views.route('/admin')
 @admin_required
 def admin():
-    return render_template('admin.html', user=current_user)
+    return render_template('admin.html', user=current_user, is_mobile=scripts.detect_mobile(request))
 
 
 @auth_views.route('/get_feed_info', methods=['POST'])

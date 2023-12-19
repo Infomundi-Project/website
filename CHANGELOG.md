@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.2.0 | 2023/12/19 | Introduced light mode, improved ticker functionality, added geopolitical placeholder. Removed unused resources. Fixed ticker and display issues. Enhanced password change page security. | @behindsecurity |
 | 1.1.9 | 2023/12/13 | Improved mobile compatibility for the ticker. Added crypto, currency, and index information to the homepage. Changed display of country stocks. Removed navbar return button for mobile users. Enhanced account creation spam prevention. Reduced password complexity. | @behindsecurity |
 | 1.1.8 | 2023/12/05 | Added login system. Fixed news ticker. No other changes or security updates. | @behindsecurity |
 | 1.1.7 | 2023/12/04 | Added nation statistics, click removal for inactive news, and main stock display. Removed unnecessary scripts. Fixed error page and UTC-related bug. Improved captcha security. No other changes. | @behindsecurity |
@@ -15,6 +16,28 @@
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.2.0 2023/12/19
+
+### Enhancements (3)
+- IME01: Introducing light mode! Users can now switch between light and dark mode with a click of a button.
+- IME02: General improvements to the ticker (speed functionality, fixes and new information being displayed).
+- IME03: Added geopolitical placeholder when no information is available.
+
+### Changed ()
+
+### Removed (1)
+- IMR01: Removed flags.css and flags.png as they were no longer being used.
+
+### Fixed (4)
+- IMF01: Fixed ticker not displaying the entire text on smaller screens.
+- IMF02: Fixed globe not showing properly on mobile.
+- IMF03: Fixed world stock data not showing in countries that don't have national stock data.
+- IMF04: Fixed GDP data not displaying accordingly.
+
+### Security (1)
+- IMS01: Enhanced security on password change page.
 
 
 ## 1.1.9 2023/12/13

@@ -23,6 +23,10 @@ def get_world_data():
         }
         response = get_request(url, headers=headers)
 
+        if response.status_code != 200:
+            print(f'[+] Error getting {endpoint}. Response code: {response.status_code}')
+            continue
+
         html = response.text
         soup = BeautifulSoup(html, 'html.parser')
 
@@ -46,8 +50,14 @@ def get_world_data():
                 from_dollar = True if name.startswith('USD') else False
                 currency_name = name.replace('USD', '')
                 price = round(float(price), 2)
+                
                 if currency_name in common_currency:
                     currency_symbol = common_currency[currency_name]['symbol']
+                    name_plural = common_currency[currency_name]['name_plural']
+                
+                if currency_name == 'DXY':
+                    currency_symbol = '$'
+                    name_plural = 'US dollars'
             else:
                 currency_symbol = ''
                 from_dollar = ''
@@ -57,6 +67,7 @@ def get_world_data():
                 'name': name,
                 'price': price,
                 'currency_symbol': currency_symbol,
+                'currency_name_plural': name_plural,
                 'from_dollar': from_dollar,
                 'day_change': day_change,
                 'percent_change': percent_change,
@@ -86,8 +97,14 @@ def get_world_data():
                 from_dollar = True if name.startswith('USD') else False
                 currency_name = name.replace('USD', '')
                 price = round(float(price), 2)
+                
                 if currency_name in common_currency:
                     currency_symbol = common_currency[currency_name]['symbol']
+                    name_plural = common_currency[currency_name]['name_plural']
+                
+                if currency_name == 'DXY':
+                    currency_symbol = '$'
+                    name_plural = 'US dollars'
             else:
                 currency_symbol = ''
                 from_dollar = ''
@@ -96,6 +113,7 @@ def get_world_data():
                 'symbol': symbol,
                 'name': name,
                 'currency_symbol': currency_symbol,
+                'currency_name_plural': name_plural,
                 'from_dollar': from_dollar,
                 'price': price,
                 'day_change': day_change,

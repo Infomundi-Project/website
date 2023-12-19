@@ -3,19 +3,19 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <div class="card bg-dark">
-        <div class="card-header text-light">
+      <div class="card">
+        <div class="card-header">
           Login
         </div>
-        <div class="card-body text-light">
+        <div class="card-body">
           <form method="post" action="{{ url_for('auth.login') }}">
             <div class="mb-3">
-              <label for="username" class="form-label">Email</label>
-              <input type="text" class="form-control bg-dark text-light" id="email" name="email" required>
+              <label for="username" class="form-label"><i class="fa-solid fa-envelope me-1"></i>Email</label>
+              <input type="text" class="form-control" id="email" name="email" required>
             </div>
             <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control bg-dark text-light" id="password" name="password" required>
+              <label for="password" class="form-label"><i class="fa-solid fa-lock me-1"></i>Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="mb-3">
               <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>

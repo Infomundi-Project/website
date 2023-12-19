@@ -3,7 +3,7 @@ from flask_login import current_user
 from random import choice
 from time import time
 
-from website_scripts import scripts, config, json_util
+from website_scripts import scripts, config, json_util, immutable
 
 views = Blueprint('views', __name__)
 
@@ -18,20 +18,36 @@ def home():
     world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
     currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
 
+    us_indexes = [x for x in world_stocks if x['name'] in ['US500', 'US100', 'US30']]
+    
+    unique_indexes = []
+    for index in us_indexes:
+        if index not in unique_indexes:
+            unique_indexes.append(index)
+
     # Assign currency information to the respective country
     for stock in world_stocks:
         for currency in currencies:
-            if currency['country_name'].replace('-', ' ').lower() == stock.get('country', '').lower():
+            country_name = currency['country_name'].replace('-', ' ').lower()
+            if country_name == stock.get('country', '').lower():
+                if currency['name'] == 'DXY':
+                    currency['name'] = 'USD'
+                    currency['price'] = 1
                 stock['currency'] = currency
                 break
-    
+
+        if not stock.get('currency', ''):
+            country_name = stock['country_name'].lower()
+            if country_name in immutable.EU_COUNTRIES:
+                stock['currency'] = currencies[0]
+
     i = 1
     for item in crypto_data:
         world_stocks.insert(i, item)
         i += 2
     
-    return render_template('homepage.html', page='Home', world_stocks=world_stocks, statistics=statistics, 
-        user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request)
+    return render_template('homepage.html', page='Home', world_stocks=world_stocks, us_indexes=enumerate(unique_indexes), statistics=statistics, 
+        user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request), country_code='en'
         )
 
 
@@ -113,7 +129,7 @@ def get_latest_feed():
     comments = json_util.read_json(config.COMMENTS_PATH)
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     for story in cache[f'page_{page_num}']:
-        story['title'] = ' '.join(story['title'].split(' ')[:8]) + '...' if len(story['title']) > 90 else story['title'] # Filter the title length
+        story['title'] = ' '.join(story['title'].split(' ')[:10]) + '...' if len(story['title']) > 90 else story['title'] # Filter the title length
         story['total_comments'] = len(comments[story['id']]) if story['id'] in comments else ''
         story['total_clicks'] = telemetry[story['id']]['clicks'] if story['id'] in telemetry else ''
     
@@ -123,10 +139,20 @@ def get_latest_feed():
     total_pages = len(cache_pages) if not query else 0 # Else is 0 because rss_template.html should not render the pagination if the query is set
 
     stock_data = scripts.scrape_stock_data(country_name)
-    country_stock = [x for x in stock_data if x['market_cap'] != None]
-    global_stocks = [x for x in stock_data if x['market_cap'] == None]
-    
-    stock_date = country_stock[0]['date'] if len(country_stock) > 0 else ''
+
+    is_global = False
+    if not stock_data or stock_data[0]['market_cap'] == None:
+        stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
+        is_global = True
+
+    stock_date = stock_data[0]['date']
+
+    try:
+        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x.get('country', '').lower() == country_name.lower()][0]
+        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x.get('country_name', '').lower() == country_name.lower()][0]
+        country_index['currency'] = currency_info
+    except IndexError:
+        country_index = ''
     
     response = make_response(render_template('rss_template.html', 
         feeds=cache[f'page_{page_num}'], 
@@ -144,9 +170,10 @@ def get_latest_feed():
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
         gdp=scripts.get_gdp(country_name),
         current_time=scripts.get_current_time_in_timezone(country_filter),
-        stock_data={} if not country_stock else country_stock,
-        stock_date=stock_date,
-        global_stocks=global_stocks
+        stock_data=stock_data,
+        is_global=is_global,
+        country_index=country_index,
+        stock_date=stock_date
         )
     )
     
@@ -283,7 +310,7 @@ def add_comment():
     new_comment = {
         'name': name,
         'random_name': is_random_name,
-        'is_admin': True if current_user.role == 'admin' else False,
+        'is_admin': True if current_user.is_authenticated and current_user.role == 'admin' else False,
         'text': comment_text,
         'link': scripts.get_session_info(request)['last_visited_news'],
         'id': scripts.create_comment_id()

@@ -87,5 +87,63 @@
       "link": "https://infomundi.net/comments?id=3135323948f440b6b427711ee068d5a3&category=it_general&page=1",
       "id": "ef9b981a54901df3046093b523596d3d"
     }
+  ],
+  "6b7ad2ad5f4c6c1e510d7ca5c6105b9e": [
+    {
+      "name": "Steel Forge",
+      "random_name": true,
+      "is_admin": false,
+      "text": "\u00e9 isso renato vamo pra cima!",
+      "link": "https://infomundi.net/comments?id=6b7ad2ad5f4c6c1e510d7ca5c6105b9e&category=br_general&page=1",
+      "id": "45b17739d6dfdbcbc5845dff79f87120"
+    },
+    {
+      "name": "Captain Peroxide",
+      "random_name": true,
+      "is_admin": false,
+      "text": "123",
+      "link": "https://infomundi.net/comments?id=6b7ad2ad5f4c6c1e510d7ca5c6105b9e&category=br_general&page=1",
+      "id": "179cd54c69a8d48438898c8ddca5c185"
+    }
+  ],
+  "1b63a273768c9b5fa9c425131a263b32": [
+    {
+      "name": "{{7*7}}",
+      "random_name": false,
+      "is_admin": false,
+      "text": "):",
+      "link": "https://infomundi.net/comments?id=1b63a273768c9b5fa9c425131a263b32&category=br_general&page=1",
+      "id": "eaea18110cfd86712b902e2933f924e0"
+    }
+  ],
+  "7d4eb50dd9fce62213e042af2752dac9": [
+    {
+      "name": "valory",
+      "random_name": false,
+      "is_admin": true,
+      "text": "test",
+      "link": "https://infomundi.net/comments?id=7d4eb50dd9fce62213e042af2752dac9&category=us_general&page=1",
+      "id": "ff1156c282837a0213bc999d9238ddba"
+    }
+  ],
+  "071cff6fa80565895165a87a8b66accc": [
+    {
+      "name": "Shield Lively",
+      "random_name": true,
+      "is_admin": false,
+      "text": "what a crazy world we are living in",
+      "link": "https://infomundi.net/comments?id=071cff6fa80565895165a87a8b66accc&category=us_general&page=1",
+      "id": "65a7cc46819e9e274266daf8b7127a4e"
+    }
+  ],
+  "90c3d2b427cc621f96d5b7392888ae3b": [
+    {
+      "name": "Sabotage",
+      "random_name": true,
+      "is_admin": false,
+      "text": "que isso pora KkKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK",
+      "link": "https://infomundi.net/comments?id=90c3d2b427cc621f96d5b7392888ae3b&category=us_general&page=1",
+      "id": "a10f971b077d77cd890b2764c3e7bbb3"
+    }
   ]
 }
