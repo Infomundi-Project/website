@@ -32,7 +32,10 @@ def get_world_data():
 
         continent_data = []
 
-            # Extracting data from each row in the continent's table
+        datatables = [row for row in soup.select('.datatable-row')]
+        
+
+        # Extracting data from each row in the continent's table
         for row in soup.select('.datatable-row'):
             symbol = row['data-symbol']
             name = row.select_one('.datatable-item-first a b').text.strip()

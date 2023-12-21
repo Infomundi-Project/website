@@ -11,16 +11,22 @@
           <form method="post" action="{{ url_for('auth.login') }}">
             <div class="mb-3">
               <label for="username" class="form-label"><i class="fa-solid fa-envelope me-1"></i>Email</label>
-              <input type="text" class="form-control" id="email" name="email" required>
+              <input type="email" class="form-control" id="email" name="email" required>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label"><i class="fa-solid fa-lock me-1"></i>Password</label>
               <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <div class="mb-3">
+            <div class="mb-2">
               <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="yes" id="rememberMe" name="remember_me">
+              <label class="form-check-label" for="rememberMe">
+                Remember me
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Login</button>
           </form>
         </div>
       </div>

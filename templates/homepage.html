@@ -5,7 +5,6 @@
   width: 100%;
   height: 100vh;
   max-width: 100%;
-  margin-top: -1.5vh;
   }
   .fa-solid me-1 {
   color: #ffffff;
@@ -25,40 +24,22 @@
   max-width: 80%;
   }
   }
-  .accordion {
-  --bs-accordion-btn-bg: #202429;
-  --bs-accordion-btn-color: #ffffff;
-  --bs-accordion-active-bg: #202429;
-  --bs-accordion-active-color: #ffffff;
-  --bs-accordion-bg: #131619;
-  --bs-accordion-color: #ffffff;
-  --bs-accordion-btn-focus-box-shadow: none;
-  }
-  .accordion-flush .accordion-button {
-  border-top: 1px solid #000000;
-  }
-  .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
-  .accordion-flush .accordion-item:last-child .accordion-body {
-  border-bottom: 1px solid #000000;
-  }
 </style>
 {% endblock %}
 {% block content %}
 <div class="row">
   <div class="col-sm text-center mb-5 mt-4">
-    <h1 class="logo-text"><img 
-      src="{{ url_for('static', filename='img/raw-infomundi-logo.webp') }}"
+    <img 
+      src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/wide-light.png') }}{% else %}{{ url_for('static', filename='img/logos/wide-dark.png') }}{% endif %}"
       class="infomundi-logo"
-      alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact."
-      height="173"
-      width="120" 
-      />Infomundi</h1>
+      alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
+      />
     <center>
       <p class="fs-4"><label for="query">Search a Country</label></p>
       <div class="input-group justify-content-center">
-        <span class="input-group-text bg-dark" id="search-icon"><i class="fa-solid me-1 fa-magnifying-glass"></i></span>
+        <span class="input-group-text" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
         <input 
-          class="form-control bg-dark text-light autocomplete" 
+          class="form-control autocomplete" 
           aria-describedby="search-icon"
           style="max-width: 360px;"
           type="search" 
@@ -101,17 +82,18 @@
                 <p class="fs-4"><i class="fa-solid me-1 fa-user"></i>Session</p>
                 
                 {% if user.is_authenticated %}
-                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ user.username }}.</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ user.username }}!</p>
+                <p class="fs-6 good-blue"><a href="{{ url_for('auth.logout') }}" class="text-reset text-decoration-none"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></p>
                 {% else %}
                 <p class="fs-6 good-blue"><a href="{{ url_for('auth.register') }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-user-pen" style="color: #3666ba;"></i>Register</a></p>
-                <p class="fs-6 good-blue"><a href="{{ url_for('auth.login') }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-user-tag" style="color: #3666ba;"></i>Log in</a></p>
+                <p class="fs-6 good-blue"><a href="{{ url_for('auth.login') }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-right-to-bracket" style="color: #3666ba;"></i>Log in</a></p>
                 {% endif %}
                 
-                {% if session_info['last_visited_country'] %}
-                <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_country'] }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited country</a></p>
+                {% if last_visited_country %}
+                <p class="fs-6 good-blue"><a href="{{ last_visited_country }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited country</a></p>
                 {% endif %}
-                {% if session_info['last_visited_news']  %}
-                <p class="fs-6 good-blue"><a href="{{ session_info['last_visited_news'] }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited news</a></p>
+                {% if last_visited_news %}
+                <p class="fs-6 good-blue"><a href="{{ last_visited_news }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited news</a></p>
                 {% endif %}
               </div>
             </div>

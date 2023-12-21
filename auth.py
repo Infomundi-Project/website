@@ -40,14 +40,14 @@ def save_users(users):
     json_util.write_json({user.email: {'username': user.username, 'password': user.password, 'role': user.role} for user in users.values()}, config.USERS_PATH)
 
 
-def verify_password(email: str, password: str):
+def verify_password(email: str, password: str, remember: bool):
     users = load_users()
     if email in users:
         user = users[email]
         if argon2.verify(password, user.password):
-            login_user(user)
+            login_user(user, remember=remember)
             
-            flash(f'Welcome back, {current_user.username}.')
+            flash(f'Welcome back, {current_user.username}!')
             return True
 
     return False
@@ -79,14 +79,14 @@ def register():
             flash('Invalid captcha. Are you a robot?', 'error')
             return redirect(url_for('auth.register'))
         
-        email = request.form['email']
+        email = request.form.get('email', '')
         if not scripts.is_valid_email(email):
-            flash('Invalid email.', 'error')
+            flash('Invalid email address.', 'error')
             return redirect(url_for('auth.register'))
 
-        username = request.form['username'].replace(' ', '')
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
 
         for character in immutable.SPECIAL_CHARACTERS:
             username.replace(character, '')
@@ -100,7 +100,7 @@ def register():
             message = 'Password Policy: The password must have at least 1 number, 8 characters minimum and a maximum of 50 characters.'
         elif email in users:
             message = 'Email already exists.'
-        elif any(user.username == username for user in users.values()):
+        elif any(user.username == username.replace(' ', '') for user in users.values()):
             message = 'Username already exists'
         else:
             message = ''
@@ -111,7 +111,8 @@ def register():
 
         send_token = scripts.send_verification_token(email, username)
         if not send_token:
-            flash('Something went wrong. Please, try again later.')
+            flash('We apologize, but something went wrong. Please, try again later.')
+            scripts.log(f'[+] Not able to send verification token to {email}.')
             return redirect(url_for('auth.register'))
 
         session['email'] = email
@@ -157,15 +158,20 @@ def verify():
 @auth_views.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        token = request.form['cf-turnstile-response']
+        token = request.form.get('cf-turnstile-response', '')
         if not scripts.valid_captcha(token):
             flash('Invalid captcha. Are you a robot?', 'error')
             return redirect(url_for('auth.login'))
 
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
 
-        if verify_password(email, password):
+        if len(password) < 8 or not email:
+            flash('Invalid credentials!', 'error')
+            return redirect(url_for('auth.login'))
+
+        # Verify password is responsible for logging in the user too.
+        if verify_password(email, password, bool(request.form.get('remember_me', ''))):
             if current_user.role != 'admin':
                 return redirect(url_for('views.home'))
             return redirect(url_for('auth.admin'))
@@ -179,18 +185,19 @@ def login():
 @login_required
 def password_change():
     if request.method == 'POST':
-        token = request.form['cf-turnstile-response']
+        token = request.form.get('cf-turnstile-response', '')
         if not scripts.valid_captcha(token):
             flash('Invalid captcha. Are you a robot?', 'error')
             return redirect(url_for('auth.login'))
         
-        try:
-            old_password = request.form['old_password']
+        old_password = request.form.get('old_password', '')
             
-            new_password = request.form['new_password']
-            confirm_password = request.form['confirm_password']
-        except Exception:
-            flash('Something went wrong.')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+            
+        if not old_password or not new_password or not confirm_password:
+            flash('We apologize, but something went wrong. Try again later.', 'error')
+            scripts.log('[!] User had issues when changing password: old_password, new_password or confirm_password.')
             return redirect(url_for('auth.password_change'))
         
         users = load_users()
@@ -343,7 +350,9 @@ def search_comments():
     search_results = []
     comments = json_util.read_json(config.COMMENTS_PATH)
     for news_id in comments:
-        if news_id == 'enabled': continue # skips 'enabled' key as it would trigger a key error below in comment['text']
+        # Skips 'enabled' key as it would trigger a key error below in comment['text']
+        if news_id == 'enabled': continue
+        
         for comment in comments[news_id]:
             if search_text in comment['text']:
                 search_results.append(comment)
@@ -374,6 +383,7 @@ def delete_comment():
                 return redirect(url_for('auth.admin'))
     
     flash(f'We could not find any comment associated with the ID {comment_id}.', 'error')
+    
     return redirect(url_for('auth.admin'))
 
 
@@ -381,6 +391,8 @@ def delete_comment():
 @login_required
 def logout():
     logout_user()
-
     flash('Logged out.')
-    return redirect(url_for('views.home'))
+
+    referer = request.headers.get('Referer', url_for('views.home'))
+    
+    return redirect(referer)

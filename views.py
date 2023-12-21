@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response
+from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response, session
 from flask_login import current_user
 from random import choice
 from time import time
@@ -12,7 +12,6 @@ views = Blueprint('views', __name__)
 def home():
     """Render the homepage."""
     statistics = scripts.get_statistics()
-    session_info = scripts.get_session_info(request)
 
     crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
     world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
@@ -46,14 +45,21 @@ def home():
         world_stocks.insert(i, item)
         i += 2
     
-    return render_template('homepage.html', page='Home', world_stocks=world_stocks, us_indexes=enumerate(unique_indexes), statistics=statistics, 
-        user=current_user, session_info=session_info, is_mobile=scripts.detect_mobile(request), country_code='en'
-        )
+    return render_template('homepage.html', 
+        page='Home', 
+        world_stocks=world_stocks, 
+        us_indexes=enumerate(unique_indexes), 
+        statistics=statistics, 
+        user=current_user, 
+        last_visited_country=session.get('last_visited_country', ''), 
+        last_visited_news=session.get('last_visited_news', ''), 
+        is_mobile=scripts.detect_mobile(request), 
+        country_code='en'
+    )
 
 
 @views.route('/contact', methods=['GET'])
 def contact():
-    """Render the contact page."""
     referer = request.headers.get('Referer', url_for('views.home'))
     
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
@@ -62,7 +68,6 @@ def contact():
 
 @views.route('/about', methods=['GET'])
 def about():
-    """Render the about page."""
     referer = request.headers.get('Referer', url_for('views.home'))
     
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
@@ -71,7 +76,6 @@ def about():
 
 @views.route('/donate', methods=['GET'])
 def donate():
-    """Render the donate page."""
     referer = request.headers.get('Referer', url_for('views.home'))
     
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
@@ -81,13 +85,14 @@ def donate():
 @views.route('/news', methods=['GET'])
 def get_latest_feed():
     """Serving the /news endpoint. This function allows three GET parameters and uses them to filter by country, news category, and page number. It reads the cache information from the respective cache file and renders the rss_template.html template."""
-
-    # Get the 'filter' parameter from the request or use 'general' if not provided
-    page_num = request.args.get('page', '1') # If page is not provided in the GET request parameters, set it to 1.
-    country_filter = request.args.get('country', f"{choice(['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}").lower() # If no country, picks a random one.
-    news_filter = request.args.get('section', 'general').lower() # If no section, set it to general
     
-    selected_filter = country_filter + "_" + news_filter
+    page_num = request.args.get('page', '1') 
+    
+    # If no country, selects a random one.
+    country_filter = request.args.get('country', f"{choice(['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}").lower()
+    
+    news_filter = request.args.get('section', 'general').lower()
+    selected_filter = f"{country_filter}_{news_filter}"
 
     # Check if the selected category is valid
     if not scripts.valid_category(selected_filter):
@@ -100,7 +105,8 @@ def get_latest_feed():
         if item['code'].lower() == country_filter:
             country_name = item['name']
 
-    try: # Read the cache for the selected filter
+    # Read the cache for the selected filter
+    try:
         cache = json_util.read_json(f"{config.CACHE_PATH}/{selected_filter}")
         err = cache[f'page_{page_num}']
     except FileNotFoundError: # Handle cache reading error
@@ -111,35 +117,45 @@ def get_latest_feed():
 
     cache_pages = [x for x in cache if 'page' in x]
     query = request.args.get('query', '').lower()
-    if query: # query will change code logic, but I think its better to adapt everything - @behindsecurity
+    
+    # Query will change code logic, but I think its better to adapt everything - @behindsecurity
+    if query:
         found_stories_via_query = []
         for page in cache_pages:
-            individual_page_keys = [{**d, 'on_page': page.split('_')[1]} for d in cache[page]] # makes a copy of all the stories on the current cache page and adds a new entry: on_page. This entry is needed to work properly with the comments section, as we no longer relay on the GET parameter 'page' to read the correct page in cache.
+            # Makes a copy of all the stories on the current cache page and adds a new entry: on_page. This entry is needed to work properly with the comments section, as we no longer relay on the GET parameter 'page' to read the correct page in cache.
+            individual_page_keys = [{**d, 'on_page': page.split('_')[1]} for d in cache[page]]
             
-            found_stories_via_query.extend([story for story in individual_page_keys if query in story['title'].lower().split(' ') or query in story['description'].lower().split(' ')]) # split words for better accuracy
+            # Split words for better accuracy.
+            found_stories_via_query.extend([story for story in individual_page_keys if query in story['title'].lower().split(' ') or query in story['description'].lower().split(' ')])
 
         if not found_stories_via_query:
             flash('No stories were found with the provided term.', 'error')
             referer = request.headers.get('Referer', url_for('views.home'))
             return redirect(referer)
 
-        cache[f'page_{page_num}'] = found_stories_via_query # changes the current page to the results from the serach to make the rest of the code unchanged.
+        # Changes the current page to the results from the search in order to make the rest of the code usable.
+        cache[f'page_{page_num}'] = found_stories_via_query
 
     # Get number of comments
     comments = json_util.read_json(config.COMMENTS_PATH)
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     for story in cache[f'page_{page_num}']:
-        story['title'] = ' '.join(story['title'].split(' ')[:10]) + '...' if len(story['title']) > 90 else story['title'] # Filter the title length
+        # Filter the title length.
+        story['title'] = ' '.join(story['title'].split(' ')[:10]) + ' ...' if len(story['title']) > 90 else story['title']
+        
+        # Add total comments and clicks to the story.
         story['total_comments'] = len(comments[story['id']]) if story['id'] in comments else ''
         story['total_clicks'] = telemetry[story['id']]['clicks'] if story['id'] in telemetry else ''
     
-    # Set to send to the template
-    supported_categories = scripts.get_supported_categories(country_filter)
-    page_num = int(page_num) # Set the page to integer to work properly with rss_template.html
-    total_pages = len(cache_pages) if not query else 0 # Else is 0 because rss_template.html should not render the pagination if the query is set
+    # Set the page to integer to work properly with rss_template.html.
+    page_num = int(page_num)
+
+    # Else is 0 because rss_template.html should not render the pagination if the query is set.
+    total_pages = len(cache_pages) if not query else 0
 
     stock_data = scripts.scrape_stock_data(country_name)
 
+    # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
     if not stock_data or stock_data[0]['market_cap'] == None:
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
@@ -149,12 +165,35 @@ def get_latest_feed():
 
     try:
         country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x.get('country', '').lower() == country_name.lower()][0]
-        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x.get('country_name', '').lower() == country_name.lower()][0]
+        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x.get('country_name', '').lower() == country_name.lower().replace(' ', '-')][0]
         country_index['currency'] = currency_info
-    except IndexError:
+    except IndexError as err:
+        scripts.log(f'[!] Error at /views: {err} // {country_name}')
         country_index = ''
     
-    response = make_response(render_template('rss_template.html', 
+    FULL_URL = f'https://infomundi.net/news?country={country_filter}&section={news_filter}&page={page_num}'
+    session['last_visited_country'] = FULL_URL
+    
+    supported_categories = scripts.get_supported_categories(country_filter)
+
+    area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/area_ranking')
+
+    for rank in area_ranks:
+        if rank['country'].lower() == country_name.lower():
+            area_rank = rank
+            break
+    else:
+        area_rank = ''
+
+    religions = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/religions')
+    for country, religion in religions.items():
+        if country.lower() == country_name.lower():
+            main_religion = religion
+            break
+    else:
+        main_religion = ''
+
+    return render_template('rss_template.html', 
         feeds=cache[f'page_{page_num}'], 
         total_pages=total_pages, 
         country_name=country_name, 
@@ -164,6 +203,8 @@ def get_latest_feed():
         country_code=country_filter, 
         supported_categories=supported_categories, 
         page='News', 
+        area_rank=area_rank,
+        main_religion=main_religion,
         user=current_user, 
         is_mobile=scripts.detect_mobile(request),
         nation_data=scripts.get_nation_data(country_filter),
@@ -174,13 +215,7 @@ def get_latest_feed():
         is_global=is_global,
         country_index=country_index,
         stock_date=stock_date
-        )
     )
-    
-    FULL_URL = f'https://infomundi.net/news?country={country_filter}&section={news_filter}&page={page_num}'
-    response.set_cookie('last_visited_country', scripts.encode_base64(FULL_URL))
-    
-    return response
 
 
 @views.route('/get-country-code', methods=['GET'])
@@ -211,15 +246,12 @@ def autocomplete():
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    """Render comments for a specific news item."""
     news_id = request.args.get('id', '').lower()
     category = request.args.get('category', '').lower()
-    page_number = request.args.get('page', '1')
 
     comments = json_util.read_json(config.COMMENTS_PATH)
-    cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
     
-    if not scripts.valid_category(category) or not news_id or not page_number or f'page_{page_number}' not in cache:
+    if not scripts.valid_category(category) or not news_id:
         message = 'We apologize, but there was an error. Please try again later.'
     elif not comments['enabled']:
         message = 'We apologize, but comments are temporarily disabled. You can try again later.'
@@ -231,57 +263,77 @@ def comments():
         flash(message, 'error')
         return redirect(referer)
 
-    news_link = ''
-    for story in cache[f'page_{page_number}']:
-        if story['id'] == news_id:
-            news_link = story['link']
-
-            comments_file = json_util.read_json(config.COMMENTS_PATH)
-            telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
-            
-            story_info = story
-            
-            story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
-            story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
-            
-            if 'infomundi' in story['media_content']['url']:
-                preview_data = scripts.get_link_preview(news_link)
-                
-                if 'infomundi' in preview_data['image']:
-                    preview_data['title'] = story['title']
-                    preview_data['description'] = scripts.remove_html_tags(story['description'])
-                    preview_data['image'] = story['media_content']['url']
-                
-                story['media_content']['url'] = preview_data['image']
-                json_util.write_json(cache, f"{config.CACHE_PATH}/{category}")
-            else:
-                preview_data = {}
-                preview_data['image'] = story['media_content']['url']
-                preview_data['description'] = scripts.remove_html_tags(story['description'])
-                preview_data['title'] = story['title']
-            break
+    cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
+    for cache_page in cache:
+        if cache_page == 'created_at': continue
         
-    if not news_link:
+        for story in cache[cache_page]:
+            if story['id'] == news_id:
+                news_link = story['link']
+
+                comments_file = json_util.read_json(config.COMMENTS_PATH)
+                telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
+                
+                story_info = story
+                
+                story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
+                story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
+                
+                # If there's no image (default is Infomundi's logo), we use scraping to get the news image.
+                if 'infomundi' in story['media_content']['url']:
+                    preview_data = scripts.get_link_preview(news_link)
+                    
+                    if 'infomundi' in preview_data['image']:
+                        preview_data['title'] = story['title']
+                        preview_data['description'] = scripts.remove_html_tags(story['description'])
+                        preview_data['image'] = story['media_content']['url']
+                    
+                    story['media_content']['url'] = preview_data['image']
+                    json_util.write_json(cache, f"{config.CACHE_PATH}/{category}")
+                else:
+                    preview_data = {}
+                    preview_data['image'] = story['media_content']['url']
+                    preview_data['description'] = scripts.remove_html_tags(story['description'])
+                    preview_data['title'] = story['title']
+                
+                break
+        else:
+            continue
+        
+        break
+    else:
         flash('We apologize, but there was an error. Please try again later.', 'error')
         return redirect(referer)
 
     scripts.add_click(news_id)
     
-    response = make_response(render_template('comments.html', page='Comments', comments=comments[news_id] if news_id in comments else False, news_link=news_link, id=news_id, story_info=story, preview_data=preview_data, user=current_user, session_info=scripts.get_session_info(request), is_mobile=scripts.detect_mobile(request)))
+    FULL_URL = f'https://infomundi.net/comments?id={news_id}&category={category}'
+    session['last_visited_news'] = FULL_URL
+
+    session['entered_comments_at'] = time()
     
-    FULL_URL = f'https://infomundi.net/comments?id={news_id}&category={category}&page={page_number}'
-    response.set_cookie('last_visited_news', scripts.encode_base64(FULL_URL))
-    return response
+    return render_template('comments.html', 
+        page='Comments', 
+        comments=comments[news_id] if news_id in comments else False, 
+        news_link=news_link, 
+        id=news_id, 
+        story_info=story, 
+        preview_data=preview_data, 
+        user=current_user, 
+        last_visited_country=session.get('last_visited_country', ''),
+        is_mobile=scripts.detect_mobile(request),
+        category=category
+    )
 
 
 @views.route('/add_comment', methods=['POST'])
 def add_comment():
-    """Add a new comment."""
     referer = request.headers.get('Referer', url_for('views.home'))
     
     comments = json_util.read_json(config.COMMENTS_PATH)
     if not comments['enabled']:
         flash('We apologize, but comments are temporarily disabled. Please try again later.', 'error')
+        
         return redirect(referer)
     
     token = request.form['cf-turnstile-response'] # Retrieve token from post data with key 'cf-turnstile-response'
@@ -289,30 +341,63 @@ def add_comment():
         flash('Invalid captcha! Are you a robot?', 'error')
         return redirect(referer)
 
+    entered_comments_at = session.get('entered_comments_at', '')
+
+    if not entered_comments_at:
+        flash('There was an error processing your comment. Please make sure your browser supports cookies.', 'error')
+        return redirect(referer)
+
+    elapsed_time = time() - entered_comments_at
+    cooldown_time = 10
+    
+    if elapsed_time < cooldown_time:
+        remaining_time = int(cooldown_time - elapsed_time)
+        flash(f'Hold up! Wait a couple of seconds, we need to make sure you are not a robot. Cooldown: {remaining_time}', 'error')
+        return redirect(referer)
+
     name = current_user.username if current_user.is_authenticated else request.form['name']
     comment_text = request.form['comment']
 
+    # Shady users may edit the request using a tool like burpsuite to bypass the form restriction. We must check input length regardless.
     if len(comment_text) > 300 or len(name) > 30:
         flash('Please limit your input accordingly.', 'error')
         return redirect(referer)
 
-    # Checks if the user needs a random name
+    # Checks if the user needs a random name.
     is_random_name = False
     if not name:
         name = choice(config.NICKNAME_LIST)
         is_random_name = True
     
-    # Checks if news_id is a valid md5 hash
-    news_id = request.form['id']
-    if len(news_id) != 32 or not (all(c.isdigit() or c.lower() in 'abcdef' for c in news_id)):
-        return "<center><h1>Blocked by Infomundi</h1></center> <br> <center><h3>Message from the Admin: What is hidden must remain hidden.</h3></center>"
+    # Checks if the news really exist (we can't trust user input)
+    news_id = request.form.get('id', '')
+    category = request.form.get('category', '')
+
+    if not scripts.valid_category(category) or not news_id:
+        flash('We apologize, but there was an error. Please try again later.', 'error')
+        return redirect(referer)
+
+    cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
+
+    for key, items in cache.items():
+        if not key.startswith('page'): continue
+
+        for item in items:
+            if item['id'] == news_id: break
+        else:
+            continue
+        break
+    else:
+        flash('We apologize, but there was an error. Please try again later.', 'error')
+        return redirect(referer)
 
     new_comment = {
         'name': name,
         'random_name': is_random_name,
         'is_admin': True if current_user.is_authenticated and current_user.role == 'admin' else False,
+        'is_logged_in': True if current_user.is_authenticated else False,
         'text': comment_text,
-        'link': scripts.get_session_info(request)['last_visited_news'],
+        'link': session.get('last_visited_news', ''),
         'id': scripts.create_comment_id()
     }
 
@@ -320,7 +405,7 @@ def add_comment():
         comments[news_id] = []
 
     comments[news_id].append(new_comment)
-    json_util.write_json(comments, f'{config.COMMENTS_PATH}') # Saving the comment
+    json_util.write_json(comments, f'{config.COMMENTS_PATH}')
     
     scripts.check_in_badlist(new_comment)
     

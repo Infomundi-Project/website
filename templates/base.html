@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'light' and page != 'Home' %}light{% else %}dark{% endif %}">
+<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'light' %}light{% else %}dark{% endif %}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Primary -->
-    <meta name="title" content="InfoMundi" />
-    <meta name="description" content="InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs." />
+    <meta name="title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
+    <meta name="description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
     <meta name="theme-color" content="#000000" />
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://infomundi.net/" />
-    <meta property="og:title" content="InfoMundi" />
-    <meta property="og:description" content="InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs." />
-    <meta property="og:image" content="https://infomundi.net/static/img/infomundi-white-darkbg-square.webp" />
+    <meta property="og:title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
+    <meta property="og:description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
+    <meta property="og:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/infomundi-white-darkbg-square.webp{% endif %}" />
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://infomundi.net/" />
-    <meta property="twitter:title" content="InfoMundi" />
-    <meta property="twitter:description" content="InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs." />
-    <meta property="twitter:image" content="https://infomundi.net/static/img/infomundi-white-darkbg-square.webp" />
+    <meta property="twitter:title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
+    <meta property="twitter:description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
+    <meta property="twitter:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/infomundi-white-darkbg-square.webp{% endif %}" />
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
@@ -42,7 +42,7 @@
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
     {% block styles %} {% endblock %}
   </head>
-  <body>
+  <body> 
     {% if page not in ['Home', 'Error'] %}
     <nav class="navbar bg-body-tertiary navbar-expand-lg border-bottom border-body sticky-top">
       <div class="container-fluid">
@@ -98,7 +98,7 @@
           {% endif %}
           {% if page == 'Comments' and not is_mobile %}
           <div class="d-flex justify-content-end ms-2">
-            <a href="{{ session_info['last_visited_country'] }}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</button></a>
+            <a href="{{ last_visited_country }}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</button></a>
           </div>
           {% endif %}
         </div>
@@ -109,7 +109,7 @@
     
     {% if page == 'Home' %}
     <div class="hwrap" id="ticker">
-      <div class="hmove">
+      <div class="hmove" style="color: white">
         <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies and<i class="fa-brands fa-bitcoin me-2 ms-2"></i>Cryptocoins - {{ world_stocks[0]['date'] }}<i class="fa-solid fa-arrow-right ms-2"></i></div>
 
         {% for entry in world_stocks %}

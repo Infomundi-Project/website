@@ -7,6 +7,7 @@ from os import listdir, urandom, path
 from json import loads as json_loads
 from difflib import SequenceMatcher
 from urllib.parse import urlparse
+from unidecode import unidecode
 from bs4 import BeautifulSoup
 from hashlib import md5
 
@@ -230,9 +231,9 @@ def check_verification_token(token: str) -> bool:
 
 def parse_utc_offset(offset_str: str):
     """Takes an offset string (i.e UTC-04:00) and converts to a valid format in order to get the current time on the time zone."""
-    sign = offset_str[3]
-    hours = int(offset_str[4:6])
-    minutes = int(offset_str[7:])
+    sign = offset_str[0]
+    hours = int(offset_str[1:3])
+    minutes = int(offset_str[4:])
 
     total_minutes = hours * 60 + minutes
 
@@ -247,7 +248,14 @@ def get_current_time_in_timezone(cca2: str) -> str:
     data = json_util.read_json(f'{config.COUNTRIES_DATA_PATH}/{cca2}')
     current_utc_time = datetime.utcnow()
 
-    timezone = data['timezones'][0]
+    try:
+        capital = data['capital'][0]
+        capitals_time = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/capitals_time')
+
+        timezone = [x['gmt_offset'] for x in capitals_time if x['capital'].lower() == unidecode(capital).lower()][0]
+    except Exception:
+        timezone = ''
+
     if '+' in timezone or '-' in timezone:
         utc_offset = parse_utc_offset(timezone)
         current_time = current_utc_time + utc_offset
@@ -356,20 +364,6 @@ def decode_base64(encoded_string: str) -> str:
     return b64decode(encoded_string).decode('utf-8')
 
 
-def get_session_info(request: str) -> dict:
-    """Takes request information and tries to return last_visited_country and last_visited_news cookies. Both are urls."""
-    try:
-        country = decode_base64(request.cookies.get('last_visited_country', ''))
-        news = decode_base64(request.cookies.get('last_visited_news', ''))
-    except Exception:
-        return {}
-    
-    if not is_valid_url(country) or not is_valid_url(news):
-        return {}
-
-    return {'last_visited_country': country, 'last_visited_news': news}
-
-
 def is_valid_url(url: str) -> bool:
     """Takes a string and checks if it is a url. Return True if is indeed a url or if the string is empty, else False."""
     if not url:
@@ -421,7 +415,7 @@ def check_in_badlist(data: dict):
             {
                 'name': 'username',
                 'text': 'comment',
-                'link': 'https://infomundi.net/comments?id=something&category=something&page=1'
+                'link': 'https://infomundi.net/comments?id=something&category=something'
             }
     """
     text_combined = data['name'] + ' ' + data['text']
@@ -608,8 +602,8 @@ def valid_category(category: str) -> bool:
     
     if category not in categories:
         return False
-    else:
-        return True
+    
+    return True
 
 
 def get_supported_categories(country_code: str) -> list:
@@ -619,6 +613,9 @@ def get_supported_categories(country_code: str) -> list:
 
 def valid_captcha(token: str) -> bool:
     """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge. Returns bool."""
+    if not token:
+        return False
+
     VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
     # Build payload with secret key and token.

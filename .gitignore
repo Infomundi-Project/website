@@ -2,8 +2,11 @@ local/
 cache/
 .venv/
 __pycache__/
-website_scripts/config.py
+data/json/stock_data/
+data/json/website/
 logs/
 infomundi.wsgi
-data/json/website/*
-data/json/stock_data/*
+config.py
+crypto.json
+currencies.json
+stocks.json

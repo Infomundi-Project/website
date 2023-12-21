@@ -11,9 +11,9 @@
   <div class="row justify-content-center mt-5">
     <div class="col-md-6">
       <div class="card mb-3">
-        <img src="{{ url_for('static', filename='img/infomundi-logo-wide-darkbg.png') }}" class="card-img-top" alt="Infomundi Logo">
+        <img src="{{ url_for('static', filename='img/logos/wide-dark-bg.png') }}" class="card-img-top" alt="Infomundi Logo">
         <div class="card-header">
-          Welcome to Infomundi! Register your account by filling out this form.
+          Welcome to Infomundi! Sign in by filling out this form.
         </div>
         <div class="card-body">
           <form method="post" action="{{ url_for('auth.register') }}" novalidate>
@@ -38,7 +38,7 @@
             <div class="mb-3 mt-2">
               <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
             </div>
-            <button type="submit" class="btn btn-outline-primary">Register</button>
+            <button type="submit" class="btn btn-outline-primary">Sign up</button>
           </form>
         </div>
       </div>

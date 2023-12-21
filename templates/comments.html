@@ -22,7 +22,7 @@
 {% block content %}
 <div class="container">
   <div class="card mb-5 mt-4 border">
-    <img src="{{  preview_data['image'] }}" class="card-img-top" alt="News Image" {% if not is_mobile %} width="1200" height="628" {% endif %}>
+    <img src="{{ preview_data['image'] }}" class="card-img-top" alt="News Image" {% if not is_mobile %} width="1200" height="628" {% endif %}>
     <div class="card-body">
       <h5 class="card-title">{{ preview_data['title'] }}</h5>
       <p class="card-text">{{ preview_data['description'] }}</p>
@@ -38,7 +38,7 @@
         <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ story_info['total_comments'] }}</span>
       </p>
       <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-2"><i class="fa-solid fa-eye me-1"></i>View Full Story</a>
-      <a href="{{ session_info['last_visited_country'] }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo me-1"></i>Return</a>
+      <a href="{{ last_visited_country }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo me-1"></i>Return</a>
     </div>
     <div class="card-footer text-body-secondary">
     <i class="fa-solid fa-calendar-days me-1"></i>{{ story_info['pubDate'] }}
@@ -51,7 +51,7 @@
     <div class="form-group">
       <label for="name" class="form-label"><i class="fa-solid fa-user me-1"></i>Username</label>
       {% if user.is_authenticated %}
-      <input class="form-control" type="text" placeholder="{{ user.username }}" aria-label="User is logged in" disabled>
+      <input class="form-control" type="text" value="{{ user.username }}" aria-label="User is logged in" readonly>
       {% else %}
       <input type="text" id="name" name="name" class="form-control" aria-describedby="nameHelp" maxlength="30">
       <div id="nameHelp" class="form-text text-secondary"><i class="fa-solid fa-circle-info me-1"></i>We'll generate one for you if you prefer not to choose a name and leave this field blank.</div>
@@ -62,20 +62,19 @@
       <textarea id="comment" name="comment" rows="4" class="form-control" maxlength="300" aria-describedby="commentHelp" required></textarea>
       <div id="commentHelp" class="form-text text-secondary"><i class="fa-solid fa-circle-info me-1"></i>Your comment must not exceed 300 characters.</div>
     </div>
-    <div class="form-group">
-      <input type="hidden" id="id" name="id" value="{{ id }}">
-    </div>
+    <input type="hidden" id="id" name="id" value="{{ id }}">
+    <input type="hidden" id="category" name="category" value="{{ category }}">
     <div class="form-group">
       <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
     </div>
-    <button type="submit" class="btn btn-outline-primary mb-5">Comment</button>
+    <button type="submit" class="btn btn-outline-secondary mb-5" id="cooldown-button" disabled>Comment</button>
   </form>
   <h2>Comments</h2>
   {% if comments %}
   {% for comment in comments %} 
   <div class="comment pb-1">
-    <p class="fw-semibold">
-      {% if comment.random_name %}<span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle"></i> Randomly Generated Name</span>{% endif %} {% if comment.is_admin %}<span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Behold, for in the vast digital realm, our esteemed commenter emerges as the sovereign guardian of the website, the virtuoso of all things admin! With a mere keystroke, they weave the intricate code that shapes the very fabric of our online sanctuary. A digital maestro, conducting the symphony of pixels with finesse and flair. In the kingdom of cybernetic wonders, our admin dons the cloak of authority, navigating the ones and zeros with the grace of a seasoned navigator. Behind the scenes, they are the puppeteer of plugins, the sorcerer of security, and the architect of a user-friendly utopia. As the pixels bow in reverence, and the algorithms hum in harmony, our website admin stands tall, a sentinel of the virtual gates. Their comments echo with the wisdom of one who holds the keys to the digital kingdom, a sovereign of the server rooms, and a ruler of the HTML hierarchy. All hail the maestro of the admin console, for theirs is the power to mold the webiverse with a stroke of brilliance! "><i class="fa-solid fa-crown"></i> Admin</span>{% endif %} {{ comment.name }}: <span class="fw-light">{{ comment.text }}</span>
+    <p>
+      {% if comment.random_name %}<span class="badge text-bg-info fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user didn't provide a name, so we generated one for them."><i class="fa-solid fa-shuffle me-1"></i>Randomly Generated Name</span>{% endif %}{% if comment.is_admin %}<span class="badge text-bg-danger fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Behold, for in the vast digital realm, our esteemed commenter emerges as the sovereign guardian of the website, the virtuoso of all things admin! With a mere keystroke, they weave the intricate code that shapes the very fabric of our online sanctuary. A digital maestro, conducting the symphony of pixels with finesse and flair. In the kingdom of cybernetic wonders, our admin dons the cloak of authority, navigating the ones and zeros with the grace of a seasoned navigator. Behind the scenes, they are the puppeteer of plugins, the sorcerer of security, and the architect of a user-friendly utopia. As the pixels bow in reverence, and the algorithms hum in harmony, our website admin stands tall, a sentinel of the virtual gates. Their comments echo with the wisdom of one who holds the keys to the digital kingdom, a sovereign of the server rooms, and a ruler of the HTML hierarchy. All hail the maestro of the admin console, for theirs is the power to mold the webiverse with a stroke of brilliance!"><i class="fa-solid fa-crown me-1"></i>Admin</span>{% endif %}{% if comment.is_logged_in and not comment.is_admin %}<span class="badge text-bg-success fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This user is registered!"><i class="fa-solid fa-user me-1"></i>Registered User</span>{% endif %}<span class="fw-semibold ms-1">{{ comment.name }}:</span><span class="ms-1 fw-light">{{ comment.text }}</span>
     </p>
   </div>
   {% endfor %} 
@@ -101,4 +100,7 @@
 <script 
   src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
   ></script>
+<script
+  src="{{ url_for('static', filename='js/cooldownCommentForm.js') }}"
+></script>
 {% endblock %}

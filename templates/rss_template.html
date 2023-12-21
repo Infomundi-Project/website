@@ -36,11 +36,11 @@
     </a><br>
     {% if nation_data %}
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Area</strong>: {{ nation_data['area'] }}<br><strong>Borders</strong>: {{ nation_data['borders'] }}"
+    data-bs-title="<strong>Area</strong>: {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}<br><strong>Borders</strong>: {{ nation_data['borders'] }}"
     ><i class="fa-solid fa-chart-area"></i></span>
     
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Population</strong>: {{ nation_data['population'] }}<br><strong>HDI</strong>: {{ nation_data['hdi'] }}<br><strong>GDP Per Capita</strong>: ${{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}"
+    data-bs-title="<strong>Population</strong>: {{ nation_data['population'] }}<br><strong>HDI</strong>: {{ nation_data['hdi'] }}<br><strong>GDP Per Capita</strong>: {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}{% if main_religion %}<br><strong>Main Religion</strong>: {{ main_religion }}{% endif %}"
     ><i class="fa-solid fa-users"></i></span>
     
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -56,15 +56,15 @@
     ><i class="fa-solid fa-dollar-sign"></i></span>
     
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Current Time</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
+    data-bs-title="<strong>Capital Time</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
     ><i class="fa-solid fa-clock"></i></span>
     {% else %}
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
     data-bs-title="There's no geopolitical data available"
     ><i class="fa-solid fa-circle-info"></i></span>
     {% endif %}
-    <form class="d-flex mt-4" role="search" action="javascript:;" onsubmit="submitSearch()">
-      <input class="form-control me-2 border border-primary" type="search" placeholder="Search" aria-label="Search" id="query" name="query">
+    <form class="d-flex mt-4 justify-content-center" role="search" action="javascript:;" onsubmit="submitSearch()">
+      <input class="form-control me-2 border border-primary" type="search" placeholder="Search" id="query" name="query" style="max-width: 80%;">
       <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
     </form>
   </div>
@@ -91,7 +91,7 @@
 </ul>
 {% if total_pages %}
 <nav aria-label="Page navigation">
-  <ul class="pagination pagination-sm justify-content-center mt-2">
+  <ul class="pagination pagination-sm justify-content-center mt-3">
     {% for page in range(1, total_pages+1) %} 
     <li class="page-item {{ 'active' if page_num == page }}">
       <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
@@ -106,17 +106,17 @@
     <div class="card mb-1 border-opacity-10">
       <div class="row g-0">
         <div class="col-md-4">
-          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ item['on_page'] if 'on_page' in item else page_num }}">
-          <img src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" style="min-height: 182px; max-height: 182px" alt="News image">
+          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
+          <img src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" height="182" alt="News image">
           </a>
         </div>
         <div class="col-md-8">
           <div class="card-body">
-            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}&page={{ item['on_page'] if 'on_page' in item else page_num }}" style="text-decoration:none;">
+            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" style="text-decoration:none;">
               <h6 class="card-title" style="overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
             </a>
             <small>
-              <a href="{{ item['publisher_link'] }}" class="text-decoration-none text-reset"><p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text good-blue"><i class="fa-solid fa-rss"></i> {{ item['publisher'] }}</p></a>
+              <a href="{{ item['publisher_link'] }}" class="text-decoration-none text-reset" target="_blank"><p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text good-blue"><i class="fa-solid fa-rss me-1"></i>{{ item['publisher'] }}</p></a>
             </small>
             {% if is_mobile %}
             <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
@@ -124,7 +124,7 @@
             {% endif %}
           </div>
           <div class="card-footer text-body-secondary">
-            <small class="me-2"><i class="fa-solid fa-calendar-days"></i> {{ item['pubDate'] }}</small>
+            <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
             {% if not is_mobile %}
             <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
             <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>

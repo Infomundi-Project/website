@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.2.1 | 2023/12/21 | Added session remember option, light mode for homepage, authenticated user badge, country area ranking, and logout button. Removed old logo images. Fixed index display and comments page entry bugs. Implemented cooldown for comments form. | @behindsecurity |
 | 1.2.0 | 2023/12/19 | Introduced light mode, improved ticker functionality, added geopolitical placeholder. Removed unused resources. Fixed ticker and display issues. Enhanced password change page security. | @behindsecurity |
 | 1.1.9 | 2023/12/13 | Improved mobile compatibility for the ticker. Added crypto, currency, and index information to the homepage. Changed display of country stocks. Removed navbar return button for mobile users. Enhanced account creation spam prevention. Reduced password complexity. | @behindsecurity |
 | 1.1.8 | 2023/12/05 | Added login system. Fixed news ticker. No other changes or security updates. | @behindsecurity |
@@ -16,6 +17,29 @@
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.2.1 2023/12/21
+
+### Enhancements (6)
+- IME01: Users can now choose if they want their session to be remembered by checking the checkbox in the log in page.
+- IME02: Added light mode compatibility to the home page.
+- IME03: Authenticated users now receive a badge before their name in the comments page.
+- IME04: Added country area ranking.
+- IME05: The "current time" of a country is now based on their capital time.
+- IME06: Added logout button to the home page (appears when the user is logged in).
+
+### Changed (0)
+
+### Removed (1)
+- IMF01: Removed former logo images from /static.
+
+### Fixed (2)
+- IMF01: Fixed bug where specific country indexes not showing up properly in the news page.
+- IMF02: Fixed bug that was stopping users from entering the comments page for specific news. 
+
+### Security (1)
+- IMS01: Added a 10 seconds cooldown for the comments form.
 
 
 ## 1.2.0 2023/12/19
