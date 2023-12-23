@@ -12,6 +12,24 @@
   .infomundi-logo {
   margin-bottom: 20px;
   }
+  {% if request.cookies.get('theme') != 'light' %}
+  .accordion {
+  --bs-accordion-btn-bg: #202429;
+  --bs-accordion-btn-color: #ffffff;
+  --bs-accordion-active-bg: #202429;
+  --bs-accordion-active-color: #ffffff;
+  --bs-accordion-bg: #131619;
+  --bs-accordion-color: #ffffff;
+  --bs-accordion-btn-focus-box-shadow: none;
+  }
+  .accordion-flush .accordion-button {
+  border-top: 1px solid #000000;
+  }
+  .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
+  .accordion-flush .accordion-item:last-child .accordion-body {
+  border-bottom: 1px solid #000000;
+  }
+  {% endif %}
   @media (max-width: 968px) {
   #chartdiv {
   width: 100%;
@@ -75,7 +93,7 @@
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.1.7-dev</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.1 <span class="badge text-bg-success">New!</span></p>
                 <p class="fs-6 good-blue"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">

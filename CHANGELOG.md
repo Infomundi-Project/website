@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.2.2 | 2023/12/22 | Implemented lazy loading for news page images, improved cache script for more images, and enhanced navbar. Changed comments page cooldown to 5 seconds and accordion look. Enhanced session cookie security. No removals or fixes. | @behindsecurity |
 | 1.2.1 | 2023/12/21 | Added session remember option, light mode for homepage, authenticated user badge, country area ranking, and logout button. Removed old logo images. Fixed index display and comments page entry bugs. Implemented cooldown for comments form. | @behindsecurity |
 | 1.2.0 | 2023/12/19 | Introduced light mode, improved ticker functionality, added geopolitical placeholder. Removed unused resources. Fixed ticker and display issues. Enhanced password change page security. | @behindsecurity |
 | 1.1.9 | 2023/12/13 | Improved mobile compatibility for the ticker. Added crypto, currency, and index information to the homepage. Changed display of country stocks. Removed navbar return button for mobile users. Enhanced account creation spam prevention. Reduced password complexity. | @behindsecurity |
@@ -17,6 +18,25 @@
 | 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+
+
+## 1.2.2 2023/12/22
+
+### Enhancements (3)
+- IME01: Added lazy loading to images in the news page.
+- IME02: Enhanced cache script capabilities (you'll see more images in the feed now).
+- IME03: Big enhancement to the navbar. 
+
+### Changed (2)
+- IMC01: Changed cooldown from 10 to 5 seconds in the comments page.
+- IMC02: Changed the accordion look in the home page (dark theme).
+
+### Removed ()
+
+### Fixed ()
+
+### Security (1)
+- IMS01: Enhanced session cookie security.
 
 
 ## 1.2.1 2023/12/21

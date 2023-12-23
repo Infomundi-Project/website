@@ -17,28 +17,7 @@ def home():
     world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
     currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
 
-    us_indexes = [x for x in world_stocks if x['name'] in ['US500', 'US100', 'US30']]
-    
-    unique_indexes = []
-    for index in us_indexes:
-        if index not in unique_indexes:
-            unique_indexes.append(index)
-
-    # Assign currency information to the respective country
-    for stock in world_stocks:
-        for currency in currencies:
-            country_name = currency['country_name'].replace('-', ' ').lower()
-            if country_name == stock.get('country', '').lower():
-                if currency['name'] == 'DXY':
-                    currency['name'] = 'USD'
-                    currency['price'] = 1
-                stock['currency'] = currency
-                break
-
-        if not stock.get('currency', ''):
-            country_name = stock['country_name'].lower()
-            if country_name in immutable.EU_COUNTRIES:
-                stock['currency'] = currencies[0]
+    us_indexes = world_stocks[:3]
 
     i = 1
     for item in crypto_data:
@@ -48,7 +27,7 @@ def home():
     return render_template('homepage.html', 
         page='Home', 
         world_stocks=world_stocks, 
-        us_indexes=enumerate(unique_indexes), 
+        us_indexes=enumerate(us_indexes), 
         statistics=statistics, 
         user=current_user, 
         last_visited_country=session.get('last_visited_country', ''), 
@@ -164,8 +143,8 @@ def get_latest_feed():
     stock_date = stock_data[0]['date']
 
     try:
-        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x.get('country', '').lower() == country_name.lower()][0]
-        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x.get('country_name', '').lower() == country_name.lower().replace(' ', '-')][0]
+        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x['country']['name'].lower() == country_name.lower()][0]
+        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x['country']['name'].lower() == country_name.lower().replace(' ', '-')][0]
         country_index['currency'] = currency_info
     except IndexError as err:
         scripts.log(f'[!] Error at /views: {err} // {country_name}')
@@ -348,7 +327,7 @@ def add_comment():
         return redirect(referer)
 
     elapsed_time = time() - entered_comments_at
-    cooldown_time = 10
+    cooldown_time = 7
     
     if elapsed_time < cooldown_time:
         remaining_time = int(cooldown_time - elapsed_time)
@@ -398,7 +377,7 @@ def add_comment():
         'is_logged_in': True if current_user.is_authenticated else False,
         'text': comment_text,
         'link': session.get('last_visited_news', ''),
-        'id': scripts.create_comment_id()
+        'id': scripts.generate_id()
     }
 
     if news_id not in comments:

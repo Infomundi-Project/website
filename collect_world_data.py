@@ -4,9 +4,56 @@ from json import dump as json_dump
 from bs4 import BeautifulSoup
 from time import sleep
 
-from website_scripts import json_util, config
+from website_scripts import json_util, config, immutable
 
-def get_world_data():
+
+def format_world_data():
+    path = f'{config.WEBSITE_ROOT}/data/json'
+
+    common_currency = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/common_currency')
+    currencies = json_util.read_json(f'{path}/currencies')
+    for currency in currencies:
+        name = currency['name']
+        currency_name = name.replace('USD', '')
+        
+        currency['price'] = round(float(currency['price']), 2)
+        
+        if currency_name in common_currency:
+            currency['symbol'] = common_currency[currency_name]['symbol']
+            currency['name_plural'] = common_currency[currency_name]['name_plural'].title()
+        
+        if currency_name == 'DXY':
+            currency['price'] = 1
+            currency['name'] = 'USD'
+            currency['symbol'] = '$'
+            currency['name_plural'] = 'US Dollars'
+  
+    countries = config.COUNTRY_LIST
+    stocks = json_util.read_json(f'{path}/stocks')
+    for stock in stocks:
+        stock_country = stock['country']['name'].lower()
+        
+        for item in countries:
+            if item['name'].lower() == stock_country:
+                stock['country']['code'] = item['code'].lower()
+                break
+
+        if stock_country in immutable.EU_COUNTRIES:
+            stock_country = 'euro area'
+
+        for currency in currencies:
+            currency_country = currency['country']['name'].lower()
+            
+            if stock_country == currency_country:
+                stock['currency'] = currency
+                break
+
+    json_util.write_json(stocks, f'{path}/stocks')
+    json_util.write_json(currencies, f'{path}/currencies')
+    print('[+] Data formatted.')
+
+
+def get_world_finance_data():
     """Function to collect data about currencies, crypto and stocks around the globe. Scrapes from 'tradingeconomics' website and saves the data to a json file to be used in Infomundi."""
     endpoints = ['currencies', 'crypto', 'stocks']
 
@@ -33,125 +80,60 @@ def get_world_data():
         continent_data = []
 
         datatables = [row for row in soup.select('.datatable-row')]
-        
 
-        # Extracting data from each row in the continent's table
-        for row in soup.select('.datatable-row'):
-            symbol = row['data-symbol']
-            name = row.select_one('.datatable-item-first a b').text.strip()
-            price = row.select_one('#p').text.strip()
-            day_change = row.select_one('#nch').text.strip()
-            percent_change = row.select_one('#pch').text.strip()
-            weekly_change = row.select('.datatable-heatmap')[0].text.strip()
-            monthly_change = row.select('.datatable-heatmap')[1].text.strip()
-            yoy_change = row.select('.datatable-heatmap')[2].text.strip()
-            href = row.select_one('.datatable-item-first a')['href']
-            date = row.select_one('#date').text.strip()
-
-            if endpoint == 'currencies':
-                common_currency = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/common_currency')
-                from_dollar = True if name.startswith('USD') else False
-                currency_name = name.replace('USD', '')
-                price = round(float(price), 2)
-                
-                if currency_name in common_currency:
-                    currency_symbol = common_currency[currency_name]['symbol']
-                    name_plural = common_currency[currency_name]['name_plural']
-                
-                if currency_name == 'DXY':
-                    currency_symbol = '$'
-                    name_plural = 'US dollars'
-            else:
-                currency_symbol = ''
-                from_dollar = ''
-
-            data = {
-                'symbol': symbol,
-                'name': name,
-                'price': price,
-                'currency_symbol': currency_symbol,
-                'currency_name_plural': name_plural,
-                'from_dollar': from_dollar,
-                'day_change': day_change,
-                'percent_change': percent_change,
-                'weekly_change': weekly_change,
-                'monthly_change': monthly_change,
-                'yoy_change': yoy_change,
-                'date': date,
-                'country_name': href.split('/')[1],
-            }
-
-            continent_data.append(data)
-
+        index = 1
         for row in soup.select('.datatable-row-alternating'):
+            datatables.insert(index, row)
+            index += 2
+        
+        for row in datatables:
             symbol = row['data-symbol']
             name = row.select_one('.datatable-item-first a b').text.strip()
             price = row.select_one('#p').text.strip()
+            
             day_change = row.select_one('#nch').text.strip()
             percent_change = row.select_one('#pch').text.strip()
             weekly_change = row.select('.datatable-heatmap')[0].text.strip()
             monthly_change = row.select('.datatable-heatmap')[1].text.strip()
-            href = row.select_one('.datatable-item-first a')['href']
             yoy_change = row.select('.datatable-heatmap')[2].text.strip()
+            
+            href = row.select_one('.datatable-item-first a')['href']
+            country_name = href.split('/')[1].replace('-', ' ').title()
+
+            if country_name.startswith('ndx:'):
+                country_name = 'United States'
+            
             date = row.select_one('#date').text.strip()
 
-            if endpoint == 'currencies':
-                common_currency = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/common_currency')
-                from_dollar = True if name.startswith('USD') else False
-                currency_name = name.replace('USD', '')
-                price = round(float(price), 2)
-                
-                if currency_name in common_currency:
-                    currency_symbol = common_currency[currency_name]['symbol']
-                    name_plural = common_currency[currency_name]['name_plural']
-                
-                if currency_name == 'DXY':
-                    currency_symbol = '$'
-                    name_plural = 'US dollars'
-            else:
-                currency_symbol = ''
-                from_dollar = ''
-            
-            data = {
+            save_data = {
                 'symbol': symbol,
                 'name': name,
-                'currency_symbol': currency_symbol,
-                'currency_name_plural': name_plural,
-                'from_dollar': from_dollar,
                 'price': price,
-                'day_change': day_change,
-                'percent_change': percent_change,
-                'weekly_change': weekly_change,
-                'monthly_change': monthly_change,
-                'yoy_change': yoy_change,
-                'date': date,
-                'country_name': href.split('/')[1],
+                
+                'changes': {
+                    'day': day_change,
+                    'percent': percent_change,
+                    'weekly': weekly_change,
+                    'monthly': monthly_change,
+                    'yoy': yoy_change
+                },
+                
+                'country': {
+                    'name': country_name
+                },
+
+                'color': 'red' if '-' in percent_change else 'green',
+
+                'date': date
             }
 
-            continent_data.append(data)
-
-        if endpoint == 'stocks':
-            flags = json_util.read_json(f'{config.STOCK_PATH}/stock_to_flag')
-            countries = config.COUNTRY_LIST
-            for item in continent_data:
-                for flag in flags:
-                    for stock_name, flag in flag.items():
-                        if stock_name.lower() == item['name'].lower().replace(' ', ''):
-                            item['flag'] = flag
-                            break
-
-                    for country in countries:
-                        try:
-                            if item['flag'].split('-')[1].lower() == country['code'].lower():
-                                country_name = country['name']
-                                
-                                item['country'] = country_name
-                                break
-                        except Exception:
-                            pass
+            continent_data.append(save_data)
 
         json_util.write_json(continent_data, f'{config.WEBSITE_ROOT}/data/json/{endpoint}')
         print(f'[+] {endpoint.title()} data has been collected.')
 
+    return format_world_data()
+
+
 if __name__ == '__main__':
-    get_world_data()
+    format_world_data()

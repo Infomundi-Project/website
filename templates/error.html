@@ -119,7 +119,7 @@
 <div class="terminal">
   <h1>Infomundi> Error <span class="errorcode">{{ error_code }}</span></h1>
   <p class="output">{{ error_message }}</p>
-  <p class="output">Please try to <a href="{{ session_info['last_visited_news'] }}">go back to your last viewed news</a> or <a href="{{ url_for('views.home') }}">return to the homepage</a>.</p>
+  <p class="output">Please try to <a href="{{ url_for('views.home') }}">return to the homepage</a>.</p>
   <p class="output">Good luck.</p>
 </div>
 {% endblock %}

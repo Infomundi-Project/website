@@ -9,7 +9,9 @@ from difflib import SequenceMatcher
 from urllib.parse import urlparse
 from unidecode import unidecode
 from bs4 import BeautifulSoup
+from random import choice
 from hashlib import md5
+from time import sleep
 
 from . import config, json_util, immutable, notifications
 
@@ -18,9 +20,9 @@ def scrape_stock_data(country_name: str) -> list:
     """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
     country_name = country_name.lower().replace(' ', '-')
 
-    # Checks if cache is old enough (12 hours)
+    # Checks if cache is old enough (10 hours)
     filepath = f'{config.STOCK_PATH}/{country_name}_stock'
-    if not is_cache_old(f'{filepath}.json', 12):
+    if not is_cache_old(f'{filepath}.json', 10):
         stock_data = json_util.read_json(filepath)
         return stock_data
 
@@ -252,7 +254,7 @@ def get_current_time_in_timezone(cca2: str) -> str:
         capital = data['capital'][0]
         capitals_time = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/capitals_time')
 
-        timezone = [x['gmt_offset'] for x in capitals_time if x['capital'].lower() == unidecode(capital).lower()][0]
+        timezone = [x['gmt_offset'] for x in capitals_time if unidecode(x['capital']).lower() == unidecode(capital).lower()][0]
     except Exception:
         timezone = ''
 
@@ -368,6 +370,9 @@ def is_valid_url(url: str) -> bool:
     """Takes a string and checks if it is a url. Return True if is indeed a url or if the string is empty, else False."""
     if not url:
         return True
+
+    if not url.startswith('http://') and not url.startswith('https://'):
+        return False
     
     try:
         result = urlparse(url)
@@ -445,15 +450,42 @@ def check_in_badlist(data: dict):
         notifications.post_webhook(webhook_data)
 
 
-def get_link_preview(url: str) -> dict:
+def get_link_preview(url: str, source: str='comments') -> dict:
     """Takes an URL as input and returns a dictionary with link preview information such as image, description and title."""
     try:
         headers = {
-            'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+            'User-Agent': choice(immutable.USER_AGENTS)
         }
-        # Send a GET request to the URL
-        response = get_request(url, timeout=5, headers=headers)
-        response.raise_for_status()
+
+        if source == 'cache':
+            with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
+                proxies = [x.rstrip() for x in f.readlines()][:100]
+
+            bad_proxies = []
+            
+            while True:
+                proxies = [x for x in proxies if x not in bad_proxies]
+                
+                if not proxies:
+                    break
+                
+                chosen_proxy = choice(proxies)
+
+                sleep(1.5)
+                try:
+                    response = get_request(url, timeout=8, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
+                except Exception:
+                    bad_proxies.append(chosen_proxy)
+                    
+                    print(f'[!] Exception connecting to {chosen_proxy}, trying another...')
+                    continue
+                print(f'[+] Sucessfully connected to {chosen_proxy}')
+
+                break
+        else:
+            print('not cache')
+            response = get_request(url, timeout=5, headers=headers)
+        
         response.encoding = 'utf-8'
 
         # Parse the HTML content of the page
@@ -464,14 +496,24 @@ def get_link_preview(url: str) -> dict:
         description = soup.find('meta', {'name': 'description'})
         description = description.get('content').strip() if description else "No description"
         image = soup.find('meta', {'property': 'og:image'})
-        image = image.get('content').strip() if image else "No image"
+        image = image.get('content').strip() if image else "static/img/infomundi-white-darkbg-square.webp"
+
+        for character in immutable.SPECIAL_CHARACTERS:
+            title.replace(character, '')
+            description.replace(character, '')
+
+        if source == 'cache':
+            return image
 
         return {
             'image': image,
             'description': description,
             'title': title
         }
-    except:
+    except Exception:
+        if source == 'cache':
+            return 'static/img/infomundi-white-darkbg-square.webp'
+        
         return {
             'image': 'static/img/infomundi-white-darkbg-square.webp',
             'description': 'No description was provided',
@@ -479,7 +521,7 @@ def get_link_preview(url: str) -> dict:
         }
 
 
-def create_comment_id() -> str:
+def generate_id() -> str:
     """Simply uses os.urandom and md5 to generate a unique ID."""
     return md5(urandom(20)).hexdigest()
 

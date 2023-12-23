@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const cooldownButton = document.getElementById("cooldown-button");
-  let cooldownTime = 10;
+  let cooldownTime = 7;
 
   function countdown() {
     if (cooldownTime > 0) {

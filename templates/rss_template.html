@@ -56,7 +56,7 @@
     ><i class="fa-solid fa-dollar-sign"></i></span>
     
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Capital Time</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
+    data-bs-title="<strong>Time in {{ nation_data['capital'] }} (Capital)</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
     ><i class="fa-solid fa-clock"></i></span>
     {% else %}
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -107,7 +107,7 @@
       <div class="row g-0">
         <div class="col-md-4">
           <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
-          <img src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" height="182" alt="News image">
+          <img loading="lazy" src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" height="182" alt="News image">
           </a>
         </div>
         <div class="col-md-8">
@@ -156,4 +156,5 @@
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
   const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
+
 {% endblock %}

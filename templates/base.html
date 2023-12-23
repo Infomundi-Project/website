@@ -44,63 +44,81 @@
   </head>
   <body> 
     {% if page not in ['Home', 'Error'] %}
-    <nav class="navbar bg-body-tertiary navbar-expand-lg border-bottom border-body sticky-top">
-      <div class="container-fluid">
-        <a class="navbar-brand logo-text" href="/">Infomundi</a>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top" aria-label="Infomundi Centered Navbar">
+      <div class="container">
         {% if is_mobile %}
-        <div class="d-flex justify-content-end">
-          <button id="themeToggleBtn" class="btn btn-outline-primary btn-sm"><i id="themeIcon" class="fa-solid fa-{% if request.cookies.get('theme') == 'light' %}sun{% else %}moon{% endif %}"></i></button>
+        <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">Infomundi</a>
+
+        <div class="me-5">
+          <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme') == 'light' %}checked{% endif %}>
+          <label for="theme-checkbox" class="theme-checkbox-label">
+            <i class="fa-solid fa-sun"></i>
+            <i class="fa-solid fa-moon"></i>
+            <span class="ball"></span>
+          </label>
         </div>
         {% endif %}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#infomundiNavbar" aria-controls="infomundiNavbar" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            {% if not user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-              <a class="nav-link disabled" href="{{ url_for('views.about') }}">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" href="{{ url_for('views.contact') }}">Contact</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" href="{{ url_for('views.donate') }}">Donate</a>
-            </li>
-            {% if user.is_authenticated %}
-              <li class="nav-item active">
-                <p class="nav-link mb-0">Welcome, {{ user.username }}!</p>
-              </li>
-              {% if user.role == 'admin' %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('auth.admin') }}">Admin Dashboard</a>
-                </li>
-              {% endif %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('auth.password_change') }}">Change Password</a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
-              </li>
-            {% endif %}
-          </ul>
+
+        <div class="collapse navbar-collapse d-lg-flex" id="infomundiNavbar">
           {% if not is_mobile %}
-          <div class="d-flex justify-content-end me-2">
-            <button id="themeToggleBtn" class="btn btn-outline-primary btn-sm"><i id="themeIcon" class="fa-solid fa-{% if request.cookies.get('theme') == 'light' %}sun{% else %}moon{% endif %}"></i></button>
-          </div>
+          <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">Infomundi</a>
           {% endif %}
-          {% if page == 'Comments' and not is_mobile %}
-          <div class="d-flex justify-content-end ms-2">
-            <a href="{{ last_visited_country }}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-undo"></i> Return</button></a>
+          <ul class="navbar-nav col-lg-6 justify-content-lg-center">
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.about') }}">Who are we?</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.contact') }}">How to contact?</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.donate') }}">How to help?</a>
+            </li>
+          <!--
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
+        -->
+          </ul>
+          <div class="d-lg-flex col-lg-3 justify-content-lg-end">
+
+            {% if not is_mobile %}
+            <div class="me-5">
+              <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme') == 'light' %}checked{% endif %}>
+              <label for="theme-checkbox" class="theme-checkbox-label">
+                <i class="fa-solid fa-sun"></i>
+                <i class="fa-solid fa-moon"></i>
+                <span class="ball"></span>
+              </label>
+            </div>
+            {% endif %}
+
+            <div class="dropdown {% if not is_mobile %}text-end{% endif %}">
+              <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-user me-2"></i>{% if user.is_authenticated %}{{ user.username }}{% else %}Account{% endif %}
+              </a>
+              <ul class="dropdown-menu text-small">
+                {% if not user.is_authenticated %}
+                <li><a class="dropdown-item" href="{{ url_for('auth.register') }}"><i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('auth.login') }}"><i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login</a></li>
+                {% else %}
+                  {% if user.role == 'admin' %}
+                <li><a class="dropdown-item" href="{{ url_for('auth.admin') }}"><i class="fa-solid fa-heart me-1"></i>Welcome daddy <3</a></li>
+                  {% endif %}
+                <li><a class="dropdown-item" href="{{ url_for('auth.password_change') }}"><i class="fa-solid fa-lock me-1"></i>Change Password</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
+                {% endif %}
+              </ul>
+            </div>
           </div>
-          {% endif %}
         </div>
       </div>
     </nav>
@@ -113,19 +131,19 @@
         <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies and<i class="fa-brands fa-bitcoin me-2 ms-2"></i>Cryptocoins - {{ world_stocks[0]['date'] }}<i class="fa-solid fa-arrow-right ms-2"></i></div>
 
         {% for entry in world_stocks %}
-    <div class="hitem" style="color: {% if '-' in entry['percent_change'] %}red; {% else %}green; {% endif %}">
-        {% if ':cur' not in entry['country_name'] %}
-            <span class="fi fi-{% if 'flag' in entry.keys() %}{{ entry['flag'].split('-')[1] }}{% endif %} me-1"></span>
+    <div class="hitem" style="color: {{ entry['color'] }};">
+        {% if not entry['symbol'].endswith(':CUR') %}
+            <span class="fi fi-{{ entry['country']['code'] }} me-1"></span>
         {% else %}
             <span style="color: white"><i class="fa-brands fa-bitcoin me-1"></i></span>
         {% endif %}
         <span style="color: white"> 
-            {% if ':cur' not in entry['country_name'] %}
-                {{ entry['country'] }}<i class="ms-1 fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
-                {% if entry['country'] == 'United States' %}
+            {% if not entry['symbol'].endswith(':CUR') %}
+                {{ entry['country']['name'] }}<i class="ms-1 fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
+                {% if entry['country']['name'] == 'United States' %}
                   {% for index, us_info in us_indexes %}
-                    <span style="color:{% if '-' in us_info['percent_change'] %}red;{% else %}green;{% endif %}">{{ us_info['name'] }} {{ us_info['percent_change'] }}</span>
-                    {% if '-' in us_info['percent_change'] %}
+                    <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
+                    {% if us_info['color'] == 'red' %}
                         <i class="fa-solid fa-caret-down" style="color: red"></i>
                     {% else %}
                         <i class="fa-solid fa-caret-up" style="color: green"></i>
@@ -135,27 +153,27 @@
                     {% endif %}
                   {% endfor %}
                 {% else %}
-                  <span style="color:{% if '-' in entry['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['name'] }} {{ entry['percent_change'] }}</span>
-                  {% if '-' in entry['percent_change'] %}
+                  <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
+                  {% if entry['color'] == 'red' %}
                     <i class="ms-1 fa-solid fa-caret-down" style="color: red"></i>
                   {% else %}
                     <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
                   {% endif %}
                 {% endif %}
                 {% if 'currency' in entry.keys() %}
-                    |<i class="ms-2 fa-solid fa-money-bill-trend-up me-1"></i>{{ entry['currency']['currency_name_plural'].title() }} ({% if  entry['country'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
-                    <span style="color:{% if '-' in entry['currency']['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['currency']['percent_change'] }}<i class="ms-1 fa-solid fa-caret-{% if '-' in entry['currency']['percent_change'] %}down{% else %}up{% endif %}"></i></span> | 
+                    |<i class="ms-2 fa-solid fa-money-bill-trend-up me-1"></i>{{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
+                    <span style="color: {{ entry['currency']['color'] }};">{{ entry['currency']['changes']['percent'] }}<i class="ms-1 fa-solid fa-caret-{% if '-' in entry['currency']['percent'] %}down{% else %}up{% endif %}"></i></span> | 
                     {% if entry['currency']['name'].startswith('USD') %}
-                        1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-2"></i>{{ entry['currency']['price'] }} {{ entry['currency']['currency_symbol'] }}
+                        1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-2"></i>{{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
                     {% else %}
-                        {{ entry['currency']['currency_symbol'] }}1<i class="fa-solid fa-arrow-right-arrow-left me-2 ms-2"></i>${{ entry['currency']['price'] }}
+                        {{ entry['currency']['symbol'] }}1<i class="fa-solid fa-arrow-right-arrow-left me-2 ms-2"></i>${{ entry['currency']['price'] }}
                     {% endif %}
                 {% endif %}
             {% else %}
                 {{ entry['name'] }}
                 <i class="fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
-                <span style="color:{% if '-' in entry['percent_change'] %}red;{% else %}green;{% endif %}">{{ entry['symbol'] }} {{ entry['percent_change'] }}</span>
-                {% if '-' in entry['percent_change'] %}
+                <span style="color: {{ entry['color'] }};">{{ entry['symbol'] }} {{ entry['changes']['percent'] }}</span>
+                {% if entry['color'] == 'red' %}
                   <i class="ms-1fa-solid fa-caret-down" style="color: red"></i>
                 {% else %}
                   <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
@@ -176,14 +194,14 @@
       {% if stock_date and not is_global %}
         {% if country_index %}
           <div class="hitem" style="color: white">
-            <span class='fi fi-{% if 'flag' in country_index.keys() %}{{ country_index['flag'].split('-')[1] }}{% endif %}'></span>
-            <span style="color: white">{{ country_index['country'] }}</span> 
+            <span class='fi fi-{{ country_index["country"]["code"] }}'></span>
+            <span style="color: white">{{ country_index['country']['name'] }}</span> 
             <i class="fa-solid fa-arrow-trend-up" style="color: white"></i> 
-            <span style="color:{% if '-' in country_index['percent_change'] %}red;{% else %}green;{% endif %}">
-              {{ country_index['name'] }} {{ country_index['percent_change'] }}
+            <span style="color: {{ country_index['color'] }};">
+              {{ country_index['name'] }} {{ country_index['changes']['percent'] }}
             </span>
 
-            {% if '-' in country_index['percent_change'] %}
+            {% if country_index['color'] == 'red' %}
               <i class="fa-solid fa-caret-down" style="color: red"></i>
             {% else %}
               <i class="fa-solid fa-caret-up" style="color: green"></i>
@@ -191,20 +209,20 @@
 
             {% if 'currency' in country_index.keys() %}
               | <i class="fa-solid fa-money-bill-trend-up" style="color: white"></i> 
-              <span style="color: white">{{ country_index['currency']['currency_name_plural'].title() }} ({{ country_index['currency']['name'].replace('USD', '') }})</span> 
+              <span style="color: white">{{ country_index['currency']['name_plural'].title() }} ({{ country_index['currency']['name'].replace('USD', '') }})</span> 
 
-              <span style="color:{% if '-' in country_index['currency']['percent_change'] %}red;{% else %}green;{% endif %}">
-                {{ country_index['currency']['percent_change'] }} 
-                <i class="fa-solid fa-caret-{% if '-' in country_index['currency']['percent_change'] %}down{% else %}up{% endif %}"></i>
+              <span style="color: {{ country_index['currency']['color'] }};">
+                {{ country_index['currency']['changes']['percent'] }} 
+                <i class="fa-solid fa-caret-{% if country_index['currency']['color'] == 'red' %}down{% else %}up{% endif %}"></i>
               </span> | 
 
               <span style="color: white">
               {% if country_index['currency']['name'].startswith('USD') %}
-                1 USD<i class="ms-1 fa-solid fa-arrow-right-arrow-left me-1"></i>
-                {{ country_index['currency']['price'] }} {{ country_index['currency']['currency_symbol'] }}
+                1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-1"></i>
+                {{ country_index['currency']['price'] }} {{ country_index['currency']['symbol'] }}
               {% else %}
-                {{ country_index['currency']['currency_symbol'] }}1
-                <i class="fa-solid fa-arrow-right-arrow-left me-1 ms-1"></i>
+                {{ country_index['currency']['symbol'] }}1
+                <i class="ms-2 fa-solid fa-arrow-right-arrow-left me-1"></i>
                 ${{ country_index['currency']['price'] }}
               {% endif %}
               </span>
@@ -254,8 +272,6 @@
     </div>
   </div>
 {% endif %}
-
-
     <div class="container-fluid">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %} {% if category ==
@@ -282,6 +298,57 @@
       </div>
       {% block content %} {% endblock %}
     </div>
+
+    {% if page == 'infomundi' %}
+    <!-- Footer -->
+    <div class="container mt-5">
+  <footer class="py-5">
+    <div class="row">
+      <div class="col-6 col-md-2 mb-3">
+        <h5>Infomundi</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary">Home</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary">About</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('views.contact') }}" class="nav-link p-0 text-body-secondary">Contact</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('views.donate') }}" class="nav-link p-0 text-body-secondary">Donate</a></li>
+          <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">FAQs</a></li>
+        </ul>
+      </div>
+
+      {% if not user.is_authenticated %}
+      <div class="col-6 col-md-2 mb-3">
+        <h5>Session</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item mb-2"><a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary">Sign up</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary">Login</a></li>
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="col-md-5 offset-md-1 mb-3">
+        <form>
+          <h5>Subscribe to our newsletter</h5>
+          <p>Daily digest of what's new and exciting from us.</p>
+          <div class="d-flex flex-column flex-sm-row w-100 gap-2">
+            <label for="newsletter1" class="visually-hidden">Email address</label>
+            <input id="newsletter1" type="text" class="form-control" placeholder="Email address">
+            <button class="btn btn-primary" type="button">Subscribe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
+      <p>&copy; 2023 Infomundi Project</p>
+      <ul class="list-unstyled d-flex">
+        <li class="ms-3"><a class="link-body-emphasis" href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
+        <li class="ms-3"><a class="link-body-emphasis" href="https://github.com/Infomundi-Project"><i class="fa-brands fa-github"></i></a></li>
+      </ul>
+    </div>
+  </footer>
+</div>
+{% endif %}
+
     <script 
       src="https://code.jquery.com/jquery-3.6.4.min.js" 
       integrity="sha384-UG8ao2jwOWB7/oDdObZc6ItJmwUkR/PfMyt9Qs5AwX7PsnYn1CRKCTWyncPTWvaS" 
@@ -314,52 +381,10 @@
         );
       }
     </script>
-    <script>
-    const setCookie = (name, value, daysToExpire) => {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + daysToExpire);
-
-      const cookieString = `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
-
-      document.cookie = cookieString;
-    };
-
-    const toggleTheme = () => {
-      const htmlElement = document.querySelector('html');
-      const currentTheme = htmlElement.getAttribute('data-bs-theme');
-
-      // Toggle between 'dark' and 'light'
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-      // Set the new theme value
-      htmlElement.setAttribute('data-bs-theme', newTheme);
-
-      // Set a cookie indicating the current theme
-      setCookie('theme', newTheme, 7);
-
-      // Change the icon based on the theme
-      const themeIcon = document.getElementById('themeIcon');
-      themeIcon.classList.toggle('fa-sun', newTheme === 'light');
-      themeIcon.classList.toggle('fa-moon', newTheme === 'dark');
-    };
-
-    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
-  </script>
-  <script>
-  const container = document.getElementById('ticker');
-
-  let scrollInterval;
-
-  container.addEventListener('mouseover', () => {
-    scrollInterval = setInterval(() => {
-      container.scrollLeft += 2; // Scroll speed
-    }, 10); // Interval
-  });
-
-  container.addEventListener('mouseout', () => {
-    clearInterval(scrollInterval);
-  });
-  </script>
+    <script src="{{ url_for('static', filename='js/tickerSpeedUp.js') }}"
+    ></script>
+    <script src="{{ url_for('static', filename='js/themeButton.js') }}"
+    ></script>
     {% block scripts %} {% endblock %}
   </body>
 </html>
