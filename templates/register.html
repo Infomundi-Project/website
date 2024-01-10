@@ -11,9 +11,9 @@
   <div class="row justify-content-center mt-5">
     <div class="col-md-6">
       <div class="card mb-3">
-        <img src="{{ url_for('static', filename='img/logos/wide-dark-bg.png') }}" class="card-img-top" alt="Infomundi Logo">
+        <img id="infomundiLogo" src="{{ url_for('static', filename='img/logos/new/logo-bg-wide-dark.png') }}" class="card-img-top" alt="Infomundi Logo">
         <div class="card-header">
-          Welcome to Infomundi! Sign in by filling out this form.
+          Welcome to Infomundi!
         </div>
         <div class="card-body">
           <form method="post" action="{{ url_for('auth.register') }}">

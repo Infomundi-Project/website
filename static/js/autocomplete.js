@@ -2,7 +2,7 @@ $(function() {
     $(".autocomplete").autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/autocomplete",
+                url: "/api/autocomplete",
                 method: "GET",
                 dataType: "json",
                 data: {
@@ -22,7 +22,7 @@ $(function() {
 
             // Make an AJAX request to get the country code
             $.ajax({
-                url: "/get-country-code",
+                url: "/api/get_country_code",
                 method: "GET",
                 data: {
                     country: selectedCountry,

@@ -16,13 +16,19 @@ const toggleTheme = () => {
   
   // Set the new theme value
   htmlElement.setAttribute('data-bs-theme', newTheme);
+
+  // Change infomundi logo
+  //const infomundiLogo = document.getElementById('infomundiLogo');
+  //if (newTheme === 'dark') {
+  //  infomundiLogo.src = '/static/img/logos/wide-dark.png';
+  //} else {
+  //  infomundiLogo.src = '/static/img/logos/wide-light.png';
+  //}
   
   // Set a cookie indicating the current theme
-  setCookie('theme', newTheme, 7);
+  setCookie('theme', newTheme, 14);
 };
 
 
 const checkbox = document.getElementById("theme-checkbox");
 checkbox.addEventListener('click', toggleTheme);
-
-document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);

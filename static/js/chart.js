@@ -1,19 +1,13 @@
 am5.ready(function() {
 
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
 var root = am5.Root.new("chartdiv");
 
 
-// Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
 root.setThemes([
   am5themes_Animated.new(root)
 ]);
 
 
-// Create the map chart
-// https://www.amcharts.com/docs/v5/charts/map-chart/
 var chart = root.container.children.push(am5map.MapChart.new(root, {
   panX: "rotateX",
   panY: "rotateY",
@@ -25,8 +19,6 @@ var chart = root.container.children.push(am5map.MapChart.new(root, {
 }));
 
 
-// Create main polygon series for countries
-// https://www.amcharts.com/docs/v5/charts/map-chart/map-polygon-series/
 var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
   geoJSON: am5geodata_worldLow 
 }));
@@ -46,8 +38,6 @@ polygonSeries.mapPolygons.template.states.create("active", {
 });
 
 
-// Create series for background fill
-// https://www.amcharts.com/docs/v5/charts/map-chart/map-polygon-series/#Background_polygon
 var backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
 backgroundSeries.mapPolygons.template.setAll({
   fill: root.interfaceColors.get("alternativeBackground"),
@@ -59,7 +49,6 @@ backgroundSeries.data.push({
 });
 
 
-// Set up events
 var previousPolygon;
 
 polygonSeries.mapPolygons.template.on("active", function(active, target) {
@@ -91,13 +80,7 @@ function selectCountry(id) {
   }
 }
 
-// Uncomment this to pre-center the globe on a country when it loads
-//polygonSeries.events.on("datavalidated", function() {
-//  selectCountry("AU");
-//});
 
-
-// Make stuff animate on load
 chart.appear(1000, 100);
 
-}); // end am5.ready()
+});

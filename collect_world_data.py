@@ -136,4 +136,4 @@ def get_world_finance_data():
 
 
 if __name__ == '__main__':
-    format_world_data()
+    get_world_finance_data()

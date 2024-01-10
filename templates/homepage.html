@@ -9,9 +9,6 @@
   .fa-solid me-1 {
   color: #ffffff;
   }
-  .infomundi-logo {
-  margin-bottom: 20px;
-  }
   {% if request.cookies.get('theme') != 'light' %}
   .accordion {
   --bs-accordion-btn-bg: #202429;
@@ -31,25 +28,24 @@
   }
   {% endif %}
   @media (max-width: 968px) {
-  #chartdiv {
-  width: 100%;
-  height: 50vh;
-  max-width: 100%;
-  margin-top: -3.5vh;
-  }
-  .infomundi-logo {
-  max-height: 80%; 
-  max-width: 80%;
-  }
+    #chartdiv {
+    width: 100%;
+    height: 50vh;
+    max-width: 100%;
+    margin-top: -3.5vh;
+    }
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="row">
-  <div class="col-sm text-center mb-5 mt-4">
+  <div class="col-lg text-center mb-5 mt-4">
     <img 
-      src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/wide-light.png') }}{% else %}{{ url_for('static', filename='img/logos/wide-dark.png') }}{% endif %}"
+      src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/new/logo-wide-light.png') }}{% else %}{{ url_for('static', filename='img/logos/new/logo-wide-dark.png') }}{% endif %}"
       class="infomundi-logo"
+      id="infomundiLogo"
+      height="16"
+      width="9" 
       alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
       />
     <center>
@@ -93,7 +89,7 @@
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.1 <span class="badge text-bg-success">New!</span></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.1<!-- <span class="badge text-bg-success">New!</span> --></p>
                 <p class="fs-6 good-blue"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">
@@ -107,11 +103,11 @@
                 <p class="fs-6 good-blue"><a href="{{ url_for('auth.login') }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-right-to-bracket" style="color: #3666ba;"></i>Log in</a></p>
                 {% endif %}
                 
-                {% if last_visited_country %}
-                <p class="fs-6 good-blue"><a href="{{ last_visited_country }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited country</a></p>
+                {% if session.get('last_visited_country', '') %}
+                <p class="fs-6 good-blue"><a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited country</a></p>
                 {% endif %}
-                {% if last_visited_news %}
-                <p class="fs-6 good-blue"><a href="{{ last_visited_news }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited news</a></p>
+                {% if session.get('last_visited_news', '') %}
+                <p class="fs-6 good-blue"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="text-reset text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square" style="color: #3666ba;"></i>Last visited news</a></p>
                 {% endif %}
               </div>
             </div>
@@ -120,22 +116,22 @@
       </div>
     </div>
   </div>
-  <div class="col-sm p-1 mt-2">
+  <div class="col-lg p-1 mt-2">
     <div id="chartdiv"></div>
   </div>
 </div>
 {% endblock %}
 {% block scripts %}
-<script defer
+<script async defer
   src="https://cdn.amcharts.com/lib/5/index.js"
   ></script>
-<script defer
+<script async defer
   src="https://cdn.amcharts.com/lib/5/map.js"
   ></script>
-<script defer
+<script async defer
   src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"
   ></script>
-<script defer
+<script async defer
   src="https://cdn.amcharts.com/lib/5/themes/Animated.js"
   ></script>
 <script defer
@@ -146,7 +142,7 @@
   integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" 
   crossorigin="anonymous"
   ></script>
-<script defer
+<script 
   src="{{ url_for('static', filename='js/autocomplete.js') }}"
   ></script>
 {% endblock %}

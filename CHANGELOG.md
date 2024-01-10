@@ -4,20 +4,51 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
-| 1.2.2 | 2023/12/22 | Implemented lazy loading for news page images, improved cache script for more images, and enhanced navbar. Changed comments page cooldown to 5 seconds and accordion look. Enhanced session cookie security. No removals or fixes. | @behindsecurity |
-| 1.2.1 | 2023/12/21 | Added session remember option, light mode for homepage, authenticated user badge, country area ranking, and logout button. Removed old logo images. Fixed index display and comments page entry bugs. Implemented cooldown for comments form. | @behindsecurity |
-| 1.2.0 | 2023/12/19 | Introduced light mode, improved ticker functionality, added geopolitical placeholder. Removed unused resources. Fixed ticker and display issues. Enhanced password change page security. | @behindsecurity |
-| 1.1.9 | 2023/12/13 | Improved mobile compatibility for the ticker. Added crypto, currency, and index information to the homepage. Changed display of country stocks. Removed navbar return button for mobile users. Enhanced account creation spam prevention. Reduced password complexity. | @behindsecurity |
-| 1.1.8 | 2023/12/05 | Added login system. Fixed news ticker. No other changes or security updates. | @behindsecurity |
-| 1.1.7 | 2023/12/04 | Added nation statistics, click removal for inactive news, and main stock display. Removed unnecessary scripts. Fixed error page and UTC-related bug. Improved captcha security. No other changes. | @behindsecurity |
-| 1.1.6 | 2023/11/24 | Implemented sleek accordion design with mobile detection, enriched news item details on comments page, streamlined navbar, and improved CLS. Changed source color, added placeholder text, revamped logo font, and relocated search bar. Removed outdated images, and fixed card height for mobile users. | @behindsecurity |
-| 1.1.5 | 2023/11/20 | Added error pages, code refactoring, email support, and comment blacklist. Changed theme color to black. Fixed return button on comments page. No removals or security changes.  | @behindsecurity |
-| 1.1.4 | 2023/11/17 | Revamped homepage layout. Added click tracking, user session stats, icons in comments. Improved cache script and added view count badges. Changed search bar and subtitle colors. Adjusted news page layout for smaller screens. Fixed search bug. No removals or security changes.  | @behindsecurity |
-| 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @behindsecurity |
-| 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @behindsecurity |
-| 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @behindsecurity |
-| 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @behindsecurity |
-| 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @behindsecurity |
+| 1.2.3 | 2023/01/10 | Version 1.2.3 introduces significant enhancements to user experience, notably in the news page presentation and search functionality. It features a more dynamic news layout, advanced search accuracy with auto-translation, and a more visually appealing interface with an updated logo. The release also includes a crucial security fix for the search feature and improvements in site navigation and data access through a new API endpoint. | @InfomundiTeam |
+| 1.2.2 | 2023/12/22 | Implemented lazy loading for news page images, improved cache script for more images, and enhanced navbar. Changed comments page cooldown to 5 seconds and accordion look. Enhanced session cookie security. No removals or fixes. | @InfomundiTeam |
+| 1.2.1 | 2023/12/21 | Added session remember option, light mode for homepage, authenticated user badge, country area ranking, and logout button. Removed old logo images. Fixed index display and comments page entry bugs. Implemented cooldown for comments form. | @InfomundiTeam |
+| 1.2.0 | 2023/12/19 | Introduced light mode, improved ticker functionality, added geopolitical placeholder. Removed unused resources. Fixed ticker and display issues. Enhanced password change page security. | @InfomundiTeam |
+| 1.1.9 | 2023/12/13 | Improved mobile compatibility for the ticker. Added crypto, currency, and index information to the homepage. Changed display of country stocks. Removed navbar return button for mobile users. Enhanced account creation spam prevention. Reduced password complexity. | @InfomundiTeam |
+| 1.1.8 | 2023/12/05 | Added login system. Fixed news ticker. No other changes or security updates. | @InfomundiTeam |
+| 1.1.7 | 2023/12/04 | Added nation statistics, click removal for inactive news, and main stock display. Removed unnecessary scripts. Fixed error page and UTC-related bug. Improved captcha security. No other changes. | @InfomundiTeam |
+| 1.1.6 | 2023/11/24 | Implemented sleek accordion design with mobile detection, enriched news item details on comments page, streamlined navbar, and improved CLS. Changed source color, added placeholder text, revamped logo font, and relocated search bar. Removed outdated images, and fixed card height for mobile users. | @InfomundiTeam |
+| 1.1.5 | 2023/11/20 | Added error pages, code refactoring, email support, and comment blacklist. Changed theme color to black. Fixed return button on comments page. No removals or security changes.  | @InfomundiTeam |
+| 1.1.4 | 2023/11/17 | Revamped homepage layout. Added click tracking, user session stats, icons in comments. Improved cache script and added view count badges. Changed search bar and subtitle colors. Adjusted news page layout for smaller screens. Fixed search bug. No removals or security changes.  | @InfomundiTeam |
+| 1.1.3 | 2023/11/13 | Code refactoring for better performance. Improved homepage display, admin dashboard, and comments page. Added admin tag, search bar, and clickable country info. Minor UI changes. No removals, fixes, or security updates.  | @InfomundiTeam |
+| 1.1.2 | 2023/11/11 | Enhancements in translator display and authenticated user navbar. Changed story card border. Removed translate box and admin-only navbar. Fixed flash error messages and comment deletion. No security updates.  | @InfomundiTeam |
+| 1.1.1 | 2023/11/10 | Key enhancements include improved HTML structure in registration and admin pages, preventing HTML tags in story descriptions, and a more professional navbar. Changes involve pagination color in `rss_template.html`, optimized comment form validation, visual adjustments in the news page, and a shift to black-themed news cards. Removed two html files, no fixes were made, and there are no specific security updates in this release.  | @InfomundiTeam |
+| 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @InfomundiTeam |
+| 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @InfomundiTeam |
+
+
+
+## 1.2.3 2024/01/10
+
+### Enhancements (8)
+- IME01: Improved user engagement by randomizing news content display on each page reload.
+- IME02: Enhanced search function accuracy, offering more relevant results.
+- IME03: Integrated auto-translation into the search feature, enhancing accessibility on the news page.
+- IME04: Redesigned news page layout for better clarity and conciseness.
+- IME05: Added descriptive headers to news stories, improving user navigation and quick access to story details.
+- IME06: Enhanced image display algorithm, resulting in more news stories featuring images.
+- IME07: Upgraded Infomundi logo design for better brand representation.
+- IME08: Launched new API endpoint (/api) for serving static data and managing actions like adding comments to stories.
+
+### Changed (4)
+- IMC01: Maintained visibility of older news posts during new cache updates.
+- IMC02: Implemented a new pagination system for countries with extensive news coverage.
+- IMC03: Relocated the theme change option to the account dropdown menu for improved accessibility.
+- IMC04: Updated the lazy load script for better performance.
+
+### Removed (0)
+- No items removed in this update.
+
+### Fixed (1)
+- IMF01: Several bug fixes.
+
+### Security (1)
+- IMS01: Addressed a vulnerability in the search function that could lead to Denial of Service (DoS) under certain conditions.
+
 
 
 ## 1.2.2 2023/12/22

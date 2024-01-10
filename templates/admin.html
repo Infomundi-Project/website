@@ -14,7 +14,7 @@
         <i class="fa-solid fa-rss"></i> Add News Feed
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('auth.add_news') }}">
+        <form method="post" action="{{ url_for('api.add_news') }}">
           <div class="form-group">
             <label for="country"><i class="fa-solid fa-earth-americas"></i> Country</label>
             <input type="text" class="form-control autocomplete" id="country" name="country" required>
@@ -82,7 +82,7 @@
         <i class="fa-regular fa-trash-can"></i> Delete a Comment
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('auth.delete_comment') }}">
+        <form method="post" action="{{ url_for('api.delete_comment') }}">
           <div class="form-group">
             <label for="comment_id">Comment ID</label>
             <input type="text" class="form-control" id="comment_id" name="comment_id" required>
@@ -105,7 +105,7 @@
           <li class="list-group-item">
             <i class="fa-solid fa-user"></i> User: {{ result['name'] }}<br>
             <i class="fa-solid fa-comment"></i> Comment: {{ result['text'] }}<br>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> <a class="text-reset" href="{{ result['link'] }}">Link</a><br>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> <a class="text-reset" href="{{ result['link'] }}" target="_blank">Link</a><br>
             <i class="fa-solid fa-fingerprint"></i> ID: {{ result['id'] }}
           </li>
           {% endfor %}
@@ -129,14 +129,14 @@
   integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" 
   crossorigin="anonymous"
   ></script>
-<script defer
+<script 
   src="{{ url_for('static', filename='js/autocompleteNoRedirect.js') }}"
   ></script>
 <script>
   $(document).ready(function() {
       // Fetch the initial state from the server
       $.ajax({
-          url: "{{ url_for('auth.get_comments_status') }}",
+          url: "{{ url_for('api.get_comments_status') }}",
           method: 'GET',
           success: function(response) {
               $('#flexSwitchCheckChecked').prop('checked', response.enabled);
@@ -146,7 +146,7 @@
       // Handle the Apply button click
       $("#applyButton").click(function() {
           $.ajax({
-              url: "{{ url_for('auth.disable_comments') }}",
+              url: "{{ url_for('api.disable_comments') }}",
               method: 'POST',
               data: { 'flexSwitchCheckChecked': $('#flexSwitchCheckChecked').prop('checked') },
               success: function(response) {

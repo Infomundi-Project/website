@@ -1,8 +1,9 @@
 import time, threading
 from datetime import datetime, timedelta
+from random import shuffle, choice
+from unidecode import unidecode
 from bs4 import BeautifulSoup
 from feedparser import parse
-from random import shuffle
 from requests import get
 from hashlib import md5
 from os import listdir
@@ -31,33 +32,10 @@ def get_img(feed, item, is_search: bool=False) -> str:
     return src
 
 
-def search_for_images():
-    categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
-    total = 0
-    for selected_filter in categories:
-        print(f"[~] Searching images for {selected_filter}...")
-        
-        try:
-            cache = json_util.read_json(f'{config.CACHE_PATH}/{selected_filter}')
-        except FileNotFoundError:
-            continue
-        for page in cache:
-            if page == 'created_at': continue
-            for news in cache[page]:
-                if 'infomundi' in news['media_content']['url']:
-                    news['media_content']['url'] = scripts.get_link_preview(news['link'], source='cache')
-                    if 'infomundi' not in news['media_content']['url']:
-                        total += 1
-
-        print(f'[+] We gathered {total} images for {selected_filter}')
-        json_util.write_json(cache, f'{config.CACHE_PATH}/{selected_filter}')
-    print('Finishing!')
-
-
 def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     """Fetch RSS feed and store relevant information in a result list."""
     headers = {
-        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+        'User-Agent': choice(immutable.USER_AGENTS)
     }
     
     try:
@@ -94,24 +72,32 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
             item_link = item.link
             
             for character in immutable.SPECIAL_CHARACTERS:
-                feed_publisher.replace(character, '')
-                feed_link.replace(character, '')
+                feed_publisher = feed_publisher.replace(character, '')
+                feed_link = feed_link.replace(character, '')
 
-                item_title.replace(character, '')
-                item_link.replace(character, '')
+                item_title = item_title.replace(character, '')
+                item_link = item_link.replace(character, '')
 
             if not scripts.is_valid_url(feed_link) or not scripts.is_valid_url(item_link):
+                print(f'[-] Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
                 continue
+
+            if item.has_key('published_parsed'):
+                pubdate = item.published_parsed
+            elif item.has_key('published'):
+                pubdate = item.published
+            else:
+                pubdate = item.updated
 
             data['items'].append(
                 {
                 'title': item_title,
                 'description': item_description,
-                'id': scripts.generate_id(),
+                'id': f'{md5(unidecode(item_title.lower()).encode()).hexdigest()}',
                 'publisher': feed_publisher,
                 'publisher_link': feed_link,
                 'link': item_link,
-                'pubDate': format_date(item.published_parsed),
+                'pubDate': format_date(pubdate),
                 'media_content': {
                     'url': image_url
                     }
@@ -126,6 +112,18 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
 
 def format_date(date) -> str:
     """Takes a pythonic date object and converts into a string to show in the news page"""
+    if not isinstance(date, tuple):
+        if date.startswith('2024') or date.startswith('2023'):
+            date_object = datetime.fromisoformat(date)
+            # Convert to 9-tuple
+            date = date_object.timetuple()
+        else:
+            if '2024' in date:
+                date_string = ' '.join(date.split('2024')[:3])
+            else:
+                date_string = ' '.join(date.split('2023')[:3])
+            return date_string
+
     today = datetime.now().date()
 
     if isinstance(date, tuple):
@@ -147,9 +145,25 @@ def main():
     current_month = datetime.today().month
 
     categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
-    now = time.time()
+    now = datetime.now()
+
     for selected_filter in categories:
-        print(f"[~] Handling cache for {selected_filter}...")
+        print(f"\n[~] Handling cache for {selected_filter}...")
+
+        cache_file_path = f'{config.CACHE_PATH}/{selected_filter}'
+
+        # We check wether the cache already exist or not.
+        is_new = False
+        try:
+            cache = json_util.read_json(cache_file_path)
+        except FileNotFoundError:
+            cache = {}
+            cache['created_at'] = now.isoformat()
+            is_new = True
+
+        if not scripts.is_cache_old(f'{cache_file_path}.json', 1):
+            print(f'[-] Cache for {selected_filter} is not old enough.')
+            continue
         
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
@@ -185,26 +199,52 @@ def main():
         # Shuffle merged articles to mix them up
         shuffle(merged_articles)
 
-        page_separated_articles = {}
-        page_separated_articles['created_at'] = now
-        
-        total_pages = len(merged_articles) // 100
-        if total_pages == 0:
-            total_pages += 1
-        
-        index = 0
-        for page in range(1, total_pages + 1):
-            page_separated_articles[f"page_{str(page)}"] = []
-            try:
-                page_separated_articles[f"page_{str(page)}"].extend(merged_articles[index:index+100])
-                index += 100
-            except:
-                page_separated_articles[f"page_{str(page)}"].extend(merged_articles)
+        # It may be a good idea to overwrite the cache with a time span of 7 days
+        saved_timestamp = datetime.fromisoformat(cache['created_at'])
 
-        json_util.write_json(page_separated_articles, f"{config.CACHE_PATH}/{selected_filter}")
-        print(f"[{total_pages} pages // {len(merged_articles)} articles] Wrote json for {selected_filter}.")
+        time_difference = now - saved_timestamp
+        if time_difference > timedelta(days=7) or is_new:
+            cache['stories'] = []
 
-    search_for_images()
+        # Correct date
+        try:
+            updated_timestamp = datetime.fromisoformat(cache['updated_at'])
+        except KeyError:
+            updated_timestamp = now
+            cache['updated_at'] = now
+        
+        time_difference = now - updated_timestamp
+        if time_difference > timedelta(days=1):
+            for story in cache['stories']:
+                pubdate = story['pubDate']
+
+                if pubdate == 'Today':
+                    story['pubDate'] = '1 day ago'
+                elif 'ago' in pubdate:
+                    days = int(pubdate[0])
+                    story['pubDate'] = f'{days + 1} days ago'
+                else:
+                    continue
+
+        existing_ids = [x['id'] for x in cache['stories']]
+
+        # Removes all repeated articles
+        articles_to_add = [x for x in merged_articles if x['id'] not in existing_ids]
+
+        if not articles_to_add:
+            print(f'[+] Cache for {selected_filter} is full. No need to write anything.')
+            continue
+
+        cache['updated_at'] = now.isoformat()
+
+        # Add newer articles to the beginning of the cache
+        articles_to_add.extend(cache['stories'])
+        cache['stories'] = articles_to_add
+
+        json_util.write_json(cache, f"{config.CACHE_PATH}/{selected_filter}")
+        print(f"[{len(articles_to_add)} articles] Wrote json for {selected_filter}.")
+    
+    return print('Finished.')
 
 if __name__ == "__main__":
-    search_for_images()
+    main()

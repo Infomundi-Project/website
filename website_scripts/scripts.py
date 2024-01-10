@@ -6,6 +6,7 @@ from base64 import b64encode, b64decode
 from os import listdir, urandom, path
 from json import loads as json_loads
 from difflib import SequenceMatcher
+from googletrans import Translator
 from urllib.parse import urlparse
 from unidecode import unidecode
 from bs4 import BeautifulSoup
@@ -191,44 +192,30 @@ def send_verification_token(email: str, username: str) -> bool:
     except Exception:
         tokens = {}
     
+    # This means there's an already issued token for that specific email address, and therefore it should return False, indicating there's an error.
     if email in tokens:
         return False
 
     verification_token = md5(urandom(20)).hexdigest()
     
-    tokens[email] = verification_token
+    tokens[email] = {}
+    tokens[email]['token'] = verification_token
     json_util.write_json(tokens, config.TOKENS_PATH)
 
     message = f"""Hello {username}, 
 
-Welcome to Infomundi! If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, we've made it quick and easy for you. Simply click on the following link to complete the verification process: 
+If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
 https://infomundi.net/auth/verify?token={verification_token}
 
-Looking forward to seeing you explore our platform!
+We're looking forward to seeing you explore our platform!
 
 Best regards,
 The Infomundi Team"""
 
-    subject = 'Infomundi - Verify Your Account'
+    subject = 'Infomundi - Activate Your Account'
     notifications.send_email(email, subject, message)
     return True
-
-
-def check_verification_token(token: str) -> bool:
-    tokens = json_util.read_json(config.TOKENS_PATH)
-    for email in tokens:
-        if tokens[email] == token:
-            delete_token = email
-            break
-    else:
-        delete_token = ''
-
-    if delete_token:
-        del tokens[delete_token]
-        json_util.write_json(tokens, config.TOKENS_PATH)
-
-    return bool(delete_token)
 
 
 def parse_utc_offset(offset_str: str):
@@ -250,12 +237,21 @@ def get_current_time_in_timezone(cca2: str) -> str:
     data = json_util.read_json(f'{config.COUNTRIES_DATA_PATH}/{cca2}')
     current_utc_time = datetime.utcnow()
 
+    if isinstance(data, list):
+        data = data[0]
+
     try:
-        capital = data['capital'][0]
+        country_capital = unidecode(data['capital'][0].lower())
         capitals_time = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/capitals_time')
 
-        timezone = [x['gmt_offset'] for x in capitals_time if unidecode(x['capital']).lower() == unidecode(capital).lower()][0]
-    except Exception:
+        for item in capitals_time:
+            if country_capital in unidecode(item['capital']).lower():
+                timezone = item['gmt_offset']
+                break
+        else:
+            timezone = ''
+    except Exception as err:
+        log(f'Exception trying to get {cca2} time zone: {err}')
         timezone = ''
 
     if '+' in timezone or '-' in timezone:
@@ -450,60 +446,35 @@ def check_in_badlist(data: dict):
         notifications.post_webhook(webhook_data)
 
 
-def get_link_preview(url: str, source: str='comments') -> dict:
+def get_link_preview(url: str) -> dict:
     """Takes an URL as input and returns a dictionary with link preview information such as image, description and title."""
     try:
         headers = {
             'User-Agent': choice(immutable.USER_AGENTS)
         }
 
-        if source == 'cache':
-            with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
-                proxies = [x.rstrip() for x in f.readlines()][:100]
-
-            bad_proxies = []
-            
-            while True:
-                proxies = [x for x in proxies if x not in bad_proxies]
-                
-                if not proxies:
-                    break
-                
-                chosen_proxy = choice(proxies)
-
-                sleep(1.5)
-                try:
-                    response = get_request(url, timeout=8, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
-                except Exception:
-                    bad_proxies.append(chosen_proxy)
-                    
-                    print(f'[!] Exception connecting to {chosen_proxy}, trying another...')
-                    continue
-                print(f'[+] Sucessfully connected to {chosen_proxy}')
-
-                break
-        else:
-            print('not cache')
-            response = get_request(url, timeout=5, headers=headers)
+        response = get_request(url, timeout=5, headers=headers)
         
-        response.encoding = 'utf-8'
+        if response.status_code != 200:
+            raise Exception
 
+        response.encoding = 'utf-8'
         # Parse the HTML content of the page
         soup = BeautifulSoup(response.text, 'html.parser')
 
         # Extract relevant information
         title = soup.title.text.strip() if soup.title else "No title"
+        
         description = soup.find('meta', {'name': 'description'})
         description = description.get('content').strip() if description else "No description"
+        
         image = soup.find('meta', {'property': 'og:image'})
         image = image.get('content').strip() if image else "static/img/infomundi-white-darkbg-square.webp"
 
+        # Remove some potentially harmful characters
         for character in immutable.SPECIAL_CHARACTERS:
             title.replace(character, '')
             description.replace(character, '')
-
-        if source == 'cache':
-            return image
 
         return {
             'image': image,
@@ -511,9 +482,6 @@ def get_link_preview(url: str, source: str='comments') -> dict:
             'title': title
         }
     except Exception:
-        if source == 'cache':
-            return 'static/img/infomundi-white-darkbg-square.webp'
-        
         return {
             'image': 'static/img/infomundi-white-darkbg-square.webp',
             'description': 'No description was provided',
@@ -529,24 +497,36 @@ def generate_id() -> str:
 def string_similarity(s1: str, s2: str) -> float:
     """Takes two strings and returns the similarity percentage between them."""
     matcher = SequenceMatcher(None, s1, s2)
-    return matcher.ratio() * 100 # Returns percentage of similarity
+    return matcher.ratio() * 100
 
 
-def add_click(news_id: str):
-    """Takes the news id and add a click to the specified news in the telemetry file."""
-    telemetry = json_util.read_json(config.TELEMETRY_PATH)
+def add_telemetry(news_id: str, telemetry_type: str):
+    """Takes the news id and add a click or a like to the specified news in the telemetry file.
+
+    Arguments
+        news_id: MD5 Hash of an ID. An example would be "d55eb4bac9849987131ec2d7c63d4c8c".
+        telemetry_type: The type of the telemetry to attach to the news. Must be in ['clicks', 'likes'].
+    """
+
     current_timestamp = datetime.now()
     timestamp_string = current_timestamp.isoformat()
     
+    telemetry = json_util.read_json(config.TELEMETRY_PATH)
     if news_id not in telemetry:
         telemetry[news_id] = {}
         telemetry[news_id]['clicks'] = 0
+        telemetry[news_id]['likes'] = 0
+        telemetry[news_id]['timestamp'] = timestamp_string
+    else:
+        telemetry[news_id][telemetry_type] += 1
         telemetry[news_id]['timestamp'] = timestamp_string
 
+    # Removes news from the telemetry file that are older than 7 days.
     to_remove = []
-    for item in list(telemetry.keys()):
+    for item in telemetry:
         saved_timestamp = datetime.fromisoformat(telemetry[item]['timestamp'])
         
+        # As soon as an entry has been made within the last 7 days, the loop must stop. Otherwise, add the entry to the delete list.
         time_difference = current_timestamp - saved_timestamp
         if time_difference < timedelta(days=7):
             break
@@ -555,9 +535,6 @@ def add_click(news_id: str):
 
     for key in to_remove:
         del telemetry[key]
-    
-    telemetry[news_id]['clicks'] += 1
-    telemetry[news_id]['timestamp'] = timestamp_string
     
     json_util.write_json(telemetry, config.TELEMETRY_PATH)
 
@@ -576,7 +553,7 @@ def get_statistics() -> dict:
         statistics['current_time'] = formatted_time
         return statistics
 
-    categories = [file.replace('.json', '') for file in listdir(config.FEEDS_PATH)]
+    categories = [file.replace('.json', '') for file in listdir(config.CACHE_PATH)]
     total_countries_supported = len([x.split('_')[0] for x in categories if 'general' in x])  # Total countries supported
 
     total_news = 0
@@ -587,29 +564,34 @@ def get_statistics() -> dict:
         total_feeds += len(news_feeds)
 
         try:
-            news_cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
+            cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
         except FileNotFoundError:
             continue
 
-        for page in news_cache:
-            if 'page' in page:
-                total_news += len(page)
+        try:
+            total_news += len(cache['stories'])
+        except KeyError:
+            log(f'We couldnt calculate total news for {category}')
         
         try:
-            timestamp = news_cache['created_at']
-        except KeyError:
+            saved_timestamp = datetime.fromisoformat(cache['updated_at'])
+        except Exception:
             continue
-    
-    time_comparison = int((current_timestamp - datetime.fromtimestamp(timestamp)).total_seconds())
-    if time_comparison < 3600: 
-        minutes = time_comparison // 60
-        last_updated_message = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
-    else:
-        hours = time_comparison // 3600
-        last_updated_message = f"{hours} hour{'s' if hours > 1 else ''} ago"
-        
-    last_updated = datetime.fromtimestamp(timestamp).strftime('%Y/%m/%d at %H:%M')  # Last updated date
 
+    # Get last updated
+    time_difference = current_timestamp - saved_timestamp
+    
+    total_seconds = time_difference.total_seconds()
+
+    hours = int(total_seconds // 3600)
+    minutes = int((total_seconds % 3600) // 60)
+
+    if time_difference < timedelta(hours=1):
+        last_updated_message = f"{minutes} minutes ago"
+    else:
+        last_updated_message = f"{hours} hours ago"
+
+    # Get total comments
     total_comments = 0
     comments = json_util.read_json(config.COMMENTS_PATH)
     for news_id in comments:
@@ -629,7 +611,6 @@ def get_statistics() -> dict:
         'total_news': total_news,
         'total_feeds': total_feeds,
         'total_comments': total_comments,
-        'last_updated': last_updated,
         'last_updated_message': last_updated_message,
         'total_clicks': total_clicks
     }
@@ -687,3 +668,21 @@ def is_strong_password(password: str) -> bool:
 
 def remove_html_tags(text_with_html: str) -> str:
     return BeautifulSoup(text_with_html, 'html.parser').get_text()
+
+
+def translate(dest_lang: str, msg: str):
+    """
+    Uses google translate to enhance user experience in many ways.
+
+    Arguments
+        dest_lang: str
+            Destination language. For example, portuguese would be 'pt'.
+    """
+    
+    translator = Translator()
+
+    try:
+        translation = translator.translate(msg, dest=dest_lang)
+        return translation.text
+    except Exception as err:
+        return ''

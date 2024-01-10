@@ -2,7 +2,7 @@ $(function() {
     $(".autocomplete").autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/autocomplete",
+                url: "/api/autocomplete",
                 method: "GET",
                 dataType: "json",
                 data: {

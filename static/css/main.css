@@ -1,9 +1,17 @@
 body {
   font-family: Alexandria, sans-serif;
 }
+
+.infomundi-logo {
+  margin-bottom: 20px;
+  width: 60%;
+  height: auto;
+}
+
 .good-blue {
   color: #3666ba;
 }
+
 .logo-text {
   font-family: 'Mulish', sans-serif;
   font-family: 'Spectral SC', serif;
@@ -44,4 +52,12 @@ body {
 
 .theme-checkbox:checked + .theme-checkbox-label .ball {
   transform: translateX(24px);
+}
+
+@media (max-width: 800px) {
+  .infomundi-logo {
+  margin-bottom: 20px;
+  width: 100%;
+  height: auto;
+  }
 }

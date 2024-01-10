@@ -38,7 +38,7 @@
         <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ story_info['total_comments'] }}</span>
       </p>
       <a href="{{ news_link }}" target="_blank" class="btn btn-outline-info me-2"><i class="fa-solid fa-eye me-1"></i>View Full Story</a>
-      <a href="{{ last_visited_country }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo me-1"></i>Return</a>
+      <a href="https://infomundi.net/{{ last_visited_country }}" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-undo me-1"></i>Return</a>
     </div>
     <div class="card-footer text-body-secondary">
     <i class="fa-solid fa-calendar-days me-1"></i>{{ story_info['pubDate'] }}
@@ -47,7 +47,7 @@
 </div>
 <div id="comments" class="container mt-4">
   <!-- Comment Form -->
-  <form action="{{ url_for('views.add_comment') }}" method="post" onsubmit="return validateForm()">
+  <form action="{{ url_for('api.add_comment') }}" method="post" onsubmit="return validateForm()">
     <div class="form-group">
       <label for="name" class="form-label"><i class="fa-solid fa-user me-1"></i>Username</label>
       {% if user.is_authenticated %}

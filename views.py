@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response, session
 from flask_login import current_user
-from random import choice
+from random import choice, shuffle
 from time import time
 
-from website_scripts import scripts, config, json_util, immutable
+from website_scripts import scripts, config, json_util, immutable, search
 
 views = Blueprint('views', __name__)
 
@@ -30,8 +30,6 @@ def home():
         us_indexes=enumerate(us_indexes), 
         statistics=statistics, 
         user=current_user, 
-        last_visited_country=session.get('last_visited_country', ''), 
-        last_visited_news=session.get('last_visited_news', ''), 
         is_mobile=scripts.detect_mobile(request), 
         country_code='en'
     )
@@ -63,11 +61,29 @@ def donate():
 
 @views.route('/news', methods=['GET'])
 def get_latest_feed():
-    """Serving the /news endpoint. This function allows three GET parameters and uses them to filter by country, news category, and page number. It reads the cache information from the respective cache file and renders the rss_template.html template."""
+    """Serving the /news endpoint. 
+
+    Arguments
+        page_num: str
+            GET 'page' parameter. Specifies the cache page. Example: '1'.
+        
+        country_filter: str
+            GET 'country' parameter. Specifies the country code (2 digits). Example: 'br' (cca2 for Brazil).
+
+        news_filter: str
+            GET 'section' parameter. Specifies the news category. Example: 'general'.
+
+    Return
+        Renders the news page, containing 100 news per page.
+    """
     
-    page_num = request.args.get('page', '1') 
+    page_num = request.args.get('page', 1)
+    try:
+        page_num = int(page_num)
+    except TypeError:
+        page_num = 1
     
-    # If no country, selects a random one.
+    # If no country was selected, selects a random one.
     country_filter = request.args.get('country', f"{choice(['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}").lower()
     
     news_filter = request.args.get('section', 'general').lower()
@@ -78,7 +94,7 @@ def get_latest_feed():
         flash('We apologize, but there is no support available for the country you selected. If you would like to recommend sources, please send us an email at contact@infomundi.net.', 'error')
         return redirect(url_for('views.home'))
 
-    # Searches for the country full name (can be modularized)
+    # Searches for the country full name (may be modularized at some point)
     countries = config.COUNTRY_LIST
     for item in countries:
         if item['code'].lower() == country_filter:
@@ -87,40 +103,87 @@ def get_latest_feed():
     # Read the cache for the selected filter
     try:
         cache = json_util.read_json(f"{config.CACHE_PATH}/{selected_filter}")
-        err = cache[f'page_{page_num}']
-    except FileNotFoundError: # Handle cache reading error
+        end_index = page_num * 100
+
+        start_index = end_index - 100
+
+        if start_index - 100 < 0:
+            start_index = 0
+        
+        feeds = cache['stories'][start_index:end_index]
+
+        # We shuffle the current page to provide a more dynamic experience to the user
+        shuffle(feeds)
+    except FileNotFoundError:
         flash('We apologize, but something went wrong. Please try again later. In the meantime, feel free to explore other countries!', 'error')
         return redirect(url_for('views.home'))
-    except KeyError: # Handle page not found in cache
+    except IndexError: 
+        feeds = cache['stories']
         page_num = 1
-
-    cache_pages = [x for x in cache if 'page' in x]
-    query = request.args.get('query', '').lower()
     
-    # Query will change code logic, but I think its better to adapt everything - @behindsecurity
-    if query:
-        found_stories_via_query = []
-        for page in cache_pages:
-            # Makes a copy of all the stories on the current cache page and adds a new entry: on_page. This entry is needed to work properly with the comments section, as we no longer relay on the GET parameter 'page' to read the correct page in cache.
-            individual_page_keys = [{**d, 'on_page': page.split('_')[1]} for d in cache[page]]
-            
-            # Split words for better accuracy.
-            found_stories_via_query.extend([story for story in individual_page_keys if query in story['title'].lower().split(' ') or query in story['description'].lower().split(' ')])
+    # Declares the referer up here just in case 
+    referer = request.headers.get('Referer', url_for('views.home'))
+    
+    # Get page language
+    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
+        
+    page_languages = []
 
-        if not found_stories_via_query:
-            flash('No stories were found with the provided term.', 'error')
-            referer = request.headers.get('Referer', url_for('views.home'))
+    for lang in languages:
+        if lang['country'].lower() == country_name.lower():
+            page_languages.append(lang)
+
+    # Query will change code logic, but I think its better to just adapt everything - @behindsecurity
+    original_query = ''
+    query = request.args.get('query', '').lower()
+    if query:
+        if len(query) < 3:
+            flash('Your query is too small. Please provide at least 3 characters.', 'error')
             return redirect(referer)
 
-        # Changes the current page to the results from the search in order to make the rest of the code usable.
-        cache[f'page_{page_num}'] = found_stories_via_query
+        for character in immutable.SPECIAL_CHARACTERS:
+            query = query.replace(character, '')
+
+        translate_language = request.args.get('translation', '').lower()
+
+        if translate_language:
+            
+            for lang in page_languages:
+                if lang['lang'].lower() == translate_language.lower():
+                    page_language = lang['lang_code'][:2]
+                    break
+            else:
+                flash('Invalid language for the specified page.', 'error')
+                return redirect(referer)
+            
+            session['want_translate'] = True
+            query_translated = scripts.translate(dest_lang=page_language, msg=query)
+        
+            if query_translated:
+                original_query = query
+                query = query_translated
+        else:
+            session['want_translate'] = False
+        
+        found_stories_via_query = []
+
+        for story in cache['stories']:
+            if search.search_text(query, story['title']) or search.search_text(query, story['description']):
+                found_stories_via_query.append(story)
+
+        if not found_stories_via_query:
+            flash(f'No stories were found with the term: "{query}".', 'error')
+            return redirect(referer)
+
+        # Change the current feed in order to make the rest of the code usable.
+        feeds = found_stories_via_query
 
     # Get number of comments
     comments = json_util.read_json(config.COMMENTS_PATH)
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
-    for story in cache[f'page_{page_num}']:
+    for story in feeds:
         # Filter the title length.
-        story['title'] = ' '.join(story['title'].split(' ')[:10]) + ' ...' if len(story['title']) > 90 else story['title']
+        #story['title'] = ' '.join(story['title'].split(' ')[:10]) + '...' if len(story['title']) > 90 else story['title']
         
         # Add total comments and clicks to the story.
         story['total_comments'] = len(comments[story['id']]) if story['id'] in comments else ''
@@ -130,7 +193,7 @@ def get_latest_feed():
     page_num = int(page_num)
 
     # Else is 0 because rss_template.html should not render the pagination if the query is set.
-    total_pages = len(cache_pages) if not query else 0
+    total_pages = len(cache['stories']) // 100 if not query else 0
 
     stock_data = scripts.scrape_stock_data(country_name)
 
@@ -140,6 +203,7 @@ def get_latest_feed():
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
         is_global = True
 
+    # Gets the date from the first stock
     stock_date = stock_data[0]['date']
 
     try:
@@ -150,13 +214,11 @@ def get_latest_feed():
         scripts.log(f'[!] Error at /views: {err} // {country_name}')
         country_index = ''
     
-    FULL_URL = f'https://infomundi.net/news?country={country_filter}&section={news_filter}&page={page_num}'
-    session['last_visited_country'] = FULL_URL
+    GET_PARAMETERS = f'news?country={country_filter}&section={news_filter}&page={page_num}'
+    session['last_visited_country'] = GET_PARAMETERS
     
-    supported_categories = scripts.get_supported_categories(country_filter)
-
+    # Get area ranking
     area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/area_ranking')
-
     for rank in area_ranks:
         if rank['country'].lower() == country_name.lower():
             area_rank = rank
@@ -164,6 +226,7 @@ def get_latest_feed():
     else:
         area_rank = ''
 
+    # Get religion info
     religions = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/religions')
     for country, religion in religions.items():
         if country.lower() == country_name.lower():
@@ -172,8 +235,10 @@ def get_latest_feed():
     else:
         main_religion = ''
 
+    supported_categories = scripts.get_supported_categories(country_filter)
     return render_template('rss_template.html', 
-        feeds=cache[f'page_{page_num}'], 
+        feeds=feeds,
+        query=query,
         total_pages=total_pages, 
         country_name=country_name, 
         news_filter=news_filter, 
@@ -193,34 +258,10 @@ def get_latest_feed():
         stock_data=stock_data,
         is_global=is_global,
         country_index=country_index,
-        stock_date=stock_date
+        stock_date=stock_date,
+        page_languages=page_languages,
+        original_query=original_query
     )
-
-
-@views.route('/get-country-code', methods=['GET'])
-def get_country_code():
-    """Get the country code based on the selected country name."""
-    selected_country = request.args.get('country', '')
-    
-    if not selected_country:
-        return redirect(url_for('views.home'))
-    
-    code = [x['code'] for x in config.COUNTRY_LIST if x['name'].lower() == selected_country.lower()]
-
-    # Return the country code as JSON
-    return jsonify({"countryCode": code[0]})
-
-
-@views.route('/autocomplete', methods=['GET'])
-def autocomplete():
-    """Autocomplete endpoint for country names."""
-    query = request.args.get('query', '').lower()
-    
-    if len(query) < 2:
-        return redirect(url_for('views.home'))
-    
-    results = [x['name'] for x in config.COUNTRY_LIST if query in x['name'].lower()]
-    return jsonify(results)
 
 
 @views.route('/comments', methods=['GET'])
@@ -243,39 +284,36 @@ def comments():
         return redirect(referer)
 
     cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
-    for cache_page in cache:
-        if cache_page == 'created_at': continue
-        
-        for story in cache[cache_page]:
-            if story['id'] == news_id:
-                news_link = story['link']
+    for story in cache['stories']:
+        if story['id'] == news_id:
+            news_link = story['link']
 
-                comments_file = json_util.read_json(config.COMMENTS_PATH)
-                telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
+            comments_file = json_util.read_json(config.COMMENTS_PATH)
+            telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
+
+            story_info = story
                 
-                story_info = story
+            story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
+            story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
                 
-                story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
-                story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
-                
-                # If there's no image (default is Infomundi's logo), we use scraping to get the news image.
-                if 'infomundi' in story['media_content']['url']:
-                    preview_data = scripts.get_link_preview(news_link)
+            # If there's no image (default is Infomundi's logo), we use scraping to get the news image.
+            if 'infomundi' in story['media_content']['url']:
+                preview_data = scripts.get_link_preview(news_link)
                     
-                    if 'infomundi' in preview_data['image']:
-                        preview_data['title'] = story['title']
-                        preview_data['description'] = scripts.remove_html_tags(story['description'])
-                        preview_data['image'] = story['media_content']['url']
-                    
-                    story['media_content']['url'] = preview_data['image']
-                    json_util.write_json(cache, f"{config.CACHE_PATH}/{category}")
-                else:
-                    preview_data = {}
-                    preview_data['image'] = story['media_content']['url']
-                    preview_data['description'] = scripts.remove_html_tags(story['description'])
+                if 'infomundi' in preview_data['image']:
                     preview_data['title'] = story['title']
+                    preview_data['description'] = scripts.remove_html_tags(story['description'])
+                    preview_data['image'] = story['media_content']['url']
+                    
+                story['media_content']['url'] = preview_data['image']
+                json_util.write_json(cache, f"{config.CACHE_PATH}/{category}")
+            else:
+                preview_data = {}
+                preview_data['image'] = story['media_content']['url']
+                preview_data['description'] = scripts.remove_html_tags(story['description'])
+                preview_data['title'] = story['title']
                 
-                break
+            break
         else:
             continue
         
@@ -284,10 +322,10 @@ def comments():
         flash('We apologize, but there was an error. Please try again later.', 'error')
         return redirect(referer)
 
-    scripts.add_click(news_id)
+    scripts.add_telemetry(news_id, 'clicks')
     
-    FULL_URL = f'https://infomundi.net/comments?id={news_id}&category={category}'
-    session['last_visited_news'] = FULL_URL
+    GET_PARAMETERS = f'comments?id={news_id}&category={category}'
+    session['last_visited_news'] = GET_PARAMETERS
 
     session['entered_comments_at'] = time()
     
@@ -303,90 +341,3 @@ def comments():
         is_mobile=scripts.detect_mobile(request),
         category=category
     )
-
-
-@views.route('/add_comment', methods=['POST'])
-def add_comment():
-    referer = request.headers.get('Referer', url_for('views.home'))
-    
-    comments = json_util.read_json(config.COMMENTS_PATH)
-    if not comments['enabled']:
-        flash('We apologize, but comments are temporarily disabled. Please try again later.', 'error')
-        
-        return redirect(referer)
-    
-    token = request.form['cf-turnstile-response'] # Retrieve token from post data with key 'cf-turnstile-response'
-    if not scripts.valid_captcha(token):
-        flash('Invalid captcha! Are you a robot?', 'error')
-        return redirect(referer)
-
-    entered_comments_at = session.get('entered_comments_at', '')
-
-    if not entered_comments_at:
-        flash('There was an error processing your comment. Please make sure your browser supports cookies.', 'error')
-        return redirect(referer)
-
-    elapsed_time = time() - entered_comments_at
-    cooldown_time = 7
-    
-    if elapsed_time < cooldown_time:
-        remaining_time = int(cooldown_time - elapsed_time)
-        flash(f'Hold up! Wait a couple of seconds, we need to make sure you are not a robot. Cooldown: {remaining_time}', 'error')
-        return redirect(referer)
-
-    name = current_user.username if current_user.is_authenticated else request.form['name']
-    comment_text = request.form['comment']
-
-    # Shady users may edit the request using a tool like burpsuite to bypass the form restriction. We must check input length regardless.
-    if len(comment_text) > 300 or len(name) > 30:
-        flash('Please limit your input accordingly.', 'error')
-        return redirect(referer)
-
-    # Checks if the user needs a random name.
-    is_random_name = False
-    if not name:
-        name = choice(config.NICKNAME_LIST)
-        is_random_name = True
-    
-    # Checks if the news really exist (we can't trust user input)
-    news_id = request.form.get('id', '')
-    category = request.form.get('category', '')
-
-    if not scripts.valid_category(category) or not news_id:
-        flash('We apologize, but there was an error. Please try again later.', 'error')
-        return redirect(referer)
-
-    cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
-
-    for key, items in cache.items():
-        if not key.startswith('page'): continue
-
-        for item in items:
-            if item['id'] == news_id: break
-        else:
-            continue
-        break
-    else:
-        flash('We apologize, but there was an error. Please try again later.', 'error')
-        return redirect(referer)
-
-    new_comment = {
-        'name': name,
-        'random_name': is_random_name,
-        'is_admin': True if current_user.is_authenticated and current_user.role == 'admin' else False,
-        'is_logged_in': True if current_user.is_authenticated else False,
-        'text': comment_text,
-        'link': session.get('last_visited_news', ''),
-        'id': scripts.generate_id()
-    }
-
-    if news_id not in comments:
-        comments[news_id] = []
-
-    comments[news_id].append(new_comment)
-    json_util.write_json(comments, f'{config.COMMENTS_PATH}')
-    
-    scripts.check_in_badlist(new_comment)
-    
-    flash('Thank you for your comment! Sharing your opinion is safe with us.')
-    return redirect(referer)

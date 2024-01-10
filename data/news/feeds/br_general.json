@@ -1,10 +1,28 @@
 [
-  {"site": "g1", "url": "https://g1.globo.com/rss/g1/"},
-  {"site": "uol", "url": "http://rss.uol.com.br/feed/noticias.xml"},
-  {"site": "r7", "url": "https://noticias.r7.com/feed.xml"},
-  {"site": "BBC", "url": "https://feeds.bbci.co.uk/portuguese/rss.xml"},
-  {"site": "Folha", "url": "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"},
-  {"site": "Notícias ao Minuto", "url": "https://www.noticiasaominuto.com.br/rss/ultima-hora"},
+  {
+    "site": "g1",
+    "url": "https://g1.globo.com/rss/g1/"
+  },
+  {
+    "site": "uol",
+    "url": "http://rss.uol.com.br/feed/noticias.xml"
+  },
+  {
+    "site": "r7",
+    "url": "https://noticias.r7.com/feed.xml"
+  },
+  {
+    "site": "BBC",
+    "url": "https://feeds.bbci.co.uk/portuguese/rss.xml"
+  },
+  {
+    "site": "Folha",
+    "url": "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
+  },
+  {
+    "site": "Not\u00edcias ao Minuto",
+    "url": "https://www.noticiasaominuto.com.br/rss/ultima-hora"
+  },
   {
     "site": "The Brazilian Report",
     "url": "https://brazilian.report/feed/"
@@ -48,5 +66,9 @@
   {
     "site": "Revista F\u00f3rum",
     "url": "https://revistaforum.com.br/rss/feed.html?r=96"
+  },
+  {
+    "site": "test",
+    "url": "https://test.com"
   }
 ]

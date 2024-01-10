@@ -47,24 +47,16 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top" aria-label="Infomundi Centered Navbar">
       <div class="container">
         {% if is_mobile %}
-        <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">Infomundi</a>
-
-        <div class="me-5">
-          <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme') == 'light' %}checked{% endif %}>
-          <label for="theme-checkbox" class="theme-checkbox-label">
-            <i class="fa-solid fa-sun"></i>
-            <i class="fa-solid fa-moon"></i>
-            <span class="ball"></span>
-          </label>
-        </div>
+          <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">infomundi</a>
         {% endif %}
+        
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#infomundiNavbar" aria-controls="infomundiNavbar" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse d-lg-flex" id="infomundiNavbar">
           {% if not is_mobile %}
-          <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">Infomundi</a>
+            <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">infomundi</a>
           {% endif %}
           <ul class="navbar-nav col-lg-6 justify-content-lg-center">
             <li class="nav-item">
@@ -89,32 +81,72 @@
           </ul>
           <div class="d-lg-flex col-lg-3 justify-content-lg-end">
 
-            {% if not is_mobile %}
-            <div class="me-5">
-              <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme') == 'light' %}checked{% endif %}>
-              <label for="theme-checkbox" class="theme-checkbox-label">
-                <i class="fa-solid fa-sun"></i>
-                <i class="fa-solid fa-moon"></i>
-                <span class="ball"></span>
-              </label>
-            </div>
-            {% endif %}
-
-            <div class="dropdown {% if not is_mobile %}text-end{% endif %}">
+            <div class="dropdown">
               <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-user me-2"></i>{% if user.is_authenticated %}{{ user.username }}{% else %}Account{% endif %}
               </a>
               <ul class="dropdown-menu text-small">
                 {% if not user.is_authenticated %}
-                <li><a class="dropdown-item" href="{{ url_for('auth.register') }}"><i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('auth.login') }}"><i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login</a></li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('auth.register') }}">
+                      <i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('auth.login') }}">
+                      <i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login
+                    </a>
+                  </li>
                 {% else %}
                   {% if user.role == 'admin' %}
-                <li><a class="dropdown-item" href="{{ url_for('auth.admin') }}"><i class="fa-solid fa-heart me-1"></i>Welcome daddy <3</a></li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.admin') }}">
+                        <i class="fa-solid fa-heart me-1"></i>Welcome daddy >.<
+                      </a>
+                    </li>
                   {% endif %}
-                <li><a class="dropdown-item" href="{{ url_for('auth.password_change') }}"><i class="fa-solid fa-lock me-1"></i>Change Password</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('auth.password_change') }}">
+                    <i class="fa-solid fa-lock me-1"></i>Change Password</a>
+                  </li>
+                {% endif %}
+
+                {% if session.get('last_visited_country', '') or session.get('last_visited_news', '') %}
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
+                {% endif %}
+                
+                {% if session.get('last_visited_country', '') %}
+                  <li>
+                    <a class="dropdown-item" href="https://infomundi.net/{{ session['last_visited_country'] }}">
+                      <i class="fa-solid fa-earth-americas me-1"></i>Last visited country
+                    </a>
+                  </li>
+                {% endif %}
+                
+                {% if session.get('last_visited_news', '') %}
+                  <li>
+                    <a class="dropdown-item" href="https://infomundi.net/{{ session['last_visited_news'] }}">
+                      <i class="fa-solid fa-newspaper me-1"></i>Last visited news
+                    </a>
+                  </li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                
+                <div class="dropdown-item">
+                  <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme', '') == 'light' %}checked{% endif %}>
+                  <label for="theme-checkbox" class="theme-checkbox-label">
+                    <i class="fa-solid fa-sun"></i>
+                    <i class="fa-solid fa-moon"></i>
+                    <span class="ball"></span>
+                  </label>
+                </div>
+                
+                {% if user.is_authenticated %}
+                <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                      <i class="fa-solid fa-right-from-bracket me-1"></i>Sign out
+                    </a>
+                  </li>
                 {% endif %}
               </ul>
             </div>
@@ -273,21 +305,25 @@
   </div>
 {% endif %}
     <div class="container-fluid">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %} {% if category ==
-      'error' %}
-      <div class="alert alert-danger mt-3" role="alert">
-        {{ message }}
-      </div>
-      {% else %}
-      <div class="alert alert-success mt-3" role="alert">
-        {{ message }}
-      </div>
-      {% endif %} {% endfor %} {% endif %} {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %} 
+          {% for category, message in messages %} 
+            {% if category == 'error' %}
+              <div class="alert alert-danger mt-3" role="alert">
+                {{ message }}
+              </div>
+            {% else %}
+              <div class="alert alert-success mt-3" role="alert">
+                {{ message }}
+              </div>
+            {% endif %} 
+          {% endfor %} 
+        {% endif %} 
+      {% endwith %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
-            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" width="50" height="50">
+            <img src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2" alt="Maximus" width="45" height="45">
             <strong class="me-auto"><i class="fa-solid fa-language me-1"></i>Maximus says: Would you like to translate this page?</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
@@ -368,7 +404,8 @@
       const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
       toastBootstrap.show()
     </script>
-    <script 
+    {% if page != 'Error' %}
+    <script defer
       type="text/javascript" 
       src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
       ></script>
@@ -381,10 +418,24 @@
         );
       }
     </script>
-    <script src="{{ url_for('static', filename='js/tickerSpeedUp.js') }}"
-    ></script>
-    <script src="{{ url_for('static', filename='js/themeButton.js') }}"
-    ></script>
+    {% endif %}
+    {% if page != 'Comments' %}
+    <script 
+      src="{{ url_for('static', filename='js/tickerSpeedUp.js') }}"
+      ></script>
+      <script>
+        var userLanguage = navigator.language || navigator.userLanguage;
+        setCookie('userLanguage', userLanguage, 7);
+      </script>
+    {% endif %}
+    {% if page not in ['Home', 'Error'] %}
+    <script 
+      src="{{ url_for('static', filename='js/themeButton.js') }}"
+      ></script>
+    <script 
+      src="{{ url_for('static', filename='js/lazysizes.min.js') }}"
+      ></script>
+    {% endif %}
     {% block scripts %} {% endblock %}
   </body>
 </html>

@@ -53,8 +53,8 @@ def verify_password(email: str, password: str, remember: bool):
     return False
 
 
-# Decorator to check if the user is an admin
 def admin_required(func):
+    """This decorator is used to check if the user is an admin."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
@@ -112,12 +112,15 @@ def register():
         send_token = scripts.send_verification_token(email, username)
         if not send_token:
             flash('We apologize, but something went wrong. Please, try again later.')
-            scripts.log(f'[+] Not able to send verification token to {email}.')
+            scripts.log(f'[!] Not able to send verification token to {email}.')
             return redirect(url_for('auth.register'))
 
-        session['email'] = email
-        session['username'] = username
-        session['password'] = password
+        tokens = json_util.read_json(config.TOKENS_PATH)
+
+        tokens[email]['username'] = username
+        tokens[email]['password'] = argon2.hash(password)
+
+        json_util.write_json(tokens, config.TOKENS_PATH)
 
         flash(f'We sent an email to {email}. Please, activate your account by clicking on the provided link.')
     
@@ -130,28 +133,29 @@ def verify():
     if not token:
         return redirect(url_for('views.home'))
 
-    email = session.get('email', '')
-    username = session.get('username', '')
-    password = session.get('password', '')
+    tokens = json_util.read_json(config.TOKENS_PATH)
 
-    if not email or not username or not password:
-        flash('For security reasons, you must use the same browser to register and verify your account. If you have cookies disabled, please enable it in order to verify your account.', 'error')
+    for item in tokens:
+        if tokens[item]['token'] == token:
+            email = item
+            username = tokens[item]['username']
+            password = tokens[item]['password']
+            break
+    else:
+        flash("We apologize, but we are unable to verify your account at the moment. Please, try again later.", 'error')
         return redirect(url_for('views.home'))
-    
-    if not scripts.check_verification_token(token):
-        flash('Invalid or expired token.', 'error')
-        return redirect(url_for('views.home'))
+
+    del tokens[email]
+    json_util.write_json(tokens, config.TOKENS_PATH)
     
     users = load_users()
-
-    hashed_password = argon2.hash(password)
-    new_user = User(email=email, username=username, password=hashed_password, role='user')
+    new_user = User(email=email, username=username, password=password, role='user')
     
     users[email] = new_user
 
     save_users(users)
 
-    flash(f'Your account has been verified.')
+    flash(f'Thanks for verifying your account! You may be able to sign in now.')
     return redirect(url_for('auth.login'))
 
 
@@ -170,7 +174,7 @@ def login():
             flash('Invalid credentials!', 'error')
             return redirect(url_for('auth.login'))
 
-        # Verify password is responsible for logging in the user too.
+        # Verify password is responsible for handling user login.
         if verify_password(email, password, bool(request.form.get('remember_me', ''))):
             if current_user.role != 'admin':
                 return redirect(url_for('views.home'))
@@ -293,55 +297,6 @@ def get_feed_info():
     return data
 
 
-@auth_views.route('/disable_comments', methods=['POST'])
-@admin_required
-def disable_comments():
-    comments = json_util.read_json(config.COMMENTS_PATH)
-    comments['enabled'] = False if request.form['flexSwitchCheckChecked'] == "false" else True
-    
-    json_util.write_json(comments, config.COMMENTS_PATH)
-    return jsonify({'status': 'Success'})
-
-
-@auth_views.route('/get_comments_status', methods=['GET'])
-@admin_required
-def get_comments_status():
-    comments = json_util.read_json(config.COMMENTS_PATH)
-
-    return jsonify({'enabled': comments['enabled']})
-
-
-@auth_views.route('/add_news', methods=['POST'])
-@admin_required
-def add_news():
-    country = request.form['country'].lower()
-    category = request.form['category']
-    site = request.form['site']
-    url = request.form['url']
-    
-    countries = config.COUNTRY_LIST
-    for entry in countries:
-        if entry['name'].lower() == country:
-            country_code = entry['code'].lower()
-            break
-    else:
-        flash('Could not find the country!', 'error')
-        return redirect(url_for('auth.admin'))
-
-    filename = f"{config.FEEDS_PATH}/{country_code}_{category.lower()}"
-    try:
-        data = json_util.read_json(filename)
-    except FileNotFoundError:
-        data = []
-
-    entry = {"site": site, "url": url}
-    data.append(entry)
-    json_util.write_json(data, filename)
-
-    flash(f'Success! Added {url} feed to {country}!')
-    return redirect(url_for('auth.admin'))
-
-
 @auth_views.route('/search_comments', methods=['POST'])
 @admin_required
 def search_comments():
@@ -359,40 +314,16 @@ def search_comments():
     
     if not search_results:
         flash('No comments found with the provided filter.', 'error')
-        
         return redirect(url_for('auth.admin'))
     
     return render_template('admin.html', search_text=search_text, search_results=search_results, user=current_user)
 
 
-@auth_views.route('/delete_comment', methods=['POST'])
-@admin_required
-def delete_comment():
-    comment_id = request.form['comment_id']
-    
-    comments = json_util.read_json(config.COMMENTS_PATH)
-    for news_id in comments:
-        if news_id == 'enabled': continue
-        for comment in comments[news_id]:
-            if comment_id == comment['id']:
-                new_comments = comments
-                new_comments[news_id].remove(comment)
-                json_util.write_json(new_comments, config.COMMENTS_PATH)
-                
-                flash('Comment deleted successfully.')
-                return redirect(url_for('auth.admin'))
-    
-    flash(f'We could not find any comment associated with the ID {comment_id}.', 'error')
-    
-    return redirect(url_for('auth.admin'))
-
-
 @auth_views.route('/logout')
 @login_required
 def logout():
-    logout_user()
-    flash('Logged out.')
+    flash(f'We hope to see you again soon, {current_user.username}.')
 
+    logout_user()
     referer = request.headers.get('Referer', url_for('views.home'))
-    
     return redirect(referer)

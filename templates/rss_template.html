@@ -1,27 +1,15 @@
 {% extends "base.html" %} {% block title %}{{ country_name }} {{ news_filter.title() }}{% endblock %}
 {% block styles %}
-<style type="text/css">
-  .card {
-  min-height: 170px;
-  max-height: 200px;
+<style>
+  .description-text {
+    overflow-y: auto;
+    max-height: 15vh;
   }
-  @media (max-width: 968px) {
-  .pagination {
-  margin-top: 20px;
-  }
-  .col-3 {
-  flex: 0 0 100%;
-  max-width: 100%;
-  }
-  .card {
-  max-width: 100%;
-  max-height: 100%;
-  min-height: 100%;
-  }
-  .card-img {
-  max-width: 500px;
-  max-height: 300px;
-  }
+  @media (max-width: 800px) {
+    .description-text {
+      overflow-y: auto;
+      max-height: 13vh;
+    }
   }
 </style>
 {% endblock %}
@@ -60,19 +48,30 @@
     ><i class="fa-solid fa-clock"></i></span>
     {% else %}
     <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="There's no geopolitical data available"
+    data-bs-title="We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible."
     ><i class="fa-solid fa-circle-info"></i></span>
     {% endif %}
-    <form class="d-flex mt-4 justify-content-center" role="search" action="javascript:;" onsubmit="submitSearch()">
-      <input class="form-control me-2 border border-primary" type="search" placeholder="Search" id="query" name="query" style="max-width: 80%;">
-      <button class="btn btn-outline-primary" type="submit" onclick="submitSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </form>
-  </div>
-  <div class="col">
-  
-  </div>
-</div>
-<ul class="nav nav-pills justify-content-center mb-2 mt-4">
+
+    <form role="search" action="javascript:;" onsubmit="submitSearch()">
+      <div class="input-group mb-3 mt-4" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="You can now enjoy automatic translation for your search queries, and the available languages are determined by the country you're in.">
+        <button class="btn btn-outline-secondary" type="button" onclick="submitSearch()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <input type="text" class="form-control" placeholder="Search" aria-label="Search query" id="query" name="query" minlength="3">
+
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="infLanguageMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-language me-1"></i>Language
+          </button>
+          <ul class="dropdown-menu inf-language-menu" aria-labelledby="infLanguageMenu">
+            {% for lang in page_languages %}
+              <li><a class="dropdown-item" href="#" name="{{ lang['lang'] }}">{{ lang['lang'] }}</a></li>
+            {% endfor %}
+          </ul>
+      </div>
+  </form>
+
+    <ul class="nav nav-pills justify-content-center mb-2 mt-4">
   <li class="nav-item">
     <a class="nav-link {{ 'active' if 'general' in selected_filter }}" href="/news?country={{ country_code }}">General</a>
   </li>
@@ -89,72 +88,218 @@
     <a class="nav-link {{ 'disabled text-secondary' if 'sports' not in supported_categories }} {{ 'active' if 'sports' in selected_filter }}" href="/news?country={{ country_code }}&section=sports">Sports</a>
   </li>
 </ul>
-{% if total_pages %}
-<nav aria-label="Page navigation">
-  <ul class="pagination pagination-sm justify-content-center mt-3">
-    {% for page in range(1, total_pages+1) %} 
-    <li class="page-item {{ 'active' if page_num == page }}">
-      <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
-    </li>
-    {% endfor %} 
-  </ul>
-</nav>
+{% if total_pages and not query %}
+  {% if total_pages < 7 %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm justify-content-center mt-3">
+      {% for page in range(1, total_pages+1) %} 
+      <li class="page-item {{ 'active' if page_num == page }}">
+        <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
+      </li>
+      {% endfor %} 
+    </ul>
+  </nav>
+  {% else %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm justify-content-center mt-3">
+      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}">Previous</a></li>
+      <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
+      <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
+      
+      {% if page_num < 3 or total_pages - 2 < page_num %}
+      <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+      {% else %}
+      <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
+      {% endif %}
+      
+      <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
+      <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
+      
+      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}">Next</a></li>
+    </ul>
+  </nav>
+  {% endif %}
+{% else %}
+  <div class="d-flex justify-content-center mt-3">
+    <p>
+    {% if session.get('want_translate', '') %}<span class="badge text-bg-success fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This query has been translated from '{{ original_query }}'."><i class="fa-solid fa-language me-1"></i>Translated</span>{% endif %}<span class="ms-1 fw-light">Showing {{ feeds|length }} results for: "{{ query }}"</span>
+    </p>
+  </div>
 {% endif %}
-<div class="row">
-  {% for item in feeds %} 
-  <div class="p-1 col-6 col-xxl-3">
-    <div class="card mb-1 border-opacity-10">
-      <div class="row g-0">
-        <div class="col-md-4">
-          <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
-          <img loading="lazy" src="{{ item['media_content']['url'] }}" class="object-fit-fill card-img" height="182" alt="News image">
-          </a>
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" style="text-decoration:none;">
-              <h6 class="card-title" style="overflow: hidden; min-height: 55px; max-height: 58px">{{ item['title'] }}</h6>
-            </a>
-            <small>
-              <a href="{{ item['publisher_link'] }}" class="text-decoration-none text-reset" target="_blank"><p style="min-height: 45px; max-height: 45px; overflow: hidden;" class="card-text good-blue"><i class="fa-solid fa-rss me-1"></i>{{ item['publisher'] }}</p></a>
-            </small>
-            {% if is_mobile %}
-            <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
-            <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
-            {% endif %}
-          </div>
-          <div class="card-footer text-body-secondary">
-            <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
-            {% if not is_mobile %}
-            <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
-            <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
-            {% endif %}
-          </div>
-        </div>
+  </div>
+  <div class="col">
+  
+  </div>
+</div>
+
+<div class="container justify-content-center">
+<div class="row justify-content-center">
+  {% for item in feeds %}
+  <div class="col-md-6 col-xxl-4">
+    <div class="card mt-4 border-opacity-10" style="min-width: 35vh; height: 60vh;" id="{{ item['id'] }}-{{ selected_filter }}">
+      <div class="card-header">
+        <ul class="nav nav-tabs nav-fill card-header-pills inf-card-header">
+          <li class="nav-item">
+            <a class="nav-link active inf-card-header-link" href="#">Preview</a>
+          </li>
+          {% if item['description']|length > 10 %}
+          <li class="nav-item">
+            <a class="nav-link description-btn inf-card-header-link" href="#">Description</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">Comments</a>
+          </li>
+        </ul>
+      </div>
+      <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
+        <img data-src="{{ item['media_content']['url'] }}" class="card-img-top lazyload" alt="News image" style="height: 25vh;">
+      </a>
+      <div class="card-body">
+        <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" class="text-decoration-none">
+          <h6 class="card-title">{{ item['title'] }}</h6>
+        </a>
+        <a href="{{ item['publisher_link'] }}" class="text-decoration-none text-reset" target="_blank">
+          <p class="card-text good-blue"><i class="fa-solid fa-rss me-1"></i>{{ item['publisher'] }}</p>
+        </a>
+      </div>
+      <div class="card-footer text-body-secondary">
+        <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
+        <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
+        <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
       </div>
     </div>
   </div>
   {% endfor %} 
 </div>
+</div>
+
 {% if total_pages %}
-<nav aria-label="Page navigation">
-  <ul class="pagination pagination-sm justify-content-center mt-2 pb-3">
-    {% for page in range(1, total_pages+1) %} 
-    <li class="page-item {{ 'active' if page_num == page }}">
-      <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
-    </li>
-    {% endfor %} 
-  </ul>
-</nav>
+  {% if total_pages < 7 %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm justify-content-center mt-3">
+      {% for page in range(1, total_pages+1) %} 
+      <li class="page-item {{ 'active' if page_num == page }}">
+        <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
+      </li>
+      {% endfor %} 
+    </ul>
+  </nav>
+  {% else %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm justify-content-center mt-3">
+      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}">Previous</a></li>
+      <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
+      <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
+      
+      {% if page_num < 3 or total_pages - 2 < page_num %}
+      <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+      {% else %}
+      <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
+      {% endif %}
+      
+      <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
+      <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
+      
+      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}">Next</a></li>
+    </ul>
+  </nav>
+  {% endif %}
 {% endif %}
+
 {% endblock %}
 {% block scripts %}
-<script>
-  function submitSearch(){const e=document.getElementById("query").value,n=new URL(window.location.href),t=new URLSearchParams(n.search);t.set("query",e),n.search=t.toString(),window.location.href=n.toString()}
+<script type="text/javascript">
+  function submitSearch() {
+    const queryValue = document.getElementById("query").value;
+
+    const languageButton = document.getElementById("infLanguageMenu");
+    const languageValue = languageButton.textContent.trim().toLowerCase();
+
+    const currentUrl = new URL(window.location.href);
+    const searchParams = new URLSearchParams(currentUrl.search);
+
+    searchParams.set("query", queryValue);
+
+    if (!languageValue.includes('language')) {
+      searchParams.set("translation", languageValue);
+    }
+
+    currentUrl.search = searchParams.toString();
+    window.location.href = currentUrl.toString();
+  }
 </script>
 <script type="text/javascript">
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
   const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
+<script>
+  document.querySelectorAll('.inf-language-menu a').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      var dropdownButton = document.getElementById('infLanguageMenu');
+      dropdownButton.textContent = e.target.textContent;
+    });
+  });
+</script>
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('.inf-card-header-link').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const card = this.closest('.card');
+        const cardId = card.id.split('-')[0];
+        const newsCategory = card.id.split('-')[1];
 
+        toggleActiveClass(this);
+
+        if (this.classList.contains('description-btn')) {
+          // Description button clicked
+          fetchDescription(cardId, newsCategory, card);
+        } else {
+          // Preview button clicked
+          updateCardWithPreview(card);
+        }
+      });
+    });
+  });
+
+  function toggleActiveClass(clickedButton) {
+    const navLinks = clickedButton.closest('.inf-card-header').querySelectorAll('.nav-link');
+    navLinks.forEach(link => link.classList.remove('active'));
+    clickedButton.classList.add('active');
+  }
+
+  function fetchDescription(cardId, newsCategory, card) {
+    fetch(`/api/get-description?id=${cardId}&category=${newsCategory}`)
+      .then(response => response.json())
+      .then(data => {
+        updateCardWithDescription(data, card);
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function updateCardWithDescription(data, card) {
+    // Hide title and publisher, show description
+    card.querySelector('.card-title').style.display = 'none';
+    card.querySelector('.card-text').style.display = 'none';
+
+    const cardBody = card.querySelector('.card-body');
+    if (!cardBody.querySelector('.description-text')) {
+      cardBody.innerHTML += `<p class="description-text">${data.description}</p>`;
+    }
+  }
+
+  function updateCardWithPreview(card) {
+    // Show title and publisher, hide description
+    card.querySelector('.card-title').style.display = 'block';
+    card.querySelector('.card-text').style.display = 'block';
+
+    const cardBody = card.querySelector('.card-body');
+    const descriptionElement = cardBody.querySelector('.description-text');
+    if (descriptionElement) {
+      descriptionElement.remove();
+    }
+  }
+</script>
 {% endblock %}

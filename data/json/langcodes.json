@@ -1,0 +1,3222 @@
+[
+  {
+    "country": "Afghanistan",
+    "lang": "Pashto",
+    "lang_code": "ps-AF"
+  },
+  {
+    "country": "Afghanistan",
+    "lang": "Persian",
+    "lang_code": "fa-AF"
+  },
+  {
+    "country": "Afghanistan",
+    "lang": "Uzbek",
+    "lang_code": "uz-AF"
+  },
+  {
+    "country": "\u00c5land Islands",
+    "lang": "Swedish",
+    "lang_code": "sv-AX"
+  },
+  {
+    "country": "Albania",
+    "lang": "Albanian",
+    "lang_code": "sq-AL"
+  },
+  {
+    "country": "Albania",
+    "lang": "English",
+    "lang_code": "en-AL"
+  },
+  {
+    "country": "Algeria",
+    "lang": "Arabic",
+    "lang_code": "ar-DZ"
+  },
+  {
+    "country": "Algeria",
+    "lang": "French",
+    "lang_code": "fr-DZ"
+  },
+  {
+    "country": "Algeria",
+    "lang": "Kabyle",
+    "lang_code": "kab-DZ"
+  },
+  {
+    "country": "American Samoa",
+    "lang": "English",
+    "lang_code": "en-AS"
+  },
+  {
+    "country": "Andorra",
+    "lang": "Catalan",
+    "lang_code": "ca-AD"
+  },
+  {
+    "country": "Andorra",
+    "lang": "English",
+    "lang_code": "en-AD"
+  },
+  {
+    "country": "Angola",
+    "lang": "Lingala",
+    "lang_code": "ln-AO"
+  },
+  {
+    "country": "Angola",
+    "lang": "Portuguese",
+    "lang_code": "pt-AO"
+  },
+  {
+    "country": "Anguilla",
+    "lang": "English",
+    "lang_code": "en-AI"
+  },
+  {
+    "country": "Anguilla",
+    "lang": "Spanish",
+    "lang_code": "es-AI"
+  },
+  {
+    "country": "Antigua & Barbuda",
+    "lang": "English",
+    "lang_code": "en-AG"
+  },
+  {
+    "country": "Antigua & Barbuda",
+    "lang": "Spanish",
+    "lang_code": "es-AG"
+  },
+  {
+    "country": "Argentina",
+    "lang": "English",
+    "lang_code": "en-AR"
+  },
+  {
+    "country": "Argentina",
+    "lang": "Spanish",
+    "lang_code": "es-AR"
+  },
+  {
+    "country": "Armenia",
+    "lang": "Armenian",
+    "lang_code": "hy-AM"
+  },
+  {
+    "country": "Aruba",
+    "lang": "Dutch",
+    "lang_code": "nl-AW"
+  },
+  {
+    "country": "Aruba",
+    "lang": "Spanish",
+    "lang_code": "es-AW"
+  },
+  {
+    "country": "Australia",
+    "lang": "English",
+    "lang_code": "en-AU"
+  },
+  {
+    "country": "Austria",
+    "lang": "English",
+    "lang_code": "en-AT"
+  },
+  {
+    "country": "Austria",
+    "lang": "German",
+    "lang_code": "de-AT"
+  },
+  {
+    "country": "Azerbaijan",
+    "lang": "Azerbaijani",
+    "lang_code": "az-AZ"
+  },
+  {
+    "country": "Azerbaijan",
+    "lang": "Azerbaijani",
+    "lang_code": "az-AZ"
+  },
+  {
+    "country": "Bahamas",
+    "lang": "English",
+    "lang_code": "en-BS"
+  },
+  {
+    "country": "Bahamas",
+    "lang": "Spanish",
+    "lang_code": "es-BS"
+  },
+  {
+    "country": "Bahrain",
+    "lang": "Arabic",
+    "lang_code": "ar-BH"
+  },
+  {
+    "country": "Bangladesh",
+    "lang": "Bangla",
+    "lang_code": "bn-BD"
+  },
+  {
+    "country": "Bangladesh",
+    "lang": "Chakma",
+    "lang_code": "ccp-BD"
+  },
+  {
+    "country": "Bangladesh",
+    "lang": "English",
+    "lang_code": "en-BD"
+  },
+  {
+    "country": "Barbados",
+    "lang": "English",
+    "lang_code": "en-BB"
+  },
+  {
+    "country": "Barbados",
+    "lang": "Spanish",
+    "lang_code": "es-BB"
+  },
+  {
+    "country": "Belarus",
+    "lang": "Belarusian",
+    "lang_code": "be-BY"
+  },
+  {
+    "country": "Belarus",
+    "lang": "Russian",
+    "lang_code": "ru-BY"
+  },
+  {
+    "country": "Belgium",
+    "lang": "Dutch",
+    "lang_code": "nl-BE"
+  },
+  {
+    "country": "Belgium",
+    "lang": "English",
+    "lang_code": "en-BE"
+  },
+  {
+    "country": "Belgium",
+    "lang": "French",
+    "lang_code": "fr-BE"
+  },
+  {
+    "country": "Belgium",
+    "lang": "German",
+    "lang_code": "de-BE"
+  },
+  {
+    "country": "Belgium",
+    "lang": "Walloon",
+    "lang_code": "wa-BE"
+  },
+  {
+    "country": "Belize",
+    "lang": "English",
+    "lang_code": "en-BZ"
+  },
+  {
+    "country": "Belize",
+    "lang": "Spanish",
+    "lang_code": "es-BZ"
+  },
+  {
+    "country": "Benin",
+    "lang": "French",
+    "lang_code": "fr-BJ"
+  },
+  {
+    "country": "Benin",
+    "lang": "Yoruba",
+    "lang_code": "yo-BJ"
+  },
+  {
+    "country": "Bermuda",
+    "lang": "English",
+    "lang_code": "en-BM"
+  },
+  {
+    "country": "Bermuda",
+    "lang": "Spanish",
+    "lang_code": "es-BM"
+  },
+  {
+    "country": "Bhutan",
+    "lang": "Dzongkha",
+    "lang_code": "dz-BT"
+  },
+  {
+    "country": "Bolivia",
+    "lang": "Quechua",
+    "lang_code": "qu-BO"
+  },
+  {
+    "country": "Bolivia",
+    "lang": "Spanish",
+    "lang_code": "es-BO"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "Bosnian",
+    "lang_code": "bs-BA"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "Bosnian",
+    "lang_code": "bs-BA"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "Croatian",
+    "lang_code": "hr-BA"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "English",
+    "lang_code": "en-BA"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "Serbian",
+    "lang_code": "sr-BA"
+  },
+  {
+    "country": "Bosnia & Herzegovina",
+    "lang": "Serbian",
+    "lang_code": "sr-BA"
+  },
+  {
+    "country": "Botswana",
+    "lang": "English",
+    "lang_code": "en-BW"
+  },
+  {
+    "country": "Botswana",
+    "lang": "Tswana",
+    "lang_code": "tn-BW"
+  },
+  {
+    "country": "Brazil",
+    "lang": "Portuguese",
+    "lang_code": "pt-BR"
+  },
+  {
+    "country": "British Indian Ocean Territory",
+    "lang": "English",
+    "lang_code": "en-IO"
+  },
+  {
+    "country": "British Virgin Islands",
+    "lang": "English",
+    "lang_code": "en-VG"
+  },
+  {
+    "country": "British Virgin Islands",
+    "lang": "Spanish",
+    "lang_code": "es-VG"
+  },
+  {
+    "country": "Brunei",
+    "lang": "Malay",
+    "lang_code": "ms-BN"
+  },
+  {
+    "country": "Brunei",
+    "lang": "Malay",
+    "lang_code": "ms-BN"
+  },
+  {
+    "country": "Bulgaria",
+    "lang": "Bulgarian",
+    "lang_code": "bg-BG"
+  },
+  {
+    "country": "Bulgaria",
+    "lang": "English",
+    "lang_code": "en-BG"
+  },
+  {
+    "country": "Burkina Faso",
+    "lang": "French",
+    "lang_code": "fr-BF"
+  },
+  {
+    "country": "Burkina Faso",
+    "lang": "Fulah",
+    "lang_code": "ff-BF"
+  },
+  {
+    "country": "Burundi",
+    "lang": "English",
+    "lang_code": "en-BI"
+  },
+  {
+    "country": "Burundi",
+    "lang": "French",
+    "lang_code": "fr-BI"
+  },
+  {
+    "country": "Burundi",
+    "lang": "Rundi",
+    "lang_code": "rn-BI"
+  },
+  {
+    "country": "Cambodia",
+    "lang": "Khmer",
+    "lang_code": "km-KH"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Aghem",
+    "lang_code": "agq-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Bafia",
+    "lang_code": "ksf-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Basaa",
+    "lang_code": "bas-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Duala",
+    "lang_code": "dua-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "English",
+    "lang_code": "en-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Ewondo",
+    "lang_code": "ewo-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "French",
+    "lang_code": "fr-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Fulah",
+    "lang_code": "ff-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Kako",
+    "lang_code": "kkj-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Kwasio",
+    "lang_code": "nmg-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Meta\u02bc",
+    "lang_code": "mgo-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Mundang",
+    "lang_code": "mua-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Ngiemboon",
+    "lang_code": "nnh-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Ngomba",
+    "lang_code": "jgo-CM"
+  },
+  {
+    "country": "Cameroon",
+    "lang": "Yangben",
+    "lang_code": "yav-CM"
+  },
+  {
+    "country": "Canada",
+    "lang": "English",
+    "lang_code": "en-CA"
+  },
+  {
+    "country": "Canada",
+    "lang": "French",
+    "lang_code": "fr-CA"
+  },
+  {
+    "country": "Canada",
+    "lang": "Inuktitut",
+    "lang_code": "iu-CA"
+  },
+  {
+    "country": "Canada",
+    "lang": "Mohawk",
+    "lang_code": "moh-CA"
+  },
+  {
+    "country": "Canada",
+    "lang": "Spanish",
+    "lang_code": "es-CA"
+  },
+  {
+    "country": "Canary Islands",
+    "lang": "Spanish",
+    "lang_code": "es-IC"
+  },
+  {
+    "country": "Cape Verde",
+    "lang": "Kabuverdianu",
+    "lang_code": "kea-CV"
+  },
+  {
+    "country": "Cape Verde",
+    "lang": "Portuguese",
+    "lang_code": "pt-CV"
+  },
+  {
+    "country": "Caribbean Netherlands",
+    "lang": "Dutch",
+    "lang_code": "nl-BQ"
+  },
+  {
+    "country": "Caribbean Netherlands",
+    "lang": "Spanish",
+    "lang_code": "es-BQ"
+  },
+  {
+    "country": "Cayman Islands",
+    "lang": "English",
+    "lang_code": "en-KY"
+  },
+  {
+    "country": "Cayman Islands",
+    "lang": "Spanish",
+    "lang_code": "es-KY"
+  },
+  {
+    "country": "Central African Republic",
+    "lang": "French",
+    "lang_code": "fr-CF"
+  },
+  {
+    "country": "Central African Republic",
+    "lang": "Lingala",
+    "lang_code": "ln-CF"
+  },
+  {
+    "country": "Central African Republic",
+    "lang": "Sango",
+    "lang_code": "sg-CF"
+  },
+  {
+    "country": "Ceuta & Melilla",
+    "lang": "Spanish",
+    "lang_code": "es-EA"
+  },
+  {
+    "country": "Chad",
+    "lang": "Arabic",
+    "lang_code": "ar-TD"
+  },
+  {
+    "country": "Chad",
+    "lang": "French",
+    "lang_code": "fr-TD"
+  },
+  {
+    "country": "Chile",
+    "lang": "English",
+    "lang_code": "en-CL"
+  },
+  {
+    "country": "Chile",
+    "lang": "Mapuche",
+    "lang_code": "arn-CL"
+  },
+  {
+    "country": "Chile",
+    "lang": "Spanish",
+    "lang_code": "es-CL"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Cantonese",
+    "lang_code": "yue-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Chinese",
+    "lang_code": "zh-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Chinese",
+    "lang_code": "zh-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "English",
+    "lang_code": "en-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Sichuan Yi",
+    "lang_code": "ii-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Tibetan",
+    "lang_code": "bo-CN"
+  },
+  {
+    "country": "China mainland",
+    "lang": "Uyghur",
+    "lang_code": "ug-CN"
+  },
+  {
+    "country": "Christmas Island",
+    "lang": "English",
+    "lang_code": "en-CX"
+  },
+  {
+    "country": "Cocos (Keeling) Islands",
+    "lang": "English",
+    "lang_code": "en-CC"
+  },
+  {
+    "country": "Colombia",
+    "lang": "English",
+    "lang_code": "en-CO"
+  },
+  {
+    "country": "Colombia",
+    "lang": "Spanish",
+    "lang_code": "es-CO"
+  },
+  {
+    "country": "Comoros",
+    "lang": "Arabic",
+    "lang_code": "ar-KM"
+  },
+  {
+    "country": "Comoros",
+    "lang": "French",
+    "lang_code": "fr-KM"
+  },
+  {
+    "country": "Congo - Brazzaville",
+    "lang": "French",
+    "lang_code": "fr-CG"
+  },
+  {
+    "country": "Congo - Brazzaville",
+    "lang": "Lingala",
+    "lang_code": "ln-CG"
+  },
+  {
+    "country": "Congo - Kinshasa",
+    "lang": "French",
+    "lang_code": "fr-CD"
+  },
+  {
+    "country": "Congo - Kinshasa",
+    "lang": "Lingala",
+    "lang_code": "ln-CD"
+  },
+  {
+    "country": "Congo - Kinshasa",
+    "lang": "Luba-Katanga",
+    "lang_code": "lu-CD"
+  },
+  {
+    "country": "Congo - Kinshasa",
+    "lang": "Swahili",
+    "lang_code": "sw-CD"
+  },
+  {
+    "country": "Cook Islands",
+    "lang": "English",
+    "lang_code": "en-CK"
+  },
+  {
+    "country": "Costa Rica",
+    "lang": "Spanish",
+    "lang_code": "es-CR"
+  },
+  {
+    "country": "C\u00f4te d\u2019Ivoire",
+    "lang": "French",
+    "lang_code": "fr-CI"
+  },
+  {
+    "country": "Croatia",
+    "lang": "Croatian",
+    "lang_code": "hr-HR"
+  },
+  {
+    "country": "Croatia",
+    "lang": "English",
+    "lang_code": "en-HR"
+  },
+  {
+    "country": "Cuba",
+    "lang": "Spanish",
+    "lang_code": "es-CU"
+  },
+  {
+    "country": "Cura\u00e7ao",
+    "lang": "Dutch",
+    "lang_code": "nl-CW"
+  },
+  {
+    "country": "Cura\u00e7ao",
+    "lang": "Spanish",
+    "lang_code": "es-CW"
+  },
+  {
+    "country": "Cyprus",
+    "lang": "English",
+    "lang_code": "en-CY"
+  },
+  {
+    "country": "Cyprus",
+    "lang": "Greek",
+    "lang_code": "el-CY"
+  },
+  {
+    "country": "Cyprus",
+    "lang": "Turkish",
+    "lang_code": "tr-CY"
+  },
+  {
+    "country": "Czechia",
+    "lang": "Czech",
+    "lang_code": "cs-CZ"
+  },
+  {
+    "country": "Czechia",
+    "lang": "English",
+    "lang_code": "en-CZ"
+  },
+  {
+    "country": "Denmark",
+    "lang": "Danish",
+    "lang_code": "da-DK"
+  },
+  {
+    "country": "Denmark",
+    "lang": "English",
+    "lang_code": "en-DK"
+  },
+  {
+    "country": "Denmark",
+    "lang": "Faroese",
+    "lang_code": "fo-DK"
+  },
+  {
+    "country": "Diego Garcia",
+    "lang": "English",
+    "lang_code": "en-DG"
+  },
+  {
+    "country": "Djibouti",
+    "lang": "Arabic",
+    "lang_code": "ar-DJ"
+  },
+  {
+    "country": "Djibouti",
+    "lang": "French",
+    "lang_code": "fr-DJ"
+  },
+  {
+    "country": "Djibouti",
+    "lang": "Somali",
+    "lang_code": "so-DJ"
+  },
+  {
+    "country": "Dominica",
+    "lang": "English",
+    "lang_code": "en-DM"
+  },
+  {
+    "country": "Dominica",
+    "lang": "Spanish",
+    "lang_code": "es-DM"
+  },
+  {
+    "country": "Dominican Republic",
+    "lang": "Spanish",
+    "lang_code": "es-DO"
+  },
+  {
+    "country": "Ecuador",
+    "lang": "Quechua",
+    "lang_code": "qu-EC"
+  },
+  {
+    "country": "Ecuador",
+    "lang": "Spanish",
+    "lang_code": "es-EC"
+  },
+  {
+    "country": "Egypt",
+    "lang": "Arabic",
+    "lang_code": "ar-EG"
+  },
+  {
+    "country": "El Salvador",
+    "lang": "Spanish",
+    "lang_code": "es-SV"
+  },
+  {
+    "country": "Equatorial Guinea",
+    "lang": "French",
+    "lang_code": "fr-GQ"
+  },
+  {
+    "country": "Equatorial Guinea",
+    "lang": "Portuguese",
+    "lang_code": "pt-GQ"
+  },
+  {
+    "country": "Equatorial Guinea",
+    "lang": "Spanish",
+    "lang_code": "es-GQ"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "Arabic",
+    "lang_code": "ar-ER"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "Blin",
+    "lang_code": "byn-ER"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "English",
+    "lang_code": "en-ER"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "Geez",
+    "lang_code": "gez-ER"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "Tigre",
+    "lang_code": "tig-ER"
+  },
+  {
+    "country": "Eritrea",
+    "lang": "Tigrinya",
+    "lang_code": "ti-ER"
+  },
+  {
+    "country": "Estonia",
+    "lang": "English",
+    "lang_code": "en-EE"
+  },
+  {
+    "country": "Estonia",
+    "lang": "Estonian",
+    "lang_code": "et-EE"
+  },
+  {
+    "country": "Eswatini",
+    "lang": "English",
+    "lang_code": "en-SZ"
+  },
+  {
+    "country": "Eswatini",
+    "lang": "Swati",
+    "lang_code": "ss-SZ"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Amharic",
+    "lang_code": "am-ET"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Geez",
+    "lang_code": "gez-ET"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Oromo",
+    "lang_code": "om-ET"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Somali",
+    "lang_code": "so-ET"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Tigrinya",
+    "lang_code": "ti-ET"
+  },
+  {
+    "country": "Ethiopia",
+    "lang": "Wolaytta",
+    "lang_code": "wal-ET"
+  },
+  {
+    "country": "Europe",
+    "lang": "English",
+    "lang_code": "en-150"
+  },
+  {
+    "country": "Falkland Islands",
+    "lang": "English",
+    "lang_code": "en-FK"
+  },
+  {
+    "country": "Falkland Islands",
+    "lang": "Spanish",
+    "lang_code": "es-FK"
+  },
+  {
+    "country": "Faroe Islands",
+    "lang": "Faroese",
+    "lang_code": "fo-FO"
+  },
+  {
+    "country": "Fiji",
+    "lang": "English",
+    "lang_code": "en-FJ"
+  },
+  {
+    "country": "Finland",
+    "lang": "English",
+    "lang_code": "en-FI"
+  },
+  {
+    "country": "Finland",
+    "lang": "Finnish",
+    "lang_code": "fi-FI"
+  },
+  {
+    "country": "Finland",
+    "lang": "Inari Sami",
+    "lang_code": "smn-FI"
+  },
+  {
+    "country": "Finland",
+    "lang": "Northern Sami",
+    "lang_code": "se-FI"
+  },
+  {
+    "country": "Finland",
+    "lang": "Swedish",
+    "lang_code": "sv-FI"
+  },
+  {
+    "country": "France",
+    "lang": "Breton",
+    "lang_code": "br-FR"
+  },
+  {
+    "country": "France",
+    "lang": "Catalan",
+    "lang_code": "ca-FR"
+  },
+  {
+    "country": "France",
+    "lang": "Corsican",
+    "lang_code": "co-FR"
+  },
+  {
+    "country": "France",
+    "lang": "English",
+    "lang_code": "en-FR"
+  },
+  {
+    "country": "France",
+    "lang": "French",
+    "lang_code": "fr-FR"
+  },
+  {
+    "country": "France",
+    "lang": "Occitan",
+    "lang_code": "oc-FR"
+  },
+  {
+    "country": "France",
+    "lang": "Portuguese",
+    "lang_code": "pt-FR"
+  },
+  {
+    "country": "France",
+    "lang": "Swiss German",
+    "lang_code": "gsw-FR"
+  },
+  {
+    "country": "French Guiana",
+    "lang": "French",
+    "lang_code": "fr-GF"
+  },
+  {
+    "country": "French Guiana",
+    "lang": "Spanish",
+    "lang_code": "es-GF"
+  },
+  {
+    "country": "French Polynesia",
+    "lang": "French",
+    "lang_code": "fr-PF"
+  },
+  {
+    "country": "Gabon",
+    "lang": "French",
+    "lang_code": "fr-GA"
+  },
+  {
+    "country": "Gambia",
+    "lang": "English",
+    "lang_code": "en-GM"
+  },
+  {
+    "country": "Gambia",
+    "lang": "Fulah",
+    "lang_code": "ff-GM"
+  },
+  {
+    "country": "Georgia",
+    "lang": "Georgian",
+    "lang_code": "ka-GE"
+  },
+  {
+    "country": "Georgia",
+    "lang": "Ossetic",
+    "lang_code": "os-GE"
+  },
+  {
+    "country": "Germany",
+    "lang": "Colognian",
+    "lang_code": "ksh-DE"
+  },
+  {
+    "country": "Germany",
+    "lang": "English",
+    "lang_code": "en-DE"
+  },
+  {
+    "country": "Germany",
+    "lang": "German",
+    "lang_code": "de-DE"
+  },
+  {
+    "country": "Germany",
+    "lang": "Low German",
+    "lang_code": "nds-DE"
+  },
+  {
+    "country": "Germany",
+    "lang": "Lower Sorbian",
+    "lang_code": "dsb-DE"
+  },
+  {
+    "country": "Germany",
+    "lang": "Upper Sorbian",
+    "lang_code": "hsb-DE"
+  },
+  {
+    "country": "Ghana",
+    "lang": "Akan",
+    "lang_code": "ak-GH"
+  },
+  {
+    "country": "Ghana",
+    "lang": "English",
+    "lang_code": "en-GH"
+  },
+  {
+    "country": "Ghana",
+    "lang": "Ewe",
+    "lang_code": "ee-GH"
+  },
+  {
+    "country": "Ghana",
+    "lang": "Fulah",
+    "lang_code": "ff-GH"
+  },
+  {
+    "country": "Ghana",
+    "lang": "Ga",
+    "lang_code": "gaa-GH"
+  },
+  {
+    "country": "Ghana",
+    "lang": "Hausa",
+    "lang_code": "ha-GH"
+  },
+  {
+    "country": "Gibraltar",
+    "lang": "English",
+    "lang_code": "en-GI"
+  },
+  {
+    "country": "Greece",
+    "lang": "English",
+    "lang_code": "en-GR"
+  },
+  {
+    "country": "Greece",
+    "lang": "Greek",
+    "lang_code": "el-GR"
+  },
+  {
+    "country": "Greenland",
+    "lang": "Danish",
+    "lang_code": "da-GL"
+  },
+  {
+    "country": "Greenland",
+    "lang": "Kalaallisut",
+    "lang_code": "kl-GL"
+  },
+  {
+    "country": "Greenland",
+    "lang": "Spanish",
+    "lang_code": "es-GL"
+  },
+  {
+    "country": "Grenada",
+    "lang": "English",
+    "lang_code": "en-GD"
+  },
+  {
+    "country": "Grenada",
+    "lang": "Spanish",
+    "lang_code": "es-GD"
+  },
+  {
+    "country": "Guadeloupe",
+    "lang": "French",
+    "lang_code": "fr-GP"
+  },
+  {
+    "country": "Guadeloupe",
+    "lang": "Spanish",
+    "lang_code": "es-GP"
+  },
+  {
+    "country": "Guam",
+    "lang": "English",
+    "lang_code": "en-GU"
+  },
+  {
+    "country": "Guatemala",
+    "lang": "Spanish",
+    "lang_code": "es-GT"
+  },
+  {
+    "country": "Guernsey",
+    "lang": "English",
+    "lang_code": "en-GG"
+  },
+  {
+    "country": "Guinea-Bissau",
+    "lang": "Fulah",
+    "lang_code": "ff-GW"
+  },
+  {
+    "country": "Guinea-Bissau",
+    "lang": "Portuguese",
+    "lang_code": "pt-GW"
+  },
+  {
+    "country": "Guinea",
+    "lang": "French",
+    "lang_code": "fr-GN"
+  },
+  {
+    "country": "Guinea",
+    "lang": "Fulah",
+    "lang_code": "ff-GN"
+  },
+  {
+    "country": "Guinea",
+    "lang": "Kpelle",
+    "lang_code": "kpe-GN"
+  },
+  {
+    "country": "Guinea",
+    "lang": "N\u2019Ko",
+    "lang_code": "nqo-GN"
+  },
+  {
+    "country": "Guyana",
+    "lang": "English",
+    "lang_code": "en-GY"
+  },
+  {
+    "country": "Guyana",
+    "lang": "Spanish",
+    "lang_code": "es-GY"
+  },
+  {
+    "country": "Haiti",
+    "lang": "French",
+    "lang_code": "fr-HT"
+  },
+  {
+    "country": "Haiti",
+    "lang": "Spanish",
+    "lang_code": "es-HT"
+  },
+  {
+    "country": "Honduras",
+    "lang": "Spanish",
+    "lang_code": "es-HN"
+  },
+  {
+    "country": "Hong Kong",
+    "lang": "Cantonese",
+    "lang_code": "yue-HK"
+  },
+  {
+    "country": "Hong Kong",
+    "lang": "Chinese",
+    "lang_code": "zh-HK"
+  },
+  {
+    "country": "Hong Kong",
+    "lang": "Chinese",
+    "lang_code": "zh-HK"
+  },
+  {
+    "country": "Hong Kong",
+    "lang": "English",
+    "lang_code": "en-HK"
+  },
+  {
+    "country": "Hungary",
+    "lang": "English",
+    "lang_code": "en-HU"
+  },
+  {
+    "country": "Hungary",
+    "lang": "Hungarian",
+    "lang_code": "hu-HU"
+  },
+  {
+    "country": "Iceland",
+    "lang": "English",
+    "lang_code": "en-IS"
+  },
+  {
+    "country": "Iceland",
+    "lang": "Icelandic",
+    "lang_code": "is-IS"
+  },
+  {
+    "country": "India",
+    "lang": "Assamese",
+    "lang_code": "as-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Bangla",
+    "lang_code": "bn-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Bodo",
+    "lang_code": "brx-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Chakma",
+    "lang_code": "ccp-IN"
+  },
+  {
+    "country": "India",
+    "lang": "English",
+    "lang_code": "en-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Gujarati",
+    "lang_code": "gu-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Hindi",
+    "lang_code": "hi-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Kannada",
+    "lang_code": "kn-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Kashmiri",
+    "lang_code": "ks-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Kashmiri",
+    "lang_code": "ks-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Kashmiri",
+    "lang_code": "ks-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Konkani",
+    "lang_code": "kok-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Malayalam",
+    "lang_code": "ml-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Manipuri",
+    "lang_code": "mni-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Manipuri",
+    "lang_code": "mni-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Marathi",
+    "lang_code": "mr-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Nepali",
+    "lang_code": "ne-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Odia",
+    "lang_code": "or-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Punjabi",
+    "lang_code": "pa-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Sanskrit",
+    "lang_code": "sa-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Santali",
+    "lang_code": "sat-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Santali",
+    "lang_code": "sat-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Tamil",
+    "lang_code": "ta-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Telugu",
+    "lang_code": "te-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Tibetan",
+    "lang_code": "bo-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Urdu",
+    "lang_code": "ur-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Urdu",
+    "lang_code": "ur-IN"
+  },
+  {
+    "country": "India",
+    "lang": "Urdu",
+    "lang_code": "ur-IN"
+  },
+  {
+    "country": "Indonesia",
+    "lang": "English",
+    "lang_code": "en-ID"
+  },
+  {
+    "country": "Indonesia",
+    "lang": "Indonesian",
+    "lang_code": "id-ID"
+  },
+  {
+    "country": "Indonesia",
+    "lang": "Javanese",
+    "lang_code": "jv-ID"
+  },
+  {
+    "country": "Iran",
+    "lang": "Kurdish, Sorani",
+    "lang_code": "ckb-IR"
+  },
+  {
+    "country": "Iran",
+    "lang": "Mazanderani",
+    "lang_code": "mzn-IR"
+  },
+  {
+    "country": "Iran",
+    "lang": "Northern Luri",
+    "lang_code": "lrc-IR"
+  },
+  {
+    "country": "Iran",
+    "lang": "Persian",
+    "lang_code": "fa-IR"
+  },
+  {
+    "country": "Iraq",
+    "lang": "Arabic",
+    "lang_code": "ar-IQ"
+  },
+  {
+    "country": "Iraq",
+    "lang": "Kurdish, Sorani",
+    "lang_code": "ckb-IQ"
+  },
+  {
+    "country": "Iraq",
+    "lang": "Northern Luri",
+    "lang_code": "lrc-IQ"
+  },
+  {
+    "country": "Iraq",
+    "lang": "Syriac",
+    "lang_code": "syr-IQ"
+  },
+  {
+    "country": "Ireland",
+    "lang": "English",
+    "lang_code": "en-IE"
+  },
+  {
+    "country": "Ireland",
+    "lang": "Irish",
+    "lang_code": "ga-IE"
+  },
+  {
+    "country": "Isle of Man",
+    "lang": "English",
+    "lang_code": "en-IM"
+  },
+  {
+    "country": "Isle of Man",
+    "lang": "Manx",
+    "lang_code": "gv-IM"
+  },
+  {
+    "country": "Israel",
+    "lang": "Arabic",
+    "lang_code": "ar-IL"
+  },
+  {
+    "country": "Israel",
+    "lang": "English",
+    "lang_code": "en-IL"
+  },
+  {
+    "country": "Israel",
+    "lang": "Hebrew",
+    "lang_code": "he-IL"
+  },
+  {
+    "country": "Italy",
+    "lang": "Catalan",
+    "lang_code": "ca-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "English",
+    "lang_code": "en-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "Friulian",
+    "lang_code": "fur-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "German",
+    "lang_code": "de-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "Italian",
+    "lang_code": "it-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "Sardinian",
+    "lang_code": "sc-IT"
+  },
+  {
+    "country": "Italy",
+    "lang": "Sicilian",
+    "lang_code": "scn-IT"
+  },
+  {
+    "country": "Jamaica",
+    "lang": "English",
+    "lang_code": "en-JM"
+  },
+  {
+    "country": "Japan",
+    "lang": "Japanese",
+    "lang_code": "ja-JP"
+  },
+  {
+    "country": "Jersey",
+    "lang": "English",
+    "lang_code": "en-JE"
+  },
+  {
+    "country": "Jordan",
+    "lang": "Arabic",
+    "lang_code": "ar-JO"
+  },
+  {
+    "country": "Kazakhstan",
+    "lang": "Kazakh",
+    "lang_code": "kk-KZ"
+  },
+  {
+    "country": "Kazakhstan",
+    "lang": "Russian",
+    "lang_code": "ru-KZ"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Embu",
+    "lang_code": "ebu-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "English",
+    "lang_code": "en-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Gusii",
+    "lang_code": "guz-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Kalenjin",
+    "lang_code": "kln-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Kamba",
+    "lang_code": "kam-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Kikuyu",
+    "lang_code": "ki-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Luo",
+    "lang_code": "luo-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Luyia",
+    "lang_code": "luy-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Masai",
+    "lang_code": "mas-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Meru",
+    "lang_code": "mer-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Oromo",
+    "lang_code": "om-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Samburu",
+    "lang_code": "saq-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Somali",
+    "lang_code": "so-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Swahili",
+    "lang_code": "sw-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Taita",
+    "lang_code": "dav-KE"
+  },
+  {
+    "country": "Kenya",
+    "lang": "Teso",
+    "lang_code": "teo-KE"
+  },
+  {
+    "country": "Kiribati",
+    "lang": "English",
+    "lang_code": "en-KI"
+  },
+  {
+    "country": "Kosovo",
+    "lang": "Albanian",
+    "lang_code": "sq-XK"
+  },
+  {
+    "country": "Kosovo",
+    "lang": "Serbian",
+    "lang_code": "sr-XK"
+  },
+  {
+    "country": "Kosovo",
+    "lang": "Serbian",
+    "lang_code": "sr-XK"
+  },
+  {
+    "country": "Kuwait",
+    "lang": "Arabic",
+    "lang_code": "ar-KW"
+  },
+  {
+    "country": "Kyrgyzstan",
+    "lang": "Kyrgyz",
+    "lang_code": "ky-KG"
+  },
+  {
+    "country": "Kyrgyzstan",
+    "lang": "Russian",
+    "lang_code": "ru-KG"
+  },
+  {
+    "country": "Laos",
+    "lang": "Lao",
+    "lang_code": "lo-LA"
+  },
+  {
+    "country": "Latin America",
+    "lang": "Spanish",
+    "lang_code": "es-419"
+  },
+  {
+    "country": "Latvia",
+    "lang": "English",
+    "lang_code": "en-LV"
+  },
+  {
+    "country": "Latvia",
+    "lang": "Latvian",
+    "lang_code": "lv-LV"
+  },
+  {
+    "country": "Lebanon",
+    "lang": "Arabic",
+    "lang_code": "ar-LB"
+  },
+  {
+    "country": "Lesotho",
+    "lang": "English",
+    "lang_code": "en-LS"
+  },
+  {
+    "country": "Lesotho",
+    "lang": "Southern Sotho",
+    "lang_code": "st-LS"
+  },
+  {
+    "country": "Liberia",
+    "lang": "English",
+    "lang_code": "en-LR"
+  },
+  {
+    "country": "Liberia",
+    "lang": "Fulah",
+    "lang_code": "ff-LR"
+  },
+  {
+    "country": "Liberia",
+    "lang": "Kpelle",
+    "lang_code": "kpe-LR"
+  },
+  {
+    "country": "Liberia",
+    "lang": "Vai",
+    "lang_code": "vai-LR"
+  },
+  {
+    "country": "Liberia",
+    "lang": "Vai",
+    "lang_code": "vai-LR"
+  },
+  {
+    "country": "Libya",
+    "lang": "Arabic",
+    "lang_code": "ar-LY"
+  },
+  {
+    "country": "Liechtenstein",
+    "lang": "German",
+    "lang_code": "de-LI"
+  },
+  {
+    "country": "Liechtenstein",
+    "lang": "Swiss German",
+    "lang_code": "gsw-LI"
+  },
+  {
+    "country": "Lithuania",
+    "lang": "English",
+    "lang_code": "en-LT"
+  },
+  {
+    "country": "Lithuania",
+    "lang": "Lithuanian",
+    "lang_code": "lt-LT"
+  },
+  {
+    "country": "Luxembourg",
+    "lang": "English",
+    "lang_code": "en-LU"
+  },
+  {
+    "country": "Luxembourg",
+    "lang": "French",
+    "lang_code": "fr-LU"
+  },
+  {
+    "country": "Luxembourg",
+    "lang": "German",
+    "lang_code": "de-LU"
+  },
+  {
+    "country": "Luxembourg",
+    "lang": "Luxembourgish",
+    "lang_code": "lb-LU"
+  },
+  {
+    "country": "Luxembourg",
+    "lang": "Portuguese",
+    "lang_code": "pt-LU"
+  },
+  {
+    "country": "Macao",
+    "lang": "Chinese",
+    "lang_code": "zh-MO"
+  },
+  {
+    "country": "Macao",
+    "lang": "Chinese",
+    "lang_code": "zh-MO"
+  },
+  {
+    "country": "Macao",
+    "lang": "English",
+    "lang_code": "en-MO"
+  },
+  {
+    "country": "Macao",
+    "lang": "Portuguese",
+    "lang_code": "pt-MO"
+  },
+  {
+    "country": "Madagascar",
+    "lang": "English",
+    "lang_code": "en-MG"
+  },
+  {
+    "country": "Madagascar",
+    "lang": "French",
+    "lang_code": "fr-MG"
+  },
+  {
+    "country": "Madagascar",
+    "lang": "Malagasy",
+    "lang_code": "mg-MG"
+  },
+  {
+    "country": "Malawi",
+    "lang": "English",
+    "lang_code": "en-MW"
+  },
+  {
+    "country": "Malawi",
+    "lang": "Nyanja",
+    "lang_code": "ny-MW"
+  },
+  {
+    "country": "Malaysia",
+    "lang": "English",
+    "lang_code": "en-MY"
+  },
+  {
+    "country": "Malaysia",
+    "lang": "Malay",
+    "lang_code": "ms-MY"
+  },
+  {
+    "country": "Malaysia",
+    "lang": "Malay",
+    "lang_code": "ms-MY"
+  },
+  {
+    "country": "Malaysia",
+    "lang": "Tamil",
+    "lang_code": "ta-MY"
+  },
+  {
+    "country": "Maldives",
+    "lang": "Dhivehi",
+    "lang_code": "dv-MV"
+  },
+  {
+    "country": "Maldives",
+    "lang": "English",
+    "lang_code": "en-MV"
+  },
+  {
+    "country": "Mali",
+    "lang": "Bambara",
+    "lang_code": "bm-ML"
+  },
+  {
+    "country": "Mali",
+    "lang": "French",
+    "lang_code": "fr-ML"
+  },
+  {
+    "country": "Mali",
+    "lang": "Koyra Chiini",
+    "lang_code": "khq-ML"
+  },
+  {
+    "country": "Mali",
+    "lang": "Koyraboro Senni",
+    "lang_code": "ses-ML"
+  },
+  {
+    "country": "Malta",
+    "lang": "English",
+    "lang_code": "en-MT"
+  },
+  {
+    "country": "Malta",
+    "lang": "Maltese",
+    "lang_code": "mt-MT"
+  },
+  {
+    "country": "Marshall Islands",
+    "lang": "English",
+    "lang_code": "en-MH"
+  },
+  {
+    "country": "Martinique",
+    "lang": "French",
+    "lang_code": "fr-MQ"
+  },
+  {
+    "country": "Martinique",
+    "lang": "Spanish",
+    "lang_code": "es-MQ"
+  },
+  {
+    "country": "Mauritania",
+    "lang": "Arabic",
+    "lang_code": "ar-MR"
+  },
+  {
+    "country": "Mauritania",
+    "lang": "French",
+    "lang_code": "fr-MR"
+  },
+  {
+    "country": "Mauritania",
+    "lang": "Fulah",
+    "lang_code": "ff-MR"
+  },
+  {
+    "country": "Mauritius",
+    "lang": "English",
+    "lang_code": "en-MU"
+  },
+  {
+    "country": "Mauritius",
+    "lang": "French",
+    "lang_code": "fr-MU"
+  },
+  {
+    "country": "Mauritius",
+    "lang": "Morisyen",
+    "lang_code": "mfe-MU"
+  },
+  {
+    "country": "Mayotte",
+    "lang": "French",
+    "lang_code": "fr-YT"
+  },
+  {
+    "country": "Mexico",
+    "lang": "English",
+    "lang_code": "en-MX"
+  },
+  {
+    "country": "Mexico",
+    "lang": "Spanish",
+    "lang_code": "es-MX"
+  },
+  {
+    "country": "Micronesia",
+    "lang": "English",
+    "lang_code": "en-FM"
+  },
+  {
+    "country": "Moldova",
+    "lang": "Romanian",
+    "lang_code": "ro-MD"
+  },
+  {
+    "country": "Moldova",
+    "lang": "Russian",
+    "lang_code": "ru-MD"
+  },
+  {
+    "country": "Monaco",
+    "lang": "French",
+    "lang_code": "fr-MC"
+  },
+  {
+    "country": "Mongolia",
+    "lang": "Mongolian",
+    "lang_code": "mn-MN"
+  },
+  {
+    "country": "Montenegro",
+    "lang": "English",
+    "lang_code": "en-ME"
+  },
+  {
+    "country": "Montenegro",
+    "lang": "Serbian",
+    "lang_code": "sr-ME"
+  },
+  {
+    "country": "Montenegro",
+    "lang": "Serbian",
+    "lang_code": "sr-ME"
+  },
+  {
+    "country": "Montserrat",
+    "lang": "English",
+    "lang_code": "en-MS"
+  },
+  {
+    "country": "Montserrat",
+    "lang": "Spanish",
+    "lang_code": "es-MS"
+  },
+  {
+    "country": "Morocco",
+    "lang": "Arabic",
+    "lang_code": "ar-MA"
+  },
+  {
+    "country": "Morocco",
+    "lang": "Central Atlas Tamazight",
+    "lang_code": "tzm-MA"
+  },
+  {
+    "country": "Morocco",
+    "lang": "French",
+    "lang_code": "fr-MA"
+  },
+  {
+    "country": "Morocco",
+    "lang": "Standard Moroccan Tamazight",
+    "lang_code": "zgh-MA"
+  },
+  {
+    "country": "Morocco",
+    "lang": "Tachelhit",
+    "lang_code": "shi-MA"
+  },
+  {
+    "country": "Morocco",
+    "lang": "Tachelhit",
+    "lang_code": "shi-MA"
+  },
+  {
+    "country": "Mozambique",
+    "lang": "Makhuwa-Meetto",
+    "lang_code": "mgh-MZ"
+  },
+  {
+    "country": "Mozambique",
+    "lang": "Portuguese",
+    "lang_code": "pt-MZ"
+  },
+  {
+    "country": "Mozambique",
+    "lang": "Sena",
+    "lang_code": "seh-MZ"
+  },
+  {
+    "country": "Myanmar (Burma)",
+    "lang": "Burmese",
+    "lang_code": "my-MM"
+  },
+  {
+    "country": "Myanmar (Burma)",
+    "lang": "English",
+    "lang_code": "en-MM"
+  },
+  {
+    "country": "Namibia",
+    "lang": "Afrikaans",
+    "lang_code": "af-NA"
+  },
+  {
+    "country": "Namibia",
+    "lang": "English",
+    "lang_code": "en-NA"
+  },
+  {
+    "country": "Namibia",
+    "lang": "Nama",
+    "lang_code": "naq-NA"
+  },
+  {
+    "country": "Nauru",
+    "lang": "English",
+    "lang_code": "en-NR"
+  },
+  {
+    "country": "Nepal",
+    "lang": "Nepali",
+    "lang_code": "ne-NP"
+  },
+  {
+    "country": "Netherlands",
+    "lang": "Dutch",
+    "lang_code": "nl-NL"
+  },
+  {
+    "country": "Netherlands",
+    "lang": "English",
+    "lang_code": "en-NL"
+  },
+  {
+    "country": "Netherlands",
+    "lang": "Low German",
+    "lang_code": "nds-NL"
+  },
+  {
+    "country": "Netherlands",
+    "lang": "Western Frisian",
+    "lang_code": "fy-NL"
+  },
+  {
+    "country": "New Caledonia",
+    "lang": "French",
+    "lang_code": "fr-NC"
+  },
+  {
+    "country": "New Zealand",
+    "lang": "English",
+    "lang_code": "en-NZ"
+  },
+  {
+    "country": "New Zealand",
+    "lang": "Maori",
+    "lang_code": "mi-NZ"
+  },
+  {
+    "country": "Nicaragua",
+    "lang": "Spanish",
+    "lang_code": "es-NI"
+  },
+  {
+    "country": "Niger",
+    "lang": "French",
+    "lang_code": "fr-NE"
+  },
+  {
+    "country": "Niger",
+    "lang": "Fulah",
+    "lang_code": "ff-NE"
+  },
+  {
+    "country": "Niger",
+    "lang": "Hausa",
+    "lang_code": "ha-NE"
+  },
+  {
+    "country": "Niger",
+    "lang": "Tasawaq",
+    "lang_code": "twq-NE"
+  },
+  {
+    "country": "Niger",
+    "lang": "Zarma",
+    "lang_code": "dje-NE"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "English",
+    "lang_code": "en-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Fulah",
+    "lang_code": "ff-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Hausa",
+    "lang_code": "ha-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Igbo",
+    "lang_code": "ig-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Jju",
+    "lang_code": "kaj-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Tyap",
+    "lang_code": "kcg-NG"
+  },
+  {
+    "country": "Nigeria",
+    "lang": "Yoruba",
+    "lang_code": "yo-NG"
+  },
+  {
+    "country": "Niue",
+    "lang": "English",
+    "lang_code": "en-NU"
+  },
+  {
+    "country": "Norfolk Island",
+    "lang": "English",
+    "lang_code": "en-NF"
+  },
+  {
+    "country": "North Korea",
+    "lang": "Korean",
+    "lang_code": "ko-KP"
+  },
+  {
+    "country": "North Macedonia",
+    "lang": "Albanian",
+    "lang_code": "sq-MK"
+  },
+  {
+    "country": "North Macedonia",
+    "lang": "Macedonian",
+    "lang_code": "mk-MK"
+  },
+  {
+    "country": "Northern Mariana Islands",
+    "lang": "English",
+    "lang_code": "en-MP"
+  },
+  {
+    "country": "Norway",
+    "lang": "English",
+    "lang_code": "en-NO"
+  },
+  {
+    "country": "Norway",
+    "lang": "Northern Sami",
+    "lang_code": "se-NO"
+  },
+  {
+    "country": "Norway",
+    "lang": "Norwegian Bokm\u00e5l",
+    "lang_code": "nb-NO"
+  },
+  {
+    "country": "Norway",
+    "lang": "Norwegian Nynorsk",
+    "lang_code": "nn-NO"
+  },
+  {
+    "country": "Oman",
+    "lang": "Arabic",
+    "lang_code": "ar-OM"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "English",
+    "lang_code": "en-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Pashto",
+    "lang_code": "ps-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Punjabi",
+    "lang_code": "pa-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Punjabi",
+    "lang_code": "pa-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Sindhi",
+    "lang_code": "sd-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Urdu",
+    "lang_code": "ur-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Urdu",
+    "lang_code": "ur-PK"
+  },
+  {
+    "country": "Pakistan",
+    "lang": "Urdu",
+    "lang_code": "ur-PK"
+  },
+  {
+    "country": "Palau",
+    "lang": "English",
+    "lang_code": "en-PW"
+  },
+  {
+    "country": "Palestinian Territories",
+    "lang": "Arabic",
+    "lang_code": "ar-PS"
+  },
+  {
+    "country": "Panama",
+    "lang": "Spanish",
+    "lang_code": "es-PA"
+  },
+  {
+    "country": "Papua New Guinea",
+    "lang": "English",
+    "lang_code": "en-PG"
+  },
+  {
+    "country": "Paraguay",
+    "lang": "Guarani",
+    "lang_code": "gn-PY"
+  },
+  {
+    "country": "Paraguay",
+    "lang": "Spanish",
+    "lang_code": "es-PY"
+  },
+  {
+    "country": "Peru",
+    "lang": "Quechua",
+    "lang_code": "qu-PE"
+  },
+  {
+    "country": "Peru",
+    "lang": "Spanish",
+    "lang_code": "es-PE"
+  },
+  {
+    "country": "Philippines",
+    "lang": "Cebuano",
+    "lang_code": "ceb-PH"
+  },
+  {
+    "country": "Philippines",
+    "lang": "English",
+    "lang_code": "en-PH"
+  },
+  {
+    "country": "Philippines",
+    "lang": "Filipino",
+    "lang_code": "fil-PH"
+  },
+  {
+    "country": "Philippines",
+    "lang": "Spanish",
+    "lang_code": "es-PH"
+  },
+  {
+    "country": "Pitcairn Islands",
+    "lang": "English",
+    "lang_code": "en-PN"
+  },
+  {
+    "country": "Poland",
+    "lang": "English",
+    "lang_code": "en-PL"
+  },
+  {
+    "country": "Poland",
+    "lang": "Polish",
+    "lang_code": "pl-PL"
+  },
+  {
+    "country": "Portugal",
+    "lang": "English",
+    "lang_code": "en-PT"
+  },
+  {
+    "country": "Portugal",
+    "lang": "Portuguese",
+    "lang_code": "pt-PT"
+  },
+  {
+    "country": "Puerto Rico",
+    "lang": "English",
+    "lang_code": "en-PR"
+  },
+  {
+    "country": "Puerto Rico",
+    "lang": "Spanish",
+    "lang_code": "es-PR"
+  },
+  {
+    "country": "Qatar",
+    "lang": "Arabic",
+    "lang_code": "ar-QA"
+  },
+  {
+    "country": "R\u00e9union",
+    "lang": "French",
+    "lang_code": "fr-RE"
+  },
+  {
+    "country": "Romania",
+    "lang": "English",
+    "lang_code": "en-RO"
+  },
+  {
+    "country": "Romania",
+    "lang": "Romanian",
+    "lang_code": "ro-RO"
+  },
+  {
+    "country": "Russia",
+    "lang": "Russian",
+    "lang_code": "ru-RU"
+  },
+  {
+    "country": "Rwanda",
+    "lang": "English",
+    "lang_code": "en-RW"
+  },
+  {
+    "country": "Rwanda",
+    "lang": "French",
+    "lang_code": "fr-RW"
+  },
+  {
+    "country": "Rwanda",
+    "lang": "Kinyarwanda",
+    "lang_code": "rw-RW"
+  },
+  {
+    "country": "Samoa",
+    "lang": "English",
+    "lang_code": "en-WS"
+  },
+  {
+    "country": "San Marino",
+    "lang": "Italian",
+    "lang_code": "it-SM"
+  },
+  {
+    "country": "S\u00e3o Tom\u00e9 & Pr\u00edncipe",
+    "lang": "Portuguese",
+    "lang_code": "pt-ST"
+  },
+  {
+    "country": "Saudi Arabia",
+    "lang": "Arabic",
+    "lang_code": "ar-SA"
+  },
+  {
+    "country": "Saudi Arabia",
+    "lang": "English",
+    "lang_code": "en-SA"
+  },
+  {
+    "country": "Senegal",
+    "lang": "French",
+    "lang_code": "fr-SN"
+  },
+  {
+    "country": "Senegal",
+    "lang": "Fulah",
+    "lang_code": "ff-SN"
+  },
+  {
+    "country": "Senegal",
+    "lang": "Jola-Fonyi",
+    "lang_code": "dyo-SN"
+  },
+  {
+    "country": "Senegal",
+    "lang": "Wolof",
+    "lang_code": "wo-SN"
+  },
+  {
+    "country": "Serbia",
+    "lang": "English",
+    "lang_code": "en-RS"
+  },
+  {
+    "country": "Serbia",
+    "lang": "Serbian",
+    "lang_code": "sr-RS"
+  },
+  {
+    "country": "Serbia",
+    "lang": "Serbian",
+    "lang_code": "sr-RS"
+  },
+  {
+    "country": "Seychelles",
+    "lang": "English",
+    "lang_code": "en-SC"
+  },
+  {
+    "country": "Seychelles",
+    "lang": "French",
+    "lang_code": "fr-SC"
+  },
+  {
+    "country": "Sierra Leone",
+    "lang": "English",
+    "lang_code": "en-SL"
+  },
+  {
+    "country": "Sierra Leone",
+    "lang": "Fulah",
+    "lang_code": "ff-SL"
+  },
+  {
+    "country": "Singapore",
+    "lang": "Chinese",
+    "lang_code": "zh-SG"
+  },
+  {
+    "country": "Singapore",
+    "lang": "English",
+    "lang_code": "en-SG"
+  },
+  {
+    "country": "Singapore",
+    "lang": "Malay",
+    "lang_code": "ms-SG"
+  },
+  {
+    "country": "Singapore",
+    "lang": "Tamil",
+    "lang_code": "ta-SG"
+  },
+  {
+    "country": "Sint Maarten",
+    "lang": "Dutch",
+    "lang_code": "nl-SX"
+  },
+  {
+    "country": "Sint Maarten",
+    "lang": "English",
+    "lang_code": "en-SX"
+  },
+  {
+    "country": "Sint Maarten",
+    "lang": "Spanish",
+    "lang_code": "es-SX"
+  },
+  {
+    "country": "Slovakia",
+    "lang": "English",
+    "lang_code": "en-SK"
+  },
+  {
+    "country": "Slovakia",
+    "lang": "Slovak",
+    "lang_code": "sk-SK"
+  },
+  {
+    "country": "Slovenia",
+    "lang": "English",
+    "lang_code": "en-SI"
+  },
+  {
+    "country": "Slovenia",
+    "lang": "Slovenian",
+    "lang_code": "sl-SI"
+  },
+  {
+    "country": "Solomon Islands",
+    "lang": "English",
+    "lang_code": "en-SB"
+  },
+  {
+    "country": "Somalia",
+    "lang": "Arabic",
+    "lang_code": "ar-SO"
+  },
+  {
+    "country": "Somalia",
+    "lang": "Somali",
+    "lang_code": "so-SO"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Afrikaans",
+    "lang_code": "af-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "English",
+    "lang_code": "en-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Northern Sotho",
+    "lang_code": "nso-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "South Ndebele",
+    "lang_code": "nr-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Southern Sotho",
+    "lang_code": "st-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Swati",
+    "lang_code": "ss-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Tsonga",
+    "lang_code": "ts-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Tswana",
+    "lang_code": "tn-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Venda",
+    "lang_code": "ve-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Xhosa",
+    "lang_code": "xh-ZA"
+  },
+  {
+    "country": "South Africa",
+    "lang": "Zulu",
+    "lang_code": "zu-ZA"
+  },
+  {
+    "country": "South Korea",
+    "lang": "English",
+    "lang_code": "en-KR"
+  },
+  {
+    "country": "South Korea",
+    "lang": "Korean",
+    "lang_code": "ko-KR"
+  },
+  {
+    "country": "South Sudan",
+    "lang": "Arabic",
+    "lang_code": "ar-SS"
+  },
+  {
+    "country": "South Sudan",
+    "lang": "English",
+    "lang_code": "en-SS"
+  },
+  {
+    "country": "South Sudan",
+    "lang": "Nuer",
+    "lang_code": "nus-SS"
+  },
+  {
+    "country": "Spain",
+    "lang": "Asturian",
+    "lang_code": "ast-ES"
+  },
+  {
+    "country": "Spain",
+    "lang": "Basque",
+    "lang_code": "eu-ES"
+  },
+  {
+    "country": "Spain",
+    "lang": "Catalan",
+    "lang_code": "ca-ES"
+  },
+  {
+    "country": "Spain",
+    "lang": "English",
+    "lang_code": "en-ES"
+  },
+  {
+    "country": "Spain",
+    "lang": "Galician",
+    "lang_code": "gl-ES"
+  },
+  {
+    "country": "Spain",
+    "lang": "Spanish",
+    "lang_code": "es-ES"
+  },
+  {
+    "country": "Sri Lanka",
+    "lang": "Sinhala",
+    "lang_code": "si-LK"
+  },
+  {
+    "country": "Sri Lanka",
+    "lang": "Tamil",
+    "lang_code": "ta-LK"
+  },
+  {
+    "country": "St. Barth\u00e9lemy",
+    "lang": "French",
+    "lang_code": "fr-BL"
+  },
+  {
+    "country": "St. Barth\u00e9lemy",
+    "lang": "Spanish",
+    "lang_code": "es-BL"
+  },
+  {
+    "country": "St. Helena",
+    "lang": "English",
+    "lang_code": "en-SH"
+  },
+  {
+    "country": "St. Kitts & Nevis",
+    "lang": "English",
+    "lang_code": "en-KN"
+  },
+  {
+    "country": "St. Kitts & Nevis",
+    "lang": "Spanish",
+    "lang_code": "es-KN"
+  },
+  {
+    "country": "St. Lucia",
+    "lang": "English",
+    "lang_code": "en-LC"
+  },
+  {
+    "country": "St. Lucia",
+    "lang": "Spanish",
+    "lang_code": "es-LC"
+  },
+  {
+    "country": "St. Martin",
+    "lang": "French",
+    "lang_code": "fr-MF"
+  },
+  {
+    "country": "St. Martin",
+    "lang": "Spanish",
+    "lang_code": "es-MF"
+  },
+  {
+    "country": "St. Pierre & Miquelon",
+    "lang": "French",
+    "lang_code": "fr-PM"
+  },
+  {
+    "country": "St. Pierre & Miquelon",
+    "lang": "Spanish",
+    "lang_code": "es-PM"
+  },
+  {
+    "country": "St. Vincent & Grenadines",
+    "lang": "English",
+    "lang_code": "en-VC"
+  },
+  {
+    "country": "St. Vincent & Grenadines",
+    "lang": "Spanish",
+    "lang_code": "es-VC"
+  },
+  {
+    "country": "Sudan",
+    "lang": "Arabic",
+    "lang_code": "ar-SD"
+  },
+  {
+    "country": "Sudan",
+    "lang": "English",
+    "lang_code": "en-SD"
+  },
+  {
+    "country": "Suriname",
+    "lang": "Dutch",
+    "lang_code": "nl-SR"
+  },
+  {
+    "country": "Suriname",
+    "lang": "Spanish",
+    "lang_code": "es-SR"
+  },
+  {
+    "country": "Svalbard & Jan Mayen",
+    "lang": "Norwegian Bokm\u00e5l",
+    "lang_code": "nb-SJ"
+  },
+  {
+    "country": "Sweden",
+    "lang": "English",
+    "lang_code": "en-SE"
+  },
+  {
+    "country": "Sweden",
+    "lang": "Northern Sami",
+    "lang_code": "se-SE"
+  },
+  {
+    "country": "Sweden",
+    "lang": "Swedish",
+    "lang_code": "sv-SE"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "English",
+    "lang_code": "en-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "French",
+    "lang_code": "fr-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "German",
+    "lang_code": "de-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "Italian",
+    "lang_code": "it-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "Portuguese",
+    "lang_code": "pt-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "Romansh",
+    "lang_code": "rm-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "Swiss German",
+    "lang_code": "gsw-CH"
+  },
+  {
+    "country": "Switzerland",
+    "lang": "Walser",
+    "lang_code": "wae-CH"
+  },
+  {
+    "country": "Syria",
+    "lang": "Arabic",
+    "lang_code": "ar-SY"
+  },
+  {
+    "country": "Syria",
+    "lang": "French",
+    "lang_code": "fr-SY"
+  },
+  {
+    "country": "Syria",
+    "lang": "Syriac",
+    "lang_code": "syr-SY"
+  },
+  {
+    "country": "Taiwan",
+    "lang": "Chinese",
+    "lang_code": "zh-TW"
+  },
+  {
+    "country": "Taiwan",
+    "lang": "English",
+    "lang_code": "en-TW"
+  },
+  {
+    "country": "Taiwan",
+    "lang": "Taroko",
+    "lang_code": "trv-TW"
+  },
+  {
+    "country": "Tajikistan",
+    "lang": "Tajik",
+    "lang_code": "tg-TJ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Asu",
+    "lang_code": "asa-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Bena",
+    "lang_code": "bez-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "English",
+    "lang_code": "en-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Langi",
+    "lang_code": "lag-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Machame",
+    "lang_code": "jmc-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Makonde",
+    "lang_code": "kde-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Masai",
+    "lang_code": "mas-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Rombo",
+    "lang_code": "rof-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Rwa",
+    "lang_code": "rwk-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Sangu",
+    "lang_code": "sbp-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Shambala",
+    "lang_code": "ksb-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Swahili",
+    "lang_code": "sw-TZ"
+  },
+  {
+    "country": "Tanzania",
+    "lang": "Vunjo",
+    "lang_code": "vun-TZ"
+  },
+  {
+    "country": "Thailand",
+    "lang": "English",
+    "lang_code": "en-TH"
+  },
+  {
+    "country": "Thailand",
+    "lang": "Thai",
+    "lang_code": "th-TH"
+  },
+  {
+    "country": "Timor-Leste",
+    "lang": "Portuguese",
+    "lang_code": "pt-TL"
+  },
+  {
+    "country": "Togo",
+    "lang": "Ewe",
+    "lang_code": "ee-TG"
+  },
+  {
+    "country": "Togo",
+    "lang": "French",
+    "lang_code": "fr-TG"
+  },
+  {
+    "country": "Tokelau",
+    "lang": "English",
+    "lang_code": "en-TK"
+  },
+  {
+    "country": "Tonga",
+    "lang": "English",
+    "lang_code": "en-TO"
+  },
+  {
+    "country": "Tonga",
+    "lang": "Tongan",
+    "lang_code": "to-TO"
+  },
+  {
+    "country": "Trinidad & Tobago",
+    "lang": "English",
+    "lang_code": "en-TT"
+  },
+  {
+    "country": "Trinidad & Tobago",
+    "lang": "Spanish",
+    "lang_code": "es-TT"
+  },
+  {
+    "country": "Tunisia",
+    "lang": "Arabic",
+    "lang_code": "ar-TN"
+  },
+  {
+    "country": "Tunisia",
+    "lang": "French",
+    "lang_code": "fr-TN"
+  },
+  {
+    "country": "Turkey",
+    "lang": "English",
+    "lang_code": "en-TR"
+  },
+  {
+    "country": "Turkey",
+    "lang": "Kurdish",
+    "lang_code": "ku-TR"
+  },
+  {
+    "country": "Turkey",
+    "lang": "Turkish",
+    "lang_code": "tr-TR"
+  },
+  {
+    "country": "Turkmenistan",
+    "lang": "Turkmen",
+    "lang_code": "tk-TM"
+  },
+  {
+    "country": "Turks & Caicos Islands",
+    "lang": "English",
+    "lang_code": "en-TC"
+  },
+  {
+    "country": "Turks & Caicos Islands",
+    "lang": "Spanish",
+    "lang_code": "es-TC"
+  },
+  {
+    "country": "Tuvalu",
+    "lang": "English",
+    "lang_code": "en-TV"
+  },
+  {
+    "country": "U.S. Outlying Islands",
+    "lang": "English",
+    "lang_code": "en-UM"
+  },
+  {
+    "country": "U.S. Virgin Islands",
+    "lang": "English",
+    "lang_code": "en-VI"
+  },
+  {
+    "country": "U.S. Virgin Islands",
+    "lang": "Spanish",
+    "lang_code": "es-VI"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Chiga",
+    "lang_code": "cgg-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "English",
+    "lang_code": "en-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Ganda",
+    "lang_code": "lg-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Nyankole",
+    "lang_code": "nyn-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Soga",
+    "lang_code": "xog-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Swahili",
+    "lang_code": "sw-UG"
+  },
+  {
+    "country": "Uganda",
+    "lang": "Teso",
+    "lang_code": "teo-UG"
+  },
+  {
+    "country": "Ukraine",
+    "lang": "English",
+    "lang_code": "en-UA"
+  },
+  {
+    "country": "Ukraine",
+    "lang": "Russian",
+    "lang_code": "ru-UA"
+  },
+  {
+    "country": "Ukraine",
+    "lang": "Ukrainian",
+    "lang_code": "uk-UA"
+  },
+  {
+    "country": "United Arab Emirates",
+    "lang": "Arabic",
+    "lang_code": "ar-AE"
+  },
+  {
+    "country": "United Arab Emirates",
+    "lang": "English",
+    "lang_code": "en-AE"
+  },
+  {
+    "country": "United Kingdom",
+    "lang": "Cornish",
+    "lang_code": "kw-GB"
+  },
+  {
+    "country": "United Kingdom",
+    "lang": "English",
+    "lang_code": "en-GB"
+  },
+  {
+    "country": "United Kingdom",
+    "lang": "Scottish Gaelic",
+    "lang_code": "gd-GB"
+  },
+  {
+    "country": "United Kingdom",
+    "lang": "Welsh",
+    "lang_code": "cy-GB"
+  },
+  {
+    "country": "United States",
+    "lang": "Cherokee",
+    "lang_code": "chr-US"
+  },
+  {
+    "country": "United States",
+    "lang": "English (United States)",
+    "lang_code": "en-US"
+  },
+  {
+    "country": "United States",
+    "lang": "English",
+    "lang_code": "en-US"
+  },
+  {
+    "country": "United States",
+    "lang": "Hawaiian",
+    "lang_code": "haw-US"
+  },
+  {
+    "country": "United States",
+    "lang": "Lakota",
+    "lang_code": "lkt-US"
+  },
+  {
+    "country": "United States",
+    "lang": "Spanish",
+    "lang_code": "es-US"
+  },
+  {
+    "country": "Uruguay",
+    "lang": "Spanish",
+    "lang_code": "es-UY"
+  },
+  {
+    "country": "Uzbekistan",
+    "lang": "Uzbek",
+    "lang_code": "uz-UZ"
+  },
+  {
+    "country": "Uzbekistan",
+    "lang": "Uzbek",
+    "lang_code": "uz-UZ"
+  },
+  {
+    "country": "Vanuatu",
+    "lang": "English",
+    "lang_code": "en-VU"
+  },
+  {
+    "country": "Vanuatu",
+    "lang": "French",
+    "lang_code": "fr-VU"
+  },
+  {
+    "country": "Vatican City",
+    "lang": "Italian",
+    "lang_code": "it-VA"
+  },
+  {
+    "country": "Venezuela",
+    "lang": "Spanish",
+    "lang_code": "es-VE"
+  },
+  {
+    "country": "Vietnam",
+    "lang": "Vietnamese",
+    "lang_code": "vi-VN"
+  },
+  {
+    "country": "Wallis & Futuna",
+    "lang": "French",
+    "lang_code": "fr-WF"
+  },
+  {
+    "country": "Western Sahara",
+    "lang": "Arabic",
+    "lang_code": "ar-EH"
+  },
+  {
+    "country": "World",
+    "lang": "Arabic",
+    "lang_code": "ar-001"
+  },
+  {
+    "country": "World",
+    "lang": "English",
+    "lang_code": "en-001"
+  },
+  {
+    "country": "World",
+    "lang": "Esperanto",
+    "lang_code": "eo-001"
+  },
+  {
+    "country": "World",
+    "lang": "Ido",
+    "lang_code": "io-001"
+  },
+  {
+    "country": "World",
+    "lang": "Interlingua",
+    "lang_code": "ia-001"
+  },
+  {
+    "country": "World",
+    "lang": "Lojban",
+    "lang_code": "jbo-001"
+  },
+  {
+    "country": "World",
+    "lang": "Yiddish",
+    "lang_code": "yi-001"
+  },
+  {
+    "country": "Yemen",
+    "lang": "Arabic",
+    "lang_code": "ar-YE"
+  },
+  {
+    "country": "Zambia",
+    "lang": "Bemba",
+    "lang_code": "bem-ZM"
+  },
+  {
+    "country": "Zambia",
+    "lang": "English",
+    "lang_code": "en-ZM"
+  },
+  {
+    "country": "Zimbabwe",
+    "lang": "English",
+    "lang_code": "en-ZW"
+  },
+  {
+    "country": "Zimbabwe",
+    "lang": "North Ndebele",
+    "lang_code": "nd-ZW"
+  },
+  {
+    "country": "Zimbabwe",
+    "lang": "Shona",
+    "lang_code": "sn-ZW"
+  }
+]
