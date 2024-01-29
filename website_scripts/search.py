@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from unidecode import unidecode
 
+
 def search_text(query, text):
     """
     Search for a multi-word query within a given text and return the relevant snippets.

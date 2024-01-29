@@ -1,0 +1,112 @@
+{% extends "base.html" %}{% block title %}Policies{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="my-5 text-center">
+      <img 
+        src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
+        class="infomundi-logo"
+        id="infomundiLogo"
+        height="16"
+        width="9" 
+        alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
+        />
+      <p class="fs-5">About</p>
+      <p class="display-5 fw-bold text-body-emphasis">Policies</p>
+      <div class="col-lg-6 mx-auto">
+      </div>
+    </div>
+
+    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.about') }}">Website</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{{ url_for('views.policies') }}">Policies</a>
+      </li>
+    </ul>
+  </div>
+
+    <header>
+        <h1>Privacy Policy</h1>
+    </header>
+    <main>
+        <section class="mb-5">
+            <p><strong>Last Updated:</strong> Sat 27 Jan, 2024 (01/27/2024)</p>
+            <p>Welcome to Infomundi. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy, or our practices with regards to your personal information, please contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a></p>
+            <p>When you visit our website (https://infomundi.net/), and use our services, you trust us with your personal information. In this privacy policy, we seek to explain to you in the clearest way possible what information we collect, how we use it, and what rights you have in relation to it. We hope you take some time to read through it carefully, as it is important. If there are any terms in this privacy policy that you do not agree with, please discontinue use of our site.</p>
+            <p>This privacy policy applies to all information collected through our website and related services.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-4">1. What Information Do We Collect?</h2>
+            <h3>Personal Information You Disclose to Us</h3>
+            <p>We collect personal information that you voluntarily provide to us when registering at the website/posting comments/contacting us. The personal information that we collect depends on the context of your interactions with us and the website, the choices you make, and the features you use.</p>
+
+            <h3>Information Automatically Collected</h3>
+            <p>Some information — such as your Internet Protocol (IP) address and browser and device characteristics — is collected automatically when you visit our website. This information is not stored in our servers nor is used by us, but by third parties such as Google Adsense.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">2. How Do We Use Your Information?</h2>
+            <p>We process your information for purposes based on compliance with our legal obligations, and/or your consent.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">3. Will Your Information Be Shared With Anyone?</h2>
+            <p>We only share information with your consent, or to comply with laws.</p>
+            <p>None of your personal information is ever shared with third parties.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">4. How Long Do We Keep Your Information?</h2>
+            <p>We keep your information for as long as necessary to fulfill the purposes outlined in this privacy policy unless otherwise required by law.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">5. How Do We Keep Your Information Safe?</h2>
+            <p>We aim to protect your personal information through a system of organizational and technical security measures.</p>
+            <p>We use argon2 (one of the best cryptographic hashing algorithm out there) to keep your password safe, so even if, for some reason, an attacker gets a foothold on our servers, this crucial information remains safe.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">6. Do We Collect Information from Minors?</h2>
+            <p>We do not knowingly collect data from or market to children under 18 years of age.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">7. What Are Your Privacy Rights?</h2>
+            <p>You may review, change, or terminate your account at any time. Just send us an email.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">8. Do We Make Updates to This Policy?</h2>
+            <p>Yes, we will update this policy as necessary.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2>9. Cookies</h2>
+
+			<p>We only use necessary cookies that are crucial for the proper operation of the website. Third parties (Google and Cloudflare) have cookies on our website for business purposes.</p>
+
+			<ol>
+				<li><strong>theme</strong> (expires in 7 days) &ndash; is only created if you change the website theme.</li>
+				<li><strong>remember_token</strong> &ndash; is created when you choose to remember your session.</li>
+				<li><strong>infomundi-session</strong> &ndash; is created/updated when you view almost every page of this website. Holds information regarding the last country you visited in our website, the last story you clicked and cooldown information for the comments page.</li>
+				<li>Also, third parties (Google and Cloudflare) may be able to use cookies on our website.</li>
+			</ol>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-2">10. How Can You Contact Us About This Policy?</h2>
+            <p>If you have questions or comments about this policy, you may <a href="{{ url_for('views.contact') }}">click here to contact us</a>.</p>
+        </section>
+    </main>
+</div>
+{% endblock %}

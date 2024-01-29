@@ -31,6 +31,35 @@ def get_description():
     return jsonify(data)
 
 
+@api.route('/comments', methods=['GET'])
+def comments():
+    card_id = request.args.get('id', '')
+    category = request.args.get('category', '')
+
+    clicked_cookie = ''
+    if not card_id or not category:
+        clicked_cookie = request.cookies.get('clicked', '')
+
+    if clicked_cookie:
+        card_id = clicked_cookie.split('-')[0]
+        category = clicked_cookie.split('-')[1]
+    
+    if not scripts.valid_category(category):
+        return {}
+
+    comments = json_util.read_json(config.COMMENTS_PATH)
+    for comment in comments:
+        if comment == card_id:
+            data = comments[card_id]
+            break
+    else:
+        data = {}
+
+    session['entered_comments_at'] = time()
+
+    return jsonify(data)
+
+
 @api.route('/get_country_code', methods=['GET'])
 def get_country_code():
     """Get the country code based on the selected country name.
@@ -76,6 +105,25 @@ def autocomplete():
     
     results = [x['name'] for x in config.COUNTRY_LIST if query in x['name'].lower()]
     return jsonify(results)
+
+
+@api.route('/search', methods=['POST'])
+def search():
+    query = request.form.get('query', '').lower()
+    
+    if len(query) < 2:
+        return redirect(url_for('views.home'))
+    
+    countries = [x['name'].lower() for x in config.COUNTRY_LIST]
+    results = [x.lower() for x in countries if scripts.string_similarity(query, x) > 80]
+    
+    if results:
+        code = [x['code'] for x in config.COUNTRY_LIST if x['name'].lower() == results[0]][0]
+    else:
+        code = 'ERROR'
+
+    url = f'https://infomundi.net/news?country={code}'
+    return redirect(url)
 
 
 @api.route('/add_comment', methods=['POST'])
@@ -127,6 +175,12 @@ def add_comment():
     news_id = request.form.get('id', '')
     category = request.form.get('category', '')
 
+    if not news_id or not category:
+        clicked_cookie = request.cookies.get('clicked', '')
+        if clicked_cookie:
+            news_id = clicked_cookie.split('-')[0]
+            category = clicked_cookie.split('-')[1]
+
     if not scripts.valid_category(category) or not news_id:
         flash('We apologize, but there was an error. Please try again later.', 'error')
         return redirect(referer)
@@ -145,7 +199,8 @@ def add_comment():
         'is_logged_in': True if current_user.is_authenticated else False,
         'text': comment_text,
         'link': session.get('last_visited_news', ''),
-        'id': scripts.generate_id()
+        'id': scripts.generate_id(),
+        'replies': []
     }
 
     if news_id not in comments:

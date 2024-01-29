@@ -110,7 +110,7 @@ def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
     # Get the modification time of the file (os.path)
     try:
         file_mtime = datetime.fromtimestamp(path.getmtime(file_path))
-    except FileNotFoundError:
+    except Exception:
         return True
     
     # Calculate the time difference between now and the file modification time
@@ -338,6 +338,9 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
             save[country]['date'] = gdp_date
             save_list.append(save)
 
+    if not save_list:
+        return []
+    
     json_util.write_json(save_list[2:], cache_filepath)
     for index, value in enumerate(save_list):
             if list(value.keys())[0].lower() == country_name:

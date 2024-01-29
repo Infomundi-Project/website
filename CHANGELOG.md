@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.2.4 | 2023/01/29 | The 1.2.4 update brings significant enhancements aimed at improving user experience and website performance. Noteworthy are the transition to WebP format for images, the introduction of essential website pages, and a more interactive news page with comment functionality. Navigation has been streamlined with a sticky search bar and an intuitive country search feature. Additionally, the update focuses on mobile user experience and performance optimization by redesigning the home page layout and pruning unnecessary elements. Security has been bolstered with the implementation of a CSP and SSRF protection, addressing critical vulnerabilities and enhancing the platform's overall security posture. | @InfomundiTeam |
 | 1.2.3 | 2023/01/10 | Version 1.2.3 introduces significant enhancements to user experience, notably in the news page presentation and search functionality. It features a more dynamic news layout, advanced search accuracy with auto-translation, and a more visually appealing interface with an updated logo. The release also includes a crucial security fix for the search feature and improvements in site navigation and data access through a new API endpoint. | @InfomundiTeam |
 | 1.2.2 | 2023/12/22 | Implemented lazy loading for news page images, improved cache script for more images, and enhanced navbar. Changed comments page cooldown to 5 seconds and accordion look. Enhanced session cookie security. No removals or fixes. | @InfomundiTeam |
 | 1.2.1 | 2023/12/21 | Added session remember option, light mode for homepage, authenticated user badge, country area ranking, and logout button. Removed old logo images. Fixed index display and comments page entry bugs. Implemented cooldown for comments form. | @InfomundiTeam |
@@ -20,7 +21,32 @@
 | 1.1.0 | 2023/11/08 | Changed the way information is displayed in this file. Improved templates, SEO, script optimization, Apache WSGI, autocomplete, `flask-gzip`, layout enhancements, stats tab, image retrieval, auth prefix, secret key change, os.environ removal, bug fixes, and security mitigation.  | @InfomundiTeam |
 | 1.0.1 | 2023/10/28 | Basically improved performance and made the code more modularized. | @InfomundiTeam |
 
+---
 
+## Changelog 1.2.4 (2024/01/29)
+
+### Enhancements (6)
+1. **IME01:** Introduced a comprehensive footer section to the website for better navigation and information access.
+2. **IME02:** Upgraded news image delivery to next-gen WebP format with an optimized caching policy, significantly boosting site performance.
+3. **IME03:** Launched new informational pages: About Us, Our Team, Contact Us, and Policies, enhancing transparency and user engagement.
+4. **IME04:** Added functionality for users to preview and post comments specific to news stories directly on the news page, fostering community interaction.
+5. **IME05:** Enhanced the news page search bar by making it sticky in the navbar on desktop devices, improving user experience while scrolling.
+6. **IME06:** Refined country search on the home page for instant and more accurate results, even with minor typos (e.g., 'canda' leads to Canada).
+
+### Changes (1)
+1. **IMC01:** Redesigned the mobile view of the home page, positioning the statistics tab below the globe for a streamlined experience.
+
+### Removed (1)
+1. **IMR01:** Eliminated superfluous icons from the ticker to boost performance and reduce the website's DOM size.
+
+### Fixed (1)
+1. **IMF01:** Corrected a defect in the news page's search-with-translation feature, ensuring seamless functionality.
+
+### Security (2)
+1. **IMS01:** Instituted a Content Security Policy (CSP) to fortify website security against various types of attacks.
+2. **IMS02:** Integrated Server-Side Request Forgery (SSRF) protection measures to safeguard against unauthorized internal network access.
+
+---
 
 ## 1.2.3 2024/01/10
 

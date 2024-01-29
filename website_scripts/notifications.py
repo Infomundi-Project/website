@@ -60,7 +60,7 @@ def send_email(recipient_email: str, subject: str, body: str) -> bool:
 
     # Create a message
     message = MIMEMultipart()
-    message['From'] = 'Infomundi Accounts <noreply@infomundi.net>'
+    message['From'] = 'Infomundi <noreply@infomundi.net>'
     message['To'] = recipient_email
     message['Subject'] = subject
     message['Reply-To'] = 'noreply@infomundi.net'

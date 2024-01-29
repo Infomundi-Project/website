@@ -1,0 +1,94 @@
+{% extends "base.html" %}{% block title %}Contact{% endblock %}
+{% block styles %}
+<style>
+        .contact-form {
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="my-5 text-center">
+      <img 
+        src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
+        class="infomundi-logo"
+        id="infomundiLogo"
+        height="16"
+        width="9" 
+        alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
+        />
+      <p class="fs-5">About</p>
+      <p class="display-5 fw-bold text-body-emphasis">Contact</p>
+      <div class="col-lg-6 mx-auto">
+      </div>
+    </div>
+
+    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.about') }}">Website</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{{ url_for('views.contact') }}">Contact</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.policies') }}">Policies</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="row">
+  <div class="col mb-4">
+    <p class="fs-2">We'd love to hear from you</p>
+    <p class="fs-6">Thank you for visiting Infomundi, where we strive to bridge the information divide and empower global citizens through accessible, accurate, and engaging content. Your thoughts, questions, and feedback are invaluable to us as they help shape our journey towards a more informed and interconnected world.</p>
+    <p class="fs-6">For direct and convenient communication, please use our Contact Form. It's the quickest way to get your message directly to the right team.</p>
+    <a href="mailto:contact@infomundi.net" class="fs-5 mt-5 text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</a>
+  </div>
+  
+  <div class="col">
+          <div class="contact-form">
+            <form method="post" action="{{ url_for('views.contact') }}">
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" maxlength="25" placeholder="Enter your name">
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" maxlength="50" placeholder="Enter your email" required>
+              </div>
+              <div class="mb-3">
+                <label for="message" class="form-label">Message</label>
+                <textarea class="form-control" id="message" name="message" rows="4" minlength="5" maxlength="500" placeholder="Type your message here" required></textarea>
+              </div>
+              <div class="mb-2">
+              	<div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
+            </div>
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+          </div>
+  </div>
+</div>
+
+</div>
+
+
+
+
+
+
+
+{% endblock %}

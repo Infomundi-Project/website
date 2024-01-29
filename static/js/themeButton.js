@@ -17,14 +17,26 @@ const toggleTheme = () => {
   // Set the new theme value
   htmlElement.setAttribute('data-bs-theme', newTheme);
 
-  // Change infomundi logo
-  //const infomundiLogo = document.getElementById('infomundiLogo');
-  //if (newTheme === 'dark') {
-  //  infomundiLogo.src = '/static/img/logos/wide-dark.png';
-  //} else {
-  //  infomundiLogo.src = '/static/img/logos/wide-light.png';
-  //}
-  
+  // Change infomundi logo and icon
+  const infomundiLogo = document.getElementById('infomundiLogo');
+  const infomundiIcon = document.getElementById('infomundiIcon');
+
+  if (newTheme === 'dark') {
+    if (infomundiLogo) {
+      infomundiLogo.src = '/static/img/logos/logo-wide-dark-resized.webp';
+    }
+    if (infomundiIcon) {
+      infomundiIcon.src = '/static/img/logos/logo-icon-dark.webp';
+    }
+  } else {
+    if (infomundiLogo) {
+      infomundiLogo.src = '/static/img/logos/logo-wide-light-resized.webp';
+    }
+    if (infomundiIcon) {
+      infomundiIcon.src = '/static/img/logos/logo-icon-light.webp';
+    }
+  }
+
   // Set a cookie indicating the current theme
   setCookie('theme', newTheme, 14);
 };

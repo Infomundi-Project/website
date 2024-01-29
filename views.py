@@ -3,7 +3,7 @@ from flask_login import current_user
 from random import choice, shuffle
 from time import time
 
-from website_scripts import scripts, config, json_util, immutable, search
+from website_scripts import scripts, config, json_util, immutable, search, notifications
 
 views = Blueprint('views', __name__)
 
@@ -35,20 +35,58 @@ def home():
     )
 
 
-@views.route('/contact', methods=['GET'])
+@views.route('/contact', methods=['GET', 'POST'])
 def contact():
     referer = request.headers.get('Referer', url_for('views.home'))
     
-    flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
-    return redirect(referer)
+    if request.method == 'GET':
+        return render_template('contact.html', user=current_user)
+    else:
+        token = request.form['cf-turnstile-response']
+        if not scripts.valid_captcha(token):
+            flash('Invalid captcha. Are you a robot?', 'error')
+            return redirect(referer)
+        
+        name = request.form.get('name', '')
+        email = request.form.get('email', '')
+        message = request.form.get('message', '')
+
+        if len(name) > 25 or len(email) > 50 or len(message) > 500:
+            flash('Something went wrong.', 'error')
+            return redirect(referer)
+
+        data = {
+        'embed': {
+            'title': 'Contact Form',
+            'description': 'We got a new message.',
+            'color': 0xED930A,
+            'fields': [
+                {'name': 'Name', 'value': name, 'inline': True},
+                {'name': 'Email', 'value': email, 'inline': True},
+                {'name': 'Message', 'value': message, 'inline': False}
+            ],
+            'footer': {'text': '2024 Infomundi'}
+            },
+        'message': '@everyone'
+        }
+        notifications.post_webhook(data)
+        flash("Your message has been sent, thank you! Expect a return from us shortly.")
+        return redirect(referer)
 
 
 @views.route('/about', methods=['GET'])
 def about():
-    referer = request.headers.get('Referer', url_for('views.home'))
-    
-    flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
-    return redirect(referer)
+    return render_template('about.html', user=current_user)
+
+
+@views.route('/policies', methods=['GET'])
+def policies():
+    return render_template('policies.html', user=current_user)
+
+
+@views.route('/team', methods=['GET'])
+def team():
+    return render_template('team.html', user=current_user)
 
 
 @views.route('/donate', methods=['GET'])
@@ -110,7 +148,7 @@ def get_latest_feed():
         if start_index - 100 < 0:
             start_index = 0
         
-        feeds = cache['stories'][start_index:end_index]
+        feeds = cache['stories'][start_index:end_index-1]
 
         # We shuffle the current page to provide a more dynamic experience to the user
         shuffle(feeds)
@@ -156,14 +194,14 @@ def get_latest_feed():
                 flash('Invalid language for the specified page.', 'error')
                 return redirect(referer)
             
-            session['want_translate'] = True
             query_translated = scripts.translate(dest_lang=page_language, msg=query)
         
             if query_translated:
                 original_query = query
                 query = query_translated
-        else:
-            session['want_translate'] = False
+                session['want_translate'] = True
+            else:
+                session['want_translate'] = False
         
         found_stories_via_query = []
 
@@ -297,7 +335,7 @@ def comments():
             story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
                 
             # If there's no image (default is Infomundi's logo), we use scraping to get the news image.
-            if 'infomundi' in story['media_content']['url']:
+            if 'infomundi' in story['media_content']['url'] and '/static/img/stories' not in story['media_content']['url']:
                 preview_data = scripts.get_link_preview(news_link)
                     
                 if 'infomundi' in preview_data['image']:

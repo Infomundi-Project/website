@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
+from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
+from flask_talisman import Talisman
 from flask_gzip import Gzip
 from os import urandom
 
@@ -10,8 +12,6 @@ from api import api
 
 
 app = Flask(__name__)
-gzip = Gzip(app)
-
 app.secret_key = APP_SECRET_KEY
 
 app.config['SESSION_COOKIE_NAME'] = 'infomundi-session'
@@ -26,6 +26,56 @@ app.register_blueprint(auth_views, url_prefix='/auth')
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 
+csrf = CSRFProtect(app)
+gzip = Gzip(app)
+
+csp = {
+    'default-src': [
+        '\'self\'',
+    ],
+    'img-src': [
+        '\'self\'',
+        'data:',
+        'https://cdn.jsdelivr.net',
+        'https://www.gstatic.com', # google images for translate
+        'https://fonts.gstatic.com',
+        'https://hatscripts.github.io'
+    ],
+    'connect-src': [
+        'https://cloudflareinsights.com',
+        '\'self\'',
+        'https://ka-f.fontawesome.com',
+        'https://translate.googleapis.com'
+    ], 
+    'frame-src': [
+        'https://challenges.cloudflare.com'
+    ],
+    'script-src': [
+        '\'self\'',
+        'https://cdn.example.com',
+        'https://ajax.cloudflare.com',
+        '\'unsafe-inline\'',
+        'https://static.cloudflareinsights.com',
+        'https://challenges.cloudflare.com',
+        'https://kit.fontawesome.com',
+        'https://translate.google.com',
+        'https://translate.googleapis.com',
+        'https://translate-pa.googleapis.com'
+    ],
+    'style-src': [
+        '\'self\'',
+        '\'unsafe-inline\'',
+        'https://fonts.googleapis.com',
+        'https://www.gstatic.com'
+    ],
+    'font-src': [
+        '\'self\'',
+        'https://fonts.gstatic.com',
+        'https://ka-f.fontawesome.com'
+    ]
+}
+
+talisman = Talisman(app, content_security_policy=csp)
 
 @login_manager.user_loader
 def load_user(user_id):

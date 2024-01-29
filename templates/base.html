@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-adsense-account" content="ca-pub-2416889662324926">
     <!-- Primary -->
     <meta name="title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
     <meta name="description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
@@ -12,32 +13,34 @@
     <meta property="og:url" content="https://infomundi.net/" />
     <meta property="og:title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
     <meta property="og:description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="og:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/infomundi-white-darkbg-square.webp{% endif %}" />
+    <meta property="og:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://infomundi.net/" />
     <meta property="twitter:title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
     <meta property="twitter:description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="twitter:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/infomundi-white-darkbg-square.webp{% endif %}" />
+    <meta property="twitter:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='img/favicon/site.webmanifest') }}">
     <link rel="mask-icon" href="{{ url_for('static', filename='img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
+    
     <!-- Stylesheets -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css" integrity="sha384-Wh/opNnCPQdVc7YXIh18hoqN6NYg40GBaO/GwQSwrIbAIo8uCeYri2DX2IisvVP6" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/libs/bootstrap-5.3.2.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% if page in ['News', 'Home'] %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ticker.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css" integrity="sha384-aQuvIWWIbpu/mSqULLDiUveyYiPoJzPKAWjUmGJ+Elm+N/LJhzfZqsutsfw870JS" crossorigin="anonymous">
     {% endif %}
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@1000&family=Spectral+SC:wght@600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/font-awesome-4.7.0.min.css') }}">
     <!-- End -->
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
     {% block styles %} {% endblock %}
@@ -47,7 +50,7 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top" aria-label="Infomundi Centered Navbar">
       <div class="container">
         {% if is_mobile %}
-          <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">infomundi</a>
+          <a class="navbar-brand col-lg-3 me-0 logo-text notranslate" href="/">infomundi</a>
         {% endif %}
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#infomundiNavbar" aria-controls="infomundiNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,28 +59,31 @@
 
         <div class="collapse navbar-collapse d-lg-flex" id="infomundiNavbar">
           {% if not is_mobile %}
-            <a class="navbar-brand col-lg-3 me-0 logo-text" href="/">infomundi</a>
+            <a class="navbar-brand col-lg-3 me-0 logo-text notranslate" href="/">infomundi</a>
           {% endif %}
           <ul class="navbar-nav col-lg-6 justify-content-lg-center">
+            {% if not is_mobile and page == 'News' %}
             <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.about') }}">Who are we?</a>
+              <form role="search" action="javascript:;" onsubmit="submitSearch()">
+                <div class="input-group" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Enjoy automatic translation for your search queries. The available languages are determined by the country you're in.">
+                  <button class="btn btn-outline-secondary dropdown-toggle notranslate" type="button" id="infLanguageMenu" data-bs-toggle="dropdown" aria-label="Translate button" aria-expanded="false">
+                      <i class="fa-solid fa-language me-1"></i>Language
+                    </button>
+                    <ul class="dropdown-menu inf-language-menu notranslate" aria-labelledby="infLanguageMenu">
+                      {% for lang in page_languages %}
+                        <li><a class="dropdown-item" href="#" name="{{ lang['lang'] }}">{{ lang['lang'] }}</a></li>
+                      {% endfor %}
+                    </ul>
+
+                  <input type="text" class="form-control" placeholder="Search" aria-label="Search query" id="query" name="query" minlength="3">
+
+                  <button class="btn btn-outline-secondary" type="button" aria-label="Submit search button" onclick="submitSearch()">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>
+                </div>
+              </form>
             </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.contact') }}">How to contact?</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true" href="{{ url_for('views.donate') }}">How to help?</a>
-            </li>
-          <!--
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-        -->
+            {% endif %}
           </ul>
           <div class="d-lg-flex col-lg-3 justify-content-lg-end">
 
@@ -165,20 +171,23 @@
         {% for entry in world_stocks %}
     <div class="hitem" style="color: {{ entry['color'] }};">
         {% if not entry['symbol'].endswith(':CUR') %}
-            <span class="fi fi-{{ entry['country']['code'] }} me-1"></span>
+            <!-- <span class="fi fi-{{ entry['country']['code'] }} me-1"></span> -->
+            {% if entry['country']['code'] %}
+            <img alt="{{ entry['country']['code'] }} flag" data-src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/flags/4x3/{{ entry['country']['code'] }}.svg" class="lazyload" height="16" width="9" style="width: 2%; height: 50%;">
+            {% endif %}
         {% else %}
-            <span style="color: white"><i class="fa-brands fa-bitcoin me-1"></i></span>
+            <span style="color: white"></span>
         {% endif %}
         <span style="color: white"> 
             {% if not entry['symbol'].endswith(':CUR') %}
-                {{ entry['country']['name'] }}<i class="ms-1 fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
+                {{ entry['country']['name'] }}
                 {% if entry['country']['name'] == 'United States' %}
                   {% for index, us_info in us_indexes %}
                     <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
                     {% if us_info['color'] == 'red' %}
-                        <i class="fa-solid fa-caret-down" style="color: red"></i>
+                        <span style="color: red">&#8659;</span> <!-- down -->
                     {% else %}
-                        <i class="fa-solid fa-caret-up" style="color: green"></i>
+                        <span style="color: green">&#8657;</span>
                     {% endif %}
                     {% if index != 2 %}
                       <span style="color: white">;</span>
@@ -187,28 +196,27 @@
                 {% else %}
                   <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
                   {% if entry['color'] == 'red' %}
-                    <i class="ms-1 fa-solid fa-caret-down" style="color: red"></i>
+                    <span style="color: red">&#8659;</span>
                   {% else %}
-                    <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
+                    <span style="color: green">&#8657;</span>
                   {% endif %}
                 {% endif %}
                 {% if 'currency' in entry.keys() %}
-                    |<i class="ms-2 fa-solid fa-money-bill-trend-up me-1"></i>{{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
-                    <span style="color: {{ entry['currency']['color'] }};">{{ entry['currency']['changes']['percent'] }}<i class="ms-1 fa-solid fa-caret-{% if '-' in entry['currency']['percent'] %}down{% else %}up{% endif %}"></i></span> | 
+                    | {{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
+                    <span style="color: {{ entry['currency']['color'] }};">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == 'green' %}<span style="color: green">&#8657;</span>{% else %}<span style="color: red">&#8659;</span>{% endif %} | 
                     {% if entry['currency']['name'].startswith('USD') %}
-                        1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-2"></i>{{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
+                        1 USD = {{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
                     {% else %}
-                        {{ entry['currency']['symbol'] }}1<i class="fa-solid fa-arrow-right-arrow-left me-2 ms-2"></i>${{ entry['currency']['price'] }}
+                        {{ entry['currency']['symbol'] }}1 = </i>${{ entry['currency']['price'] }}
                     {% endif %}
                 {% endif %}
             {% else %}
-                {{ entry['name'] }}
-                <i class="fa-solid fa-arrow-trend-up me-1" style="color: white"></i>
+                <i class="fa-brands fa-bitcoin me-2"></i>{{ entry['name'] }}
                 <span style="color: {{ entry['color'] }};">{{ entry['symbol'] }} {{ entry['changes']['percent'] }}</span>
                 {% if entry['color'] == 'red' %}
-                  <i class="ms-1fa-solid fa-caret-down" style="color: red"></i>
+                  <span style="color: red">&#8659;</span>
                 {% else %}
-                  <i class="ms-1 fa-solid fa-caret-up" style="color: green"></i>
+                  <span style="color: green">&#8657;</span>
                 {% endif %}
             {% endif %}
         </span>
@@ -227,35 +235,35 @@
         {% if country_index %}
           <div class="hitem" style="color: white">
             <span class='fi fi-{{ country_index["country"]["code"] }}'></span>
-            <span style="color: white">{{ country_index['country']['name'] }}</span> 
-            <i class="fa-solid fa-arrow-trend-up" style="color: white"></i> 
+            <span style="color: white">{{ country_index['country']['name'] }}</span>  
             <span style="color: {{ country_index['color'] }};">
               {{ country_index['name'] }} {{ country_index['changes']['percent'] }}
             </span>
 
             {% if country_index['color'] == 'red' %}
-              <i class="fa-solid fa-caret-down" style="color: red"></i>
+              <span style="color: red">&#8659;</span>
             {% else %}
-              <i class="fa-solid fa-caret-up" style="color: green"></i>
+              <span style="color: green">&#8657;</span>
             {% endif %}
 
             {% if 'currency' in country_index.keys() %}
-              | <i class="fa-solid fa-money-bill-trend-up" style="color: white"></i> 
+              | 
               <span style="color: white">{{ country_index['currency']['name_plural'].title() }} ({{ country_index['currency']['name'].replace('USD', '') }})</span> 
 
               <span style="color: {{ country_index['currency']['color'] }};">
-                {{ country_index['currency']['changes']['percent'] }} 
-                <i class="fa-solid fa-caret-{% if country_index['currency']['color'] == 'red' %}down{% else %}up{% endif %}"></i>
+                {{ country_index['currency']['changes']['percent'] }}</span>
+                {% if country_index['currency']['color'] == 'red' %}
+                <span style="color: red">&#8659;</span>
+                {% else %}
+                <span style="color: green">&#8657;</span>
+                {% endif %}
               </span> | 
 
               <span style="color: white">
               {% if country_index['currency']['name'].startswith('USD') %}
-                1 USD<i class="ms-2 fa-solid fa-arrow-right-arrow-left me-1"></i>
-                {{ country_index['currency']['price'] }} {{ country_index['currency']['symbol'] }}
+                1 USD = {{ country_index['currency']['price'] }} {{ country_index['currency']['symbol'] }}
               {% else %}
-                {{ country_index['currency']['symbol'] }}1
-                <i class="ms-2 fa-solid fa-arrow-right-arrow-left me-1"></i>
-                ${{ country_index['currency']['price'] }}
+                {{ country_index['currency']['symbol'] }}1 = ${{ country_index['currency']['price'] }}
               {% endif %}
               </span>
             {% endif %}
@@ -265,8 +273,7 @@
 
       {% if not is_global %}
       <div class="hitem" style="color: white">
-        <i class="fa-solid fa-arrow-trend-up me-1"></i>
-        Stocks (<i class="fa-solid fa-calendar-days me-1"></i>{{ stock_date }})
+        Stocks ({{ stock_date }})
         <i class="fa-solid fa-arrow-right ms-1"></i>
       </div>
       {% endif %}
@@ -289,13 +296,13 @@
           {{ stock_info['symbol'] }}
           {{ stock_info['day_change'] }}
           {% if '-' in stock_info['day_change'] %}
-            <i class="fa-solid fa-caret-down"></i>
+            <span style="color: red">&#8659;</span>
           {% else %}
-            <i class="fa-solid fa-caret-up"></i>
+            <span style="color: green">&#8657;</span>
           {% endif %}
           {% if stock_info['market_cap'] != None %}
             <span style="color: white">
-              ({{ stock_info['market_cap'] }} <i class="fa-solid fa-shop-lock"></i>)
+              ({{ stock_info['market_cap'] }})
             </span>
           {% endif %}
         </div>
@@ -320,6 +327,7 @@
           {% endfor %} 
         {% endif %} 
       {% endwith %}
+      {% if page != "Error" %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
@@ -332,68 +340,87 @@
           </div>
         </div>
       </div>
+      {% endif %}
       {% block content %} {% endblock %}
     </div>
 
-    {% if page == 'infomundi' %}
-    <!-- Footer -->
-    <div class="container mt-5">
-  <footer class="py-5">
-    <div class="row">
-      <div class="col-6 col-md-2 mb-3">
-        <h5>Infomundi</h5>
-        <ul class="nav flex-column">
-          <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary">Home</a></li>
-          <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary">About</a></li>
-          <li class="nav-item mb-2"><a href="{{ url_for('views.contact') }}" class="nav-link p-0 text-body-secondary">Contact</a></li>
-          <li class="nav-item mb-2"><a href="{{ url_for('views.donate') }}" class="nav-link p-0 text-body-secondary">Donate</a></li>
-          <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">FAQs</a></li>
-        </ul>
-      </div>
-
-      {% if not user.is_authenticated %}
-      <div class="col-6 col-md-2 mb-3">
-        <h5>Session</h5>
-        <ul class="nav flex-column">
-          <li class="nav-item mb-2"><a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary">Sign up</a></li>
-          <li class="nav-item mb-2"><a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary">Login</a></li>
-        </ul>
-      </div>
-      {% endif %}
-
-      <div class="col-md-5 offset-md-1 mb-3">
-        <form>
-          <h5>Subscribe to our newsletter</h5>
-          <p>Daily digest of what's new and exciting from us.</p>
-          <div class="d-flex flex-column flex-sm-row w-100 gap-2">
-            <label for="newsletter1" class="visually-hidden">Email address</label>
-            <input id="newsletter1" type="text" class="form-control" placeholder="Email address">
-            <button class="btn btn-primary" type="button">Subscribe</button>
-          </div>
-        </form>
-      </div>
+{% if page not in ["Home", "Error"] %}
+<div class="container py-5">
+  <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
+    
+    <div class="col-md-4 mb-3">
+      <center>
+      <a href="/" class="text-decoration-none" aria-label="Click to return to the home page.">
+        <img src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="16" height="9" style="height: auto; width: 13vh;" id="infomundiIcon" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">
+      </a>
+      <p class="text-body-secondary mt-3">&copy; Infomundi 2023-2024<br>
+        <span class="mt-2"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</span>
+      </p>
+      </center>
     </div>
 
-    <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
-      <p>&copy; 2023 Infomundi Project</p>
-      <ul class="list-unstyled d-flex">
-        <li class="ms-3"><a class="link-body-emphasis" href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
-        <li class="ms-3"><a class="link-body-emphasis" href="https://github.com/Infomundi-Project"><i class="fa-brands fa-github"></i></a></li>
-      </ul>
+    <div class="col mb-3">
+      <h5>INFOMUNDI</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to return to the home page"><i class="fa-solid fa-globe me-1"></i>Back to Globe</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary"><i class="fa-solid fa-address-card me-1" aria-label="Click to open the about page"></i>About</a></li>
+          
+          <li class="nav-item mb-2"><a href="{{ url_for('views.team') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page"><i class="fa-solid fa-people-group me-1"></i>Team</a></li>
+          
+          <li class="nav-item mb-2"><a href="{{ url_for('views.contact') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page"><i class="fa-solid fa-phone me-1"></i>Contact</a></li>
+
+          <li class="nav-item mb-2"><a href="{{ url_for('views.donate') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the donate page"><i class="fa-solid fa-hand-holding-dollar me-1"></i>Donate</a></li>
+
+          <li class="nav-item mb-2"><a href="{{ url_for('views.policies') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the policies page"><i class="fa-solid fa-building-shield me-1"></i>Policies</a></li>
+          <!--
+          <li class="nav-item mb-2">
+            <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme', '') == 'light' %}checked{% endif %}>
+            <label for="theme-checkbox" class="theme-checkbox-label">
+              <i class="fa-solid fa-sun"></i>
+              <i class="fa-solid fa-moon"></i>
+              <span class="ball"></span>
+            </label>
+          </li>
+        -->
+        </ul>
+    </div>
+
+    <div class="col mb-3">
+      <h5>SESSION</h5>
+        <ul class="nav flex-column">
+          {% if not user.is_authenticated %}
+            <li class="nav-item mb-2"><a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page"><i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up</a></li>
+            <li class="nav-item mb-2"><a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the login page"><i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login</a></li>
+          {% else %}
+            <li class="nav-item mb-2"><a href="{{ url_for('auth.password_change') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the password change page"><i class="fa-solid fa-lock me-1"></i>Change password</a></li>
+            {% if session.get('last_visited_country', '') %}
+              <li class="nav-item mb-2"><a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited country"><i class="fa-solid fa-earth-americas me-1"></i>Last visited country</a></li>
+            {% endif %}
+            {% if session.get('last_visited_news', '') %}
+              <li class="nav-item mb-2"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited story"><i class="fa-solid fa-newspaper me-1"></i>Last visited news</a></li>
+            {% endif %}
+            <li class="nav-item mb-2"><a href="{{ url_for('auth.logout') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to log out from your account"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
+          {% endif %}
+        </ul>
+    </div>
+
+    <div class="col mb-3">
+      <h5>FOLLOW US</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item mb-2"><a href="https://twitter.com/infomundi_net" aria-label="Click to open Infomundi's profile on Twitter" target="_blank" class="nav-link p-0 text-body-secondary"><i class="fa-brands fa-x-twitter me-1"></i>Twitter</a></li>
+          <li class="nav-item mb-2"><a href="https://instagram.com/infomundi_net" aria-label="Click to open Infomundi's profile on Instagram" target="_blank" class="nav-link p-0 text-body-secondary"><i class="fa-brands fa-instagram me-1"></i>Instagram</a></li>
+          <li class="nav-item mb-2"><a href="https://github.com/Infomundi-Project" aria-label="Click to open Infomundi's profile on Github" target="_blank" class="nav-link p-0 text-body-secondary"><i class="fa-brands fa-github me-1"></i>Github</a></li>
+        </ul>
     </div>
   </footer>
 </div>
 {% endif %}
 
+    <script
+    src="{{ url_for('static', filename='js/libs/jquery-3.7.1.min.js') }}" 
+    ></script>
     <script 
-      src="https://code.jquery.com/jquery-3.6.4.min.js" 
-      integrity="sha384-UG8ao2jwOWB7/oDdObZc6ItJmwUkR/PfMyt9Qs5AwX7PsnYn1CRKCTWyncPTWvaS" 
-      crossorigin="anonymous"
-      ></script>
-    <script 
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
-      crossorigin="anonymous"
+      src="{{ url_for('static', filename='js/libs/bootstrap-5.3.2.bundle.min.js') }}"
       ></script>
     <script defer
       src="https://kit.fontawesome.com/26c9d739ef.js" 
@@ -404,6 +431,8 @@
       const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
       toastBootstrap.show()
     </script>
+
+
     {% if page != 'Error' %}
     <script defer
       type="text/javascript" 
@@ -419,23 +448,32 @@
       }
     </script>
     {% endif %}
-    {% if page != 'Comments' %}
+
+
+    {% if page in ['Home', 'News'] %}
     <script 
       src="{{ url_for('static', filename='js/tickerSpeedUp.js') }}"
       ></script>
-      <script>
-        var userLanguage = navigator.language || navigator.userLanguage;
-        setCookie('userLanguage', userLanguage, 7);
-      </script>
     {% endif %}
-    {% if page not in ['Home', 'Error'] %}
-    <script 
+
+
+    {% if page not in ['Error'] %}
+    <script defer
       src="{{ url_for('static', filename='js/themeButton.js') }}"
       ></script>
-    <script 
+    <script defer
       src="{{ url_for('static', filename='js/lazysizes.min.js') }}"
       ></script>
     {% endif %}
+
+    {% if page not in ['Home', 'Error'] %}
+    <script 
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+      async defer
+    ></script>
+    {% endif %}
+
+
     {% block scripts %} {% endblock %}
   </body>
 </html>

@@ -11,12 +11,12 @@
   <div class="row justify-content-center mt-5">
     <div class="col-md-6">
       <div class="card mb-3">
-        <img id="infomundiLogo" src="{{ url_for('static', filename='img/logos/new/logo-bg-wide-dark.png') }}" class="card-img-top" alt="Infomundi Logo">
         <div class="card-header">
           Welcome to Infomundi!
         </div>
         <div class="card-body">
           <form method="post" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="form-group">
               <label for="email" class="form-label"><i class="fa-solid fa-envelope me-1"></i>Email</label>
               <input type="email" class="form-control" id="email" name="email" minlength="10" required>
@@ -45,10 +45,4 @@
     </div>
   </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script 
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
-  async defer
-></script>
 {% endblock %}

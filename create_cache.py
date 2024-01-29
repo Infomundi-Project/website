@@ -161,9 +161,9 @@ def main():
             cache['created_at'] = now.isoformat()
             is_new = True
 
-        if not scripts.is_cache_old(f'{cache_file_path}.json', 1):
-            print(f'[-] Cache for {selected_filter} is not old enough.')
-            continue
+        #if not scripts.is_cache_old(f'{cache_file_path}.json', 1):
+        #    print(f'[-] Cache for {selected_filter} is not old enough.')
+        #    continue
         
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
@@ -205,6 +205,7 @@ def main():
         time_difference = now - saved_timestamp
         if time_difference > timedelta(days=7) or is_new:
             cache['stories'] = []
+            print('------------- Deleting all stories ----------')
 
         # Correct date
         try:

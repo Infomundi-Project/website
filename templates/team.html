@@ -1,0 +1,137 @@
+{% extends "base.html" %} {% block title %}Team{% endblock %}
+{% block styles %}
+<style type="text/css">
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.card-img-top {
+  height: 40vh;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="my-5 text-center">
+      <img 
+        src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
+        class="infomundi-logo"
+        id="infomundiLogo"
+        height="16"
+        width="9" 
+        alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
+        />
+      <p class="fs-5">About</p>
+      <p class="display-5 fw-bold text-body-emphasis">Team</p>
+      <div class="col-lg-6 mx-auto">
+      </div>
+    </div>
+
+    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.about') }}">Website</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{{ url_for('views.team') }}">Team</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.policies') }}">Policies</a>
+      </li>
+    </ul>
+  </div>
+
+
+
+
+
+
+
+  <div class="row justify-content-center">
+    <div class="col-md-4 mb-5">
+      <div class="card">
+      	<div class="card-header">
+	      	<ul class="nav nav-pills card-header-pills">
+		      <li class="nav-item">
+		        <a class="nav-link" target="_blank" href="https://www.instagram.com/diogo.cavalcantii/">
+		        	<i class="fa-brands fa-instagram me"></i></a>
+		      </li>
+		    </ul>
+      	</div>
+        <img src="{{ url_for('static', filename='img/dbarros.webp') }}" class="card-img-top" alt="Infomundi CEO">
+        <div class="card-body">
+          <h5 class="card-title">Diogo Cristovão de Barros Cavalcanti</h5>
+          <p class="card-text">CEO, Creative Director & Co-Founder</p>
+          <span class="card-text fst-italic">"Be an eagle every day...not a pigeon!"</span><span> - My father</span>
+        </div>
+        
+        <ul class="list-group list-group-flush mt-3">
+		    <li class="list-group-item">
+		    	<a href="mailto:socialsDB@proton.me" target="_blank" class="text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>socialsDB@proton.me</a>
+		    </li>
+		</ul>
+        
+        <div class="card-footer text-body-secondary">
+        	<i class="fa-solid fa-location-dot me-1"></i>Brazil (UTC-3)
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="col-md-4">
+      <div class="card">
+      	<div class="card-header">
+	      	<ul class="nav nav-pills card-header-pills">
+		      <li class="nav-item">
+		        <a class="nav-link" target="_blank" href="https://github.com/behindsecurity"><i class="fa-brands fa-github me"></i></a>
+		      </li>
+		      <li class="nav-item">
+		        <a class="nav-link" target="_blank" href="https://behindsecurity.com/"><i class="fa-solid fa-globe"></i></a>
+		      </li>
+		    </ul>
+      	</div>
+
+        <img src="{{ url_for('static', filename='img/galves.webp') }}" class="card-img-top" alt="Infomundi CTO">
+        <div class="card-body">
+          <h5 class="card-title">Guilherme Alves</h5>
+          <p class="card-text">CTO, Fullstack Dev & Co-Founder</p>
+          <p class="card-text">I create things, and I break things.</p>
+        </div>
+        
+        <ul class="list-group list-group-flush mt-3">
+		    <li class="list-group-item">
+		    	<a href="mailto:gui.alves@behindsecurity.com" target="_blank" class="text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>gui.alves@behindsecurity.com</a>
+		    </li>
+		</ul>
+
+        <div class="card-footer text-body-secondary">
+        	<i class="fa-solid fa-location-dot me-1"></i>Brazil (UTC-3)
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+</div>
+
+
+
+
+
+{% endblock %}
