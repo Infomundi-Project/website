@@ -4,7 +4,7 @@ var root = am5.Root.new("chartdiv");
 
 
 root.setThemes([
-  am5themes_Animated.new(root)
+  am5themes_Micro.new(root)
 ]);
 
 
@@ -75,11 +75,10 @@ function selectCountry(id) {
       chart.animate({ key: "rotationY", to: -centroid.latitude, duration: 1500, easing: am5.ease.inOut(am5.ease.cubic) });
 
       var selectedCountry = dataItem.get("id");
-      sleep(2000).then(() => { window.location.href = 'https://infomundi.net/news?country=' + encodeURIComponent(selectedCountry); });
+      sleep(1500).then(() => { window.location.href = 'https://infomundi.net/news?country=' + encodeURIComponent(selectedCountry); });
     }
   }
 }
-
 
 chart.appear(1000, 100);
 

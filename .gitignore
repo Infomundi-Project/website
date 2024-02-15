@@ -11,3 +11,4 @@ crypto.json
 currencies.json
 stocks.json
 stories/
+.webassets-cache/

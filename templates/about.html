@@ -14,7 +14,6 @@
       <img 
         src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
         class="infomundi-logo"
-        id="infomundiLogo"
         height="16"
         width="9" 
         alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."

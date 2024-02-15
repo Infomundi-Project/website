@@ -1,3 +1,20 @@
+@font-face {
+  font-family: 'Spectral SC';
+  src: url('/static/fonts/SpectralSC-SemiBold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alexandria';
+  src: url('/static/fonts/Alexandria-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 body {
   font-family: Alexandria, sans-serif;
 }
@@ -8,7 +25,6 @@ body {
 }
 
 .logo-text {
-  font-family: 'Mulish', sans-serif;
   font-family: 'Spectral SC', serif;
 }
 

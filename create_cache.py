@@ -1,4 +1,5 @@
-import time, threading
+import time, threading, os
+
 from datetime import datetime, timedelta
 from random import shuffle, choice
 from unidecode import unidecode
@@ -6,30 +7,9 @@ from bs4 import BeautifulSoup
 from feedparser import parse
 from requests import get
 from hashlib import md5
-from os import listdir
 from sys import exit
 
 from website_scripts import json_util, config, scripts, immutable
-
-
-def get_img(feed, item, is_search: bool=False) -> str:
-    """Returns img url associated with the RSS item."""
-    src = "static/img/infomundi-white-darkbg-square.webp"
-    
-    try:
-        src = item.contributors[0]['href']
-        return src
-    except Exception:
-        if not item.has_key('summary') and not item.has_key('description'):
-            return scripts.get_link_preview(item.link, source='cache')
-        
-        soup = BeautifulSoup(item.summary, 'html.parser')
-        img_tags = soup.find_all('img')
-        for img_tag in img_tags:
-            src = img_tag.get('src')
-            return src
-    
-    return src
 
 
 def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
@@ -60,15 +40,11 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            image_url = item.media_content[0]['url'] if 'media_content' in item else ''
-            if not image_url:
-                image_url = get_img(feed, item)
-
             feed_publisher = feed.feed.title
             feed_link = feed.feed.link
 
             item_title = item.get('title', f'No title was provided')
-            item_description = scripts.remove_html_tags(item.get('description', 'No description was provided'))[:700]
+            item_description = scripts.remove_html_tags(item.get('description', 'No description was provided'))[:1500]
             item_link = item.link
             
             for character in immutable.SPECIAL_CHARACTERS:
@@ -77,6 +53,8 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
 
                 item_title = item_title.replace(character, '')
                 item_link = item_link.replace(character, '')
+
+            feed_publisher = feed_publisher.split('-')[0]
 
             if not scripts.is_valid_url(feed_link) or not scripts.is_valid_url(item_link):
                 print(f'[-] Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
@@ -89,17 +67,29 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
             else:
                 pubdate = item.updated
 
+            # Manual correction :)
+            feed_link = feed_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
+            item_link = item_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
+            
+            item_id = f'{md5(unidecode(item_title.lower()).encode()).hexdigest()}'
+            
+            if os.path.isfile(f'{config.WEBSITE_ROOT}/static/img/stories/{news_filter}/{item_id}.webp'):
+                item_image = f'static/img/stories/{news_filter}/{item_id}.webp'
+            else:
+                item_image = 'static/img/infomundi-white-darkbg-square.webp'
+            
             data['items'].append(
                 {
                 'title': item_title,
                 'description': item_description,
-                'id': f'{md5(unidecode(item_title.lower()).encode()).hexdigest()}',
+                'id': item_id,
                 'publisher': feed_publisher,
                 'publisher_link': feed_link,
+                'publisher_id': f'{md5(unidecode(feed_link).encode()).hexdigest()}',
                 'link': item_link,
                 'pubDate': format_date(pubdate),
                 'media_content': {
-                    'url': image_url
+                    'url': item_image
                     }
                 })
     
@@ -144,11 +134,14 @@ def main():
     """Main function to fetch and cache RSS feeds."""
     current_month = datetime.today().month
 
-    categories = [file.replace(".json", "") for file in listdir(f"{config.FEEDS_PATH}")]
+    categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
     now = datetime.now()
 
+    #categories = ['br_general']
+    total_done = 0
     for selected_filter in categories:
-        print(f"\n[~] Handling cache for {selected_filter}...")
+        percentage = (total_done * 100) // len(categories)
+        print(f"\n[{percentage}%] Handling cache for {selected_filter}...")
 
         cache_file_path = f'{config.CACHE_PATH}/{selected_filter}'
 
@@ -160,10 +153,6 @@ def main():
             cache = {}
             cache['created_at'] = now.isoformat()
             is_new = True
-
-        #if not scripts.is_cache_old(f'{cache_file_path}.json', 1):
-        #    print(f'[-] Cache for {selected_filter} is not old enough.')
-        #    continue
         
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
@@ -199,11 +188,12 @@ def main():
         # Shuffle merged articles to mix them up
         shuffle(merged_articles)
 
-        # It may be a good idea to overwrite the cache with a time span of 7 days
+        # It may be a good idea to overwrite the cache with a time span of 15 days
         saved_timestamp = datetime.fromisoformat(cache['created_at'])
 
         time_difference = now - saved_timestamp
-        if time_difference > timedelta(days=7) or is_new:
+        if time_difference > timedelta(days=15) or is_new:
+            cache['created_at'] = now.isoformat()
             cache['stories'] = []
             print('------------- Deleting all stories ----------')
 
@@ -227,25 +217,29 @@ def main():
                 else:
                     continue
 
+        # Remove all repeated articles
         existing_ids = [x['id'] for x in cache['stories']]
-
-        # Removes all repeated articles
         articles_to_add = [x for x in merged_articles if x['id'] not in existing_ids]
 
         if not articles_to_add:
             print(f'[+] Cache for {selected_filter} is full. No need to write anything.')
             continue
 
+        # Save new update date
         cache['updated_at'] = now.isoformat()
 
         # Add newer articles to the beginning of the cache
         articles_to_add.extend(cache['stories'])
         cache['stories'] = articles_to_add
 
+        # Calculate and save to the file the total of newly added articles, in order to optimzie image gathering. 
+        cache['recently_added'] = len(articles_to_add)
+
         json_util.write_json(cache, f"{config.CACHE_PATH}/{selected_filter}")
+        total_done += 1
         print(f"[{len(articles_to_add)} articles] Wrote json for {selected_filter}.")
     
-    return print('Finished.')
+    return print('[+] Finished!')
 
 if __name__ == "__main__":
     main()

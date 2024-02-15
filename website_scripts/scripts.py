@@ -1,3 +1,4 @@
+import uuid, bleach
 from re import search as search_regex, compile as re_compile, match as re_match
 from requests import get as get_request, post as post_request
 from pytz import timezone as pytz_timezone
@@ -11,10 +12,11 @@ from urllib.parse import urlparse
 from unidecode import unidecode
 from bs4 import BeautifulSoup
 from random import choice
+from openai import OpenAI
 from hashlib import md5
 from time import sleep
 
-from . import config, json_util, immutable, notifications
+from . import config, json_util, immutable, notifications, models
 
 
 def scrape_stock_data(country_name: str) -> list:
@@ -187,6 +189,15 @@ def get_nation_data(cca2: str) -> dict:
 
 
 def send_verification_token(email: str, username: str) -> bool:
+    """Generates a verification token, stores in a json file and uses notifications.send_email to send the verification token to the user
+
+    Arguments
+        email:str User's email address
+        username:str User's username (max 30 characters)
+
+    Returns
+        False if there's a token associated with the email. Otherswise True.
+    """
     try:
         tokens = json_util.read_json(config.TOKENS_PATH)
     except Exception:
@@ -196,11 +207,8 @@ def send_verification_token(email: str, username: str) -> bool:
     if email in tokens:
         return False
 
+    # Generate a REEEEALLY random verification token
     verification_token = md5(urandom(20)).hexdigest()
-    
-    tokens[email] = {}
-    tokens[email]['token'] = verification_token
-    json_util.write_json(tokens, config.TOKENS_PATH)
 
     message = f"""Hello {username}, 
 
@@ -214,8 +222,75 @@ Best regards,
 The Infomundi Team"""
 
     subject = 'Infomundi - Activate Your Account'
-    notifications.send_email(email, subject, message)
-    return True
+    
+    result = notifications.send_email(email, subject, message)
+    
+    if result:
+        tokens[email] = {}
+        tokens[email]['token'] = verification_token
+        json_util.write_json(tokens, config.TOKENS_PATH)
+
+    return result
+
+
+def send_forgot_password_token(email: str='', token: str='') -> bool:
+    try:
+        tokens = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
+    except Exception:
+        tokens = {}
+
+    if email in tokens:
+        return False
+    
+    now = datetime.now()
+
+    if token:
+        to_delete = []
+        
+        for key, value in tokens.items():
+            created_at = datetime.fromisoformat(value['timestamp'])
+            time_difference = now - created_at
+            if time_difference > timedelta(minutes=30):
+                to_delete.append(key)
+            
+            if value['token'] == token and key not in to_delete:
+                email = key
+                to_delete.append(key)
+                break
+        else:
+            return False
+
+        for item in to_delete:
+            del tokens[item]
+
+        json_util.write_json(tokens, f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
+
+        return email
+    
+    verification_token = md5(urandom(20)).hexdigest()
+
+    message = f"""Hello,
+
+If you've received this message in error, feel free to disregard it. However, if you're here to change the password for your Infomundi account, feel free to click on the link below:
+
+https://infomundi.net/auth/forgot_password?token={verification_token}
+
+Please keep in mind that this link will expire in 30 minutes.
+
+Best regards,
+The Infomundi Team"""
+    subject = 'Infomundi - Account Recovery'
+    
+    result = notifications.send_email(email, subject, message)
+
+    if result:
+        tokens[email] = {}
+        tokens[email]['token'] = verification_token
+        tokens[email]['timestamp'] = now.isoformat()
+
+        json_util.write_json(tokens, f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
+
+    return result
 
 
 def parse_utc_offset(offset_str: str):
@@ -347,16 +422,6 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
                 return save_list[index]
 
 
-def detect_mobile(request) -> bool:
-    """Uses a request object to check if the user is using a mobile device or not. If mobile, return True. Else, return False."""
-    user_agent = request.user_agent.string
-
-    if 'Mobile' in user_agent or 'Android' in user_agent:
-        return True
-    
-    return False
-
-
 def encode_base64(input_string: str) -> str:
     return b64encode(input_string.encode('utf-8')).decode('utf-8')
 
@@ -383,12 +448,19 @@ def is_valid_url(url: str) -> bool:
 def is_valid_email(email: str) -> bool:
     if len(email) < 10 or '@' not in email or len(email) > 60:
         return False
-
-    domain = email.split('@')[1]
-    if domain not in immutable.EMAIL_DOMAINS:
-        return False
     
     return True
+
+def is_valid_username(username):
+    # Regular expression to match allowed characters: alphanumeric and !@#$%¨&*()_-
+    allowed_chars_regex = r'^[A-Za-z0-9!@#$%¨&*()_\-]+$'
+
+    # Check if the username matches the allowed pattern
+    if re_match(allowed_chars_regex, username):
+        return True  # Username is valid
+    else:
+        return False  # Username contains invalid characters
+
 
 
 def is_url_or_domain(input_str: str) -> str:
@@ -492,9 +564,9 @@ def get_link_preview(url: str) -> dict:
         }
 
 
-def generate_id() -> str:
-    """Simply uses os.urandom and md5 to generate a unique ID."""
-    return md5(urandom(20)).hexdigest()
+def generate_id(length: int=8) -> str:
+    """Simply uses uuid to generate an unique ID."""
+    return str(uuid.uuid4())[:length]
 
 
 def string_similarity(s1: str, s2: str) -> float:
@@ -519,6 +591,7 @@ def add_telemetry(news_id: str, telemetry_type: str):
         telemetry[news_id] = {}
         telemetry[news_id]['clicks'] = 0
         telemetry[news_id]['likes'] = 0
+        telemetry[news_id]['comments'] = 0
         telemetry[news_id]['timestamp'] = timestamp_string
     else:
         telemetry[news_id][telemetry_type] += 1
@@ -594,24 +667,19 @@ def get_statistics() -> dict:
     else:
         last_updated_message = f"{hours} hours ago"
 
-    # Get total comments
-    total_comments = 0
-    comments = json_util.read_json(config.COMMENTS_PATH)
-    for news_id in comments:
-        if news_id != 'enabled':
-            total_comments += len(comments[news_id])
-
     total_clicks = 0
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     for news_id in telemetry:
         total_clicks += telemetry[news_id]['clicks']
+
+    total_comments = models.Comment.query.count()
 
     timestamp_string = current_timestamp.isoformat()
     data = {
         'current_time': formatted_time,
         'timestamp': timestamp_string,  # this will be used to check if the statistics are ready for an update
         'total_countries_supported': total_countries_supported,
-        'total_news': total_news,
+        'total_news': f"{total_news:,}",
         'total_feeds': total_feeds,
         'total_comments': total_comments,
         'last_updated_message': last_updated_message,
@@ -630,6 +698,18 @@ def valid_category(category: str) -> bool:
         return False
     
     return True
+
+
+def country_code_to_name(cca2: str) -> str:
+    countries = config.COUNTRY_LIST
+    for item in countries:
+        if item['code'].lower() == cca2:
+            country_name = item['name']
+            break
+    else:
+        country_name = ''
+
+    return country_name
 
 
 def get_supported_categories(country_code: str) -> list:
@@ -658,12 +738,9 @@ def valid_captcha(token: str) -> bool:
 
 
 def is_strong_password(password: str) -> bool:
-    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 1 number, and 8 characters"""
+    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 8 characters"""
 
-    #if not search_regex(r'[a-z]', password) or not search_regex(r'[A-Z]', password) or not search_regex(r'\d', password) or not search_regex(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', password) or len(password) < 12 or len(password) > 50:
-        #return False
-
-    if not search_regex(r'\d', password) or len(password) < 8 or len(password) > 50:
+    if len(password) < 8 or len(password) > 50:
         return False
     
     return True
@@ -689,3 +766,56 @@ def translate(dest_lang: str, msg: str):
         return translation.text
     except Exception as err:
         return ''
+
+
+def gpt_summarize(url:str):
+    """As you may have guessed, this script is responsible for accessing a 
+
+    """
+    user_agent = choice(immutable.USER_AGENTS)
+    r = get_request(url, headers={'User-Agent': user_agent})
+    
+    if r.status_code != 200:
+        return ''
+    
+    html_content = r.content
+
+    # Use BeautifulSoup to extract text
+    soup = BeautifulSoup(html_content, 'lxml')
+
+    news_title = soup.title.string if soup.title else "News Article"
+
+    # Extract relevant text from paragraphs and headings
+    article_text = ''.join([p.get_text() for p in soup.find_all(['p'])])[:1000]
+
+    prompt = f"""Considering the context of "{news_title}", please identify the language of the text below, but keep in mind: don't tell the language in the output.
+    
+    ```text
+    {article_text}
+    ```
+    
+    Now that you have identified the language, please generate three paragraphs in that language on the topic. The first one is an opinion article, impartial in relation to the provided news. The second paragraph is going to be a contextualization from an outisde point of view from the news, it's going to give information about the things around the matter. The third one is about ways to find more information on the matter, and the subjects presented in the news.
+    """
+
+    client = OpenAI(api_key=config.OPENAI_API_KEY)
+    response = client.chat.completions.create(
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a helpful and comprehensive assistant designed to output JSON, identifying the language of the user and changing the output keys accordingly. The output JSON must have 'maximus_noted_some_important_things' (refers to the opinion article), 'the_context_behind_this_news' (refering to contextualization) and 'where_can_i_find_more_information?' (refering to ways to find more information on the matter) as keys."},
+        {"role": "user", "content": prompt}
+      ],
+      n=1,
+      temperature=0.3
+    )
+
+    return response.choices[0].message.content
+
+
+def sanitize_input(text: str) -> str:
+    """Takes an input string and uses bleach library to sanitize it.
+
+    Returns
+        str: Sanitized input
+    """
+
+    return bleach.clean(text)

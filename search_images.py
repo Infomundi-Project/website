@@ -4,6 +4,7 @@ import os
 from requests.exceptions import ProxyError, ConnectionError, Timeout
 from requests import get as get_request
 from random import shuffle, choice
+from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
@@ -14,15 +15,15 @@ from website_scripts import json_util, config, scripts, immutable
 bad_proxies = []
 
 
-def get_link_preview(data: str, source:str='default', selected_filter:str='None') -> str:
+def get_link_preview(data, source:str='default', selected_filter:str='None') -> str:
     """
     Takes an URL as input and returns a link to an image preview.
     Handles proxy selection and retries on failure.
     """
-    if not isinstance(data, dict):
-        url = data
-    else:
+    if isinstance(data, dict):
         url = data['link']
+    else:
+        url = data
     
     try:
         headers = {'User-Agent': choice(immutable.USER_AGENTS)}
@@ -45,28 +46,28 @@ def get_link_preview(data: str, source:str='default', selected_filter:str='None'
                     return "static/img/infomundi-white-darkbg-square.webp"
             except ProxyError:
                 bad_proxies.append(chosen_proxy)
-                print(f'[!] Proxy error with {chosen_proxy}, trying another...')
+                #print(f'[!] Proxy error with {chosen_proxy}, trying another...')
                 continue
             except (ConnectionError, Timeout):
-                print(f'[!] Connection or timeout error with {url}')
+                #print(f'[!] Connection or timeout error with {url}')
                 return "static/img/infomundi-white-darkbg-square.webp"
             except Exception as err:
-                print(f'[!] Unexpected error: {err}')
+                #print(f'[!] Unexpected error: {err}')
                 return "static/img/infomundi-white-darkbg-square.webp"
             
-            print(f'[+] Connected to {chosen_proxy}')
+            #print(f'[+] Connected to {chosen_proxy}')
             break
 
         if source != 'default':
             return response
 
-        return extract_image_from_response(response, data, selected_filter)
+        return extract_image_from_response(response, url, data, selected_filter)
     except Exception as e:
         print(f'[!] Error in get_link_preview: {e}')
         return 'static/img/infomundi-white-darkbg-square.webp'
 
 
-def extract_image_from_response(response, story:dict, selected_filter:str):
+def extract_image_from_response(response, url:str, story:dict, selected_filter:str):
     """
     Extracts image URL from the response object.
     """
@@ -76,36 +77,79 @@ def extract_image_from_response(response, story:dict, selected_filter:str):
     image = soup.find('meta', {'property': 'og:image'})
     image = image.get('content').strip() if image else "static/img/infomundi-white-darkbg-square.webp"
 
+    icon_link = soup.find('link', rel=lambda rel: rel and 'icon' in rel.lower())
+
     if not image.endswith('infomundi-white-darkbg-square.webp'):
         if not os.path.exists(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}'):
             os.mkdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}')
 
-        output_path = f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/{story['id']}"
-        return download_and_convert_image(image, output_path)
+        if not os.path.exists(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons'):
+            os.mkdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')
+
+        if icon_link and icon_link.get('href'):
+            favicon = urljoin(url, icon_link['href'])
+        else:
+            favicon = urljoin(url, '/favicon.ico')
+
+        favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
+        
+        publisher_id = story.get('publisher_id', '')
+        if not publisher_id or publisher_id in favicon_database:
+            images = {
+            'news': {
+                'url': image,
+                'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/{story['id']}"
+                }
+            }
+        else:
+            images = {
+                'news': {
+                    'url': image,
+                    'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/{story['id']}"
+                },
+                'favicon': {
+                    'url': favicon,
+                    'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons/{story['publisher_id']}"
+                }
+            }
+
+        return download_and_convert_image(images)
 
     return image
 
 
-def download_and_convert_image(url, output_path):
-    # Download the image
-    response = get_link_preview(url, source='convert')
-    if response.status_code != 200:
-        raise Exception(f"Failed to download the image: Status code {response.status_code}")
+def download_and_convert_image(data: dict):
+    website_paths = []
+    for item in data:
+        url = data[item]['url']
+        response = get_link_preview(url, source='convert')
 
-    # Open the image using PIL
-    image = Image.open(BytesIO(response.content))
+        if isinstance(response, str):
+            return response
+        
+        if response.status_code != 200:
+            raise Exception(f"Failed to download the image: Status code {response.status_code}")
 
-    # Convert the image to WebP
-    image = image.convert("RGB")
-    webp_image_path = output_path + ".webp"
-    image.save(webp_image_path, format="webp", optimize=True, quality=35)
+        # Open the image using PIL
+        try:
+            image = Image.open(BytesIO(response.content))
+        except Exception:
+            continue
 
-    print(f'[+] Downloading {webp_image_path}')
+        if item == 'news':
+            image.thumbnail((500, 500))
+            image = image.convert("RGB")
+            
+            image_path = data[item]['output_path'] + ".webp"
+            image.save(image_path, format="webp", optimize=True, quality=35)
+        else:
+            image.resize((32, 32))
+            image_path = data[item]['output_path'] + ".ico"
+            image.save(image_path)
 
-    path_splitted = webp_image_path.split('/')
-
-    website_path = f'static/img/stories/{path_splitted[-2]}/{path_splitted[-1]}'
-    return website_path
+        website_paths.append(image_path.replace(config.WEBSITE_ROOT, ''))
+    
+    return website_paths
 
 
 def search_images():
@@ -114,35 +158,25 @@ def search_images():
     """
     categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
     shuffle(categories)
+
+    top_countries = ['us_general', 'br_general', 'in_general', 'ru_general', 'ca_general', 'au_general', 'ar_general']
+
+    # Removes top countries from the categories variable, in order to prevent going into the same country twice
+    for country in top_countries:
+        categories.remove(country)
+
+    # Extends the top countries list so the script begins getting images for the biggest countries.
+    top_countries.extend(categories)
     
-    for selected_filter in categories:
-        print(f"\n[~] Searching images for {selected_filter}...")
+    total = 0
+    for selected_filter in top_countries:
+        total += 1
+        progress_percentage = (total * 100) // len(categories)
+        
+        print(f"\n[{progress_percentage}% done] Searching images for {selected_filter}...")
         process_category(selected_filter)
 
-    cleanup_images()    
     print('[+] Finished!')
-
-
-def cleanup_images():
-    """
-    Lists all the images within the folder and removes images for news that are no longer being used
-    """
-    categories = [directory for directory in os.listdir(f"{config.WEBSITE_ROOT}/static/img/stories")]
-
-    total_deleted = 0
-    for category in categories:
-        files = [x.replace('.webp', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{category}')]
-        
-        cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
-        stories = [x['id'] for x in cache['stories']]
-
-        to_remove = [x for x in files if x not in stories]
-
-        for file in to_remove:
-            os.remove(f'{config.WEBSITE_ROOT}/static/img/stories/{category}/{file}.webp')
-            total_deleted += 1
-
-    print(f'[~] We deleted {total_deleted} images that were not being used.')
 
 
 def process_category(selected_filter):
@@ -157,20 +191,36 @@ def process_category(selected_filter):
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
+        count = 0
         for story in cache['stories']:
-            if 'static/img/stories' in story['media_content']['url'] and False:
+            if 'recently_added' in cache:
+                if count >= cache['recently_added']:
+                    break
+            else:
+                if count >= 500:
+                    break
+            
+            if 'static/img/stories' in story['media_content']['url']:
                 continue
+            
             future = executor.submit(get_link_preview, story, 'default', selected_filter)
             futures.append((future, story))
+            count += 1
 
         total = 0
         for future, story in futures:
             image_url = future.result()
-            if image_url.endswith('infomundi-white-darkbg-square.webp'):
-                continue
-            
-            story['media_content']['url'] = image_url
-            total += 1
+            if isinstance(image_url, str):
+                if image_url.endswith('infomundi-white-darkbg-square.webp'):
+                    continue
+                
+                story['media_content']['url'] = image_url
+                total += 1
+            else:
+                # We are now collecting favicon data! First item will always be news image, and second will always be favicon image.
+                total += 1
+                for index, url in enumerate(image_url):
+                    story['media_content']['url' if index == 0 else 'favicon'] = url
 
         print(f'[+] Gathered {total} images for {selected_filter}')
         json_util.write_json(cache, f'{config.CACHE_PATH}/{selected_filter}')

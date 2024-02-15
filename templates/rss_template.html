@@ -5,64 +5,88 @@
     overflow-y: auto;
     max-height: 20vh;
   }
-  @media (max-width: 1000px) {
+  
+  @media (max-width: 800px) {
     .description-text {
-      overflow-y: auto;
       max-height: 30vh;
+    }
+    /* Smaller search button and dropdown */
+    .btn-outline-primary {
+        font-size: 0.8rem; /* Smaller font size */
+        padding: 5px 10px; /* Smaller padding */
+    }
+
+    /* Smaller input field */
+    .form-control {
+        font-size: 0.8rem; /* Smaller font size */
+        padding: 5px 10px; /* Smaller padding */
+    }
+
+    /* Ensure the dropdown items match the new button size */
+    .dropdown-item {
+        font-size: 0.8rem; /* Smaller font size */
+        padding: 3px 10px; /* Smaller padding */
+    }
+    .nav-item .nav-link {
+      font-size: 0.8rem; /* Smaller font size */
+      padding: 5px 10px; /* Smaller padding */
+    }
+
+    .nav-item {
+        margin-right: 5px; /* Adjust space between nav items */
     }
   }
 
   #offcanvasWithBothOptions {
-    width: 90%;
-    height: 70vh;
+    border-radius: 1%;
+    width: 95%;
+    height: 85vh;
     margin: auto;
     transform: translate(-50%, -50%);
     top: 50%;
     bottom: auto;
     left: 50%;
     right: auto;
-
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
   }
 
-  #offcanvasWithBothOptions:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
 </style>
 {% endblock %}
 {% block content %}
 
 
-<div class="offcanvas offcanvas-bottom" data-bs-backdrop="static" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+<div class="offcanvas shadow-lg" data-bs-backdrop="static" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Comments</h5>
+    <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"></h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
+    
+    <div id="comments-section" class="container my-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3>Comments <span id="total-comments" class="badge bg-secondary">0</span></h3>
+          <div>
+              <select id="sort-comments" aria-label="Sort Comments:" class="form-select form-select-sm w-auto">
+                  <option value="top">Top Comments</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+              </select>
+          </div>
+      </div>
 
-    <form action="{{ url_for('api.add_comment') }}" method="post" onsubmit="return validateForm()">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <div class="form-group">
-      <label for="name" class="form-label"><i class="fa-solid fa-user me-1"></i>Username</label>
-      {% if user.is_authenticated %}
-      <input class="form-control" type="text" value="{{ user.username }}" aria-label="User is logged in" readonly>
-      {% else %}
-      <input type="text" id="name" name="name" class="form-control" aria-describedby="nameHelp" maxlength="30">
-      <div id="nameHelp" class="form-text text-secondary"><i class="fa-solid fa-circle-info me-1"></i>We'll generate one for you if you prefer not to choose a name and leave this field blank.</div>
-      {% endif %}
+      <div class="mb-4">
+          {% if user.is_authenticated %}
+          <div class="d-flex align-items-start">
+              <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
+              <textarea id="new-comment" class="form-control me-2" rows="2" placeholder="Add a comment..."></textarea>
+              <button id="cooldown-button" class="btn btn-secondary">Submit</button>
+          </div>
+          {% else %}
+            <p class="fs-3 text-decoration-none">You must <a href="{{ url_for('auth.register') }}">create an account</a> or <a href="{{ url_for('auth.login') }}">sign in</a> in order to interact with the comments section.</p>
+          {% endif %}
+      </div>
+      
+      <div id="comments-list" class="list-group"></div>
     </div>
-    <div class="form-group">
-      <label for="comment" class="form-label"><i class="fa-solid fa-message me-1"></i>Comment *</label>
-      <textarea id="comment" name="comment" rows="4" class="form-control" maxlength="300" aria-describedby="commentHelp" required></textarea>
-      <div id="commentHelp" class="form-text text-secondary"><i class="fa-solid fa-circle-info me-1"></i>Your comment must not exceed 300 characters.</div>
-    </div>
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
-    <button type="submit" class="btn btn-outline-secondary mb-5" id="cooldown-button" disabled>Comment</button>
-  </form>
-
-    <!-- Dynamic area for comments -->
-    <div id="commentsContainer"></div>
     
   </div>
 </div>
@@ -115,8 +139,8 @@
 
     {% if is_mobile %}
     <form role="search" action="javascript:;" onsubmit="submitSearch()">
-      <div class="input-group mb-3 mt-4" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Enjoy automatic translation for your search queries. The available languages are determined by the country you're in.">
-        <button class="btn btn-outline-secondary dropdown-toggle notranslate" type="button" id="infLanguageMenu" data-bs-toggle="dropdown" aria-label="Translate button" aria-expanded="false">
+      <div class="input-group mb-3 mt-4">
+        <button class="btn btn-outline-primary dropdown-toggle notranslate" type="button" id="infLanguageMenu" data-bs-toggle="dropdown" aria-label="Translate button" aria-expanded="false">
             <i class="fa-solid fa-language me-1"></i>Language
           </button>
           <ul class="dropdown-menu inf-language-menu notranslate" aria-labelledby="infLanguageMenu">
@@ -127,7 +151,7 @@
 
         <input type="text" class="form-control" placeholder="Search" aria-label="Search query" id="query" name="query" minlength="3">
 
-        <button class="btn btn-outline-secondary" type="button" aria-label="Submit search button" onclick="submitSearch()">
+        <button class="btn btn-outline-primary" type="button" aria-label="Submit search button" onclick="submitSearch()">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
@@ -135,22 +159,22 @@
   {% endif %}
 
     <ul class="nav nav-pills justify-content-center mb-2 mt-4">
-  <li class="nav-item">
-    <a class="nav-link {{ 'active' if 'general' in selected_filter }}" href="/news?country={{ country_code }}">General</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'economy' not in supported_categories }} {{ 'active' if 'economy' in selected_filter }}" href="/news?country={{ country_code }}&section=economy">Economy</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'politics' not in supported_categories }} {{ 'active' if 'politics' in selected_filter }}" href="/news?country={{ country_code }}&section=politics">Politics</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'technology' not in supported_categories }} {{ 'active' if 'technology' in selected_filter }}" href="/news?country={{ country_code }}&section=technology">Technology</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {{ 'disabled text-secondary' if 'sports' not in supported_categories }} {{ 'active' if 'sports' in selected_filter }}" href="/news?country={{ country_code }}&section=sports">Sports</a>
-  </li>
-</ul>
+      
+      {% for category in all_categories %}
+        {% if category in supported_categories %}
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if category in selected_filter }}" href="/news?country={{ country_code }}&section={{ category }}">{{ category.title() }}</a>
+          </li>
+        {% else %}
+          <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" 
+            data-bs-title="We apologize, but currently there's no {{ category }} information available. Meanwhile, you can use the contact form to recommend news sources to us.">
+            <a class="nav-link disabled" href="#"><small>{{ category.title() }}</small></a>
+          </li>
+        {% endif %}
+      
+      {% endfor %}
+    
+    </ul>
 {% if total_pages %}
   {% if total_pages < 7 %}
   <nav aria-label="Page navigation">
@@ -186,7 +210,7 @@
 {% if query %}
   <div class="d-flex justify-content-center mt-3">
     <p>
-    {% if session.get('want_translate', '') %}<span class="badge text-bg-success fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This query has been translated from '{{ original_query }}'."><i class="fa-solid fa-language me-1"></i>Translated</span>{% endif %}<span class="ms-1 fw-light">{{ feeds|length }} results for "{{ query }}"</span>
+    {% if session.get('want_translate', '') %}<span class="badge text-bg-success fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This query has been translated from '{{ original_query }}'."><i class="fa-solid fa-language me-1"></i>Translated</span>{% endif %}<span class="ms-1 fw-light">{{ feed_length }} results for "{{ query }}"</span>
     </p>
   </div>
 {% endif %}
@@ -198,9 +222,9 @@
 
 <div class="container justify-content-center">
 <div class="row justify-content-center">
-  {% for item in feeds %}
+  {% for index, item in feeds %}
   <div class="col-md-6 col-xxl-4">
-    <div class="card mt-4 border-opacity-10" style="min-width: 35vh; min-height: 60vh; height: auto;" id="{{ item['id'] }}-{{ selected_filter }}">
+    <div class="card mt-4 border-opacity-10" style="min-height: 65vh; height: auto;" id="{{ item['id'] }}-{{ selected_filter }}">
       <div class="card-header">
         <ul class="nav nav-pills nav-fill card-header-pills inf-card-header">
           <li class="nav-item">
@@ -217,20 +241,36 @@
         </ul>
       </div>
       <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
-        <img data-src="{{ item['media_content']['url'] }}" class="card-img-top lazyload" alt="News image" style="height: 35vh;" height="16" width="9">
+        {% if index < 3 %}
+          <img fetchpriority="high" src="{{ item['media_content']['url'] }}" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
+        {% else %}
+          <img data-src="{{ item['media_content']['url'] }}" class="lazyload" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
+        {% endif %}
       </a>
       <div class="card-body">
         <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" class="text-reset text-decoration-none">
           <h6 class="card-title">{{ item['title'] }}</h6>
         </a>
-        <a href="{{ item['publisher_link'] }}" class="text-decoration-none" target="_blank">
-          <p class="card-text"><i class="fa-solid fa-rss me-1"></i>{{ item['publisher'] }}</p>
-        </a>
       </div>
+      <ul class="list-group list-group-flush mt-3">
+          <li class="list-group-item">
+            <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
+            {% if item['total_clicks'] %}
+            <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
+            {% endif %}
+            {% if item['total_comments'] %}
+            <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
+            {% endif %}
+          </li>
+        </ul>
       <div class="card-footer text-body-secondary">
-        <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
-        <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
-        <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
+        
+        <small>
+          <a href="{{ item['publisher_link'] }}" class="text-decoration-none" target="_blank">
+              {% if 'favicon' in item %}<img src="{{ item['favicon'] }}" class="rounded me-2" alt="{{ item['publisher'] }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss me-1"></i>{% endif %}{{ item['publisher'] }}
+          </a>
+        </small>
+      
       </div>
     </div>
   </div>
@@ -274,137 +314,12 @@
 {% endblock %}
 {% block scripts %}
 
-<script type="text/javascript">
-  function submitSearch() {
-    const queryValue = document.getElementById("query").value;
+  {% assets "js_news" %}
+  <script defer src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-    const languageButton = document.getElementById("infLanguageMenu");
-    const languageValue = languageButton.textContent.trim().toLowerCase();
+  {% assets "js_comments" %}
+  <script defer src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-    const currentUrl = new URL(window.location.href);
-    const searchParams = new URLSearchParams(currentUrl.search);
-
-    searchParams.set("query", queryValue);
-
-    if (!languageValue.includes('language')) {
-      searchParams.set("translation", languageValue);
-    }
-
-    currentUrl.search = searchParams.toString();
-    window.location.href = currentUrl.toString();
-  }
-</script>
-<script type="text/javascript">
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-</script>
-<script>
-  document.querySelectorAll('.inf-language-menu a').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      var dropdownButton = document.getElementById('infLanguageMenu');
-      dropdownButton.textContent = e.target.textContent;
-    });
-  });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-    document.querySelectorAll('.inf-card-header-link').forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const card = this.closest('.card');
-        const cardId = card.id.split('-')[0];
-        const newsCategory = card.id.split('-')[1];
-
-        toggleActiveClass(this);
-
-        if (this.classList.contains('description-btn')) {
-          // Description button clicked
-          fetchDescription(cardId, newsCategory, card);
-        } else if (this.classList.contains('comments-btn')) {
-          fetch(`/api/comments?id=${cardId}&category=${newsCategory}`)
-            .then(response => response.json())
-            .then(data => {
-                // Assume 'data' is an array of comment objects
-                const offcanvasBody = document.querySelector('#offcanvasWithBothOptions .offcanvas-body');
-                
-                const commentsContainer = document.querySelector('#commentsContainer');
-
-                // Check if data is an array and has at least one comment
-                if (Array.isArray(data) && data.length > 0) {
-                    data.forEach(comment => {
-                        const commentElement = document.createElement('div');
-                        commentElement.classList.add('comment');
-
-                        // Comment identification
-                        let identification = '';
-                        if (comment.is_admin) identification += '[Admin] ';
-                        if (comment.random_name) identification += '[Random Name] ';
-                        if (!comment.is_logged_in) identification += '[Guest] ';
-
-                        // Comment content
-                        commentElement.innerHTML = `
-                            <p class="mt-3"><strong>${identification}${comment.name}</strong>: ${comment.text}</p>
-                            <a href="${comment.link}" target="_blank">View Comment</a>
-                        `;
-                        offcanvasBody.appendChild(commentElement);
-                    });
-
-                } else {
-                    // Display a message or just show the comment form if there are no comments
-                    commentsContainer.innerHTML = `<p>No comments yet. Be the first to comment!</p>`;
-                }
-
-                document.cookie = "clicked=" + cardId + "-" + newsCategory + ";path=/";
-            })
-            .catch(error => console.error('Error fetching comments:', error));
-        } else {
-          // Preview button clicked
-          updateCardWithPreview(card);
-        }
-      });
-    });
-  });
-
-  function toggleActiveClass(clickedButton) {
-    const navLinks = clickedButton.closest('.inf-card-header').querySelectorAll('.nav-link');
-    navLinks.forEach(link => link.classList.remove('active'));
-    clickedButton.classList.add('active');
-  }
-
-  function fetchDescription(cardId, newsCategory, card) {
-    fetch(`/api/get-description?id=${cardId}&category=${newsCategory}`)
-      .then(response => response.json())
-      .then(data => {
-        updateCardWithDescription(data, card);
-      })
-      .catch(error => console.error('Error:', error));
-  }
-
-  function updateCardWithDescription(data, card) {
-    // Hide title and publisher, show description
-    card.querySelector('.card-title').style.display = 'none';
-    card.querySelector('.card-text').style.display = 'none';
-
-    const cardBody = card.querySelector('.card-body');
-    if (!cardBody.querySelector('.description-text')) {
-      cardBody.innerHTML += `<p class="description-text">${data.description}</p>`;
-    }
-  }
-
-  function updateCardWithPreview(card) {
-    // Show title and publisher, hide description
-    card.querySelector('.card-title').style.display = 'block';
-    card.querySelector('.card-text').style.display = 'block';
-
-    const cardBody = card.querySelector('.card-body');
-    const descriptionElement = cardBody.querySelector('.description-text');
-    if (descriptionElement) {
-      descriptionElement.remove();
-    }
-  }
-</script>
-<script
-  src="{{ url_for('static', filename='js/cooldownCommentForm.js') }}"
-></script>
 {% endblock %}

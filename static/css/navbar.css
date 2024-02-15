@@ -1,0 +1,10 @@
+.offcanvas.inf-nav-offcanvas {
+    border-radius: 1%; 
+    max-width: 70%;
+    transition: all 0.5s;
+}
+
+.nav-item.inf-nav-item a:hover,
+.nav-item.inf-nav-item a:focus {
+  background-color: var(--bs-primary-bg-subtle);
+}

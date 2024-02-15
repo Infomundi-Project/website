@@ -27,7 +27,7 @@
   border-bottom: 1px solid #000000;
   }
   {% endif %}
-  @media (max-width: 968px) {
+  @media (max-width: 480px) {
     #chartdiv {
     width: 100%;
     height: 50vh;
@@ -43,43 +43,81 @@
       fetchpriority="high" 
       src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
       class="infomundi-logo"
-      id="infomundiLogo"
-      height="16"
-      width="9" 
+      height="316"
+      width="790" 
       alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
       />
 
+    {% if is_mobile %}
     <ul class="nav nav-underline nav-fill justify-content-center border-top mb-4">
       <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.about') }}"><small>About</small></a>
+      </li>
+      <li class="nav-item">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-americas"></i></small></span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.team') }}"><small>Team</small></a>
+      </li>
+      <li class="nav-item">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-africa"></i></small></span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.contact') }}"><small>Contact</small></a>
+      </li>
+      <li class="nav-item">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-oceania"></i></small></span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('views.policies') }}"><small>Policies</small></a>
+      </li>
+    </ul>
+
+    {% else %}
+
+    <ul class="nav nav-underline justify-content-center border-top mb-4">
+      <li class="nav-item">
         <a class="nav-link" href="{{ url_for('views.about') }}">About</a>
+      </li>
+      <li class="nav-item ms-4 me-4">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-americas"></i></small></span>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
       </li>
+      <li class="nav-item ms-4 me-4">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-africa"></i></small></span>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
+      </li>
+      <li class="nav-item ms-4 me-4">
+        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-oceania"></i></small></span>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('views.policies') }}">Policies</a>
       </li>
     </ul>
+    {% endif %}
+
+
     <center>
       <p class="fs-4"><label for="query">Search a Country</label></p>
         <form action="{{ url_for('api.search') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="input-group justify-content-center">
-          <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
-          <input 
-            class="form-control autocomplete" 
-            aria-describedby="search-icon"
-            style="max-width: 360px;"
-            type="search" 
-            aria-label="Search Field" 
-            id="query" 
-            name="query"
-            />
-        </div>
-      </form>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="input-group justify-content-center">
+            <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <input 
+              class="form-control autocomplete" 
+              aria-describedby="search-icon"
+              style="max-width: 360px;"
+              type="search" 
+              aria-label="Search Field" 
+              id="query" 
+              name="query"
+              />
+          </div>
+        </form>
     </center>
     <p class="fs-4 mt-2 mb-2">or</p>
     <div class="d-inline-flex">
@@ -108,7 +146,7 @@
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.1<!-- <span class="badge text-bg-success">New!</span> --></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.4<!--<span class="badge text-bg-success ms-1">New!</span>--></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">
@@ -161,7 +199,7 @@
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.1<!-- <span class="badge text-bg-success">New!</span> --></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.4<!-- <span class="badge text-bg-success">New!</span> --></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">
@@ -195,22 +233,8 @@
 <script defer
   src="{{ url_for('static', filename='js/amcharts/index.js') }}"
   ></script>
-<script defer
-  src="{{ url_for('static', filename='js/amcharts/map.js') }}"
-  ></script>
-<script defer
-  src="{{ url_for('static', filename='js/amcharts/worldLow.js') }}"
-  ></script>
-<script defer
-  src="{{ url_for('static', filename='js/amcharts/animated.js') }}"
-  ></script>
-<script defer
-  src="{{ url_for('static', filename='js/chart.js') }}"
-  ></script>
-<script 
-  src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}" 
-  ></script>
-<script 
-  src="{{ url_for('static', filename='js/autocomplete.js') }}"
-  ></script>
+
+  {% assets "js_home" %}
+  <script defer type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 {% endblock %}

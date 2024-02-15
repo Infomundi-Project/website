@@ -1,0 +1,274 @@
+{% extends "base.html" %}{% block title %}Testing Page{% endblock %}
+{% block styles %}
+<style type="text/css">
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+
+.dropdown-menu{
+    &.show{
+        -webkit-animation: fadeIn 0.3s alternate; /* Safari 4.0 - 8.0 */
+         animation: fadeIn 0.3s alternate;
+    }
+}
+
+
+.nav-item.dropdown.dropdown-mega{
+    position: static;
+    .dropdown-menu{
+        width: 90%;
+        top: auto;
+        left: 5%;
+    }
+}
+
+.hamburger-button{
+    border: none;
+    padding: 0;
+    outline: none;
+    &:focus{
+        box-shadow: none;
+    }
+    .hamburger-toggle{
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        z-index: 11;
+        float: right;
+        .hamburger {
+            position: absolute;
+            transform: translate(-50%, -50%) rotate(0deg);
+            left: 50%;
+            top: 50%;
+            width: 50%;
+            height: 50%;
+            pointer-events: none;
+            span {
+                width: 100%;
+                height: 4px;
+                position: absolute;
+                background: #333;
+                border-radius: 2px;
+                z-index: 1;
+                transition: transform 0.2s cubic-bezier(0.77,0.2,0.05,1.0), background 0.2s cubic-bezier(0.77,0.2,0.05,1.0), all 0.2s ease-in-out;
+                left: 0px;
+                &:first-child{
+                    top: 10%;
+                    transform-origin: 50% 50%;
+                    transform: translate(0% -50%) !important;
+                }
+                &:nth-child(2){
+                    top: 50%;
+                    transform: translate(0,-50%);
+                }
+                &:last-child{
+                    left: 0px;
+                    top: auto;
+                    bottom: 10%;
+                    transform-origin: 50% 50%;
+                }
+            }
+            &.active{
+                span {
+                    position: absolute;
+                    margin: 0;
+                    &:first-child{
+                        top: 45%;
+                        transform: rotate(45deg);
+                    }
+                    &:nth-child(2){
+                        left: 50%;
+                        width: 0px;
+                    }
+                    &:last-child{
+                        top: 45%;
+                        transform: rotate(-45deg);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+.icons{
+  display: inline-flex;
+  margin-left: auto;
+  a{
+    transition: all 0.2s ease-in-out;
+    padding: 0.2rem 0.4rem;
+    color: #ccc !important;
+    text-decoration: none;
+    &:hover{
+      color: white;
+      text-shadow: 0 0 30px white;
+    }
+  }
+}
+</style>
+{% endblock %}
+{% block content %}
+
+
+<nav class="navbar navbar-expand-lg sticky-top shadow">
+    <div class="container">
+      <a class="navbar-brand" href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation">
+        <img src="https://infomundi.net/static/img/logos/logo-icon-dark.webp" height="500" width="500" style="height: auto; width: 10%;"> <span class="logo-text">infomundi</span>
+      </a>
+      <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
+        <div class="hamburger-toggle">
+          <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar-content">
+        <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Multilevel</a>
+            <ul class="dropdown-menu shadow">
+              <li><a class="dropdown-item" href="#">Gallery</a></li>
+              <li><a class="dropdown-item" href="blog.html">Blog</a></li>
+              <li class="dropstart">
+                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Submenu Left</a>
+                <ul class="dropdown-menu shadow">
+                  <li><a class="dropdown-item" href=""> Third level 1</a></li>
+                  <li><a class="dropdown-item" href=""> Third level 2</a></li>
+                  <li><a class="dropdown-item" href=""> Third level 3</a></li>
+                  <li><a class="dropdown-item" href=""> Third level 4</a></li>
+                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                </ul>
+              </li>
+              <li class="dropend">
+                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Submenu Right</a>
+                <ul class="dropdown-menu shadow">
+                  <li><a class="dropdown-item" href=""> Second level 1</a></li>
+                  <li><a class="dropdown-item" href=""> Second level 2</a></li>
+                  <li><a class="dropdown-item" href=""> Second level 3</a></li>
+                  <li class="dropend">
+                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Let's go deeper!</a>
+                    <ul class="dropdown-menu dropdown-submenu shadow">
+                      <li><a class="dropdown-item" href=""> Third level 1</a></li>
+                      <li><a class="dropdown-item" href=""> Third level 2</a></li>
+                      <li><a class="dropdown-item" href=""> Third level 3</a></li>
+                      <li><a class="dropdown-item" href=""> Third level 4</a></li>
+                      <li class="dropend">
+                        <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Still don't have enough? Go much deeper!</a>
+                        <ul class="dropdown-menu dropdown-submenu shadow">
+                          <li><a class="dropdown-item" href=""> Third level 1</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 2</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 3</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 4</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                </ul>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item dropdown dropdown-mega position-static">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Megamenu</a>
+            <div class="dropdown-menu shadow">
+              <div class="mega-content px-4">
+                <div class="container-fluid">
+                  <div class="row">
+                    <div class="col-12 col-sm-4 col-md-3 py-4">
+                      <h5>Pages</h5>
+                      <div class="list-group">
+                        <a class="list-group-item" href="#">Accomodations</a>
+                        <a class="list-group-item" href="#">Terms & Conditions</a>
+                        <a class="list-group-item" href="#">Privacy</a>
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-4 col-md-3 py-4">
+                      <h5>Card</h5>
+                      <div class="card">
+                  <img src="https://via.placeholder.com/320x180" class="img-fluid" alt="image">
+                  <div class="card-body">
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                  </div>
+                </div>
+                    </div>
+                    <div class="col-12 col-sm-4 col-md-3 py-4">
+                      <h5>Lot of Pages</h5>
+                      <p>Lorem ipsum dolo sit achmet muhamed borlan de irtka.
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-3 py-4">
+                      <h5>Damn, so many</h5>
+                      <div class="list-group">
+                        <a class="list-group-item" href="#">Accomodations</a>
+                        <a class="list-group-item" href="#">Terms & Conditions</a>
+                        <a class="list-group-item" href="#">Privacy</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+          </li>
+        </ul>
+        
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" tabindex="-1" data-bs-toggle-theme="true" aria-disabled="true"><i class="fa fa-adjust"></i></a>
+          </li>
+
+          <li class="nav-item">
+            <img src="{{ user.avatar_url }}" class="rounded-circle" height="500" width="333" style="height: auto; width:10%" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation" aria-controls="offcanvasUserNavigation">
+          </li>
+        
+
+        </ul>
+
+        
+
+
+
+
+
+        <form class="d-flex">
+            <div class="input-group">
+                <input class="form-control mr-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-primary border-0" type="submit">Search</button>
+            </div>
+        </form>
+
+
+      </div>
+    </div>
+  </nav>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(event) {
+
+  // Hamburger menu
+  var navbarToggler = document.querySelectorAll('.hamburger-button')[0];
+  navbarToggler.addEventListener('click', function(e) {
+    e.target.children[0].classList.toggle('active');
+  });
+}); 
+</script>
+{% endblock %}

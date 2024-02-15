@@ -23,7 +23,6 @@
       <img 
         src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
         class="infomundi-logo"
-        id="infomundiLogo"
         height="16"
         width="9" 
         alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
@@ -49,46 +48,37 @@
       </li>
     </ul>
   </div>
+</div>
 
-
-<div class="row">
-  <div class="col mb-4">
-    <p class="fs-2">We'd love to hear from you</p>
-    <p class="fs-6">Thank you for visiting Infomundi, where we strive to bridge the information divide and empower global citizens through accessible, accurate, and engaging content. Your thoughts, questions, and feedback are invaluable to us as they help shape our journey towards a more informed and interconnected world.</p>
-    <p class="fs-6">For direct and convenient communication, please use our Contact Form. It's the quickest way to get your message directly to the right team.</p>
-    <a href="mailto:contact@infomundi.net" class="fs-5 mt-5 text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</a>
-  </div>
-  
-  <div class="col">
-          <div class="contact-form">
-            <form method="post" action="{{ url_for('views.contact') }}">
-              <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" name="name" maxlength="25" placeholder="Enter your name">
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" maxlength="50" placeholder="Enter your email" required>
-              </div>
-              <div class="mb-3">
-                <label for="message" class="form-label">Message</label>
-                <textarea class="form-control" id="message" name="message" rows="4" minlength="5" maxlength="500" placeholder="Type your message here" required></textarea>
-              </div>
-              <div class="mb-2">
-              	<div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
-            </div>
-              <button type="submit" class="btn btn-primary">Send Message</button>
-            </form>
+<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-lg-5 py-5">
+      <div class="col-lg-7 text-lg-start">
+        <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">We'd love to hear from you</h1>
+        <p class="col-lg-10 fs-5">Your thoughts, questions, and feedback are invaluable to us as they help shape our journey towards a more informed and interconnected world.<br><br>For direct and convenient communication, please use our contact form. It's the quickest way to get your message directly to the team.</p>
+        <a href="mailto:contact@infomundi.net" class="fs-5 mt-5 text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</a>
+      </div>
+      <div class="col-md-10 mx-auto col-lg-5">
+        <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary mt-3" method="post" action="{{ url_for('views.contact') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingName" name="name" maxlength="25" placeholder="Your name">
+            <label for="floatingName">Name</label>
           </div>
+
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="floatingEmail" name="email" maxlength="50" placeholder="name@example.com" required>
+            <label for="floatingEmail">Email address</label>
+          </div>
+          <div class="form-floating mb-3">
+            <textarea type="text" class="form-control" id="floatingMessage" name="message" rows="4" minlength="5" maxlength="500" placeholder="Message" style="height: 200px" required></textarea>
+            <label for="floatingMessage">Message</label>
+          </div>
+          <div class="mb-2">
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
+          </div>
+          <button class="w-100 btn btn-lg btn-primary" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
   </div>
-</div>
-
-</div>
-
-
-
-
-
-
-
 {% endblock %}

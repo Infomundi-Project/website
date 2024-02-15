@@ -29,7 +29,6 @@
       <img 
         src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
         class="infomundi-logo"
-        id="infomundiLogo"
         height="16"
         width="9" 
         alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
@@ -56,12 +55,6 @@
     </ul>
   </div>
 
-
-
-
-
-
-
   <div class="row justify-content-center">
     <div class="col-md-4 mb-5">
       <div class="card">
@@ -77,14 +70,24 @@
         <div class="card-body">
           <h5 class="card-title">Diogo Cristovão de Barros Cavalcanti</h5>
           <p class="card-text">CEO, Creative Director & Co-Founder</p>
-          <span class="card-text fst-italic">"Be an eagle every day...not a pigeon!"</span><span> - My father</span>
+
+          <figure>
+            <blockquote class="blockquote">
+              <small><p>Be an eagle every day...not a pigeon!</p></small>
+            </blockquote>
+            <figcaption class="blockquote-footer">
+              Alexandre de Barros Cavalcanti, <cite title="Source Title">my father</cite>
+            </figcaption>
+          </figure>
+
+          <!--<span class="card-text fst-italic">"Be an eagle every day...not a pigeon!"</span><span> - My father</span>-->
         </div>
         
         <ul class="list-group list-group-flush mt-3">
-		    <li class="list-group-item">
-		    	<a href="mailto:socialsDB@proton.me" target="_blank" class="text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>socialsDB@proton.me</a>
-		    </li>
-		</ul>
+  		    <li class="list-group-item">
+  		    	<a href="mailto:socialsDB@proton.me" target="_blank" class="text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>socialsDB@proton.me</a>
+  		    </li>
+		    </ul>
         
         <div class="card-footer text-body-secondary">
         	<i class="fa-solid fa-location-dot me-1"></i>Brazil (UTC-3)
@@ -125,13 +128,5 @@
       </div>
     </div>
   </div>
-
-
-
 </div>
-
-
-
-
-
 {% endblock %}

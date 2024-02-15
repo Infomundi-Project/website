@@ -1,9 +1,11 @@
+import os 
 from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response, session
-from flask_login import current_user
+from flask_login import current_user, login_required
 from random import choice, shuffle
 from time import time
 
-from website_scripts import scripts, config, json_util, immutable, search, notifications
+from website_scripts import scripts, config, json_util, immutable, search, notifications, image_util, extensions, models
+from auth import admin_required, in_maintenance
 
 views = Blueprint('views', __name__)
 
@@ -30,22 +32,70 @@ def home():
         us_indexes=enumerate(us_indexes), 
         statistics=statistics, 
         user=current_user, 
-        is_mobile=scripts.detect_mobile(request), 
         country_code='en'
     )
 
 
+@views.route('/maintenance', methods=['GET'])
+def maintenance():
+    if False:
+        return redirect(url_for('views.home'))
+    else:
+        return render_template('maintenance.html', user=current_user)
+
+
+@views.route('/test', methods=['GET', 'POST'])
+@admin_required
+def test():
+    return render_template('test.html', user=current_user, page='Test')
+
+
+@views.route('/dashboard')
+@login_required
+@in_maintenance
+def dashboard():
+    return render_template('dashboard.html', user=current_user)
+
+
+@views.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    file = request.files.get('profilePhoto')
+
+    if not file:
+        message = 'No file part'
+    elif file.filename == '':
+        message = 'No selected file'
+    elif not image_util.allowed_file(file.filename) or not image_util.allowed_mime_type(file.stream) or not image_util.verify_image_content(file.stream) or not image_util.check_image_dimensions(file.stream):
+        message = 'Invalid file'
+    else:
+        message = ''
+
+    if message:
+        flash(message, 'error')
+        return redirect(url_for('views.dashboard'))
+    
+    filepath = f'{config.WEBSITE_ROOT}/static/img/users/{current_user.user_id}'
+    
+    image_util.convert_to_webp(file.stream, filepath)
+
+    user_data = models.User.query.filter_by(email=current_user.email).first()
+    user_data.avatar_url = f'https://infomundi.net/static/img/users/{current_user.user_id}.webp'
+    extensions.db.session.commit()
+
+    flash('File uploaded successfully')
+    return redirect(url_for('views.dashboard'))
+
+
 @views.route('/contact', methods=['GET', 'POST'])
 def contact():
-    referer = request.headers.get('Referer', url_for('views.home'))
-    
     if request.method == 'GET':
         return render_template('contact.html', user=current_user)
     else:
         token = request.form['cf-turnstile-response']
         if not scripts.valid_captcha(token):
             flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(referer)
+            return redirect(url_for('views.contact'))
         
         name = request.form.get('name', '')
         email = request.form.get('email', '')
@@ -53,25 +103,35 @@ def contact():
 
         if len(name) > 25 or len(email) > 50 or len(message) > 500:
             flash('Something went wrong.', 'error')
-            return redirect(referer)
+            return redirect(url_for('views.contact'))
 
         data = {
-        'embed': {
-            'title': 'Contact Form',
-            'description': 'We got a new message.',
-            'color': 0xED930A,
-            'fields': [
-                {'name': 'Name', 'value': name, 'inline': True},
-                {'name': 'Email', 'value': email, 'inline': True},
-                {'name': 'Message', 'value': message, 'inline': False}
-            ],
-            'footer': {'text': '2024 Infomundi'}
-            },
-        'message': '@everyone'
+        'username': 'Maximus',
+        'icon_url': 'https://infomundi.net/static/img/maximus.webp',
+        'text': f"""@here
+
+# Contact Form
+
+We got a new message.
+
+**Name:** {name}  
+**Email:** {email}
+
+**Message:**  
+{message}
+
+---
+
+2024 Infomundi
+"""
         }
-        notifications.post_webhook(data)
-        flash("Your message has been sent, thank you! Expect a return from us shortly.")
-        return redirect(referer)
+        sent_message = notifications.post_webhook(data)
+        if sent_message:
+            flash("Your message has been sent, thank you! Expect a return from us shortly.")
+        else:
+            flash("We apologize, but your message couldn't be sent. We'll look into that as soon as possible. In the meantime, feel free to send us an email at contac@infomundi.net", 'error')
+        
+        return redirect(url_for('views.contact'))
 
 
 @views.route('/about', methods=['GET'])
@@ -133,10 +193,7 @@ def get_latest_feed():
         return redirect(url_for('views.home'))
 
     # Searches for the country full name (may be modularized at some point)
-    countries = config.COUNTRY_LIST
-    for item in countries:
-        if item['code'].lower() == country_filter:
-            country_name = item['name']
+    country_name = scripts.country_code_to_name(country_filter)
 
     # Read the cache for the selected filter
     try:
@@ -160,13 +217,11 @@ def get_latest_feed():
         page_num = 1
     
     # Declares the referer up here just in case 
-    referer = request.headers.get('Referer', url_for('views.home'))
+    referer = 'https://infomundi.net/' + session.get('last_visited_country', '')
     
-    # Get page language
-    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
-        
+    # Get page language    
     page_languages = []
-
+    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
     for lang in languages:
         if lang['country'].lower() == country_name.lower():
             page_languages.append(lang)
@@ -184,6 +239,7 @@ def get_latest_feed():
 
         translate_language = request.args.get('translation', '').lower()
 
+        session['want_translate'] = False
         if translate_language:
             
             for lang in page_languages:
@@ -200,8 +256,6 @@ def get_latest_feed():
                 original_query = query
                 query = query_translated
                 session['want_translate'] = True
-            else:
-                session['want_translate'] = False
         
         found_stories_via_query = []
 
@@ -215,17 +269,26 @@ def get_latest_feed():
 
         # Change the current feed in order to make the rest of the code usable.
         feeds = found_stories_via_query
+    
+    favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
 
-    # Get number of comments
-    comments = json_util.read_json(config.COMMENTS_PATH)
+    # Get telemetry
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     for story in feeds:
-        # Filter the title length.
-        #story['title'] = ' '.join(story['title'].split(' ')[:10]) + '...' if len(story['title']) > 90 else story['title']
+        story['publisher'] = story['publisher'].split('-')[0]
         
-        # Add total comments and clicks to the story.
-        story['total_comments'] = len(comments[story['id']]) if story['id'] in comments else ''
-        story['total_clicks'] = telemetry[story['id']]['clicks'] if story['id'] in telemetry else ''
+        if story.get('publisher_id', '') in favicon_database:
+            story['favicon'] = f"static/img/stories/{selected_filter}/favicons/{story['publisher_id']}.ico"
+
+        if telemetry.get(story['id'], ''):
+            total_comments = telemetry[story['id']]['comments']
+            story['total_comments'] = total_comments if total_comments > 0 else ''
+            
+            total_clicks = telemetry[story['id']]['clicks']
+            story['total_clicks'] = total_clicks if total_clicks > 0 else ''
+        else:
+            story['total_comments'] = ''
+            story['total_clicks'] = ''
     
     # Set the page to integer to work properly with rss_template.html.
     page_num = int(page_num)
@@ -274,8 +337,10 @@ def get_latest_feed():
         main_religion = ''
 
     supported_categories = scripts.get_supported_categories(country_filter)
+    session['visited_country'] = country_name.title()
     return render_template('rss_template.html', 
-        feeds=feeds,
+        feeds=enumerate(feeds),
+        feed_length=len(feeds),
         query=query,
         total_pages=total_pages, 
         country_name=country_name, 
@@ -284,11 +349,11 @@ def get_latest_feed():
         selected_filter=selected_filter, 
         country_code=country_filter, 
         supported_categories=supported_categories, 
+        all_categories=['general', 'politics', 'economy', 'technology', 'sports'],
         page='News', 
         area_rank=area_rank,
         main_religion=main_religion,
         user=current_user, 
-        is_mobile=scripts.detect_mobile(request),
         nation_data=scripts.get_nation_data(country_filter),
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
         gdp=scripts.get_gdp(country_name),
@@ -304,15 +369,14 @@ def get_latest_feed():
 
 @views.route('/comments', methods=['GET'])
 def comments():
+    #if not current_user.is_authenticated or not current_user.role == 'admin':
+    #    return redirect(url_for('views.maintenance'))
+    
     news_id = request.args.get('id', '').lower()
     category = request.args.get('category', '').lower()
-
-    comments = json_util.read_json(config.COMMENTS_PATH)
     
     if not scripts.valid_category(category) or not news_id:
         message = 'We apologize, but there was an error. Please try again later.'
-    elif not comments['enabled']:
-        message = 'We apologize, but comments are temporarily disabled. You can try again later.'
     else:
         message = ''
 
@@ -326,36 +390,33 @@ def comments():
         if story['id'] == news_id:
             news_link = story['link']
 
-            comments_file = json_util.read_json(config.COMMENTS_PATH)
             telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
 
             story_info = story
                 
             story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
-            story_info['total_comments'] = len(comments_file[news_id]) if news_id in comments_file else 0
+            story_info['total_comments'] = telemetry_file[news_id]['comments'] if news_id in telemetry_file else 0
                 
-            # If there's no image (default is Infomundi's logo), we use scraping to get the news image.
-            if 'infomundi' in story['media_content']['url'] and '/static/img/stories' not in story['media_content']['url']:
-                preview_data = scripts.get_link_preview(news_link)
-                    
-                if 'infomundi' in preview_data['image']:
-                    preview_data['title'] = story['title']
-                    preview_data['description'] = scripts.remove_html_tags(story['description'])
-                    preview_data['image'] = story['media_content']['url']
-                    
-                story['media_content']['url'] = preview_data['image']
-                json_util.write_json(cache, f"{config.CACHE_PATH}/{category}")
-            else:
-                preview_data = {}
-                preview_data['image'] = story['media_content']['url']
-                preview_data['description'] = scripts.remove_html_tags(story['description'])
-                preview_data['title'] = story['title']
-                
+            preview_data = {}
+            preview_data['image'] = story['media_content']['url']
+            preview_data['description'] = story['description']
+            preview_data['title'] = story['title']
+
+            favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{category}/favicons')]
+
+            if story.get('publisher_id', '') in favicon_database:
+                preview_data['favicon'] = f"static/img/stories/{category}/favicons/{story['publisher_id']}.ico"
+
+            if 'gpt_summarize' in story and story['gpt_summarize'].startswith('{'):
+                # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
+                content = []
+                for key, value in json_util.load_json(story['gpt_summarize']).items():
+                    header = key.replace('_', ' ').title()
+                    content.append({'header': header, 'paragraph': value})
+
+                preview_data['gpt_summarize'] = content
+            
             break
-        else:
-            continue
-        
-        break
     else:
         flash('We apologize, but there was an error. Please try again later.', 'error')
         return redirect(referer)
@@ -364,18 +425,20 @@ def comments():
     
     GET_PARAMETERS = f'comments?id={news_id}&category={category}'
     session['last_visited_news'] = GET_PARAMETERS
-
     session['entered_comments_at'] = time()
+    session['visited_category'] = category
+    session['visited_news'] = news_id
     
-    return render_template('comments.html', 
+    resp = make_response(render_template('comments.html', 
         page='Comments', 
-        comments=comments[news_id] if news_id in comments else False, 
         news_link=news_link, 
         id=news_id, 
         story_info=story, 
         preview_data=preview_data, 
-        user=current_user, 
-        last_visited_country=session.get('last_visited_country', ''),
-        is_mobile=scripts.detect_mobile(request),
-        category=category
-    )
+        user=current_user,
+        from_country_code=category.split('_')[0],
+        from_country_name=scripts.country_code_to_name(category.split('_')[0])
+    ))
+    resp.set_cookie('clicked', f'{news_id}-{category}')
+    
+    return resp

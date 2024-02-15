@@ -1,6 +1,6 @@
+import requests
 from email.mime.multipart import MIMEMultipart
 from smtplib import SMTP_SSL, SMTPException
-from requests import post as post_request
 from email.mime.text import MIMEText
 
 from . import config
@@ -8,37 +8,18 @@ from . import config
 
 def post_webhook(data: dict) -> bool:
     """
-    Takes 'data' dictionary as argument, makes an embed message and sends to the discord webhook. Returns bool.
+    Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
     
     Arguments
         data: dict
             Information needed to create the embed message. Should have the following structure:
             {
-                'embed': {
-                    'title': 'title',
-                    'description': 'description',
-                    'color': 0xHEXADECIMAL_COLOR,
-                    'fields': [
-                        {'name': 'field_name', 'value': 'field_value', 'inline': bool}
-                    ],
-                    'footer': {'text': 'footer_text'}
-                },
-                'message': 'any message'
+                'text': 'some text'
             }
     """
 
-    try:
-        payload = {
-            'content': data['message'],
-            'embeds': [data['embed']]
-        }
-    except Exception:
-        payload = {
-            'content': data['message']
-        }
-
     # Make the HTTP POST request to the Discord webhook URL
-    response = post_request(config.WEBHOOK_URL, json=payload)
+    response = requests.post(config.WEBHOOK_URL, json=data)
 
     try:
         response.raise_for_status()
@@ -49,7 +30,9 @@ def post_webhook(data: dict) -> bool:
 
 
 def send_email(recipient_email: str, subject: str, body: str) -> bool:
-    """Takes the recipient email, the subject and the body of the email and sends it. Returns bool."""
+    """Takes the recipient email, the subject and the body of the email and sends it. 
+
+    Returns bool."""
     
     # Email credentials
     sender_email = "contact@infomundi.net"
