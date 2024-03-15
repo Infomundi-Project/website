@@ -1,5 +1,5 @@
 function submitSearch() {
-    const queryValue = document.getElementById("query").value;
+    const queryValue = document.getElementById("searchForTerm").value;
 
     const languageButton = document.getElementById("infLanguageMenu");
     const languageValue = languageButton.textContent.trim().toLowerCase();

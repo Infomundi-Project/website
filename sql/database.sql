@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS comment_reactions;
+DROP TABLE IF EXISTS comments;
+
+/*
 CREATE TABLE users (
     user_id VARCHAR(10) PRIMARY KEY,
     username VARCHAR(30) NOT NULL UNIQUE,
@@ -7,6 +11,7 @@ CREATE TABLE users (
     avatar_url VARCHAR(80),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+*/
 
 CREATE TABLE comments (
     comment_id VARCHAR(10) PRIMARY KEY,
@@ -15,6 +20,7 @@ CREATE TABLE comments (
     parent_comment_id VARCHAR(10) DEFAULT NULL,  -- NULL for top-level comments, refers to comment_id for replies
     text TEXT NOT NULL,
     likes INT DEFAULT 0,
+    is_root_comment TINYINT(1) NOT NULL,
     dislikes INT DEFAULT 0,
     reports INT DEFAULT 0,
     timestamp VARCHAR(30),

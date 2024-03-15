@@ -1,45 +1,42 @@
-{% extends "base.html" %} {% block title %}Comments{% endblock %}
+{% extends "base.html" %} {% block title %}{{ story.title }}{% endblock %}
 {% block styles %}
 <style>
   .news-top-image{
-    aspect-ratio: 16 / 9;
-    width: 100%;
+    width: 50%;
     height: auto
   }
 
-  @media (max-width: 1000px) {
+  @media (max-width: 600px) {
     .news-top-image{
-      aspect-ratio: 16 / 9;
       width: 100%;
-      height: auto
     }
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="container align-items-center mt-5">
-  <nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}">{{ from_country_name }}</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ preview_data['title'] }}</li>
+      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
 
-  <p class="fs-2 fw-bold">{{ preview_data['title'] }}</p>
+  <p class="fs-2 fw-bold">{{ story.title }}</p>
   
-  <p class="fs-6 fw-light text-secondary-emphasis">{{ preview_data['description'] }}</p> 
+  <p class="fs-6 fw-light text-secondary-emphasis mb-3">{{ story.description }}</p>
 
-  <small><p><a href="{{ story_info['publisher_link'] }}" target="_blank" class="text-decoration-none mt-3 mb-1"> 
-    Published by{% if 'favicon' in preview_data %}<img src="{{ preview_data['favicon'] }}" class="rounded ms-1 me-1" alt="{{ story_info['publisher'] }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss ms-1 me-1"></i>{% endif %}{{ story_info['publisher'] }}
+  <small><p><a href="{{ story.link }}" target="_blank" class="text-decoration-none mb-1"> 
+    Published by{% if favicon_url %}<img src="{{ favicon_url }}" class="rounded ms-1 me-1" alt="{{ story.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss ms-1 me-1"></i>{% endif %}{{ story.publisher.name }}
   </a></p>
   
-    <p class="text-body-secondary"><i class="fa-solid fa-calendar-days me-1"></i>{{ story_info['pubDate'] }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story_info['total_clicks'] }} view{% if story_info['total_clicks'] > 1 or story_info['total_clicks'] == 0 %}s{% endif %}</span></p>
+    <p class="text-body-secondary"><i class="fa-solid fa-calendar-days me-1"></i>{{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.clicks }} view{% if story.clicks > 1 or story.clicks == 0 %}s{% endif %}</span></p>
   </small>
 
-  <img fetchpriority="high" src="{{ preview_data['image'] }}" class="rounded my-3 news-top-image" alt="{{ preview_data['title'] }}" width="500" height="333">
+  <img fetchpriority="high" src="{{ story.media_content_url }}" class="rounded my-3 news-top-image" alt="{{ story.title }}" width="500" height="333">
 
-  {% if user.is_authenticated and not preview_data['gpt_summarize'] %}
+  {% if current_user.is_authenticated and not story.gpt_summary %}
     <div id="maximusInitialText">
       <h3 class="mb-3">Maximus is reading the news, wait a few seconds...</h3>
     </div>
@@ -56,31 +53,80 @@
     </div>
 
     <div class="invisible" id="maximusFinalMessageTrue">
-      <p>We are glad to help you further understand this news. You can <a href="{{ news_link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story_info['publisher'] }}</a>.</p>
+      <p>We are glad to help you further understand this news. You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
+      
+      <div class="d-flex justify-content-between mb-3">
+        {% if previous_news %}
+          <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+
+        {% if next_news %}
+          <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+      </div> 
+    
     </div>
 
   {% else %}
-    {% if preview_data['gpt_summarize'] %}
+    {% if story.gpt_summary %}
       
-      {% for item in preview_data['gpt_summarize'] %}
+      {% for item in formatted_gpt_summary %}
         <h3>{{ item.header }}</h3>
         <p>{{ item.paragraph }}</p>
       {% endfor %}
 
       <div class="mt-4">
-        <p>We are glad to help you further understand this news. You can <a href="{{ news_link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story_info['publisher'] }}</a>.</p>
+        <p>We are glad to help you further understand this news. You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
       </div>
 
+      <div class="d-flex justify-content-between mb-3">
+        {% if previous_news %}
+          <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+
+        {% if next_news %}
+          <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+      </div> 
+
     {% else %}
-      <p>{{ preview_data['description'] }}</p>
+      <p>{{ story.description }}</p>
       <div class="mt-4">
-        <p>You can <a href="{{ news_link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story_info['publisher'] }}</a>.</p>
+        <p>You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
       </div>
+
+      <div class="d-flex justify-content-between mb-3">
+        {% if previous_news %}
+          <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+
+        {% if next_news %}
+          <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
+        {% else %}
+          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+        {% endif %}
+      </div> 
     {% endif %}
   {% endif %}
 
+<div class="mt-5"></div>
+
+<script async src="https://talk.hyvor.com/embed/embed.js" type="module"></script>
+<hyvor-talk-comments website-id="10638" page-id="{{ request.args.get('id', '') }}" page-url="{{ request.url }}" {% if current_user.is_authenticated %} sso-user="{{ hyvor_data[0] }}" sso-hash="{{ hyvor_data[1] }}" {% endif %}></hyvor-talk-comments>
+
 </div>
 
+<!--
 <div id="comments-section" class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Comments <span id="total-comments" class="badge bg-secondary">0</span></h3>
@@ -94,9 +140,9 @@
     </div>
 
     <div class="mb-4">
-        {% if user.is_authenticated %}
+        {% if current_user.is_authenticated %}
         <div class="d-flex align-items-start">
-            <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
+            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
             <textarea id="new-comment" class="form-control me-2" rows="5" placeholder="Add a comment..." maxlength="300" minlength="2"></textarea>
             <button id="cooldown-button" class="btn btn-secondary">Submit</button>
         </div>
@@ -107,26 +153,47 @@
     
     <div id="comments-list" class="list-group"></div>
 </div>
+-->
+
 <div class="container">
-<nav aria-label="breadcrumb">
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}">{{ from_country_name }}</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ preview_data['title'] }}</li>
+      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
 </div>
+
+<!-- Return button -->
+{% if is_mobile %}
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button invisible" href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" id="commentsReturnButtonMobile" style="position: fixed; top: 12vh; left: 20px;">
+  <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
+</a>
+{% else %}
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button" href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" id="commentsReturnButton" style="position: fixed; top: 12vh; left: 20px;">
+  <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
+</a>
+{% endif %}
+
 {% endblock %}
+
 
 {% block scripts %}
 
-{% if user.is_authenticated and not preview_data['gpt_summarize'] %}
+{% if current_user.is_authenticated and not story.gpt_summary %}
 <script 
   src="{{ url_for('static', filename='js/fetchGptSummary.js') }}"
 ></script>
 {% endif %}
 
-  {% assets "js_comments" %}
-  <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+<!--
+<script 
+  src="{{ url_for('static', filename='js/comments.js') }}"
+></script>
+-->
+<script 
+  src="{{ url_for('static', filename='js/cooldownButton.js') }}"
+></script>
+
 {% endblock %}

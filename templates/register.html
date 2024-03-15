@@ -59,8 +59,8 @@
         </div>
 
 
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
-        <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Sign up</button>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+        <button class="w-100 btn btn-lg btn-primary mb-3" type="submit" id="signUpButton">Sign up</button>
         <p>I already have an account. <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Sign in</a>.</p>
         <hr class="my-4">
         <small class="text-muted">By clicking Sign up, you agree to <a href="{{ url_for('views.policies') }}" class="text-decoration-none">our policies</a>.</small>

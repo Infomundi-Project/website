@@ -74,21 +74,27 @@ function renderComments(comments, parentId = null) {
             }
         }
 
+        // Modify comment text to include "Replying to {username}" if it's a reply and not the root comment
+        var replyPrefix = "";
+        if (parentId && comment.repliedToUserName) {
+            replyPrefix = `<span class="text-muted">Replying to ${comment.repliedToUserName}:</span> `;
+        }
+
         var commentHtml = `
             <div class="list-group-item ${parentId ? 'ms-3' : ''}" id="comment-${comment.id}">
                 <div class="d-flex w-100 justify-content-between">
                     <div class="d-flex align-items-center">
-                        <img src="${comment.userAvatar}" alt="${comment.userName}'s Avatar" class="rounded-circle me-2" style="width: 38px; height: 38px;">
-                        <h5 class="mb-1">${comment.userName}${roleTag}</h5>
+                        <img src="${comment.userAvatar}" alt="${comment.userName}'s Avatar" class="rounded-circle me-1" style="width: 38px; height: 38px;">
+                        <h6 class="mb-1">${comment.userName}${roleTag}</h6>
                     </div>
                     <small>${timeSince(new Date(comment.timestamp))}</small>
                 </div>
-                <p class="mb-1" style="word-wrap: break-word;">${comment.text}</p>
+                <p class="mb-1" style="word-wrap: break-word;">${replyPrefix}${comment.text}</p>
                 <div>
                     <button class="btn btn-outline-primary btn-sm like-btn" data-comment-id="${comment.id}"><i class="fa-solid fa-circle-up me-1"></i>${comment.likes}</button>
                     <button class="btn btn-outline-secondary btn-sm dislike-btn ms-1" data-comment-id="${comment.id}"><i class="fa-solid fa-circle-down me-1"></i>${comment.dislikes}</button>
-                    <button class="btn btn-outline-info btn-sm reply-btn ms-1" data-comment-id="${comment.id}"><i class="fa-solid fa-reply"></i></button>
-                    <button class="btn btn-outline-danger btn-sm report-btn ms-3" data-comment-id="${comment.id}"><i class="fa-solid fa-flag"></i></button>
+                    <button class="btn btn-outline-info btn-sm reply-btn ms-1" data-comment-id="${comment.id}" data-replied-to-user-name="${comment.userName}"><i class="fa-solid fa-reply"></i></button>
+                    <button class="btn btn-outline-danger btn-sm report-btn ms-2" data-comment-id="${comment.id}"><i class="fa-solid fa-flag"></i></button>
                 </div>
             </div>
         `;
@@ -97,16 +103,16 @@ function renderComments(comments, parentId = null) {
             $(`#comment-${parentId} .replies`).append(commentHtml);
         } else {
             $('#comments-list').append(commentHtml);
-        }
-
-        if (comment.replies && comment.replies.length > 0) {
-            if (!$(`#comment-${comment.id} .replies`).length) {
-                $(`#comment-${comment.id}`).append('<div class="replies list-group mt-2"></div>');
+            if (comment.replies && comment.replies.length > 0) {
+                comment.replies.forEach(reply => {
+                    reply.repliedToUserName = reply.userName; // Set the replied to username for proper prefixing in nested replies
+                    renderComments([reply], comment.id);
+                });
             }
-            renderComments(comment.replies, comment.id);
         }
     });
 }
+
 
 
 function submitComment() {
@@ -214,23 +220,23 @@ function timeSince(date) {
     var interval = seconds / 31536000;
 
     if (interval > 1) {
-        return Math.floor(interval) + " years ago";
+        return Math.floor(interval) + " yrs ago";
     }
     interval = seconds / 2592000;
     if (interval > 1) {
-        return Math.floor(interval) + " months ago";
+        return Math.floor(interval) + " mos ago";
     }
     interval = seconds / 86400;
     if (interval > 1) {
-        return Math.floor(interval) + " days ago";
+        return Math.floor(interval) + " d ago";
     }
     interval = seconds / 3600;
     if (interval > 1) {
-        return Math.floor(interval) + " hours ago";
+        return Math.floor(interval) + " hrs ago";
     }
     interval = seconds / 60;
     if (interval > 1) {
-        return Math.floor(interval) + " minutes ago";
+        return Math.floor(interval) + " min ago";
     }
-    return Math.floor(seconds) + " seconds ago";
+    return Math.floor(seconds) + " sec ago";
 }

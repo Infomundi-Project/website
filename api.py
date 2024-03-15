@@ -1,4 +1,3 @@
-import os
 from flask import Blueprint, request, redirect, jsonify, url_for, flash, session
 from flask_login import current_user, login_required
 from datetime import datetime
@@ -13,20 +12,18 @@ api = Blueprint('api', __name__)
 
 @api.route('/get-description', methods=['GET'])
 def get_description():
-    card_id = request.args.get('id')
+    news_id = request.args.get('id')
     category = request.args.get('category')
 
     if not scripts.valid_category(category):
         return {}
 
-    cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
-    for story in cache['stories']:
-        if story['id'] == card_id:
-            data = {}
-            data['title'] = story['title']
-            data['description'] = story['description']
-            data['publisher'] = story['publisher']
-            break
+    story = models.Story.query.filter_by(story_id=news_id).first()
+    if story:
+        data = {}
+        data['title'] = story.title
+        data['description'] = story.description
+        data['publisher'] = story.publisher.name
     else:
         data = {}
 
@@ -162,6 +159,7 @@ def comments(comment_id=None, action=None):
                 'userAvatar': comment.user.avatar_url,
                 'timestamp': comment.timestamp,
                 'likes': comment.likes,
+                'is_root_comment': comment.is_root_comment,
                 'dislikes': comment.dislikes,
                 'replies': comments_util.get_replies(comment)  # Use the helper function to get replies
             }
@@ -180,22 +178,12 @@ def comments(comment_id=None, action=None):
         # Handle actions
         if comment_id:
             if action not in ['like', 'dislike', 'report']:
-                return jsonify({"message": "Invalid action. Use 'like' or 'dislike'."}), 400
+                return jsonify({"message": "Invalid action. Use 'like', 'dislike' or 'report'."}), 400
 
             comment = models.Comment.query.get_or_404(comment_id)
             existing_reaction = models.CommentReaction.query.filter_by(comment_id=comment_id, user_id=current_user.user_id).first()
 
-            if existing_reaction and existing_reaction.action == action:
-                # User has already performed this action; remove it
-                extensions.db.session.delete(existing_reaction)
-                if action == 'like':
-                    comment.likes = max(comment.likes - 1, 0)  # Ensure likes don't go negative
-                elif action == 'report':
-                    comment.reports = max(comment.reports - 1, 0) # Ensure reports don't go negative
-                else:
-                    comment.dislikes = max(comment.dislikes - 1, 0)  # Ensure dislikes don't go negative
-                message = f'Your {action} has been removed.'
-            elif action in ['like', 'dislike'] and (existing_reaction and existing_reaction.action != action):
+            if action in ['like', 'dislike'] and (existing_reaction and existing_reaction.action != action):
                 # User has performed the opposite action; switch it
                 existing_reaction.action = action
                 if action == 'like':
@@ -205,6 +193,16 @@ def comments(comment_id=None, action=None):
                     comment.dislikes += 1
                     comment.likes = max(comment.likes - 1, 0)  # Ensure likes don't go negative
                 message = f'Your {action} has been updated.'
+            elif existing_reaction:
+                # User has already performed this action; remove it
+                extensions.db.session.delete(existing_reaction)
+                if action == 'like':
+                    comment.likes = max(comment.likes - 1, 0)  # Ensure likes don't go negative
+                elif action == 'report':
+                    comment.reports = max(comment.reports - 1, 0) # Ensure reports don't go negative
+                else:
+                    comment.dislikes = max(comment.dislikes - 1, 0)  # Ensure dislikes don't go negative
+                message = f'Your {action} has been removed.'
             else:
                 # User has not reacted to this comment yet; add new reaction
                 new_reaction = models.CommentReaction(reaction_id=scripts.generate_id(10), comment_id=comment_id, user_id=current_user.user_id, action=action, timestamp=datetime.utcnow().isoformat() + 'Z')
@@ -249,6 +247,9 @@ Users are upset with a specific comment, and we should look into that.
         # Sanitize input
         data['text'] = scripts.sanitize_input(data['text'])
 
+        if len(data['text']) > 300:
+            return jsonify( {'message': 'Comment is too big.'} ), 406
+
         # If top level comment, just add it to the list.
         if not parent_comment_id:
             # We just need to save the id of the user who commented, so we can retrive its username and avatar when pulling comments.
@@ -257,6 +258,7 @@ Users are upset with a specific comment, and we should look into that.
                 comment_id=scripts.generate_id(),
                 user_id=current_user.user_id,
                 news_id=news_id,
+                is_root_comment=True,
                 timestamp=datetime.utcnow().isoformat() + 'Z'
             )
             extensions.db.session.add(new_comment)
@@ -270,6 +272,7 @@ Users are upset with a specific comment, and we should look into that.
                 user_id=current_user.user_id,
                 news_id=parent_comment.news_id,  # Inherit news_id from parent comment
                 parent_comment_id=parent_comment_id,
+                is_root_comment=False,
                 timestamp=datetime.utcnow().isoformat() + 'Z'
             )
             extensions.db.session.add(reply_comment)
@@ -288,20 +291,14 @@ def summarize_story():
     if not news_id or not category:
         return jsonify({'success': False}), 406 # Not acceptable
 
-    filename = f'{config.CACHE_PATH}/{category}'
-    
-    cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
-    for story in cache['stories']:
-        if story['id'] == news_id:
-            response = scripts.gpt_summarize(story['link'])
-            if response:
-                story['gpt_summarize'] = response
-                json_util.write_json(cache, f'{config.CACHE_PATH}/{category}')
-            else:
-                response = story['description']
-            
-            break
+    story = models.Story.query.filter_by(story_id=news_id).first()
+
+    response = scripts.gpt_summarize(story.link)
+    if response:
+        # We convert the json response to a dict in order to store it in the database
+        story.gpt_summary = json_util.loads_json(response)
+        extensions.db.session.commit()
     else:
-        return jsonify({'success': False}), 406 # Not acceptable
+        return jsonify({'response': response}), 500
 
     return jsonify({'response': response}), 200

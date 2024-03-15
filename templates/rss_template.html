@@ -6,7 +6,7 @@
     max-height: 20vh;
   }
   
-  @media (max-width: 800px) {
+  @media (max-width: 600px) {
     .description-text {
       max-height: 30vh;
     }
@@ -48,7 +48,6 @@
     left: 50%;
     right: auto;
   }
-
 </style>
 {% endblock %}
 {% block content %}
@@ -74,9 +73,9 @@
       </div>
 
       <div class="mb-4">
-          {% if user.is_authenticated %}
+          {% if current_user.is_authenticated %}
           <div class="d-flex align-items-start">
-              <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
+              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
               <textarea id="new-comment" class="form-control me-2" rows="2" placeholder="Add a comment..."></textarea>
               <button id="cooldown-button" class="btn btn-secondary">Submit</button>
           </div>
@@ -137,8 +136,9 @@
     ><i class="fa-solid fa-circle-info"></i></span>
     {% endif %}
 
-    {% if is_mobile %}
-    <form role="search" action="javascript:;" onsubmit="submitSearch()">
+    <!-- Search Form -->
+  <center>
+    <form role="search" action="javascript:;" onsubmit="submitSearch()" style="max-width: 70vh">
       <div class="input-group mb-3 mt-4">
         <button class="btn btn-outline-primary dropdown-toggle notranslate" type="button" id="infLanguageMenu" data-bs-toggle="dropdown" aria-label="Translate button" aria-expanded="false">
             <i class="fa-solid fa-language me-1"></i>Language
@@ -149,14 +149,25 @@
             {% endfor %}
           </ul>
 
-        <input type="text" class="form-control" placeholder="Search" aria-label="Search query" id="query" name="query" minlength="3">
+        <input type="text" class="form-control border-primary" placeholder="Search in {{ country_name }} {{ news_filter.title() }}" aria-label="Search query" id="searchForTerm" name="query" minlength="3">
 
         <button class="btn btn-outline-primary" type="button" aria-label="Submit search button" onclick="submitSearch()">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
-  </form>
-  {% endif %}
+    </form>
+  </center>
+    <!-- End Search Form -->
+    
+    {% if tags %}
+      <span class="badge text-bg-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" 
+      data-bs-title="The most popular terms in {{ country_name.title() }} {{ news_filter.title() }} as of this week">
+        <i class="fa-solid fa-fire"></i>
+      </span>
+      {% for tag in tags %}
+        <a href="https://infomundi.net/news?country={{ country_code }}&section={{ news_filter }}&query={{ tag }}"><span class="badge text-bg-secondary">{{ tag }}</span></a>
+      {% endfor %}
+    {% endif %}
 
     <ul class="nav nav-pills justify-content-center mb-2 mt-4">
       
@@ -189,7 +200,7 @@
   {% else %}
   <nav aria-label="Page navigation">
     <ul class="pagination pagination-sm justify-content-center mt-3">
-      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}">Previous</a></li>
+      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}"><i class="fa-solid fa-angle-left"></i></a></li>
       <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
       <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
       
@@ -202,7 +213,7 @@
       <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
       <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
       
-      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}">Next</a></li>
+      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}"><i class="fa-solid fa-angle-right"></i></a></li>
     </ul>
   </nav>
   {% endif %}
@@ -224,13 +235,13 @@
 <div class="row justify-content-center">
   {% for index, item in feeds %}
   <div class="col-md-6 col-xxl-4">
-    <div class="card mt-4 border-opacity-10" style="min-height: 65vh; height: auto;" id="{{ item['id'] }}-{{ selected_filter }}">
+    <div class="card mt-4 border-opacity-10" style="min-height: 65vh; height: auto;" id="{{ item.story_id }}-{{ selected_filter }}">
       <div class="card-header">
         <ul class="nav nav-pills nav-fill card-header-pills inf-card-header">
           <li class="nav-item">
             <a class="nav-link active inf-card-header-link" href="#">Preview</a>
           </li>
-          {% if item['description']|length > 10 %}
+          {% if item.description|length > 10 %}
           <li class="nav-item">
             <a class="nav-link description-btn inf-card-header-link" href="#">Description</a>
           </li>
@@ -240,35 +251,45 @@
           </li>
         </ul>
       </div>
-      <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}">
+      <a href="/comments?id={{ item.story_id }}&category={{ selected_filter }}">
         {% if index < 3 %}
-          <img fetchpriority="high" src="{{ item['media_content']['url'] }}" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
+          <img fetchpriority="high" src="{{ item.media_content_url }}" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
         {% else %}
-          <img data-src="{{ item['media_content']['url'] }}" class="lazyload" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
+          <img data-src="{{ item.media_content_url }}" class="lazyload" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
         {% endif %}
       </a>
       <div class="card-body">
-        <a href="/comments?id={{ item['id'] }}&category={{ selected_filter }}" class="text-reset text-decoration-none">
-          <h6 class="card-title">{{ item['title'] }}</h6>
+        <a href="/comments?id={{ item.story_id }}&category={{ selected_filter }}" class="text-reset text-decoration-none">
+          <h6 class="card-title">{{ item.title }}</h6>
         </a>
       </div>
-      <ul class="list-group list-group-flush mt-3">
+      {% if item.tags or item.total_comments or item.total_clicks %}
+        <ul class="list-group list-group-flush mt-3">
           <li class="list-group-item">
-            <small class="me-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ item['pubDate'] }}</small>
-            {% if item['total_clicks'] %}
-            <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item['total_clicks'] }}</span>
+            {% for tag in item.tags %}
+              {% if tag in tags %}
+                <a href="https://infomundi.net/news?country={{ country_code }}&query={{ tag }}&section={{ news_filter }}"><span class="badge text-bg-secondary">{{ tag }}</span></a>
+              {% endif %}
+            {% endfor %}
+
+            {% if item.total_clicks %}
+              <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item.total_clicks }}</span>
             {% endif %}
-            {% if item['total_comments'] %}
-            <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item['total_comments'] }}</span>
+              
+            {% if item.total_comments %}
+              <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item.total_comments }}</span>
             {% endif %}
+
           </li>
         </ul>
+      {% endif %}
       <div class="card-footer text-body-secondary">
         
         <small>
-          <a href="{{ item['publisher_link'] }}" class="text-decoration-none" target="_blank">
-              {% if 'favicon' in item %}<img src="{{ item['favicon'] }}" class="rounded me-2" alt="{{ item['publisher'] }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss me-1"></i>{% endif %}{{ item['publisher'] }}
+          <a href="{{ item.publisher.link }}" class="text-decoration-none" target="_blank">
+              {% if item.favicon %}<img data-src="{{ item.favicon }}" class="rounded me-1 lazyload" alt="{{ item.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss me-1"></i>{% endif %}{{ item.publisher.name }}
           </a>
+          <span class="ms-1 me-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">{{ item.pub_date }}</span>
         </small>
       
       </div>
@@ -292,7 +313,7 @@
   {% else %}
   <nav aria-label="Page navigation">
     <ul class="pagination pagination-sm justify-content-center mt-3">
-      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}">Previous</a></li>
+      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}"><i class="fa-solid fa-angle-left"></i></a></li>
       <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
       <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
       
@@ -305,7 +326,7 @@
       <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
       <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
       
-      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}">Next</a></li>
+      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}"><i class="fa-solid fa-angle-right"></i></a></li>
     </ul>
   </nav>
   {% endif %}
@@ -318,8 +339,11 @@
   <script defer src="{{ ASSET_URL }}"></script>
   {% endassets %}
 
-  {% assets "js_comments" %}
-  <script defer src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+  <script 
+    src="{{ url_for('static', filename='js/comments.js') }}"
+  ></script>
+  <script 
+    src="{{ url_for('static', filename='js/cooldownButton.js') }}"
+  ></script>
 
 {% endblock %}

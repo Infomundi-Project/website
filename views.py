@@ -1,7 +1,8 @@
-import os 
+import os
 from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response, session
 from flask_login import current_user, login_required
-from random import choice, shuffle
+from random import choice, shuffle, randint
+from sqlalchemy import or_
 from time import time
 
 from website_scripts import scripts, config, json_util, immutable, search, notifications, image_util, extensions, models
@@ -27,11 +28,10 @@ def home():
         i += 2
     
     return render_template('homepage.html', 
-        page='Home', 
         world_stocks=world_stocks, 
         us_indexes=enumerate(us_indexes), 
-        statistics=statistics, 
-        user=current_user, 
+        page='home',
+        statistics=statistics,
         country_code='en'
     )
 
@@ -41,20 +41,20 @@ def maintenance():
     if False:
         return redirect(url_for('views.home'))
     else:
-        return render_template('maintenance.html', user=current_user)
+        return render_template('maintenance.html')
 
 
 @views.route('/test', methods=['GET', 'POST'])
 @admin_required
 def test():
-    return render_template('test.html', user=current_user, page='Test')
+    return render_template('test.html')
 
 
 @views.route('/dashboard')
 @login_required
 @in_maintenance
 def dashboard():
-    return render_template('dashboard.html', user=current_user)
+    return render_template('dashboard.html')
 
 
 @views.route('/upload_image', methods=['POST'])
@@ -83,14 +83,14 @@ def upload_image():
     user_data.avatar_url = f'https://infomundi.net/static/img/users/{current_user.user_id}.webp'
     extensions.db.session.commit()
 
-    flash('File uploaded successfully')
+    flash('File uploaded successfully!')
     return redirect(url_for('views.dashboard'))
 
 
 @views.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'GET':
-        return render_template('contact.html', user=current_user)
+        return render_template('contact.html')
     else:
         token = request.form['cf-turnstile-response']
         if not scripts.valid_captcha(token):
@@ -136,17 +136,17 @@ We got a new message.
 
 @views.route('/about', methods=['GET'])
 def about():
-    return render_template('about.html', user=current_user)
+    return render_template('about.html')
 
 
 @views.route('/policies', methods=['GET'])
 def policies():
-    return render_template('policies.html', user=current_user)
+    return render_template('policies.html')
 
 
 @views.route('/team', methods=['GET'])
 def team():
-    return render_template('team.html', user=current_user)
+    return render_template('team.html')
 
 
 @views.route('/donate', methods=['GET'])
@@ -195,9 +195,8 @@ def get_latest_feed():
     # Searches for the country full name (may be modularized at some point)
     country_name = scripts.country_code_to_name(country_filter)
 
-    # Read the cache for the selected filter
-    try:
-        cache = json_util.read_json(f"{config.CACHE_PATH}/{selected_filter}")
+    cache = Story.query.order_by(Story.created_at.desc()).all()
+    if cache:
         end_index = page_num * 100
 
         start_index = end_index - 100
@@ -205,16 +204,13 @@ def get_latest_feed():
         if start_index - 100 < 0:
             start_index = 0
         
-        feeds = cache['stories'][start_index:end_index-1]
+        feeds = cache[start_index:end_index-1]
 
         # We shuffle the current page to provide a more dynamic experience to the user
         shuffle(feeds)
-    except FileNotFoundError:
+    else:
         flash('We apologize, but something went wrong. Please try again later. In the meantime, feel free to explore other countries!', 'error')
         return redirect(url_for('views.home'))
-    except IndexError: 
-        feeds = cache['stories']
-        page_num = 1
     
     # Declares the referer up here just in case 
     referer = 'https://infomundi.net/' + session.get('last_visited_country', '')
@@ -239,6 +235,7 @@ def get_latest_feed():
 
         translate_language = request.args.get('translation', '').lower()
 
+        # This value will be used in the frontend to display a badge if the query has been translated
         session['want_translate'] = False
         if translate_language:
             
@@ -257,11 +254,13 @@ def get_latest_feed():
                 query = query_translated
                 session['want_translate'] = True
         
-        found_stories_via_query = []
-
-        for story in cache['stories']:
-            if search.search_text(query, story['title']) or search.search_text(query, story['description']):
-                found_stories_via_query.append(story)
+        found_stories_via_query = extensions.db.session.query(models.Story).filter(
+            models.Story.category_id == selected_filter,
+            or_(
+                models.Story.title.ilike(f"%{query}%"),
+                models.Story.description.ilike(f"%{query}%")
+            )
+        ).distinct().all()
 
         if not found_stories_via_query:
             flash(f'No stories were found with the term: "{query}".', 'error')
@@ -270,31 +269,28 @@ def get_latest_feed():
         # Change the current feed in order to make the rest of the code usable.
         feeds = found_stories_via_query
     
-    favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
+    try:
+        favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
+    except FileNotFoundError:
+        favicon_database = []
 
     # Get telemetry
     telemetry = json_util.read_json(config.TELEMETRY_PATH)
     for story in feeds:
-        story['publisher'] = story['publisher'].split('-')[0]
-        
-        if story.get('publisher_id', '') in favicon_database:
-            story['favicon'] = f"static/img/stories/{selected_filter}/favicons/{story['publisher_id']}.ico"
+        if story.publisher_id in favicon_database:
+            story.favicon = f"static/img/stories/{selected_filter}/favicons/{story.publisher_id}.ico"
 
-        if telemetry.get(story['id'], ''):
-            total_comments = telemetry[story['id']]['comments']
-            story['total_comments'] = total_comments if total_comments > 0 else ''
-            
-            total_clicks = telemetry[story['id']]['clicks']
-            story['total_clicks'] = total_clicks if total_clicks > 0 else ''
+        if telemetry.get(story.story_id, ''):
+            total_clicks = telemetry[story.story_id]['clicks']
+            story.total_clicks = total_clicks if total_clicks > 0 else ''
         else:
-            story['total_comments'] = ''
-            story['total_clicks'] = ''
+            story.total_clicks = ''
     
     # Set the page to integer to work properly with rss_template.html.
     page_num = int(page_num)
 
     # Else is 0 because rss_template.html should not render the pagination if the query is set.
-    total_pages = len(cache['stories']) // 100 if not query else 0
+    total_pages = len(cache) // 100 if not query else 0
 
     stock_data = scripts.scrape_stock_data(country_name)
 
@@ -338,6 +334,11 @@ def get_latest_feed():
 
     supported_categories = scripts.get_supported_categories(country_filter)
     session['visited_country'] = country_name.title()
+    
+    best_tags = models.Category.query.filter_by(category_id=selected_filter).first()
+    if best_tags:
+        best_tags = [x.tag for x in best_tags.tags]
+
     return render_template('rss_template.html', 
         feeds=enumerate(feeds),
         feed_length=len(feeds),
@@ -350,10 +351,8 @@ def get_latest_feed():
         country_code=country_filter, 
         supported_categories=supported_categories, 
         all_categories=['general', 'politics', 'economy', 'technology', 'sports'],
-        page='News', 
         area_rank=area_rank,
         main_religion=main_religion,
-        user=current_user, 
         nation_data=scripts.get_nation_data(country_filter),
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
         gdp=scripts.get_gdp(country_name),
@@ -363,15 +362,13 @@ def get_latest_feed():
         country_index=country_index,
         stock_date=stock_date,
         page_languages=page_languages,
-        original_query=original_query
+        original_query=original_query,
+        tags=best_tags if best_tags else ''
     )
 
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    #if not current_user.is_authenticated or not current_user.role == 'admin':
-    #    return redirect(url_for('views.maintenance'))
-    
     news_id = request.args.get('id', '').lower()
     category = request.args.get('category', '').lower()
     
@@ -385,59 +382,53 @@ def comments():
         flash(message, 'error')
         return redirect(referer)
 
-    cache = json_util.read_json(f"{config.CACHE_PATH}/{category}")
-    for story in cache['stories']:
-        if story['id'] == news_id:
-            news_link = story['link']
-
-            telemetry_file = json_util.read_json(config.TELEMETRY_PATH)
-
-            story_info = story
-                
-            story_info['total_clicks'] = telemetry_file[news_id]['clicks'] if news_id in telemetry_file else 0
-            story_info['total_comments'] = telemetry_file[news_id]['comments'] if news_id in telemetry_file else 0
-                
-            preview_data = {}
-            preview_data['image'] = story['media_content']['url']
-            preview_data['description'] = story['description']
-            preview_data['title'] = story['title']
-
-            favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{category}/favicons')]
-
-            if story.get('publisher_id', '') in favicon_database:
-                preview_data['favicon'] = f"static/img/stories/{category}/favicons/{story['publisher_id']}.ico"
-
-            if 'gpt_summarize' in story and story['gpt_summarize'].startswith('{'):
-                # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
-                content = []
-                for key, value in json_util.load_json(story['gpt_summarize']).items():
-                    header = key.replace('_', ' ').title()
-                    content.append({'header': header, 'paragraph': value})
-
-                preview_data['gpt_summarize'] = content
-            
-            break
-    else:
+    story = models.Story.query.filter_by(story_id=news_id).first()
+    if not story:
         flash('We apologize, but there was an error. Please try again later.', 'error')
         return redirect(referer)
-
-    scripts.add_telemetry(news_id, 'clicks')
     
+    # Get publisher favicon
+    favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{category}/favicons')]
+    if story.publisher_id in favicon_database:
+        favicon_url = f'static/img/stories/{category}/favicons/{story.publisher_id}.ico'
+    else:
+        favicon_url = ''
+
+    # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
+    formatted_gpt_summary = []
+    if story.gpt_summary:
+        summary_dict = story.gpt_summary
+        
+        for key, value in summary_dict.items():
+            header = key.replace('_', ' ').title()
+            formatted_gpt_summary.append({'header': header, 'paragraph': value})
+
+    # Add a click to the story
+    if story.clicks is None:
+        story.clicks = 1
+    else:
+        story.clicks += 1
+
+    # Commit changes to the database
+    extensions.db.session.commit()
+    
+    # Assign GET parameters to the session cookie
     GET_PARAMETERS = f'comments?id={news_id}&category={category}'
     session['last_visited_news'] = GET_PARAMETERS
-    session['entered_comments_at'] = time()
+    
     session['visited_category'] = category
     session['visited_news'] = news_id
     
     resp = make_response(render_template('comments.html', 
-        page='Comments', 
-        news_link=news_link, 
-        id=news_id, 
-        story_info=story, 
-        preview_data=preview_data, 
-        user=current_user,
+        story=story,
+        favicon_url=favicon_url,
+        formatted_gpt_summary=formatted_gpt_summary,
+        from_country_name=scripts.country_code_to_name(category.split('_')[0]),
+        from_country_category=category.split('_')[1],
         from_country_code=category.split('_')[0],
-        from_country_name=scripts.country_code_to_name(category.split('_')[0])
+        previous_news='',
+        next_news='',
+        hyvor_data=scripts.generate_hyvor_sso(current_user.email if current_user.is_authenticated else '')
     ))
     resp.set_cookie('clicked', f'{news_id}-{category}')
     

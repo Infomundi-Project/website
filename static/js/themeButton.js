@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (checkbox) { // Check if the checkbox element exists
     checkbox.addEventListener('click', toggleTheme);
-  } else {
-    console.log('The checkbox with ID "theme-checkbox" was not found.');
   }
 });
 
@@ -48,6 +46,12 @@ const toggleTheme = () => {
     for (let icon of infomundiIcons) {
       icon.src = '/static/img/logos/logo-icon-light.webp';
     }
+  }
+
+  const hyvorTalk = document.querySelector('hyvor-talk-comments')
+
+  if (hyvorTalk){ 
+    hyvorTalk.setAttribute('colors', newTheme);
   }
 
   // Set a cookie indicating the current theme

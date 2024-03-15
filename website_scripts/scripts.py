@@ -1,31 +1,75 @@
-import uuid, bleach
+import uuid, bleach, hmac, time
 from re import search as search_regex, compile as re_compile, match as re_match
 from requests import get as get_request, post as post_request
+from json import loads as json_loads, dumps as json_dumps
+from langdetect import detect as detect_language
 from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
 from base64 import b64encode, b64decode
 from os import listdir, urandom, path
-from json import loads as json_loads
 from difflib import SequenceMatcher
 from googletrans import Translator
 from urllib.parse import urlparse
 from unidecode import unidecode
+from hashlib import md5, sha256
 from bs4 import BeautifulSoup
 from random import choice
 from openai import OpenAI
-from hashlib import md5
-from time import sleep
 
-from . import config, json_util, immutable, notifications, models
+from . import config, json_util, immutable, notifications, models, extensions
+
+
+def generate_hyvor_sso(email: str) -> tuple:
+    """The idea of Stateless SSO is simple: Each time the <hyvor-talk-comments> element loads, you will let us know if the user is logged in or not. If yes, you will also send the user's data along with other configuration. An HMAC hash is used to validate the authenticity of user data.
+
+    Arguments
+        email:str - The email address for the authenticated user
+
+    Returns: tuple
+        Returns a tuple containing the base64 encoded jsonified user data, and the HMAC SHA256 hash.
+    """
+    
+    # There may be the case where user is not authenticated, so we return ()
+    if not email:
+        return ()
+
+    # Get user information
+    user = models.User.query.filter_by(email=email).first()
+
+    # Create an object that Hyvor Talk understands
+    user_data = {
+        'timestamp': int(time.time()),
+        'id': user.user_id,
+        'name': user.username,
+        'email': user.email,
+        'picture_url': user.avatar_url
+    }
+
+    # Adds 'owner' (ID 1381) and 'moderator' (ID 1379) badges if user is admin.
+    if email.endswith('@infomundi.net'):
+        user_data['badge_ids'] = [1381, 1379]
+
+    # 1. JSON encoding
+    user_data_json = json_dumps(user_data)
+
+    # 2. Base64 encoding
+    user_data_base64 = b64encode(user_data_json.encode()).decode()
+
+    # HMAC SHA256 hash
+    private_key = config.HYVOR_SSO_KEY
+    hash_object = hmac.new(private_key.encode(), user_data_base64.encode(), sha256)
+    hash_result = hash_object.hexdigest()
+
+    return (user_data_base64, hash_result)
 
 
 def scrape_stock_data(country_name: str) -> list:
     """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
     country_name = country_name.lower().replace(' ', '-')
 
-    # Checks if cache is old enough (10 hours)
+    # Checks if cache is old enough (4 hours)
     filepath = f'{config.STOCK_PATH}/{country_name}_stock'
-    if not is_cache_old(f'{filepath}.json', 10):
+    if not is_cache_old(f'{filepath}.json', 4):
         stock_data = json_util.read_json(filepath)
         return stock_data
 
@@ -33,7 +77,7 @@ def scrape_stock_data(country_name: str) -> list:
     
     # We need to use a fake header, otherwise we'll get blocked (code 403)
     headers = {
-        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     }
 
     response = get_request(url, headers=headers)
@@ -446,10 +490,15 @@ def is_valid_url(url: str) -> bool:
 
 
 def is_valid_email(email: str) -> bool:
-    if len(email) < 10 or '@' not in email or len(email) > 60:
+    if email.count('@') != 1:
         return False
     
+    domain = email.split('@')[1]
+    if '.' not in domain:
+        return False
+
     return True
+
 
 def is_valid_username(username):
     # Regular expression to match allowed characters: alphanumeric and !@#$%¨&*()_-
@@ -625,68 +674,58 @@ def get_statistics() -> dict:
     saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
     time_difference = current_timestamp - saved_timestamp
     
+    # Return cache if it's less than 15 minutes old
     if time_difference < timedelta(minutes=15):
         statistics['current_time'] = formatted_time
         return statistics
 
-    categories = [file.replace('.json', '') for file in listdir(config.CACHE_PATH)]
-    total_countries_supported = len([x.split('_')[0] for x in categories if 'general' in x])  # Total countries supported
+    try:
+        total_countries_supported = models.Category.query.count()
 
-    total_news = 0
-    total_feeds = 0
+        total_feeds = models.Publisher.query.count()
+        total_news = models.Story.query.count()
 
-    for category in categories:
-        news_feeds = json_util.read_json(f'{config.FEEDS_PATH}/{category}')
-        total_feeds += len(news_feeds)
-
-        try:
-            cache = json_util.read_json(f'{config.CACHE_PATH}/{category}')
-        except FileNotFoundError:
-            continue
-
-        try:
-            total_news += len(cache['stories'])
-        except KeyError:
-            log(f'We couldnt calculate total news for {category}')
+        # Get last updated
+        time_difference = current_timestamp - saved_timestamp
         
-        try:
-            saved_timestamp = datetime.fromisoformat(cache['updated_at'])
-        except Exception:
-            continue
+        total_seconds = time_difference.total_seconds()
 
-    # Get last updated
-    time_difference = current_timestamp - saved_timestamp
-    
-    total_seconds = time_difference.total_seconds()
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
 
-    hours = int(total_seconds // 3600)
-    minutes = int((total_seconds % 3600) // 60)
+        if time_difference < timedelta(hours=1):
+            last_updated_message = f"{minutes} minutes ago"
+        else:
+            last_updated_message = f"{hours} hours ago"
 
-    if time_difference < timedelta(hours=1):
-        last_updated_message = f"{minutes} minutes ago"
-    else:
-        last_updated_message = f"{hours} hours ago"
+        total_clicks = int(models.Story.query.with_entities(extensions.db.func.sum(models.Story.clicks)).scalar())
 
-    total_clicks = 0
-    telemetry = json_util.read_json(config.TELEMETRY_PATH)
-    for news_id in telemetry:
-        total_clicks += telemetry[news_id]['clicks']
+        # Endpoint to get comments
+        url = f'https://talk.hyvor.com/api/console/v1/{config.HYVOR_WEBSITE_ID}/comments'
+        response = get_request(url, headers={'X-API-KEY': config.HYVOR_CONSOLE_KEY})
+        if response.status_code == 200:
+            comments_data = response.json()
+            total_comments = len(comments_data)
+        else:
+            total_comments = 0
 
-    total_comments = models.Comment.query.count()
+        timestamp_string = current_timestamp.isoformat()
+        data = {
+            'current_time': formatted_time,
+            'timestamp': timestamp_string,  # this will be used to check if the statistics are ready for an update
+            'total_countries_supported': total_countries_supported,
+            'total_news': f"{total_news:,}",
+            'total_feeds': total_feeds,
+            'total_comments': total_comments,
+            'last_updated_message': last_updated_message,
+            'total_clicks': total_clicks
+        }
 
-    timestamp_string = current_timestamp.isoformat()
-    data = {
-        'current_time': formatted_time,
-        'timestamp': timestamp_string,  # this will be used to check if the statistics are ready for an update
-        'total_countries_supported': total_countries_supported,
-        'total_news': f"{total_news:,}",
-        'total_feeds': total_feeds,
-        'total_comments': total_comments,
-        'last_updated_message': last_updated_message,
-        'total_clicks': total_clicks
-    }
+        json_util.write_json(data, config.STATISTICS_PATH)
+    except Exception as err:
+        log(err)
+        return statistics
 
-    json_util.write_json(data, config.STATISTICS_PATH)
     return data
 
 
@@ -750,7 +789,7 @@ def remove_html_tags(text_with_html: str) -> str:
     return BeautifulSoup(text_with_html, 'html.parser').get_text()
 
 
-def translate(dest_lang: str, msg: str):
+def translate(dest_lang: str, msg: str) -> str:
     """
     Uses google translate to enhance user experience in many ways.
 
@@ -768,10 +807,17 @@ def translate(dest_lang: str, msg: str):
         return ''
 
 
-def gpt_summarize(url:str):
-    """As you may have guessed, this script is responsible for accessing a 
-
+def gpt_summarize(url:str) -> str:
     """
+    This function performs an in-depth summarization of a news article found at the specified URL, and the the prompt includes the article's title and a snippet of its text to give the GPT model context.
+
+    Arguments:
+        url (str): The URL of the news article to summarize.
+
+    Returns:
+        str: A string dictionary containing the detailed analysis of the article. The dictionary includes three keys corresponding to the sections of the analysis. If the operation is unsuccessful for any reason, an empty dictionary is returned.
+    """
+
     user_agent = choice(immutable.USER_AGENTS)
     r = get_request(url, headers={'User-Agent': user_agent})
     
@@ -786,26 +832,39 @@ def gpt_summarize(url:str):
     news_title = soup.title.string if soup.title else "News Article"
 
     # Extract relevant text from paragraphs and headings
-    article_text = ''.join([p.get_text() for p in soup.find_all(['p'])])[:1000]
+    article_text = ' '.join([p.get_text() for p in soup.find_all(['p'])])[:1300]
 
-    prompt = f"""Considering the context of "{news_title}", please identify the language of the text below, but keep in mind: don't tell the language in the output.
+    try:
+        lang = detect_language(news_title)
+    except Exception:
+        lang = 'en'  # Default to English if language detection fails
+
+    prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
     
     ```text
     {article_text}
     ```
     
-    Now that you have identified the language, please generate three paragraphs in that language on the topic. The first one is an opinion article, impartial in relation to the provided news. The second paragraph is going to be a contextualization from an outisde point of view from the news, it's going to give information about the things around the matter. The third one is about ways to find more information on the matter, and the subjects presented in the news.
-    """
+    Produce a comprehensive response based on the topic, structured as follows:
+
+    1. Opinion Article: Write an extended, nuanced opinion article that remains neutral and balanced regarding the news presented. Delve into the complexities and multiple perspectives surrounding the issue, offering a thoughtful analysis without taking a definitive stance. Aim for a thorough exploration that considers various angles and the broader implications.
+
+    2. Contextual Analysis: Provide an extensive background analysis from an external viewpoint, not directly involved in the news. This should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding.
+
+    3. Research Directions: Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
+
+    Ensure each section is well-researched and articulated, providing valuable insights and fostering a comprehensive understanding of the news and its broader context."""
 
     client = OpenAI(api_key=config.OPENAI_API_KEY)
     response = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": "You are a helpful and comprehensive assistant designed to output JSON, identifying the language of the user and changing the output keys accordingly. The output JSON must have 'maximus_noted_some_important_things' (refers to the opinion article), 'the_context_behind_this_news' (refering to contextualization) and 'where_can_i_find_more_information?' (refering to ways to find more information on the matter) as keys."},
-        {"role": "user", "content": prompt}
-      ],
-      n=1,
-      temperature=0.3
+        model="gpt-3.5-turbo-0125",
+        messages=[
+            {"role": "system", "content": f'You are a helpful and comprehensive assistant designed to output in JSON format. The output JSON must include three keys: "maximus_noted_some_important_things" for the Opinion Article, "the_context_behind_this_news" for the Contextual Analysis, and "where_can_i_find_more_information?" for the Research Directions. Each section should contain well-elaborated, insightful paragraphs, offering a deep dive into the respective topics. Ensure that the output is in the language "{lang}" and adheres to a valid JSON structure, with clear separation between keys and their corresponding textual content.'},
+            {"role": "user", "content": prompt}
+        ],
+        n=1,
+        response_format={"type": "json_object"},
+        temperature=0.1
     )
 
     return response.choices[0].message.content

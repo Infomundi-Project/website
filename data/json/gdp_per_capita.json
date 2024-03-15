@@ -126,12 +126,6 @@
     }
   },
   {
-    "Cuba": {
-      "gdp": "$56,495 (World Bank)",
-      "date": "2022"
-    }
-  },
-  {
     "Sweden": {
       "gdp": "$55,216 (IMF)",
       "date": "2023"
@@ -633,6 +627,12 @@
     "Dominican Republic": {
       "gdp": "$11,249 (IMF)",
       "date": "2023"
+    }
+  },
+  {
+    "Cuba": {
+      "gdp": "$9,500 (World Bank)",
+      "date": "2020"
     }
   },
   {

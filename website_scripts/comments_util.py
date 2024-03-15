@@ -4,6 +4,7 @@ def get_replies(comment):
         reply_dict = {
             'id': reply.comment_id,
             'text': reply.text,
+            'is_root_comment': reply.is_root_comment,
             'userName': reply.user.username,
             'userRole': reply.user.role,
             'userAvatar': reply.user.avatar_url,

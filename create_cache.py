@@ -1,4 +1,4 @@
-import time, threading, os
+import time, threading, os, pymysql
 
 from datetime import datetime, timedelta
 from random import shuffle, choice
@@ -10,6 +10,42 @@ from hashlib import md5
 from sys import exit
 
 from website_scripts import json_util, config, scripts, immutable
+
+
+# Database connection parameters
+db_params = {
+    'host': 'localhost',
+    'user': config.MYSQL_USERNAME,
+    'password': config.MYSQL_PASSWORD,
+    'db': 'infomundi',
+    'charset': 'utf8mb4'
+}
+
+db_connection = pymysql.connect(**db_params)
+
+
+def insert_to_database(stories: list, category_id: str):
+    with db_connection.cursor() as cursor:
+        for item in stories:
+            try:
+                # Insert category
+                cursor.execute("INSERT INTO categories (category_id) VALUES (%s) ON DUPLICATE KEY UPDATE category_id = category_id", (category_id,))
+
+                # Insert publisher
+                cursor.execute("""
+                    INSERT INTO publishers (publisher_id, name, link) VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE name = VALUES(name), link = VALUES(link)
+                """, (item['publisher_id'], item['publisher'], item['publisher_link']))
+
+                # Insert story
+                cursor.execute("""
+                    INSERT INTO stories (story_id, title, description, link, pub_date, category_id, publisher_id, media_content_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (item['id'], item['title'], item['description'], item['link'], item['pubDate'], category_id, item['publisher_id'], item['media_content']['url']))
+            except Exception as err:
+                print(f"[-] {err}")
+
+    db_connection.commit()
 
 
 def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
@@ -71,15 +107,24 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
             feed_link = feed_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
             item_link = item_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
             
-            item_id = f'{md5(unidecode(item_title.lower()).encode()).hexdigest()}'
+            item_id = f'{md5(unidecode( item_title.lower() + item_link.lower() ).encode()).hexdigest()}'
             
             if os.path.isfile(f'{config.WEBSITE_ROOT}/static/img/stories/{news_filter}/{item_id}.webp'):
                 item_image = f'static/img/stories/{news_filter}/{item_id}.webp'
             else:
                 item_image = 'static/img/infomundi-white-darkbg-square.webp'
             
-            data['items'].append(
-                {
+            pubdate = format_date(pubdate)
+            
+            pubdate_full = ''
+            pubdate_short = ''
+            if isinstance(pubdate, dict):
+                pubdate_full = pubdate['full']
+                pubdate_short = pubdate['short']
+            else:
+                pubdate_full = pubdate
+
+            new_story = {
                 'title': item_title,
                 'description': item_description,
                 'id': item_id,
@@ -87,11 +132,14 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
                 'publisher_link': feed_link,
                 'publisher_id': f'{md5(unidecode(feed_link).encode()).hexdigest()}',
                 'link': item_link,
-                'pubDate': format_date(pubdate),
+                'pubDate': pubdate_full,
+                'pubDate_short': pubdate_short,
                 'media_content': {
                     'url': item_image
                     }
-                })
+                }
+
+            data['items'].append(new_story)
     
     except Exception as err:
         print(f"[!] Exception getting {rss_url} ({news_filter}) // {err}")
@@ -114,45 +162,34 @@ def format_date(date) -> str:
                 date_string = ' '.join(date.split('2023')[:3])
             return date_string
 
+    date_result = {}
+
     today = datetime.now().date()
 
     if isinstance(date, tuple):
         date = datetime(*date[:6]).date()
     
     if date == today:
-        return 'Today'
+        date_result['short'] = 'Today'
 
     for day in range(1, 16):
         comparison = today - timedelta(days=day)
         if date == comparison:
-            return f"{day} day{'s' if day > 1 else ''} ago"
+            date_result['short'] = f"{day} day{'s' if day > 1 else ''} ago"
 
-    return date.strftime('%Y/%m/%d')
+    date_result['full'] = date.strftime('%Y/%m/%d')
+    return date_result
 
 
 def main():
     """Main function to fetch and cache RSS feeds."""
-    current_month = datetime.today().month
-
     categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
-    now = datetime.now()
 
-    #categories = ['br_general']
     total_done = 0
+    
     for selected_filter in categories:
         percentage = (total_done * 100) // len(categories)
         print(f"\n[{percentage}%] Handling cache for {selected_filter}...")
-
-        cache_file_path = f'{config.CACHE_PATH}/{selected_filter}'
-
-        # We check wether the cache already exist or not.
-        is_new = False
-        try:
-            cache = json_util.read_json(cache_file_path)
-        except FileNotFoundError:
-            cache = {}
-            cache['created_at'] = now.isoformat()
-            is_new = True
         
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
@@ -188,56 +225,10 @@ def main():
         # Shuffle merged articles to mix them up
         shuffle(merged_articles)
 
-        # It may be a good idea to overwrite the cache with a time span of 15 days
-        saved_timestamp = datetime.fromisoformat(cache['created_at'])
-
-        time_difference = now - saved_timestamp
-        if time_difference > timedelta(days=15) or is_new:
-            cache['created_at'] = now.isoformat()
-            cache['stories'] = []
-            print('------------- Deleting all stories ----------')
-
-        # Correct date
-        try:
-            updated_timestamp = datetime.fromisoformat(cache['updated_at'])
-        except KeyError:
-            updated_timestamp = now
-            cache['updated_at'] = now
-        
-        time_difference = now - updated_timestamp
-        if time_difference > timedelta(days=1):
-            for story in cache['stories']:
-                pubdate = story['pubDate']
-
-                if pubdate == 'Today':
-                    story['pubDate'] = '1 day ago'
-                elif 'ago' in pubdate:
-                    days = int(pubdate[0])
-                    story['pubDate'] = f'{days + 1} days ago'
-                else:
-                    continue
-
-        # Remove all repeated articles
-        existing_ids = [x['id'] for x in cache['stories']]
-        articles_to_add = [x for x in merged_articles if x['id'] not in existing_ids]
-
-        if not articles_to_add:
-            print(f'[+] Cache for {selected_filter} is full. No need to write anything.')
-            continue
-
-        # Save new update date
-        cache['updated_at'] = now.isoformat()
-
-        # Add newer articles to the beginning of the cache
-        articles_to_add.extend(cache['stories'])
-        cache['stories'] = articles_to_add
-
-        # Calculate and save to the file the total of newly added articles, in order to optimzie image gathering. 
-        cache['recently_added'] = len(articles_to_add)
-
-        json_util.write_json(cache, f"{config.CACHE_PATH}/{selected_filter}")
+        insert_to_database(merged_articles, selected_filter)
         total_done += 1
-        print(f"[{len(articles_to_add)} articles] Wrote json for {selected_filter}.")
+        
+        print(f"[{len(merged_articles)} articles] Saved for {selected_filter}.")
     
     return print('[+] Finished!')
 

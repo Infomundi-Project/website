@@ -40,7 +40,7 @@ app.register_blueprint(auth_views, url_prefix='/auth')
 
 # CSRF Configuration
 csrf = CSRFProtect(app)
-csrf.exempt('api.comments') # There's no need to protect this endpoint, correct? :3
+csrf.exempt('api.comments') # There's no need to protect this endpoint
 
 # Login manager
 login_manager.init_app(app)
@@ -63,7 +63,7 @@ css_base = Bundle(
     filters='cssmin', 
     output='gen/base_packed.css')
 js_base = Bundle(
-    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/cookieConsent.js', 'js/autocomplete.js',
+    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/cookieConsent.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js',
     filters='jsmin', 
     output='gen/base_packed.js')
 
@@ -72,25 +72,17 @@ assets.register('js_base', js_base)
 
 # Home template bundles
 js_home = Bundle(
-    'js/amcharts/map.js', 'js/amcharts/worldLow.js', 'js/amcharts/micro.js', 'js/chart.js', 
+    'js/amcharts/map.js', 'js/amcharts/worldLow.js', 'js/amcharts/animated.js', 'js/chart.js', 
     filters='jsmin', 
     output='gen/home_packed.js')
 assets.register('js_home', js_home)
 
-# Comments template bundles
-js_comments = Bundle(
-    'js/comments.js', 'js/cooldownButton.js', 
-    filters='jsmin', 
-    output='gen/comments_packed.js')
-assets.register('js_comments', js_comments)
-
 # News template bundles
 js_news = Bundle(
-    'js/submitSearch.js', 'js/newsCardHeader.js', 'js/languageMenu.js', 
+    'js/submitSearch.js', 'js/newsCardHeader.js', 'js/languageMenu.js', 'js/timeAgo.js',
     filters='jsmin', 
     output='gen/news_packed.js')
 assets.register('js_news', js_news)
-
 
 
 # Security - CSP Rules
@@ -101,14 +93,21 @@ csp = {
     'img-src': [
         '\'self\'',
         'data:',
-        'https://cdn.jsdelivr.net',
+        'https://talk.hyvor.com', # Comments reactions
+        'https://media.tenor.com', # gifs
+        'https://hyvor.com', # Comments user picture
         'https://www.gstatic.com', # google images for translate
-        'https://fonts.gstatic.com',
-        'https://hatscripts.github.io'
+        'https://fonts.gstatic.com', # google translate icon
+        'https://hatscripts.github.io',
+        'https://cdn.jsdelivr.net' # flag images
     ],
     'connect-src': [
-        'https://cloudflareinsights.com',
         '\'self\'',
+        'https://api.tenor.com', # Gifs
+        'https://talk.hyvor.com', # Comments
+        'wss://soketi.hyvor.com', # Comments real-time socket connection
+        'https://commento.io', # Commento
+        'https://cloudflareinsights.com',
         'https://ka-f.fontawesome.com',
         'https://translate.googleapis.com'
     ], 
@@ -118,6 +117,8 @@ csp = {
     'script-src': [
         '\'self\'',
         '\'unsafe-inline\'',
+        'https://cdn.commento.io', # Commento
+        'https://talk.hyvor.com', # Comments
         'https://ajax.cloudflare.com',
         'https://static.cloudflareinsights.com',
         'https://challenges.cloudflare.com',
@@ -129,13 +130,14 @@ csp = {
     'style-src': [
         '\'self\'',
         '\'unsafe-inline\'',
+        'https://cdn.commento.io', # Commento
         'https://fonts.googleapis.com',
         'https://www.gstatic.com'
     ],
     'font-src': [
         '\'self\'',
-        'https://fonts.gstatic.com',
-        'https://ka-f.fontawesome.com'
+        'https://ka-f.fontawesome.com',
+        'https://cdn.commento.io' # Commento
     ]
 }
 

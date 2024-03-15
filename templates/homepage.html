@@ -2,14 +2,13 @@
 {% block styles %}
 <style type="text/css">
   #chartdiv {
-  width: 100%;
   height: 100vh;
   max-width: 100%;
   }
   .fa-solid me-1 {
   color: #ffffff;
   }
-  {% if request.cookies.get('theme') != 'light' %}
+  {% if request.cookies.get('theme') == 'dark' %}
   .accordion {
   --bs-accordion-btn-bg: #202429;
   --bs-accordion-btn-color: #ffffff;
@@ -26,7 +25,15 @@
   .accordion-flush .accordion-item:last-child .accordion-body {
   border-bottom: 1px solid #000000;
   }
+  {% else %}
+  .accordion {
+  --bs-accordion-btn-bg: #ffffff;
+  --bs-accordion-active-bg: #ffffff;
+  --bs-accordion-btn-color: #000000;
+  --bs-accordion-active-color: #000000;
+  }
   {% endif %}
+
   @media (max-width: 480px) {
     #chartdiv {
     width: 100%;
@@ -37,91 +44,32 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="row">
-  <div class="col-lg text-center mb-5 mt-4">
-    <img 
-      fetchpriority="high" 
-      src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
-      class="infomundi-logo"
-      height="316"
-      width="790" 
-      alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
-      />
-
-    {% if is_mobile %}
-    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-4">
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.about') }}"><small>About</small></a>
-      </li>
-      <li class="nav-item">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-americas"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.team') }}"><small>Team</small></a>
-      </li>
-      <li class="nav-item">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-africa"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.contact') }}"><small>Contact</small></a>
-      </li>
-      <li class="nav-item">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-oceania"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.policies') }}"><small>Policies</small></a>
-      </li>
-    </ul>
-
-    {% else %}
-
-    <ul class="nav nav-underline justify-content-center border-top mb-4">
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.about') }}">About</a>
-      </li>
-      <li class="nav-item ms-4 me-4">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-americas"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
-      </li>
-      <li class="nav-item ms-4 me-4">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-africa"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
-      </li>
-      <li class="nav-item ms-4 me-4">
-        <span class="nav-link text-reset disabled" aria-disabled="true"><small><i class="fa-solid fa-earth-oceania"></i></small></span>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.policies') }}">Policies</a>
-      </li>
-    </ul>
-    {% endif %}
-
-
+<div class="row d-flex align-items-center justify-content-center">
+  <div class="col-lg text-center mb-5">
     <center>
-      <p class="fs-4"><label for="query">Search a Country</label></p>
+      <p class="fs-2"><label for="query">Search a Country to View Information About It</label></p>
         <form action="{{ url_for('api.search') }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="input-group justify-content-center">
-            <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button aria-label="Submit search button" type="submit" class="input-group-text {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" id="search-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
             <input 
-              class="form-control autocomplete" 
+              class="form-control autocomplete {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" 
               aria-describedby="search-icon"
               style="max-width: 360px;"
               type="search" 
               aria-label="Search Field" 
+              minlength="3" 
               id="query" 
               name="query"
               />
           </div>
         </form>
     </center>
-    <p class="fs-4 mt-2 mb-2">or</p>
+    <p class="fs-3 mt-2 mb-2">or</p>
     <div class="d-inline-flex">
-      <p class="fs-3">Use the Globe to Choose</p>
+      <p class="fs-1">Use the Globe to Choose It</p>
     </div>
     {% if not is_mobile %}
     <div class="accordion" id="accordionExample">
@@ -140,20 +88,20 @@
                 <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}<span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="We're performing some maintenance at the moment, and the updates are temporarily paused. Sorry for any inconvenience!">Maintenance</span></p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.4<!--<span class="badge text-bg-success ms-1">New!</span>--></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success ms-1">New!</span>--></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-user"></i>Session</p>
                 
-                {% if user.is_authenticated %}
-                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ user.username }}!</p>
+                {% if current_user.is_authenticated %}
+                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ current_user.username }}!</p>
                 <p class="fs-6"><a href="{{ url_for('auth.logout') }}" class="text-decoration-none"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></p>
                 {% else %}
                 <p class="fs-6"><a href="{{ url_for('auth.register') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-user-pen"></i>Register</a></p>
@@ -193,20 +141,20 @@
                 <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}<span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="We're performing some maintenance at the moment, and the updates are temporarily paused. Sorry for any inconvenience!">Maintenance</span></p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.4<!-- <span class="badge text-bg-success">New!</span> --></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success">New!</span>--></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-user"></i>Session</p>
                 
-                {% if user.is_authenticated %}
-                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ user.username }}!</p>
+                {% if current_user.is_authenticated %}
+                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ current_user.username }}!</p>
                 <p class="fs-6"><a href="{{ url_for('auth.logout') }}" class="text-decoration-none"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></p>
                 {% else %}
                 <p class="fs-6"><a href="{{ url_for('auth.register') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-user-pen"></i>Register</a></p>

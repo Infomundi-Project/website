@@ -4,6 +4,7 @@
 
 | Version | Date       | Brief Description      | Authors        |
 | ------ | ---------- | ----------------------------- | ------------- |
+| 1.2.6 | 2023/03/15 | Version 1.2.6 marks a significant backend-focused update, aimed at bolstering the platform's infrastructure, security, and user engagement features. Noteworthy enhancements include substantial database improvements to support an expanded archive of news stories, the integration of Hyvor Talk for advanced commenting capabilities, and an upgrade to image quality. Interface optimizations and a shift to light mode as the default theme enhance the user experience. Additionally, this update introduces crucial security upgrades, including the implementation of HSTS for subdomains and an upgrade to TLS 1.3, ensuring a safer browsing environment. The removal of the search limit and logical fixes in the backend further streamline user interactions and platform reliability. | @InfomundiTeam |
 | 1.2.5 | 2024/02/15 | Version 1.2.5 introduces a comprehensive set of enhancements focused on improving the aesthetic, functionality, and user experience across the website. Notable updates include revamped authentication interfaces, enhanced form validations, and interactive features such as password strength indicators and profile picture uploads. The update also introduces important community-focused features like community policies and a fully functional comments section. Performance and usability have been further optimized through the bundling of resources and interface improvements. Additionally, this version takes significant strides in security with the enforcement of stricter encryption protocols and the remediation of critical vulnerabilities, ensuring a safer and more reliable platform for users. | @InfomundiTeam |
 | 1.2.4 | 2023/01/29 | The 1.2.4 update brings significant enhancements aimed at improving user experience and website performance. Noteworthy are the transition to WebP format for images, the introduction of essential website pages, and a more interactive news page with comment functionality. Navigation has been streamlined with a sticky search bar and an intuitive country search feature. Additionally, the update focuses on mobile user experience and performance optimization by redesigning the home page layout and pruning unnecessary elements. Security has been bolstered with the implementation of a CSP and CSRF protection, enhancing the platform's overall security posture. | @InfomundiTeam |
 | 1.2.3 | 2023/01/10 | Version 1.2.3 introduces significant enhancements to user experience, notably in the news page presentation and search functionality. It features a more dynamic news layout, advanced search accuracy with auto-translation, and a more visually appealing interface with an updated logo. The release also includes a crucial security fix for the search feature and improvements in site navigation and data access through a new API endpoint. | @InfomundiTeam |
@@ -24,6 +25,43 @@
 
 
 ---
+
+
+## Changelog 1.2.6 (2024/03/15)
+
+### Backend Focus:
+This update primarily enhances backend functionalities, improving the platform's scalability, security, and overall performance. Key backend enhancements include a substantial upgrade to the database capacity and the integration of Hyvor Talk for an enriched commenting experience.
+
+### Enhancements (8)
+1. **IME01:** Optimized user interface by making the navbar disappear while scrolling down, reappearing when scrolling up.
+2. **IME02:** Introduced "Maximus Translate" as an optional feature, accessible via the user's navbar on the right side of the screen.
+3. **IME03:** Added a green progress bar at the bottom of the page to visually indicate reading progress and page length.
+4. **IME04:** Enhanced the "Maximus Story Analysis" feature for deeper insights into news content.
+5. **IME05:** Significantly expanded database capabilities, now supporting storage of extensive news archives with up to 7 or 8 digits total news items.
+6. **IME06:** Improved sign-up process feedback by deactivating the sign-up button and displaying "Loading..." during server processing.
+7. **IME07:** Integrated Hyvor Talk for a more engaging and feature-rich commenting system.
+8. **IME08:** Upgraded image quality for news stories, providing clearer and more vibrant visuals.
+
+### Changes (4)
+1. **IMC01:** Transitioned the homepage globe theme to an animated version, prioritizing aesthetic appeal.
+2. **IMC02:** Set the website's default theme to light mode, enhancing readability and visual comfort.
+3. **IMC03:** Adjusted Cloudflare's captcha to a shorter version for mobile users, streamlining the verification process.
+4. **IMC04:** Reorganized the home page layout to include both the navbar and footer, significantly improving navigation and user experience.
+
+### Removed (1)
+1. **IMR01:** Removed the search result limit, now allowing searches to return all relevant stories for comprehensive exploration.
+
+### Fixed (1)
+1. **IMF01:** Addressed several logical inconsistencies within the backend, enhancing system integrity and performance.
+
+### Security (3)
+1. **IMS01:** Strengthened HSTS configuration to encompass subdomains, boosting protection against man-in-the-middle attacks.
+2. **IMS02:** Advanced to a minimum supported TLS version of 1.3, ensuring a higher security standard for data transmission.
+3. **IMS03:** Made adjustments to the website's Content Security Policy (CSP) for refined security measures.
+
+
+---
+
 
 
 ## Changelog 1.2.5 (2024/02/15)

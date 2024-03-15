@@ -67,7 +67,6 @@ def register():
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-
         # Is email already present?
         email_lookup = models.User.query.filter_by(email=email).first()
         
@@ -91,6 +90,8 @@ def register():
             flash(message, 'error')
             return redirect(url_for('auth.register'))
 
+        username = scripts.sanitize_input(username)
+
         send_token = scripts.send_verification_token(email, username)
         if not send_token:
             flash('We apologize, but something went wrong. Please, try again later.')
@@ -109,9 +110,9 @@ def register():
 
         json_util.write_json(tokens, config.TOKENS_PATH)
 
-        flash(f'We sent an email to {email}. Please, activate your account by clicking on the provided link.')
+        flash(f'We sent an activation email to {email}.')
     
-    return render_template('register.html', user=current_user)
+    return render_template('register.html')
 
 
 @auth_views.route('/verify', methods=['GET'])
@@ -200,7 +201,7 @@ def forgot_password():
             else:
                 flash('An error has ocurred.', 'error')
         
-        return render_template('forgot_password.html', user=current_user)
+        return render_template('forgot_password.html')
 
 
 @auth_views.route('/password_change', methods=['GET', 'POST'])
@@ -261,7 +262,7 @@ def password_change():
         if forgot_password:
             return redirect(url_for('auth.login'))
     
-    return render_template('password_change.html', user=current_user)
+    return render_template('password_change.html')
 
 
 @auth_views.route('/login', methods=['GET', 'POST'])
@@ -293,7 +294,7 @@ def login():
         else:
             flash('Invalid credentials!', 'error')
     
-    return render_template('login.html', user=current_user)
+    return render_template('login.html')
 
 
 @auth_views.route('/logout')

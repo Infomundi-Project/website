@@ -21,7 +21,7 @@
   <div class="row">
     <div class="my-5 text-center">
       <img 
-        src="{% if request.cookies.get('theme') == 'light' %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% endif %}"
+        src="{% if request.cookies.get('theme') == 'dark' %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% endif %}"
         class="infomundi-logo"
         height="16"
         width="9" 
@@ -74,7 +74,7 @@
             <label for="floatingMessage">Message</label>
           </div>
           <div class="mb-2">
-              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X"></div>
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
           </div>
           <button class="w-100 btn btn-lg btn-primary" type="submit">Send</button>
         </form>

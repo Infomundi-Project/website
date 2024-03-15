@@ -4,7 +4,7 @@ var root = am5.Root.new("chartdiv");
 
 
 root.setThemes([
-  am5themes_Micro.new(root)
+  am5themes_Animated.new(root)
 ]);
 
 
@@ -41,7 +41,7 @@ polygonSeries.mapPolygons.template.states.create("active", {
 var backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
 backgroundSeries.mapPolygons.template.setAll({
   fill: root.interfaceColors.get("alternativeBackground"),
-  fillOpacity: 0.1,
+  fillOpacity: 0.105,
   strokeOpacity: 0
 });
 backgroundSeries.data.push({

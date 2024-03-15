@@ -1,6 +1,6 @@
 function googleTranslateElementInit() {
         new google.translate.TranslateElement({
-          pageLanguage: '{{ country_code }}'
+          pageLanguage: 'en'
         },
         'google_translate_element'
         );

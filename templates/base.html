@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'light' %}light{% else %}dark{% endif %}">
+<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'dark' %}dark{% else %}light{% endif %}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Primary -->
-    <meta name="title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
-    <meta name="description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
+    <meta name="title" content="Infomundi" />
+    <meta name="description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}...{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
     <meta name="theme-color" content="#000000" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://infomundi.net/" />
     <meta property="og:title" content="Infomundi" />
-    <meta property="og:description" content="{% if page == 'Comments' %}{{ preview_data['description'][:140] }}{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="og:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
+    <meta property="og:description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
+    <meta property="og:image" content="{% if '/comments' in request.url and False %}{{ story.image_source_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://infomundi.net/" />
-    <meta property="twitter:title" content="Infomundi{% if page == 'Comments' %} News{% endif %}" />
-    <meta property="twitter:description" content="{% if page == 'Comments' %}View on Infomundi: {{ preview_data['description'][:140] }}...{% else %}InfoMundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="twitter:image" content="{% if page == 'Comments' %}{{ preview_data['image'] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
+    <meta property="twitter:title" content="Infomundi" />
+    <meta property="twitter:description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
+    <meta property="twitter:image" content="{% if '/comments' in request.url and False %}{{ story.image_source_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
@@ -30,9 +30,9 @@
     <meta name="msapplication-TileColor" content="#da532c">
     
     <!-- Stylesheets/Libraries -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/font-awesome-4.7.0.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/bootstrap-5.3.2.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/font-awesome-4.7.0.min.css') }}">
     
     <!-- Stylesheets/Website -->
     {% assets "css_base" %}
@@ -63,10 +63,13 @@
 </div>
 {% endif %}
 
-    {% if page not in ['Home', 'Error', 'Test'] %}
+    {% if page != 'Error' %}
     <div class="offcanvas inf-nav-offcanvas offcanvas-start shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasNavigation">
       <div class="offcanvas-header">
-        <a href="/"><img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'light' %}logo-icon-light{% else %}logo-icon-dark{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon"></a>
+        <a href="/" class="text-decoration-none text-reset">
+          <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
+          <span class="logo-text fs-4 notranslate">infomundi</span>
+        </a>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
@@ -74,14 +77,17 @@
         <form action="{{ url_for('api.search') }}" method="POST" class="mb-5">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="input-group justify-content-center">
-            <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
             <input 
               class="form-control autocomplete" 
               aria-describedby="search-icon"
               style="max-width: 360px;"
               type="search" 
               aria-label="Search Field" 
-              id="query" 
+              id="searchForCountry" 
+              minlength="3" 
               name="query"
               />
           </div>
@@ -90,7 +96,7 @@
         <hr>
         <ul class="nav nav-pills flex-column mb-5">
           <li class="nav-item inf-nav-item">
-            <a href="/" class="nav-link {{ 'active' if request.url.endswith('/about') else '' }}">
+            <a href="/" class="nav-link {{ 'active' if request.url.endswith('/') else '' }}">
             <i class="fa-solid fa-house me-1"></i>Home
             </a>
           </li>
@@ -139,11 +145,14 @@
 
     <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
       <div class="offcanvas-header">
-        {% if user.is_authenticated %}
-          <img src="{{ user.avatar_url }}" class="rounded-circle" height="500" width="500" style="height: 6vh; width: 6vh;">
-          <h5 class="offcanvas-title" id="offcanvasRightLabel">{{ user.username }}</h5>
+        {% if current_user.is_authenticated %}
+          <img src="{{ current_user.avatar_url }}" class="rounded-circle" height="500" width="500" style="height: 6vh; width: 6vh;">
+          <h5 class="offcanvas-title notranslate" id="offcanvasRightLabel">{{ current_user.username }}</h5>
         {% else %}
-          <h5 class="offcanvas-title logo-text" id="offcanvasRightLabel">infomundi</h5>
+          <a href="/" class="text-decoration-none text-reset">
+            <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
+            <span class="logo-text fs-4 notranslate">infomundi</span>
+          </a>
         {% endif %}
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
@@ -168,7 +177,7 @@
             {% endif %}
           </ul>
         {% endif %}
-        {% if user.is_authenticated %}
+        {% if current_user.is_authenticated %}
           <span class="fs-4">Settings</span>
           <hr>
           <ul class="nav nav-pills flex-column mb-5">
@@ -198,24 +207,25 @@
             <hr>
 
             <li class="nav-item inf-nav-item">
+              <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.url.endswith('/login') else '' }}">
+                <i class="fa-solid me-1 fa-right-to-bracket"></i>Sign in
+              </a>
+            </li>
+
+            <li class="nav-item inf-nav-item">
               <a href="{{ url_for('auth.register') }}" class="nav-link {{ 'active' if request.url.endswith('/register') else '' }}">
                 <i class="fa-solid me-1 fa-user-pen"></i>Sign up
               </a>
             </li>
 
-            <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.url.endswith('/login') else '' }}">
-                <i class="fa-solid me-1 fa-right-to-bracket"></i>Sign in
-              </a>
-            </li>
           </ul>
         {% endif %}
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="toastSwitch" checked>
-          <label class="form-check-label" for="toastSwitch"><i class="fa-solid fa-language me-1"></i>Enable Maximus translation</label>
+          <input class="form-check-input" type="checkbox" id="maximusTranslationSwitch">
+          <label class="form-check-label" for="maximusTranslationSwitch"><i class="fa-solid fa-language me-1"></i>Enable Maximus translation</label>
         </div>
         <div class="position-fixed bottom-0 end-0 m-3">
-          <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme', '') == 'light' %}checked{% endif %}>
+          <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if request.cookies.get('theme', '') == 'dark' %}checked{% endif %}>
           <label for="theme-checkbox" class="theme-checkbox-label">
           <i class="fa-solid fa-sun"></i>
           <i class="fa-solid fa-moon"></i>
@@ -225,17 +235,17 @@
       </div>
     </div>
 
-    <nav class="navbar bg-body-tertiary shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar">
+    <nav class="navbar bg-body-tertiary shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar" id="mainNavbar">
       <div class="container">
         <span class="navbar-brand">
 
-          <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-2" style="height: 1.7rem; width: 1.7rem;"></a>
+          <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3" style="height: 1.7rem; width: 1.7rem;" aria-label="Click to expand the site navigation"></a>
         
         {% if not is_mobile %}
-        <a href="/" class="logo-text text-decoration-none text-reset fs-4">
+        <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-4">
         <img 
           fetchpriority="high" 
-          src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'light' %}logo-icon-light{% else %}logo-icon-dark{% endif %}.webp" 
+          src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" 
           class="me-2 infomundi-icon"
           width="380" 
           height="380" 
@@ -243,10 +253,10 @@
           alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">infomundi
         </a>
         {% else %}
-        <a href="/" class="logo-text text-decoration-none text-reset fs-5">
+        <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-5">
         <img 
           fetchpriority="high" 
-          src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'light' %}logo-icon-light{% else %}logo-icon-dark{% endif %}.webp" 
+          src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" 
           class="me-2 infomundi-icon"
           width="380" 
           height="380" 
@@ -259,17 +269,18 @@
         <div class="dropdown text-end">
           <a 
             href="#" 
-            class="d-block link-body-emphasis text-decoration-none {% if is_mobile and user.is_authenticated %}dropdown-toggle{% endif %}" 
+            class="d-block link-body-emphasis text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}" 
             data-bs-toggle="offcanvas" 
             data-bs-target="#offcanvasUserNavigation" 
             aria-controls="offcanvasUserNavigation"
+            aria-label="Click here to expand the user navigation"
             >
           
-          {% if user.is_authenticated %}
+          {% if current_user.is_authenticated %}
             {% if not is_mobile %}
-              <span class="dropdown-toggle ">{{ user.username }}</span>
+              <span class="dropdown-toggle notranslate">{{ current_user.username }}</span>
             {% endif %}
-            <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s profile picture" style="height: auto; width: 6.7vh;" class="rounded border border-1 border-dark">
+            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: auto; width: 6.7vh;" class="rounded border border-1 border-dark">
           {% else %}
             <span class="dropdown-toggle"><i class="fa-solid fa-user me-1"></i>{% if not is_mobile %}Account{% endif %}</span>
           {% endif %}
@@ -281,7 +292,7 @@
     {% endif %}
 
     
-    {% if page == 'Home' %}
+    {% if world_stocks %}
     <div class="hwrap" id="ticker">
       <div class="hmove" style="color: white">
         <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies and<i class="fa-brands fa-bitcoin me-2 ms-2"></i>Cryptocoins - {{ world_stocks[0]['date'] }}<i class="fa-solid fa-arrow-right ms-2"></i></div>
@@ -302,10 +313,10 @@
                 {% if entry['country']['name'] == 'United States' %}
                   {% for index, us_info in us_indexes %}
                     <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
-                    {% if us_info['color'] == 'red' %}
-                        <span style="color: red">&#8659;</span> <!-- down -->
+                    {% if us_info['color'] == '#FF6666' %}
+                        <span style="color: #FF6666">&#8659;</span> <!-- down -->
                     {% else %}
-                        <span style="color: green">&#8657;</span>
+                        <span style="color: #00FF00">&#8657;</span>
                     {% endif %}
                     {% if index != 2 %}
                       <span style="color: white">;</span>
@@ -313,15 +324,15 @@
                   {% endfor %}
                 {% else %}
                   <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
-                  {% if entry['color'] == 'red' %}
-                    <span style="color: red">&#8659;</span>
+                  {% if entry['color'] == '#FF6666' %}
+                    <span style="color: #FF6666">&#8659;</span>
                   {% else %}
-                    <span style="color: green">&#8657;</span>
+                    <span style="color: #00FF00">&#8657;</span>
                   {% endif %}
                 {% endif %}
                 {% if 'currency' in entry.keys() %}
                     | {{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
-                    <span style="color: {{ entry['currency']['color'] }};">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == 'green' %}<span style="color: green">&#8657;</span>{% else %}<span style="color: red">&#8659;</span>{% endif %} | 
+                    <span style="color: {{ entry['currency']['color'] }};" class="me-1">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == '#00FF00' %}<span style="color: #00FF00">&#8657;</span>{% else %}<span style="color: #FF6666">&#8659;</span>{% endif %} | 
                     {% if entry['currency']['name'].startswith('USD') %}
                         1 USD = {{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
                     {% else %}
@@ -331,21 +342,21 @@
             {% else %}
                 <i class="fa-brands fa-bitcoin me-2"></i>{{ entry['name'] }}
                 <span style="color: {{ entry['color'] }};">{{ entry['symbol'] }} {{ entry['changes']['percent'] }}</span>
-                {% if entry['color'] == 'red' %}
-                  <span style="color: red">&#8659;</span>
+                {% if entry['color'] == '#FF6666' %}
+                  <span style="color: #FF6666">&#8659;</span>
                 {% else %}
-                  <span style="color: green">&#8657;</span>
+                  <span style="color: #00FF00">&#8657;</span>
                 {% endif %}
             {% endif %}
         </span>
     </div>
-{% endfor %}
+        {% endfor %}
       </div>
     </div>
     {% endif %}
 
 
-{% if page == 'News' %}
+{% if '/news' in request.url %}
   <div class="hwrap" id="ticker">
     <div class="hmove">
 
@@ -358,10 +369,10 @@
               {{ country_index['name'] }} {{ country_index['changes']['percent'] }}
             </span>
 
-            {% if country_index['color'] == 'red' %}
-              <span style="color: red">&#8659;</span>
+            {% if country_index['color'] == '#FF6666' %}
+              <span style="color: #FF6666">&#8659;</span>
             {% else %}
-              <span style="color: green">&#8657;</span>
+              <span style="color: #00FF00">&#8657;</span>
             {% endif %}
 
             {% if 'currency' in country_index.keys() %}
@@ -370,10 +381,10 @@
 
               <span style="color: {{ country_index['currency']['color'] }};">
                 {{ country_index['currency']['changes']['percent'] }}</span>
-                {% if country_index['currency']['color'] == 'red' %}
-                <span style="color: red">&#8659;</span>
+                {% if country_index['currency']['color'] == '#FF6666' %}
+                <span style="color: #FF6666">&#8659;</span>
                 {% else %}
-                <span style="color: green">&#8657;</span>
+                <span style="color: #00FF00">&#8657;</span>
                 {% endif %}
               </span> | 
 
@@ -409,14 +420,14 @@
       {% endif %}
 
       {% for stock_info in stock_data %}
-        <div class="hitem" style="color:{% if '-' in stock_info['day_change'] %} red;{% else %} green;{% endif %}">
+        <div class="hitem" style="color:{% if '-' in stock_info['day_change'] %} #FF6666;{% else %} #00FF00;{% endif %}">
           <span style="color: white">{{ stock_info['name'] }}</span>
           {{ stock_info['symbol'] }}
           {{ stock_info['day_change'] }}
           {% if '-' in stock_info['day_change'] %}
-            <span style="color: red">&#8659;</span>
+            <span style="color: #FF6666">&#8659;</span>
           {% else %}
-            <span style="color: green">&#8657;</span>
+            <span style="color: #00FF00">&#8657;</span>
           {% endif %}
           {% if stock_info['market_cap'] != None %}
             <span style="color: white">
@@ -430,7 +441,7 @@
   </div>
 {% endif %}
 
-    <div class="{% if page != 'Test' %}container-fluid{% else %}test{% endif %}">
+    <div class="container-fluid">
       {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %} 
           {% for category, message in messages %} 
@@ -448,7 +459,7 @@
           {% endfor %} 
         {% endif %} 
       {% endwith %}
-      {% if page != "Error" and request.cookies.get('toastPreference', '') == 'enabled' %}
+      {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
@@ -465,14 +476,18 @@
       {% block content %} {% endblock %}
     </div>
 
-{% if page not in ["Home", "Error"] %}
+<!-- Scroll top button -->
+<button type="button" class="btn btn-primary inf-fixed-button" id="scrollTopBtn" style="position: fixed; bottom: 20px; right: 20px; display: none;"><i class="fa-solid fa-angles-up"></i></button>
+
+<!-- Start Footer -->
+{% if page != "Error" %}
 <div class="container py-5">
   <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
     
     <div class="col-md-4 mb-3">
       <center>
       <a href="/" class="text-decoration-none" aria-label="Click to return to the home page.">
-        <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'light' %}logo-icon-light{% else %}logo-icon-dark{% endif %}.webp" width="380" height="380" style="height: auto; width: 35%;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon">
+        <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 35%;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon">
       </a>
       <p class="text-body-secondary mt-3 notranslate">&copy; Infomundi 2023-2024<br>
         <span class="mt-2 notranslate"><a href="mailto:contact@infomundi.net" class="text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</a></span>
@@ -483,7 +498,7 @@
     <div class="col mb-3">
       <p class="fs-4 notranslate">INFOMUNDI</p>
         <ul class="nav flex-column">
-          <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to return to the home page"><i class="fa-solid fa-globe me-1"></i>Back to Globe</a></li>
+          <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to return to the home page"><i class="fa-solid fa-house me-1"></i>Home</a></li>
           <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary"><i class="fa-solid fa-address-card me-1" aria-label="Click to open the about page"></i>About</a></li>
           
           <li class="nav-item mb-2"><a href="{{ url_for('views.team') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page"><i class="fa-solid fa-people-group me-1"></i>Team</a></li>
@@ -509,7 +524,7 @@
     <div class="col mb-3">
       <p class="fs-4">SESSION</p>
         <ul class="nav flex-column">
-          {% if not user.is_authenticated %}
+          {% if not current_user.is_authenticated %}
             <li class="nav-item mb-2"><a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page"><i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the login page"><i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login</a></li>
           {% else %}
@@ -551,69 +566,26 @@
       crossorigin="anonymous"
     ></script>
     
-    <script defer
-      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-    ></script>
-
-    {% if page not in ['Home', 'Error', 'Comments'] %}
     <script 
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer
     ></script>
-    {% endif %}
-
-    <script>
-document.addEventListener("DOMContentLoaded", function() {
-  var toastSwitch = document.getElementById('toastSwitch');
-  var toastEl = document.getElementById('liveToast');
-  var toast = new bootstrap.Toast(toastEl);
-
-  // Function to set a cookie
-  function setCookie(name, value, hours) {
-    var now = new Date();
-    now.setTime(now.getTime() + (hours * 60 * 60 * 1000));
-    var expires = "expires=" + now.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/";
-  }
-
-  // Function to get a cookie value
-  function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1,c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-  }
-
-  // Check the cookie at load and set the switch state
-  var toastPreference = getCookie('toastPreference');
-  if (toastPreference === 'disabled') {
-    toastSwitch.checked = false;
-  }
-
-  // Listen for the switch change event
-  toastSwitch.addEventListener('change', function() {
-    if (this.checked) {
-      setCookie('toastPreference', 'enabled', 24); // Enable toast and set cookie
-    } else {
-      setCookie('toastPreference', 'disabled', 24); // Disable toast and set cookie
-    }
-  });
-
-  // Optionally, show the toast based on the preference
-  if (toastPreference !== 'disabled') {
-    toast.show();
-  }
-});
-
-    </script>
 
     {% assets "js_base" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}
+
+    {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
+    <script
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    ></script>
+    {% endif %}
+
+    {% if '/news' in request.url or '/comments' in request.url %}
+    <script 
+      src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
+    ></script>
+    {% endif %}
 
     {% block scripts %} {% endblock %}
   </body>

@@ -18,7 +18,7 @@ $(document).ready(function() {
 
     // Set the cookieConsent cookie to 'true' when the 'I Agree' button is clicked
     $('#acceptCookieConsent').click(function() {
-      setCookie('cookieConsent', 'true', 7); // Set the cookie to expire in 7 days
+      setCookie('cookieConsent', 'true', 30); // Set the cookie to expire in 30 days
       $('#cookieConsentModal').modal('hide');
     });
   });
