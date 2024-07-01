@@ -85,5 +85,6 @@ fetch('/api/summarize_story', {
     maximusCooking.innerHTML = '';
     
     // Display the error
-    apiResponse.innerHTML = `An error occurred, and therefore no further information could be retrieved.<br>${error.toString()}`;
+    apiResponse.innerHTML = `An error occurred, and therefore no further information could be retrieved.<br>`;
+    console.log(error)
 });

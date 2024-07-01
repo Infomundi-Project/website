@@ -6,7 +6,7 @@
       <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
         <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/login.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500">
         <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Welcome back!</h1>
-        <p class="col-lg-10 fs-4">We're glad to see you again. Please log in to access your account.</p>
+        <h2 class="col-lg-10 fs-4">We're glad to see you again. Please log in to access your account.</h2>
       </div>
       <div class="col-md-10 mx-auto col-lg-5">
         <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('auth.login') }}">
@@ -46,7 +46,7 @@
   </div>
 {% endblock %}
 {% block scripts %}
-<script
+<script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"
 ></script>
 {% endblock %}

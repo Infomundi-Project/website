@@ -1,211 +1,213 @@
-{
-  "name": {
-    "common": "Liberia",
-    "official": "Republic of Liberia",
-    "nativeName": {
-      "eng": {
+[
+  {
+    "name": {
+      "common": "Liberia",
+      "official": "Republic of Liberia",
+      "nativeName": {
+        "eng": {
+          "official": "Republic of Liberia",
+          "common": "Liberia"
+        }
+      }
+    },
+    "tld": [
+      ".lr"
+    ],
+    "cca2": "LR",
+    "ccn3": "430",
+    "cca3": "LBR",
+    "cioc": "LBR",
+    "independent": true,
+    "status": "officially-assigned",
+    "unMember": true,
+    "currencies": {
+      "LRD": {
+        "name": "Liberian dollar",
+        "symbol": "$"
+      }
+    },
+    "idd": {
+      "root": "+2",
+      "suffixes": [
+        "31"
+      ]
+    },
+    "capital": [
+      "Monrovia"
+    ],
+    "altSpellings": [
+      "LR",
+      "Republic of Liberia"
+    ],
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "languages": {
+      "eng": "English"
+    },
+    "translations": {
+      "ara": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0644\u064a\u0628\u064a\u0631\u064a\u0627",
+        "common": "\u0644\u064a\u0628\u064a\u0631\u064a\u0627"
+      },
+      "bre": {
+        "official": "Republik Liberia",
+        "common": "Liberia"
+      },
+      "ces": {
+        "official": "Liberijsk\u00e1 republika",
+        "common": "Lib\u00e9rie"
+      },
+      "cym": {
         "official": "Republic of Liberia",
         "common": "Liberia"
+      },
+      "deu": {
+        "official": "Republik Liberia",
+        "common": "Liberia"
+      },
+      "est": {
+        "official": "Libeeria Vabariik",
+        "common": "Libeeria"
+      },
+      "fin": {
+        "official": "Liberian tasavalta",
+        "common": "Liberia"
+      },
+      "fra": {
+        "official": "R\u00e9publique du Lib\u00e9ria",
+        "common": "Liberia"
+      },
+      "hrv": {
+        "official": "Republika Liberija",
+        "common": "Liberija"
+      },
+      "hun": {
+        "official": "Lib\u00e9riai K\u00f6zt\u00e1rsas\u00e1g",
+        "common": "Lib\u00e9ria"
+      },
+      "ita": {
+        "official": "Repubblica di Liberia",
+        "common": "Liberia"
+      },
+      "jpn": {
+        "official": "\u30ea\u30d9\u30ea\u30a2\u5171\u548c\u56fd",
+        "common": "\u30ea\u30d9\u30ea\u30a2"
+      },
+      "kor": {
+        "official": "\ub77c\uc774\ubca0\ub9ac\uc544 \uacf5\ud654\uad6d",
+        "common": "\ub77c\uc774\ubca0\ub9ac\uc544"
+      },
+      "nld": {
+        "official": "Republiek Liberia",
+        "common": "Liberia"
+      },
+      "per": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0644\u06cc\u0628\u0631\u06cc\u0627",
+        "common": "\u0644\u06cc\u0628\u0640\u0650\u0631\u06cc\u0627"
+      },
+      "pol": {
+        "official": "Republika Liberii",
+        "common": "Liberia"
+      },
+      "por": {
+        "official": "Rep\u00fablica da Lib\u00e9ria",
+        "common": "Lib\u00e9ria"
+      },
+      "rus": {
+        "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041b\u0438\u0431\u0435\u0440\u0438\u044f",
+        "common": "\u041b\u0438\u0431\u0435\u0440\u0438\u044f"
+      },
+      "slk": {
+        "official": "Lib\u00e9rijsk\u00e1 republika",
+        "common": "Lib\u00e9ria"
+      },
+      "spa": {
+        "official": "Rep\u00fablica de Liberia",
+        "common": "Liberia"
+      },
+      "srp": {
+        "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041b\u0438\u0431\u0435\u0440\u0438\u0458\u0430",
+        "common": "\u041b\u0438\u0431\u0435\u0440\u0438\u0458\u0430"
+      },
+      "swe": {
+        "official": "Republiken Liberia",
+        "common": "Liberia"
+      },
+      "tur": {
+        "official": "Liberya Cumhuriyeti",
+        "common": "Liberya"
+      },
+      "urd": {
+        "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0644\u0627\u0626\u0628\u06cc\u0631\u06cc\u0627",
+        "common": "\u0644\u0627\u0626\u0628\u06cc\u0631\u06cc\u0627"
+      },
+      "zho": {
+        "official": "\u5229\u6bd4\u91cc\u4e9a\u5171\u548c\u56fd",
+        "common": "\u5229\u6bd4\u91cc\u4e9a"
       }
-    }
-  },
-  "tld": [
-    ".lr"
-  ],
-  "cca2": "LR",
-  "ccn3": "430",
-  "cca3": "LBR",
-  "cioc": "LBR",
-  "independent": true,
-  "status": "officially-assigned",
-  "unMember": true,
-  "currencies": {
-    "LRD": {
-      "name": "Liberian dollar",
-      "symbol": "$"
-    }
-  },
-  "idd": {
-    "root": "+2",
-    "suffixes": [
-      "31"
-    ]
-  },
-  "capital": [
-    "Monrovia"
-  ],
-  "altSpellings": [
-    "LR",
-    "Republic of Liberia"
-  ],
-  "region": "Africa",
-  "subregion": "Western Africa",
-  "languages": {
-    "eng": "English"
-  },
-  "translations": {
-    "ara": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0644\u064a\u0628\u064a\u0631\u064a\u0627",
-      "common": "\u0644\u064a\u0628\u064a\u0631\u064a\u0627"
     },
-    "bre": {
-      "official": "Republik Liberia",
-      "common": "Liberia"
-    },
-    "ces": {
-      "official": "Liberijsk\u00e1 republika",
-      "common": "Lib\u00e9rie"
-    },
-    "cym": {
-      "official": "Republic of Liberia",
-      "common": "Liberia"
-    },
-    "deu": {
-      "official": "Republik Liberia",
-      "common": "Liberia"
-    },
-    "est": {
-      "official": "Libeeria Vabariik",
-      "common": "Libeeria"
-    },
-    "fin": {
-      "official": "Liberian tasavalta",
-      "common": "Liberia"
-    },
-    "fra": {
-      "official": "R\u00e9publique du Lib\u00e9ria",
-      "common": "Liberia"
-    },
-    "hrv": {
-      "official": "Republika Liberija",
-      "common": "Liberija"
-    },
-    "hun": {
-      "official": "Lib\u00e9riai K\u00f6zt\u00e1rsas\u00e1g",
-      "common": "Lib\u00e9ria"
-    },
-    "ita": {
-      "official": "Repubblica di Liberia",
-      "common": "Liberia"
-    },
-    "jpn": {
-      "official": "\u30ea\u30d9\u30ea\u30a2\u5171\u548c\u56fd",
-      "common": "\u30ea\u30d9\u30ea\u30a2"
-    },
-    "kor": {
-      "official": "\ub77c\uc774\ubca0\ub9ac\uc544 \uacf5\ud654\uad6d",
-      "common": "\ub77c\uc774\ubca0\ub9ac\uc544"
-    },
-    "nld": {
-      "official": "Republiek Liberia",
-      "common": "Liberia"
-    },
-    "per": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0644\u06cc\u0628\u0631\u06cc\u0627",
-      "common": "\u0644\u06cc\u0628\u0640\u0650\u0631\u06cc\u0627"
-    },
-    "pol": {
-      "official": "Republika Liberii",
-      "common": "Liberia"
-    },
-    "por": {
-      "official": "Rep\u00fablica da Lib\u00e9ria",
-      "common": "Lib\u00e9ria"
-    },
-    "rus": {
-      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041b\u0438\u0431\u0435\u0440\u0438\u044f",
-      "common": "\u041b\u0438\u0431\u0435\u0440\u0438\u044f"
-    },
-    "slk": {
-      "official": "Lib\u00e9rijsk\u00e1 republika",
-      "common": "Lib\u00e9ria"
-    },
-    "spa": {
-      "official": "Rep\u00fablica de Liberia",
-      "common": "Liberia"
-    },
-    "srp": {
-      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u041b\u0438\u0431\u0435\u0440\u0438\u0458\u0430",
-      "common": "\u041b\u0438\u0431\u0435\u0440\u0438\u0458\u0430"
-    },
-    "swe": {
-      "official": "Republiken Liberia",
-      "common": "Liberia"
-    },
-    "tur": {
-      "official": "Liberya Cumhuriyeti",
-      "common": "Liberya"
-    },
-    "urd": {
-      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0644\u0627\u0626\u0628\u06cc\u0631\u06cc\u0627",
-      "common": "\u0644\u0627\u0626\u0628\u06cc\u0631\u06cc\u0627"
-    },
-    "zho": {
-      "official": "\u5229\u6bd4\u91cc\u4e9a\u5171\u548c\u56fd",
-      "common": "\u5229\u6bd4\u91cc\u4e9a"
-    }
-  },
-  "latlng": [
-    6.5,
-    -9.5
-  ],
-  "landlocked": false,
-  "borders": [
-    "GIN",
-    "CIV",
-    "SLE"
-  ],
-  "area": 111369.0,
-  "demonyms": {
-    "eng": {
-      "f": "Liberian",
-      "m": "Liberian"
-    },
-    "fra": {
-      "f": "Lib\u00e9rienne",
-      "m": "Lib\u00e9rien"
-    }
-  },
-  "flag": "\ud83c\uddf1\ud83c\uddf7",
-  "maps": {
-    "googleMaps": "https://goo.gl/maps/4VsHsc2oeGeRL3wg6",
-    "openStreetMaps": "https://www.openstreetmap.org/relation/192780"
-  },
-  "population": 5057677,
-  "gini": {
-    "2016": 35.3
-  },
-  "fifa": "LBR",
-  "car": {
-    "signs": [
-      "LB"
-    ],
-    "side": "right"
-  },
-  "timezones": [
-    "UTC"
-  ],
-  "continents": [
-    "Africa"
-  ],
-  "flags": {
-    "png": "https://flagcdn.com/w320/lr.png",
-    "svg": "https://flagcdn.com/lr.svg",
-    "alt": "The flag of Liberia is composed of eleven equal horizontal bands of red alternating with white. A blue square bearing a five-pointed white star is superimposed in the canton."
-  },
-  "coatOfArms": {
-    "png": "https://mainfacts.com/media/images/coats_of_arms/lr.png",
-    "svg": "https://mainfacts.com/media/images/coats_of_arms/lr.svg"
-  },
-  "startOfWeek": "monday",
-  "capitalInfo": {
     "latlng": [
-      6.3,
-      -10.8
-    ]
-  },
-  "postalCode": {
-    "format": "####",
-    "regex": "^(\\d{4})$"
+      6.5,
+      -9.5
+    ],
+    "landlocked": false,
+    "borders": [
+      "GIN",
+      "CIV",
+      "SLE"
+    ],
+    "area": 111369.0,
+    "demonyms": {
+      "eng": {
+        "f": "Liberian",
+        "m": "Liberian"
+      },
+      "fra": {
+        "f": "Lib\u00e9rienne",
+        "m": "Lib\u00e9rien"
+      }
+    },
+    "flag": "\ud83c\uddf1\ud83c\uddf7",
+    "maps": {
+      "googleMaps": "https://goo.gl/maps/4VsHsc2oeGeRL3wg6",
+      "openStreetMaps": "https://www.openstreetmap.org/relation/192780"
+    },
+    "population": 5057677,
+    "gini": {
+      "2016": 35.3
+    },
+    "fifa": "LBR",
+    "car": {
+      "signs": [
+        "LB"
+      ],
+      "side": "right"
+    },
+    "timezones": [
+      "UTC"
+    ],
+    "continents": [
+      "Africa"
+    ],
+    "flags": {
+      "png": "https://flagcdn.com/w320/lr.png",
+      "svg": "https://flagcdn.com/lr.svg",
+      "alt": "The flag of Liberia is composed of eleven equal horizontal bands of red alternating with white. A blue square bearing a five-pointed white star is superimposed in the canton."
+    },
+    "coatOfArms": {
+      "png": "https://mainfacts.com/media/images/coats_of_arms/lr.png",
+      "svg": "https://mainfacts.com/media/images/coats_of_arms/lr.svg"
+    },
+    "startOfWeek": "monday",
+    "capitalInfo": {
+      "latlng": [
+        6.3,
+        -10.8
+      ]
+    },
+    "postalCode": {
+      "format": "####",
+      "regex": "^(\\d{4})$"
+    }
   }
-}
+]

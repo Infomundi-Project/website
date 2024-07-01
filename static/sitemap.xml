@@ -4,44 +4,44 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-
-
-
-<url>
-  <loc>https://infomundi.net/</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>1.00</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/about</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.90</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/team</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.90</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/contact</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.90</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/policies</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.90</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/auth/register</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://infomundi.net/auth/login</loc>
-  <lastmod>2024-01-25T18:53:29+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
-
+  <url>
+    <loc>https://infomundi.net/</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/about</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/team</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/contact</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/policies</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/auth/register</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/auth/login</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://infomundi.net/auth/forgot_password</loc>
+    <lastmod>2024-01-25T18:53:29+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
 </urlset>

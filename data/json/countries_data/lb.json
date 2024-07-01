@@ -1,216 +1,218 @@
-{
-  "name": {
-    "common": "Lebanon",
-    "official": "Lebanese Republic",
-    "nativeName": {
+[
+  {
+    "name": {
+      "common": "Lebanon",
+      "official": "Lebanese Republic",
+      "nativeName": {
+        "ara": {
+          "official": "\u0627\u0644\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0644\u0628\u0646\u0627\u0646\u064a\u0629",
+          "common": "\u0644\u0628\u0646\u0627\u0646"
+        },
+        "fra": {
+          "official": "R\u00e9publique libanaise",
+          "common": "Liban"
+        }
+      }
+    },
+    "tld": [
+      ".lb"
+    ],
+    "cca2": "LB",
+    "ccn3": "422",
+    "cca3": "LBN",
+    "cioc": "LBN",
+    "independent": true,
+    "status": "officially-assigned",
+    "unMember": true,
+    "currencies": {
+      "LBP": {
+        "name": "Lebanese pound",
+        "symbol": "\u0644.\u0644"
+      }
+    },
+    "idd": {
+      "root": "+9",
+      "suffixes": [
+        "61"
+      ]
+    },
+    "capital": [
+      "Beirut"
+    ],
+    "altSpellings": [
+      "LB",
+      "Lebanese Republic",
+      "Al-Jumh\u016br\u012byah Al-Libn\u0101n\u012byah"
+    ],
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "languages": {
+      "ara": "Arabic",
+      "fra": "French"
+    },
+    "translations": {
       "ara": {
         "official": "\u0627\u0644\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0644\u0628\u0646\u0627\u0646\u064a\u0629",
         "common": "\u0644\u0628\u0646\u0627\u0646"
       },
+      "bre": {
+        "official": "Republik Liban",
+        "common": "Liban"
+      },
+      "ces": {
+        "official": "Libanonsk\u00e1 republika",
+        "common": "Libanon"
+      },
+      "cym": {
+        "official": "Lebanese Republic",
+        "common": "Lebanon"
+      },
+      "deu": {
+        "official": "Libanesische Republik",
+        "common": "Libanon"
+      },
+      "est": {
+        "official": "Liibanoni Vabariik",
+        "common": "Liibanon"
+      },
+      "fin": {
+        "official": "Libanonin tasavalta",
+        "common": "Libanon"
+      },
       "fra": {
         "official": "R\u00e9publique libanaise",
         "common": "Liban"
+      },
+      "hrv": {
+        "official": "Libanonska Republika",
+        "common": "Libanon"
+      },
+      "hun": {
+        "official": "Libanoni K\u00f6zt\u00e1rsas\u00e1g",
+        "common": "Libanon"
+      },
+      "ita": {
+        "official": "Repubblica libanese",
+        "common": "Libano"
+      },
+      "jpn": {
+        "official": "\u30ec\u30d0\u30ce\u30f3\u5171\u548c\u56fd",
+        "common": "\u30ec\u30d0\u30ce\u30f3"
+      },
+      "kor": {
+        "official": "\ub808\ubc14\ub17c \uacf5\ud654\uad6d",
+        "common": "\ub808\ubc14\ub17c"
+      },
+      "nld": {
+        "official": "Libanese Republiek",
+        "common": "Libanon"
+      },
+      "per": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0644\u0628\u0646\u0627\u0646",
+        "common": "\u0644\u0628\u0646\u0627\u0646"
+      },
+      "pol": {
+        "official": "Republika Liba\u0144ska",
+        "common": "Liban"
+      },
+      "por": {
+        "official": "Rep\u00fablica Libanesa",
+        "common": "L\u00edbano"
+      },
+      "rus": {
+        "official": "\u041b\u0438\u0432\u0430\u043d\u0441\u043a\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+        "common": "\u041b\u0438\u0432\u0430\u043d"
+      },
+      "slk": {
+        "official": "Libanonsk\u00e1 republika",
+        "common": "Libanon"
+      },
+      "spa": {
+        "official": "Rep\u00fablica Libanesa",
+        "common": "L\u00edbano"
+      },
+      "srp": {
+        "official": "\u041b\u0438\u0431\u0430\u043d\u0441\u043a\u0430 \u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+        "common": "\u041b\u0438\u0431\u0430\u043d"
+      },
+      "swe": {
+        "official": "Republiken Libanon",
+        "common": "Libanon"
+      },
+      "tur": {
+        "official": "L\u00fcbnan Cumhuriyeti",
+        "common": "L\u00fcbnan"
+      },
+      "urd": {
+        "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0644\u0628\u0646\u0627\u0646",
+        "common": "\u0644\u0628\u0646\u0627\u0646"
+      },
+      "zho": {
+        "official": "\u9ece\u5df4\u5ae9\u5171\u548c\u56fd",
+        "common": "\u9ece\u5df4\u5ae9"
       }
-    }
-  },
-  "tld": [
-    ".lb"
-  ],
-  "cca2": "LB",
-  "ccn3": "422",
-  "cca3": "LBN",
-  "cioc": "LBN",
-  "independent": true,
-  "status": "officially-assigned",
-  "unMember": true,
-  "currencies": {
-    "LBP": {
-      "name": "Lebanese pound",
-      "symbol": "\u0644.\u0644"
-    }
-  },
-  "idd": {
-    "root": "+9",
-    "suffixes": [
-      "61"
-    ]
-  },
-  "capital": [
-    "Beirut"
-  ],
-  "altSpellings": [
-    "LB",
-    "Lebanese Republic",
-    "Al-Jumh\u016br\u012byah Al-Libn\u0101n\u012byah"
-  ],
-  "region": "Asia",
-  "subregion": "Western Asia",
-  "languages": {
-    "ara": "Arabic",
-    "fra": "French"
-  },
-  "translations": {
-    "ara": {
-      "official": "\u0627\u0644\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0644\u0628\u0646\u0627\u0646\u064a\u0629",
-      "common": "\u0644\u0628\u0646\u0627\u0646"
     },
-    "bre": {
-      "official": "Republik Liban",
-      "common": "Liban"
-    },
-    "ces": {
-      "official": "Libanonsk\u00e1 republika",
-      "common": "Libanon"
-    },
-    "cym": {
-      "official": "Lebanese Republic",
-      "common": "Lebanon"
-    },
-    "deu": {
-      "official": "Libanesische Republik",
-      "common": "Libanon"
-    },
-    "est": {
-      "official": "Liibanoni Vabariik",
-      "common": "Liibanon"
-    },
-    "fin": {
-      "official": "Libanonin tasavalta",
-      "common": "Libanon"
-    },
-    "fra": {
-      "official": "R\u00e9publique libanaise",
-      "common": "Liban"
-    },
-    "hrv": {
-      "official": "Libanonska Republika",
-      "common": "Libanon"
-    },
-    "hun": {
-      "official": "Libanoni K\u00f6zt\u00e1rsas\u00e1g",
-      "common": "Libanon"
-    },
-    "ita": {
-      "official": "Repubblica libanese",
-      "common": "Libano"
-    },
-    "jpn": {
-      "official": "\u30ec\u30d0\u30ce\u30f3\u5171\u548c\u56fd",
-      "common": "\u30ec\u30d0\u30ce\u30f3"
-    },
-    "kor": {
-      "official": "\ub808\ubc14\ub17c \uacf5\ud654\uad6d",
-      "common": "\ub808\ubc14\ub17c"
-    },
-    "nld": {
-      "official": "Libanese Republiek",
-      "common": "Libanon"
-    },
-    "per": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0644\u0628\u0646\u0627\u0646",
-      "common": "\u0644\u0628\u0646\u0627\u0646"
-    },
-    "pol": {
-      "official": "Republika Liba\u0144ska",
-      "common": "Liban"
-    },
-    "por": {
-      "official": "Rep\u00fablica Libanesa",
-      "common": "L\u00edbano"
-    },
-    "rus": {
-      "official": "\u041b\u0438\u0432\u0430\u043d\u0441\u043a\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
-      "common": "\u041b\u0438\u0432\u0430\u043d"
-    },
-    "slk": {
-      "official": "Libanonsk\u00e1 republika",
-      "common": "Libanon"
-    },
-    "spa": {
-      "official": "Rep\u00fablica Libanesa",
-      "common": "L\u00edbano"
-    },
-    "srp": {
-      "official": "\u041b\u0438\u0431\u0430\u043d\u0441\u043a\u0430 \u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
-      "common": "\u041b\u0438\u0431\u0430\u043d"
-    },
-    "swe": {
-      "official": "Republiken Libanon",
-      "common": "Libanon"
-    },
-    "tur": {
-      "official": "L\u00fcbnan Cumhuriyeti",
-      "common": "L\u00fcbnan"
-    },
-    "urd": {
-      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0644\u0628\u0646\u0627\u0646",
-      "common": "\u0644\u0628\u0646\u0627\u0646"
-    },
-    "zho": {
-      "official": "\u9ece\u5df4\u5ae9\u5171\u548c\u56fd",
-      "common": "\u9ece\u5df4\u5ae9"
-    }
-  },
-  "latlng": [
-    33.83333333,
-    35.83333333
-  ],
-  "landlocked": false,
-  "borders": [
-    "ISR",
-    "SYR"
-  ],
-  "area": 10452.0,
-  "demonyms": {
-    "eng": {
-      "f": "Lebanese",
-      "m": "Lebanese"
-    },
-    "fra": {
-      "f": "Libanaise",
-      "m": "Libanais"
-    }
-  },
-  "flag": "\ud83c\uddf1\ud83c\udde7",
-  "maps": {
-    "googleMaps": "https://goo.gl/maps/Sz5VCU8UFBqMyTdc9",
-    "openStreetMaps": "https://www.openstreetmap.org/relation/184843"
-  },
-  "population": 6825442,
-  "gini": {
-    "2011": 31.8
-  },
-  "fifa": "LBN",
-  "car": {
-    "signs": [
-      "RL"
-    ],
-    "side": "right"
-  },
-  "timezones": [
-    "UTC+02:00"
-  ],
-  "continents": [
-    "Asia"
-  ],
-  "flags": {
-    "png": "https://flagcdn.com/w320/lb.png",
-    "svg": "https://flagcdn.com/lb.svg",
-    "alt": "The flag of Lebanon is composed of three horizontal bands of red, white and red. The white band is twice the height of the red bands and bears a green Lebanese Cedar tree at its center."
-  },
-  "coatOfArms": {
-    "png": "https://mainfacts.com/media/images/coats_of_arms/lb.png",
-    "svg": "https://mainfacts.com/media/images/coats_of_arms/lb.svg"
-  },
-  "startOfWeek": "monday",
-  "capitalInfo": {
     "latlng": [
-      33.87,
-      35.5
-    ]
-  },
-  "postalCode": {
-    "format": "#### ####|####",
-    "regex": "^(\\d{4}(\\d{4})?)$"
+      33.83333333,
+      35.83333333
+    ],
+    "landlocked": false,
+    "borders": [
+      "ISR",
+      "SYR"
+    ],
+    "area": 10452.0,
+    "demonyms": {
+      "eng": {
+        "f": "Lebanese",
+        "m": "Lebanese"
+      },
+      "fra": {
+        "f": "Libanaise",
+        "m": "Libanais"
+      }
+    },
+    "flag": "\ud83c\uddf1\ud83c\udde7",
+    "maps": {
+      "googleMaps": "https://goo.gl/maps/Sz5VCU8UFBqMyTdc9",
+      "openStreetMaps": "https://www.openstreetmap.org/relation/184843"
+    },
+    "population": 6825442,
+    "gini": {
+      "2011": 31.8
+    },
+    "fifa": "LBN",
+    "car": {
+      "signs": [
+        "RL"
+      ],
+      "side": "right"
+    },
+    "timezones": [
+      "UTC+02:00"
+    ],
+    "continents": [
+      "Asia"
+    ],
+    "flags": {
+      "png": "https://flagcdn.com/w320/lb.png",
+      "svg": "https://flagcdn.com/lb.svg",
+      "alt": "The flag of Lebanon is composed of three horizontal bands of red, white and red. The white band is twice the height of the red bands and bears a green Lebanese Cedar tree at its center."
+    },
+    "coatOfArms": {
+      "png": "https://mainfacts.com/media/images/coats_of_arms/lb.png",
+      "svg": "https://mainfacts.com/media/images/coats_of_arms/lb.svg"
+    },
+    "startOfWeek": "monday",
+    "capitalInfo": {
+      "latlng": [
+        33.87,
+        35.5
+      ]
+    },
+    "postalCode": {
+      "format": "#### ####|####",
+      "regex": "^(\\d{4}(\\d{4})?)$"
+    }
   }
-}
+]

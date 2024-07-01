@@ -11,7 +11,7 @@
         alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
         />
       <p class="fs-5">About</p>
-      <p class="display-5 fw-bold text-body-emphasis">Policies</p>
+      <h1 class="display-5 fw-bold text-body-emphasis">Policies</h1>
       <div class="col-lg-6 mx-auto">
       </div>
     </div>
@@ -73,7 +73,7 @@
     </header>
     <main>
         <div class="mb-5" id="privacy-policy">
-            <p><strong>Last Updated:</strong> Thu 15 Feb, 2024 (02/15/2024) - 19:34 UTC</p>
+            <p><strong>Last Updated:</strong> Thu 30 May, 2024 (05/30/2024) - 16:06 UTC</p>
             <p>Welcome to Infomundi. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy, or our practices with regards to your personal information, please contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or use the <a href="{{ url_for('views.contact') }}">contact form</a>.</p>
             <p>When you visit our website (https://infomundi.net/), and use our services, you trust us with your personal information. In this privacy policy, we seek to explain to you in the clearest way possible what information we collect, how we use it, and what rights you have in relation to it. We hope you take some time to read through it carefully, as it is important. If there are any terms in this privacy policy that you do not agree with, please discontinue use of our site.</p>
             <p>This privacy policy applies to all information collected through our website and related services.</p>
@@ -106,8 +106,16 @@
         <div class="mb-5" id="privacy-5">
             <h2 class="mb-2">5. How Do We Keep Your Information Safe?</h2>
             <p>We aim to protect your personal information through a system of organizational and technical security measures.</p>
+            
             <p>We employ Argon2, recognized as one of the most robust cryptographic hashing algorithms available, to ensure the utmost security of your passwords. This advanced method ensures that, even in the unlikely event an attacker gains access to our servers, your vital password information remains securely encrypted, safeguarding your privacy and data integrity.</p>
+            
             <p>We utilize TLS (Transport Layer Security) to safeguard our online interactions, encrypting the data exchanged between your device and our servers. This ensures that all communications remain confidential and secure, protecting sensitive information from potential cyber threats and unauthorized access.</p>
+            
+            <p>Additionally, we take the privacy and security of your email address seriously. To ensure its protection, we do not store your email address in clear text in our database. Instead, before being stored, your email address is hashed using the SHA-256 algorithm. This hashing process converts your email address into a unique string of characters that can only be reversed to reveal the original email address if you already know the original value. For instance, the SHA-256 cryptographic value for 'test@example.com' is equal to <code>973dfe463ec85785f5f95af5ba3906eedb2d931c24e69824a89ea65dba4e813b</code>. By employing this method, we enhance the security of your personal information and minimize the risk of unauthorized access.</p>
+            
+            <p>Furthermore, your email address is encrypted and saved to your session cookie. We can only access your email address via your session cookie when you log in. This means that your email address remains secure and is only accessible in a controlled manner, ensuring that it is protected at all times.</p>
+            
+            <p>Please be assured that your privacy is our priority, and we continuously implement and update our security measures to safeguard your data.</p>
         </div>
 
         <div class="mb-5" id="privacy-6">
@@ -117,7 +125,7 @@
 
         <div class="mb-5" id="privacy-7">
             <h2 class="mb-2">7. What Are Your Privacy Rights?</h2>
-            <p>You may review, change, or terminate your account at any time. <a href="{{ url_for('views.contact') }}">Contact us</a>.</p>
+            <p>You may review, change, or terminate your account at any time. A dashboard with user options such as update profile picture, update account informaton and account deletion is still being developed, meanwhile, you may <a href="{{ url_for('views.contact') }}">contact us</a> if you want to change account information or have your data completely removed from our servers.</p>
         </div>
 
         <div class="mb-5" id="privacy-8">
@@ -127,13 +135,15 @@
 
         <div class="mb-5" id="privacy-9">
             <h2>9. Cookies</h2>
-              <p>We only use necessary cookies that are crucial for the proper operation of the website. Third parties (Google and Cloudflare) have cookies on our website for business purposes.</p>
+              <p>We only use necessary cookies that are crucial for the proper operation of the website.</p>
+              <p>When you choose to enable translation on our website (under the "account" tab on the top right of the navigation bar, "Enable Maximus translation") for your convenience, we utilize Google Translate services. Google Translate may use cookies to provide translation services effectively. However, please note that enabling translation does not involve the processing of any personal information by our website. By continuing to use this feature, you consent to the use of cookies by Google Translate. For more information on how Google handles data, please refer to <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>.</p>
+              <p>Also, we utilize Cloudflare for security purposes on this website. Cloudflare helps protect our website against malicious attacks and ensures its availability. While Cloudflare may collect certain data for security analytics, none of your personal information is directly processed by our website. By continuing to use this site, you consent to the use of cookies for security purposes. You can learn more about how they handle data by visiting <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare's Privacy Policy</a>.</p>
+              <p>We utilize a self-hosted instance of <a href="https://comentario.app" target="_blank">Comentario</a> under the domain name "commento.infomundi.net" for our commenting system. Comentario may use cookies for its functionality, such as remembering your preferences and login status. Additionally, when you create an account on our website, we utilize Comentario Single Sign-On (SSO) to automatically create an account for you in the Comentario self-hosted instance. However, please note that your personal information is securely managed and not directly processed by our website through Comentario. By using our commenting system and creating an account, you consent to the use of cookies by Comentario. For more information on how they handle data, please refer to <a href="https://docs.comentario.app/en/legal/privacy/" target="_blank">Comentario's Privacy Policy</a>.</p>
+              <p>Cookies used by our website:</p>
               <ol>
                 <li><code>theme</code> (expires in 7 days) &ndash; is only created if you change the website theme.</li>
-                <li><code>clicked</code> (expires upon browser closure) &ndash; is created/updated when you click in a story. This cookie is essential for the webite as we need it for the comments section.</li>
-                <li><code>remember_token</code> (expires in 6 months or when user logs out) &ndash; is created when you choose to remember your session when you sign in.</li>
-                <li><code>infomundi-session</code> (expires upon browser closure) &ndash; is created/updated when you view almost every page of this website. Holds information regarding the last country you visited in our website, the last story you clicked, cooldown information for the comments page and a lot more. This cookie is essential for the website to work properly.</li>
-                <li><code>cf_clearence</code> &ndash; stores the proof of challenge passed. It is used to no longer issue a Cloudflare challenge if present. It is required to reach an origin server.</li>
+                <li><code>remember_token</code> (expires in 15 days or when user logs out) &ndash; is created when you choose to remember your session when you sign in.</li>
+                <li><code>infomundi-session</code> (expires 15 days after user login or upon browser closure if the user prefer to stay logged out) &ndash; is created/updated when you view almost every page of this website. Holds information regarding the last country you visited in our website, the last story you clicked, and a lot more. This cookie is essential for the website to work properly.</li>
               </ol>
         </div>
     </main>

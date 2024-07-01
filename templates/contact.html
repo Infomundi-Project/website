@@ -1,19 +1,19 @@
 {% extends "base.html" %}{% block title %}Contact{% endblock %}
 {% block styles %}
 <style>
-        .contact-form {
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  .contact-form {
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -28,7 +28,7 @@
         alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
         />
       <p class="fs-5">About</p>
-      <p class="display-5 fw-bold text-body-emphasis">Contact</p>
+      <h1 class="display-5 fw-bold text-body-emphasis">Contact</h1>
       <div class="col-lg-6 mx-auto">
       </div>
     </div>
@@ -53,32 +53,66 @@
 <div class="container col-xl-10 col-xxl-8 px-4 py-5">
     <div class="row align-items-center g-lg-5 py-5">
       <div class="col-lg-7 text-lg-start">
-        <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">We'd love to hear from you</h1>
+        <h2 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">We'd love to hear from you</h2>
         <p class="col-lg-10 fs-5">Your thoughts, questions, and feedback are invaluable to us as they help shape our journey towards a more informed and interconnected world.<br><br>For direct and convenient communication, please use our contact form. It's the quickest way to get your message directly to the team.</p>
         <a href="mailto:contact@infomundi.net" class="fs-5 mt-5 text-decoration-none"><i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net</a>
+        <p class="fs-6 mt-3"><a href="https://infomundi.net/pubkey.asc" class="text-decoration-none"><i class="fa-solid fa-key me-1"></i></i>PGP Public Key</a></p>
       </div>
       <div class="col-md-10 mx-auto col-lg-5">
         <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary mt-3" method="post" action="{{ url_for('views.contact') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          {% if not current_user.is_authenticated %}
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingName" name="name" maxlength="25" placeholder="Your name">
+            <input type="text" class="form-control" id="floatingName" name="name" maxlength="50" placeholder="Your name" required>
             <label for="floatingName">Name</label>
           </div>
-
+          {% else %}
           <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="floatingEmail" name="email" maxlength="50" placeholder="name@example.com" required>
+            <input type="text" class="form-control" id="floatingName" name="name" maxlength="50" value="{{ current_user.username }}" placeholder="Your name" required>
+            <label for="floatingName">Name</label>
+          </div>
+          {% endif %}
+
+          {% if not current_user.is_authenticated %}
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="floatingEmail" name="email" maxlength="70" placeholder="name@example.com" required>
             <label for="floatingEmail">Email address</label>
           </div>
+          {% else %}
           <div class="form-floating mb-3">
-            <textarea type="text" class="form-control" id="floatingMessage" name="message" rows="4" minlength="5" maxlength="500" placeholder="Message" style="height: 200px" required></textarea>
+            <input type="email" class="form-control" id="floatingEmail" value="{{ session.get('email_address', '') }}" name="email" maxlength="70" placeholder="name@example.com" required>
+            <label for="floatingEmail">Email address</label>
+          </div>
+          {% endif %}
+
+          <div class="form-floating mb-3">
+            <textarea type="text" class="form-control" id="floatingMessage" name="message" rows="4" minlength="5" maxlength="1000" placeholder="Message" style="height: 200px" required></textarea>
             <label for="floatingMessage">Message</label>
+            <div id="charCount">Characters remaining: 1000</div>
           </div>
           <div class="mb-2">
-              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
           </div>
           <button class="w-100 btn btn-lg btn-primary" type="submit">Send</button>
         </form>
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block scripts %}
+
+<script nonce="{{ nonce }}">
+    document.addEventListener('DOMContentLoaded', function() {
+        var messageInput = document.getElementById('floatingMessage');
+        var charCount = document.getElementById('charCount');
+
+        messageInput.addEventListener('input', function() {
+            var remainingChars = 1000 - this.value.length;
+            charCount.textContent = 'Characters remaining: ' + remainingChars;
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,27 +1,60 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if request.cookies.get('theme') == 'dark' %}dark{% else %}light{% endif %}">
+<html lang="{% if '/comments' in request.url and story %}{{ page_language }}{% else %}en{% endif %}" data-bs-theme="{% if request.cookies.get('theme') == 'dark' %}dark{% else %}light{% endif %}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="{{ request.url }}">
+
+    <!-- Verifications, ADS and Schema -->
+    <meta name="google-adsense-account" content="ca-pub-2416889662324926">
+    <meta name="msvalidate.01" content="02225A95C7E679E2FCBD558DCA1EFD89">
+    
+    {% if current_user.is_authenticated and current_user.in_recovery and 'password_change' not in request.url %}
+      <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/password_change");</script>
+    {% endif %}
+
+    <script type="application/ld+json" nonce="{{ nonce }}">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Infomundi",
+        "url": "https://infomundi.net",
+        "logo": "https://infomundi.net/static/img/logos/logo-500-bg-light.webp",
+        "email": "contact@infomundi.net",
+        "contactPoint": [{
+          "@type": "ContactPoint",
+          "email": "contact@infomundi.net",
+          "contactType": "customer support"
+        }],
+        "sameAs": [
+          "https://twitter.com/infomundi_net",
+          "https://instagram.com/infomundi_net",
+          "https://github.com/Infomundi-Project"
+        ]
+      }
+    </script>
+
     
     <!-- Primary -->
-    <meta name="title" content="Infomundi" />
-    <meta name="description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}...{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta name="description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta name="theme-color" content="#000000">
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://infomundi.net/" />
-    <meta property="og:title" content="Infomundi" />
-    <meta property="og:description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="og:image" content="{% if '/comments' in request.url and False %}{{ story.image_source_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta property="og:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta property="og:image" content="{% if '/comments' in request.url and story %}{{ story.media_content_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://infomundi.net/" />
-    <meta property="twitter:title" content="Infomundi" />
-    <meta property="twitter:description" content="{% if '/comments' in request.url and False %}View on Infomundi: {{ story.description }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}" />
-    <meta property="twitter:image" content="{% if '/comments' in request.url and False %}{{ story.image_source_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}" />
+    <meta property="twitter:card" content="summary_large_image">
+
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta property="twitter:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta property="twitter:image" content="{% if '/comments' in request.url and story %}{{ story.media_content_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
+
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
@@ -30,9 +63,12 @@
     <meta name="msapplication-TileColor" content="#da532c">
     
     <!-- Stylesheets/Libraries -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/bootstrap-5.3.2.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cookieconsent.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/font-awesome-4.7.0.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/solid.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/brands.css') }}">
     
     <!-- Stylesheets/Website -->
     {% assets "css_base" %}
@@ -40,29 +76,10 @@
     {% endassets %}
 
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
+    
     {% block styles %} {% endblock %}
   </head>
-  <body> 
-
-{% if not request.url.endswith('/policies') %}
-<!-- Cookie Consent Modal -->
-<div class="modal fade" id="cookieConsentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="cookieConsentModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cookieConsentModalLabel">Cookie Consent</h5>
-      </div>
-      <div class="modal-body">
-        We use cookies to improve your experience on our site. By continuing to use our site, you accept our use of cookies. <a href="https://infomundi.net/policies">What for?</a>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="acceptCookieConsent">I Agree</button>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
+  <body>
     {% if page != 'Error' %}
     <div class="offcanvas inf-nav-offcanvas offcanvas-start shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasNavigation">
       <div class="offcanvas-header">
@@ -75,7 +92,7 @@
       <div class="offcanvas-body">
         <span class="fs-4">Search a Country</span>
         <form action="{{ url_for('api.search') }}" method="POST" class="mb-5">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="input-group justify-content-center">
             <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon">
               <i class="fa-solid fa-magnifying-glass"></i>
@@ -89,7 +106,7 @@
               id="searchForCountry" 
               minlength="3" 
               name="query"
-              />
+             >
           </div>
         </form>
         <span class="fs-4">Pages</span>
@@ -146,8 +163,8 @@
     <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
       <div class="offcanvas-header">
         {% if current_user.is_authenticated %}
-          <img src="{{ current_user.avatar_url }}" class="rounded-circle" height="500" width="500" style="height: 6vh; width: 6vh;">
-          <h5 class="offcanvas-title notranslate" id="offcanvasRightLabel">{{ current_user.username }}</h5>
+          <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded-circle" height="500" width="500" style="height: 6vh; width: 6vh;">
+          <p class="offcanvas-title notranslate fs-5" id="offcanvasRightLabel">{{ current_user.username }}</p>
         {% else %}
           <a href="/" class="text-decoration-none text-reset">
             <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
@@ -201,7 +218,7 @@
           <ul class="nav nav-pills flex-column mb-5">
             <li class="nav-item inf-nav-item">
               <a href="{{ url_for('auth.forgot_password') }}" class="nav-link {{ 'active' if request.url.endswith('/forgot_password') else '' }}">
-                <i class="fa-solid fa-person-circle-question me-1"></i>Forgot Password
+                <i class="fa-solid fa-person-circle-question me-1"></i>Account Recovery
               </a>
             </li>
             <hr>
@@ -292,25 +309,21 @@
     {% endif %}
 
     
-    {% if world_stocks %}
-    <div class="hwrap" id="ticker">
+  {% if world_stocks and is_mobile %}
+    <div class="hwrap-home mb-3" style="border-radius: 0px;" id="ticker">
       <div class="hmove" style="color: white">
-        <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies and<i class="fa-brands fa-bitcoin me-2 ms-2"></i>Cryptocoins - {{ world_stocks[0]['date'] }}<i class="fa-solid fa-arrow-right ms-2"></i></div>
+        <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies - {{ stock_date }}</div>
 
-        {% for entry in world_stocks %}
-    <div class="hitem" style="color: {{ entry['color'] }};">
-        {% if not entry['symbol'].endswith(':CUR') %}
+        {% for index, entry in world_stocks %}
+            {% if not entry['symbol'].endswith(':CUR') %}
+        <div class="hitem" style="color: {{ entry['color'] }};">
             <!-- <span class="fi fi-{{ entry['country']['code'] }} me-1"></span> -->
             {% if entry['country']['code'] %}
             <img alt="{{ entry['country']['code'] }} flag" data-src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/flags/4x3/{{ entry['country']['code'] }}.svg" class="lazyload" height="16" width="9" style="width: 2%; height: 50%;">
             {% endif %}
-        {% else %}
-            <span style="color: white"></span>
-        {% endif %}
-        <span style="color: white"> 
-            {% if not entry['symbol'].endswith(':CUR') %}
+            <span style="color: white"> 
                 {{ entry['country']['name'] }}
-                {% if entry['country']['name'] == 'United States' %}
+                {% if index == 1 %}
                   {% for index, us_info in us_indexes %}
                     <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
                     {% if us_info['color'] == '#FF6666' %}
@@ -339,17 +352,9 @@
                         {{ entry['currency']['symbol'] }}1 = </i>${{ entry['currency']['price'] }}
                     {% endif %}
                 {% endif %}
-            {% else %}
-                <i class="fa-brands fa-bitcoin me-2"></i>{{ entry['name'] }}
-                <span style="color: {{ entry['color'] }};">{{ entry['symbol'] }} {{ entry['changes']['percent'] }}</span>
-                {% if entry['color'] == '#FF6666' %}
-                  <span style="color: #FF6666">&#8659;</span>
-                {% else %}
-                  <span style="color: #00FF00">&#8657;</span>
-                {% endif %}
+            </span>
+        </div>
             {% endif %}
-        </span>
-    </div>
         {% endfor %}
       </div>
     </div>
@@ -499,13 +504,12 @@
       <p class="fs-4 notranslate">INFOMUNDI</p>
         <ul class="nav flex-column">
           <li class="nav-item mb-2"><a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to return to the home page"><i class="fa-solid fa-house me-1"></i>Home</a></li>
-          <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary"><i class="fa-solid fa-address-card me-1" aria-label="Click to open the about page"></i>About</a></li>
+          
+          <li class="nav-item mb-2"><a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the about page"><i class="fa-solid fa-address-card me-1"></i>About</a></li>
           
           <li class="nav-item mb-2"><a href="{{ url_for('views.team') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page"><i class="fa-solid fa-people-group me-1"></i>Team</a></li>
           
           <li class="nav-item mb-2"><a href="{{ url_for('views.contact') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page"><i class="fa-solid fa-phone me-1"></i>Contact</a></li>
-
-          <li class="nav-item mb-2"><a href="{{ url_for('views.donate') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the donate page"><i class="fa-solid fa-hand-holding-dollar me-1"></i>Donate</a></li>
 
           <li class="nav-item mb-2"><a href="{{ url_for('views.policies') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the policies page"><i class="fa-solid fa-building-shield me-1"></i>Policies</a></li>
           <!--
@@ -517,7 +521,7 @@
               <span class="ball"></span>
             </label>
           </li>
-        -->
+          -->
         </ul>
     </div>
 
@@ -525,6 +529,7 @@
       <p class="fs-4">SESSION</p>
         <ul class="nav flex-column">
           {% if not current_user.is_authenticated %}
+            <li class="nav-item mb-2"><a href="{{ url_for('auth.forgot_password') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page"><i class="fa-solid fa-person-circle-question me-1"></i>Account Recovery</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page"><i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the login page"><i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login</a></li>
           {% else %}
@@ -551,38 +556,44 @@
   </footer>
 </div>
 {% endif %}
-    <script 
-      src="{{ url_for('static', filename='js/libs/bootstrap-5.3.2.bundle.min.js') }}"
+    <script nonce="{{ nonce }}"
+      src="{{ url_for('static', filename='js/libs/bootstrap.bundle.min.js') }}"
     ></script>
-    <script
+    <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/libs/jquery-3.7.1.min.js') }}" 
     ></script>
-    <script 
+    <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}" 
     ></script>
     
-    <script defer
-      src="https://kit.fontawesome.com/26c9d739ef.js" 
-      crossorigin="anonymous"
-    ></script>
-    
-    <script 
+
+    <script nonce="{{ nonce }}"
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer
     ></script>
 
+
+    <script nonce="{{ nonce }}"
+      src="{{ url_for('static', filename='js/libs/cookieconsent-3.0.1.js') }}"
+    ></script>
+    <script nonce="{{ nonce }}"
+      src="{{ url_for('static', filename='js/cookieConsent.js') }}"
+      async defer
+    ></script>
+    
+
     {% assets "js_base" %}
-    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+      <script nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
     {% endassets %}
 
     {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
-    <script
+    <script nonce="{{ nonce }}"
       src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
     ></script>
     {% endif %}
 
     {% if '/news' in request.url or '/comments' in request.url %}
-    <script 
+    <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
     ></script>
     {% endif %}

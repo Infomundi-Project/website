@@ -1,212 +1,214 @@
-{
-  "name": {
-    "common": "Philippines",
-    "official": "Republic of the Philippines",
-    "nativeName": {
-      "eng": {
+[
+  {
+    "name": {
+      "common": "Philippines",
+      "official": "Republic of the Philippines",
+      "nativeName": {
+        "eng": {
+          "official": "Republic of the Philippines",
+          "common": "Philippines"
+        },
+        "fil": {
+          "official": "Republic of the Philippines",
+          "common": "Pilipinas"
+        }
+      }
+    },
+    "tld": [
+      ".ph"
+    ],
+    "cca2": "PH",
+    "ccn3": "608",
+    "cca3": "PHL",
+    "cioc": "PHI",
+    "independent": true,
+    "status": "officially-assigned",
+    "unMember": true,
+    "currencies": {
+      "PHP": {
+        "name": "Philippine peso",
+        "symbol": "\u20b1"
+      }
+    },
+    "idd": {
+      "root": "+6",
+      "suffixes": [
+        "3"
+      ]
+    },
+    "capital": [
+      "Manila"
+    ],
+    "altSpellings": [
+      "PH",
+      "Republic of the Philippines",
+      "Rep\u00fablika ng Pilipinas"
+    ],
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "languages": {
+      "eng": "English",
+      "fil": "Filipino"
+    },
+    "translations": {
+      "ara": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0641\u0644\u0628\u064a\u0646",
+        "common": "\u0627\u0644\u0641\u0644\u0628\u064a\u0646"
+      },
+      "bre": {
+        "official": "Republik Filipinez",
+        "common": "Filipinez"
+      },
+      "ces": {
+        "official": "Filip\u00ednsk\u00e1 republika",
+        "common": "Filip\u00edny"
+      },
+      "cym": {
         "official": "Republic of the Philippines",
         "common": "Philippines"
       },
-      "fil": {
-        "official": "Republic of the Philippines",
-        "common": "Pilipinas"
+      "deu": {
+        "official": "Republik der Philippinen",
+        "common": "Philippinen"
+      },
+      "est": {
+        "official": "Filipiini Vabariik",
+        "common": "Filipiinid"
+      },
+      "fin": {
+        "official": "Filippiinien tasavalta",
+        "common": "Filippiinit"
+      },
+      "fra": {
+        "official": "R\u00e9publique des Philippines",
+        "common": "Philippines"
+      },
+      "hrv": {
+        "official": "Republika Filipini",
+        "common": "Filipini"
+      },
+      "hun": {
+        "official": "F\u00fcl\u00f6p-szigeteki K\u00f6zt\u00e1rsas\u00e1g",
+        "common": "F\u00fcl\u00f6p-szigetek"
+      },
+      "ita": {
+        "official": "Repubblica delle Filippine",
+        "common": "Filippine"
+      },
+      "jpn": {
+        "official": "\u30d5\u30a3\u30ea\u30d4\u30f3\u5171\u548c\u56fd",
+        "common": "\u30d5\u30a3\u30ea\u30d4\u30f3"
+      },
+      "kor": {
+        "official": "\ud544\ub9ac\ud540 \uacf5\ud654\uad6d",
+        "common": "\ud544\ub9ac\ud540"
+      },
+      "nld": {
+        "official": "Republiek der Filipijnen",
+        "common": "Filipijnen"
+      },
+      "per": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0641\u06cc\u0644\u06cc\u067e\u06cc\u0646",
+        "common": "\u0641\u06cc\u0644\u06cc\u067e\u06cc\u0646"
+      },
+      "pol": {
+        "official": "Republika Filipin",
+        "common": "Filipiny"
+      },
+      "por": {
+        "official": "Rep\u00fablica das Filipinas",
+        "common": "Filipinas"
+      },
+      "rus": {
+        "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0424\u0438\u043b\u0438\u043f\u043f\u0438\u043d\u044b",
+        "common": "\u0424\u0438\u043b\u0438\u043f\u043f\u0438\u043d\u044b"
+      },
+      "slk": {
+        "official": "Filip\u00ednska republika",
+        "common": "Filip\u00edny"
+      },
+      "spa": {
+        "official": "Rep\u00fablica de las Filipinas",
+        "common": "Filipinas"
+      },
+      "srp": {
+        "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0424\u0438\u043b\u0438\u043f\u0438\u043d\u0438",
+        "common": "\u0424\u0438\u043b\u0438\u043f\u0438\u043d\u0438"
+      },
+      "swe": {
+        "official": "Republiken Filippinerna",
+        "common": "Filippinerna"
+      },
+      "tur": {
+        "official": "Filipinler Cumhuriyeti",
+        "common": "Filipinler"
+      },
+      "urd": {
+        "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0641\u0644\u067e\u0627\u0626\u0646",
+        "common": "\u0641\u0644\u067e\u0627\u0626\u0646"
+      },
+      "zho": {
+        "official": "\u83f2\u5f8b\u5bbe\u5171\u548c\u56fd",
+        "common": "\u83f2\u5f8b\u5bbe"
       }
-    }
-  },
-  "tld": [
-    ".ph"
-  ],
-  "cca2": "PH",
-  "ccn3": "608",
-  "cca3": "PHL",
-  "cioc": "PHI",
-  "independent": true,
-  "status": "officially-assigned",
-  "unMember": true,
-  "currencies": {
-    "PHP": {
-      "name": "Philippine peso",
-      "symbol": "\u20b1"
-    }
-  },
-  "idd": {
-    "root": "+6",
-    "suffixes": [
-      "3"
-    ]
-  },
-  "capital": [
-    "Manila"
-  ],
-  "altSpellings": [
-    "PH",
-    "Republic of the Philippines",
-    "Rep\u00fablika ng Pilipinas"
-  ],
-  "region": "Asia",
-  "subregion": "South-Eastern Asia",
-  "languages": {
-    "eng": "English",
-    "fil": "Filipino"
-  },
-  "translations": {
-    "ara": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0641\u0644\u0628\u064a\u0646",
-      "common": "\u0627\u0644\u0641\u0644\u0628\u064a\u0646"
     },
-    "bre": {
-      "official": "Republik Filipinez",
-      "common": "Filipinez"
-    },
-    "ces": {
-      "official": "Filip\u00ednsk\u00e1 republika",
-      "common": "Filip\u00edny"
-    },
-    "cym": {
-      "official": "Republic of the Philippines",
-      "common": "Philippines"
-    },
-    "deu": {
-      "official": "Republik der Philippinen",
-      "common": "Philippinen"
-    },
-    "est": {
-      "official": "Filipiini Vabariik",
-      "common": "Filipiinid"
-    },
-    "fin": {
-      "official": "Filippiinien tasavalta",
-      "common": "Filippiinit"
-    },
-    "fra": {
-      "official": "R\u00e9publique des Philippines",
-      "common": "Philippines"
-    },
-    "hrv": {
-      "official": "Republika Filipini",
-      "common": "Filipini"
-    },
-    "hun": {
-      "official": "F\u00fcl\u00f6p-szigeteki K\u00f6zt\u00e1rsas\u00e1g",
-      "common": "F\u00fcl\u00f6p-szigetek"
-    },
-    "ita": {
-      "official": "Repubblica delle Filippine",
-      "common": "Filippine"
-    },
-    "jpn": {
-      "official": "\u30d5\u30a3\u30ea\u30d4\u30f3\u5171\u548c\u56fd",
-      "common": "\u30d5\u30a3\u30ea\u30d4\u30f3"
-    },
-    "kor": {
-      "official": "\ud544\ub9ac\ud540 \uacf5\ud654\uad6d",
-      "common": "\ud544\ub9ac\ud540"
-    },
-    "nld": {
-      "official": "Republiek der Filipijnen",
-      "common": "Filipijnen"
-    },
-    "per": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0641\u06cc\u0644\u06cc\u067e\u06cc\u0646",
-      "common": "\u0641\u06cc\u0644\u06cc\u067e\u06cc\u0646"
-    },
-    "pol": {
-      "official": "Republika Filipin",
-      "common": "Filipiny"
-    },
-    "por": {
-      "official": "Rep\u00fablica das Filipinas",
-      "common": "Filipinas"
-    },
-    "rus": {
-      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0424\u0438\u043b\u0438\u043f\u043f\u0438\u043d\u044b",
-      "common": "\u0424\u0438\u043b\u0438\u043f\u043f\u0438\u043d\u044b"
-    },
-    "slk": {
-      "official": "Filip\u00ednska republika",
-      "common": "Filip\u00edny"
-    },
-    "spa": {
-      "official": "Rep\u00fablica de las Filipinas",
-      "common": "Filipinas"
-    },
-    "srp": {
-      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0424\u0438\u043b\u0438\u043f\u0438\u043d\u0438",
-      "common": "\u0424\u0438\u043b\u0438\u043f\u0438\u043d\u0438"
-    },
-    "swe": {
-      "official": "Republiken Filippinerna",
-      "common": "Filippinerna"
-    },
-    "tur": {
-      "official": "Filipinler Cumhuriyeti",
-      "common": "Filipinler"
-    },
-    "urd": {
-      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0641\u0644\u067e\u0627\u0626\u0646",
-      "common": "\u0641\u0644\u067e\u0627\u0626\u0646"
-    },
-    "zho": {
-      "official": "\u83f2\u5f8b\u5bbe\u5171\u548c\u56fd",
-      "common": "\u83f2\u5f8b\u5bbe"
-    }
-  },
-  "latlng": [
-    13.0,
-    122.0
-  ],
-  "landlocked": false,
-  "area": 342353.0,
-  "demonyms": {
-    "eng": {
-      "f": "Filipino",
-      "m": "Filipino"
-    },
-    "fra": {
-      "f": "Philippine",
-      "m": "Philippin"
-    }
-  },
-  "flag": "\ud83c\uddf5\ud83c\udded",
-  "maps": {
-    "googleMaps": "https://goo.gl/maps/k8T2fb5VMUfsWFX6A",
-    "openStreetMaps": "https://www.openstreetmap.org/relation/443174"
-  },
-  "population": 109581085,
-  "gini": {
-    "2018": 42.3
-  },
-  "fifa": "PHI",
-  "car": {
-    "signs": [
-      "RP"
-    ],
-    "side": "right"
-  },
-  "timezones": [
-    "UTC+08:00"
-  ],
-  "continents": [
-    "Asia"
-  ],
-  "flags": {
-    "png": "https://flagcdn.com/w320/ph.png",
-    "svg": "https://flagcdn.com/ph.svg",
-    "alt": "The flag of Philippines is composed of two equal horizontal bands of blue and red, with a white equilateral triangle superimposed on the hoist side of the field. This triangle has its base on the hoist end, spans about two-fifth the width of the field and bears a central golden-yellow sun with eight rays and a five-pointed golden-yellow star at each vertex."
-  },
-  "coatOfArms": {
-    "png": "https://mainfacts.com/media/images/coats_of_arms/ph.png",
-    "svg": "https://mainfacts.com/media/images/coats_of_arms/ph.svg"
-  },
-  "startOfWeek": "monday",
-  "capitalInfo": {
     "latlng": [
-      14.6,
-      120.97
-    ]
-  },
-  "postalCode": {
-    "format": "####",
-    "regex": "^(\\d{4})$"
+      13.0,
+      122.0
+    ],
+    "landlocked": false,
+    "area": 342353.0,
+    "demonyms": {
+      "eng": {
+        "f": "Filipino",
+        "m": "Filipino"
+      },
+      "fra": {
+        "f": "Philippine",
+        "m": "Philippin"
+      }
+    },
+    "flag": "\ud83c\uddf5\ud83c\udded",
+    "maps": {
+      "googleMaps": "https://goo.gl/maps/k8T2fb5VMUfsWFX6A",
+      "openStreetMaps": "https://www.openstreetmap.org/relation/443174"
+    },
+    "population": 109581085,
+    "gini": {
+      "2018": 42.3
+    },
+    "fifa": "PHI",
+    "car": {
+      "signs": [
+        "RP"
+      ],
+      "side": "right"
+    },
+    "timezones": [
+      "UTC+08:00"
+    ],
+    "continents": [
+      "Asia"
+    ],
+    "flags": {
+      "png": "https://flagcdn.com/w320/ph.png",
+      "svg": "https://flagcdn.com/ph.svg",
+      "alt": "The flag of Philippines is composed of two equal horizontal bands of blue and red, with a white equilateral triangle superimposed on the hoist side of the field. This triangle has its base on the hoist end, spans about two-fifth the width of the field and bears a central golden-yellow sun with eight rays and a five-pointed golden-yellow star at each vertex."
+    },
+    "coatOfArms": {
+      "png": "https://mainfacts.com/media/images/coats_of_arms/ph.png",
+      "svg": "https://mainfacts.com/media/images/coats_of_arms/ph.svg"
+    },
+    "startOfWeek": "monday",
+    "capitalInfo": {
+      "latlng": [
+        14.6,
+        120.97
+      ]
+    },
+    "postalCode": {
+      "format": "####",
+      "regex": "^(\\d{4})$"
+    }
   }
-}
+]

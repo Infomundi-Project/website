@@ -1,16 +1,19 @@
-import re, os, random
-from collections import Counter
-from nltk.corpus import stopwords
+import re
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from collections import Counter
 from langdetect import detect
+from sys import exit
 
-from website_scripts import json_util, config
+from website_scripts import json_util, config, models, extensions
+from app import app
 
-tags = {}
-STORIES_MAXIMUM = 500
+with app.app_context():
+    session = extensions.db.session
+    categories = session.query(models.Category).all()
 
 
-def preprocess_text(text, lang='en'):
+def preprocess_text(text:str, lang:str='en') -> list:
     """Preprocess text: remove punctuation, lowercase, tokenize, remove stopwords"""
     text = re.sub(r'\W', ' ', text)  # Remove punctuation
     text = text.lower()  # Convert to lowercase
@@ -26,66 +29,55 @@ def preprocess_text(text, lang='en'):
     return filtered_words
 
 
-def process_articles(news_data: list, cache_category: str):
-    """Process and tag articles"""
-    tags[cache_category] = []
-    for title, description in news_data:
-        # Detect the language of the article
-        try:
-            lang = detect(title + " " + description)
-        except Exception:
-            lang = 'en'  # Default to English if language detection fails
+def process_articles(category_id: str):
+    with app.app_context():
+        # Remove previous tag associations for the category
+        existing_associations = session.query(models.CategoryTag).filter_by(category_id=category_id).all()
+        for association in existing_associations:
+            session.delete(association)
+        session.commit()
 
-        # Tokenize and preprocess the title and description
-        words = preprocess_text(title, lang) + preprocess_text(description, lang)
+        stories = session.query(models.Story).filter_by(category_id=category_id).order_by(models.Story.created_at.desc()).limit(1000).all()
+        all_tags = []
+        
+        for story in stories:
+            try:
+                lang = detect(story.title + " " + story.description)
+            except Exception:
+                lang = 'en'
 
-        # Count word frequency
-        word_counts = Counter(words)
+            words = preprocess_text(story.title, lang) + preprocess_text(story.description, lang)
+            word_counts = Counter(words)
+            N = 5
+            top_tags = [word for word, count in word_counts.most_common(N)]
+            all_tags.extend(top_tags)
 
-        # Select top N words as tags (adjust N as needed)
-        N = 3
-        tags[cache_category].extend([word for word, count in word_counts.most_common(N)])
+        # Deduplicate and count tags for the category
+        category_tags_count = Counter(all_tags)
+        best_tags = category_tags_count.most_common(10)  # Adjust the number as necessary
+        best_tags_names = [tag for tag, _ in best_tags]
 
-    print(f'[+] Got total of {len(tags[cache_category])} tags for {cache_category} (language: {lang})')
+        print(f"Best tags for category {category_id}: {best_tags_names}")
+
+        for tag_name in best_tags_names:
+            tag = session.query(models.Tag).filter_by(tag=tag_name).first()
+            if not tag:
+                tag = models.Tag(tag=tag_name)
+                session.add(tag)
+                session.flush()
+
+            association_exists = session.query(models.CategoryTag).filter_by(category_id=category_id, tag_id=tag.tag_id).first()
+            if not association_exists:
+                new_association = models.CategoryTag(category_id=category_id, tag_id=tag.tag_id)
+                session.add(new_association)
+
+        session.commit()
 
 
-cache_files = os.listdir(config.CACHE_PATH)
-random.shuffle(cache_files)
-
-# cache_files = ['br_technology.json'] # DEBUG
-
-for cache_file in cache_files:
-    cache = json_util.read_json(f"{config.CACHE_PATH}/{cache_file.replace('.json', '')}")
-
-    news_data = []
-    for story in cache['stories'][:STORIES_MAXIMUM]:
-        news_data.append( (story['title'], story['description']) )
-
-    cache_category = cache_file.replace('.json', '')
-    process_articles(news_data, cache_category)
-
-
-for cache_file in cache_files:
-    cache = json_util.read_json(f"{config.CACHE_PATH}/{cache_file.replace('.json', '')}")
-    
-    cache_category = cache_file.replace('.json', '')
-    country_tags = tags[cache_category]
-    
-    # We count again the most common tags and assign the most common of the most common
-    word_counts = Counter(country_tags)
-
-    N = 5
-    tags[cache_category] = [word for word, count in word_counts.most_common(N)]
-    cache['best_tags'] = tags[cache_category]
-
-    print(f'[+] Best tags for {cache_category}: {tags[cache_category]}')
-    
-    for story in cache['stories'][:STORIES_MAXIMUM]:
-        story['tags'] = []
-        for tag in tags[cache_category]:
-            if ( tag in story['title'].lower() or tag in story['description'].lower() ) and tag not in story['tags']:
-                story['tags'].append(tag)
-
-    json_util.write_json(cache, f"{config.CACHE_PATH}/{cache_file.replace('.json', '')}")
-
-print("\n\n[+] Finished associating tags to the news!")
+if __name__ == '__main__':
+    with app.app_context():
+        categories = session.query(models.Category).all()
+        categories = ['br_general'] # DEBUG
+        for category in categories:
+            #process_articles(category.category_id)
+            process_articles(category) # DEBUG

@@ -1,17 +1,30 @@
-import magic
+import magic, boto3
+from io import BytesIO
 from PIL import Image
 
-from . import immutable
+from . import immutable, config
 
-def convert_to_webp(image_stream, filepath:str, dimensions: tuple=(500, 500)):
-    """Uses PIL library to convert image stream to webp, saving locally.
+# r2 configuration
+s3_client = boto3.client(
+    's3',
+    endpoint_url=config.R2_ENDPOINT,
+    aws_access_key_id=config.R2_ACCESS_KEY,
+    aws_secret_access_key=config.R2_SECRET,
+    region_name='auto',
+)
 
-    Arguments
-        image_stream - Usually bytes. The image iteself.
-        dimensions:tuple - A tuple containing dimensions to save the image with. Example 500 width x 333 height would be: (500, 333)
-        filepath:str - Where to save the file in the system.
-    
-    Return: bool
+def convert_to_jpg(image_stream: bytes, s3_object_key: str, dimensions: tuple=(500, 500)) -> bool:
+    """Uses PIL library to crop the image into a quare, convert to jpeg, save the data a IO buffer and upload to the bucket.
+
+    Arguments:
+        image_stream: bytes
+            The image iteself, in bytes.
+        
+        dimensions: tuple
+            A tuple containing dimensions to save the image with. Example 500 width x 333 height would be: (500, 333)
+        
+        s3_object_key: str 
+            Where to save the file in the bucket. Example: 'users/5045a910.jpg'
     """
     image = Image.open(image_stream)
 
@@ -26,22 +39,39 @@ def convert_to_webp(image_stream, filepath:str, dimensions: tuple=(500, 500)):
     image.thumbnail(dimensions)
     image = image.convert("RGB")
 
-    image.save(f"{filepath}.webp", format="webp", optimize=True, quality=70, method=6)
-    
+    output_buffer = BytesIO()
+    image.save(output_buffer, format="JPEG", optimize=True, quality=50, progressive=True)
+
+    output_buffer.seek(0)
+
+    try:
+        # Upload the buffer content to R2
+        s3_client.upload_fileobj(output_buffer, config.BUCKET_NAME, s3_object_key)
+    except Exception as e:
+        return False
+        
+    output_buffer.close()
     return True
 
 
 def allowed_mime_type(file_stream):
     mime = magic.from_buffer(file_stream.read(2048), mime=True)
-    file_stream.seek(0)  # Reset file stream position
-    return mime in ['image/png', 'image/jpeg', 'image/gif']
+    
+    # Reset file stream position
+    file_stream.seek(0)
+    
+    return mime in ['image/png', 'image/jpeg']
 
 
 def verify_image_content(file_stream):
     try:
         with Image.open(file_stream) as img:
-            img.verify()  # Verifies that an image can be opened and decoded
-        file_stream.seek(0)  # Reset file stream position
+            # Verifies that an image can be opened and decoded
+            img.verify()
+        
+        # Reset file stream position
+        file_stream.seek(0)
+        
         return True
     except Exception:
         return False
@@ -60,4 +90,5 @@ def allowed_file(filename):
 def check_image_dimensions(image_stream, min_width: int=300, min_height: int=300):
     image = Image.open(image_stream)
     width, height = image.size
+    
     return width >= min_width and height >= min_height

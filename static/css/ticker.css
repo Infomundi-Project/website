@@ -13,14 +13,19 @@
   scrollbar-width: none; /* Firefox */
 }
 
+.hwrap-home {
+  overflow: hidden;
+  background: #000;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  border-radius: 20px; /* Rounded border */
+}
+
+
 .hwrap::-webkit-scrollbar {
   display: none; /* WebKit browsers */
 }
 
-.hmove { 
-  display: flex; 
-  overflow-x: visible;
-}
 
 .hitem {
   flex: 0 0 auto;
@@ -33,23 +38,47 @@
   text-align: center;
 }
 
+/* -------------- Home ticker */
+.hmove-home { 
+  display: flex; 
+  overflow-x: visible;
+}
+
+@keyframes hometickerh {
+  0% { transform: translate3d(100%, 0, 0); }
+  100% { transform: translate3d(-3000%, 0, 0); }
+}
+
+.hmove-home { animation: hometickerh linear 330s infinite; }
+
+
+/* -------------- News ticker */
+.hmove {
+  display: flex;
+  overflow-x: visible;
+}
 
 @keyframes tickerh {
   0% { transform: translate3d(100%, 0, 0); }
-  100% { transform: translate3d(-1800%, 0, 0); }
+  100% { transform: translate3d(-1000%, 0, 0); }
 }
-.hmove { animation: tickerh linear 330s infinite; }
+
+.hmove { animation: tickerh linear 180s infinite; }
 
 
+/* -------------- Adapted for mobile and small screen sizes */
 @media (max-width: 800px) {
   @keyframes tickerh {
-  0% { transform: translate3d(100%, 0, 0); }
-  100% { transform: translate3d(-7000%, 0, 0); }
+    0% { transform: translate3d(100%, 0, 0); }
+    100% { transform: translate3d(-4000%, 0, 0); }
+  }
+
+  @keyframes hometickerh {
+    0% { transform: translate3d(100%, 0, 0); }
+    100% { transform: translate3d(-4000%, 0, 0); }
   }
 
   .hitem {
-  font-size: 14px;
+    font-size: 14px;
   }
-
-  .hmove { animation: tickerh linear 340s infinite; }
 }

@@ -1,205 +1,207 @@
-{
-  "name": {
-    "common": "Gambia",
-    "official": "Republic of the Gambia",
-    "nativeName": {
-      "eng": {
+[
+  {
+    "name": {
+      "common": "Gambia",
+      "official": "Republic of the Gambia",
+      "nativeName": {
+        "eng": {
+          "official": "Republic of the Gambia",
+          "common": "Gambia"
+        }
+      }
+    },
+    "tld": [
+      ".gm"
+    ],
+    "cca2": "GM",
+    "ccn3": "270",
+    "cca3": "GMB",
+    "cioc": "GAM",
+    "independent": true,
+    "status": "officially-assigned",
+    "unMember": true,
+    "currencies": {
+      "GMD": {
+        "name": "dalasi",
+        "symbol": "D"
+      }
+    },
+    "idd": {
+      "root": "+2",
+      "suffixes": [
+        "20"
+      ]
+    },
+    "capital": [
+      "Banjul"
+    ],
+    "altSpellings": [
+      "GM",
+      "Republic of the Gambia"
+    ],
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "languages": {
+      "eng": "English"
+    },
+    "translations": {
+      "ara": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u063a\u0627\u0645\u0628\u064a\u0627",
+        "common": "\u063a\u0627\u0645\u0628\u064a\u0627"
+      },
+      "bre": {
+        "official": "Republik islamek ar Gambia",
+        "common": "Gambia"
+      },
+      "ces": {
+        "official": "Gambijsk\u00e1 republika",
+        "common": "Gambie"
+      },
+      "cym": {
         "official": "Republic of the Gambia",
         "common": "Gambia"
+      },
+      "deu": {
+        "official": "Republik Gambia",
+        "common": "Gambia"
+      },
+      "est": {
+        "official": "Gambia Vabariik",
+        "common": "Gambia"
+      },
+      "fin": {
+        "official": "Gambian tasavalta",
+        "common": "Gambia"
+      },
+      "fra": {
+        "official": "R\u00e9publique de Gambie",
+        "common": "Gambie"
+      },
+      "hrv": {
+        "official": "Republika Gambija",
+        "common": "Gambija"
+      },
+      "hun": {
+        "official": "Gambiai K\u00f6zt\u00e1rsas\u00e1g",
+        "common": "Gambia"
+      },
+      "ita": {
+        "official": "Repubblica del Gambia",
+        "common": "Gambia"
+      },
+      "jpn": {
+        "official": "\u30ac\u30f3\u30d3\u30a2\u5171\u548c\u56fd",
+        "common": "\u30ac\u30f3\u30d3\u30a2"
+      },
+      "kor": {
+        "official": "\uac10\ube44\uc544 \uacf5\ud654\uad6d",
+        "common": "\uac10\ube44\uc544"
+      },
+      "nld": {
+        "official": "Republiek Gambia",
+        "common": "Gambia"
+      },
+      "per": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u06af\u0627\u0645\u0628\u06cc\u0627",
+        "common": "\u06af\u0627\u0645\u0628\u06cc\u0627"
+      },
+      "pol": {
+        "official": "Republika Gambii",
+        "common": "Gambia"
+      },
+      "por": {
+        "official": "Rep\u00fablica da G\u00e2mbia",
+        "common": "G\u00e2mbia"
+      },
+      "rus": {
+        "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0430\u043c\u0431\u0438\u044f",
+        "common": "\u0413\u0430\u043c\u0431\u0438\u044f"
+      },
+      "slk": {
+        "official": "Gambijsk\u00e1 republika",
+        "common": "Gambia"
+      },
+      "spa": {
+        "official": "Rep\u00fablica de Gambia",
+        "common": "Gambia"
+      },
+      "srp": {
+        "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0430\u043c\u0431\u0438\u0458\u0430",
+        "common": "\u0413\u0430\u043c\u0431\u0438\u0458\u0430"
+      },
+      "swe": {
+        "official": "Republiken Gambia",
+        "common": "Gambia"
+      },
+      "tur": {
+        "official": "Gambiya Cumhuriyeti",
+        "common": "Gambiya"
+      },
+      "urd": {
+        "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u06af\u06cc\u0645\u0628\u06cc\u0627",
+        "common": "\u06af\u06cc\u0645\u0628\u06cc\u0627"
+      },
+      "zho": {
+        "official": "\u5188\u6bd4\u4e9a\u5171\u548c\u56fd",
+        "common": "\u5188\u6bd4\u4e9a"
       }
-    }
-  },
-  "tld": [
-    ".gm"
-  ],
-  "cca2": "GM",
-  "ccn3": "270",
-  "cca3": "GMB",
-  "cioc": "GAM",
-  "independent": true,
-  "status": "officially-assigned",
-  "unMember": true,
-  "currencies": {
-    "GMD": {
-      "name": "dalasi",
-      "symbol": "D"
-    }
-  },
-  "idd": {
-    "root": "+2",
-    "suffixes": [
-      "20"
-    ]
-  },
-  "capital": [
-    "Banjul"
-  ],
-  "altSpellings": [
-    "GM",
-    "Republic of the Gambia"
-  ],
-  "region": "Africa",
-  "subregion": "Western Africa",
-  "languages": {
-    "eng": "English"
-  },
-  "translations": {
-    "ara": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u063a\u0627\u0645\u0628\u064a\u0627",
-      "common": "\u063a\u0627\u0645\u0628\u064a\u0627"
     },
-    "bre": {
-      "official": "Republik islamek ar Gambia",
-      "common": "Gambia"
-    },
-    "ces": {
-      "official": "Gambijsk\u00e1 republika",
-      "common": "Gambie"
-    },
-    "cym": {
-      "official": "Republic of the Gambia",
-      "common": "Gambia"
-    },
-    "deu": {
-      "official": "Republik Gambia",
-      "common": "Gambia"
-    },
-    "est": {
-      "official": "Gambia Vabariik",
-      "common": "Gambia"
-    },
-    "fin": {
-      "official": "Gambian tasavalta",
-      "common": "Gambia"
-    },
-    "fra": {
-      "official": "R\u00e9publique de Gambie",
-      "common": "Gambie"
-    },
-    "hrv": {
-      "official": "Republika Gambija",
-      "common": "Gambija"
-    },
-    "hun": {
-      "official": "Gambiai K\u00f6zt\u00e1rsas\u00e1g",
-      "common": "Gambia"
-    },
-    "ita": {
-      "official": "Repubblica del Gambia",
-      "common": "Gambia"
-    },
-    "jpn": {
-      "official": "\u30ac\u30f3\u30d3\u30a2\u5171\u548c\u56fd",
-      "common": "\u30ac\u30f3\u30d3\u30a2"
-    },
-    "kor": {
-      "official": "\uac10\ube44\uc544 \uacf5\ud654\uad6d",
-      "common": "\uac10\ube44\uc544"
-    },
-    "nld": {
-      "official": "Republiek Gambia",
-      "common": "Gambia"
-    },
-    "per": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u06af\u0627\u0645\u0628\u06cc\u0627",
-      "common": "\u06af\u0627\u0645\u0628\u06cc\u0627"
-    },
-    "pol": {
-      "official": "Republika Gambii",
-      "common": "Gambia"
-    },
-    "por": {
-      "official": "Rep\u00fablica da G\u00e2mbia",
-      "common": "G\u00e2mbia"
-    },
-    "rus": {
-      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0430\u043c\u0431\u0438\u044f",
-      "common": "\u0413\u0430\u043c\u0431\u0438\u044f"
-    },
-    "slk": {
-      "official": "Gambijsk\u00e1 republika",
-      "common": "Gambia"
-    },
-    "spa": {
-      "official": "Rep\u00fablica de Gambia",
-      "common": "Gambia"
-    },
-    "srp": {
-      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0430\u043c\u0431\u0438\u0458\u0430",
-      "common": "\u0413\u0430\u043c\u0431\u0438\u0458\u0430"
-    },
-    "swe": {
-      "official": "Republiken Gambia",
-      "common": "Gambia"
-    },
-    "tur": {
-      "official": "Gambiya Cumhuriyeti",
-      "common": "Gambiya"
-    },
-    "urd": {
-      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u06af\u06cc\u0645\u0628\u06cc\u0627",
-      "common": "\u06af\u06cc\u0645\u0628\u06cc\u0627"
-    },
-    "zho": {
-      "official": "\u5188\u6bd4\u4e9a\u5171\u548c\u56fd",
-      "common": "\u5188\u6bd4\u4e9a"
-    }
-  },
-  "latlng": [
-    13.46666666,
-    -16.56666666
-  ],
-  "landlocked": false,
-  "borders": [
-    "SEN"
-  ],
-  "area": 10689.0,
-  "demonyms": {
-    "eng": {
-      "f": "Gambian",
-      "m": "Gambian"
-    },
-    "fra": {
-      "f": "Gambienne",
-      "m": "Gambien"
-    }
-  },
-  "flag": "\ud83c\uddec\ud83c\uddf2",
-  "maps": {
-    "googleMaps": "https://goo.gl/maps/bbGBCxxtfD2A9Z4m6",
-    "openStreetMaps": "https://www.openstreetmap.org/relation/192774"
-  },
-  "population": 2416664,
-  "gini": {
-    "2015": 35.9
-  },
-  "fifa": "GAM",
-  "car": {
-    "signs": [
-      "WAG"
-    ],
-    "side": "right"
-  },
-  "timezones": [
-    "UTC+00:00"
-  ],
-  "continents": [
-    "Africa"
-  ],
-  "flags": {
-    "png": "https://flagcdn.com/w320/gm.png",
-    "svg": "https://flagcdn.com/gm.svg",
-    "alt": "The flag of Gambia is composed of three equal horizontal bands of red, blue with white top and bottom edges, and green."
-  },
-  "coatOfArms": {
-    "png": "https://mainfacts.com/media/images/coats_of_arms/gm.png",
-    "svg": "https://mainfacts.com/media/images/coats_of_arms/gm.svg"
-  },
-  "startOfWeek": "monday",
-  "capitalInfo": {
     "latlng": [
-      13.45,
-      -16.57
-    ]
+      13.46666666,
+      -16.56666666
+    ],
+    "landlocked": false,
+    "borders": [
+      "SEN"
+    ],
+    "area": 10689.0,
+    "demonyms": {
+      "eng": {
+        "f": "Gambian",
+        "m": "Gambian"
+      },
+      "fra": {
+        "f": "Gambienne",
+        "m": "Gambien"
+      }
+    },
+    "flag": "\ud83c\uddec\ud83c\uddf2",
+    "maps": {
+      "googleMaps": "https://goo.gl/maps/bbGBCxxtfD2A9Z4m6",
+      "openStreetMaps": "https://www.openstreetmap.org/relation/192774"
+    },
+    "population": 2416664,
+    "gini": {
+      "2015": 35.9
+    },
+    "fifa": "GAM",
+    "car": {
+      "signs": [
+        "WAG"
+      ],
+      "side": "right"
+    },
+    "timezones": [
+      "UTC+00:00"
+    ],
+    "continents": [
+      "Africa"
+    ],
+    "flags": {
+      "png": "https://flagcdn.com/w320/gm.png",
+      "svg": "https://flagcdn.com/gm.svg",
+      "alt": "The flag of Gambia is composed of three equal horizontal bands of red, blue with white top and bottom edges, and green."
+    },
+    "coatOfArms": {
+      "png": "https://mainfacts.com/media/images/coats_of_arms/gm.png",
+      "svg": "https://mainfacts.com/media/images/coats_of_arms/gm.svg"
+    },
+    "startOfWeek": "monday",
+    "capitalInfo": {
+      "latlng": [
+        13.45,
+        -16.57
+      ]
+    }
   }
-}
+]

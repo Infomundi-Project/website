@@ -10,9 +10,10 @@
     .description-text {
       max-height: 30vh;
     }
+    
     /* Smaller search button and dropdown */
     .btn-outline-primary {
-        font-size: 0.8rem; /* Smaller font size */
+        font-size: 0.9rem; /* Smaller font size */
         padding: 5px 10px; /* Smaller padding */
     }
 
@@ -24,11 +25,11 @@
 
     /* Ensure the dropdown items match the new button size */
     .dropdown-item {
-        font-size: 0.8rem; /* Smaller font size */
+        font-size: 0.9rem; /* Smaller font size */
         padding: 3px 10px; /* Smaller padding */
     }
     .nav-item .nav-link {
-      font-size: 0.8rem; /* Smaller font size */
+      font-size: 0.9rem; /* Smaller font size */
       padding: 5px 10px; /* Smaller padding */
     }
 
@@ -48,49 +49,73 @@
     left: 50%;
     right: auto;
   }
+
+.list-group {
+  width: 100%;
+  max-width: 460px;
+  /* margin-inline: 1.5rem; */
+}
+
+.form-check-input:checked + .form-checked-content {
+  opacity: .5;
+}
+
+.form-check-input-placeholder {
+  border-style: dashed;
+}
+[contenteditable]:focus {
+  outline: 0;
+}
+
+.list-group-checkable .list-group-item {
+  cursor: pointer;
+}
+.list-group-item-check {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+}
+.list-group-item-check:hover + .list-group-item {
+  background-color: var(--bs-secondary-bg);
+}
+.list-group-item-check:checked + .list-group-item {
+  color: #fff;
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+.list-group-item-check[disabled] + .list-group-item,
+.list-group-item-check:disabled + .list-group-item {
+  pointer-events: none;
+  filter: none;
+  opacity: .5;
+}
+
+.list-group-radio .list-group-item {
+  cursor: pointer;
+  border-radius: .5rem;
+}
+.list-group-radio .form-check-input {
+  z-index: 2;
+  margin-top: -.5em;
+}
+.list-group-radio .list-group-item:hover,
+.list-group-radio .list-group-item:focus {
+  background-color: var(--bs-secondary-bg);
+}
+
+.list-group-radio .form-check-input:checked + .list-group-item {
+  background-color: var(--bs-body);
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 2px var(--bs-primary);
+}
+.list-group-radio .form-check-input[disabled] + .list-group-item,
+.list-group-radio .form-check-input:disabled + .list-group-item {
+  pointer-events: none;
+  filter: none;
+  opacity: .5;
+}
 </style>
 {% endblock %}
 {% block content %}
-
-
-<div class="offcanvas shadow-lg" data-bs-backdrop="static" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"></h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    
-    <div id="comments-section" class="container my-5">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3>Comments <span id="total-comments" class="badge bg-secondary">0</span></h3>
-          <div>
-              <select id="sort-comments" aria-label="Sort Comments:" class="form-select form-select-sm w-auto">
-                  <option value="top">Top Comments</option>
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-              </select>
-          </div>
-      </div>
-
-      <div class="mb-4">
-          {% if current_user.is_authenticated %}
-          <div class="d-flex align-items-start">
-              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
-              <textarea id="new-comment" class="form-control me-2" rows="2" placeholder="Add a comment..."></textarea>
-              <button id="cooldown-button" class="btn btn-secondary">Submit</button>
-          </div>
-          {% else %}
-            <p class="fs-3 text-decoration-none">You must <a href="{{ url_for('auth.register') }}">create an account</a> or <a href="{{ url_for('auth.login') }}">sign in</a> in order to interact with the comments section.</p>
-          {% endif %}
-      </div>
-      
-      <div id="comments-list" class="list-group"></div>
-    </div>
-    
-  </div>
-</div>
-
-
 <div class="row mt-4">
   <div class="col">
   
@@ -168,56 +193,7 @@
         <a href="https://infomundi.net/news?country={{ country_code }}&section={{ news_filter }}&query={{ tag }}"><span class="badge text-bg-secondary">{{ tag }}</span></a>
       {% endfor %}
     {% endif %}
-
-    <ul class="nav nav-pills justify-content-center mb-2 mt-4">
-      
-      {% for category in all_categories %}
-        {% if category in supported_categories %}
-          <li class="nav-item">
-            <a class="nav-link {{ 'active' if category in selected_filter }}" href="/news?country={{ country_code }}&section={{ category }}">{{ category.title() }}</a>
-          </li>
-        {% else %}
-          <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" 
-            data-bs-title="We apologize, but currently there's no {{ category }} information available. Meanwhile, you can use the contact form to recommend news sources to us.">
-            <a class="nav-link disabled" href="#"><small>{{ category.title() }}</small></a>
-          </li>
-        {% endif %}
-      
-      {% endfor %}
     
-    </ul>
-{% if total_pages %}
-  {% if total_pages < 7 %}
-  <nav aria-label="Page navigation">
-    <ul class="pagination pagination-sm justify-content-center mt-3">
-      {% for page in range(1, total_pages+1) %} 
-      <li class="page-item {{ 'active' if page_num == page }}">
-        <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
-      </li>
-      {% endfor %} 
-    </ul>
-  </nav>
-  {% else %}
-  <nav aria-label="Page navigation">
-    <ul class="pagination pagination-sm justify-content-center mt-3">
-      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}"><i class="fa-solid fa-angle-left"></i></a></li>
-      <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
-      <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
-      
-      {% if page_num < 3 or total_pages - 2 < page_num %}
-      <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-      {% else %}
-      <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
-      {% endif %}
-      
-      <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
-      <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
-      
-      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}"><i class="fa-solid fa-angle-right"></i></a></li>
-    </ul>
-  </nav>
-  {% endif %}
-{% endif %}
 {% if query %}
   <div class="d-flex justify-content-center mt-3">
     <p>
@@ -231,119 +207,150 @@
   </div>
 </div>
 
+
 <div class="container justify-content-center">
-<div class="row justify-content-center">
-  {% for index, item in feeds %}
-  <div class="col-md-6 col-xxl-4">
-    <div class="card mt-4 border-opacity-10" style="min-height: 65vh; height: auto;" id="{{ item.story_id }}-{{ selected_filter }}">
-      <div class="card-header">
-        <ul class="nav nav-pills nav-fill card-header-pills inf-card-header">
-          <li class="nav-item">
-            <a class="nav-link active inf-card-header-link" href="#">Preview</a>
-          </li>
-          {% if item.description|length > 10 %}
-          <li class="nav-item">
-            <a class="nav-link description-btn inf-card-header-link" href="#">Description</a>
-          </li>
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-10">
+      <form id="filterForm" class="form-inline">
+        <input type="hidden" id="country" name="country">
+
+        <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center">
+          <div class="list-group list-group-checkable d-grid gap-2 border-0">
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category1" value="general" checked>
+            <label class="list-group-item rounded-3 py-3" for="category1">
+              <i class="fa-solid fa-globe"></i> General
+              <span class="d-block small opacity-50">All general news</span>
+            </label>
+
+
+            {% if 'politics' in supported_categories %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics">
+            <label class="list-group-item rounded-3 py-3" for="category2">
+              <i class="fa-solid fa-landmark"></i> Politics
+                <span class="d-block small opacity-50">News related to politics</span>
+            </label>
+            {% else %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics" disabled>
+            <label class="list-group-item rounded-3 py-3" for="category2">
+              <i class="fa-solid fa-landmark"></i> Politics
+                <span class="d-block small opacity-50">Not yet available in this country</span>
+            </label>
+            {% endif %}
+
+
+            {% if 'economy' in supported_categories %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="economy">
+            <label class="list-group-item rounded-3 py-3" for="category3">
+              <i class="fa-solid fa-chart-line"></i> Economy
+                <span class="d-block small opacity-50">News on economy and finance</span>
+            </label>
+            {% else %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="economy" disabled>
+            <label class="list-group-item rounded-3 py-3" for="category3">
+              <i class="fa-solid fa-chart-line"></i> Economy
+              <span class="d-block small opacity-50">Not yet available in this country</span>
+            </label>
+            {% endif %}
+
+
+            {% if 'technology' in supported_categories %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="technology">
+            <label class="list-group-item rounded-3 py-3" for="category4">
+              <i class="fa-solid fa-microchip"></i> Technology
+                <span class="d-block small opacity-50">Latest in tech and gadgets</span>
+            </label>
+            {% else %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="technology" disabled>
+            <label class="list-group-item rounded-3 py-3" for="category4">
+              <i class="fa-solid fa-microchip"></i> Technology
+                <span class="d-block small opacity-50">Not yet available in this country</span>
+            </label>
+            {% endif %}
+
+
+          {% if 'sports' in supported_categories %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category5" value="sports">
+              <label class="list-group-item rounded-3 py-3" for="category5">
+                <i class="fa-solid fa-football-ball"></i> Sports
+                <span class="d-block small opacity-50">Sports news and updates</span>
+            </label>
+          {% else %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category5" value="sports" disabled>
+              <label class="list-group-item rounded-3 py-3" for="category5">
+                <i class="fa-solid fa-football-ball"></i> Sports
+                <span class="d-block small opacity-50">Not yet available in this country</span>
+              </label>
           {% endif %}
-          <li class="nav-item">
-            <a class="nav-link comments-btn inf-card-header-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Comments</a>
-          </li>
-        </ul>
-      </div>
-      <a href="/comments?id={{ item.story_id }}&category={{ selected_filter }}">
-        {% if index < 3 %}
-          <img fetchpriority="high" src="{{ item.media_content_url }}" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
-        {% else %}
-          <img data-src="{{ item.media_content_url }}" class="lazyload" alt="News image" width="500" height="333" style="aspect-ratio: 16 / 9;width: 100%;object-fit: cover;">
-        {% endif %}
-      </a>
-      <div class="card-body">
-        <a href="/comments?id={{ item.story_id }}&category={{ selected_filter }}" class="text-reset text-decoration-none">
-          <h6 class="card-title">{{ item.title }}</h6>
-        </a>
-      </div>
-      {% if item.tags or item.total_comments or item.total_clicks %}
-        <ul class="list-group list-group-flush mt-3">
-          <li class="list-group-item">
-            {% for tag in item.tags %}
-              {% if tag in tags %}
-                <a href="https://infomundi.net/news?country={{ country_code }}&query={{ tag }}&section={{ news_filter }}"><span class="badge text-bg-secondary">{{ tag }}</span></a>
-              {% endif %}
-            {% endfor %}
+          </div>
 
-            {% if item.total_clicks %}
-              <span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> {{ item.total_clicks }}</span>
-            {% endif %}
-              
-            {% if item.total_comments %}
-              <span class="badge text-bg-dark"><i class="fa fa-comment"></i> {{ item.total_comments }}</span>
-            {% endif %}
+          <!-- Filters -->
+          <div class="list-group list-group-checkable d-grid gap-2 border-0">
+            <!--
+            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy1" value="created_at" checked>
+            <label class="list-group-item rounded-3 py-3" for="orderBy1">
+              <i class="fa-solid fa-calendar-alt"></i> Created At
+              <span class="d-block small opacity-50">Sort by creation date</span>
+            </label>
+            -->
+            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy4" value="pub_date" checked>
+            <label class="list-group-item rounded-3 py-3" for="orderBy4">
+              <i class="fa-solid fa-calendar-day"></i> Publication Date
+              <span class="d-block small opacity-50">Sort by publication date</span>
+            </label>
 
-          </li>
-        </ul>
-      {% endif %}
-      <div class="card-footer text-body-secondary">
-        
-        <small>
-          <a href="{{ item.publisher.link }}" class="text-decoration-none" target="_blank">
-              {% if item.favicon %}<img data-src="{{ item.favicon }}" class="rounded me-1 lazyload" alt="{{ item.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss me-1"></i>{% endif %}{{ item.publisher.name }}
-          </a>
-          <span class="ms-1 me-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">{{ item.pub_date }}</span>
-        </small>
-      
-      </div>
+            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy2" value="clicks">
+            <label class="list-group-item rounded-3 py-3" for="orderBy2">
+              <i class="fa-solid fa-mouse-pointer"></i> Clicks
+              <span class="d-block small opacity-50">Sort by number of clicks</span>
+            </label>
+
+            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy3" value="title">
+            <label class="list-group-item rounded-3 py-3" for="orderBy3">
+              <i class="fa-solid fa-heading"></i> Title
+              <span class="d-block small opacity-50">Sort by title</span>
+            </label>
+          </div>
+
+          <div class="list-group list-group-checkable d-grid gap-2 border-0">
+            <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir1" value="desc" checked>
+            <label class="list-group-item rounded-3 py-3" for="orderDir1">
+              <i class="fa-solid fa-sort-amount-down"></i> Descending
+              <span class="d-block small opacity-50">Newest first</span>
+            </label>
+
+            <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir2" value="asc">
+            <label class="list-group-item rounded-3 py-3" for="orderDir2">
+              <i class="fa-solid fa-sort-amount-up"></i> Ascending
+              <span class="d-block small opacity-50">Oldest first</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mb-2" id="filterButton">
+          <span id="filterButtonText">Filter</span>
+          <span class="spinner-border spinner-border-sm" id="filterSpinner" style="display: none;" aria-hidden="true"></span>
+        </button>
+      </form>
     </div>
   </div>
-  {% endfor %} 
-</div>
-</div>
 
-{% if total_pages %}
-  {% if total_pages < 7 %}
-  <nav aria-label="Page navigation">
-    <ul class="pagination pagination-sm justify-content-center mt-3">
-      {% for page in range(1, total_pages+1) %} 
-      <li class="page-item {{ 'active' if page_num == page }}">
-        <a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page }}">{{ page }}</a>
-      </li>
-      {% endfor %} 
-    </ul>
-  </nav>
-  {% else %}
-  <nav aria-label="Page navigation">
-    <ul class="pagination pagination-sm justify-content-center mt-3">
-      <li class="page-item {{ 'disabled' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num - 1 }}"><i class="fa-solid fa-angle-left"></i></a></li>
-      <li class="page-item {{ 'active' if page_num == 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=1">1</a></li>
-      <li class="page-item {{ 'active' if page_num == 2 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page=2">2</a></li>
-      
-      {% if page_num < 3 or total_pages - 2 < page_num %}
-      <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-      {% else %}
-      <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
-      {% endif %}
-      
-      <li class="page-item {{ 'active' if page_num == total_pages - 1 }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages - 1 }}">{{ total_pages - 1 }}</a></li>
-      <li class="page-item {{ 'active' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ total_pages }}">{{ total_pages }}</a></li>
-      
-      <li class="page-item {{ 'disabled' if page_num == total_pages }}"><a class="page-link" href="/news?country={{ country_code }}&section={{ news_filter }}&page={{ page_num + 1 }}"><i class="fa-solid fa-angle-right"></i></a></li>
-    </ul>
-  </nav>
-  {% endif %}
-{% endif %}
+  <div class="row justify-content-center" id="storiesContainer">
+    <!-- Stories will be inserted here -->
+  </div>
+</div>
 
 {% endblock %}
+
 {% block scripts %}
 
-  {% assets "js_news" %}
-  <script defer src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+  <script nonce="{{ nonce }}" defer 
+    src="{{ url_for('static', filename='js/renderStories.js') }}"
+    ></script>
 
-  <script 
-    src="{{ url_for('static', filename='js/comments.js') }}"
-  ></script>
-  <script 
-    src="{{ url_for('static', filename='js/cooldownButton.js') }}"
-  ></script>
+  {% assets "js_news" %}
+  <script defer nonce="{{ nonce }}" 
+    src="{{ ASSET_URL }}"
+    ></script>
+  {% endassets %}
 
 {% endblock %}

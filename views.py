@@ -1,19 +1,25 @@
-import os
-from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, make_response, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, session, g
 from flask_login import current_user, login_required
-from random import choice, shuffle, randint
-from sqlalchemy import or_
-from time import time
+from datetime import datetime, timedelta
+from random import choice, shuffle
+from sqlalchemy import or_, and_
+from hashlib import md5
 
-from website_scripts import scripts, config, json_util, immutable, search, notifications, image_util, extensions, models
-from auth import admin_required, in_maintenance
+from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models
+from auth import admin_required, in_maintenance, captcha_required
 
 views = Blueprint('views', __name__)
 
 
+def make_cache_key(*args, **kwargs):
+    user_id = current_user.user_id if current_user.is_authenticated else 'guest'
+    args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
+    key = md5(str(args_list).encode('utf-8')).hexdigest()
+    return key
+
+
 @views.route('/', methods=['GET'])
 def home():
-    """Render the homepage."""
     statistics = scripts.get_statistics()
 
     crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
@@ -22,26 +28,50 @@ def home():
 
     us_indexes = world_stocks[:3]
 
-    i = 1
-    for item in crypto_data:
-        world_stocks.insert(i, item)
-        i += 2
-    
+    # We remove unused US stock data
+    world_stocks.pop(1)
+    world_stocks.pop(1)
+
     return render_template('homepage.html', 
-        world_stocks=world_stocks, 
+        stock_date=world_stocks[0]['date'],
+        world_stocks=enumerate(world_stocks), 
         us_indexes=enumerate(us_indexes), 
         page='home',
         statistics=statistics,
-        country_code='en'
+        crypto_data=crypto_data
     )
 
 
-@views.route('/maintenance', methods=['GET'])
-def maintenance():
-    if False:
-        return redirect(url_for('views.home'))
-    else:
-        return render_template('maintenance.html')
+@views.route('/be-right-back', methods=['GET'])
+def be_right_back():
+    return render_template('maintenance.html')
+
+
+@views.route('/captcha', methods=['GET', 'POST'])
+def captcha():
+    if request.method == 'GET':
+        # If they have clearance (means that they have recently proven they're human)
+        clearance = session.get('clearance', '')
+        if clearance:
+            now = datetime.now()
+
+            time_difference = now - datetime.fromisoformat(clearance)
+            if time_difference < timedelta(hours=config.CAPTCHA_CLEARANCE_HOURS):
+                referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
+                flash("We know you are not a robot, don't worry")
+                return redirect(referer)
+
+        return render_template('captcha.html')
+
+    # Checks if the user is a robot
+    token = request.form['cf-turnstile-response']
+    if not scripts.valid_captcha(token):
+        flash('Invalid captcha!', 'error')
+        return redirect(url_for('views.captcha'))
+    
+    session['clearance'] = datetime.now().isoformat()
+    flash('Thanks for verifying! You are not a robot after all.')
+    return redirect(session.get('clearance_from', url_for('views.home')))
 
 
 @views.route('/test', methods=['GET', 'POST'])
@@ -63,11 +93,11 @@ def upload_image():
     file = request.files.get('profilePhoto')
 
     if not file:
-        message = 'No file part'
+        message = 'We apologize, but no file was found!'
     elif file.filename == '':
-        message = 'No selected file'
+        message = "We apologize, but we couldn't find your image!"
     elif not image_util.allowed_file(file.filename) or not image_util.allowed_mime_type(file.stream) or not image_util.verify_image_content(file.stream) or not image_util.check_image_dimensions(file.stream):
-        message = 'Invalid file'
+        message = "The file you provided is invalid."
     else:
         message = ''
 
@@ -75,15 +105,18 @@ def upload_image():
         flash(message, 'error')
         return redirect(url_for('views.dashboard'))
     
-    filepath = f'{config.WEBSITE_ROOT}/static/img/users/{current_user.user_id}'
-    
-    image_util.convert_to_webp(file.stream, filepath)
+    # Convert the uploaded image to JPG format and save it. If conversion fails, flash an error message and redirect to the dashboard
+    convert = image_util.convert_to_jpg(file.stream, f'users/{current_user.user_id}.jpg')
+    if not convert:
+        flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
+        return redirect(url_for('views.dashboard'))
 
+    # Update the user's avatar URL in the database
     user_data = models.User.query.filter_by(email=current_user.email).first()
-    user_data.avatar_url = f'https://infomundi.net/static/img/users/{current_user.user_id}.webp'
+    user_data.avatar_url = f'https://bucket.infomundi.net/users/{current_user.user_id}.jpg'
     extensions.db.session.commit()
 
-    flash('File uploaded successfully!')
+    flash('File uploaded successfully! Wait a few minutes for your profile picture to update.')
     return redirect(url_for('views.dashboard'))
 
 
@@ -91,50 +124,57 @@ def upload_image():
 def contact():
     if request.method == 'GET':
         return render_template('contact.html')
-    else:
-        token = request.form['cf-turnstile-response']
-        if not scripts.valid_captcha(token):
-            flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(url_for('views.contact'))
-        
-        name = request.form.get('name', '')
-        email = request.form.get('email', '')
-        message = request.form.get('message', '')
 
-        if len(name) > 25 or len(email) > 50 or len(message) > 500:
-            flash('Something went wrong.', 'error')
-            return redirect(url_for('views.contact'))
-
-        data = {
-        'username': 'Maximus',
-        'icon_url': 'https://infomundi.net/static/img/maximus.webp',
-        'text': f"""@here
-
-# Contact Form
-
-We got a new message.
-
-**Name:** {name}  
-**Email:** {email}
-
-**Message:**  
-{message}
-
----
-
-2024 Infomundi
-"""
-        }
-        sent_message = notifications.post_webhook(data)
-        if sent_message:
-            flash("Your message has been sent, thank you! Expect a return from us shortly.")
-        else:
-            flash("We apologize, but your message couldn't be sent. We'll look into that as soon as possible. In the meantime, feel free to send us an email at contac@infomundi.net", 'error')
-        
+    # Checks if the user is a robot
+    token = request.form['cf-turnstile-response']
+    if not scripts.valid_captcha(token):
+        flash('Invalid captcha. Are you a robot?', 'error')
         return redirect(url_for('views.contact'))
+    
+    # Gets all valus from the form
+    name = scripts.sanitize_input(request.form.get('name', ''))
+    email = scripts.sanitize_input(request.form.get('email', '')).lower()
+    message = scripts.sanitize_input(request.form.get('message', ''))
+
+    # Validate user input
+    if not scripts.is_valid_email(email) or not (5 <= len(name) <= 50) or not (5 <= len(message) <= 1000):
+        flash('Something went wrong.', 'error')
+        return render_template('contact.html')
+
+    # Gets the user ipv4 and/or ipv6
+    user_ips = scripts.get_user_ip(request)
+
+    if current_user.is_authenticated:
+        email = session.get('email_address', '')
+        login_message = f"Yes, as {email}"
+    else:
+        login_message = 'No'
+
+    # Formats the from message
+    from_formatted = f'{name} - {email}'
+
+    email_body = f"""This message was sent through the contact form in our website.
+
+Authenticated: {login_message}
+From: {from_formatted}
+IP: {' '.join(user_ips).strip()}
+Country: {scripts.get_user_country(request)}
+Timestamp: {scripts.get_current_date_and_time()} UTC
+
+
+{message}"""
+
+    sent_message = notifications.send_email('contact@infomundi.net', 'Infomundi - Contact Form', email_body, email, f'{name} <{email}>')
+    if sent_message:
+        flash("Your message has been sent, thank you! Expect a return from us shortly.")
+    else:
+        flash("We apologize, but looks like that the contact form isn't working. We'll look into that as soon as possible. In the meantime, feel free to send us an email directly at contact@infomundi.net", 'error')
+    
+    return render_template('contact.html')
 
 
 @views.route('/about', methods=['GET'])
+@captcha_required
 def about():
     return render_template('about.html')
 
@@ -145,13 +185,14 @@ def policies():
 
 
 @views.route('/team', methods=['GET'])
+@captcha_required
 def team():
     return render_template('team.html')
 
 
 @views.route('/donate', methods=['GET'])
 def donate():
-    referer = request.headers.get('Referer', url_for('views.home'))
+    referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
     
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
     return redirect(referer)
@@ -161,7 +202,7 @@ def donate():
 def get_latest_feed():
     """Serving the /news endpoint. 
 
-    Arguments
+    Arguments:
         page_num: str
             GET 'page' parameter. Specifies the cache page. Example: '1'.
         
@@ -171,20 +212,20 @@ def get_latest_feed():
         news_filter: str
             GET 'section' parameter. Specifies the news category. Example: 'general'.
 
-    Return
+    Behavior:
         Renders the news page, containing 100 news per page.
     """
-    
-    page_num = request.args.get('page', 1)
-    try:
-        page_num = int(page_num)
-    except TypeError:
-        page_num = 1
+    page_num = request.args.get('page', 1, type=int)
     
     # If no country was selected, selects a random one.
-    country_filter = request.args.get('country', f"{choice(['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}").lower()
+    country_filter = request.args.get('country', f"{choice(
+        ['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}",
+         type=str).lower()
     
-    news_filter = request.args.get('section', 'general').lower()
+    # Gets the news filter from the url. Defaults to 'general'.
+    news_filter = request.args.get('section', 'general', type=str).lower()
+    
+    # Format news filter (e.g. br_general or us_general and so on)
     selected_filter = f"{country_filter}_{news_filter}"
 
     # Check if the selected category is valid
@@ -195,50 +236,30 @@ def get_latest_feed():
     # Searches for the country full name (may be modularized at some point)
     country_name = scripts.country_code_to_name(country_filter)
 
-    cache = Story.query.order_by(Story.created_at.desc()).all()
-    if cache:
-        end_index = page_num * 100
-
-        start_index = end_index - 100
-
-        if start_index - 100 < 0:
-            start_index = 0
-        
-        feeds = cache[start_index:end_index-1]
-
-        # We shuffle the current page to provide a more dynamic experience to the user
-        shuffle(feeds)
-    else:
-        flash('We apologize, but something went wrong. Please try again later. In the meantime, feel free to explore other countries!', 'error')
-        return redirect(url_for('views.home'))
-    
-    # Declares the referer up here just in case 
+    # Declares the referer up here just in case. No open redirect here because the session is encrypted and we control it.
     referer = 'https://infomundi.net/' + session.get('last_visited_country', '')
     
-    # Get page language    
+    # Get page language
     page_languages = []
     languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
     for lang in languages:
         if lang['country'].lower() == country_name.lower():
             page_languages.append(lang)
 
-    # Query will change code logic, but I think its better to just adapt everything - @behindsecurity
+    # Query will change code logic, but I think its better to just adapt everything
     original_query = ''
-    query = request.args.get('query', '').lower()
+    query = scripts.sanitize_input(request.args.get('query', '').lower())
     if query:
         if len(query) < 3:
             flash('Your query is too small. Please provide at least 3 characters.', 'error')
             return redirect(referer)
 
-        for character in immutable.SPECIAL_CHARACTERS:
-            query = query.replace(character, '')
-
-        translate_language = request.args.get('translation', '').lower()
+        # Deactivated!
+        translate_language = '' #request.args.get('translation', '').lower()
 
         # This value will be used in the frontend to display a badge if the query has been translated
         session['want_translate'] = False
         if translate_language:
-            
             for lang in page_languages:
                 if lang['lang'].lower() == translate_language.lower():
                     page_language = lang['lang_code'][:2]
@@ -256,11 +277,12 @@ def get_latest_feed():
         
         found_stories_via_query = extensions.db.session.query(models.Story).filter(
             models.Story.category_id == selected_filter,
+            models.Story.media_content_url.contains('bucket.infomundi.net'),
             or_(
                 models.Story.title.ilike(f"%{query}%"),
                 models.Story.description.ilike(f"%{query}%")
             )
-        ).distinct().all()
+        ).order_by(models.Story.created_at.desc()).limit(50).all()
 
         if not found_stories_via_query:
             flash(f'No stories were found with the term: "{query}".', 'error')
@@ -268,34 +290,47 @@ def get_latest_feed():
 
         # Change the current feed in order to make the rest of the code usable.
         feeds = found_stories_via_query
-    
-    try:
-        favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
-    except FileNotFoundError:
-        favicon_database = []
+    else:
+        # Calculates start index based on the page number
+        start_index = page_num * 100
 
-    # Get telemetry
-    telemetry = json_util.read_json(config.TELEMETRY_PATH)
-    for story in feeds:
-        if story.publisher_id in favicon_database:
-            story.favicon = f"static/img/stories/{selected_filter}/favicons/{story.publisher_id}.ico"
+        if start_index == 100:
+            start_index = 0
 
-        if telemetry.get(story.story_id, ''):
-            total_clicks = telemetry[story.story_id]['clicks']
-            story.total_clicks = total_clicks if total_clicks > 0 else ''
-        else:
-            story.total_clicks = ''
-    
-    # Set the page to integer to work properly with rss_template.html.
-    page_num = int(page_num)
+        # Retrieve the cache
+        """
+        cache = models.Story.query.filter(
+            and_(
+                models.Story.category_id == selected_filter,
+                models.Story.media_content_url.contains('bucket.infomundi.net')
+            )
+        ).order_by(models.Story.created_at.desc()).offset(start_index).limit(100).all()
+        """
+        cache = []
+        if cache:
+            flash('We apologize, but something went wrong. Please try again later.', 'error')
+            return redirect(url_for('views.home'))
 
-    # Else is 0 because rss_template.html should not render the pagination if the query is set.
-    total_pages = len(cache) // 100 if not query else 0
+        # Get the feed and shuffle it
+        feeds = cache
+        shuffle(feeds)
 
-    stock_data = scripts.scrape_stock_data(country_name)
+    best_tags = models.Category.query.filter_by(category_id=selected_filter).first()
+    if best_tags:
+        best_tags = [x.tag for x in best_tags.tags]
+
+        for story in feeds:
+            story.tags = []
+            
+            for tag in best_tags:
+                if tag in story.title.lower() or tag in story.description.lower():
+                    story.tags.append(tag)
+    else:
+        best_tags = []
 
     # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
+    stock_data = scripts.scrape_stock_data(country_name)
     if not stock_data or stock_data[0]['market_cap'] == None:
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
         is_global = True
@@ -311,7 +346,7 @@ def get_latest_feed():
         scripts.log(f'[!] Error at /views: {err} // {country_name}')
         country_index = ''
     
-    GET_PARAMETERS = f'news?country={country_filter}&section={news_filter}&page={page_num}'
+    GET_PARAMETERS = f'news?country={country_filter}'
     session['last_visited_country'] = GET_PARAMETERS
     
     # Get area ranking
@@ -334,23 +369,16 @@ def get_latest_feed():
 
     supported_categories = scripts.get_supported_categories(country_filter)
     session['visited_country'] = country_name.title()
-    
-    best_tags = models.Category.query.filter_by(category_id=selected_filter).first()
-    if best_tags:
-        best_tags = [x.tag for x in best_tags.tags]
+
+    seo_title = f'Infomundi - {country_name.title()} {news_filter.title()}'
+    seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news. Visit us today to stay informed and connected with {country_name.title()} and beyond."
 
     return render_template('rss_template.html', 
-        feeds=enumerate(feeds),
-        feed_length=len(feeds),
-        query=query,
-        total_pages=total_pages, 
+        seo_data=(seo_title, seo_description),
         country_name=country_name, 
         news_filter=news_filter, 
-        page_num=page_num, 
-        selected_filter=selected_filter, 
-        country_code=country_filter, 
+        country_code=country_filter,
         supported_categories=supported_categories, 
-        all_categories=['general', 'politics', 'economy', 'technology', 'sports'],
         area_rank=area_rank,
         main_religion=main_religion,
         nation_data=scripts.get_nation_data(country_filter),
@@ -363,36 +391,26 @@ def get_latest_feed():
         stock_date=stock_date,
         page_languages=page_languages,
         original_query=original_query,
+        query=query,
         tags=best_tags if best_tags else ''
     )
 
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    news_id = request.args.get('id', '').lower()
-    category = request.args.get('category', '').lower()
+    referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
     
-    if not scripts.valid_category(category) or not news_id:
-        message = 'We apologize, but there was an error. Please try again later.'
-    else:
-        message = ''
-
-    referer = request.headers.get('Referer', url_for('views.home'))
-    if message:
-        flash(message, 'error')
+    news_id = request.args.get('id', '').lower()
+    # Check if has the length of a md5 hash
+    if not scripts.has_md5_hash(news_id):
+        flash('We apologize, but the ID you provided is not valid. Please try again.', 'error')
         return redirect(referer)
 
+    # Check if story exists
     story = models.Story.query.filter_by(story_id=news_id).first()
     if not story:
-        flash('We apologize, but there was an error. Please try again later.', 'error')
+        flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(referer)
-    
-    # Get publisher favicon
-    favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{category}/favicons')]
-    if story.publisher_id in favicon_database:
-        favicon_url = f'static/img/stories/{category}/favicons/{story.publisher_id}.ico'
-    else:
-        favicon_url = ''
 
     # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
     formatted_gpt_summary = []
@@ -412,24 +430,45 @@ def comments():
     # Commit changes to the database
     extensions.db.session.commit()
     
-    # Assign GET parameters to the session cookie
-    GET_PARAMETERS = f'comments?id={news_id}&category={category}'
-    session['last_visited_news'] = GET_PARAMETERS
-    
-    session['visited_category'] = category
+    # Set session information
+    session['last_visited_news'] = f'comments?id={news_id}'
+    session['visited_category'] = story.category_id
     session['visited_news'] = news_id
     
-    resp = make_response(render_template('comments.html', 
+    # Create the SEO title. Must NOT have more than 60 characters.
+    seo_title = 'Infomundi - '
+    for word in story.title.split(' '):
+        seo_title += word
+        
+        if len(seo_title) >= 60:
+            break
+        
+        seo_title += ' '
+
+    # Create the SEO description. Must NOT have more than 150 characters.
+    seo_description = ''
+    for word in story.description.split(' '):
+        seo_description += word
+        
+        if len(seo_description) >= 150:
+            break
+        
+        seo_description += ' '
+    
+    country = story.category_id.split('_')[0]
+    section = story.category_id.split('_')[1]
+
+    favicon_url = f'https://bucket.infomundi.net/favicons/{story.category_id}/{story.publisher_id}.ico'
+    return render_template('comments.html', 
         story=story,
+        seo_data=(seo_title, seo_description),
         favicon_url=favicon_url,
         formatted_gpt_summary=formatted_gpt_summary,
-        from_country_name=scripts.country_code_to_name(category.split('_')[0]),
-        from_country_category=category.split('_')[1],
-        from_country_code=category.split('_')[0],
+        from_country_name=scripts.country_code_to_name(story.category_id.split('_')[0]),
+        referer='https://infomundi.net/' + session.get('last_visited_country', f'news?country={country}'),
+        from_country_category=story.category_id.split('_')[1],
+        from_country_code=story.category_id.split('_')[0],
+        page_language=scripts.detect_language(story.title + ' ' + story.description),
         previous_news='',
-        next_news='',
-        hyvor_data=scripts.generate_hyvor_sso(current_user.email if current_user.is_authenticated else '')
-    ))
-    resp.set_cookie('clicked', f'{news_id}-{category}')
-    
-    return resp
+        next_news=''
+    )

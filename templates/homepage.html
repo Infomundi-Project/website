@@ -34,20 +34,75 @@
   }
   {% endif %}
 
-  @media (max-width: 480px) {
+  @media (max-width: 580px) {
     #chartdiv {
     width: 100%;
     height: 50vh;
-    margin-top: -10.5vh;
+    margin-top: -3.5vh;
     }
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="row d-flex align-items-center justify-content-center">
-  <div class="col-lg text-center mb-5">
+  <div class="col-lg-6 text-center">
+
+
+    {% if world_stocks and not is_mobile %}
+    <div class="hwrap-home" id="ticker">
+      <div class="hmove-home" style="color: white">
+        <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies - {{ stock_date }}</div>
+
+        {% for index, entry in world_stocks %}
+            {% if not entry['symbol'].endswith(':CUR') %}
+        <div class="hitem" style="color: {{ entry['color'] }};">
+            <!-- <span class="fi fi-{{ entry['country']['code'] }} me-1"></span> -->
+            {% if entry['country']['code'] %}
+            <img alt="{{ entry['country']['code'] }} flag" data-src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/flags/4x3/{{ entry['country']['code'] }}.svg" class="lazyload" height="16" width="9" style="width: 2%; height: 50%;">
+            {% endif %}
+            <span style="color: white"> 
+                {{ entry['country']['name'] }}
+                {% if index == 1 %}
+                  {% for index, us_info in us_indexes %}
+                    <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
+                    {% if us_info['color'] == '#FF6666' %}
+                        <span style="color: #FF6666">&#8659;</span> <!-- down -->
+                    {% else %}
+                        <span style="color: #00FF00">&#8657;</span>
+                    {% endif %}
+                    {% if index != 2 %}
+                      <span style="color: white">;</span>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
+                  {% if entry['color'] == '#FF6666' %}
+                    <span style="color: #FF6666">&#8659;</span>
+                  {% else %}
+                    <span style="color: #00FF00">&#8657;</span>
+                  {% endif %}
+                {% endif %}
+                {% if 'currency' in entry.keys() %}
+                    | {{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
+                    <span style="color: {{ entry['currency']['color'] }};" class="me-1">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == '#00FF00' %}<span style="color: #00FF00">&#8657;</span>{% else %}<span style="color: #FF6666">&#8659;</span>{% endif %} | 
+                    {% if entry['currency']['name'].startswith('USD') %}
+                        1 USD = {{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
+                    {% else %}
+                        {{ entry['currency']['symbol'] }}1 = </i>${{ entry['currency']['price'] }}
+                    {% endif %}
+                {% endif %}
+            </span>
+        </div>
+            {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+
+
     <center>
-      <p class="fs-2"><label for="query">Search a Country to View Information About It</label></p>
+      <h1 class="fs-2" style="margin-top: 100px"><label for="query">Search a Country to View Information About It</label></h1>
         <form action="{{ url_for('api.search') }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="input-group justify-content-center">
@@ -69,7 +124,7 @@
     </center>
     <p class="fs-3 mt-2 mb-2">or</p>
     <div class="d-inline-flex">
-      <p class="fs-1">Use the Globe to Choose It</p>
+      <h2 class="fs-1">Use the Globe to Choose It</h2>
     </div>
     {% if not is_mobile %}
     <div class="accordion" id="accordionExample">
@@ -88,12 +143,12 @@
                 <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}<span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="We're performing some maintenance at the moment, and the updates are temporarily paused. Sorry for any inconvenience!">Maintenance</span></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success ms-1">New!</span>--></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
@@ -121,8 +176,47 @@
       </div>
     </div>
     {% endif %}
+
+
+    {% if crypto_data and not is_mobile %}
+      <!-- Container for the cryptocurrency ticker -->
+      <div class="hwrap-home mt-3" id="crypto-ticker">
+        <!-- Container for moving/scrolling content with white text color -->
+        <div class="hmove-home" style="color: white">
+          <!-- Static header for the cryptocurrency ticker -->
+          <div class="hitem">
+            <i class="fa-brands fa-bitcoin me-2"></i>Cryptocurrencies - {{ crypto_data[0]['date'] }}
+          </div>
+
+          <!-- Loop through each entry in the crypto_data variable -->
+          {% for entry in crypto_data %}
+          <!-- Individual ticker item with dynamic color for each entry -->
+          <div class="hitem" style="color: {{ entry['color'] }};">
+
+            <!-- Display cryptocurrency name -->
+            <span>{{ entry['name'] }}</span>
+
+            <!-- Display cryptocurrency symbol and percent change with dynamic color -->
+            <span style="color: {{ entry['color'] }};">
+              {{ entry['symbol'] }} {{ entry['changes']['percent'] }}
+            </span>
+
+            <!-- Visual indicator for cryptocurrency direction -->
+            {% if entry['color'] == '#FF6666' %}
+            <span style="color: #FF6666">&#8659;</span> <!-- down -->
+            {% else %}
+            <span style="color: #00FF00">&#8657;</span> <!-- up -->
+            {% endif %}
+
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+
   </div>
-  <div class="col-lg p-1">
+  <div class="col-lg-6 p-1">
     <div id="chartdiv"></div>
     {% if is_mobile %}
       <div class="accordion mt-3" id="accordionExample">
@@ -141,12 +235,12 @@
                 <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}<span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="We're performing some maintenance at the moment, and the updates are temporarily paused. Sorry for any inconvenience!">Maintenance</span></p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
               </div>
               <div class="p-2">
                 <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }} (last 7 days)</p>
+                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }}</p>
                 <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success">New!</span>--></p>
                 <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
               </div>
@@ -178,11 +272,11 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script defer
+<script defer nonce="{{ nonce }}"
   src="{{ url_for('static', filename='js/amcharts/index.js') }}"
   ></script>
 
   {% assets "js_home" %}
-  <script defer type="text/javascript" src="{{ ASSET_URL }}"></script>
+  <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock %}

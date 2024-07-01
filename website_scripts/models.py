@@ -9,11 +9,16 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     user_id = db.Column(db.String(10), primary_key=True)
     username = db.Column(db.String(30), nullable=False, unique=True)
-    password = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(15), nullable=True)
-    email = db.Column(db.String(50), unique=True, nullable=False)
+    role = db.Column(db.String(15), default='user')
+    password = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(70), unique=True, nullable=False)
     avatar_url = db.Column(db.String(80))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    last_login = db.Column(db.DateTime)
+
+    in_recovery = db.Column(db.Boolean, default=False)
+    recovery_token = db.Column(db.String(40))
+    recovery_token_timestamp = db.Column(db.DateTime)
 
     def set_password(self, password):
         self.password = argon2.hash(password)
@@ -25,37 +30,15 @@ class User(db.Model, UserMixin):
         return str(self.user_id)
 
 
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    comment_id = db.Column(db.String(10), primary_key=True)
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))
-    news_id = db.Column(db.String(35))
-    parent_comment_id = db.Column(db.String(10), db.ForeignKey('comments.comment_id'), nullable=True)
-    text = db.Column(db.Text, nullable=False)
-    is_root_comment = db.Column(db.Boolean, nullable=False)
-    likes = db.Column(db.Integer, default=0)
-    dislikes = db.Column(db.Integer, default=0)
-    reports = db.Column(db.Integer, default=0)
-    timestamp = db.Column(db.String(30), nullable=False)
+class RegisterToken(db.Model):
+    __tablename__ = 'register_tokens'
+    user_id = db.Column(db.String(10), primary_key=True)
+    email = db.Column(db.String(70), unique=True, nullable=False)
+    username = db.Column(db.String(30), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)
 
-    # Relationships
-    user = db.relationship('User', backref='comments')
-    replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[comment_id]), lazy='dynamic')
-
-
-class CommentReaction(db.Model):
-    __tablename__ = 'comment_reactions'
-    reaction_id = db.Column(db.String(12), primary_key=True)
-    comment_id = db.Column(db.String(10), db.ForeignKey('comments.comment_id'))
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))
-    action = db.Column(db.Enum('like', 'dislike', 'report'))
-    timestamp = db.Column(db.String(30), nullable=False)
-
-    # Unique constraint to prevent multiple reactions from the same user to the same comment
-    __table_args__ = (db.UniqueConstraint('comment_id', 'user_id', 'action', name='unique_reaction'),)
-
-
-# Stories-related Models
+    token = db.Column(db.String(40), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
 class Publisher(db.Model):
@@ -63,6 +46,7 @@ class Publisher(db.Model):
     publisher_id = db.Column(db.String(40), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     link = db.Column(db.String(512), nullable=False)
+    favicon = db.Column(db.String(100), nullable=True)
     stories = db.relationship('Story', backref='publisher', lazy=True)
 
 
@@ -107,7 +91,7 @@ class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     story_id = db.Column(db.String(40), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(10))  # This should reference the 'users' table if it exists
+    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))  # This should reference the 'users' table if it exists
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 

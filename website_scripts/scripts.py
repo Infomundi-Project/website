@@ -1,17 +1,15 @@
-import uuid, bleach, hmac, time
+import uuid, bleach, hmac, time, langdetect, hashlib
 from re import search as search_regex, compile as re_compile, match as re_match
 from requests import get as get_request, post as post_request
 from json import loads as json_loads, dumps as json_dumps
-from langdetect import detect as detect_language
 from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
 from base64 import b64encode, b64decode
 from os import listdir, urandom, path
 from difflib import SequenceMatcher
-from googletrans import Translator
+#from googletrans import Translator
 from urllib.parse import urlparse
 from unidecode import unidecode
-from hashlib import md5, sha256
 from bs4 import BeautifulSoup
 from random import choice
 from openai import OpenAI
@@ -19,52 +17,94 @@ from openai import OpenAI
 from . import config, json_util, immutable, notifications, models, extensions
 
 
-def generate_hyvor_sso(email: str) -> tuple:
-    """The idea of Stateless SSO is simple: Each time the <hyvor-talk-comments> element loads, you will let us know if the user is logged in or not. If yes, you will also send the user's data along with other configuration. An HMAC hash is used to validate the authenticity of user data.
+def generate_nonce():
+    return b64encode(urandom(16)).decode('utf-8')
 
-    Arguments
-        email:str - The email address for the authenticated user
 
-    Returns: tuple
-        Returns a tuple containing the base64 encoded jsonified user data, and the HMAC SHA256 hash.
-    """
+def detect_mobile(request) -> bool:
+    """Uses a request object to check if the user is using a mobile device or not. If mobile, return True. Else, return False."""
+    user_agent = request.user_agent.string
+
+    mobile_keywords = ('Mobile', 'Android', 'iPhone', 'iPod', 'iPad', 'BlackBerry', 'Phone')
+
+    # Check if any of the mobile keywords appear in the user agent string
+    for keyword in mobile_keywords:
+        if keyword in user_agent:
+            return True
+
+    # If none of the keywords were found, it's likely not a mobile device
+    return False
+
+
+def sha256_hash_text(text: str):
+    """Hashes the given text using SHA-256 and returns the hash in hexadecimal format."""
+    sha256 = hashlib.sha256()
+    sha256.update(text.encode('utf-8'))
+    return sha256.hexdigest()
+
+
+def verify_sha256_hash(text, hash_value):
+    """Verifies that the given text matches the provided SHA-256 hash."""
+    return hash_text(text) == hash_value
+
+
+def detect_language(text: str) -> str:
+    """Tries to detect the language of a text value.
     
-    # There may be the case where user is not authenticated, so we return ()
-    if not email:
-        return ()
+    Args:
+        text (str): Any given text.
 
-    # Get user information
-    user = models.User.query.filter_by(email=email).first()
-
-    # Create an object that Hyvor Talk understands
-    user_data = {
-        'timestamp': int(time.time()),
-        'id': user.user_id,
-        'name': user.username,
-        'email': user.email,
-        'picture_url': user.avatar_url
-    }
-
-    # Adds 'owner' (ID 1381) and 'moderator' (ID 1379) badges if user is admin.
-    if email.endswith('@infomundi.net'):
-        user_data['badge_ids'] = [1381, 1379]
-
-    # 1. JSON encoding
-    user_data_json = json_dumps(user_data)
-
-    # 2. Base64 encoding
-    user_data_base64 = b64encode(user_data_json.encode()).decode()
-
-    # HMAC SHA256 hash
-    private_key = config.HYVOR_SSO_KEY
-    hash_object = hmac.new(private_key.encode(), user_data_base64.encode(), sha256)
-    hash_result = hash_object.hexdigest()
-
-    return (user_data_base64, hash_result)
+    Returns:
+        str: The text's language code. Defaults to 'en' when fails to detect the actual language.
+    
+    Examples:
+        >>> detect_language('Esse é claramente um texto em português!')
+        'pt'
+        >>> detect_language('This is clearly written in English.')
+        'en'
+    """
+    try:
+        lang = langdetect.detect(text)
+    except Exception:
+        lang = 'en'
+    
+    return lang
 
 
 def scrape_stock_data(country_name: str) -> list:
-    """Uses tradingeconomics website to scrape stock info. Takes a country name as argument and returns a list of dictionaries related to stocks on that country."""
+    """Uses tradingeconomics website to scrape stock info.
+
+    Args:
+        country_name (str): The country name.
+
+    Returns:
+        list: A list contaning all the stock data for the specified country.
+
+    Example:
+        >>> scrape_stock_data('Brazil')
+        [
+          {
+            "symbol": "PETR3:BS",
+            "name": "Petrobras",
+            "price": "42.58",
+            "day_change": "1.36%",
+            "year_change": "65.62%",
+            "date": "May/06",
+            "market_cap": "63.42B"
+          },
+          {
+            "symbol": "VALE3:BZ",
+            "name": "Vale",
+            "price": "64.40",
+            "day_change": "0.64%",
+            "year_change": "-7.96%",
+            "date": "May/06",
+            "market_cap": "52.39B"
+          },
+
+          <output shortened for brevity>
+        ]
+    """
     country_name = country_name.lower().replace(' ', '-')
 
     # Checks if cache is old enough (4 hours)
@@ -77,7 +117,7 @@ def scrape_stock_data(country_name: str) -> list:
     
     # We need to use a fake header, otherwise we'll get blocked (code 403)
     headers = {
-        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        'User-Agent': choice(immutable.USER_AGENTS)
     }
 
     response = get_request(url, headers=headers)
@@ -126,35 +166,43 @@ def scrape_stock_data(country_name: str) -> list:
 
 
 def log(text: str, log_type: str='exception') -> bool:
-    """Receives text and log_type. Both are required, but log_type has a default value set to 'Exception'. It writes to different log files based on the type of the log."""
+    """Writes to a log file. Used for debug purposes.
+    
+    Args:
+        text (str): Any given text. The log content.
+        log_type (str, optional): The log type. Must be one of ['exception', 'mail']. Defaults to 'exception'.
+
+    Returns:
+        bool: False if log type is not in ['exception', 'mail']. Otherwise, True.
+    
+    Example:
+        >>> log(f'[+] User admin failed to log in with the IP of 10.10.11.10 because of {exception}')
+        True
+    """
     log_type = log_type.lower()
     if log_type not in ['exception', 'mail']:
         return False
 
     log_file = f'{config.LOGS_PATH}/{log_type}.log'
-    try:
-        with open(log_file, 'a') as f:
-            f.write(f'{text}\n')
-    except Exception:
-        return False
+    
+    with open(log_file, 'a') as f:
+        f.write(f'{text}\n')
 
     return True
 
 
 def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
-    """Checks the modification date of a desired file and compares it with a default threshold of 24 hours. If lower than 24 hours since last modification, return False. Else, return True.
+    """Checks the modification date of a desired file and compares it with a default threshold of 24 hours. 
 
-    Arguments
-        file_path: str
-            File path to compare
+    Args:
+        file_path (str): File path to compare
+        threshold_hours (int, optional): Time in hours to compare. Defaults to 24.
 
-        threshold_hours: int
-            Default of 24. User may change it accordingly. Time to compare.
-
-    Return: bool"""
-
-    # Get the modification time of the file (os.path)
+    Returns: 
+        bool: False if cache is not old, meaning that there's less than 24 hours since last modification. Otherwise, True.
+    """
     try:
+        # Get the modification time of the file using os.path
         file_mtime = datetime.fromtimestamp(path.getmtime(file_path))
     except Exception:
         return True
@@ -170,7 +218,7 @@ def get_nation_data(cca2: str) -> dict:
     """Takes cca2 (country code) and returns a bunch of data about the specified country"""
     config_filepath = f'{config.COUNTRIES_DATA_PATH}/{cca2}'
     
-    # 720 hours = 30 days (just for convencience)
+    # 720 hours = 30 days
     if not is_cache_old(f'{config_filepath}.json', 720):
         data = json_util.read_json(config_filepath)
     else:
@@ -216,43 +264,43 @@ def get_nation_data(cca2: str) -> dict:
 
     try:
         return {
-        'area': f"{int(data['area']):,} km²",
-        'borders': ', '.join(formatted_borders),
-        'population': f"{data['population']:,}",
-        'hdi': f'{hdi_rate} ({hdi_tier} - data from 2021)',
-        'capital': ', '.join(data['capital']),
-        'leader': leader,
-        'currency': f"{currencies[list(currencies)[0]]['name']}, {currencies[list(currencies)[0]]['symbol']}",
-        'united_nations_member': 'Yes' if {data['unMember']} else 'No',
-        'languages': ', '.join(list(data['languages'].values())),
-        'timezones': ', '.join(data['timezones']),
-        'top_level_domain': data['tld'][0]
+            'area': f"{int(data['area']):,} km²",
+            'borders': ', '.join(formatted_borders),
+            'population': f"{data['population']:,}",
+            'hdi': f'{hdi_rate} ({hdi_tier} - data from 2021)',
+            'capital': ', '.join(data['capital']),
+            'leader': leader,
+            'currency': f"{currencies[list(currencies)[0]]['name']}, {currencies[list(currencies)[0]]['symbol']}",
+            'united_nations_member': 'Yes' if {data['unMember']} else 'No',
+            'languages': ', '.join(list(data['languages'].values())),
+            'timezones': ', '.join(data['timezones']),
+            'top_level_domain': data['tld'][0]
         }
     except Exception:
         return {}
 
 
-def send_verification_token(email: str, username: str) -> bool:
-    """Generates a verification token, stores in a json file and uses notifications.send_email to send the verification token to the user
+def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
+    """Generates a verification token, stores in a json file and 
+    uses notifications.send_email to send the verification token to the user.
 
-    Arguments
-        email:str User's email address
-        username:str User's username (max 30 characters)
+    Args:
+        email (str): User's email address.
+        hashed_email (str): User's sha256 hashed email.
+        username (str): User's username.
+        hashed_password (str): User's argon2 hashed password.
 
-    Returns
-        False if there's a token associated with the email. Otherswise True.
+    Returns:
+        bool: False if there's a token associated with the email or if we couldn't get to send the email. Otherwise True.
     """
-    try:
-        tokens = json_util.read_json(config.TOKENS_PATH)
-    except Exception:
-        tokens = {}
+    token_lookup = models.RegisterToken.query.filter_by(email=email).first()
     
-    # This means there's an already issued token for that specific email address, and therefore it should return False, indicating there's an error.
-    if email in tokens:
+    # This means there's an already issued token for the specified email address.
+    if token_lookup:
         return False
 
-    # Generate a REEEEALLY random verification token
-    verification_token = md5(urandom(20)).hexdigest()
+    # Generate a REEEEALLY random verification token.
+    verification_token = hashlib.md5(urandom(20)).hexdigest()
 
     message = f"""Hello {username}, 
 
@@ -267,72 +315,95 @@ The Infomundi Team"""
 
     subject = 'Infomundi - Activate Your Account'
     
+    # If we can send the email, save token to the database
     result = notifications.send_email(email, subject, message)
-    
     if result:
-        tokens[email] = {}
-        tokens[email]['token'] = verification_token
-        json_util.write_json(tokens, config.TOKENS_PATH)
+        new_token = models.RegisterToken(email=hashed_email, username=username, 
+            token=verification_token, user_id=generate_id(), password=hashed_password)
+        extensions.db.session.add(new_token)
+        extensions.db.session.commit()
 
     return result
 
 
-def send_forgot_password_token(email: str='', token: str='') -> bool:
-    try:
-        tokens = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
-    except Exception:
-        tokens = {}
+def check_recovery_token(token: str) -> object:
+    """Checks if the account recovery token is valid.
 
-    if email in tokens:
-        return False
+    Arguments:
+        token (str): Account recovery token. MD5 hash.
+
+    Returns:
+        object: The user object. None if error.
+    """
+    user_lookup = models.User.query.filter_by(recovery_token=token).first()
+    # Checks if there is any user associated with the specified token. If not, return False
+    if not user_lookup:
+        return None
+
+    now = datetime.now()
+    created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
     
+    # Checks if the token is expired. If it's expired, we clear it from the database, commit change and return False
+    time_difference = now - created_at
+    if time_difference > timedelta(minutes=30):
+        user_lookup.recovery_token = None
+        extensions.db.session.commit()
+        return None
+
+    # If passes the above checks, we clear from the database and return the user's sha256 hashed email address.
+    user_lookup.in_recovery = True
+    user_lookup.recovery_token = None
+    extensions.db.session.commit()
+
+    return user_lookup
+
+
+def send_recovery_token(email: str, hashed_email: str) -> bool:
+    """Tries to send the account recovery token to the user requesting account recovery.
+
+    Args:
+        email (str): The user's email address.
+        hashed_email (str): The user's sha256 hashed email address.
+
+    Returns:
+        bool: True if user can proceed with account recovery. Otherwise, False.
+    """
+    user_lookup = models.User.query.filter_by(email=hashed_email).first()
+    if not user_lookup:
+        return False
+
     now = datetime.now()
 
-    if token:
-        to_delete = []
+    # If there's a token already issued to the user, check if it's expired. If expired, proceed. If not, return False.
+    if user_lookup.recovery_token:
+        created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
         
-        for key, value in tokens.items():
-            created_at = datetime.fromisoformat(value['timestamp'])
-            time_difference = now - created_at
-            if time_difference > timedelta(minutes=30):
-                to_delete.append(key)
-            
-            if value['token'] == token and key not in to_delete:
-                email = key
-                to_delete.append(key)
-                break
-        else:
+        # Checks if the token is expired
+        time_difference = now - created_at
+        if time_difference < timedelta(minutes=30):
             return False
 
-        for item in to_delete:
-            del tokens[item]
-
-        json_util.write_json(tokens, f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
-
-        return email
-    
-    verification_token = md5(urandom(20)).hexdigest()
+    # Generates a super random token.
+    verification_token = hashlib.md5(urandom(20)).hexdigest()
 
     message = f"""Hello,
 
-If you've received this message in error, feel free to disregard it. However, if you're here to change the password for your Infomundi account, feel free to click on the link below:
+If you've received this message in error, feel free to disregard it. However, if you're here to recover your Infomundi account, feel free to click on the link below:
 
 https://infomundi.net/auth/forgot_password?token={verification_token}
 
-Please keep in mind that this link will expire in 30 minutes.
+Please keep in mind that this token will expire in 30 minutes.
 
 Best regards,
 The Infomundi Team"""
     subject = 'Infomundi - Account Recovery'
     
+    # If we get to send the email, save it to the tokens file.
     result = notifications.send_email(email, subject, message)
-
     if result:
-        tokens[email] = {}
-        tokens[email]['token'] = verification_token
-        tokens[email]['timestamp'] = now.isoformat()
-
-        json_util.write_json(tokens, f'{config.WEBSITE_ROOT}/data/json/website/forgot_password')
+        user_lookup.recovery_token = verification_token
+        user_lookup.recovery_token_timestamp = now
+        extensions.db.session.commit()
 
     return result
 
@@ -384,7 +455,8 @@ def get_current_time_in_timezone(cca2: str) -> str:
 
 
 def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
-    """Takes the country name and wether is per capta or not (optional, default=False). Also, updates the saved database if the current save is more than 30 days old.
+    """Takes the country name and wether is per capta or not (optional, default=False). 
+    Also, updates the saved database if the current save is more than 30 days old.
 
     Arguments
         country_name: str
@@ -413,7 +485,11 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
                 return cache_data[index]
 
     url = f"https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal){'_per_capita' if is_per_capita else ''}"
-    response = get_request(url)
+    
+    headers = {
+        'User-Agent': choice(immutable.USER_AGENTS)
+    }
+    response = get_request(url, headers=headers)
 
     if response.status_code != 200:
         return []
@@ -474,6 +550,18 @@ def decode_base64(encoded_string: str) -> str:
     return b64decode(encoded_string).decode('utf-8')
 
 
+def has_md5_hash(text: str) -> bool:
+    """Check if the text contains an MD5 hash
+    
+    Arguments:
+        text: str - Any text.
+
+    Return
+        bool: True if the input text contains a md5 hash. Otherwise False.
+    """
+    return bool(search_regex(r'\b[a-fA-F0-9]{32}\b', text))
+
+
 def is_valid_url(url: str) -> bool:
     """Takes a string and checks if it is a url. Return True if is indeed a url or if the string is empty, else False."""
     if not url:
@@ -489,8 +577,23 @@ def is_valid_url(url: str) -> bool:
         return False
 
 
+# Define the function to validate URLs based on the trusted domain
+def is_safe_url(target: str, trusted_domain='infomundi.net'):
+    if not target:
+        return False
+    test_url = urlparse(target)
+    
+    if not (test_url.scheme in ('http', 'https') and test_url.netloc.endswith(trusted_domain)):
+        return 'https://infomundi.net'
+
+    return target
+
+
 def is_valid_email(email: str) -> bool:
     if email.count('@') != 1:
+        return False
+
+    if len(email) >= 70 or not email:
         return False
     
     domain = email.split('@')[1]
@@ -498,18 +601,6 @@ def is_valid_email(email: str) -> bool:
         return False
 
     return True
-
-
-def is_valid_username(username):
-    # Regular expression to match allowed characters: alphanumeric and !@#$%¨&*()_-
-    allowed_chars_regex = r'^[A-Za-z0-9!@#$%¨&*()_\-]+$'
-
-    # Check if the username matches the allowed pattern
-    if re_match(allowed_chars_regex, username):
-        return True  # Username is valid
-    else:
-        return False  # Username contains invalid characters
-
 
 
 def is_url_or_domain(input_str: str) -> str:
@@ -529,45 +620,6 @@ def is_url_or_domain(input_str: str) -> str:
         return "Domain"
     else:
         return "Neither"
-
-
-def check_in_badlist(data: dict):
-    """Takes data related to a comment. Uses notifications.py's post_webhook to send information about the comment to the admins discord server.
-    
-    Arguments
-        data: dict
-            Data related to a comment. Should have the following keys:
-            {
-                'name': 'username',
-                'text': 'comment',
-                'link': 'https://infomundi.net/comments?id=something&category=something'
-            }
-    """
-    text_combined = data['name'] + ' ' + data['text']
-    suspicious_words = []
-    
-    in_badlist = False
-    for word in text_combined.lower().split(' '):
-        if word in immutable.BADLIST:
-            suspicious_words.append(word)
-            in_badlist = True
-
-    if in_badlist:
-        webhook_data = {
-            'embed': {
-                'title': '🔔 Suspicious Comment',
-                'description': f"{data['name']} posted a suspicious comment.",
-                    'color': 0xFF0000,
-                    'fields': [
-                        {"name": "👤 Username", "value": data['name'], "inline": True},
-                        {"name": "💬 Comment", "value": data['text'], "inline": True},
-                        {"name": "🔗 Link", "value": data['link'], "inline": False}
-                    ],
-                    'footer': {'text': f"Comment ID: {data['id']}! Suspicious word{'s' if len(suspicious_words) > 1 else ''}: {' // '.join(suspicious_words)}"}
-                },
-                'message': 'We got a suspicious comment @everyone'
-            }
-        notifications.post_webhook(webhook_data)
 
 
 def get_link_preview(url: str) -> dict:
@@ -624,114 +676,14 @@ def string_similarity(s1: str, s2: str) -> float:
     return matcher.ratio() * 100
 
 
-def add_telemetry(news_id: str, telemetry_type: str):
-    """Takes the news id and add a click or a like to the specified news in the telemetry file.
-
-    Arguments
-        news_id: MD5 Hash of an ID. An example would be "d55eb4bac9849987131ec2d7c63d4c8c".
-        telemetry_type: The type of the telemetry to attach to the news. Must be in ['clicks', 'likes'].
-    """
-
-    current_timestamp = datetime.now()
-    timestamp_string = current_timestamp.isoformat()
-    
-    telemetry = json_util.read_json(config.TELEMETRY_PATH)
-    if news_id not in telemetry:
-        telemetry[news_id] = {}
-        telemetry[news_id]['clicks'] = 0
-        telemetry[news_id]['likes'] = 0
-        telemetry[news_id]['comments'] = 0
-        telemetry[news_id]['timestamp'] = timestamp_string
-    else:
-        telemetry[news_id][telemetry_type] += 1
-        telemetry[news_id]['timestamp'] = timestamp_string
-
-    # Removes news from the telemetry file that are older than 7 days.
-    to_remove = []
-    for item in telemetry:
-        saved_timestamp = datetime.fromisoformat(telemetry[item]['timestamp'])
-        
-        # As soon as an entry has been made within the last 7 days, the loop must stop. Otherwise, add the entry to the delete list.
-        time_difference = current_timestamp - saved_timestamp
-        if time_difference < timedelta(days=7):
-            break
-        
-        to_remove.append(item)
-
-    for key in to_remove:
-        del telemetry[key]
-    
-    json_util.write_json(telemetry, config.TELEMETRY_PATH)
-
-
 def get_statistics() -> dict:
     """Handles the statistics for Infomundi. Returns a dict with related information."""
-    statistics = json_util.read_json(config.STATISTICS_PATH)
-
-    current_timestamp = datetime.now()
-    formatted_time = current_timestamp.strftime('%Y/%m/%d %H:%M')  # Local Time
-
-    saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
-    time_difference = current_timestamp - saved_timestamp
-    
-    # Return cache if it's less than 15 minutes old
-    if time_difference < timedelta(minutes=15):
-        statistics['current_time'] = formatted_time
-        return statistics
-
-    try:
-        total_countries_supported = models.Category.query.count()
-
-        total_feeds = models.Publisher.query.count()
-        total_news = models.Story.query.count()
-
-        # Get last updated
-        time_difference = current_timestamp - saved_timestamp
-        
-        total_seconds = time_difference.total_seconds()
-
-        hours = int(total_seconds // 3600)
-        minutes = int((total_seconds % 3600) // 60)
-
-        if time_difference < timedelta(hours=1):
-            last_updated_message = f"{minutes} minutes ago"
-        else:
-            last_updated_message = f"{hours} hours ago"
-
-        total_clicks = int(models.Story.query.with_entities(extensions.db.func.sum(models.Story.clicks)).scalar())
-
-        # Endpoint to get comments
-        url = f'https://talk.hyvor.com/api/console/v1/{config.HYVOR_WEBSITE_ID}/comments'
-        response = get_request(url, headers={'X-API-KEY': config.HYVOR_CONSOLE_KEY})
-        if response.status_code == 200:
-            comments_data = response.json()
-            total_comments = len(comments_data)
-        else:
-            total_comments = 0
-
-        timestamp_string = current_timestamp.isoformat()
-        data = {
-            'current_time': formatted_time,
-            'timestamp': timestamp_string,  # this will be used to check if the statistics are ready for an update
-            'total_countries_supported': total_countries_supported,
-            'total_news': f"{total_news:,}",
-            'total_feeds': total_feeds,
-            'total_comments': total_comments,
-            'last_updated_message': last_updated_message,
-            'total_clicks': total_clicks
-        }
-
-        json_util.write_json(data, config.STATISTICS_PATH)
-    except Exception as err:
-        log(err)
-        return statistics
-
-    return data
+    return json_util.read_json(config.STATISTICS_PATH)
 
 
 def valid_category(category: str) -> bool:
     """Takes a category and checks if it is a valid category based on existing JSON files."""
-    categories = [file.replace('.json', '') for file in listdir(config.FEEDS_PATH)]
+    categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
     
     if category not in categories:
         return False
@@ -757,7 +709,15 @@ def get_supported_categories(country_code: str) -> list:
 
 
 def valid_captcha(token: str) -> bool:
-    """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge. Returns bool."""
+    """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge. 
+
+    Args:
+        token (str): The turnstile token.
+
+    Returns:
+        bool: True if CAPTCHA is valid, otherwise False.
+    """
+    
     if not token:
         return False
 
@@ -777,26 +737,67 @@ def valid_captcha(token: str) -> bool:
 
 
 def is_strong_password(password: str) -> bool:
-    """Takes a password and checks if it is a strong password based on Infomundi password policy. That is: at least 8 characters"""
-
-    if len(password) < 8 or len(password) > 50:
-        return False
+    """Checks if password is valid. Password is valid if it's between 8 and 50 characters.
     
-    return True
+    Args:
+        password (str): A simple string. User's password. For example, '#SuperSecurePassword123'
+    
+    Returns:
+        bool: True if password is valid, otherwise False.
+    """
+
+    return 8 < len(password) <= 50
+
+
+def is_valid_username(username: str) -> bool:
+    """Checks if username is valid. Username is valid if it's between 3 and 30 chacaters.
+    
+    Args:
+        username (str): Username to check. A simple string. For example, 'Lony'.
+
+    Returns:
+        bool: True if username is between 3 and 30 characters. Otherwise False.
+    """
+    
+    return 3 < len(username) < 30
 
 
 def remove_html_tags(text_with_html: str) -> str:
+    """Removes HTML tags from a desired string.
+
+    Args:
+        text_with_html (str): HTML text to be sanitized.
+    
+    Returns:
+        str: Sanitized text, without HTML tags.
+
+    Examples:
+        >>> remove_html_tags('<h1>test</h1>')
+        'test'
+        
+        >>> remove_html_tags('<script>alert(1)</script>')
+        ''
+    """
+    
     return BeautifulSoup(text_with_html, 'html.parser').get_text()
 
 
+"""
 def translate(dest_lang: str, msg: str) -> str:
-    """
-    Uses google translate to enhance user experience in many ways.
+    Uses google translate to... yes, you guessed correctly, translate some text. Identifies the source language
+    automatically.
 
-    Arguments
-        dest_lang: str
-            Destination language. For example, portuguese would be 'pt'.
-    """
+    Args:
+        dest_lang (str): Destination language.
+        msg (str): Message to translate.
+
+    Returns:
+        str: Translated text.
+
+    Examples:
+        >>> translate('pt', 'Hello, how are you?')
+        'Olá, como você está?'
+    
     
     translator = Translator()
 
@@ -805,21 +806,23 @@ def translate(dest_lang: str, msg: str) -> str:
         return translation.text
     except Exception as err:
         return ''
+"""
 
 
-def gpt_summarize(url:str) -> str:
-    """
-    This function performs an in-depth summarization of a news article found at the specified URL, and the the prompt includes the article's title and a snippet of its text to give the GPT model context.
+def gpt_summarize(url: str) -> str:
+    """This function performs an in-depth summarization of a news article found at the specified URL, 
+    and the the prompt includes the article's title and a snippet of its text to give the GPT model context.
 
-    Arguments:
+    Args:
         url (str): The URL of the news article to summarize.
 
-    Returns:
-        str: A string dictionary containing the detailed analysis of the article. The dictionary includes three keys corresponding to the sections of the analysis. If the operation is unsuccessful for any reason, an empty dictionary is returned.
+    Returns: 
+        str: A string dictionary containing the detailed analysis of the article. The dictionary includes 
+        three keys corresponding to the sections of the analysis. If the operation is unsuccessful for any reason, 
+        an empty dictionary is returned.
     """
 
-    user_agent = choice(immutable.USER_AGENTS)
-    r = get_request(url, headers={'User-Agent': user_agent})
+    r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
     
     if r.status_code != 200:
         return ''
@@ -873,8 +876,45 @@ def gpt_summarize(url:str) -> str:
 def sanitize_input(text: str) -> str:
     """Takes an input string and uses bleach library to sanitize it.
 
-    Returns
-        str: Sanitized input
-    """
+    Args:
+        text (str): Any user-input text.
 
+    Returns:
+        str: Sanitized input.
+
+    Example:
+        >>> sanitize_input('an <script>evil()</script> example')
+        'an &lt;script&gt;evil()&lt;/script&gt; example'
+    """
+    
     return bleach.clean(text)
+
+
+def get_current_date_and_time() -> str:
+    return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def get_user_ip(request: object) -> tuple:
+    """Uses Cloudflare's headers to obtain the user real IP address.
+
+    Arguments:
+        request (object): The request object.
+
+    Returns:
+        tuple: A tuple containing both user's ipv4 and ipv6 addresses. First value is ipv4, second value ipv6.
+    """
+    ipv4 = request.headers.get('CF-Connecting-IP', '')
+    ipv6 = request.headers.get('CF-Connecting-IPv6', '')
+    return (ipv4, ipv6)
+
+
+def get_user_country(request: object) -> str:
+    """Gets the country of the IP making the request.
+
+    Arguments:
+        request (object): The request object.
+
+    Returns:
+        str: The cca2 for the user IP. For instance, BR or US or CA>
+    """
+    return request.headers.get('CF-IPCountry', '')

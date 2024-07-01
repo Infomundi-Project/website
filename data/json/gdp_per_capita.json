@@ -1,68 +1,68 @@
 [
   {
-    "Monaco": {
-      "gdp": "$234,317 (World Bank)",
-      "date": "2021"
-    }
-  },
-  {
     "Liechtenstein": {
-      "gdp": "$184,083 (World Bank)",
+      "gdp": "$197,505 (World Bank)",
       "date": "2021"
     }
   },
   {
     "Luxembourg": {
-      "gdp": "$135,605 (IMF)",
-      "date": "2023"
+      "gdp": "$131,384 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bermuda": {
-      "gdp": "$118,846 (World Bank)",
+      "gdp": "$118,775 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Ireland": {
-      "gdp": "$112,248 (IMF)",
-      "date": "2023"
+      "gdp": "$106,059 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Switzerland": {
-      "gdp": "$102,865 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Norway": {
-      "gdp": "$99,266 (IMF)",
-      "date": "2023"
+      "gdp": "$105,669 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cayman Islands": {
-      "gdp": "$88,476 (World Bank)",
-      "date": "2021"
+      "gdp": "$99,625 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Norway": {
+      "gdp": "$94,660 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Singapore": {
-      "gdp": "$87,884 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Qatar": {
-      "gdp": "$81,968 (IMF)",
-      "date": "2023"
+      "gdp": "$88,447 (IMF)",
+      "date": "2024"
     }
   },
   {
     "United States": {
-      "gdp": "$80,412 (IMF)",
-      "date": "2023"
+      "gdp": "$85,373 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Iceland": {
+      "gdp": "$84,594 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Qatar": {
+      "gdp": "$81,400 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -72,21 +72,15 @@
     }
   },
   {
-    "Iceland": {
-      "gdp": "$78,837 (IMF)",
-      "date": "2023"
+    "Macau": {
+      "gdp": "$78,962 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Denmark": {
-      "gdp": "$71,402 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Faroe Islands": {
-      "gdp": "$69,010 (World Bank)",
-      "date": "2021"
+      "gdp": "$68,898 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -96,27 +90,39 @@
     }
   },
   {
+    "Faroe Islands": {
+      "gdp": "$66,979 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
     "Australia": {
-      "gdp": "$63,487 (IMF)",
-      "date": "2023"
+      "gdp": "$66,589 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Netherlands": {
-      "gdp": "$61,770 (IMF)",
-      "date": "2023"
+      "gdp": "$63,750 (IMF)",
+      "date": "2024"
     }
   },
   {
     "San Marino": {
-      "gdp": "$58,541 (IMF)",
-      "date": "2023"
+      "gdp": "$59,405 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Austria": {
-      "gdp": "$58,013 (IMF)",
-      "date": "2023"
+      "gdp": "$59,225 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Sweden": {
+      "gdp": "$58,529 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -126,57 +132,51 @@
     }
   },
   {
-    "Sweden": {
-      "gdp": "$55,216 (IMF)",
-      "date": "2023"
+    "Belgium": {
+      "gdp": "$55,536 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Finland": {
-      "gdp": "$54,507 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Macau": {
-      "gdp": "$54,296 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Belgium": {
-      "gdp": "$53,657 (IMF)",
-      "date": "2023"
+      "gdp": "$55,127 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Canada": {
-      "gdp": "$53,247 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Israel": {
-      "gdp": "$53,196 (IMF)",
-      "date": "2023"
+      "gdp": "$54,866 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Germany": {
-      "gdp": "$52,824 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Hong Kong": {
-      "gdp": "$51,168 (IMF)",
-      "date": "2023"
+      "gdp": "$54,291 (IMF)",
+      "date": "2024"
     }
   },
   {
     "United Arab Emirates": {
-      "gdp": "$50,602 (IMF)",
-      "date": "2023"
+      "gdp": "$53,916 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Hong Kong": {
+      "gdp": "$53,606 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Israel": {
+      "gdp": "$53,372 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "United Kingdom": {
+      "gdp": "$51,075 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -186,69 +186,63 @@
     }
   },
   {
-    "United Kingdom": {
-      "gdp": "$48,912 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
     "New Zealand": {
-      "gdp": "$48,072 (IMF)",
-      "date": "2023"
+      "gdp": "$48,531 (IMF)",
+      "date": "2024"
     }
   },
   {
     "France": {
-      "gdp": "$46,315 (IMF)",
-      "date": "2023"
+      "gdp": "$47,359 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Andorra": {
-      "gdp": "$44,107 (IMF)",
-      "date": "2023"
+      "gdp": "$44,900 (IMF)",
+      "date": "2024"
     }
   },
   {
     "European Union[n 1]": {
-      "gdp": "$41,110 (IMF)",
-      "date": "2023"
+      "gdp": "$42,440 (IMF)",
+      "date": "2024"
     }
   },
   {
     "U.S. Virgin Islands": {
-      "gdp": "$39,552 (World Bank)",
-      "date": "2020"
+      "gdp": "$41,976 (World Bank)",
+      "date": "2021"
     }
   },
   {
     "Malta": {
-      "gdp": "$38,715 (IMF)",
-      "date": "2023"
+      "gdp": "$41,738 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Italy": {
-      "gdp": "$37,146 (IMF)",
-      "date": "2023"
+      "gdp": "$39,580 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Aruba": {
+      "gdp": "$38,018 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Puerto Rico": {
-      "gdp": "$37,093 (IMF)",
-      "date": "2023"
+      "gdp": "$37,172 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "New Caledonia": {
-      "gdp": "$36,668 (World Bank)",
-      "date": "2022"
-    }
-  },
-  {
-    "Sint Maarten (Dutch part)": {
-      "gdp": "$36,220 (World Bank)",
-      "date": "2022"
+    "Cyprus": {
+      "gdp": "$37,149 (IMF)",
+      "date": "[n 2]2024"
     }
   },
   {
@@ -258,189 +252,219 @@
     }
   },
   {
-    "Aruba": {
-      "gdp": "$35,718 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Cyprus": {
-      "gdp": "$34,791 (IMF)",
-      "date": "[n 2]2023"
-    }
-  },
-  {
-    "Brunei": {
-      "gdp": "$34,384 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bahamas": {
-      "gdp": "$34,371 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Japan": {
-      "gdp": "$33,950 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "South Korea": {
-      "gdp": "$33,147 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Spain": {
-      "gdp": "$33,090 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Saudi Arabia": {
-      "gdp": "$32,586 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Slovenia": {
-      "gdp": "$32,350 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Taiwan": {
-      "gdp": "$32,339 (IMF)",
-      "date": "[n 3]2023"
-    }
-  },
-  {
-    "Kuwait": {
-      "gdp": "$32,215 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Estonia": {
-      "gdp": "$30,998 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Czech Republic": {
-      "gdp": "$30,475 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Lithuania": {
-      "gdp": "$28,482 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bahrain": {
-      "gdp": "$28,464 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Portugal": {
-      "gdp": "$26,879 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Latvia": {
-      "gdp": "$24,929 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Slovakia": {
-      "gdp": "$24,471 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Greece": {
-      "gdp": "$23,173 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Poland": {
-      "gdp": "$22,393 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Saint Martin (French part)": {
-      "gdp": "$21,921 (World Bank)",
-      "date": "2014"
-    }
-  },
-  {
-    "Barbados": {
-      "gdp": "$21,442 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Uruguay": {
-      "gdp": "$21,378 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Oman": {
-      "gdp": "$21,266 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Hungary": {
-      "gdp": "$21,075 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Seychelles": {
-      "gdp": "$20,890 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Croatia": {
-      "gdp": "$20,877 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Guyana": {
-      "gdp": "$20,565 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Turks and Caicos Islands": {
-      "gdp": "$20,177 (World Bank)",
+    "Sint Maarten (Dutch part)": {
+      "gdp": "$35,873 (World Bank)",
       "date": "2022"
     }
   },
   {
-    "French Polynesia": {
-      "gdp": "$19,999 (World Bank)",
+    "New Caledonia": {
+      "gdp": "$35,745 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Bahamas": {
+      "gdp": "$35,257 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Brunei": {
+      "gdp": "$35,111 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Taiwan": {
+      "gdp": "$34,432 (IMF)",
+      "date": "[n 3]2024"
+    }
+  },
+  {
+    "South Korea": {
+      "gdp": "$34,165 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Spain": {
+      "gdp": "$34,045 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Slovenia": {
+      "gdp": "$34,026 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Japan": {
+      "gdp": "$33,138 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Saudi Arabia": {
+      "gdp": "$33,040 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Estonia": {
+      "gdp": "$31,855 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Kuwait": {
+      "gdp": "$31,724 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Czech Republic": {
+      "gdp": "$29,801 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Portugal": {
+      "gdp": "$28,969 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Bahrain": {
+      "gdp": "$28,876 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Lithuania": {
+      "gdp": "$28,407 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Guyana": {
+      "gdp": "$26,592 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Slovakia": {
+      "gdp": "$25,935 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Turks and Caicos Islands": {
+      "gdp": "$24,918 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Latvia": {
+      "gdp": "$24,194 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Greece": {
+      "gdp": "$23,966 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Saint Kitts and Nevis": {
+      "gdp": "$23,705 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Barbados": {
+      "gdp": "$23,596 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Hungary": {
+      "gdp": "$23,319 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Uruguay": {
+      "gdp": "$23,088 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Poland": {
+      "gdp": "$23,014 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Croatia": {
+      "gdp": "$22,966 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Seychelles": {
+      "gdp": "$21,875 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Oman": {
+      "gdp": "$20,913 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Antigua and Barbuda": {
+      "gdp": "$20,533 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Cura\u00e7ao": {
+      "gdp": "$20,502 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Saint Martin (French part)": {
+      "gdp": "$20,321 (World Bank)",
       "date": "2021"
     }
   },
   {
     "Trinidad and Tobago": {
-      "gdp": "$19,622 (IMF)",
-      "date": "2023"
+      "gdp": "$19,861 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "American Samoa": {
+      "gdp": "$19,673 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Romania": {
+      "gdp": "$19,530 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Panama": {
+      "gdp": "$19,369 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -456,39 +480,27 @@
     }
   },
   {
-    "Antigua and Barbuda": {
-      "gdp": "$19,068 (IMF)",
-      "date": "2023"
+    "French Polynesia": {
+      "gdp": "$18,985 (World Bank)",
+      "date": "2022"
     }
   },
   {
-    "Panama": {
-      "gdp": "$18,493 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Romania": {
-      "gdp": "$18,413 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Saint Kitts and Nevis": {
-      "gdp": "$18,158 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Cura\u00e7ao": {
-      "gdp": "$17,718 (World Bank)",
-      "date": "2021"
+    "Costa Rica": {
+      "gdp": "$18,031 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Maldives": {
-      "gdp": "$17,559 (IMF)",
-      "date": "2023"
+      "gdp": "$17,818 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Palau": {
+      "gdp": "$17,441 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -498,15 +510,15 @@
     }
   },
   {
-    "Chile": {
-      "gdp": "$17,254 (IMF)",
-      "date": "2023"
+    "Bulgaria": {
+      "gdp": "$16,943 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Costa Rica": {
-      "gdp": "$16,213 (IMF)",
-      "date": "2023"
+    "Chile": {
+      "gdp": "$16,616 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -516,117 +528,105 @@
     }
   },
   {
-    "Bulgaria": {
-      "gdp": "$16,087 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "American Samoa": {
-      "gdp": "$15,743 (World Bank)",
-      "date": "2021"
-    }
-  },
-  {
-    "Palau": {
-      "gdp": "$15,113 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
     "Mexico": {
-      "gdp": "$13,804 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Saint Lucia": {
-      "gdp": "$13,572 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Turkey": {
-      "gdp": "$13,384 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "World": {
-      "gdp": "$12,648 (World Bank)",
-      "date": "2022"
-    }
-  },
-  {
-    "Argentina": {
-      "gdp": "$13,297 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Malaysia": {
-      "gdp": "$13,034 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Russia": {
-      "gdp": "$13,006 (IMF)",
-      "date": "2023"
+      "gdp": "$15,249 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kazakhstan": {
-      "gdp": "$12,968 (IMF)",
-      "date": "2023"
+      "gdp": "$14,778 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Turkmenistan": {
-      "gdp": "$12,934 (IMF)",
-      "date": "2023"
+    "Russia": {
+      "gdp": "$14,391 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Saint Lucia": {
+      "gdp": "$14,101 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "World": {
+      "gdp": "$12,688 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Malaysia": {
+      "gdp": "$13,315 (IMF)",
+      "date": "2024"
     }
   },
   {
     "China": {
-      "gdp": "$12,541 (IMF)",
-      "date": "[n 4]2023"
-    }
-  },
-  {
-    "Nauru": {
-      "gdp": "$11,757 (IMF)",
-      "date": "2023"
+      "gdp": "$13,136 (IMF)",
+      "date": "[n 4]2024"
     }
   },
   {
     "Mauritius": {
-      "gdp": "$11,752 (IMF)",
-      "date": "2023"
+      "gdp": "$12,973 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Grenada": {
-      "gdp": "$11,437 (IMF)",
-      "date": "2023"
+    "Argentina": {
+      "gdp": "$12,812 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Turkey": {
+      "gdp": "$12,765 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Montenegro": {
-      "gdp": "$11,338 (IMF)",
-      "date": "2023"
+      "gdp": "$12,646 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Turkmenistan": {
+      "gdp": "$12,412 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Serbia": {
-      "gdp": "$11,301 (IMF)",
-      "date": "2023"
+      "gdp": "$12,384 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Nauru": {
+      "gdp": "$12,362 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Grenada": {
+      "gdp": "$12,255 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Dominican Republic": {
-      "gdp": "$11,249 (IMF)",
-      "date": "2023"
+      "gdp": "$11,774 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Brazil": {
+      "gdp": "$11,352 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -636,327 +636,321 @@
     }
   },
   {
-    "Brazil": {
-      "gdp": "$10,413 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
     "Saint Vincent and the Grenadines": {
-      "gdp": "$9,360 (IMF)",
-      "date": "2023"
+      "gdp": "$10,150 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Dominica": {
-      "gdp": "$9,356 (IMF)",
-      "date": "2023"
+      "gdp": "$9,455 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Gabon": {
-      "gdp": "$8,832 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Armenia": {
-      "gdp": "$8,283 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Georgia": {
-      "gdp": "$8,165 (IMF)",
-      "date": "[n 6]2023"
+      "gdp": "$9,308 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Albania": {
-      "gdp": "$8,057 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bosnia and Herzegovina": {
-      "gdp": "$7,778 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Botswana": {
-      "gdp": "$7,758 (IMF)",
-      "date": "2023"
+      "gdp": "$8,924 (IMF)",
+      "date": "2024"
     }
   },
   {
     "North Macedonia": {
-      "gdp": "$7,672 (IMF)",
-      "date": "2023"
+      "gdp": "$8,847 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Georgia": {
+      "gdp": "$8,825 (IMF)",
+      "date": "[n 6]2024"
+    }
+  },
+  {
+    "Armenia": {
+      "gdp": "$8,575 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Bosnia and Herzegovina": {
+      "gdp": "$8,416 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Peru": {
-      "gdp": "$7,669 (IMF)",
-      "date": "2023"
+      "gdp": "$8,291 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Azerbaijan": {
-      "gdp": "$7,530 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Belarus": {
-      "gdp": "$7,477 (IMF)",
-      "date": "2023"
+    "Botswana": {
+      "gdp": "$7,875 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Thailand": {
-      "gdp": "$7,298 (IMF)",
-      "date": "2023"
+      "gdp": "$7,812 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Belize": {
-      "gdp": "$7,142 (IMF)",
-      "date": "2023"
+    "Azerbaijan": {
+      "gdp": "$7,641 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Colombia": {
-      "gdp": "$6,976 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Jamaica": {
-      "gdp": "$6,831 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Equatorial Guinea": {
-      "gdp": "$6,502 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Ecuador": {
-      "gdp": "$6,500 (IMF)",
-      "date": "2023"
+    "Belarus": {
+      "gdp": "$7,558 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Moldova": {
-      "gdp": "$6,411 (IMF)",
-      "date": "[n 7]2023"
+      "gdp": "$7,488 (IMF)",
+      "date": "[n 7]2024"
     }
   },
   {
-    "South Africa": {
-      "gdp": "$6,191 (IMF)",
-      "date": "2023"
+    "Colombia": {
+      "gdp": "$7,327 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Marshall Islands": {
-      "gdp": "$6,141 (IMF)",
-      "date": "2023"
+    "Jamaica": {
+      "gdp": "$7,309 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Fiji": {
-      "gdp": "$6,025 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Kosovo": {
-      "gdp": "$5,912 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Iraq": {
-      "gdp": "$5,883 (IMF)",
-      "date": "2023"
+    "Belize": {
+      "gdp": "$7,170 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Libya": {
-      "gdp": "$5,872 (IMF)",
-      "date": "2023"
+      "gdp": "$6,975 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Paraguay": {
-      "gdp": "$5,843 (IMF)",
-      "date": "2023"
+    "Equatorial Guinea": {
+      "gdp": "$6,733 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Tuvalu": {
-      "gdp": "$5,773 (IMF)",
-      "date": "2023"
+    "Marshall Islands": {
+      "gdp": "$6,711 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Suriname": {
-      "gdp": "$5,667 (IMF)",
-      "date": "2023"
+      "gdp": "$6,702 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "El Salvador": {
-      "gdp": "$5,558 (IMF)",
-      "date": "2023"
+    "Ecuador": {
+      "gdp": "$6,567 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Tonga": {
-      "gdp": "$5,488 (IMF)",
-      "date": "2023"
+    "Kosovo": {
+      "gdp": "$6,389 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Guatemala": {
-      "gdp": "$5,407 (IMF)",
-      "date": "2023"
+    "Fiji": {
+      "gdp": "$6,287 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Mongolia": {
-      "gdp": "$5,348 (IMF)",
-      "date": "2023"
+      "gdp": "$6,182 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Ukraine": {
-      "gdp": "$5,225 (IMF)",
-      "date": "[n 8]2023"
+    "Tuvalu": {
+      "gdp": "$6,001 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Indonesia": {
-      "gdp": "$5,109 (IMF)",
-      "date": "2023"
+    "Paraguay": {
+      "gdp": "$5,984 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Iraq": {
+      "gdp": "$5,979 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "South Africa": {
+      "gdp": "$5,975 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Tonga": {
+      "gdp": "$5,840 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Algeria": {
-      "gdp": "$4,875 (IMF)",
-      "date": "2023"
+      "gdp": "$5,722 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Jordan": {
-      "gdp": "$4,851 (IMF)",
-      "date": "2023"
+    "Guatemala": {
+      "gdp": "$5,678 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Namibia": {
-      "gdp": "$4,786 (IMF)",
-      "date": "2023"
+    "Ukraine": {
+      "gdp": "$5,663 (IMF)",
+      "date": "[n 8]2024"
     }
   },
   {
-    "Samoa": {
-      "gdp": "$4,638 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Cape Verde": {
-      "gdp": "$4,503 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Micronesia": {
-      "gdp": "$4,358 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Vietnam": {
-      "gdp": "$4,316 (IMF)",
-      "date": "2023"
+    "El Salvador": {
+      "gdp": "$5,537 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Iran": {
-      "gdp": "$4,234 (IMF)",
-      "date": "2023"
+      "gdp": "$5,310 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Indonesia": {
+      "gdp": "$5,271 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Micronesia": {
+      "gdp": "$5,120 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Samoa": {
+      "gdp": "$4,840 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Namibia": {
+      "gdp": "$4,745 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Jordan": {
+      "gdp": "$4,705 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Cape Verde": {
+      "gdp": "$4,656 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Vietnam": {
+      "gdp": "$4,623 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tunisia": {
-      "gdp": "$4,191 (IMF)",
-      "date": "2023"
+      "gdp": "$4,435 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Eswatini": {
-      "gdp": "$3,995 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Morocco": {
-      "gdp": "$3,980 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Philippines": {
-      "gdp": "$3,859 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bolivia": {
-      "gdp": "$3,858 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Palestine": {
-      "gdp": "$3,464 (IMF)",
-      "date": "[n 9]2021"
-    }
-  },
-  {
-    "Egypt": {
-      "gdp": "$3,770 (IMF)",
-      "date": "2023"
+      "gdp": "$4,324 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Djibouti": {
-      "gdp": "$3,761 (IMF)",
-      "date": "2023"
+      "gdp": "$4,184 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Philippines": {
+      "gdp": "$4,130 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Morocco": {
+      "gdp": "$4,078 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Bolivia": {
+      "gdp": "$4,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bhutan": {
-      "gdp": "$3,500 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Vanuatu": {
-      "gdp": "$3,492 (IMF)",
-      "date": "2023"
+      "gdp": "$4,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Venezuela": {
-      "gdp": "$3,474 (IMF)",
-      "date": "2023"
+      "gdp": "$3,867 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Vanuatu": {
+      "gdp": "$3,734 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Honduras": {
+      "gdp": "$3,505 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Palestine": {
+      "gdp": "$3,396 (IMF)",
+      "date": "[n 9]2023"
     }
   },
   {
@@ -972,201 +966,207 @@
     }
   },
   {
-    "Honduras": {
-      "gdp": "$3,245 (IMF)",
-      "date": "2023"
+    "Egypt": {
+      "gdp": "$3,225 (IMF)",
+      "date": "2024"
     }
   },
   {
     "S\u00e3o Tom\u00e9 and Pr\u00edncipe": {
-      "gdp": "$2,905 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Congo": {
-      "gdp": "$2,858 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Ivory Coast": {
-      "gdp": "$2,728 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bangladesh": {
-      "gdp": "$2,621 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "India": {
-      "gdp": "$2,612 (IMF)",
-      "date": "2023"
+      "gdp": "$3,167 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Nicaragua": {
-      "gdp": "$2,599 (IMF)",
-      "date": "2023"
+      "gdp": "$2,791 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Papua New Guinea": {
-      "gdp": "$2,581 (IMF)",
-      "date": "2023"
+    "India": {
+      "gdp": "$2,731 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Angola": {
-      "gdp": "$2,550 (IMF)",
-      "date": "2023"
+    "Ivory Coast": {
+      "gdp": "$2,717 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Uzbekistan": {
-      "gdp": "$2,509 (IMF)",
-      "date": "2023"
+      "gdp": "$2,666 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Mauritania": {
-      "gdp": "$2,338 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Ghana": {
-      "gdp": "$2,329 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Solomon Islands": {
-      "gdp": "$2,285 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Kenya": {
-      "gdp": "$2,188 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Haiti": {
-      "gdp": "$2,125 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Zimbabwe": {
-      "gdp": "$2,006 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Kiribati": {
-      "gdp": "$1,968 (IMF)",
-      "date": "2023"
+    "Bangladesh": {
+      "gdp": "$2,646 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cambodia": {
-      "gdp": "$1,916 (IMF)",
-      "date": "2023"
+      "gdp": "$2,628 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Papua New Guinea": {
+      "gdp": "$2,530 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Congo": {
+      "gdp": "$2,457 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Kiribati": {
+      "gdp": "$2,446 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Angola": {
+      "gdp": "$2,432 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Mauritania": {
+      "gdp": "$2,347 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Solomon Islands": {
+      "gdp": "$2,253 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Ghana": {
+      "gdp": "$2,230 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Zimbabwe": {
+      "gdp": "$2,088 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Kenya": {
+      "gdp": "$1,983 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Laos": {
-      "gdp": "$1,879 (IMF)",
-      "date": "2023"
+      "gdp": "$1,976 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Haiti": {
+      "gdp": "$1,941 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kyrgyzstan": {
-      "gdp": "$1,830 (IMF)",
-      "date": "2023"
+      "gdp": "$1,922 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "Nigeria": {
-      "gdp": "$1,755 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Cameroon": {
-      "gdp": "$1,722 (IMF)",
-      "date": "2023"
+    "Ethiopia": {
+      "gdp": "$1,910 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Senegal": {
-      "gdp": "$1,715 (IMF)",
-      "date": "2023"
+      "gdp": "$1,900 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Cameroon": {
+      "gdp": "$1,815 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guinea": {
-      "gdp": "$1,543 (IMF)",
+      "gdp": "$1,651 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Benin": {
+      "gdp": "$1,512 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Pakistan": {
+      "gdp": "$1,461 (IMF)",
       "date": "2023"
     }
   },
   {
     "East Timor": {
-      "gdp": "$1,497 (IMF)",
-      "date": "2023"
+      "gdp": "$1,454 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Zambia": {
-      "gdp": "$1,486 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Ethiopia": {
-      "gdp": "$1,473 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Pakistan": {
-      "gdp": "$1,471 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Benin": {
-      "gdp": "$1,449 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Myanmar": {
-      "gdp": "$1,381 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Comoros": {
-      "gdp": "$1,377 (IMF)",
-      "date": "2023"
+      "gdp": "$1,413 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Nepal": {
-      "gdp": "$1,353 (IMF)",
-      "date": "2023"
+      "gdp": "$1,397 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Comoros": {
+      "gdp": "$1,384 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Tajikistan": {
+      "gdp": "$1,271 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Myanmar": {
+      "gdp": "$1,248 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tanzania": {
-      "gdp": "$1,327 (IMF)",
-      "date": "2023"
+      "gdp": "$1,220 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Uganda": {
+      "gdp": "$1,202 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -1176,87 +1176,87 @@
     }
   },
   {
-    "Tajikistan": {
-      "gdp": "$1,180 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Uganda": {
-      "gdp": "$1,163 (IMF)",
-      "date": "2023"
+    "Nigeria": {
+      "gdp": "$1,110 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Lesotho": {
-      "gdp": "$1,110 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Rwanda": {
-      "gdp": "$1,032 (IMF)",
-      "date": "2023"
+      "gdp": "$1,107 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guinea-Bissau": {
-      "gdp": "$1,028 (IMF)",
-      "date": "2023"
+      "gdp": "$1,087 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Togo": {
-      "gdp": "$1,004 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Syria": {
-      "gdp": "$\u2014 (IMF)",
-      "date": "537"
-    }
-  },
-  {
-    "Mali": {
-      "gdp": "$913 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Gambia": {
-      "gdp": "$903 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Burkina Faso": {
-      "gdp": "$888 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Liberia": {
-      "gdp": "$800 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Somalia": {
-      "gdp": "$717 (IMF)",
-      "date": "2023"
+      "gdp": "$1,058 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Chad": {
-      "gdp": "$703 (IMF)",
-      "date": "2023"
+      "gdp": "$1,014 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Rwanda": {
+      "gdp": "$989 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Gambia": {
+      "gdp": "$989 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Burkina Faso": {
+      "gdp": "$910 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Mali": {
+      "gdp": "$899 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Liberia": {
+      "gdp": "$855 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Somalia": {
+      "gdp": "$776 (IMF)",
+      "date": "2024"
     }
   },
   {
     "DR Congo": {
-      "gdp": "$675 (IMF)",
-      "date": "2023"
+      "gdp": "$715 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Niger": {
+      "gdp": "$670 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Mozambique": {
+      "gdp": "$659 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -1266,75 +1266,69 @@
     }
   },
   {
-    "Mozambique": {
-      "gdp": "$647 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Niger": {
-      "gdp": "$631 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
     "Eritrea": {
       "gdp": "$\u2014 (IMF)",
       "date": "644"
     }
   },
   {
-    "Yemen": {
-      "gdp": "$618 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Malawi": {
-      "gdp": "$580 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
-    "Central African Republic": {
-      "gdp": "$539 (IMF)",
-      "date": "2023"
-    }
-  },
-  {
     "Sudan": {
-      "gdp": "$534 (IMF)",
-      "date": "2023"
+      "gdp": "$547 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Madagascar": {
-      "gdp": "$530 (IMF)",
-      "date": "2023"
+      "gdp": "$538 (IMF)",
+      "date": "2024"
     }
   },
   {
-    "South Sudan": {
-      "gdp": "$417 (IMF)",
-      "date": "2023"
+    "Central African Republic": {
+      "gdp": "$538 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Sierra Leone": {
-      "gdp": "$415 (IMF)",
-      "date": "2023"
+      "gdp": "$527 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Yemen": {
+      "gdp": "$486 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Malawi": {
+      "gdp": "$481 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "South Sudan": {
+      "gdp": "$422 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Afghanistan": {
-      "gdp": "$443 (IMF)",
-      "date": "2021"
+      "gdp": "$422 (IMF)",
+      "date": "2022"
+    }
+  },
+  {
+    "Syria": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "421"
     }
   },
   {
     "Burundi": {
-      "gdp": "$246 (IMF)",
-      "date": "2023"
+      "gdp": "$230 (IMF)",
+      "date": "2024"
     }
   },
   {

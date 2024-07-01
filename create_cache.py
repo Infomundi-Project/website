@@ -24,32 +24,118 @@ db_params = {
 db_connection = pymysql.connect(**db_params)
 
 
-def insert_to_database(stories: list, category_id: str):
+def insert_to_database(stories: list, category_id: str) -> int:
+    """Inserts a list of stories into the database with associated categories and publishers.
+
+    Parameters:
+        stories (list): A list of dictionaries containing story details.
+        category_id (str): The ID of the category to which these stories belong.
+
+    Returns:
+        int: Exceptions count, if any.
+    """
+    exceptions_count = 0
+
+    # Open a database cursor
     with db_connection.cursor() as cursor:
+        # Iterate over each story in the provided list
         for item in stories:
             try:
-                # Insert category
-                cursor.execute("INSERT INTO categories (category_id) VALUES (%s) ON DUPLICATE KEY UPDATE category_id = category_id", (category_id,))
+                # Insert or update the category
+                cursor.execute(
+                    "INSERT INTO categories (category_id) VALUES (%s) "
+                    "ON DUPLICATE KEY UPDATE category_id = category_id", 
+                    (category_id,)
+                )
 
-                # Insert publisher
+                # Insert or update the publisher
                 cursor.execute("""
-                    INSERT INTO publishers (publisher_id, name, link) VALUES (%s, %s, %s)
+                    INSERT INTO publishers (publisher_id, name, link) 
+                    VALUES (%s, %s, %s)
                     ON DUPLICATE KEY UPDATE name = VALUES(name), link = VALUES(link)
                 """, (item['publisher_id'], item['publisher'], item['publisher_link']))
 
-                # Insert story
+                # Insert the story
                 cursor.execute("""
                     INSERT INTO stories (story_id, title, description, link, pub_date, category_id, publisher_id, media_content_url)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (item['id'], item['title'], item['description'], item['link'], item['pubDate'], category_id, item['publisher_id'], item['media_content']['url']))
+                """, (
+                    item['id'], 
+                    item['title'], 
+                    item['description'], 
+                    item['link'], 
+                    item['pub_date'], 
+                    category_id, 
+                    item['publisher_id'], 
+                    item['media_content']['url']
+                ))
             except Exception as err:
+                # Handle any exceptions that occur during insertion
+                exceptions_count += 1
                 print(f"[-] {err}")
 
+    # Commit all changes to the database
     db_connection.commit()
+    
+    return exceptions_count
+
+
+def format_text(text: str, max_lenght: int=500) -> str:
+    """Takes a text and the desired length and returns the formatted text without potentially
+    harmful special characters and within the character length range.
+    
+    Arguments
+        text (str): The text (obviously).
+        length (int): The desired length you want the text to be. Defaults to 500.
+
+    Returns
+        str: The text within the specified length range.
+    """
+
+    # Removes all html tags
+    text = scripts.remove_html_tags(text)
+    
+    # Removes some special characters
+    for special_character in immutable.SPECIAL_CHARACTERS:
+        text = text.replace(special_character, '')
+
+    # There's no need to proccess the text any further if it's below the specified length 
+    if len(text) <= max_lenght:
+        return text
+
+    # Formats the text breaking off when it reaches the length limit
+    formatted_text = ''
+    for word in text.split(' '):
+        # A bit less than the limit to avoid cutting off words
+        if len(formatted_text) >= max_lenght - 20:
+            break
+
+        formatted_text += f'{word} '
+
+    # If it's still above the limit for some reason, just cut this shit off for fuck sake
+    if len(formatted_text) > max_lenght:
+        formatted_text = formatted_text[:max_lenght]
+
+    # Strips the formatted text to avoid having unneccessary spaces
+    formatted_text = formatted_text.strip()
+    if not formatted_text.endswith('...'):
+        formatted_text += '...'
+    
+    return formatted_text
 
 
 def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
-    """Fetch RSS feed and store relevant information in a result list."""
+    """
+    Fetch RSS feed and store relevant information in a result list.
+
+    Args:
+        rss_url (str): The URL of the RSS feed to fetch.
+        news_filter (str): A filter keyword for news items.
+        result_list (list): A list to store the fetched and processed news items.
+
+    Returns:
+        None: Appends the fetched and processed news items to the result_list.
+    """
     headers = {
         'User-Agent': choice(immutable.USER_AGENTS)
     }
@@ -76,21 +162,12 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            feed_publisher = feed.feed.title
-            feed_link = feed.feed.link
+            feed_publisher = format_text(feed.feed.title)
+            feed_link = format_text(feed.feed.link)
 
-            item_title = item.get('title', f'No title was provided')
-            item_description = scripts.remove_html_tags(item.get('description', 'No description was provided'))[:1500]
-            item_link = item.link
-            
-            for character in immutable.SPECIAL_CHARACTERS:
-                feed_publisher = feed_publisher.replace(character, '')
-                feed_link = feed_link.replace(character, '')
-
-                item_title = item_title.replace(character, '')
-                item_link = item_link.replace(character, '')
-
-            feed_publisher = feed_publisher.split('-')[0]
+            item_title = format_text(item.get('title', f'No title was provided'))
+            item_description = format_text(item.get('description', 'No description was provided'))
+            item_link = format_text(item.link)
 
             if not scripts.is_valid_url(feed_link) or not scripts.is_valid_url(item_link):
                 print(f'[-] Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
@@ -102,27 +179,23 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
                 pubdate = item.published
             else:
                 pubdate = item.updated
-
-            # Manual correction :)
-            feed_link = feed_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
-            item_link = item_link.replace('https://redir.folha.com.br/redir/online/emcimadahora/rss091/', '')
             
+            # Creates the item ID based on a MD5 summary of item title + item link.
             item_id = f'{md5(unidecode( item_title.lower() + item_link.lower() ).encode()).hexdigest()}'
+
+            # Creates the publisher id based on a MD5 summary of the feed link.
+            publisher_id = md5(unidecode(feed_link).encode()).hexdigest()
             
-            if os.path.isfile(f'{config.WEBSITE_ROOT}/static/img/stories/{news_filter}/{item_id}.webp'):
-                item_image = f'static/img/stories/{news_filter}/{item_id}.webp'
-            else:
-                item_image = 'static/img/infomundi-white-darkbg-square.webp'
+            # Defines default image path.
+            item_image = 'static/img/infomundi-white-darkbg-square.webp'
             
+            # Tries to format pubdate
             pubdate = format_date(pubdate)
-            
-            pubdate_full = ''
-            pubdate_short = ''
-            if isinstance(pubdate, dict):
-                pubdate_full = pubdate['full']
-                pubdate_short = pubdate['short']
+            if 'error' in pubdate.keys():
+                # If errors out, well... We use today's date, what else could we do?
+                pubdate_full = datetime.now().date().strftime('%Y/%m/%d')
             else:
-                pubdate_full = pubdate
+                pubdate_full = pubdate['full']
 
             new_story = {
                 'title': item_title,
@@ -130,10 +203,9 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
                 'id': item_id,
                 'publisher': feed_publisher,
                 'publisher_link': feed_link,
-                'publisher_id': f'{md5(unidecode(feed_link).encode()).hexdigest()}',
+                'publisher_id': publisher_id,
                 'link': item_link,
-                'pubDate': pubdate_full,
-                'pubDate_short': pubdate_short,
+                'pub_date': pubdate_full,
                 'media_content': {
                     'url': item_image
                     }
@@ -148,49 +220,87 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     result_list.append(data)
 
 
-def format_date(date) -> str:
-    """Takes a pythonic date object and converts into a string to show in the news page"""
-    if not isinstance(date, tuple):
-        if date.startswith('2024') or date.startswith('2023'):
-            date_object = datetime.fromisoformat(date)
-            # Convert to 9-tuple
-            date = date_object.timetuple()
-        else:
-            if '2024' in date:
-                date_string = ' '.join(date.split('2024')[:3])
-            else:
-                date_string = ' '.join(date.split('2023')[:3])
-            return date_string
+def iso_to_tuple(date_str: str) -> tuple:
+    """Convert ISO format date string to a 9-tuple date."""
+    return datetime.fromisoformat(date_str).timetuple()
 
-    date_result = {}
 
-    today = datetime.now().date()
+def format_date(date) -> dict:
+    """
+    Converts a date object or ISO formatted date string into a readable string format 
+    for displaying on the news page. Returns a dictionary with both short and full date formats.
 
+    Args:
+        date (str or tuple): A date in ISO format string ('YYYY-MM-DD') or a 9-tuple date.
+
+    Returns:
+        dict: A dictionary with 'short' and 'full' keys containing the formatted date strings.
+
+    Examples:
+        >>> format_date('2024-06-24')
+        {'short': 'Today', 'full': '2024/06/24'}
+
+        >>> format_date('2024-06-19')
+        {'short': '5 days ago', 'full': '2024/06/19'}
+
+        >>> format_date('2024-05-01')
+        {'full': '2024/05/01'}
+
+        >>> format_date((2024, 6, 24, 0, 0, 0, 0, 0, 0))
+        {'short': 'Today', 'full': '2024/06/24'}
+
+        >>> format_date('24-06-2024')
+        {'error': 'Invalid date format'}
+
+        >>> format_date((2024, 6, 19, 0, 0, 0, 0, 0, 0))
+        {'short': '5 days ago', 'full': '2024/06/19'}
+    """
+
+    # Convert date to a 9-tuple if it's a string in ISO format
+    if isinstance(date, str):
+        try:
+            date = iso_to_tuple(date)
+        except ValueError:
+            # Handle invalid date string format
+            return {'error': 'Invalid date format'}
+
+    # Convert the 9-tuple date to a datetime.date object
     if isinstance(date, tuple):
         date = datetime(*date[:6]).date()
-    
+
+    date_result = {}  # Dictionary to hold the formatted date strings
+
+    today = datetime.now().date()  # Get today's date
+
+    # Check if the date is today
     if date == today:
         date_result['short'] = 'Today'
+    else:
+        # Calculate the difference in days from today
+        days_diff = (today - date).days
+        if 1 <= days_diff <= 15:
+            date_result['short'] = f"{days_diff} day{'s' if days_diff > 1 else ''} ago"
 
-    for day in range(1, 16):
-        comparison = today - timedelta(days=day)
-        if date == comparison:
-            date_result['short'] = f"{day} day{'s' if day > 1 else ''} ago"
-
+    # Set the 'full' format to 'YYYY/MM/DD'
     date_result['full'] = date.strftime('%Y/%m/%d')
+    
     return date_result
 
 
 def main():
     """Main function to fetch and cache RSS feeds."""
+
+    # Get the list of categories by reading the filenames in the feeds path
     categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
 
     total_done = 0
     
+    # Loop over each category to handle its RSS feeds
     for selected_filter in categories:
-        percentage = (total_done * 100) // len(categories)
-        print(f"\n[{percentage}%] Handling cache for {selected_filter}...")
+        percentage = (total_done // 100) * len(categories)
+        print(f"\n[{round(percentage, 2)}%] Handling cache for {selected_filter}...")
         
+        # Read the RSS feeds configuration for the current category
         rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
         all_rss_data = []
 
@@ -203,9 +313,11 @@ def main():
             threads.append(thread)
             thread.start()
 
+        # Wait for all threads to complete
         for thread in threads:
             thread.join()
 
+        # Process and collect data from each RSS feed
         for rss_data in result_list:
             if len(rss_data) == 0:
                 continue
@@ -218,6 +330,7 @@ def main():
         for rss_data in all_rss_data:
             merged_articles.extend(rss_data["items"])
 
+        # Skip if no articles were found
         if not merged_articles:
             print(f"[-] Empty cache: {selected_filter}")
             continue
@@ -225,12 +338,19 @@ def main():
         # Shuffle merged articles to mix them up
         shuffle(merged_articles)
 
-        insert_to_database(merged_articles, selected_filter)
+        # Insert articles into the database and count any exceptions
+        exceptions_count = insert_to_database(merged_articles, selected_filter)
         total_done += 1
         
-        print(f"[{len(merged_articles)} articles] Saved for {selected_filter}.")
+        print(f"[{len(merged_articles) - exceptions_count} articles] Saved for {selected_filter}.")
     
-    return print('[+] Finished!')
+    print('[+] Finished!')
+
+
+# Ensure main() is called when the script is run directly
+if __name__ == "__main__":
+    main()
+
 
 if __name__ == "__main__":
     main()

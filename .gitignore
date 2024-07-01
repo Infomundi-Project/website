@@ -13,3 +13,4 @@ config.py
 crypto.json
 currencies.json
 stocks.json
+backups/

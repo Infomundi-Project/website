@@ -27,6 +27,45 @@
 ---
 
 
+## Changelog 1.2.7 (2024/05/30)
+
+### Enhancements (0)
+1. **IME01:** All stories images are now storage in our r2 bucket for better performance.
+2. **IME02:** We now use a self-hosted instance of [Comentario](https://comentario.app) to handle the commenting system in the platform. All your comments and data are safely stored within our servers.
+3. **IME03**: SEO optimization for search engines.
+4. **IME04**: Now we display two different tickers in the home page, one for stocks and the other for crypto coins, enhancing visibility and comprehension.
+
+
+### Changes (0)
+1. **IMC01:** 
+
+
+### Removed (0)
+1. **IMR01:** Removed Hyvor Talk support from the platform.
+
+
+### Fixed (0)
+1. **IMF01:** Fixed several bugs.
+
+
+### Security (0)
+1. **IMS01:** Added automatic email obfuscation in order to hide email addresses in webpages from malicious crawlers and web scrapers. Whenever an email is present in a page in our website, a javascript challenge must be solved by the browser in order to view it. This processi s done automatically.
+2. **IMS02:** Rest assured, even in the unlikely event of an attacker getting access to our servers, it's now even harder for them to obtain sensitive data from our users. Since the start of the account creation feature, your passwords are stored using Argon2, one of the best cryptographic algorithms out there, to keep it safe. Now, even your email address is never stored in our database if it's not encrypted. Here is an example of how user account data is stored in our database:
+
+```
+| user_id | username | password | email | avatar_url | created_at | last_login |
+
+| df3c14e9 | example | $argon2id$v=19$m=65535,t=3,p=4$MTIzMTIzMTIz$7z+doaz1x0kYBvpCYKdLDg | 464ede306df1d8719e90665b3ab75f3d2d4a43a2c016e4d0b2b650cf1aa1f5f5 | https://infomundi.net/static/img/avatar.webp | 2024-05-29 17:54:59 | 2024-05-29 18:02:44 |
+```
+
+3. **IMS03**: Need more privacy for your conversations with us? Our PGP public key is now [available in our website](https://infomundi.net/pubkey.asc).
+4. **IMS04**: In order to prevent compatibility issues, we downgraded the minimum TLS version from 1.3 to 1.2.
+
+
+---
+
+
+
 ## Changelog 1.2.6 (2024/03/15)
 
 ### Backend Focus:

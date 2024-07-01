@@ -1,220 +1,222 @@
-{
-  "name": {
-    "common": "Rwanda",
-    "official": "Republic of Rwanda",
-    "nativeName": {
-      "eng": {
+[
+  {
+    "name": {
+      "common": "Rwanda",
+      "official": "Republic of Rwanda",
+      "nativeName": {
+        "eng": {
+          "official": "Republic of Rwanda",
+          "common": "Rwanda"
+        },
+        "fra": {
+          "official": "R\u00e9publique rwandaise",
+          "common": "Rwanda"
+        },
+        "kin": {
+          "official": "Repubulika y'u Rwanda",
+          "common": "Rwanda"
+        }
+      }
+    },
+    "tld": [
+      ".rw"
+    ],
+    "cca2": "RW",
+    "ccn3": "646",
+    "cca3": "RWA",
+    "cioc": "RWA",
+    "independent": true,
+    "status": "officially-assigned",
+    "unMember": true,
+    "currencies": {
+      "RWF": {
+        "name": "Rwandan franc",
+        "symbol": "Fr"
+      }
+    },
+    "idd": {
+      "root": "+2",
+      "suffixes": [
+        "50"
+      ]
+    },
+    "capital": [
+      "Kigali"
+    ],
+    "altSpellings": [
+      "RW",
+      "Republic of Rwanda",
+      "Repubulika y'u Rwanda",
+      "R\u00e9publique du Rwanda"
+    ],
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "languages": {
+      "eng": "English",
+      "fra": "French",
+      "kin": "Kinyarwanda"
+    },
+    "translations": {
+      "ara": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0631\u0648\u0627\u0646\u062f\u0627",
+        "common": "\u0631\u0648\u0627\u0646\u062f\u0627"
+      },
+      "bre": {
+        "official": "Republik Rwanda",
+        "common": "Rwanda"
+      },
+      "ces": {
+        "official": "Rwandsk\u00e1 republika",
+        "common": "Rwanda"
+      },
+      "cym": {
         "official": "Republic of Rwanda",
         "common": "Rwanda"
+      },
+      "deu": {
+        "official": "Republik Ruanda",
+        "common": "Ruanda"
+      },
+      "est": {
+        "official": "Rwanda Vabariik",
+        "common": "Rwanda"
+      },
+      "fin": {
+        "official": "Ruandan tasavalta",
+        "common": "Ruanda"
       },
       "fra": {
         "official": "R\u00e9publique rwandaise",
         "common": "Rwanda"
       },
-      "kin": {
-        "official": "Repubulika y'u Rwanda",
+      "hrv": {
+        "official": "Republika Ruandi",
+        "common": "Ruanda"
+      },
+      "hun": {
+        "official": "Ruandai K\u00f6zt\u00e1rsas\u00e1g",
+        "common": "Ruanda"
+      },
+      "ita": {
+        "official": "Repubblica del Ruanda",
+        "common": "Ruanda"
+      },
+      "jpn": {
+        "official": "\u30eb\u30ef\u30f3\u30c0\u5171\u548c\u56fd",
+        "common": "\u30eb\u30ef\u30f3\u30c0"
+      },
+      "kor": {
+        "official": "\ub974\uc644\ub2e4 \uacf5\ud654\uad6d",
+        "common": "\ub974\uc644\ub2e4"
+      },
+      "nld": {
+        "official": "Republiek Rwanda",
         "common": "Rwanda"
+      },
+      "per": {
+        "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0631\u0648\u0627\u0646\u062f\u0627",
+        "common": "\u0631\u0648\u0627\u0646\u062f\u0627"
+      },
+      "pol": {
+        "official": "Republika Rwandy",
+        "common": "Rwanda"
+      },
+      "por": {
+        "official": "Rep\u00fablica do Ruanda",
+        "common": "Ruanda"
+      },
+      "rus": {
+        "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0420\u0443\u0430\u043d\u0434\u0430",
+        "common": "\u0420\u0443\u0430\u043d\u0434\u0430"
+      },
+      "slk": {
+        "official": "Rwandsk\u00e1 republika",
+        "common": "Rwanda"
+      },
+      "spa": {
+        "official": "Rep\u00fablica de Rwanda",
+        "common": "Ruanda"
+      },
+      "srp": {
+        "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0420\u0443\u0430\u043d\u0434\u0430",
+        "common": "\u0420\u0443\u0430\u043d\u0434\u0430"
+      },
+      "swe": {
+        "official": "Republiken Rwanda",
+        "common": "Rwanda"
+      },
+      "tur": {
+        "official": "Ruanda Cumhuriyeti",
+        "common": "Ruanda"
+      },
+      "urd": {
+        "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0631\u0648\u0627\u0646\u0688\u0627",
+        "common": "\u0631\u0648\u0627\u0646\u0688\u0627"
+      },
+      "zho": {
+        "official": "\u5362\u65fa\u8fbe\u5171\u548c\u56fd",
+        "common": "\u5362\u65fa\u8fbe"
       }
-    }
-  },
-  "tld": [
-    ".rw"
-  ],
-  "cca2": "RW",
-  "ccn3": "646",
-  "cca3": "RWA",
-  "cioc": "RWA",
-  "independent": true,
-  "status": "officially-assigned",
-  "unMember": true,
-  "currencies": {
-    "RWF": {
-      "name": "Rwandan franc",
-      "symbol": "Fr"
-    }
-  },
-  "idd": {
-    "root": "+2",
-    "suffixes": [
-      "50"
-    ]
-  },
-  "capital": [
-    "Kigali"
-  ],
-  "altSpellings": [
-    "RW",
-    "Republic of Rwanda",
-    "Repubulika y'u Rwanda",
-    "R\u00e9publique du Rwanda"
-  ],
-  "region": "Africa",
-  "subregion": "Eastern Africa",
-  "languages": {
-    "eng": "English",
-    "fra": "French",
-    "kin": "Kinyarwanda"
-  },
-  "translations": {
-    "ara": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0631\u0648\u0627\u0646\u062f\u0627",
-      "common": "\u0631\u0648\u0627\u0646\u062f\u0627"
     },
-    "bre": {
-      "official": "Republik Rwanda",
-      "common": "Rwanda"
-    },
-    "ces": {
-      "official": "Rwandsk\u00e1 republika",
-      "common": "Rwanda"
-    },
-    "cym": {
-      "official": "Republic of Rwanda",
-      "common": "Rwanda"
-    },
-    "deu": {
-      "official": "Republik Ruanda",
-      "common": "Ruanda"
-    },
-    "est": {
-      "official": "Rwanda Vabariik",
-      "common": "Rwanda"
-    },
-    "fin": {
-      "official": "Ruandan tasavalta",
-      "common": "Ruanda"
-    },
-    "fra": {
-      "official": "R\u00e9publique rwandaise",
-      "common": "Rwanda"
-    },
-    "hrv": {
-      "official": "Republika Ruandi",
-      "common": "Ruanda"
-    },
-    "hun": {
-      "official": "Ruandai K\u00f6zt\u00e1rsas\u00e1g",
-      "common": "Ruanda"
-    },
-    "ita": {
-      "official": "Repubblica del Ruanda",
-      "common": "Ruanda"
-    },
-    "jpn": {
-      "official": "\u30eb\u30ef\u30f3\u30c0\u5171\u548c\u56fd",
-      "common": "\u30eb\u30ef\u30f3\u30c0"
-    },
-    "kor": {
-      "official": "\ub974\uc644\ub2e4 \uacf5\ud654\uad6d",
-      "common": "\ub974\uc644\ub2e4"
-    },
-    "nld": {
-      "official": "Republiek Rwanda",
-      "common": "Rwanda"
-    },
-    "per": {
-      "official": "\u062c\u0645\u0647\u0648\u0631\u06cc \u0631\u0648\u0627\u0646\u062f\u0627",
-      "common": "\u0631\u0648\u0627\u0646\u062f\u0627"
-    },
-    "pol": {
-      "official": "Republika Rwandy",
-      "common": "Rwanda"
-    },
-    "por": {
-      "official": "Rep\u00fablica do Ruanda",
-      "common": "Ruanda"
-    },
-    "rus": {
-      "official": "\u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0420\u0443\u0430\u043d\u0434\u0430",
-      "common": "\u0420\u0443\u0430\u043d\u0434\u0430"
-    },
-    "slk": {
-      "official": "Rwandsk\u00e1 republika",
-      "common": "Rwanda"
-    },
-    "spa": {
-      "official": "Rep\u00fablica de Rwanda",
-      "common": "Ruanda"
-    },
-    "srp": {
-      "official": "\u0420\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0420\u0443\u0430\u043d\u0434\u0430",
-      "common": "\u0420\u0443\u0430\u043d\u0434\u0430"
-    },
-    "swe": {
-      "official": "Republiken Rwanda",
-      "common": "Rwanda"
-    },
-    "tur": {
-      "official": "Ruanda Cumhuriyeti",
-      "common": "Ruanda"
-    },
-    "urd": {
-      "official": "\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0631\u0648\u0627\u0646\u0688\u0627",
-      "common": "\u0631\u0648\u0627\u0646\u0688\u0627"
-    },
-    "zho": {
-      "official": "\u5362\u65fa\u8fbe\u5171\u548c\u56fd",
-      "common": "\u5362\u65fa\u8fbe"
-    }
-  },
-  "latlng": [
-    -2.0,
-    30.0
-  ],
-  "landlocked": true,
-  "borders": [
-    "BDI",
-    "COD",
-    "TZA",
-    "UGA"
-  ],
-  "area": 26338.0,
-  "demonyms": {
-    "eng": {
-      "f": "Rwandan",
-      "m": "Rwandan"
-    },
-    "fra": {
-      "f": "Rwandaise",
-      "m": "Rwandais"
-    }
-  },
-  "flag": "\ud83c\uddf7\ud83c\uddfc",
-  "maps": {
-    "googleMaps": "https://goo.gl/maps/j5xb5r7CLqjYbyP86",
-    "openStreetMaps": "https://www.openstreetmap.org/relation/171496"
-  },
-  "population": 12952209,
-  "gini": {
-    "2016": 43.7
-  },
-  "fifa": "RWA",
-  "car": {
-    "signs": [
-      "RWA"
-    ],
-    "side": "right"
-  },
-  "timezones": [
-    "UTC+02:00"
-  ],
-  "continents": [
-    "Africa"
-  ],
-  "flags": {
-    "png": "https://flagcdn.com/w320/rw.png",
-    "svg": "https://flagcdn.com/rw.svg",
-    "alt": "The flag of Rwanda is composed of three horizontal bands of light blue, yellow and green. The light blue band is twice the height of the other two bands and bears a yellow sun with twenty-four rays on its fly side."
-  },
-  "coatOfArms": {
-    "png": "https://mainfacts.com/media/images/coats_of_arms/rw.png",
-    "svg": "https://mainfacts.com/media/images/coats_of_arms/rw.svg"
-  },
-  "startOfWeek": "monday",
-  "capitalInfo": {
     "latlng": [
-      -1.95,
-      30.05
-    ]
+      -2.0,
+      30.0
+    ],
+    "landlocked": true,
+    "borders": [
+      "BDI",
+      "COD",
+      "TZA",
+      "UGA"
+    ],
+    "area": 26338.0,
+    "demonyms": {
+      "eng": {
+        "f": "Rwandan",
+        "m": "Rwandan"
+      },
+      "fra": {
+        "f": "Rwandaise",
+        "m": "Rwandais"
+      }
+    },
+    "flag": "\ud83c\uddf7\ud83c\uddfc",
+    "maps": {
+      "googleMaps": "https://goo.gl/maps/j5xb5r7CLqjYbyP86",
+      "openStreetMaps": "https://www.openstreetmap.org/relation/171496"
+    },
+    "population": 12952209,
+    "gini": {
+      "2016": 43.7
+    },
+    "fifa": "RWA",
+    "car": {
+      "signs": [
+        "RWA"
+      ],
+      "side": "right"
+    },
+    "timezones": [
+      "UTC+02:00"
+    ],
+    "continents": [
+      "Africa"
+    ],
+    "flags": {
+      "png": "https://flagcdn.com/w320/rw.png",
+      "svg": "https://flagcdn.com/rw.svg",
+      "alt": "The flag of Rwanda is composed of three horizontal bands of light blue, yellow and green. The light blue band is twice the height of the other two bands and bears a yellow sun with twenty-four rays on its fly side."
+    },
+    "coatOfArms": {
+      "png": "https://mainfacts.com/media/images/coats_of_arms/rw.png",
+      "svg": "https://mainfacts.com/media/images/coats_of_arms/rw.svg"
+    },
+    "startOfWeek": "monday",
+    "capitalInfo": {
+      "latlng": [
+        -1.95,
+        30.05
+      ]
+    }
   }
-}
+]

@@ -39,16 +39,4 @@
     };
     password.addEventListener('input', validatePasswords);
     confirmPassword.addEventListener('input', validatePasswords);
-
-    // Username special character validation allowing specific characters
-    const username = document.getElementById('floatingUsername');
-    const validateUsername = () => {
-        const specialCharRegex = /[^A-Za-z0-9!@#$%¨&*()_\-]/;
-        if (specialCharRegex.test(username.value)) {
-            username.setCustomValidity('Username contains invalid characters');
-        } else {
-            username.setCustomValidity('');
-        }
-    };
-    username.addEventListener('input', validateUsername);
 })();

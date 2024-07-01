@@ -1,16 +1,16 @@
-from flask import Flask, render_template, request
+import os
+from flask import Flask, render_template, request, send_from_directory, abort, g
 from flask_assets import Environment, Bundle
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
-from flask_talisman import Talisman
-from flask_gzip import Gzip
-from os import urandom
+from datetime import timedelta
 
 from website_scripts.config import APP_SECRET_KEY, MYSQL_USERNAME, MYSQL_PASSWORD
-from website_scripts.extensions import db, login_manager
+from website_scripts.scripts import detect_mobile, generate_nonce
+from website_scripts.extensions import db, login_manager, cache
+from auth import auth_views, admin_required
 from website_scripts.models import User
-from auth import auth_views
 from views import views
 from api import api
 
@@ -18,7 +18,12 @@ from api import api
 app = Flask(__name__, static_folder='static')
 app.secret_key = APP_SECRET_KEY
 
+app.config['PREFERRED_URL_SCHEME'] = 'https'
+
 # Session Cookie Configuration
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=15)
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=15)
+
 app.config['SESSION_COOKIE_NAME'] = 'infomundi-session'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -29,6 +34,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USERNAME}:{MYSQ
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+# Cache
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_HOST'] = 'localhost'
+app.config['CACHE_REDIS_PORT'] = 6379
+app.config['CACHE_REDIS_DB'] = 0
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+cache.init_app(app)
+
 # Uploads
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 Megabytes
 app.config['UPLOAD_FOLDER'] = 'static/img/users/'
@@ -38,9 +51,65 @@ app.register_blueprint(views, url_prefix='/')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(auth_views, url_prefix='/auth')
 
+
+def is_safe_path(basedir, path, follow_symlinks=True):
+    # Resolves the absolute path and ensures it is within the base directory
+    if follow_symlinks:
+        return os.path.realpath(path).startswith(basedir)
+    return os.path.abspath(path).startswith(basedir)
+
+
+@app.route('/download-backup/<filename>', methods=['GET'])
+@admin_required
+def download_backup(filename):
+    BACKUP_DIRECTORY = '/var/www/infomundi/backups'
+    try:
+        # Securely join the directory and the requested file
+        file_path = os.path.join(BACKUP_DIRECTORY, filename)
+        
+        # Ensure the file is within the backup directory
+        if is_safe_path(BACKUP_DIRECTORY, file_path) and (filename.endswith('.enc') or filename == 'backup_log.txt'):
+            # Ensure the file exists
+            if os.path.exists(file_path):
+                return send_from_directory(BACKUP_DIRECTORY, filename, as_attachment=True)
+            else:
+                abort(404)  # Not Found
+
+        # If not valid, abort
+        abort(403)
+
+    except Exception as e:
+        abort(500)  # Internal Server Error
+
+
+# Ads.txt and robots.txt
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'ads.txt', mimetype='text/plain')
+
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'robots.txt', mimetype='text/plain')
+
+
+@app.route('/security.txt')
+def security_txt():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'security.txt', mimetype='text/plain')
+
+
+@app.route('/pubkey.asc')
+def pubkey_asc():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'pubkey.asc', mimetype='text/plain')
+
+
 # CSRF Configuration
 csrf = CSRFProtect(app)
-csrf.exempt('api.comments') # There's no need to protect this endpoint
+# Remove protection to endpoint --> csrf.exempt('api.comments')
 
 # Login manager
 login_manager.init_app(app)
@@ -52,117 +121,79 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-# Performance
-gzip = Gzip(app)
+@app.before_request
+def set_nonce():
+    # Generates a nonce using website_scripts.scripts.generate_nonce(). It's basically a base64 string
+    # created out of nothing. Saves to flask's g variable to be used in other scripts.
+    g.nonce = generate_nonce()
 
-assets = Environment(app)
 
-# Base template bundles
+@app.after_request
+def add_csp_header(response):
+    nonce = g.get('nonce', '')
+
+    # https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://commento.infomundi.net https://static.cloudflareinsights.com https://translate-pa.googleapis.com https://translate.googleapis.com https://challenges.cloudflare.com https://ajax.cloudflare.com https://kit.fontawesome.com https://translate.google.com; 
+    # Sets the CSP header to include the nonce
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self' https://*.infomundi.net; "
+        "img-src https: data:; "
+
+        "connect-src 'self' https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com https://ka-f.fontawesome.com https://api.tenor.com; "
+
+        "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
+        
+        f"script-src 'self' 'strict-dynamic' 'nonce-{nonce}'; "
+
+        "style-src 'self' 'unsafe-inline' https://*.infomundi.net https://fonts.googleapis.com https://www.gstatic.com; "
+        
+        "base-uri 'self' https://*.infomundi.net; "
+        "font-src 'self' https://*.infomundi.net"
+    )
+    
+    return response
+
+
+@app.after_request
+def add_cache_header(response):
+    if request.path.startswith('/static'):
+        # Set Cache-Control header for static files
+        response.headers['Cache-Control'] = 'public, max-age=2592000'  # 30 days
+
+    return response
+
+
+# base.html
 css_base = Bundle(
     'css/main.css', 'css/navbar.css', 'css/ticker.css', 
     filters='cssmin', 
     output='gen/base_packed.css')
+# base.html
 js_base = Bundle(
-    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/cookieConsent.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js',
+    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js',
     filters='jsmin', 
     output='gen/base_packed.js')
-
-assets.register('css_base', css_base)
-assets.register('js_base', js_base)
-
-# Home template bundles
+# homepage.html
 js_home = Bundle(
     'js/amcharts/map.js', 'js/amcharts/worldLow.js', 'js/amcharts/animated.js', 'js/chart.js', 
     filters='jsmin', 
     output='gen/home_packed.js')
-assets.register('js_home', js_home)
-
-# News template bundles
+# rss_template.html
 js_news = Bundle(
-    'js/submitSearch.js', 'js/newsCardHeader.js', 'js/languageMenu.js', 'js/timeAgo.js',
+    'js/submitSearch.js', 'js/languageMenu.js',
     filters='jsmin', 
     output='gen/news_packed.js')
+
+assets = Environment(app)
+assets.register('css_base', css_base)
+assets.register('js_base', js_base)
+assets.register('js_home', js_home)
 assets.register('js_news', js_news)
-
-
-# Security - CSP Rules
-csp = {
-    'default-src': [
-        '\'self\'',
-    ],
-    'img-src': [
-        '\'self\'',
-        'data:',
-        'https://talk.hyvor.com', # Comments reactions
-        'https://media.tenor.com', # gifs
-        'https://hyvor.com', # Comments user picture
-        'https://www.gstatic.com', # google images for translate
-        'https://fonts.gstatic.com', # google translate icon
-        'https://hatscripts.github.io',
-        'https://cdn.jsdelivr.net' # flag images
-    ],
-    'connect-src': [
-        '\'self\'',
-        'https://api.tenor.com', # Gifs
-        'https://talk.hyvor.com', # Comments
-        'wss://soketi.hyvor.com', # Comments real-time socket connection
-        'https://commento.io', # Commento
-        'https://cloudflareinsights.com',
-        'https://ka-f.fontawesome.com',
-        'https://translate.googleapis.com'
-    ], 
-    'frame-src': [
-        'https://challenges.cloudflare.com'
-    ],
-    'script-src': [
-        '\'self\'',
-        '\'unsafe-inline\'',
-        'https://cdn.commento.io', # Commento
-        'https://talk.hyvor.com', # Comments
-        'https://ajax.cloudflare.com',
-        'https://static.cloudflareinsights.com',
-        'https://challenges.cloudflare.com',
-        'https://kit.fontawesome.com',
-        'https://translate.google.com',
-        'https://translate.googleapis.com',
-        'https://translate-pa.googleapis.com'
-    ],
-    'style-src': [
-        '\'self\'',
-        '\'unsafe-inline\'',
-        'https://cdn.commento.io', # Commento
-        'https://fonts.googleapis.com',
-        'https://www.gstatic.com'
-    ],
-    'font-src': [
-        '\'self\'',
-        'https://ka-f.fontawesome.com',
-        'https://cdn.commento.io' # Commento
-    ]
-}
-
-talisman = Talisman(app, content_security_policy=csp)
-
-
-def detect_mobile(request) -> bool:
-    """Uses a request object to check if the user is using a mobile device or not. If mobile, return True. Else, return False."""
-    user_agent = request.user_agent.string
-
-    mobile_keywords = ('Mobile', 'Android', 'iPhone', 'iPod', 'iPad', 'BlackBerry', 'Phone')
-
-    # Check if any of the mobile keywords appear in the user agent string
-    for keyword in mobile_keywords:
-        if keyword in user_agent:
-            return True
-
-    # If none of the keywords were found, it's likely not a mobile device
-    return False
 
 
 @app.context_processor
 def inject_user():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
-    return dict(is_mobile=detect_mobile(request))
+    return dict(is_mobile=detect_mobile(request), nonce=g.get('nonce', ''))
 
 
 @app.errorhandler(404)
@@ -181,4 +212,4 @@ def error_handler(error):
 
 # Runs in debug mode if called directly!
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

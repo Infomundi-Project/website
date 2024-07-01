@@ -7,32 +7,45 @@ from . import config
 
 
 def post_webhook(data: dict) -> bool:
-    """
-    Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
+    """Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
     
-    Arguments
+    Arguments:
         data: dict
             Information needed to create the embed message. Should have the following structure:
             {
                 'text': 'some text'
             }
+
+    Returns: 
+        bool: True if we were able to POST the webhook, otherwise False.
     """
 
     # Make the HTTP POST request to the Discord webhook URL
-    response = requests.post(config.WEBHOOK_URL, json=data)
-
     try:
+        response = requests.post(config.WEBHOOK_URL, json=data)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
+    except Exception as err:
         return False
-    else:
-        return True
+
+    return True
 
 
-def send_email(recipient_email: str, subject: str, body: str) -> bool:
-    """Takes the recipient email, the subject and the body of the email and sends it. 
-
-    Returns bool."""
+def send_email(recipient_email: str, subject: str, body: str, reply_to: str='noreply@infomundi.net', from_email: str='Infomundi <noreply@infomundi.net>') -> bool:
+    """Takes the recipient email, the subject and the body of the email and sends it.
+    
+    Arguments:
+        recipient_email: str
+            Email address to send message to
+        subject: str
+            Email's subject
+        body: str
+            Email's message
+        reply_to: str
+            Reply-To address. Defaults to 'noreply@infomundi.net'
+    
+    Returns:
+        bool: True if we were able to send the message, otherwise False.
+    """
     
     # Email credentials
     sender_email = "contact@infomundi.net"
@@ -43,10 +56,10 @@ def send_email(recipient_email: str, subject: str, body: str) -> bool:
 
     # Create a message
     message = MIMEMultipart()
-    message['From'] = 'Infomundi <noreply@infomundi.net>'
+    message['From'] = from_email
     message['To'] = recipient_email
     message['Subject'] = subject
-    message['Reply-To'] = 'noreply@infomundi.net'
+    message['Reply-To'] = reply_to
     message.attach(MIMEText(body, 'plain'))
 
     try:

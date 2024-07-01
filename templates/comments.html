@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}{{ story.title }}{% endblock %}
+{% extends "base.html" %} {% block title %}{{ story.title.capitalize() }}{% endblock %}
 {% block styles %}
 <style>
   .news-top-image{
@@ -18,14 +18,13 @@
   <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ referer }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
       <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
 
-  <p class="fs-2 fw-bold">{{ story.title }}</p>
-  
-  <p class="fs-6 fw-light text-secondary-emphasis mb-3">{{ story.description }}</p>
+  <h1 class="fs-2 fw-bold">{{ story.title }}</h1>
+  <h2 class="fs-6 fw-light text-secondary-emphasis mb-3">{{ story.description }}</h2>
 
   <small><p><a href="{{ story.link }}" target="_blank" class="text-decoration-none mb-1"> 
     Published by{% if favicon_url %}<img src="{{ favicon_url }}" class="rounded ms-1 me-1" alt="{{ story.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss ms-1 me-1"></i>{% endif %}{{ story.publisher.name }}
@@ -36,7 +35,7 @@
 
   <img fetchpriority="high" src="{{ story.media_content_url }}" class="rounded my-3 news-top-image" alt="{{ story.title }}" width="500" height="333">
 
-  {% if current_user.is_authenticated and not story.gpt_summary %}
+  {% if not story.gpt_summary %}
     <div id="maximusInitialText">
       <h3 class="mb-3">Maximus is reading the news, wait a few seconds...</h3>
     </div>
@@ -52,20 +51,17 @@
     
     </div>
 
+    
     <div class="invisible" id="maximusFinalMessageTrue">
       <p>We are glad to help you further understand this news. You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
       
       <div class="d-flex justify-content-between mb-3">
         {% if previous_news %}
           <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
         {% endif %}
 
         {% if next_news %}
           <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
         {% endif %}
       </div> 
     
@@ -85,15 +81,11 @@
 
       <div class="d-flex justify-content-between mb-3">
         {% if previous_news %}
-          <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+          <a href="https://infomundi.net/comments?id={{ previous_news }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
         {% endif %}
 
         {% if next_news %}
-          <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+          <a href="https://infomundi.net/comments?id={{ next_news }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
         {% endif %}
       </div> 
 
@@ -105,61 +97,31 @@
 
       <div class="d-flex justify-content-between mb-3">
         {% if previous_news %}
-          <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+          <a href="https://infomundi.net/comments?id={{ previous_news }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
         {% endif %}
 
         {% if next_news %}
-          <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-        {% else %}
-          <a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" class="btn btn-outline-primary">{{ from_country_name }} {{ from_country_category.title() }}</a>
+          <a href="https://infomundi.net/comments?id={{ next_news }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
         {% endif %}
       </div> 
     {% endif %}
   {% endif %}
 
-<div class="mt-5"></div>
 
-<script async src="https://talk.hyvor.com/embed/embed.js" type="module"></script>
-<hyvor-talk-comments website-id="10638" page-id="{{ request.args.get('id', '') }}" page-url="{{ request.url }}" {% if current_user.is_authenticated %} sso-user="{{ hyvor_data[0] }}" sso-hash="{{ hyvor_data[1] }}" {% endif %}></hyvor-talk-comments>
+<div class="mt-5" style="background-color: white">
+
+<!--<script defer src="https://commento.infomundi.net/comentario.js"></script>-->
+<comentario-comments auto-init="false" live-update="false" lang="{{ page_language }}" page-id="/comments?id={{ story.story_id }}" max-level="5"></comentario-comments>
 
 </div>
 
-<!--
-<div id="comments-section" class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Comments <span id="total-comments" class="badge bg-secondary">0</span></h3>
-        <div>
-            <select id="sort-comments" aria-label="Sort Comments:" class="form-select form-select-sm w-auto">
-                <option value="top">Top Comments</option>
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            </select>
-        </div>
-    </div>
 
-    <div class="mb-4">
-        {% if current_user.is_authenticated %}
-        <div class="d-flex align-items-start">
-            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s avatar" class="rounded-circle me-2" style="width: 48px; height: 48px;">
-            <textarea id="new-comment" class="form-control me-2" rows="5" placeholder="Add a comment..." maxlength="300" minlength="2"></textarea>
-            <button id="cooldown-button" class="btn btn-secondary">Submit</button>
-        </div>
-        {% else %}
-          <p class="fs-3 text-decoration-none">You must <a href="{{ url_for('auth.register') }}">create an account</a> or <a href="{{ url_for('auth.login') }}">sign in</a> in order to interact with the comments section.</p>
-        {% endif %}
-    </div>
-    
-    <div id="comments-list" class="list-group"></div>
-</div>
--->
 
 <div class="container">
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ referer }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
       <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
@@ -167,33 +129,51 @@
 
 <!-- Return button -->
 {% if is_mobile %}
-<a type="button" class="btn btn-primary btn-sm inf-fixed-button invisible" href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" id="commentsReturnButtonMobile" style="position: fixed; top: 12vh; left: 20px;">
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button invisible" href="{{ referer }}" id="commentsReturnButtonMobile" style="position: fixed; top: 12vh; left: 20px;">
   <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
 </a>
 {% else %}
-<a type="button" class="btn btn-primary btn-sm inf-fixed-button" href="https://infomundi.net/news?country={{ from_country_code }}&section={{ from_country_category }}" id="commentsReturnButton" style="position: fixed; top: 12vh; left: 20px;">
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button" href="{{ referer }}" id="commentsReturnButton" style="position: fixed; top: 12vh; left: 20px;">
   <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
 </a>
 {% endif %}
 
 {% endblock %}
-
-
 {% block scripts %}
 
-{% if current_user.is_authenticated and not story.gpt_summary %}
-<script 
+{% if not story.gpt_summary %}
+<script nonce="{{ nonce }}"
   src="{{ url_for('static', filename='js/fetchGptSummary.js') }}"
 ></script>
 {% endif %}
 
-<!--
-<script 
-  src="{{ url_for('static', filename='js/comments.js') }}"
-></script>
--->
-<script 
-  src="{{ url_for('static', filename='js/cooldownButton.js') }}"
-></script>
+<script nonce="{{ nonce }}">
+  window.userAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+</script>
+
+<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/awaitLoadComentario.js') }}"></script>
+
+<script type="application/ld+json" nonce="{{ nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ story.title }}",
+  "description": "{{ story.description }}",
+  "image": "{{ story.media_content_url }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ story.publisher.name }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ favicon_url }}"
+    }
+  },
+  "datePublished": "{{ story.pub_date.replace('/', '-') }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.url }}"
+  }
+}
+</script>
 
 {% endblock %}

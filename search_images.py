@@ -1,106 +1,126 @@
 import concurrent.futures
-import pymysql
+import requests
+import boto3
+import sys
 import os
 
 from requests.exceptions import ProxyError, ConnectionError, Timeout
-from requests import get as get_request
 from random import shuffle, choice
+from sqlalchemy import or_, and_
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 
-from website_scripts import json_util, config, scripts, immutable
+from website_scripts import json_util, config, scripts, immutable, models, extensions
+from app import app
 
-# Database connection parameters
-db_params = {
-    'host': 'localhost',
-    'user': config.MYSQL_USERNAME,
-    'password': config.MYSQL_PASSWORD,
-    'db': 'infomundi',
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
-}
+WORKERS = 4
 
-db_connection = pymysql.connect(**db_params)
+# Define proxies variable as global and load proxy list from file
+with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
+    proxies = [x.rstrip() for x in f.readlines()]
+    shuffle(proxies)
 
 # Global list to keep track of bad proxies
 bad_proxies = []
 
+# r2 configuration
+s3_client = boto3.client(
+    's3',
+    endpoint_url=config.R2_ENDPOINT,
+    aws_access_key_id=config.R2_ACCESS_KEY,
+    aws_secret_access_key=config.R2_SECRET,
+    region_name='auto',
+)
+bucket_name = 'infomundi'
+bucket_base_url = 'https://bucket.infomundi.net'
 
-def get_link_preview(data, source:str='default', selected_filter:str='None'):
+with app.app_context():
+    session = extensions.db.session
+    
+    categories = [x.category_id for x in session.query(models.Category).all()]
+    shuffle(categories)
+    
+    favicon_database = [link.split('/')[-1] for link in [x.favicon for x in session.query(models.Publisher).all()] if isinstance(link, str)]
+
+
+def get_link_preview(data, source: str='default', selected_filter: str='None'):
     """
     Attempts to retrieve a link preview image URL for a given URL. Handles proxy rotation
     and retries upon failure. Can return either a preview image URL or, under certain conditions,
     a response object directly.
 
     Parameters:
-        data (str or models.Story): If a models.Story, expects 'link' attribute with the URL. Otherwise, directly uses the string as the URL.
+        data (str or dict): If a dict, expects 'link' key with the URL. Otherwise, directly uses the string as the URL.
         source (str): Determines the mode of operation. If not 'default', the raw response object is returned for further processing.
         selected_filter (str): Not directly used in this function but passed to subsequent functions for directory management.
 
     Returns:
         str or requests.Response: Returns the image preview URL as a string under normal operation. If source is not 'default',
-                                  returns the response object for further processing.
+        returns the response object for further processing.
     """
+    global proxies
+    global bad_proxies
 
-    # Determine URL based on data type
+    # Determine URL based on data type.
     if isinstance(data, str):
         url = data
     else:
         url = data.link
     
-    try:
-        # Randomly select a user agent to simulate browser requests
-        headers = {'User-Agent': choice(immutable.USER_AGENTS)}
-
-        # Load proxy list from file and limit to first 200 entries for efficiency
-        with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
-            proxies = [x.rstrip() for x in f.readlines()][:200]
-
+    default_image = 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp'
+    try:        
         while True:
+            # Randomly select a user agent to simulate browser requests
+            headers = {'User-Agent': choice(immutable.USER_AGENTS)}
+
             # Filter out bad proxies identified in previous attempts
             proxies = [x for x in proxies if x not in bad_proxies]
-                
+
             if not proxies:
                 # Return default image if no proxies are left
-                return "static/img/infomundi-white-darkbg-square.webp"
-                
+                return default_image
+            
             chosen_proxy = choice(proxies)
             
             try:
                 response = requests.get(url, timeout=8, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
-                if response.status_code >= 400:
-                    # HTTP error handling
-                    print(f'[!] Received HTTP error {response.status_code} from {url}')
-                    return 'static/img/infomundi-white-darkbg-square.webp'
+                if response.status_code not in [200, 301, 302]:
+                    print(f'[Invalid HTTP Response] {response.status_code} from {url}. Returning default image.')
+                    return default_image
             except requests.exceptions.ProxyError:
                 # Handle proxy errors by marking proxy as bad and retrying
                 bad_proxies.append(chosen_proxy)
+                print(f'[Proxy Error] Added to badlist: {chosen_proxy}')
                 continue
-            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
                 # Connection and timeout errors handling
-                return 'static/img/infomundi-white-darkbg-square.webp'
+                print(f'[Timeout] {err} from {url}')
+                return default_image
             except Exception as err:
                 # General error handling
-                print(f'[!] Unexpected error: {err}')
-                return 'static/img/infomundi-white-darkbg-square.webp'
+                print(f'[Unexpected Error] {err}')
+                if isinstance(data, object):
+                    print(f'[Debug] Story: {data.story_id} from: {data.publisher_id} ({data.publisher.name})')
+                
+                return default_image
             
             break  # Break the loop if the request was successful
 
         if source != 'default':
-            # Return response object directly for non-default sources
+            # Return response object directly for non-default sources. The response object can be used to scrape the story image and favicon url.
             return response
 
-        # Otherwise, proceed to extract and return the image URL
+        # Otherwise, proceed to extract and return the image URL. 'data' in this case is a models.Story object.
         return extract_image_from_response(response, url, data, selected_filter)
     except Exception as e:
         # Log unexpected errors encountered during execution
-        print(f'[!] Error in get_link_preview: {e}')
-        return 'static/img/infomundi-white-darkbg-square.webp'
+        print(f'[Unexpected] From get_link_preview: {e}')
+        return default_image
 
 
-def extract_image_from_response(response, url:str, story:dict, selected_filter:str):
+def extract_image_from_response(response: requests.Response, url: str, story: object, selected_filter: str):
     """
     Extracts and handles an image URL from a web response, with specific attention to news story imagery.
     
@@ -111,7 +131,7 @@ def extract_image_from_response(response, url:str, story:dict, selected_filter:s
     Parameters:
         response (requests.Response): The web response object containing the HTML content.
         url (str): The URL from which the response was fetched, used for resolving relative image URLs.
-        story (dict): A dict, containing details about the story.
+        story (object): The story itself.
         selected_filter (str): A filter criteria indicating the subdirectory within which the image should be stored.
     
     Returns:
@@ -123,56 +143,48 @@ def extract_image_from_response(response, url:str, story:dict, selected_filter:s
     # Attempt to find the Open Graph image meta tag for the primary image.
     image = soup.find('meta', {'property': 'og:image'})
     # If found, strip leading/trailing whitespace from the URL, otherwise use a default image.
-    image = image.get('content').strip() if image else "static/img/infomundi-white-darkbg-square.webp"
+    image_url = image.get('content').strip() if image else "https://infomundi.net/static/img/infomundi-white-darkbg-square.webp"
     
-    # Attempt to find a link tag for the site's favicon.
-    icon_link = soup.find('link', rel=lambda rel: rel and 'icon' in rel.lower())
+    favicon = soup.find('link', rel='icon')
+    if favicon:
+        favicon_url = favicon['href']
 
-    if image.endswith('infomundi-white-darkbg-square.webp'):
-        return image
-    
-    # Ensure the directory for storing images for this filter exists.
-    if not os.path.exists(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}'):
-        os.mkdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}')
-    
-    # Ensure the directory for storing favicons for this filter exists.
-    if not os.path.exists(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons'):
-        os.mkdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')
-
-    # Resolve the favicon URL, defaulting to '/favicon.ico' if no specific link tag was found.
-    if icon_link and icon_link.get('href'):
-        favicon = urljoin(url, icon_link['href'])
+        if not favicon_url.startswith(('http://', 'https://')):
+            favicon_url = urljoin(url, favicon['href'])
     else:
-        favicon = urljoin(url, '/favicon.ico')
+        favicon_url = urljoin(url, '/favicon.ico')
 
-    # Check if the publisher's favicon has already been stored by listing existing favicons and removing the file extension.
-    favicon_database = [x.replace('.ico', '') for x in os.listdir(f'{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons')]
-        
-    # Determine the structure of the return value based on the presence of a publisher ID and whether it's in the favicon database.
-    publisher_id = story['publisher_id']
-    if not publisher_id or publisher_id in favicon_database:
+    with app.app_context():
+        if story.publisher.favicon:
+            print(f'[Debug] Favicon for {story.publisher.name} already in database.')
+            is_favicon_in_database = True
+        else:
+            is_favicon_in_database = False
+
+    # If the favicon is already stored, there's no need for us to store it again. So, we specify only the story image information.
+    if is_favicon_in_database:
         images = {
-        'news': {
-            'url': image,
-            'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/{story['story_id']}"
+            'news': {
+                'url': image_url,
+                'output_path': f"stories/{selected_filter}/{story.story_id}"
             }
         }
     else:
         images = {
             'news': {
-                'url': image,
-                'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/{story['story_id']}"
+                'url': image_url,
+                'output_path': f"stories/{selected_filter}/{story.story_id}"
             },
             'favicon': {
-                'url': favicon,
-                'output_path': f"{config.WEBSITE_ROOT}/static/img/stories/{selected_filter}/favicons/{story['publisher_id']}"
+                'url': favicon_url,
+                'output_path': f"favicons/{selected_filter}/{story.publisher_id}"
             }
         }
 
     return download_and_convert_image(images)
 
 
-def download_and_convert_image(data: dict) -> str:
+def download_and_convert_image(data: dict) -> list:
     """
     Downloads and processes images specified in the input dictionary.
     
@@ -181,58 +193,65 @@ def download_and_convert_image(data: dict) -> str:
     are resized and converted to the WebP format for efficiency, while favicons are resized to
     a standard 32x32 pixel size and saved as ICO files.
     
-    Parameters:
+    Arguments:
         data (dict): A dictionary where each key is a type of image ('news' or 'favicon') and
-                     the value is another dictionary with 'url' and 'output_path' keys.
+        the value is another dictionary with 'url' and 'output_path' keys.
     
     Returns:
-        str: A str containing the path where the processed image has been saved, relative to the
-              website root directory.
+        list: A list containing the paths where the processed images were saved to.
     """
     website_paths = []
     for item in data:
         url = data[item]['url']
-        # Downloading the image using a previously defined function or directly if not using proxies.
-        # Consider using try-except here to manage download failures gracefully.
-        response = get_request(url, timeout=8)  # Adjust timeout as necessary
 
-        if response.status_code != 200:
-            # If the image cannot be downloaded, log or handle this situation appropriately.
-            raise Exception(f"Failed to download the image from {url}: Status code {response.status_code}")
+        if url == 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp' or not url:
+            continue
 
-        # Open the image using PIL
+        response = get_link_preview(url, 'download')
+        
+        # if response is not a requests Object, then the download failed.
+        if isinstance(response, str):
+            continue
+
         try:
+            # Open the image using PIL
             image = Image.open(BytesIO(response.content))
         except Exception as e:
-            # Handling exceptions if the image is corrupted or in an unexpected format.
-            # It might be useful to log this error for troubleshooting.
-            print(f"Error opening image from {url}: {e}")
-            continue  # Skip this iteration and proceed with the next item
+            print(f"[!] Error opening image from {url}, possibly wrong format.")
+            continue
 
+        output_buffer = BytesIO()
         if item == 'news':
-            # Resizing the news image to a maximum of 1280x720 pixels and converting to RGB for WebP format.
+            # Process as before but save to an in-memory bytes buffer
             image.thumbnail((1280, 720))
-            image = image.convert("RGB")  # Ensure compatibility with WebP format
-            
-            image_path = data[item]['output_path'] + ".webp"
-            image.save(image_path, format="webp", optimize=True, quality=50, method=6)
+            image = image.convert("RGB")
+            image.save(output_buffer, format="webp", optimize=True, quality=15, method=6)
+            s3_object_key = data[item]['output_path'] + ".webp"
         else:
-            # Resizing favicon images to 32x32 pixels.
-            image = image.resize((32, 32), Image.ANTIALIAS)
-            
-            favicon_path = data[item]['output_path'] + ".ico"
-            image.save(favicon_path)
-    
-    return image_path.replace(config.WEBSITE_ROOT, '')
+            # Processing favicon images as before, saving to buffer
+            image = image.resize((32, 32))
+            image.save(output_buffer, format="ico")
+            s3_object_key = data[item]['output_path'] + ".ico"
+
+        output_buffer.seek(0)
+        
+        try:
+            # Upload the buffer content to S3
+            s3_client.upload_fileobj(output_buffer, bucket_name, s3_object_key)
+        except Exception as e:
+            print(f'[-] Failed to upload to bucket: {e}')
+            continue
+        
+        output_buffer.close()
+        website_paths.append(s3_object_key)
+
+    return website_paths
 
 
 def search_images():
     """
     Searches images for each category in the feeds path.
     """
-    categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
-    shuffle(categories)
-
     top_countries = ['us_general', 'br_general', 'in_general', 'ru_general', 'ca_general', 'au_general', 'ar_general']
 
     # Removes top countries from the categories variable, in order to prevent going into the same country twice
@@ -241,15 +260,15 @@ def search_images():
 
     # Extends the top countries list so the script begins getting images for the biggest countries.
     top_countries.extend(categories)
-    
-    top_countries = ['mx_general'] # DEBUG
+
+    #top_countries = ['pe_general'] # DEBUG
 
     total = 0
     for selected_filter in top_countries:
         total += 1
-        progress_percentage = (total * 100) // len(categories)
+        progress_percentage = (total / 100) * len(categories)
         
-        print(f"\n[{progress_percentage}% done] Searching images for {selected_filter}...")
+        print(f"\n[{round(progress_percentage, 2)}%] Searching images for {selected_filter}...")
         process_category(selected_filter)
 
     print('[+] Finished!')
@@ -271,54 +290,56 @@ def process_category(selected_filter: str):
         This function handles a fixed number of stories (up to 500) to avoid overwhelming 
         the system with too many concurrent operations. Additionally, it updates the 
         media content URL for each story, either with a direct image URL or paths to 
-        downloaded and processed images, including handling favicons.
+        downloaded and processed images.
     """
 
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT story_id, media_content_url, publisher_id, link FROM stories
-            WHERE category_id = %s AND media_content_url NOT LIKE 'static/img/stories/%%'
-            ORDER BY created_at DESC 
-            LIMIT 500
-            """, (selected_filter,))
-        stories = cursor.fetchall()
+    with app.app_context() as cursor:
+        stories = models.Story.query.filter(
+            and_(
+                models.Story.category_id == selected_filter,
+                ~models.Story.media_content_url.contains('%stories%')
+            )
+        ).order_by(models.Story.created_at.desc()).all()
+        
+        print(f'[{selected_filter}] Total stories without image: {len(stories)}')
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
+            session = extensions.db.session()
+
             futures = []
-            count = 0
             for story in stories:
-                # Limiting to 500 stories to manage resource usage and ensure responsiveness.
-                if count == 500:
-                    break
-                
-                # Skipping stories that already have a manually assigned or previously processed image.
-                if 'static/img/stories' in story['media_content_url']:
-                    continue
-                
                 # Submitting a task to the executor to process each story's link preview.
                 future = executor.submit(get_link_preview, story, 'default', selected_filter)
                 futures.append((future, story))
-                count += 1
 
             total_updated = 0
             for future, story in futures:
-                image_url = future.result()
-                
-                if image_url.endswith('infomundi-white-darkbg-square.webp'):
+                # Gets a list containing paths to the story image and favicon image respectively
+                images_paths = future.result()
+
+                # If it's not a list, meaning that something went wrong during the link preview phase, we simply skip the result. There's no need for us to write anything to the database.
+                if not isinstance(images_paths, list):
                     continue
-                    
-                cursor.execute("""
-                    UPDATE stories SET media_content_url = %s WHERE story_id = %s
-                    """, (image_url, story_id))
-                total_updated += 1
+                
+                for path in images_paths:
+                    image_url = f'{bucket_base_url}/{path}'
+
+                    if 'stories' in path:
+                        print(f'[Story] Added {image_url} to the story {story.story_id}')
+                        story.media_content_url = image_url
+                    else:
+                        if not story.publisher.favicon:
+                            print(f'[Favicon] Changed favicon for {story.publisher.name}')
+                            story.publisher.favicon = image_url
+
+                    total_updated += 1
 
             if total_updated > 0:
-                print(f'[+] Gathered {total_updated} images for {selected_filter}')
-                db_connection.commit()
+                print(f'[{selected_filter}] Downloaded {total_updated}/{len(stories)} images.')
+                session.commit()
             else:
-                print(f'[-] No image for {selected_filter} has been gathered.')
+                print(f'[{selected_filter}] No image has been downloaded.')
 
-# Main execution
+
 if __name__ == "__main__":
     search_images()
-    db_connection.close()
