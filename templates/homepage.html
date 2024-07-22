@@ -44,12 +44,11 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="row d-flex align-items-center justify-content-center">
+<div class="row d-flex justify-content-center">
   <div class="col-lg-6 text-center">
 
-
     {% if world_stocks and not is_mobile %}
-    <div class="hwrap-home" id="ticker">
+    <div class="hwrap-home mt-3" id="ticker" style="margin-bottom: 12vh;">
       <div class="hmove-home" style="color: white">
         <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies - {{ stock_date }}</div>
 
@@ -99,10 +98,8 @@
     </div>
     {% endif %}
 
-
-
-    <center>
-      <h1 class="fs-2" style="margin-top: 100px"><label for="query">Search a Country to View Information About It</label></h1>
+    <div style="margin-top: 11vh; margin-bottom: 11vh;">
+      <h1 class="fs-2"><label for="query">Search a Country to View Information About It</label></h1>
         <form action="{{ url_for('api.search') }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="input-group justify-content-center">
@@ -121,7 +118,6 @@
               />
           </div>
         </form>
-    </center>
     <p class="fs-3 mt-2 mb-2">or</p>
     <div class="d-inline-flex">
       <h2 class="fs-1">Use the Globe to Choose It</h2>
@@ -175,12 +171,13 @@
         </div>
       </div>
     </div>
+  </div>
     {% endif %}
 
 
     {% if crypto_data and not is_mobile %}
       <!-- Container for the cryptocurrency ticker -->
-      <div class="hwrap-home mt-3" id="crypto-ticker">
+      <div class="hwrap-home" id="crypto-ticker">
         <!-- Container for moving/scrolling content with white text color -->
         <div class="hmove-home" style="color: white">
           <!-- Static header for the cryptocurrency ticker -->

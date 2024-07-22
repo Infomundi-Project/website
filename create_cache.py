@@ -9,7 +9,7 @@ from requests import get
 from hashlib import md5
 from sys import exit
 
-from website_scripts import json_util, config, scripts, immutable
+from website_scripts import json_util, config, input_sanitization, immutable
 
 
 # Database connection parameters
@@ -80,50 +80,6 @@ def insert_to_database(stories: list, category_id: str) -> int:
     return exceptions_count
 
 
-def format_text(text: str, max_lenght: int=500) -> str:
-    """Takes a text and the desired length and returns the formatted text without potentially
-    harmful special characters and within the character length range.
-    
-    Arguments
-        text (str): The text (obviously).
-        length (int): The desired length you want the text to be. Defaults to 500.
-
-    Returns
-        str: The text within the specified length range.
-    """
-
-    # Removes all html tags
-    text = scripts.remove_html_tags(text)
-    
-    # Removes some special characters
-    for special_character in immutable.SPECIAL_CHARACTERS:
-        text = text.replace(special_character, '')
-
-    # There's no need to proccess the text any further if it's below the specified length 
-    if len(text) <= max_lenght:
-        return text
-
-    # Formats the text breaking off when it reaches the length limit
-    formatted_text = ''
-    for word in text.split(' '):
-        # A bit less than the limit to avoid cutting off words
-        if len(formatted_text) >= max_lenght - 20:
-            break
-
-        formatted_text += f'{word} '
-
-    # If it's still above the limit for some reason, just cut this shit off for fuck sake
-    if len(formatted_text) > max_lenght:
-        formatted_text = formatted_text[:max_lenght]
-
-    # Strips the formatted text to avoid having unneccessary spaces
-    formatted_text = formatted_text.strip()
-    if not formatted_text.endswith('...'):
-        formatted_text += '...'
-    
-    return formatted_text
-
-
 def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     """
     Fetch RSS feed and store relevant information in a result list.
@@ -162,14 +118,21 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            feed_publisher = format_text(feed.feed.title)
-            feed_link = format_text(feed.feed.link)
+            # Sanitize text input
+            feed_publisher = input_sanitization.sanitize_text(feed.feed.title)
+            item_title = input_sanitization.sanitize_text(item.get('title', f'No title was provided'))
+            item_description = input_sanitization.sanitize_text(item.get('description', 'No description was provided'))
+            
+            # Gentle cut (without cutting off words)
+            feed_publisher = input_sanitization.gentle_cut_text(80, feed_publisher)
+            item_title = input_sanitization.gentle_cut_text(120, item_title)
+            item_description = input_sanitization.gentle_cut_text(500, item_description)
+            
+            feed_link = feed.feed.link
+            item_link = item.link
 
-            item_title = format_text(item.get('title', f'No title was provided'))
-            item_description = format_text(item.get('description', 'No description was provided'))
-            item_link = format_text(item.link)
-
-            if not scripts.is_valid_url(feed_link) or not scripts.is_valid_url(item_link):
+            # Checks to see if the url is valid
+            if not input_sanitization.is_valid_url(feed_link) or not input_sanitization.is_valid_url(item_link):
                 print(f'[-] Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
                 continue
 
@@ -181,7 +144,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
                 pubdate = item.updated
             
             # Creates the item ID based on a MD5 summary of item title + item link.
-            item_id = f'{md5(unidecode( item_title.lower() + item_link.lower() ).encode()).hexdigest()}'
+            item_id = md5(unidecode( item_title.lower() + item_link.lower() ).encode()).hexdigest()
 
             # Creates the publisher id based on a MD5 summary of the feed link.
             publisher_id = md5(unidecode(feed_link).encode()).hexdigest()
@@ -348,9 +311,5 @@ def main():
 
 
 # Ensure main() is called when the script is run directly
-if __name__ == "__main__":
-    main()
-
-
 if __name__ == "__main__":
     main()

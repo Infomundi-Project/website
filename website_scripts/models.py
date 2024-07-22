@@ -7,15 +7,27 @@ from .extensions import db
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
+    # Really important stuff
+    username = db.Column(db.String(25), nullable=False, unique=True)
+    email = db.Column(db.String(70), nullable=False, unique=True)
     user_id = db.Column(db.String(10), primary_key=True)
-    username = db.Column(db.String(30), nullable=False, unique=True)
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(70), unique=True, nullable=False)
-    avatar_url = db.Column(db.String(80))
+
+    # Timestamps
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     last_login = db.Column(db.DateTime)
 
+    # Profile Customization
+    display_name = db.Column(db.String(40))
+    avatar_url = db.Column(db.String(80))
+    profile_description = db.Column(db.String(1500))
+    profile_banner_url = db.Column(db.String(80))
+    profile_wallpaper_url = db.Column(db.String(80))
+    level = db.Column(db.Integer, default=0)
+    level_progress = db.Column(db.Integer, default=0)
+
+    # Account Recovery
     in_recovery = db.Column(db.Boolean, default=False)
     recovery_token = db.Column(db.String(40))
     recovery_token_timestamp = db.Column(db.DateTime)
@@ -44,7 +56,7 @@ class RegisterToken(db.Model):
 class Publisher(db.Model):
     __tablename__ = 'publishers'
     publisher_id = db.Column(db.String(40), primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=False) # too big! change to 80
     link = db.Column(db.String(512), nullable=False)
     favicon = db.Column(db.String(100), nullable=True)
     stories = db.relationship('Story', backref='publisher', lazy=True)
@@ -73,15 +85,15 @@ class Story(db.Model):
     __tablename__ = 'stories'
     story_id = db.Column(db.String(40), primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text)
+    title = db.Column(db.String(255), nullable=False) # too big! change to 120
+    description = db.Column(db.String(550))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
     link = db.Column(db.String(512), nullable=False)
     pub_date = db.Column(db.String(30), nullable=False)
     category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
     publisher_id = db.Column(db.String(40), db.ForeignKey('publishers.publisher_id'), nullable=False)
-    media_content_url = db.Column(db.String(255))
+    media_content_url = db.Column(db.String(100))
 
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)
@@ -91,7 +103,7 @@ class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     story_id = db.Column(db.String(40), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))  # This should reference the 'users' table if it exists
+    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 

@@ -11,14 +11,66 @@
       width: 100%;
     }
   }
+  .blurred-text {
+    width: 80%;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: transparent;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    line-height: 1.6;
+    height: 100px; /* Adjust height as needed */
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #ccc;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.mascot {
+    width: 100px;
+    height: auto;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #ccc;
+    margin-top: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.loading-bar .progress {
+    width: 0;
+    height: 100%;
+    background-color: #007bff;
+    animation: loading 3s linear infinite;
+}
+
+@keyframes loading {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
 </style>
 {% endblock %}
 {% block content %}
-<div class="container align-items-center mt-5">
+<div class="container align-items-center mt-4">
   <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="{{ referer }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ from_country_url }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
       <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
@@ -27,7 +79,7 @@
   <h2 class="fs-6 fw-light text-secondary-emphasis mb-3">{{ story.description }}</h2>
 
   <small><p><a href="{{ story.link }}" target="_blank" class="text-decoration-none mb-1"> 
-    Published by{% if favicon_url %}<img src="{{ favicon_url }}" class="rounded ms-1 me-1" alt="{{ story.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss ms-1 me-1"></i>{% endif %}{{ story.publisher.name }}
+    Published by{% if story.publisher.favicon %}<img src="{{ story.publisher.favicon }}" class="rounded ms-1 me-1" alt="{{ story.publisher.name }} favicon image" width="24" height="24">{% else %}<i class="fa-solid fa-rss ms-1 me-1"></i>{% endif %}{{ story.publisher.name }}
   </a></p>
   
     <p class="text-body-secondary"><i class="fa-solid fa-calendar-days me-1"></i>{{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.clicks }} view{% if story.clicks > 1 or story.clicks == 0 %}s{% endif %}</span></p>
@@ -111,7 +163,7 @@
 <div class="mt-5" style="background-color: white">
 
 <!--<script defer src="https://commento.infomundi.net/comentario.js"></script>-->
-<comentario-comments auto-init="false" live-update="false" lang="{{ page_language }}" page-id="/comments?id={{ story.story_id }}" max-level="5"></comentario-comments>
+<comentario-comments auto-init="false" live-update="true" lang="{% if page_language == 'pt' %}pt-BR{% else %}{{ page_language }}{% endif %}" page-id="/comments?id={{ story.story_id }}" max-level="5"></comentario-comments>
 
 </div>
 
@@ -121,7 +173,7 @@
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="{{ referer }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ from_country_url }}">{{ from_country_name }} {{ from_country_category.title() }}</a></li>
       <li class="breadcrumb-item active" aria-current="page"><small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small></li>
     </ol>
   </nav>
@@ -129,11 +181,11 @@
 
 <!-- Return button -->
 {% if is_mobile %}
-<a type="button" class="btn btn-primary btn-sm inf-fixed-button invisible" href="{{ referer }}" id="commentsReturnButtonMobile" style="position: fixed; top: 12vh; left: 20px;">
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button invisible" href="{{ from_country_url }}" id="commentsReturnButtonMobile" style="position: fixed; top: 12vh; left: 20px;">
   <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
 </a>
 {% else %}
-<a type="button" class="btn btn-primary btn-sm inf-fixed-button" href="{{ referer }}" id="commentsReturnButton" style="position: fixed; top: 12vh; left: 20px;">
+<a type="button" class="btn btn-primary btn-sm inf-fixed-button" href="{{ from_country_url }}" id="commentsReturnButton" style="position: fixed; top: 12vh; left: 20px;">
   <i class="fa-solid fa-rotate-left me-1"></i>{{ from_country_name }} {{ from_country_category.title() }}
 </a>
 {% endif %}
@@ -165,7 +217,7 @@
     "name": "{{ story.publisher.name }}",
     "logo": {
       "@type": "ImageObject",
-      "url": "{{ favicon_url }}"
+      "url": "{{ story.publisher.favicon }}"
     }
   },
   "datePublished": "{{ story.pub_date.replace('/', '-') }}",

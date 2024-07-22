@@ -1,24 +1,110 @@
-import uuid, bleach, hmac, time, langdetect, hashlib
-from re import search as search_regex, compile as re_compile, match as re_match
-from requests import get as get_request, post as post_request
-from json import loads as json_loads, dumps as json_dumps
+import uuid, time, langdetect, hashlib, secrets
 from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
+from requests import get as get_request
 from base64 import b64encode, b64decode
-from os import listdir, urandom, path
+from json import loads as json_loads
 from difflib import SequenceMatcher
 #from googletrans import Translator
-from urllib.parse import urlparse
+from random import choice, uniform
 from unidecode import unidecode
 from bs4 import BeautifulSoup
-from random import choice
+from os import listdir, path
 from openai import OpenAI
 
 from . import config, json_util, immutable, notifications, models, extensions
 
 
+@extensions.cache.memoize(timeout=60*60*8) # 8 hours
+def home_processing() -> dict:
+    """This function processes data for the home endpoint and caches it to speed up performance"""
+    statistics = get_statistics()
+
+    crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
+    world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+
+    us_indexes = world_stocks[:3]
+
+    # We remove unused US stock data
+    world_stocks.pop(1)
+    world_stocks.pop(1)
+
+    home_data = {
+        'stock_date': world_stocks[0]['date'],
+        'us_indexes': us_indexes,
+        'crypto_data': crypto_data,
+        'world_stocks': world_stocks,
+        'currencies': currencies,
+        'statistics': statistics
+    }
+
+    return home_data
+
+
+@extensions.cache.memoize(timeout=60*60*6) # 6 hours
+def news_page_processing(country_name: str) -> dict:
+    country_name = country_name.lower()
+
+    # Get area ranking
+    area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/area_ranking')
+    for rank in area_ranks:
+        if rank['country'].lower() == country_name:
+            area_rank = rank
+            break
+    else:
+        area_rank = ''
+
+    # Get religion info
+    religions = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/religions')
+    for country, religion in religions.items():
+        if country.lower() == country_name:
+            main_religion = religion
+            break
+    else:
+        main_religion = ''
+
+    # There are countries with no national stock data available, so we use global stocks if that is the case.
+    is_global = False
+    stock_data = scrape_stock_data(country_name)
+    if not stock_data or stock_data[0]['market_cap'] == None:
+        stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
+        is_global = True
+
+    # Gets the date from the first stock
+    stock_date = stock_data[0]['date']
+
+    try:
+        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x['country']['name'].lower() == country_name][0]
+        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x['country']['name'].lower() == country_name.replace(' ', '-')][0]
+        country_index['currency'] = currency_info
+    except IndexError as err:
+        log(f'[!] Error at /views: {err} // {country_name}')
+        country_index = ''
+
+    # Get page language
+    page_languages = []
+    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
+    for lang in languages:
+        if lang['country'].lower() == country_name:
+            page_languages.append(lang)
+
+    news_page_data = {
+        'area_rank': area_rank,
+        'main_religion': main_religion,
+        'is_global': is_global,
+        'stocks': {
+            'data': stock_data,
+            'date': stock_date
+        },
+        'page_languages': page_languages,
+        'country_index': country_index
+    }
+    return news_page_data
+
+
 def generate_nonce():
-    return b64encode(urandom(16)).decode('utf-8')
+    return b64encode(secrets.token_bytes(32)).decode('utf-8')
 
 
 def detect_mobile(request) -> bool:
@@ -214,6 +300,7 @@ def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
     return time_difference > timedelta(hours=threshold_hours)
 
 
+@extensions.cache.memoize(timeout=60*60*16) # 16 hours
 def get_nation_data(cca2: str) -> dict:
     """Takes cca2 (country code) and returns a bunch of data about the specified country"""
     config_filepath = f'{config.COUNTRIES_DATA_PATH}/{cca2}'
@@ -300,7 +387,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
         return False
 
     # Generate a REEEEALLY random verification token.
-    verification_token = hashlib.md5(urandom(20)).hexdigest()
+    verification_token = hashlib.md5(secrets.token_bytes(32)).hexdigest()
 
     message = f"""Hello {username}, 
 
@@ -384,7 +471,7 @@ def send_recovery_token(email: str, hashed_email: str) -> bool:
             return False
 
     # Generates a super random token.
-    verification_token = hashlib.md5(urandom(20)).hexdigest()
+    verification_token = hashlib.md5(secrets.token_bytes(32)).hexdigest()
 
     message = f"""Hello,
 
@@ -404,7 +491,8 @@ The Infomundi Team"""
         user_lookup.recovery_token = verification_token
         user_lookup.recovery_token_timestamp = now
         extensions.db.session.commit()
-
+    # Sleeps for a random time in order to prevent user enumeration based on response time.
+    time.sleep(uniform(1.0, 2.5))
     return result
 
 
@@ -423,6 +511,7 @@ def parse_utc_offset(offset_str: str):
     return utc_offset
 
 
+@extensions.cache.memoize(timeout=60*60*16) # 16 hours
 def get_current_time_in_timezone(cca2: str) -> str:
     data = json_util.read_json(f'{config.COUNTRIES_DATA_PATH}/{cca2}')
     current_utc_time = datetime.utcnow()
@@ -454,6 +543,7 @@ def get_current_time_in_timezone(cca2: str) -> str:
     return formatted_time
 
 
+@extensions.cache.memoize(timeout=60*60*16) # 16 hours
 def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
     """Takes the country name and wether is per capta or not (optional, default=False). 
     Also, updates the saved database if the current save is more than 30 days old.
@@ -550,78 +640,6 @@ def decode_base64(encoded_string: str) -> str:
     return b64decode(encoded_string).decode('utf-8')
 
 
-def has_md5_hash(text: str) -> bool:
-    """Check if the text contains an MD5 hash
-    
-    Arguments:
-        text: str - Any text.
-
-    Return
-        bool: True if the input text contains a md5 hash. Otherwise False.
-    """
-    return bool(search_regex(r'\b[a-fA-F0-9]{32}\b', text))
-
-
-def is_valid_url(url: str) -> bool:
-    """Takes a string and checks if it is a url. Return True if is indeed a url or if the string is empty, else False."""
-    if not url:
-        return True
-
-    if not url.startswith('http://') and not url.startswith('https://'):
-        return False
-    
-    try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
-
-
-# Define the function to validate URLs based on the trusted domain
-def is_safe_url(target: str, trusted_domain='infomundi.net'):
-    if not target:
-        return False
-    test_url = urlparse(target)
-    
-    if not (test_url.scheme in ('http', 'https') and test_url.netloc.endswith(trusted_domain)):
-        return 'https://infomundi.net'
-
-    return target
-
-
-def is_valid_email(email: str) -> bool:
-    if email.count('@') != 1:
-        return False
-
-    if len(email) >= 70 or not email:
-        return False
-    
-    domain = email.split('@')[1]
-    if '.' not in domain:
-        return False
-
-    return True
-
-
-def is_url_or_domain(input_str: str) -> str:
-    """Takes a string and uses regex expressions to return 'Url' if the string is an url, 'Domain' if the string is a domain name and 'neither' if the string is neither a domain name or an url.
-
-    Arguments
-        input_str: str
-            String to compare.
-    """
-    url_pattern = re_compile(r'^https?://\S+')
-
-    domain_pattern = re_compile(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-
-    if re_match(url_pattern, input_str):
-        return "Url"
-    elif re_match(domain_pattern, input_str):
-        return "Domain"
-    else:
-        return "Neither"
-
-
 def get_link_preview(url: str) -> dict:
     """Takes an URL as input and returns a dictionary with link preview information such as image, description and title."""
     try:
@@ -708,34 +726,6 @@ def get_supported_categories(country_code: str) -> list:
     return [file.split('_')[1].replace('.json', '') for file in listdir(config.FEEDS_PATH) if file.startswith(country_code)]
 
 
-def valid_captcha(token: str) -> bool:
-    """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge. 
-
-    Args:
-        token (str): The turnstile token.
-
-    Returns:
-        bool: True if CAPTCHA is valid, otherwise False.
-    """
-    
-    if not token:
-        return False
-
-    VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-
-    # Build payload with secret key and token.
-    data = {
-        'secret': config.CAPTCHA_SECRET_KEY, 
-        'response': token
-    }
-
-    # Make POST request with data payload to hCaptcha API endpoint.
-    response = post_request(url=VERIFY_URL, data=data)
-
-    # Parse JSON from response and return if was a success (True or False).
-    return json_loads(response.content)['success']
-
-
 def is_strong_password(password: str) -> bool:
     """Checks if password is valid. Password is valid if it's between 8 and 50 characters.
     
@@ -747,39 +737,6 @@ def is_strong_password(password: str) -> bool:
     """
 
     return 8 < len(password) <= 50
-
-
-def is_valid_username(username: str) -> bool:
-    """Checks if username is valid. Username is valid if it's between 3 and 30 chacaters.
-    
-    Args:
-        username (str): Username to check. A simple string. For example, 'Lony'.
-
-    Returns:
-        bool: True if username is between 3 and 30 characters. Otherwise False.
-    """
-    
-    return 3 < len(username) < 30
-
-
-def remove_html_tags(text_with_html: str) -> str:
-    """Removes HTML tags from a desired string.
-
-    Args:
-        text_with_html (str): HTML text to be sanitized.
-    
-    Returns:
-        str: Sanitized text, without HTML tags.
-
-    Examples:
-        >>> remove_html_tags('<h1>test</h1>')
-        'test'
-        
-        >>> remove_html_tags('<script>alert(1)</script>')
-        ''
-    """
-    
-    return BeautifulSoup(text_with_html, 'html.parser').get_text()
 
 
 """
@@ -873,48 +830,5 @@ def gpt_summarize(url: str) -> str:
     return response.choices[0].message.content
 
 
-def sanitize_input(text: str) -> str:
-    """Takes an input string and uses bleach library to sanitize it.
-
-    Args:
-        text (str): Any user-input text.
-
-    Returns:
-        str: Sanitized input.
-
-    Example:
-        >>> sanitize_input('an <script>evil()</script> example')
-        'an &lt;script&gt;evil()&lt;/script&gt; example'
-    """
-    
-    return bleach.clean(text)
-
-
 def get_current_date_and_time() -> str:
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_user_ip(request: object) -> tuple:
-    """Uses Cloudflare's headers to obtain the user real IP address.
-
-    Arguments:
-        request (object): The request object.
-
-    Returns:
-        tuple: A tuple containing both user's ipv4 and ipv6 addresses. First value is ipv4, second value ipv6.
-    """
-    ipv4 = request.headers.get('CF-Connecting-IP', '')
-    ipv6 = request.headers.get('CF-Connecting-IPv6', '')
-    return (ipv4, ipv6)
-
-
-def get_user_country(request: object) -> str:
-    """Gets the country of the IP making the request.
-
-    Arguments:
-        request (object): The request object.
-
-    Returns:
-        str: The cca2 for the user IP. For instance, BR or US or CA>
-    """
-    return request.headers.get('CF-IPCountry', '')

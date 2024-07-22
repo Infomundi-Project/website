@@ -13,6 +13,7 @@ s3_client = boto3.client(
     region_name='auto',
 )
 
+
 def convert_to_jpg(image_stream: bytes, s3_object_key: str, dimensions: tuple=(500, 500)) -> bool:
     """Uses PIL library to crop the image into a quare, convert to jpeg, save the data a IO buffer and upload to the bucket.
 
@@ -60,7 +61,7 @@ def allowed_mime_type(file_stream):
     # Reset file stream position
     file_stream.seek(0)
     
-    return mime in ['image/png', 'image/jpeg']
+    return mime in ['image/png', 'image/jpeg', 'image/jpg']
 
 
 def verify_image_content(file_stream):
@@ -77,7 +78,7 @@ def verify_image_content(file_stream):
         return False
 
 
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
     for extension in immutable.IMAGE_EXTENSIONS:
         if filename.lower().endswith(extension):
             break
@@ -87,8 +88,22 @@ def allowed_file(filename):
     return True
 
 
-def check_image_dimensions(image_stream, min_width: int=300, min_height: int=300):
+def check_image_dimensions(image_stream, min_width: int=300, min_height: int=300) -> bool:
+    """Checks if image dimension is in range. The image should not be bigger than 3000x3000 to
+    avoid pixel bomb DoS attack.
+    
+    Arguments
+        image_stream (bytes): The image itself.
+        min_width (int): Defaults to 300. The minimum width.
+        min_height (int): Defaults to 300. The minimum height.
+
+    Returns
+        bool: If the image complies with the determined min and max width and height.
+    """
     image = Image.open(image_stream)
     width, height = image.size
-    
-    return width >= min_width and height >= min_height
+
+    minimum_dimensions = (width >= min_width and height >= min_height)
+    maximum_dimensions = (width <= 3000 and height <= 3000)
+
+    return minimum_dimensions and maximum_dimensions

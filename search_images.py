@@ -1,5 +1,7 @@
 import concurrent.futures
 import requests
+import pymysql
+import logging
 import boto3
 import sys
 import os
@@ -12,10 +14,8 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 
-from website_scripts import json_util, config, scripts, immutable, models, extensions
-from app import app
-
-WORKERS = 4
+from website_scripts import json_util, config, scripts, immutable, models, extensions, input_sanitization
+WORKERS = 2
 
 # Define proxies variable as global and load proxy list from file
 with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
@@ -36,13 +36,65 @@ s3_client = boto3.client(
 bucket_name = 'infomundi'
 bucket_base_url = 'https://bucket.infomundi.net'
 
-with app.app_context():
-    session = extensions.db.session
+db_params = {
+        'host': 'localhost',
+        'user': config.MYSQL_USERNAME,
+        'password': config.MYSQL_PASSWORD,
+        'db': 'infomundi',
+        'charset': 'utf8mb4',
+        'cursorclass': pymysql.cursors.DictCursor  # Ensure DictCursor is used
+    }
+db_connection = pymysql.connect(**db_params)
+
+
+# Setup logging
+logging.basicConfig(filename='/var/www/infomundi/logs/search_images.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
+
+
+def log_message(message):
+    print(f'[~] {message}')
+    logging.info(message)
+
+
+def fetch_categories():
+    log_message('Fetching categories from the database')
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query to fetch category IDs
+            sql_query = "SELECT category_id FROM categories"
+            cursor.execute(sql_query)
+            categories = cursor.fetchall()
+
+            category_database = [row['category_id'] for row in categories]
+            shuffle(category_database)
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching categories: {e}")
+        return []
     
-    categories = [x.category_id for x in session.query(models.Category).all()]
-    shuffle(categories)
+    log_message(f'Got a total of {len(category_database)} categories from the database')
+    return category_database
+
+
+def fetch_favicons():
+    log_message('Fetching favicons from the database')
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query to fetch favicons
+            sql_query = "SELECT favicon FROM publishers"
+            cursor.execute(sql_query)
+            favicons = cursor.fetchall()
+
+            favicon_database = [row['favicon'].split('/')[-1] for row in favicons if row['favicon']]
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching favicons: {e}")
+        return []
     
-    favicon_database = [link.split('/')[-1] for link in [x.favicon for x in session.query(models.Publisher).all()] if isinstance(link, str)]
+    log_message(f'Got a total of {len(favicon_database)} from the database')
+    return favicon_database
+
+
+# What a mess, I'm sorry but I'm fucking tired and we need a global favicon database variable
+favicon_database = fetch_favicons()
 
 
 def get_link_preview(data, source: str='default', selected_filter: str='None'):
@@ -67,10 +119,10 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
     if isinstance(data, str):
         url = data
     else:
-        url = data.link
+        url = data['link']
     
     default_image = 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp'
-    try:        
+    try:
         while True:
             # Randomly select a user agent to simulate browser requests
             headers = {'User-Agent': choice(immutable.USER_AGENTS)}
@@ -87,22 +139,22 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
             try:
                 response = requests.get(url, timeout=8, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
                 if response.status_code not in [200, 301, 302]:
-                    print(f'[Invalid HTTP Response] {response.status_code} from {url}. Returning default image.')
+                    log_message(f'[Invalid HTTP Response] {response.status_code} from {url}. Returning default image.')
                     return default_image
             except requests.exceptions.ProxyError:
                 # Handle proxy errors by marking proxy as bad and retrying
                 bad_proxies.append(chosen_proxy)
-                print(f'[Proxy Error] Added to badlist: {chosen_proxy}')
+                log_message(f'[Proxy Error] Added to badlist: {chosen_proxy}')
                 continue
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
                 # Connection and timeout errors handling
-                print(f'[Timeout] {err} from {url}')
+                log_message(f'[Timeout] {err} from {url}')
                 return default_image
             except Exception as err:
                 # General error handling
-                print(f'[Unexpected Error] {err}')
+                log_message(f'[Unexpected Error] {err}')
                 if isinstance(data, object):
-                    print(f'[Debug] Story: {data.story_id} from: {data.publisher_id} ({data.publisher.name})')
+                    log_message(f'Story: {data['story_id']} from: {data['publisher_id']} ({data['publisher']['name']})')
                 
                 return default_image
             
@@ -116,11 +168,11 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
         return extract_image_from_response(response, url, data, selected_filter)
     except Exception as e:
         # Log unexpected errors encountered during execution
-        print(f'[Unexpected] From get_link_preview: {e}')
+        log_message(f'[Unexpected] From get_link_preview: {e}')
         return default_image
 
 
-def extract_image_from_response(response: requests.Response, url: str, story: object, selected_filter: str):
+def extract_image_from_response(response: requests.Response, url: str, story: dict, selected_filter: str):
     """
     Extracts and handles an image URL from a web response, with specific attention to news story imagery.
     
@@ -131,12 +183,15 @@ def extract_image_from_response(response: requests.Response, url: str, story: ob
     Parameters:
         response (requests.Response): The web response object containing the HTML content.
         url (str): The URL from which the response was fetched, used for resolving relative image URLs.
-        story (object): The story itself.
+        story (dict): The story itself.
         selected_filter (str): A filter criteria indicating the subdirectory within which the image should be stored.
     
     Returns:
         The result of attempting to download and convert the found or default image, and favicon if applicable.
     """
+    global favicon_database
+    log_message(f'Attempting to extract image from response for {story['story_id']}')
+
     response.encoding = 'utf-8'
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -149,35 +204,38 @@ def extract_image_from_response(response: requests.Response, url: str, story: ob
     if favicon:
         favicon_url = favicon['href']
 
-        if not favicon_url.startswith(('http://', 'https://')):
+        if not input_sanitization.is_valid_url(favicon_url):
             favicon_url = urljoin(url, favicon['href'])
     else:
         favicon_url = urljoin(url, '/favicon.ico')
+    
+    log_message(f"Checking to see if the favicon for story {story['story_id']} is in the database")
+    favicon_file = f"{story['publisher_id']}.ico"
+    # Checks to see if the favicon is already in the database so we don't send duplicate requests to the bucket (spend less cash$)
+    if favicon_file in favicon_database:
+        log_message(f'Favicon for publisher {story['publisher_id']} is already in the database')
+        is_favicon_in_database = True
+    else:
+        is_favicon_in_database = False
 
-    with app.app_context():
-        if story.publisher.favicon:
-            print(f'[Debug] Favicon for {story.publisher.name} already in database.')
-            is_favicon_in_database = True
-        else:
-            is_favicon_in_database = False
 
     # If the favicon is already stored, there's no need for us to store it again. So, we specify only the story image information.
     if is_favicon_in_database:
         images = {
             'news': {
                 'url': image_url,
-                'output_path': f"stories/{selected_filter}/{story.story_id}"
+                'output_path': f"stories/{selected_filter}/{story['story_id']}"
             }
         }
     else:
         images = {
             'news': {
                 'url': image_url,
-                'output_path': f"stories/{selected_filter}/{story.story_id}"
+                'output_path': f"stories/{selected_filter}/{story['story_id']}"
             },
             'favicon': {
                 'url': favicon_url,
-                'output_path': f"favicons/{selected_filter}/{story.publisher_id}"
+                'output_path': f"favicons/{selected_filter}/{story['publisher_id']}"
             }
         }
 
@@ -217,7 +275,7 @@ def download_and_convert_image(data: dict) -> list:
             # Open the image using PIL
             image = Image.open(BytesIO(response.content))
         except Exception as e:
-            print(f"[!] Error opening image from {url}, possibly wrong format.")
+            log_message(f"[!] Error opening image from {url}, possibly wrong format.")
             continue
 
         output_buffer = BytesIO()
@@ -225,6 +283,7 @@ def download_and_convert_image(data: dict) -> list:
             # Process as before but save to an in-memory bytes buffer
             image.thumbnail((1280, 720))
             image = image.convert("RGB")
+            # Let's be real here, alright? We have no money to spend storing a bunch of images so we optimize them as much as we can
             image.save(output_buffer, format="webp", optimize=True, quality=15, method=6)
             s3_object_key = data[item]['output_path'] + ".webp"
         else:
@@ -236,11 +295,12 @@ def download_and_convert_image(data: dict) -> list:
         output_buffer.seek(0)
         
         try:
-            # Upload the buffer content to S3
+            log_message(f'Attempting to upload {s3_object_key} to the bucket')
             s3_client.upload_fileobj(output_buffer, bucket_name, s3_object_key)
         except Exception as e:
-            print(f'[-] Failed to upload to bucket: {e}')
+            log_message(f'Failed to upload to bucket: {e}')
             continue
+        log_message(f'Upload for {s3_object_key} was a success')
         
         output_buffer.close()
         website_paths.append(s3_object_key)
@@ -252,6 +312,9 @@ def search_images():
     """
     Searches images for each category in the feeds path.
     """
+    categories = fetch_categories()
+    
+    # Prioritizes the world's biggest countries
     top_countries = ['us_general', 'br_general', 'in_general', 'ru_general', 'ca_general', 'au_general', 'ar_general']
 
     # Removes top countries from the categories variable, in order to prevent going into the same country twice
@@ -261,17 +324,66 @@ def search_images():
     # Extends the top countries list so the script begins getting images for the biggest countries.
     top_countries.extend(categories)
 
-    #top_countries = ['pe_general'] # DEBUG
+    #top_countries = ['br_general'] # DEBUG
 
     total = 0
     for selected_filter in top_countries:
         total += 1
         progress_percentage = (total / 100) * len(categories)
         
-        print(f"\n[{round(progress_percentage, 2)}%] Searching images for {selected_filter}...")
+        log_message(f"\n[{round(progress_percentage, 2)}%] Searching images for {selected_filter}...")
         process_category(selected_filter)
 
-    print('[+] Finished!')
+    log_message('[+] Finished!')
+
+
+def fetch_stories(selected_filter: str, limit: int=500):
+    log_message(f'Fetching stories for {selected_filter}')
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query with a LIMIT clause
+            sql_query = """
+                SELECT * FROM stories 
+                WHERE category_id = %s AND media_content_url NOT LIKE %s 
+                ORDER BY created_at DESC
+                LIMIT %s
+            """
+            # Execute the query
+            cursor.execute(sql_query, (selected_filter, '%stories%', limit))
+            
+            # Fetch all the results
+            stories = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching stories: {e}")
+        stories = []
+    
+    log_message(f'Got a total of {len(stories)} for {selected_filter}')
+    return stories
+
+
+def update_story_media_content_url(story_id, image_url):
+    log_message(f"Updating image for story {story_id} image url to {image_url}...")
+    try:
+        with db_connection.cursor() as cursor:
+            update_query = "UPDATE stories SET media_content_url = %s WHERE story_id = %s"
+            cursor.execute(update_query, (image_url, story_id))
+            db_connection.commit()
+    except pymysql.MySQLError as e:
+        log_message(f"Error updating story media content URL: {e}")
+    log_message(f'Updated story {story_id} image url to {image_url}')
+
+
+def update_publisher_favicon(publisher_id, image_url):
+    log_message(f"Updating image for publisher {publisher_id} image url to {image_url}...")
+    try:
+        with db_connection.cursor() as cursor:
+            update_query = "UPDATE publishers SET favicon = %s WHERE publisher_id = %s"
+            cursor.execute(update_query, (image_url, publisher_id))
+            db_connection.commit()
+            log_message(f'[Favicon] Changed favicon for publisher {publisher_id}')
+    except pymysql.MySQLError as e:
+        log_message(f"Error updating publisher favicon: {e}")
+    log_message(f'Updated favicon {publisher_id} image url to {image_url}')
 
 
 def process_category(selected_filter: str):
@@ -287,58 +399,47 @@ def process_category(selected_filter: str):
         selected_filter (str): The category ID used to filter stories for processing.
 
     Note:
-        This function handles a fixed number of stories (up to 500) to avoid overwhelming 
+        This function handles a fixed number of stories (up to 500 by default) to avoid overwhelming 
         the system with too many concurrent operations. Additionally, it updates the 
         media content URL for each story, either with a direct image URL or paths to 
         downloaded and processed images.
     """
+    stories = fetch_stories(selected_filter)
 
-    with app.app_context() as cursor:
-        stories = models.Story.query.filter(
-            and_(
-                models.Story.category_id == selected_filter,
-                ~models.Story.media_content_url.contains('%stories%')
-            )
-        ).order_by(models.Story.created_at.desc()).all()
-        
-        print(f'[{selected_filter}] Total stories without image: {len(stories)}')
+    log_message(f'Starting threading with {WORKERS} workers for {selected_filter}')
+    # I assume the whole code is a mess at this point...
+    with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
+        futures = []
+        for story in stories:
+            # Submitting a task to the executor to process each story's link preview.
+            future = executor.submit(get_link_preview, story, 'default', selected_filter)
+            futures.append((future, story))
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
-            session = extensions.db.session()
+        total_updated = 0
+        for future, story in futures:
+            # Gets a list containing paths to the story image and favicon image respectively
+            images_paths = future.result()
 
-            futures = []
-            for story in stories:
-                # Submitting a task to the executor to process each story's link preview.
-                future = executor.submit(get_link_preview, story, 'default', selected_filter)
-                futures.append((future, story))
+            # If it's not a list, meaning that something went wrong during the link preview phase, we simply skip the result.
+            if not isinstance(images_paths, list):
+                continue
+            
+            for path in images_paths:
+                image_url = f'{bucket_base_url}/{path}'
 
-            total_updated = 0
-            for future, story in futures:
-                # Gets a list containing paths to the story image and favicon image respectively
-                images_paths = future.result()
+                if 'stories' in path:
+                    update_story_media_content_url(story['story_id'], image_url)
+                else:
+                    log_message(f"Favicon for publisher {story['publisher_id']} is being updated to {image_url}")
+                    update_publisher_favicon(story['publisher_id'], image_url)
+                    favicon_database.append(f"{story['publisher_id']}.ico")
 
-                # If it's not a list, meaning that something went wrong during the link preview phase, we simply skip the result. There's no need for us to write anything to the database.
-                if not isinstance(images_paths, list):
-                    continue
-                
-                for path in images_paths:
-                    image_url = f'{bucket_base_url}/{path}'
+                total_updated += 1
 
-                    if 'stories' in path:
-                        print(f'[Story] Added {image_url} to the story {story.story_id}')
-                        story.media_content_url = image_url
-                    else:
-                        if not story.publisher.favicon:
-                            print(f'[Favicon] Changed favicon for {story.publisher.name}')
-                            story.publisher.favicon = image_url
-
-                    total_updated += 1
-
-            if total_updated > 0:
-                print(f'[{selected_filter}] Downloaded {total_updated}/{len(stories)} images.')
-                session.commit()
-            else:
-                print(f'[{selected_filter}] No image has been downloaded.')
+        if total_updated > 0:
+            log_message(f'[{selected_filter}] Downloaded {total_updated}/{len(stories)} images for {selected_filter}.')
+        else:
+            log_message(f'[{selected_filter}] No image has been downloaded for {selected_filter}.')
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   window.addEventListener('scroll', () => {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 2500 && !isLoading && hasMoreStories) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 3000 && !isLoading && hasMoreStories) {
       fetchStories(false);
     }
   });
@@ -49,13 +49,35 @@ document.addEventListener("DOMContentLoaded", function() {
   function fetchStories(reset) {
     if (isLoading) return;
 
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+
+    if (tooltipTriggerList.length > 0) {
+      [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }
+
     isLoading = true;
     const category = document.querySelector('input[name="category"]:checked').value;
     const orderBy = document.querySelector('input[name="order_by"]:checked').value;
     const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
     const country = document.getElementById("country").value;
+    const specificDate = document.getElementById("specificDate").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const query = document.getElementById("query").value;
 
-    const url = `/api/get_stories?country=${country}&category=${category}&order_by=${orderBy}&order_dir=${orderDir}&page=${currentPage}`;
+    let url = `/api/get_stories?country=${country}&category=${category}&order_by=${orderBy}&order_dir=${orderDir}&page=${currentPage}`;
+
+    if (specificDate) {
+      url += `&specific_date=${specificDate}`;
+    }
+
+    if (startDate && endDate) {
+      url += `&start_date=${startDate}&end_date=${endDate}`;
+    }
+
+    if (query) {
+      url += `&query=${query}`;
+    }
 
     fetch(url)
       .then(response => response.json())
@@ -140,15 +162,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     imageLink.appendChild(imgTag);
 
-    const cardFooter = document.createElement('div');
+    const cardFooter = document.createElement('div'); 
     cardFooter.classList.add('card-footer', 'text-body-secondary');
     cardFooter.innerHTML = `
       <small>
-        <a href="${item.publisher.link}" class="text-decoration-none" target="_blank">
+        <a href="${item.publisher.link}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
           ${item.publisher.favicon ? 
             `<img src="${item.publisher.favicon}" class="rounded me-1" alt="${item.publisher.name} favicon image" width="24" height="24">` : 
-            `<i class="fa-solid fa-rss me-1"></i>`
-          }${item.publisher.name}
+            `<i class="fa-solid fa-rss me-1""></i>`
+          }
         </a>
         <span class="ms-1 me-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">${item.pub_date}</span>
       </small>
@@ -221,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function fetchDescription(cardId, newsCategory, card) {
-    fetch(`/api/get-description?id=${cardId}&category=${newsCategory}`)
+    fetch(`/api/get-description?id=${cardId}`)
       .then(response => response.json())
       .then(data => {
         updateCardWithDescription(data, card);
@@ -299,21 +321,30 @@ document.addEventListener("DOMContentLoaded", function() {
     const category = document.querySelector('input[name="category"]:checked').value;
     const orderBy = document.querySelector('input[name="order_by"]:checked').value;
     const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
+    const specificDate = document.getElementById("specificDate").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const query = document.getElementById("query").value;
 
-    localStorage.setItem('newsFilters', JSON.stringify({ category, orderBy, orderDir }));
+    localStorage.setItem('newsFilters', JSON.stringify({ category, orderBy, orderDir, specificDate, startDate, endDate, query }));
   }
 
   // Function to load filter settings from localStorage
   function loadSavedFilters() {
     const savedFilters = JSON.parse(localStorage.getItem('newsFilters'));
     if (savedFilters) {
-      const { category, orderBy, orderDir } = savedFilters;
+      const { category, orderBy, orderDir, specificDate, startDate, endDate, query } = savedFilters;
       document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
       document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
       document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
+      document.getElementById("specificDate").value = specificDate;
+      document.getElementById("startDate").value = startDate;
+      document.getElementById("endDate").value = endDate;
+      document.getElementById("query").value = query;
     }
   }
 
   // Initial fetch to populate stories on page load
+  showLoading();
   fetchStories(true);
 });

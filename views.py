@@ -5,8 +5,8 @@ from random import choice, shuffle
 from sqlalchemy import or_, and_
 from hashlib import md5
 
-from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models
-from auth import admin_required, in_maintenance, captcha_required
+from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models, cloudflare_util, input_sanitization
+from website_scripts.decorators import admin_required, in_maintenance, captcha_required
 
 views = Blueprint('views', __name__)
 
@@ -20,26 +20,147 @@ def make_cache_key(*args, **kwargs):
 
 @views.route('/', methods=['GET'])
 def home():
-    statistics = scripts.get_statistics()
-
-    crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
-    world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
-    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
-
-    us_indexes = world_stocks[:3]
-
-    # We remove unused US stock data
-    world_stocks.pop(1)
-    world_stocks.pop(1)
+    home_data = scripts.home_processing()
 
     return render_template('homepage.html', 
-        stock_date=world_stocks[0]['date'],
-        world_stocks=enumerate(world_stocks), 
-        us_indexes=enumerate(us_indexes), 
+        stock_date=home_data['stock_date'],
+        world_stocks=enumerate(home_data['world_stocks']), 
+        us_indexes=enumerate(home_data['us_indexes']), 
         page='home',
-        statistics=statistics,
-        crypto_data=crypto_data
+        statistics=home_data['statistics'],
+        crypto_data=home_data['crypto_data']
     )
+
+
+@views.route('/admin', methods=['GET'])
+@admin_required
+@extensions.limiter.limit('1 per minute')
+def admin():
+    return render_template('admin.html')
+
+
+@views.route('/profile/<username>', methods=['GET'])
+@admin_required
+def user_profile(username):
+    user = models.User.query.filter_by(username=username).first()
+    if not user:
+        flash('User not found!', 'error')
+        return redirect(url_for('views.user_redirect'))
+    
+    short_description = input_sanitization.gentle_cut_text(200, user.profile_description or '')
+
+    return render_template('user_profile.html', user=user, short_description=short_description)
+
+
+@views.route('/profile/<username>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_user_profile(username):
+    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
+    if current_user.username != username:
+        flash('You are not authorized to edit this profile!', 'error')
+        return redirect(url_for('views.user_redirect'))
+    
+    # Fetches the user from the database, making sure it exists
+    user = models.User.query.filter_by(username=username).first()
+    if not user:
+        flash('User not found!', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    # Returns the edit profile template if request is flat GET :plank:
+    if request.method == 'GET':
+        return render_template('edit_profile.html', user=user)
+
+    # At this point, we're dealing with a POST request (nice to mention, duh)
+    token = request.form['cf-turnstile-response']
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha!', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    # Gets user input (dangrous!!!! caution)
+    notifications.post_webhook({'text': 'vai tomar no cu!!'})
+    display_name = request.form.get('display_name', '')
+    description = request.form.get('description', '')
+
+    # Sanitizes the display name allowing only a whitelist of characters
+    display_name = input_sanitization.sanitize_text(display_name)
+
+    # Sanitizes the descriptiong allowing only a whitelist of html tags
+    description = input_sanitization.sanitize_description(description)
+
+    # Checks if the description is in the allowed range
+    if not input_sanitization.is_text_length_between(config.DESCRIPTION_LENGTH_RANGE, description):
+        flash(f'We apologize, but your description is too big. Keep it under {config.MAX_DESCRIPTION_LEN} characters.')
+        return redirect(url_for('views.user_redirect'))
+    
+    # Checks if the display name is in the allowed range
+    if not input_sanitization.is_text_length_between(config.DISPLAY_NAME_LENGTH_RANGE, display_name):
+        flash(f'We apologize, but your display name is too big. Keep it under {config.MAX_DISPLAY_NAME_LEN} characters.')
+        return redirect(url_for('views.user_redirect'))
+    
+    # At this point user input should be safe :thumbsup: so we save to the database
+    user.display_name = display_name
+    user.profile_description = description
+
+    # Commit changes to the database
+    models.db.session.commit()
+    
+    flash('Profile updated successfully!', 'success')
+    return redirect(url_for('views.user_redirect'))
+
+
+@views.route('/profile/<username>/edit/avatar', methods=['GET'])
+@admin_required
+def edit_user_avatar(username):
+    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
+    if current_user.username != username:
+        flash('You are not authorized to edit this profile!', 'error')
+        return redirect(url_for('views.user_profile', username=username))
+    
+    # Fetches the user from the database, making sure it exists
+    user = models.User.query.filter_by(username=username).first()
+    if not user:
+        flash('User not found!', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    return render_template('edit_avatar.html', user=user)
+
+
+@views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
+@admin_required
+def edit_user_settings(username):
+    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
+    if current_user.username != username:
+        flash('You are not authorized to edit this profile!', 'error')
+        return redirect(url_for('views.user_profile', username=username))
+    
+    # Fetches the user from the database, making sure it exists
+    user = models.User.query.filter_by(username=username).first()
+    if not user:
+        flash('User not found!', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    # Returns the edit profile template
+    if request.method == 'GET':
+        return render_template('edit_settings.html', user=user)
+
+    token = request.form['cf-turnstile-response']
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha!', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    flash('Profile updated successfully! (só que não!)')
+    return redirect(url_for('views.user_redirect'))
+
+
+@views.route('/redirect', methods=['GET'])
+def user_redirect():
+    target_url = request.headers.get('Referer', '')
+    
+    # If target url is not safe, redirects to the home page.
+    if not input_sanitization.is_safe_url(target_url):
+        return redirect(url_for('views.home'))
+
+    return redirect(target_url)
 
 
 @views.route('/be-right-back', methods=['GET'])
@@ -57,15 +178,14 @@ def captcha():
 
             time_difference = now - datetime.fromisoformat(clearance)
             if time_difference < timedelta(hours=config.CAPTCHA_CLEARANCE_HOURS):
-                referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
                 flash("We know you are not a robot, don't worry")
-                return redirect(referer)
+                return redirect(url_for('views.user_redirect'))
 
         return render_template('captcha.html')
 
     # Checks if the user is a robot
     token = request.form['cf-turnstile-response']
-    if not scripts.valid_captcha(token):
+    if not cloudflare_util.is_valid_captcha(token):
         flash('Invalid captcha!', 'error')
         return redirect(url_for('views.captcha'))
     
@@ -74,22 +194,14 @@ def captcha():
     return redirect(session.get('clearance_from', url_for('views.home')))
 
 
-@views.route('/test', methods=['GET', 'POST'])
-@admin_required
-def test():
-    return render_template('test.html')
-
-
-@views.route('/dashboard')
-@login_required
-@in_maintenance
-def dashboard():
-    return render_template('dashboard.html')
-
-
 @views.route('/upload_image', methods=['POST'])
 @login_required
 def upload_image():
+    token = request.form['cf-turnstile-response']
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha!', 'error')
+        return redirect(url_for('views.user_redirect'))
+    
     file = request.files.get('profilePhoto')
 
     if not file:
@@ -103,21 +215,21 @@ def upload_image():
 
     if message:
         flash(message, 'error')
-        return redirect(url_for('views.dashboard'))
+        return redirect(url_for('views.user_redirect'))
     
-    # Convert the uploaded image to JPG format and save it. If conversion fails, flash an error message and redirect to the dashboard
+    # Convert the uploaded image to JPG format and save it. If conversion fails, flash an error message
     convert = image_util.convert_to_jpg(file.stream, f'users/{current_user.user_id}.jpg')
     if not convert:
         flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
-        return redirect(url_for('views.dashboard'))
+        return redirect(url_for('views.user_redirect'))
 
     # Update the user's avatar URL in the database
     user_data = models.User.query.filter_by(email=current_user.email).first()
     user_data.avatar_url = f'https://bucket.infomundi.net/users/{current_user.user_id}.jpg'
     extensions.db.session.commit()
 
-    flash('File uploaded successfully! Wait a few minutes for your profile picture to update.')
-    return redirect(url_for('views.dashboard'))
+    flash('File uploaded successfully! Please wait a few minutes for your profile picture to update.')
+    return redirect(url_for('views.user_redirect'))
 
 
 @views.route('/contact', methods=['GET', 'POST'])
@@ -127,22 +239,26 @@ def contact():
 
     # Checks if the user is a robot
     token = request.form['cf-turnstile-response']
-    if not scripts.valid_captcha(token):
+    if not cloudflare_util.is_valid_captcha(token):
         flash('Invalid captcha. Are you a robot?', 'error')
-        return redirect(url_for('views.contact'))
+        return render_template('contact.html')
     
-    # Gets all valus from the form
-    name = scripts.sanitize_input(request.form.get('name', ''))
-    email = scripts.sanitize_input(request.form.get('email', '')).lower()
-    message = scripts.sanitize_input(request.form.get('message', ''))
+    # Get and sanitize input data
+    name = input_sanitization.sanitize_text(request.form.get('name', ''))
+    message = input_sanitization.sanitize_text(request.form.get('message', ''))
 
-    # Validate user input
-    if not scripts.is_valid_email(email) or not (5 <= len(name) <= 50) or not (5 <= len(message) <= 1000):
-        flash('Something went wrong.', 'error')
+    # Checks if email is valid
+    email = request.form.get('email', '')
+    if not input_sanitization.is_valid_email(email):
+        flash('We apologize, but your email address format is invalid.')
         return render_template('contact.html')
 
-    # Gets the user ipv4 and/or ipv6
-    user_ips = scripts.get_user_ip(request)
+    # Cuts the name and message gently
+    name = input_sanitization.gentle_cut_text(30, name)
+    message = input_sanitization.gentle_cut_text(1000, message)
+
+    # Gets the user ipv4 or ipv6
+    user_ip = cloudflare_util.get_user_ip(request)
 
     if current_user.is_authenticated:
         email = session.get('email_address', '')
@@ -157,8 +273,8 @@ def contact():
 
 Authenticated: {login_message}
 From: {from_formatted}
-IP: {' '.join(user_ips).strip()}
-Country: {scripts.get_user_country(request)}
+IP: {user_ip}
+Country: {cloudflare_util.get_user_country(request)}
 Timestamp: {scripts.get_current_date_and_time()} UTC
 
 
@@ -169,6 +285,7 @@ Timestamp: {scripts.get_current_date_and_time()} UTC
         flash("Your message has been sent, thank you! Expect a return from us shortly.")
     else:
         flash("We apologize, but looks like that the contact form isn't working. We'll look into that as soon as possible. In the meantime, feel free to send us an email directly at contact@infomundi.net", 'error')
+        notifications.post_webhook({'text': f"It wasn't possible to get a contact message for some reason, so... here's the email body: {email_body}"})
     
     return render_template('contact.html')
 
@@ -192,10 +309,8 @@ def team():
 
 @views.route('/donate', methods=['GET'])
 def donate():
-    referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
-    
     flash('We apologize, but this page is currently unavailable. Please try again later!', 'error')
-    return redirect(referer)
+    return redirect(url_for('views.user_redirect'))
 
 
 @views.route('/news', methods=['GET'])
@@ -203,214 +318,61 @@ def get_latest_feed():
     """Serving the /news endpoint. 
 
     Arguments:
-        page_num: str
-            GET 'page' parameter. Specifies the cache page. Example: '1'.
-        
-        country_filter: str
-            GET 'country' parameter. Specifies the country code (2 digits). Example: 'br' (cca2 for Brazil).
-
-        news_filter: str
-            GET 'section' parameter. Specifies the news category. Example: 'general'.
+        country_cca2 (str): GET 'country' parameter. Specifies the country code (2 digits). Example: 'br' (cca2 for Brazil).
 
     Behavior:
         Renders the news page, containing 100 news per page.
     """
-    page_num = request.args.get('page', 1, type=int)
+    contry_cca2 = request.args.get('country', '').lower()
+
+    # Searches for the country full name
+    country_name = scripts.country_code_to_name(contry_cca2)
+    if not country_name:
+        flash("We apologize, but we couldn't find the country you are looking for.")
+        return redirect(url_for('views.user_redirect'))
     
-    # If no country was selected, selects a random one.
-    country_filter = request.args.get('country', f"{choice(
-        ['br', 'us', 'ca', 'es', 'ro', 'ly', 'ru', 'in', 'za', 'au'])}",
-         type=str).lower()
-    
-    # Gets the news filter from the url. Defaults to 'general'.
-    news_filter = request.args.get('section', 'general', type=str).lower()
-    
-    # Format news filter (e.g. br_general or us_general and so on)
-    selected_filter = f"{country_filter}_{news_filter}"
-
-    # Check if the selected category is valid
-    if not scripts.valid_category(selected_filter):
-        flash('We apologize, but there is no support available for the country you selected. If you would like to recommend sources, please send us an email at contact@infomundi.net.', 'error')
-        return redirect(url_for('views.home'))
-
-    # Searches for the country full name (may be modularized at some point)
-    country_name = scripts.country_code_to_name(country_filter)
-
-    # Declares the referer up here just in case. No open redirect here because the session is encrypted and we control it.
-    referer = 'https://infomundi.net/' + session.get('last_visited_country', '')
-    
-    # Get page language
-    page_languages = []
-    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
-    for lang in languages:
-        if lang['country'].lower() == country_name.lower():
-            page_languages.append(lang)
-
-    # Query will change code logic, but I think its better to just adapt everything
-    original_query = ''
-    query = scripts.sanitize_input(request.args.get('query', '').lower())
-    if query:
-        if len(query) < 3:
-            flash('Your query is too small. Please provide at least 3 characters.', 'error')
-            return redirect(referer)
-
-        # Deactivated!
-        translate_language = '' #request.args.get('translation', '').lower()
-
-        # This value will be used in the frontend to display a badge if the query has been translated
-        session['want_translate'] = False
-        if translate_language:
-            for lang in page_languages:
-                if lang['lang'].lower() == translate_language.lower():
-                    page_language = lang['lang_code'][:2]
-                    break
-            else:
-                flash('Invalid language for the specified page.', 'error')
-                return redirect(referer)
-            
-            query_translated = scripts.translate(dest_lang=page_language, msg=query)
-        
-            if query_translated:
-                original_query = query
-                query = query_translated
-                session['want_translate'] = True
-        
-        found_stories_via_query = extensions.db.session.query(models.Story).filter(
-            models.Story.category_id == selected_filter,
-            models.Story.media_content_url.contains('bucket.infomundi.net'),
-            or_(
-                models.Story.title.ilike(f"%{query}%"),
-                models.Story.description.ilike(f"%{query}%")
-            )
-        ).order_by(models.Story.created_at.desc()).limit(50).all()
-
-        if not found_stories_via_query:
-            flash(f'No stories were found with the term: "{query}".', 'error')
-            return redirect(referer)
-
-        # Change the current feed in order to make the rest of the code usable.
-        feeds = found_stories_via_query
-    else:
-        # Calculates start index based on the page number
-        start_index = page_num * 100
-
-        if start_index == 100:
-            start_index = 0
-
-        # Retrieve the cache
-        """
-        cache = models.Story.query.filter(
-            and_(
-                models.Story.category_id == selected_filter,
-                models.Story.media_content_url.contains('bucket.infomundi.net')
-            )
-        ).order_by(models.Story.created_at.desc()).offset(start_index).limit(100).all()
-        """
-        cache = []
-        if cache:
-            flash('We apologize, but something went wrong. Please try again later.', 'error')
-            return redirect(url_for('views.home'))
-
-        # Get the feed and shuffle it
-        feeds = cache
-        shuffle(feeds)
-
-    best_tags = models.Category.query.filter_by(category_id=selected_filter).first()
-    if best_tags:
-        best_tags = [x.tag for x in best_tags.tags]
-
-        for story in feeds:
-            story.tags = []
-            
-            for tag in best_tags:
-                if tag in story.title.lower() or tag in story.description.lower():
-                    story.tags.append(tag)
-    else:
-        best_tags = []
-
-    # There are countries with no national stock data available, so we use global stocks if that is the case.
-    is_global = False
-    stock_data = scripts.scrape_stock_data(country_name)
-    if not stock_data or stock_data[0]['market_cap'] == None:
-        stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
-        is_global = True
-
-    # Gets the date from the first stock
-    stock_date = stock_data[0]['date']
-
-    try:
-        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x['country']['name'].lower() == country_name.lower()][0]
-        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x['country']['name'].lower() == country_name.lower().replace(' ', '-')][0]
-        country_index['currency'] = currency_info
-    except IndexError as err:
-        scripts.log(f'[!] Error at /views: {err} // {country_name}')
-        country_index = ''
-    
-    GET_PARAMETERS = f'news?country={country_filter}'
+    GET_PARAMETERS = f'news?country={contry_cca2}'
     session['last_visited_country'] = GET_PARAMETERS
-    
-    # Get area ranking
-    area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/area_ranking')
-    for rank in area_ranks:
-        if rank['country'].lower() == country_name.lower():
-            area_rank = rank
-            break
-    else:
-        area_rank = ''
 
-    # Get religion info
-    religions = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/religions')
-    for country, religion in religions.items():
-        if country.lower() == country_name.lower():
-            main_religion = religion
-            break
-    else:
-        main_religion = ''
+    supported_categories = scripts.get_supported_categories(contry_cca2)
 
-    supported_categories = scripts.get_supported_categories(country_filter)
-    session['visited_country'] = country_name.title()
+    seo_title = f'Infomundi - {country_name.title()} Stories'
+    seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news."
 
-    seo_title = f'Infomundi - {country_name.title()} {news_filter.title()}'
-    seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news. Visit us today to stay informed and connected with {country_name.title()} and beyond."
-
-    return render_template('rss_template.html', 
-        seo_data=(seo_title, seo_description),
-        country_name=country_name, 
-        news_filter=news_filter, 
-        country_code=country_filter,
-        supported_categories=supported_categories, 
-        area_rank=area_rank,
-        main_religion=main_religion,
-        nation_data=scripts.get_nation_data(country_filter),
+    news_page_data = scripts.news_page_processing(country_name)
+    return render_template('news.html', 
+        current_time=scripts.get_current_time_in_timezone(contry_cca2),
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
+        nation_data=scripts.get_nation_data(contry_cca2),
+        supported_categories=supported_categories, 
+        seo_data=(seo_title, seo_description),
         gdp=scripts.get_gdp(country_name),
-        current_time=scripts.get_current_time_in_timezone(country_filter),
-        stock_data=stock_data,
-        is_global=is_global,
-        country_index=country_index,
-        stock_date=stock_date,
-        page_languages=page_languages,
-        original_query=original_query,
-        query=query,
-        tags=best_tags if best_tags else ''
+        country_code=contry_cca2,
+        country_name=country_name, 
+        page_languages=news_page_data['page_languages'],
+        main_religion=news_page_data['main_religion'],
+        country_index=news_page_data['country_index'],
+        stock_data=news_page_data['stocks']['data'],
+        stock_date=news_page_data['stocks']['date'],
+        is_global=news_page_data['is_global'],
+        area_rank=news_page_data['area_rank'],
     )
 
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    referer = scripts.is_safe_url(request.headers.get('Referer', url_for('views.home')))
-    
     news_id = request.args.get('id', '').lower()
+    
     # Check if has the length of a md5 hash
-    if not scripts.has_md5_hash(news_id):
+    if not input_sanitization.is_md5_hash(news_id):
         flash('We apologize, but the ID you provided is not valid. Please try again.', 'error')
-        return redirect(referer)
+        return redirect(url_for('views.user_redirect'))
 
-    # Check if story exists
+    # Check if story exists.
     story = models.Story.query.filter_by(story_id=news_id).first()
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
-        return redirect(referer)
+        return redirect(url_for('views.user_redirect'))
 
     # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
     formatted_gpt_summary = []
@@ -421,54 +383,35 @@ def comments():
             header = key.replace('_', ' ').title()
             formatted_gpt_summary.append({'header': header, 'paragraph': value})
 
-    # Add a click to the story
+    # Add a click to the story.
     if story.clicks is None:
         story.clicks = 1
     else:
         story.clicks += 1
 
-    # Commit changes to the database
+    # Commit changes to the database.
     extensions.db.session.commit()
     
-    # Set session information
+    # Set session information, used in templates.
     session['last_visited_news'] = f'comments?id={news_id}'
-    session['visited_category'] = story.category_id
+    
+    # Used in the api.
     session['visited_news'] = news_id
     
-    # Create the SEO title. Must NOT have more than 60 characters.
-    seo_title = 'Infomundi - '
-    for word in story.title.split(' '):
-        seo_title += word
-        
-        if len(seo_title) >= 60:
-            break
-        
-        seo_title += ' '
-
-    # Create the SEO description. Must NOT have more than 150 characters.
-    seo_description = ''
-    for word in story.description.split(' '):
-        seo_description += word
-        
-        if len(seo_description) >= 150:
-            break
-        
-        seo_description += ' '
+    # Create the SEO dataw. Title should be 60 characters, description must be 150 characters
+    seo_title = 'Infomundi - ' + input_sanitization.gentle_cut_text(60, story.title)
+    seo_description = input_sanitization.gentle_cut_text(150, story.description)
     
-    country = story.category_id.split('_')[0]
-    section = story.category_id.split('_')[1]
-
-    favicon_url = f'https://bucket.infomundi.net/favicons/{story.category_id}/{story.publisher_id}.ico'
+    country_cca2 = story.category_id.split('_')[0]
     return render_template('comments.html', 
-        story=story,
-        seo_data=(seo_title, seo_description),
-        favicon_url=favicon_url,
-        formatted_gpt_summary=formatted_gpt_summary,
         from_country_name=scripts.country_code_to_name(story.category_id.split('_')[0]),
-        referer='https://infomundi.net/' + session.get('last_visited_country', f'news?country={country}'),
+        page_language=scripts.detect_language(story.title + ' ' + story.description),
+        from_country_url=f'https://infomundi.net/news?country={country_cca2}',
         from_country_category=story.category_id.split('_')[1],
         from_country_code=story.category_id.split('_')[0],
-        page_language=scripts.detect_language(story.title + ' ' + story.description),
+        formatted_gpt_summary=formatted_gpt_summary,
+        seo_data=(seo_title, seo_description),
         previous_news='',
+        story=story,
         next_news=''
     )

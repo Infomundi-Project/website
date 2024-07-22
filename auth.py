@@ -1,159 +1,110 @@
 import time, hmac, hashlib, binascii, json
-from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, session, g
 from flask_login import login_user, login_required, current_user, logout_user
 from datetime import datetime, timedelta
 from passlib.hash import argon2
 from functools import wraps
-from random import uniform
 
-from website_scripts import config, json_util, scripts, immutable, extensions, models
+from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization, cloudflare_util, decorators
+from website_scripts.decorators import admin_required, in_maintenance, captcha_required, unauthenticated_only
 
 auth_views = Blueprint('auth', __name__)
 
 
-def admin_required(func):
-    """This decorator is used to check if the user is an admin."""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        # Check if the user is an admin based on the role
-        if current_user.is_authenticated and current_user.role == 'admin':
-            return func(*args, **kwargs)
-        
-        flash('This page is restricted.', 'error')
-        return redirect(url_for('views.home'))
-
-    return decorated_function
-
-
-def in_maintenance(func):
-    """This decorator is used when the endpoint is in maintenance."""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        # If the user is admin, maintenance is bypassed
-        if current_user.is_authenticated and current_user.role == 'admin' and current_user.username == 'behindsecurity':
-            return func(*args, **kwargs)
-        
-        return redirect(url_for('views.be_right_back'))
-
-    return decorated_function
-
-
-def captcha_required(func):
-    """This decorator is used to check if the user needs to resolve a proof of life first."""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        clearance = session.get('clearance', '')
-        if clearance:
-            now = datetime.now()
-            
-            time_difference = now - datetime.fromisoformat(clearance)
-            if time_difference < timedelta(hours=config.CAPTCHA_CLEARANCE_HOURS):
-                return func(*args, **kwargs)
-        
-        session['clearance_from'] = request.url
-        return redirect(url_for('views.captcha'))
-
-    return decorated_function
-
-
 @auth_views.route('/register', methods=['GET', 'POST'])
+@unauthenticated_only
 def register():
-    if current_user.is_authenticated:
-        flash('You are already logged in!')
-        return redirect(url_for('views.home'))
+    if request.method == 'GET':
+        return render_template('register.html')
 
-    if request.method == 'POST':
-        # Checks if captcha token is valid
-        token = request.form['cf-turnstile-response']
-        if not scripts.valid_captcha(token):
-            flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(url_for('auth.register'))
+    # Checks if captcha token is valid
+    token = request.form['cf-turnstile-response']
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha. Are you a robot?', 'error')
+        return redirect(url_for('auth.register'))
         
-        # Checks if email is valid
-        email = request.form.get('email', '').lower().strip()
-        if not scripts.is_valid_email(email):
-            flash('Invalid email address.', 'error')
-            return redirect(url_for('auth.register'))
+    # Checks if email is valid
+    email = request.form.get('email', '')
+    if not input_sanitization.is_valid_email(email):
+        flash('We apologize, but your email address format is invalid.', 'error')
+        return redirect(url_for('auth.register'))
 
-        # Collects user input
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        confirm_password = request.form.get('confirm_password', '')
+    # Checks if username is valid
+    username = request.form.get('username', '')
+    if not input_sanitization.is_valid_username(username):
+        flash('We apologize, but your username is invalid. Must be 3-25 characters long and contain only letters, numbers, underscores, or hyphens.', 'error')
+        return redirect(url_for('auth.register'))
 
-        hashed_email = scripts.sha256_hash_text(email)
-
-        # Is email already present?
-        email_lookup = models.User.query.filter_by(email=hashed_email).first()
-        
-        # Is username already present?
-        username_lookup = models.User.query.filter_by(username=username).first()
-
-        token_username_lookup = models.RegisterToken.query.filter_by(username=username).first()
-        if token_username_lookup:
-            now = datetime.now()
-            created_at = datetime.fromisoformat(token_username_lookup.timestamp.isoformat())
-            
-            # Checks if the token is expired. If it's expired, we clear it from the database, commit change and return False
-            time_difference = now - created_at
-            if time_difference > timedelta(minutes=30):
-                extensions.db.session.delete(token_username_lookup)
-                extensions.db.session.commit()
-                token_username_lookup = None
-
-        if password != confirm_password:
-            message = 'The passwords don\'t match.'
-        elif not scripts.is_valid_username(username):
-            message = 'Your username is invalid. The username must have at least 3 characters and 50 characters at most.'
-        elif not scripts.is_strong_password(password):
-            message = 'Password Policy: The password must have at least 8 characters and a maximum and 50 characters at most.'
-        elif email_lookup:
-            message = 'Email already exists.'
-        elif username_lookup or token_username_lookup:
-            message = 'Username already exists.'
-        else:
-            message = ''
-        
-        if message:
-            flash(message, 'error')
-            return redirect(url_for('auth.register'))
-
-        # Sanitize username, just in case
-        username = scripts.sanitize_input(username)
-
-        # Tries to send a verification email to the user.
-        send_token = scripts.handle_register_token(email, hashed_email, 
-            username, argon2.hash(password))
-        if not send_token:
-            flash('We apologize, but something went wrong. Please, try again later.', 'error')
-            scripts.log(f'[!] Not able to send verification token to {email}.')
-            
-            return redirect(url_for('auth.register'))
-
-        flash(f'We sent an email with activation instructions to your address at {email}')
+    password = request.form.get('password', '')
+    confirm_password = request.form.get('confirm_password', '')
     
+    # Checks if the passwords match
+    if password != confirm_password:
+        flash('The passwords don\'t match.', 'error')
+        return redirect(url_for('auth.register'))
+
+    # Checks if password is strong enough
+    if not scripts.is_strong_password(password):
+        flash('Password Policy: The password must be 8-50 characters.', 'error')
+        return redirect(url_for('auth.register'))
+
+    # Is email already present?
+    hashed_email = scripts.sha256_hash_text(email)
+    email_lookup = models.User.query.filter_by(email=hashed_email).first()
+    if email_lookup:
+        flash('We apologize, but there has been an error!', 'error')
+        return redirect(url_for('auth.register'))
+    
+    # Checks to see if this username is already being registered (has a register token associated to it)
+    token_username_lookup = models.RegisterToken.query.filter_by(username=username).first()
+    if token_username_lookup:
+        now = datetime.now()
+        created_at = datetime.fromisoformat(token_username_lookup.timestamp.isoformat())
+            
+        # Checks if the token is expired. If it's expired, we clear it from the database, commit change and set the token to None
+        time_difference = now - created_at
+        if time_difference > timedelta(minutes=30):
+            extensions.db.session.delete(token_username_lookup)
+            extensions.db.session.commit()
+            token_username_lookup = None
+
+    # Is username already present? We also check the token lookup here
+    username_lookup = models.User.query.filter_by(username=username).first()
+    if token_username_lookup or username_lookup:
+        flash(f'We apologize, but the username {username} is already being used.', 'error')
+        return redirect(url_for('auth.register'))
+
+    # Tries to send a verification email to the user.
+    send_token = scripts.handle_register_token(email, hashed_email, 
+        username, argon2.hash(password))
+    if not send_token:
+        flash('We apologize, but something went wrong. Please, try again later.', 'error')
+        scripts.log(f'[!] Not able to send verification token to {email}.')
+        
+        return redirect(url_for('auth.register'))
+
+    flash(f'We sent an email with activation instructions to your address at {email}')
     return render_template('register.html')
 
 
 @auth_views.route('/verify', methods=['GET'])
+@unauthenticated_only
 def verify():
     token = request.args.get('token', '')
-    if not token or current_user.is_authenticated:
-        return redirect(url_for('views.home'))
-
-    if not scripts.has_md5_hash(token):
+    if not input_sanitization.is_md5_hash(token):
         flash('We apologize, but the token seems to be invalid.', 'error')
         return redirect(url_for('views.home'))
 
     # Tries to find the token in the database
     token_lookup = models.RegisterToken.query.filter_by(token=token).first()
     if not token_lookup:
-        flash('We apologize, but the token was not found in our database. Try again.', 'error')
+        flash('We apologize, but the token seems to be invalid.', 'error')
         return redirect(url_for('views.home'))
 
     now = datetime.now()
     created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
     
-    # Checks if the token is expired
+    # Checks if the token is expired or the user already exist
     time_difference = now - created_at
     if time_difference > timedelta(minutes=30) or models.User.query.filter_by(email=token_lookup.email).first():
         extensions.db.session.delete(token_lookup)
@@ -174,128 +125,129 @@ def verify():
 
 
 @auth_views.route('/forgot_password', methods=['GET', 'POST'])
+@unauthenticated_only
 def forgot_password():
-    if current_user.is_authenticated:
-        flash(f'Hey {current_user.username}, you are already authenticated!')
-        return redirect(url_for('views.home'))
-
-    if request.method == 'POST':
-        turnstile = request.form['cf-turnstile-response']
-        if not scripts.valid_captcha(turnstile):
-            flash('Invalid captcha. Are you a robot?', 'error')
+    if request.method == 'GET':
+        recovery_token = request.args.get('token', '')
+        if not recovery_token:
             return render_template('forgot_password.html')
         
-        email = request.form.get('email', '').lower()
-        if not email:
-            flash('Something went wrong.', 'error')
-            return render_template('forgot_password.html')
-
-        # Sleeps for a random time in order to prevent user enumeration based on response time.
-        time.sleep(uniform(1.0, 4.0))
-
-        # Tries to send the recovery token to the user
-        scripts.send_recovery_token(email, scripts.sha256_hash_text(email))
-
-        # Generic error message to prevent user enumeration
-        flash(f"If {email} is in our database, an email will be sent with instructions.")
-
-    token = request.args.get('token', '')
-    if token:
-        result = scripts.check_recovery_token(token)
+        # Checks if the token is valid
+        result = scripts.check_recovery_token(recovery_token)
         if result:
             login_user(result)
 
             flash('Success! You may be able to change your password now.')
             return redirect(url_for('auth.password_change'))
 
-        flash('We apologize, but the token is invalid.', 'error')
+        flash('We apologize, but the token seems to be invalid.', 'error')
+        return render_template('forgot_password.html')
+
+    token = request.form['cf-turnstile-response']
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha. Are you a robot?', 'error')
+        return render_template('forgot_password.html')
         
+    email = request.form.get('email', '')
+    if not input_sanitization.is_valid_email(email):
+        flash('We apologize, but your email address format is invalid.', 'error')
+        return render_template('forgot_password.html')
+
+    # Tries to send the recovery token to the user
+    scripts.send_recovery_token(email, scripts.sha256_hash_text(email))
+
+    # Generic error message to prevent user enumeration
+    flash(f"If {email} is in our database, an email will be sent with instructions.")
     return render_template('forgot_password.html')
 
 
 @auth_views.route('/password_change', methods=['GET', 'POST'])
 @login_required
 def password_change():
-    if request.method == 'POST':
-        # Checks if captcha is valid
-        token = request.form.get('cf-turnstile-response', '')
-        if not scripts.valid_captcha(token):
-            flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(url_for('auth.password_change'))
-        
-        # Get form data
-        old_password = request.form.get('old_password', '')
-        new_password = request.form.get('new_password', '')
-        confirm_password = request.form.get('confirm_password', '')
-        
-        user = models.User.query.filter_by(email=current_user.email).first()
-        if not current_user.in_recovery and not user.check_password(old_password):
-            message = 'Incorrect old password.'
-        elif new_password != confirm_password:
-            message = 'Passwords must match!'
-        elif not scripts.is_strong_password(new_password):
-            message = "Password Policy: The password's character count must be between 8 and 50 characters."
-        else:
-            message = ''
+    if request.method == 'GET':
+        return render_template('password_change.html')
 
-        if message:
-            flash(message, 'error')
-            return redirect(url_for('auth.password_change'))
+    # Checks if captcha is valid
+    token = request.form.get('cf-turnstile-response', '')
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha. Are you a robot?', 'error')
+        return redirect(url_for('auth.password_change'))
         
-        # Update the user's password
-        user.password = argon2.hash(new_password)
-        user.in_recovery = False
-        extensions.db.session.commit()
+    # Get form data
+    old_password = request.form.get('old_password', '')
+    new_password = request.form.get('new_password', '')
+    confirm_password = request.form.get('confirm_password', '')
         
-        logout_user()
+    user = models.User.query.filter_by(email=current_user.email).first()
+    # If the user is in recovery mode, they should bypass the old password check
+    if not current_user.in_recovery and not user.check_password(old_password):
+        message = 'Incorrect old password.'
+    elif new_password != confirm_password:
+        message = 'Passwords must match!'
+    elif not scripts.is_strong_password(new_password):
+        message = "Password Policy: The password should be 8-50 characers long."
+    else:
+        message = ''
 
-        flash(f'Your password has been updated, {user.username}. You may log in now.')
-        return redirect(url_for('auth.login'))
+    if message:
+        flash(message, 'error')
+        return render_template('password_change.html')
+        
+    # Update the user's password
+    user.password = argon2.hash(new_password)
     
-    return render_template('password_change.html')
+    # Make sure the user is not in recovery mode
+    user.in_recovery = False
+    
+    # Commits to the database
+    extensions.db.session.commit()
+        
+    logout_user()
+
+    flash(f'Your password has been updated, {user.username}. You may log in now.')
+    return redirect(url_for('auth.login'))
 
 
 @auth_views.route('/login', methods=['GET', 'POST'])
+@unauthenticated_only
 def login():
-    if current_user.is_authenticated:
-        flash('You are already logged in!')
-        return redirect(url_for('views.home'))
-    
-    if request.method == 'POST':
-        token = request.form.get('cf-turnstile-response', '')
-        if not scripts.valid_captcha(token):
-            flash('Invalid captcha. Are you a robot?', 'error')
-            return redirect(url_for('auth.login'))
+    if request.method == 'GET':
+        return render_template('login.html')
 
-        email = request.form.get('email', '', type=str)
-        password = request.form.get('password', '', type=str)
+    token = request.form.get('cf-turnstile-response', '')
+    if not cloudflare_util.is_valid_captcha(token):
+        flash('Invalid captcha. Are you a robot?', 'error')
+        return redirect(url_for('auth.login'))
 
-        if len(password) < 8 or not email:
-            flash('Invalid credentials!', 'error')
-            return redirect(url_for('auth.login'))
+    email = request.form.get('email', '')
+    password = request.form.get('password', '')
 
-        # Hash the email address before querying
-        user = models.User.query.filter_by(email=scripts.sha256_hash_text(email)).first()
-        if user and user.check_password(password):
-            # Save the timestamp of the last login
-            user.last_login = datetime.now()
-            extensions.db.session.commit()
-
-            remember_me = bool(request.form.get('remember_me', ''))
-            login_user(user, remember=remember_me)
-            
-            session.permanent = True
-            session['email_address'] = email
-            
-            flash(f'Welcome back, {current_user.username}!')
-            return redirect(url_for('views.home'))
-
+    if not input_sanitization.is_valid_email(email) or not scripts.is_strong_password(password):
         flash('Invalid credentials!', 'error')
-    
+        return redirect(url_for('auth.login'))
+
+    # Hash the email address before querying
+    user = models.User.query.filter_by(email=scripts.sha256_hash_text(email)).first()
+    if user and user.check_password(password):
+        # Save the timestamp of the last login
+        user.last_login = datetime.now()
+        extensions.db.session.commit()
+
+        remember_me = bool(request.form.get('remember_me', ''))
+        login_user(user, remember=remember_me)
+            
+        # Make the email address last in the session
+        session.permanent = True
+        session['email_address'] = email
+            
+        flash(f'Welcome back, {current_user.username}!')
+        return redirect(url_for('views.home'))
+
+    flash('Invalid credentials!', 'error')
     return render_template('login.html')
 
 
-@auth_views.route('/commento')
+@auth_views.route('/commento', methods=['GET'])
 @login_required
 def commento():
     token = request.args.get("token", '', type=str)
@@ -328,15 +280,59 @@ def commento():
     return redirect(redirect_url, code=302)
 
 
-@auth_views.route('/logout')
+@auth_views.route('/google_redirect', methods=['GET'])
+@unauthenticated_only
+def google_redirect():
+    nonce = g.nonce
+    session['nonce'] = nonce
+
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return extensions.google.authorize_redirect(redirect_uri, nonce=nonce)
+
+
+@auth_views.route('/google', methods=['GET'])
+@unauthenticated_only
+def google_callback():
+    token = extensions.google.authorize_access_token()
+    user_info = extensions.google.parse_id_token(token, nonce=session['nonce'])
+
+    username = user_info['name']
+    hashed_email = scripts.sha256_hash_text(user_info['email'])
+    
+    # If the user is not already in the database, we create an entry for them
+    user = models.User.query.filter_by(email=hashed_email).first()
+    if not user:
+        username_lookup = models.User.query.filter_by(username=username)
+        if username_lookup:
+            username += '-' + scripts.generate_id()
+
+        if len(username) > 30:
+            username = username[:30]
+
+        # Generate a super random password and argon2 hash it. 
+        # The user can only log in using google integration or if they want to recover their account for some reason.
+        random_hashed_password = argon2.hash(scripts.generate_nonce())
+        user = models.User(user_id=scripts.generate_id(), username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
+        extensions.db.session.add(user)
+        extensions.db.session.commit()
+    
+    session['email_address'] = user_info['email']
+    login_user(user, remember=True)
+
+    flash(f"Hello, {user.username}! Welcome to Infomundi!")
+    return redirect(url_for('views.home'))
+
+
+@auth_views.route('/logout', methods=['GET'])
 @login_required
 def logout():
-    flash(f'We hope to see you again soon, {current_user.username}.')
+    flash(f'We hope to see you again soon, {current_user.username}')
 
     # Removes email from the user's session. 
-    # It would be creepy to see your email address in the contact form when you're logged out, wouldn't it?
-    del session['email_address']
+    # It'd be creepy to see your email address in the contact form when you're logged out, wouldn't it?
+    if 'email_address' in session:
+        del session['email_address']
     session.permanent = False
 
     logout_user()
-    return redirect(scripts.is_safe_url(request.headers.get('Referer', url_for('views.home'))))
+    return redirect(url_for('views.home'))

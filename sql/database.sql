@@ -3,11 +3,20 @@ DROP TABLE IF EXISTS register_tokens;
 
 CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(10) PRIMARY KEY,
-    username VARCHAR(30) NOT NULL UNIQUE,
+    username VARCHAR(25) NOT NULL UNIQUE,
     role VARCHAR(15) DEFAULT 'user',
     password VARCHAR(100) NOT NULL,
     email VARCHAR(70) NOT NULL UNIQUE,
     avatar_url VARCHAR(80),
+
+    display_name VARCHAR(40) NOT NULL,
+    
+    profile_description VARCHAR(1500),
+    profile_banner_url VARCHAR(80),
+    profile_wallpaper_url VARCHAR(80),
+    level INT DEFAULT 0,
+    level_progress INT DEFAULT 0,
+    
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME,
     in_recovery TINYINT(1) DEFAULT 0,

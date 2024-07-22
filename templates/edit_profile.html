@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block styles %}
+<style>
+    .main-container {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .profile-container {
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block edit_profile_content %}
+<h3>General</h3>
+<hr>
+<form method="post" action="{{ url_for('views.edit_user_profile', username=user.username) }}">
+   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+   <div class="mb-3">
+      <!--<div class="input-group mb-3">
+         <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+         <div class="form-floating">
+            <input type="text" name="username" class="form-control" id="floatingInputGroup1" placeholder="Username" value="{{ user.username }}">
+            <label for="floatingInputGroup1">Username</label>
+         </div>
+      </div>-->
+      <div class="input-group mb-3">
+         <span class="input-group-text"><i class="fa-solid fa-users-viewfinder"></i></span>
+         <div class="form-floating">
+            <input type="text" name="display_name" class="form-control" id="floatingInputDisplayName" placeholder="Display Name" value="{{ user.display_name }}" maxlength="40">
+            <label for="floatingInputDisplayName">Display Name</label>
+         </div>
+      </div>
+   </div>
+   <div class="mb-3">
+      <div class="form-floating">
+         <textarea name="description" class="form-control" placeholder="Add a description to your profile" id="floatingTextarea" style="height: 100px" maxlength="1500">{{ user.profile_description }}</textarea>
+         <label for="floatingTextarea">Description</label>
+      </div>
+   </div>
+   <h4 class="mt-5">Localization</h4>
+   <hr>
+   <div class="mb-3">
+      <div class="form-floating">
+         <select class="form-select" id="floatingSelectCountry" aria-label="Country selection">
+            <option selected>Brazil</option>
+            <option value="1">USA</option>
+            <option value="2">Canada</option>
+            <option value="3">Australia</option>
+         </select>
+         <label for="floatingSelectCountry">Country</label>
+      </div>
+   </div>
+   <div class="mb-3">
+      <div class="form-floating">
+         <select class="form-select" id="floatingSelectState" aria-label="State selection">
+            <option selected>Pernambuco</option>
+            <option value="1">Acre</option>
+            <option value="2">Roraima</option>
+            <option value="3">Rio de Janeiro</option>
+         </select>
+         <label for="floatingSelectState">State</label>
+      </div>
+   </div>
+   <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+   <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
+</form>
+{% endblock %}

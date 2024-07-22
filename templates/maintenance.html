@@ -12,7 +12,11 @@
         <p class="lead">We apologize for the inconvenience, but we're performing some maintenance in this page at the moment. Be right back!</p>
         <div class="d-grid gap-2 d-md-flex justify-content-md-start">
           <a type="button" role="button" class="btn btn-primary btn-lg px-4 me-md-2" href="{{ url_for('views.contact') }}">Contact Us</a>
-          <a type="button" role="button" class="btn btn-outline-secondary btn-lg px-4" href="{{ url_for('views.home') }}">Return Home</a>
+          {% if not referer %}
+            <a type="button" role="button" class="btn btn-outline-secondary btn-lg px-4" href="{{ url_for('views.home') }}">Return Home</a>
+          {% else %}
+            <a type="button" role="button" class="btn btn-outline-secondary btn-lg px-4" href="{{ referer }}">Return to Previous Page</a>
+          {% endif %}
         </div>
       </div>
     </div>

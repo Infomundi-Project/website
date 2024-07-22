@@ -1,37 +1,7 @@
 {% extends "base.html" %}{% block title %}Policies{% endblock %}
-{% block content %}
+{% block about_content %}
+
 <div class="container" data-bs-spy="scroll" data-bs-target="#inf-scrollspy-navbar" data-bs-smooth-scroll="true" tabindex="0">
-  <div class="row">
-    <div class="my-5 text-center">
-      <img 
-        src="{% if request.cookies.get('theme') == 'dark' %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% endif %}"
-        class="infomundi-logo"
-        height="16"
-        width="9" 
-        alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
-        />
-      <p class="fs-5">About</p>
-      <h1 class="display-5 fw-bold text-body-emphasis">Policies</h1>
-      <div class="col-lg-6 mx-auto">
-      </div>
-    </div>
-
-    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.about') }}">Website</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{{ url_for('views.policies') }}">Policies</a>
-      </li>
-    </ul>
-  </div>
-
     <div class="row">
   <div class="col-md-4">
     <nav id="inf-scrollspy-navbar" class="h-100 flex-column align-items-stretch pe-4 border-end">
@@ -217,5 +187,6 @@
 
     </div>
   </div>
+</div>
 </div>
 {% endblock %}

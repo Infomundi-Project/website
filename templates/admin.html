@@ -14,7 +14,7 @@
         <i class="fa-solid fa-rss"></i> Add News Feed
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('api.add_news') }}">
+        <form method="post" action="#">
           <div class="form-group">
             <label for="country"><i class="fa-solid fa-earth-americas"></i> Country</label>
             <input type="text" class="form-control autocomplete" id="country" name="country" required>
@@ -48,7 +48,7 @@
         <i class="fa-solid fa-magnifying-glass"></i> Search Comments
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('auth.search_comments') }}">
+        <form method="post" action="#">
           <div class="form-group">
             <label for="search_text">Search Text</label>
             <input type="text" class="form-control" id="search_text" name="search_text" required>
@@ -66,7 +66,7 @@
         <i class="fa-solid fa-magnifying-glass"></i> Search Info About a Country
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('auth.get_feed_info') }}">
+        <form method="post" action="#">
           <div class="form-group">
             <label for="country_name">Country Name</label>
             <input type="text" class="form-control autocomplete" id="country_name" name="country_name" required>
@@ -82,7 +82,7 @@
         <i class="fa-regular fa-trash-can"></i> Delete a Comment
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('api.delete_comment') }}">
+        <form method="post" action="#">
           <div class="form-group">
             <label for="comment_id">Comment ID</label>
             <input type="text" class="form-control" id="comment_id" name="comment_id" required>
@@ -122,39 +122,4 @@
     <button type="button" class="btn btn-outline-primary btn-sm" id="applyButton">Apply</button>
   </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script 
-  src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" 
-  integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" 
-  crossorigin="anonymous"
-  ></script>
-<script 
-  src="{{ url_for('static', filename='js/autocompleteNoRedirect.js') }}"
-  ></script>
-<script>
-  $(document).ready(function() {
-      // Fetch the initial state from the server
-      $.ajax({
-          url: "{{ url_for('api.get_comments_status') }}",
-          method: 'GET',
-          success: function(response) {
-              $('#flexSwitchCheckChecked').prop('checked', response.enabled);
-          }
-      });
-  
-      // Handle the Apply button click
-      $("#applyButton").click(function() {
-          $.ajax({
-              url: "{{ url_for('api.disable_comments') }}",
-              method: 'POST',
-              data: { 'flexSwitchCheckChecked': $('#flexSwitchCheckChecked').prop('checked') },
-              success: function(response) {
-                  // Handle any response if needed
-                  console.log(response);
-              }
-          });
-      });
-  });
-</script>
 {% endblock %}

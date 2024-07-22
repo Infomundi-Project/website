@@ -1,11 +1,12 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, flash, session, abort
 from flask_login import current_user, login_required
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, cast
+from sqlalchemy.types import Date
 from datetime import datetime
 from random import choice
 from time import time
 
-from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable
+from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization
 from views import make_cache_key
 from auth import admin_required
 
@@ -13,16 +14,16 @@ api = Blueprint('api', __name__)
 
 
 @api.route('/get-description', methods=['GET'])
-@extensions.cache.cached(timeout=60*60*24, query_string=True) # 24 hours
+@extensions.cache.cached(timeout=60*60*24*15, query_string=True) # 15 days
 def get_description():
-    news_id = request.args.get('id')
+    news_id = request.args.get('id', '')
 
     story = models.Story.query.filter_by(story_id=news_id).first()
     if story:
         data = {}
-        data['title'] = scripts.sanitize_input(story.title)
-        data['description'] = scripts.sanitize_input(story.description)
-        data['publisher'] = scripts.sanitize_input(story.publisher.name)
+        data['title'] = input_sanitization.sanitize_html(story.title)
+        data['description'] = input_sanitization.sanitize_html(story.description)
+        data['publisher'] = input_sanitization.sanitize_html(story.publisher.name)
     else:
         data = {}
 
@@ -30,6 +31,7 @@ def get_description():
 
 
 @api.route('/get_country_code', methods=['GET'])
+@extensions.cache.cached(timeout=60*60*24*30, query_string=True) # 30 days
 def get_country_code():
     """Get the country code based on the selected country name.
 
@@ -92,7 +94,7 @@ def search():
     else:
         code = 'ERROR'
 
-    url = f'https://infomundi.net/news?country={code}&section=general&page=1'
+    url = f'https://infomundi.net/news?country={code}'
     return redirect(url)
 
 
@@ -100,12 +102,14 @@ def search():
 def summarize_story():
     # This is safe because only who has access to the secret key can control the session variables.
     news_id = session.get('visited_news', '')
-    category = session.get('visited_category', '')
-
-    if not news_id or not category:
-        return jsonify({'success': False}), 406 # Not acceptable
+    if not news_id:
+        # 406 = Not acceptable
+        return jsonify({'success': False}), 406
 
     story = models.Story.query.filter_by(story_id=news_id).first()
+    # If the story has a summary, there's no point continuing.
+    if story.gpt_summary:
+        return jsonify({'success': False}), 406
 
     response = scripts.gpt_summarize(story.link)
     if response:
@@ -128,10 +132,14 @@ def get_stories():
     order_by = request.args.get('order_by', 'created_at', type=str).lower()
     order_dir = request.args.get('order_dir', 'desc', type=str).lower()
 
+    start_date = request.args.get('start_date', '', type=str)
+    end_date = request.args.get('end_date', '', type=str)
+    query = request.args.get('query', '', type=str)
+
     # br_general, us_general and so on
     selected_filter = f'{country}_{category}'
     if not scripts.valid_category(selected_filter):
-        return jsonify({'error': 'This category is not yet supported!'}), 500
+        return jsonify({'error': 'This category is not yet supported!'}), 501
 
     valid_order_columns = ('created_at', 'clicks', 'title', 'pub_date')
     if order_by not in valid_order_columns:
@@ -142,18 +150,45 @@ def get_stories():
     else:
         order_criterion = getattr(models.Story, order_by).desc()
 
-    # Page should be between 1 and 999
+    # Page should be between 1 and 9999
     if not (1 <= page <= 9999):
         page = 1
+
+    # Basic filtering. Category id should match and story should have image.
+    query_filters = [
+        models.Story.category_id == selected_filter,
+        models.Story.media_content_url.contains('bucket.infomundi.net')
+    ]
+
+    # Filter by search query
+    if query:
+        query_filters.append(
+            or_(
+                models.Story.title.ilike(f'%{query}%'),
+                models.Story.description.ilike(f'%{query}%')
+            )
+        )
+
+    # Filter by date range
+    if start_date and end_date:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        query_filters.append(
+            and_(
+                cast(models.Story.pub_date, Date) >= start_date_obj,
+                cast(models.Story.pub_date, Date) <= end_date_obj
+            )
+        )
 
     stories_per_page = 9
     start_index = (page - 1) * stories_per_page
     stories = models.Story.query.filter(
-        and_(
-            models.Story.category_id == selected_filter,
-            models.Story.media_content_url.contains('bucket.infomundi.net')
-        )
-    ).order_by(order_criterion).offset(start_index).limit(stories_per_page).all()
+        and_(*query_filters)
+        ).order_by(order_criterion).offset(start_index).limit(stories_per_page).all()
+
+    if not stories:
+        return jsonify({'error': 'No stories found!'}), 501
 
     stories_list = [
         {
@@ -175,9 +210,5 @@ def get_stories():
         }
         for story in stories
     ]
-
-    session['category'] = category
-    session['order_by'] = order_by
-    session['order_dir'] = order_dir
 
     return jsonify(stories_list)

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block styles %}
+<style>
+    .background-container {
+        background: url('https://infomundi.net/static/img/wallpapers/galaxy.webp') no-repeat center center;
+        background-size: cover;
+        padding: 30px;
+        position: relative;
+    }
+    .background-container::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.8));
+        z-index: 1;
+    }
+    .profile-container {
+        /*background: rgba(0, 0, 0, 0.7);*/ /* Semi-transparent background */
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 50px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+    }
+    .profile-header {
+        background: url('https://infomundi.net/static/img/wallpapers/bolsonaro.webp') no-repeat center center;
+        background-size: cover;
+        height: 200px;
+        position: relative;
+        border-radius: 15px 15px 15px 15px;
+        overflow: hidden;
+    }
+    .profile-header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+    }
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 15px;
+        border: 5px solid white;
+        /*position: absolute;*/
+        /*top: 160px; */
+        left: 3.5vh;
+        /*z-index: 3; */
+    }
+    .edit-profile-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="descriptionModalLabel">{{ user.username }}'s description</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{ user.profile_description }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <!--<button type="button" class="btn btn-primary">Send message</button>-->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+    <div class="container profile-container bg-secondary-subtle opacity-90">
+        <div class="profile-header mb-3"></div>
+        
+        <div class="row">
+            <div class="col-8">
+                <div class="row">
+                    <div class="col-2">
+                        <img src="{{ user.avatar_url }}" alt="User Avatar" class="profile-avatar">
+                    </div>
+                    <div class="ms-2 col">
+                        {% if user.display_name %}
+                            <p class="fs-2 fw-bold">{{ user.display_name }}</p>
+                            <p class="fs-6 text-muted">@{{ user.username }}</p>
+                        {% else %}
+                            <h2>{{ user.username }}</h2>
+                        {% endif %}
+
+                        {% if user.profile_description %}
+                            <p class="fs-6 text-wrap">{{ short_description }} {% if user.profile_description|length > 200 %}<a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>{% endif %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-4">
+                <p class="fs-4">
+                    <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">5</span>
+                </p>
+                <span>250/1000</span>
+                <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 3px">
+                  <div class="progress-bar bg-info" style="width: 25%"></div>
+                </div>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.username == user.username %}
+                        <a type="button" role="button" class="w-100 btn btn-lg btn-outline-light mt-2" href="{{ url_for('views.edit_user_profile', username=user.username) }}"><i class="fa-solid fa-pen me-1"></i>Edit Profile</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mt-4">
+            <h3>Recent Activity</h3>
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action">Comeu xibiu por 3 horas</a>
+                <a href="#" class="list-group-item list-group-item-action">Beijou Clara na boca há 3 minutos</a>
+                <a href="#" class="list-group-item list-group-item-action">Jogou valoras há 37 minutos</a>
+            </div>
+        </div>
+        
+        <!-- Friends -->
+        <div class="mt-4">
+            <h3>Friends</h3>
+            <div class="d-flex flex-wrap">
+                <div class="p-2">
+                    <img src="{{ url_for('static', filename='img/wallpapers/dbarros.webp') }}" alt="Friend 1" class="rounded-circle" style="width: 5vh; height: 5vh;">
+                    <p class="text-center">Diogo Barros</p>
+                </div>
+                <div class="p-2">
+                    <img src="{{ url_for('static', filename='img/wallpapers/jdoe.webp') }}" alt="Friend 2" class="rounded-circle" style="width: 50px; height: 50px;">
+                    <p class="text-center">John Doe</p>
+                </div>
+                <!-- Add more friends as needed -->
+            </div>
+        </div>
+        <div class="mt-5" style="background-color: white; border-radius: 15px;">
+            <comentario-comments auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.username }}" max-level="5"></comentario-comments>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ nonce }}">
+  window.userAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+</script>
+
+<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/awaitLoadComentario.js') }}"></script>
+{% endblock %}

@@ -1,85 +1,49 @@
 {% extends "base.html" %} {% block title %}About{% endblock %}
+
 {% block styles %}
-<style type="text/css">
+<style>
   ul {
   list-style-type: disc;
 }
 </style>
 {% endblock %}
-{% block content %}
 
+{% block about_content %}
 <div class="container">
-  <div class="row">
-    <div class="my-5 text-center">
-      <img 
-        src="{% if request.cookies.get('theme') == 'dark' %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% endif %}"
-        class="infomundi-logo"
-        height="16"
-        width="9" 
-        alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
-        />
-      <p class="fs-5">About</p>
-      <h1 class="display-5 fw-bold text-body-emphasis">Website</h1>
-      <div class="col-lg-6 mx-auto">
-      </div>
-    </div>
-
-    <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{{ url_for('views.about') }}">Website</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.team') }}">Team</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.contact') }}">Contact</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('views.policies') }}">Policies</a>
-      </li>
-    </ul>
-  </div>
-
-  <h2 class="fs-2">Who are we?</h2>
-  <p>Infomundi is a creation by two Brazilian university students, aimed at simplifying access to global information. Our platform is dedicated to providing users with reliable and detailed insights into countries worldwide, covering a broad range of topics from geopolitics to economics.
-
-  We update our content constantly to keep our community informed and engaged. Recognizing the value of information, Infomundi is designed to be accessible and user-friendly, supporting discussions and fostering a deeper understanding of the world around us.</p>
-
-  <h2 class="fs-2 mt-5">Goals</h2>
-  <ol>
-            <li>Create a platform capable of helping the user inform themselves about all the countries in the world in a practical and credible way.</li>
-            <li>Establish a community both within and beyond our platform that actively participates in shaping a more comprehensive understanding of the world and promotes the importance of communication.</li>
-            <li>Develop methods to make information significantly more accessible and to enhance and widely acknowledge its value.</li>
-            <li>Make Infomundi be recognized as an information network where individuals see us as a secure platform for both expressing themselves and obtaining information.</li>
-            <li>Extend our reach globally and ensure that everyone can access the information they seek through our assistance.</li>
-  </ol>
-
-  <h2 class="fs-2 mt-5">Features</h2>
-  <ol>
-  
-  <li>Global Database</li>
+   <h2 class="fs-2">Who are we?</h2>
+   <p>Infomundi is a creation by two Brazilian university students, aimed at simplifying access to global information. Our platform is dedicated to providing users with reliable and detailed insights into countries worldwide, covering a broad range of topics from geopolitics to economics.
+      We update our content constantly to keep our community informed and engaged. Recognizing the value of information, Infomundi is designed to be accessible and user-friendly, supporting discussions and fostering a deeper understanding of the world around us.
+   </p>
+   <h2 class="fs-2 mt-5">Goals</h2>
+   <ol>
+      <li>Create a platform capable of helping the user inform themselves about all the countries in the world in a practical and credible way.</li>
+      <li>Establish a community both within and beyond our platform that actively participates in shaping a more comprehensive understanding of the world and promotes the importance of communication.</li>
+      <li>Develop methods to make information significantly more accessible and to enhance and widely acknowledge its value.</li>
+      <li>Make Infomundi be recognized as an information network where individuals see us as a secure platform for both expressing themselves and obtaining information.</li>
+      <li>Extend our reach globally and ensure that everyone can access the information they seek through our assistance.</li>
+   </ol>
+   <h2 class="fs-2 mt-5">Features</h2>
+   <ol>
+      <li>Global Database</li>
       <ul>
-        <li>
-          Our platform provides detailed profiles for each country, covering essential areas like culture, politics, geography, and economics, alongside in-depth analyses of stock markets, geopolitical events, social trends, and a broad spectrum of national news. This ensures users gain a comprehensive and clear understanding of every nation, in line with the extensive range of information we aim to provide.
-        </li>
-        <li>
-          Our platform updates global news and events every 12 hours, ensuring timely and relevant information for our users.
-        </li>
-    </ul>
-        <li>Community Engagement Tools</li>
-        <ul>
-        <li>Each news card is thoughtfully designed with a dedicated section for users to engage in meaningful conversations, allowing them to share and explore diverse perspectives on the subject matter together.</li>
+         <li>
+            Our platform provides detailed profiles for each country, covering essential areas like culture, politics, geography, and economics, alongside in-depth analyses of stock markets, geopolitical events, social trends, and a broad spectrum of national news. This ensures users gain a comprehensive and clear understanding of every nation, in line with the extensive range of information we aim to provide.
+         </li>
+         <li>
+            Our platform updates global news and events every 12 hours, ensuring timely and relevant information for our users.
+         </li>
       </ul>
-
-        <li>Accessibility Features</li>
-        <ul>
-            <li>Comprehensive multilingual support, ensuring that individuals from all language backgrounds feel welcomed and fully engaged.</li>
-            <li>Sleek and user-friendly interface, to ensure a seamless and inclusive experience for all users.</li>
-            <li>Ability to switch from dark to light theme.</li>
-        </ul>
-
-  </ol>
-
+      <li>Community Engagement Tools</li>
+      <ul>
+         <li>Each news card is thoughtfully designed with a dedicated section for users to engage in meaningful conversations, allowing them to share and explore diverse perspectives on the subject matter together.</li>
+      </ul>
+      <li>Accessibility Features</li>
+      <ul>
+         <li>Comprehensive multilingual support, ensuring that individuals from all language backgrounds feel welcomed and fully engaged.</li>
+         <li>Sleek and user-friendly interface, to ensure a seamless and inclusive experience for all users.</li>
+         <li>Ability to switch from dark to light theme.</li>
+      </ul>
+   </ol>
 </div>
 
 {% endblock %}

@@ -6,8 +6,8 @@
     <link rel="canonical" href="{{ request.url }}">
 
     <!-- Verifications, ADS and Schema -->
-    <meta name="google-adsense-account" content="ca-pub-2416889662324926">
-    <meta name="msvalidate.01" content="02225A95C7E679E2FCBD558DCA1EFD89">
+    <!--<meta name="google-adsense-account" content="ca-pub-2416889662324926">-->
+    <!--<meta name="msvalidate.01" content="02225A95C7E679E2FCBD558DCA1EFD89">-->
     
     {% if current_user.is_authenticated and current_user.in_recovery and 'password_change' not in request.url %}
       <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/password_change");</script>
@@ -49,12 +49,12 @@
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-
     <meta property="twitter:url" content="{{ request.url }}">
     <meta property="twitter:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
     <meta property="twitter:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
     <meta property="twitter:image" content="{% if '/comments' in request.url and story %}{{ story.media_content_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
 
+    <!-- Icons -->
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
@@ -161,17 +161,29 @@
     </div>
 
     <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
-      <div class="offcanvas-header">
+      <div class="offcanvas-header d-flex justify-content-between">
         {% if current_user.is_authenticated %}
-          <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded-circle" height="500" width="500" style="height: 6vh; width: 6vh;">
-          <p class="offcanvas-title notranslate fs-5" id="offcanvasRightLabel">{{ current_user.username }}</p>
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" height="500" width="500" style="height: 5.5vh; width: 5.5vh;">
+            </div>
+            <div class="col text-center">
+              <p class="offcanvas-title notranslate {% if is_mobile %}fs-6{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{{ current_user.username }}</p>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
         {% else %}
           <a href="/" class="text-decoration-none text-reset">
             <img data-src="https://infomundi.net/static/img/logos/{% if request.cookies.get('theme', '') == 'dark' %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
             <span class="logo-text fs-4 notranslate">infomundi</span>
           </a>
         {% endif %}
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+
+        <!--<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
       </div>
       <div class="offcanvas-body">
         {% if session.get('last_visited_country', '') or session.get('last_visited_news', '') %}
@@ -446,7 +458,7 @@
   </div>
 {% endif %}
 
-    <div class="container-fluid">
+    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
       {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %} 
           {% for category, message in messages %} 
@@ -478,6 +490,87 @@
         </div>
       </div>
       {% endif %}
+
+      {% if request.endpoint in ['views.about', 'views.contact', 'views.policies', 'views.team'] %}
+      <div class="container">
+         <div class="row">
+            <div class="my-5 text-center">
+               <img 
+                  src="{% if request.cookies.get('theme') == 'dark' %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% endif %}"
+                  class="infomundi-logo"
+                  height="16"
+                  width="9" 
+                  alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi."
+                  />
+               <p class="fs-5">About</p>
+               <h1 class="display-5 fw-bold text-body-emphasis">{% if request.endpoint == 'views.about' %}Website{% else %}{{ request.path.replace('/', '').capitalize() }}{% endif %}</h1>
+               <div class="col-lg-6 mx-auto">
+               </div>
+            </div>
+            <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
+               <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'views.about' %}active{% endif %}" aria-current="page" href="{{ url_for('views.about') }}">Website</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'views.team' %}active{% endif %}" href="{{ url_for('views.team') }}">Team</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'views.contact' %}active{% endif %}" href="{{ url_for('views.contact') }}">Contact</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'views.policies' %}active{% endif %}" href="{{ url_for('views.policies') }}">Policies</a>
+               </li>
+            </ul>
+         </div>
+      </div>
+
+      {% block about_content %} 
+
+      {% endblock %}
+      
+      {% endif %}
+
+
+      {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
+
+      <div class="container mt-5">
+        <div class="row align-items-center">
+            
+            <div class="col-md-3 main-container bg-secondary-subtle">
+                <img src="{{ user.avatar_url }}" class="img-thumbnail" style="border-radius: 15px;" alt="{{ user.username }}'s profile picture">
+                <h3 class="mt-2">{{ user.username }}</h3>
+                <a href="https://infomundi.net/profile/{{ user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
+                <ul class="nav nav-pills flex-column mt-4">
+                    <li class="nav-item inf-nav-item">
+                        <a class="nav-link {% if request.url.endswith('/edit') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
+                    </li>
+                    <li class="nav-item inf-nav-item">
+                        <a class="nav-link {% if request.url.endswith('/avatar') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
+                    </li>
+                    <li class="nav-item inf-nav-item">
+                        <a class="nav-link {% if request.url.endswith('/background') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/background"><i class="fa-solid fa-camera me-1"></i>Background Image</a>
+                    </li>
+                    <li class="nav-item inf-nav-item">
+                        <a class="nav-link {% if request.url.endswith('/settings') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-9">
+                <div class="profile-container bg-secondary-subtle">
+                    {% block edit_profile_content %}
+
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+      {% endif %}
+
+
+
+      <!-- Where the main content of the webpage gets inserted -->
       {% block content %} {% endblock %}
     </div>
 

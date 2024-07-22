@@ -6,17 +6,20 @@ from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from datetime import timedelta
 
-from website_scripts.config import APP_SECRET_KEY, MYSQL_USERNAME, MYSQL_PASSWORD
+from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING
+from website_scripts.extensions import db, login_manager, cache, oauth, limiter
 from website_scripts.scripts import detect_mobile, generate_nonce
-from website_scripts.extensions import db, login_manager, cache
-from auth import auth_views, admin_required
+from website_scripts.input_sanitization import is_safe_url
 from website_scripts.models import User
+
+from auth import auth_views, admin_required
 from views import views
 from api import api
 
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = APP_SECRET_KEY
+app.config['SECRET_KEY'] = '@33-CompletelySecureAppSecretKeyThatShouldBeUncrackable'
+app.config['WTF_CSRF_SECRET_KEY'] = app.config['SECRET_KEY']  # Optional but recommended
 
 app.config['PREFERRED_URL_SCHEME'] = 'https'
 
@@ -39,8 +42,12 @@ app.config['CACHE_TYPE'] = 'RedisCache'
 app.config['CACHE_REDIS_HOST'] = 'localhost'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_REDIS_DB'] = 0
-app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+app.config['CACHE_REDIS_URL'] = REDIS_CONNECTION_STRING
 cache.init_app(app)
+
+
+# Rate Limiting
+limiter.init_app(app)
 
 # Uploads
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 Megabytes
@@ -50,6 +57,9 @@ app.config['UPLOAD_FOLDER'] = 'static/img/users/'
 app.register_blueprint(views, url_prefix='/')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(auth_views, url_prefix='/auth')
+
+# Google OAuth
+oauth.init_app(app)
 
 
 def is_safe_path(basedir, path, follow_symlinks=True):
@@ -79,10 +89,10 @@ def download_backup(filename):
         abort(403)
 
     except Exception as e:
-        abort(500)  # Internal Server Error
+        # Internal Server Error
+        abort(500)
 
 
-# Ads.txt and robots.txt
 @app.route('/ads.txt')
 def ads_txt():
     return send_from_directory(os.path.join(app.root_path, 'static'),
@@ -124,7 +134,7 @@ def load_user(user_id):
 @app.before_request
 def set_nonce():
     # Generates a nonce using website_scripts.scripts.generate_nonce(). It's basically a base64 string
-    # created out of nothing. Saves to flask's g variable to be used in other scripts.
+    # created out of random values. Saves to flask's g variable to be used in other scripts.
     g.nonce = generate_nonce()
 
 
@@ -138,7 +148,7 @@ def add_csp_header(response):
         "default-src 'self' https://*.infomundi.net; "
         "img-src https: data:; "
 
-        "connect-src 'self' https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com https://ka-f.fontawesome.com https://api.tenor.com; "
+        "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com https://api.tenor.com; "
 
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
         
@@ -191,9 +201,10 @@ assets.register('js_news', js_news)
 
 
 @app.context_processor
-def inject_user():
+def inject_variables():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
-    return dict(is_mobile=detect_mobile(request), nonce=g.get('nonce', ''))
+    referer = is_safe_url(request.headers.get('referer', ''))
+    return dict(is_mobile=detect_mobile(request), nonce=g.get('nonce', ''), referer=referer)
 
 
 @app.errorhandler(404)
@@ -210,6 +221,5 @@ def error_handler(error):
     return render_template('error.html', error_code=error_code, error_message=error_message, page='Error'), error_code
 
 
-# Runs in debug mode if called directly!
 if __name__ == '__main__':
     app.run(debug=False)

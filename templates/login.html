@@ -20,15 +20,21 @@
             </div>
         </div>
 
-        <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" required>
-            <label for="floatingPassword">Password</label>
-            <div class="invalid-feedback">
-                Please provide a valid password.
+        <div class="input-group">
+            <div class="form-floating flex-grow-1">
+                <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
+                <label for="floatingPassword">Password</label>
+                <div class="invalid-feedback">
+                    Please provide a password with 8 to 50 characters.
+                </div>
             </div>
+
+            <span class="input-group-text password-toggle" id="floatingPasswordIcon">
+                <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
+            </span>
         </div>
 
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+        <div class="cf-turnstile mt-3" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
 
         <div class="checkbox mb-3">
             <label>
@@ -36,7 +42,13 @@
             </label>
         </div>
 
-        <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Sign in</button>
+        <button class="w-100 btn btn-lg btn-primary mb-2" type="submit">Sign in</button>
+        
+
+        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}"><img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30">Sign in with Google<span class="invisible">.</span></a>
+
+
+
         <p>I don't have an account. <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Sign up</a>.</p>
         <hr class="my-4">
         <small class="text-muted">Can't sign in? <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none">Recover your account</a>.</small>
@@ -48,5 +60,8 @@
 {% block scripts %}
 <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"
+></script>
+<script nonce="{{ nonce }}"
+    src="{{ url_for('static', filename='js/passwordUtility.js') }}"
 ></script>
 {% endblock %}
