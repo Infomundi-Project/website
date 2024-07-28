@@ -108,3 +108,98 @@ class StoryReaction(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
     __table_args__ = (db.UniqueConstraint('story_id', 'user_id', 'action', name='unique_reaction'),)
+
+
+class Region(db.Model):
+    __tablename__ = 'regions'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    translations = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=None)
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    flag = db.Column(db.Boolean, default=True)
+    wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
+
+    subregions = db.relationship('Subregion', backref='parent_region', lazy=True)
+    countries = db.relationship('Country', backref='region', lazy=True)
+
+
+class Subregion(db.Model):
+    __tablename__ = 'subregions'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    translations = db.Column(db.Text)
+    region_id = db.Column(db.Integer, db.ForeignKey('regions.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=None)
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    flag = db.Column(db.Boolean, default=True)
+    wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
+
+    countries = db.relationship('Country', backref='subregion', lazy=True)
+
+
+class Country(db.Model):
+    __tablename__ = 'countries'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    iso3 = db.Column(db.String(3))
+    numeric_code = db.Column(db.String(3))
+    iso2 = db.Column(db.String(2))
+    phonecode = db.Column(db.String(255))
+    capital = db.Column(db.String(255))
+    currency = db.Column(db.String(255))
+    currency_name = db.Column(db.String(255))
+    currency_symbol = db.Column(db.String(255))
+    tld = db.Column(db.String(255))
+    native = db.Column(db.String(255))
+    region_id = db.Column(db.Integer, db.ForeignKey('regions.id'), nullable=True)
+    subregion_id = db.Column(db.Integer, db.ForeignKey('subregions.id'), nullable=True)
+    nationality = db.Column(db.String(255))
+    timezones = db.Column(db.Text)
+    translations = db.Column(db.Text)
+    latitude = db.Column(db.Numeric(10, 8))
+    longitude = db.Column(db.Numeric(11, 8))
+    emoji = db.Column(db.String(191))
+    emojiU = db.Column(db.String(191))
+    created_at = db.Column(db.DateTime, default=None)
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    flag = db.Column(db.Boolean, default=True)
+    wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
+
+    states = db.relationship('State', backref='country', lazy=True)
+    cities = db.relationship('City', backref='country', lazy=True)
+
+
+class State(db.Model):
+    __tablename__ = 'states'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+    country_code = db.Column(db.String(2), nullable=False)
+    fips_code = db.Column(db.String(255))
+    iso2 = db.Column(db.String(255))
+    type = db.Column(db.String(191))
+    latitude = db.Column(db.Numeric(10, 8))
+    longitude = db.Column(db.Numeric(11, 8))
+    created_at = db.Column(db.DateTime, default=None)
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    flag = db.Column(db.Boolean, default=True)
+    wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
+
+    cities = db.relationship('City', backref='state', lazy=True)
+
+
+class City(db.Model):
+    __tablename__ = 'cities'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
+    state_code = db.Column(db.String(255), nullable=False)
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+    country_code = db.Column(db.String(2), nullable=False)
+    latitude = db.Column(db.Numeric(10, 8), nullable=False)
+    longitude = db.Column(db.Numeric(11, 8), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime(2014, 1, 1, 6, 31, 1))
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    flag = db.Column(db.Boolean, default=True)
+    wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')

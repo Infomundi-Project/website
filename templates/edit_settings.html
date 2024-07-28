@@ -2,28 +2,20 @@
 
 {% block title %}Account Settings{% endblock %}
 
-{% block styles %}
-<style>
-    .main-container {
-        padding: 20px;
-        border-radius: 10px;
-    }
-
-    .profile-container {
-        padding: 20px;
-        border-radius: 10px;
-        margin: 20px;
-    }
-</style>
-{% endblock %}
-
 {% block edit_profile_content %}
-<h3>General</h3>
+<h3>User's Information</h3>
 <hr>
 <form method="post" action="{{ url_for('views.edit_user_settings', username=user.username) }}">
    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+   <div class="input-group mb-3">
+      <span class="input-group-text">@</span>
+      <div class="form-floating">
+         <input type="text" name="username" class="form-control" id="floatingInputGroup1" placeholder="Username" value="{{ user.username }}">
+         <label for="floatingInputGroup1">Username</label>
+      </div>
+   </div>
    <div class="mb-3">
-      <div class="input-group mb-3">
+      <div class="input-group">
          <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
          <div class="form-floating">
             <input name="email" type="email" class="form-control" id="floatingInputEmail" placeholder="Email" value="{{ session['email_address'] }}">
@@ -31,32 +23,43 @@
          </div>
       </div>
    </div>
+
+   <div class="input-group mt-3">
+            <div class="form-floating flex-grow-1">
+                <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="new_password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
+                <label for="floatingPassword">Password</label>
+                <div class="invalid-feedback">
+                    Please provide a password with 8 to 50 characters.
+                </div>
+            </div>
+            <span class="input-group-text password-toggle" id="floatingPasswordIcon">
+                <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
+            </span>
+        </div>
+        <div id="passwordStrengthDisplay" class="mt-1"></div>
+
+
+        <div class="input-group mb-3 mt-3">
+            <div class="form-floating flex-grow-1">
+                <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" name="confirm_password" maxlength="50" minlength="8" required>
+                <label for="floatingConfirmPassword">Confirm Password</label>
+                <div class="invalid-feedback">
+                    Passwords must match.
+                </div>
+            </div>
+            <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon">
+                <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
+            </span>
+        </div>
+   
+   <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+
    <div class="mb-3">
       <div class="form-floating">
          <input name="current_password" type="password" class="form-control" id="floatInputCurrentPassword" placeholder="Your current password" required>
          <label for="floatInputCurrentPassword">Current Password</label>
       </div>
    </div>
-
-   <h4 class="mt-5">Change Password</h4>
-   <hr>
-   <div class="mb-3">
-      <div class="row g-2">
-         <div class="col-md">
-            <div class="form-floating">
-               <input name="new_password" type="password" class="form-control" id="floatInputPassword" placeholder="Fill this if you want to change your password">
-               <label for="floatInputPassword">New Password</label>
-            </div>
-         </div>
-         <div class="col-md">
-            <div class="form-floating">
-               <input name="confirm_password" type="password" class="form-control" id="floatInputPasswordConfirm" placeholder="Confirm your new password">
-               <label for="floatInputPasswordConfirm">Confirm New Password</label>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
    
    <div class="d-flex justify-content-between mt-4">
         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
@@ -64,4 +67,12 @@
         <a type="button" role="button" class="btn btn-outline-danger"><i class="fa-solid fa-trash-can me-1"></i>Delete Account</a>
     </div>
 </form>
+{% endblock %}
+{% block scripts %}
+<script defer nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/passwordUtility.js') }}"
+></script>
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/registerFormValidation.js') }}"
+></script>
 {% endblock %}

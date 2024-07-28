@@ -122,7 +122,8 @@ def edit_user_avatar(username):
         flash('User not found!', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    return render_template('edit_avatar.html', user=user)
+    short_description = input_sanitization.gentle_cut_text(25, user.profile_description or '')
+    return render_template('edit_avatar.html', user=user, short_description=short_description)
 
 
 @views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
@@ -201,34 +202,40 @@ def upload_image():
     if not cloudflare_util.is_valid_captcha(token):
         flash('Invalid captcha!', 'error')
         return redirect(url_for('views.user_redirect'))
-    
-    file = request.files.get('profilePhoto')
-
-    if not file:
-        message = 'We apologize, but no file was found!'
-    elif file.filename == '':
-        message = "We apologize, but we couldn't find your image!"
-    elif not image_util.allowed_file(file.filename) or not image_util.allowed_mime_type(file.stream) or not image_util.verify_image_content(file.stream) or not image_util.check_image_dimensions(file.stream):
-        message = "The file you provided is invalid."
-    else:
-        message = ''
-
-    if message:
-        flash(message, 'error')
-        return redirect(url_for('views.user_redirect'))
-    
-    # Convert the uploaded image to JPG format and save it. If conversion fails, flash an error message
-    convert = image_util.convert_to_jpg(file.stream, f'users/{current_user.user_id}.jpg')
-    if not convert:
-        flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
-        return redirect(url_for('views.user_redirect'))
 
     # Update the user's avatar URL in the database
-    user_data = models.User.query.filter_by(email=current_user.email).first()
-    user_data.avatar_url = f'https://bucket.infomundi.net/users/{current_user.user_id}.jpg'
-    extensions.db.session.commit()
+    user_data = models.User.query.filter_by(username=current_user.username).first()
 
-    flash('File uploaded successfully! Please wait a few minutes for your profile picture to update.')
+    image_categories = ('profile_picture', 'profile_banner', 'profile_background')
+    for image_category in image_categories:
+        file = request.files.get(image_category, '')
+        
+        if not file:
+            continue
+        
+        # Checks file extension, mime type, image content and dimensions
+        if not image_util.perform_all_checks(file.stream, file.filename):
+            flash("We apologize, but the file you provided is invalid.", "error")
+            return redirect(url_for('views.user_redirect'))
+    
+        # Changes some variables depending on the image category
+        if image_category == 'profile_picture':
+            bucket_path = f'users/{current_user.user_id}.jpg'
+            user_data.avatar_url = f'https://bucket.infomundi.net/{bucket_path}'
+        elif image_category == 'profile_banner':
+            bucket_path = f'banners/{current_user.user_id}.jpg'
+            user_data.profile_banner_url = f'https://bucket.infomundi.net/{bucket_path}'
+        else:
+            bucket_path = f'backgrounds/{current_user.user_id}.jpg'
+            user_data.profile_wallpaper_url = f'https://bucket.infomundi.net/{bucket_path}'
+
+        convert = image_util.convert_and_save(file.stream, image_category, bucket_path)
+        if not convert:
+            flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
+            return redirect(url_for('views.user_redirect'))
+        
+    extensions.db.session.commit()
+    flash('File uploaded successfully! Please wait a few minutes for the changes to be applied.')
     return redirect(url_for('views.user_redirect'))
 
 

@@ -69,6 +69,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/fontawesome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/solid.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/brands.css') }}">
+
+    {% if '/edit' in request.url %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_profile.css') }}">
+    {% endif %}
     
     <!-- Stylesheets/Website -->
     {% assets "css_base" %}
@@ -534,9 +538,9 @@
       {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
 
       <div class="container mt-5">
-        <div class="row align-items-center">
+        <div class="row align-items-start">
             
-            <div class="col-md-3 main-container bg-secondary-subtle">
+            <div class="col main-container bg-secondary-subtle">
                 <img src="{{ user.avatar_url }}" class="img-thumbnail" style="border-radius: 15px;" alt="{{ user.username }}'s profile picture">
                 <h3 class="mt-2">{{ user.username }}</h3>
                 <a href="https://infomundi.net/profile/{{ user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>

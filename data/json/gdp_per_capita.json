@@ -1,476 +1,554 @@
 [
   {
     "Liechtenstein": {
-      "gdp": "$197,505 (IMF)",
+      "gdp": "$197,505 (World Bank)",
       "date": "2021"
     }
   },
   {
     "Luxembourg": {
-      "gdp": "$125,006 (World Bank)",
-      "date": "2022"
+      "gdp": "$131,384 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bermuda": {
-      "gdp": "$118,775 (IMF)",
+      "gdp": "$118,775 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Ireland": {
-      "gdp": "$103,983 (World Bank)",
-      "date": "2022"
+      "gdp": "$106,059 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Switzerland": {
-      "gdp": "$93,260 (World Bank)",
-      "date": "2022"
+      "gdp": "$105,669 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cayman Islands": {
-      "gdp": "$99,625 (IMF)",
+      "gdp": "$99,625 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Norway": {
-      "gdp": "$108,729 (World Bank)",
-      "date": "2022"
+      "gdp": "$94,660 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Singapore": {
-      "gdp": "$82,808 (World Bank)",
-      "date": "2022"
+      "gdp": "$88,447 (IMF)",
+      "date": "2024"
     }
   },
   {
     "United States": {
-      "gdp": "$76,330 (World Bank)",
-      "date": "2022"
+      "gdp": "$85,373 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Iceland": {
-      "gdp": "$73,467 (World Bank)",
-      "date": "2022"
+      "gdp": "$84,594 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Qatar": {
-      "gdp": "$87,662 (World Bank)",
-      "date": "2022"
+      "gdp": "$81,400 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Isle of Man": {
+      "gdp": "$79,531 (World Bank)",
+      "date": "2020"
     }
   },
   {
     "Macau": {
-      "gdp": "$34,585 (World Bank)",
-      "date": "2022"
+      "gdp": "$78,962 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Denmark": {
-      "gdp": "$67,790 (World Bank)",
+      "gdp": "$68,898 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Channel Islands": {
+      "gdp": "$67,961 (World Bank)",
+      "date": "2021"
+    }
+  },
+  {
+    "Faroe Islands": {
+      "gdp": "$66,979 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Australia": {
-      "gdp": "$65,100 (World Bank)",
-      "date": "2022"
+      "gdp": "$66,589 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Netherlands": {
-      "gdp": "$57,025 (World Bank)",
-      "date": "2022"
+      "gdp": "$63,750 (IMF)",
+      "date": "2024"
     }
   },
   {
     "San Marino": {
-      "gdp": "$54,983 (World Bank)",
-      "date": "2021"
+      "gdp": "$59,405 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Austria": {
-      "gdp": "$52,085 (World Bank)",
-      "date": "2022"
+      "gdp": "$59,225 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Sweden": {
-      "gdp": "$56,424 (World Bank)",
-      "date": "2022"
+      "gdp": "$58,529 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Greenland": {
-      "gdp": "$57,116 (IMF)",
+      "gdp": "$57,116 (World Bank)",
       "date": "2021"
     }
   },
   {
     "Belgium": {
-      "gdp": "$49,927 (World Bank)",
-      "date": "2022"
+      "gdp": "$55,536 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Finland": {
-      "gdp": "$50,872 (World Bank)",
-      "date": "2022"
+      "gdp": "$55,127 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Canada": {
-      "gdp": "$55,522 (World Bank)",
-      "date": "2022"
+      "gdp": "$54,866 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Germany": {
-      "gdp": "$48,718 (World Bank)",
-      "date": "2022"
+      "gdp": "$54,291 (IMF)",
+      "date": "2024"
     }
   },
   {
     "United Arab Emirates": {
-      "gdp": "$53,708 (World Bank)",
-      "date": "2022"
+      "gdp": "$53,916 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Hong Kong": {
-      "gdp": "$48,984 (World Bank)",
-      "date": "2022"
+      "gdp": "$53,606 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Israel": {
-      "gdp": "$54,931 (World Bank)",
-      "date": "2022"
+      "gdp": "$53,372 (IMF)",
+      "date": "2024"
     }
   },
   {
     "United Kingdom": {
-      "gdp": "$46,125 (World Bank)",
-      "date": "2022"
+      "gdp": "$51,075 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "British Virgin Islands": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "\u2014"
     }
   },
   {
     "New Zealand": {
-      "gdp": "$48,419 (World Bank)",
-      "date": "2022"
+      "gdp": "$48,531 (IMF)",
+      "date": "2024"
     }
   },
   {
     "France": {
-      "gdp": "$40,886 (World Bank)",
-      "date": "2022"
+      "gdp": "$47,359 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Andorra": {
-      "gdp": "$41,993 (World Bank)",
-      "date": "2022"
+      "gdp": "$44,900 (IMF)",
+      "date": "2024"
     }
   },
   {
     "European Union[n 1]": {
-      "gdp": "$37,433 (World Bank)",
-      "date": "2022"
+      "gdp": "$42,440 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "U.S. Virgin Islands": {
+      "gdp": "$41,976 (World Bank)",
+      "date": "2021"
     }
   },
   {
     "Malta": {
-      "gdp": "$34,128 (World Bank)",
-      "date": "2022"
+      "gdp": "$41,738 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Italy": {
-      "gdp": "$34,776 (World Bank)",
-      "date": "2022"
+      "gdp": "$39,580 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Aruba": {
-      "gdp": "$33,301 (World Bank)",
-      "date": "2022"
+      "gdp": "$38,018 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Puerto Rico": {
-      "gdp": "$35,209 (World Bank)",
-      "date": "2022"
+      "gdp": "$37,172 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cyprus": {
-      "gdp": "$32,048 (World Bank)",
-      "date": "[n 2]2022"
+      "gdp": "$37,149 (IMF)",
+      "date": "[n 2]2024"
+    }
+  },
+  {
+    "Guam": {
+      "gdp": "$35,905 (World Bank)",
+      "date": "2021"
     }
   },
   {
     "Sint Maarten (Dutch part)": {
-      "gdp": "$35,873 (IMF)",
+      "gdp": "$35,873 (World Bank)",
       "date": "2022"
     }
   },
   {
     "New Caledonia": {
-      "gdp": "$35,745 (IMF)",
+      "gdp": "$35,745 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Bahamas": {
-      "gdp": "$31,458 (World Bank)",
-      "date": "2022"
+      "gdp": "$35,257 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Brunei": {
-      "gdp": "$37,153 (World Bank)",
-      "date": "2022"
+      "gdp": "$35,111 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Taiwan": {
+      "gdp": "$34,432 (IMF)",
+      "date": "[n 3]2024"
     }
   },
   {
     "South Korea": {
-      "gdp": "$32,423 (World Bank)",
-      "date": "2022"
+      "gdp": "$34,165 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Spain": {
-      "gdp": "$29,675 (World Bank)",
-      "date": "2022"
+      "gdp": "$34,045 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Slovenia": {
-      "gdp": "$28,439 (World Bank)",
-      "date": "2022"
+      "gdp": "$34,026 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Japan": {
-      "gdp": "$34,017 (World Bank)",
-      "date": "2022"
+      "gdp": "$33,138 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Saudi Arabia": {
-      "gdp": "$30,448 (World Bank)",
-      "date": "2022"
+      "gdp": "$33,040 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Estonia": {
-      "gdp": "$28,247 (World Bank)",
-      "date": "2022"
+      "gdp": "$31,855 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kuwait": {
-      "gdp": "$41,080 (World Bank)",
-      "date": "2022"
+      "gdp": "$31,724 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Czech Republic": {
-      "gdp": "$27,227 (World Bank)",
-      "date": "2022"
+      "gdp": "$29,801 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Portugal": {
-      "gdp": "$24,515 (World Bank)",
-      "date": "2022"
+      "gdp": "$28,969 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bahrain": {
-      "gdp": "$30,147 (World Bank)",
-      "date": "2022"
+      "gdp": "$28,876 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Lithuania": {
-      "gdp": "$25,065 (World Bank)",
-      "date": "2022"
+      "gdp": "$28,407 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guyana": {
-      "gdp": "$18,200 (World Bank)",
-      "date": "2022"
+      "gdp": "$26,592 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Slovakia": {
-      "gdp": "$21,257 (World Bank)",
-      "date": "2022"
+      "gdp": "$25,935 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Turks and Caicos Islands": {
-      "gdp": "$24,918 (IMF)",
+      "gdp": "$24,918 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Latvia": {
-      "gdp": "$21,780 (World Bank)",
-      "date": "2022"
+      "gdp": "$24,194 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Greece": {
-      "gdp": "$20,867 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,966 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Saint Kitts and Nevis": {
-      "gdp": "$20,262 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,705 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Barbados": {
-      "gdp": "$20,239 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,596 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Hungary": {
-      "gdp": "$18,390 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,319 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Uruguay": {
-      "gdp": "$20,795 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,088 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Poland": {
-      "gdp": "$18,688 (World Bank)",
-      "date": "2022"
+      "gdp": "$23,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Croatia": {
-      "gdp": "$18,570 (World Bank)",
-      "date": "2022"
+      "gdp": "$22,966 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Seychelles": {
-      "gdp": "$13,251 (World Bank)",
-      "date": "2022"
+      "gdp": "$21,875 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Oman": {
-      "gdp": "$25,057 (World Bank)",
-      "date": "2022"
+      "gdp": "$20,913 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Antigua and Barbuda": {
-      "gdp": "$19,920 (World Bank)",
-      "date": "2022"
+      "gdp": "$20,533 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cura\u00e7ao": {
-      "gdp": "$20,502 (IMF)",
+      "gdp": "$20,502 (World Bank)",
       "date": "2022"
     }
   },
   {
+    "Saint Martin (French part)": {
+      "gdp": "$20,321 (World Bank)",
+      "date": "2021"
+    }
+  },
+  {
     "Trinidad and Tobago": {
-      "gdp": "$19,630 (World Bank)",
+      "gdp": "$19,861 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "American Samoa": {
+      "gdp": "$19,673 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Romania": {
-      "gdp": "$15,787 (World Bank)",
-      "date": "2022"
+      "gdp": "$19,530 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Panama": {
-      "gdp": "$17,358 (World Bank)",
-      "date": "2022"
+      "gdp": "$19,369 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Cook Islands": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "\u2014"
+    }
+  },
+  {
+    "Anguilla": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "\u2014"
     }
   },
   {
     "French Polynesia": {
-      "gdp": "$18,985 (IMF)",
+      "gdp": "$18,985 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Costa Rica": {
-      "gdp": "$13,365 (World Bank)",
-      "date": "2022"
+      "gdp": "$18,031 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Maldives": {
-      "gdp": "$11,781 (World Bank)",
-      "date": "2022"
+      "gdp": "$17,818 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Palau": {
-      "gdp": "$12,922 (World Bank)",
-      "date": "2021"
+      "gdp": "$17,441 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Northern Mariana Islands": {
+      "gdp": "$17,303 (World Bank)",
+      "date": "2020"
     }
   },
   {
     "Bulgaria": {
-      "gdp": "$13,974 (World Bank)",
-      "date": "2022"
+      "gdp": "$16,943 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Chile": {
-      "gdp": "$15,356 (World Bank)",
-      "date": "2022"
+      "gdp": "$16,616 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "Montserrat": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "\u2014"
     }
   },
   {
     "Mexico": {
-      "gdp": "$11,497 (World Bank)",
-      "date": "2022"
+      "gdp": "$15,249 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kazakhstan": {
-      "gdp": "$11,492 (World Bank)",
-      "date": "2022"
+      "gdp": "$14,778 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Russia": {
-      "gdp": "$15,271 (World Bank)",
-      "date": "2022"
+      "gdp": "$14,391 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Saint Lucia": {
-      "gdp": "$13,031 (World Bank)",
-      "date": "2022"
+      "gdp": "$14,101 (IMF)",
+      "date": "2024"
     }
   },
   {
@@ -481,770 +559,776 @@
   },
   {
     "Malaysia": {
-      "gdp": "$11,993 (World Bank)",
-      "date": "2022"
+      "gdp": "$13,315 (IMF)",
+      "date": "2024"
     }
   },
   {
     "China": {
-      "gdp": "$12,720 (World Bank)",
-      "date": "[n 5]2022"
+      "gdp": "$13,136 (IMF)",
+      "date": "[n 4]2024"
     }
   },
   {
     "Mauritius": {
-      "gdp": "$10,256 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,973 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Argentina": {
-      "gdp": "$13,651 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,812 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Turkey": {
-      "gdp": "$10,675 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,765 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Montenegro": {
-      "gdp": "$10,093 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,646 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Turkmenistan": {
-      "gdp": "$8,793 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,412 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Serbia": {
-      "gdp": "$9,538 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,384 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Nauru": {
-      "gdp": "$11,971 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,362 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Grenada": {
-      "gdp": "$9,689 (World Bank)",
-      "date": "2022"
+      "gdp": "$12,255 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Dominican Republic": {
-      "gdp": "$10,111 (World Bank)",
-      "date": "2022"
+      "gdp": "$11,774 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Brazil": {
-      "gdp": "$8,918 (World Bank)",
-      "date": "2022"
+      "gdp": "$11,352 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cuba": {
-      "gdp": "$9,500 (IMF)",
+      "gdp": "$9,500 (World Bank)",
       "date": "2020"
     }
   },
   {
     "Saint Vincent and the Grenadines": {
-      "gdp": "$9,125 (World Bank)",
-      "date": "2022"
+      "gdp": "$10,150 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Dominica": {
-      "gdp": "$8,351 (World Bank)",
-      "date": "2022"
+      "gdp": "$9,455 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Gabon": {
-      "gdp": "$8,820 (World Bank)",
-      "date": "2022"
+      "gdp": "$9,308 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Albania": {
-      "gdp": "$6,810 (World Bank)",
-      "date": "2022"
+      "gdp": "$8,924 (IMF)",
+      "date": "2024"
     }
   },
   {
     "North Macedonia": {
-      "gdp": "$6,592 (World Bank)",
-      "date": "2022"
+      "gdp": "$8,847 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Georgia": {
-      "gdp": "$6,675 (World Bank)",
-      "date": "[n 6]2022"
+      "gdp": "$8,825 (IMF)",
+      "date": "[n 6]2024"
     }
   },
   {
     "Armenia": {
-      "gdp": "$7,018 (World Bank)",
-      "date": "2022"
+      "gdp": "$8,575 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bosnia and Herzegovina": {
-      "gdp": "$7,569 (World Bank)",
-      "date": "2022"
+      "gdp": "$8,416 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Peru": {
-      "gdp": "$7,126 (World Bank)",
-      "date": "2022"
+      "gdp": "$8,291 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Botswana": {
-      "gdp": "$7,739 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,875 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Thailand": {
-      "gdp": "$6,910 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,812 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Azerbaijan": {
-      "gdp": "$7,762 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,641 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Belarus": {
-      "gdp": "$7,888 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,558 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Moldova": {
-      "gdp": "$5,714 (World Bank)",
-      "date": "[n 7]2022"
+      "gdp": "$7,488 (IMF)",
+      "date": "[n 7]2024"
     }
   },
   {
     "Colombia": {
-      "gdp": "$6,624 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,327 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Jamaica": {
-      "gdp": "$6,047 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,309 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Belize": {
-      "gdp": "$6,984 (World Bank)",
-      "date": "2022"
+      "gdp": "$7,170 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Libya": {
-      "gdp": "$6,716 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,975 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Equatorial Guinea": {
-      "gdp": "$7,182 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,733 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Marshall Islands": {
-      "gdp": "$6,225 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,711 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Suriname": {
-      "gdp": "$5,859 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,702 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Ecuador": {
-      "gdp": "$6,391 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,567 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kosovo": {
-      "gdp": "$5,340 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,389 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Fiji": {
-      "gdp": "$5,356 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,287 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Mongolia": {
-      "gdp": "$5,046 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,182 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tuvalu": {
-      "gdp": "$5,222 (World Bank)",
-      "date": "2022"
+      "gdp": "$6,001 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Paraguay": {
-      "gdp": "$6,153 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,984 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Iraq": {
-      "gdp": "$5,937 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,979 (IMF)",
+      "date": "2024"
     }
   },
   {
     "South Africa": {
-      "gdp": "$6,767 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,975 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tonga": {
-      "gdp": "$4,426 (World Bank)",
-      "date": "2021"
+      "gdp": "$5,840 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Algeria": {
-      "gdp": "$4,343 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,722 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guatemala": {
-      "gdp": "$5,473 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,678 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Ukraine": {
-      "gdp": "$4,534 (World Bank)",
-      "date": "[n 8]2022"
+      "gdp": "$5,663 (IMF)",
+      "date": "[n 8]2024"
     }
   },
   {
     "El Salvador": {
-      "gdp": "$5,127 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,537 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Iran": {
-      "gdp": "$4,670 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,310 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Indonesia": {
-      "gdp": "$4,788 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,271 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Micronesia": {
-      "gdp": "$3,714 (World Bank)",
-      "date": "2022"
+      "gdp": "$5,120 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Samoa": {
-      "gdp": "$3,746 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,840 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Namibia": {
-      "gdp": "$5,031 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,745 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Jordan": {
-      "gdp": "$4,311 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,705 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cape Verde": {
-      "gdp": "$3,754 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,656 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Vietnam": {
-      "gdp": "$4,164 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,623 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tunisia": {
-      "gdp": "$3,747 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,435 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Eswatini": {
-      "gdp": "$3,987 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,324 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Djibouti": {
-      "gdp": "$3,136 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,184 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Philippines": {
-      "gdp": "$3,499 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,130 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Morocco": {
-      "gdp": "$3,442 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,078 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bolivia": {
-      "gdp": "$3,600 (World Bank)",
-      "date": "2022"
+      "gdp": "$4,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bhutan": {
-      "gdp": "$3,560 (World Bank)",
-      "date": "2021"
+      "gdp": "$4,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Venezuela": {
-      "gdp": "$15,976 (World Bank)",
-      "date": "2014"
+      "gdp": "$3,867 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Vanuatu": {
-      "gdp": "$3,231 (World Bank)",
-      "date": "2022"
+      "gdp": "$3,734 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Honduras": {
-      "gdp": "$3,040 (World Bank)",
-      "date": "2022"
+      "gdp": "$3,505 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Palestine": {
-      "gdp": "$3,789 (World Bank)",
-      "date": "[n 9]2022"
+      "gdp": "$3,396 (IMF)",
+      "date": "[n 9]2023"
     }
   },
   {
     "Sri Lanka": {
-      "gdp": "$3,354 (World Bank)",
+      "gdp": "$3,342 (IMF)",
       "date": "2022"
     }
   },
   {
     "Lebanon": {
-      "gdp": "$4,136 (World Bank)",
-      "date": "2021"
+      "gdp": "$3,283 (IMF)",
+      "date": "2022"
     }
   },
   {
     "Egypt": {
-      "gdp": "$4,295 (World Bank)",
-      "date": "2022"
+      "gdp": "$3,225 (IMF)",
+      "date": "2024"
     }
   },
   {
     "S\u00e3o Tom\u00e9 and Pr\u00edncipe": {
-      "gdp": "$2,387 (World Bank)",
-      "date": "2022"
+      "gdp": "$3,167 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Nicaragua": {
-      "gdp": "$2,255 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,791 (IMF)",
+      "date": "2024"
     }
   },
   {
     "India": {
-      "gdp": "$2,411 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,731 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Ivory Coast": {
-      "gdp": "$2,486 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,717 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Uzbekistan": {
-      "gdp": "$2,255 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,666 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Bangladesh": {
-      "gdp": "$2,688 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,646 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cambodia": {
-      "gdp": "$1,760 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,628 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Papua New Guinea": {
-      "gdp": "$3,116 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,530 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Congo": {
-      "gdp": "$2,649 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,457 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kiribati": {
-      "gdp": "$1,702 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,446 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Angola": {
-      "gdp": "$3,000 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,432 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Mauritania": {
-      "gdp": "$2,065 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,347 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Solomon Islands": {
-      "gdp": "$2,205 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,253 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Ghana": {
-      "gdp": "$2,204 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,230 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Zimbabwe": {
-      "gdp": "$1,677 (World Bank)",
-      "date": "2022"
+      "gdp": "$2,088 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kenya": {
-      "gdp": "$2,099 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,983 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Laos": {
-      "gdp": "$2,054 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,976 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Haiti": {
-      "gdp": "$1,748 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,941 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Kyrgyzstan": {
-      "gdp": "$1,655 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,922 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Ethiopia": {
-      "gdp": "$1,028 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,910 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Senegal": {
-      "gdp": "$1,599 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,900 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Cameroon": {
-      "gdp": "$1,564 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,815 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guinea": {
-      "gdp": "$1,515 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,651 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Benin": {
-      "gdp": "$1,303 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,512 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Pakistan": {
-      "gdp": "$1,589 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,461 (IMF)",
+      "date": "2023"
     }
   },
   {
     "East Timor": {
-      "gdp": "$2,389 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,454 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Zambia": {
-      "gdp": "$1,457 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,413 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Nepal": {
-      "gdp": "$1,337 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,397 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Comoros": {
-      "gdp": "$1,485 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,384 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tajikistan": {
-      "gdp": "$1,054 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,271 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Myanmar": {
-      "gdp": "$1,149 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,248 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Tanzania": {
-      "gdp": "$1,193 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,220 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Uganda": {
-      "gdp": "$2024 (IMF)",
-      "date": "964"
+      "gdp": "$1,202 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Zanzibar": {
-      "gdp": "$1,192 (IMF)",
+      "gdp": "$1,192 (World Bank)",
       "date": "2022"
     }
   },
   {
     "Nigeria": {
-      "gdp": "$2,163 (World Bank)",
-      "date": "2022"
+      "gdp": "$1,110 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Lesotho": {
-      "gdp": "$2024 (IMF)",
-      "date": "970"
+      "gdp": "$1,107 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Guinea-Bissau": {
-      "gdp": "$2024 (IMF)",
-      "date": "776"
+      "gdp": "$1,087 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Togo": {
-      "gdp": "$2024 (IMF)",
-      "date": "943"
+      "gdp": "$1,058 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Chad": {
-      "gdp": "$2024 (IMF)",
-      "date": "717"
+      "gdp": "$1,014 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Rwanda": {
-      "gdp": "$2024 (IMF)",
-      "date": "966"
+      "gdp": "$989 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Gambia": {
-      "gdp": "$2024 (IMF)",
-      "date": "808"
+      "gdp": "$989 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Burkina Faso": {
-      "gdp": "$2024 (IMF)",
-      "date": "830"
+      "gdp": "$910 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Mali": {
-      "gdp": "$2024 (IMF)",
-      "date": "833"
+      "gdp": "$899 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Liberia": {
-      "gdp": "$2024 (IMF)",
-      "date": "755"
+      "gdp": "$855 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Somalia": {
-      "gdp": "$2024 (IMF)",
-      "date": "592"
+      "gdp": "$776 (IMF)",
+      "date": "2024"
     }
   },
   {
     "DR Congo": {
-      "gdp": "$2024 (IMF)",
-      "date": "654"
+      "gdp": "$715 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Niger": {
-      "gdp": "$2024 (IMF)",
-      "date": "585"
+      "gdp": "$670 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Mozambique": {
-      "gdp": "$2024 (IMF)",
-      "date": "558"
+      "gdp": "$659 (IMF)",
+      "date": "2024"
+    }
+  },
+  {
+    "North Korea": {
+      "gdp": "$\u2014 (IMF)",
+      "date": "\u2014"
     }
   },
   {
     "Eritrea": {
-      "gdp": "$644 (IMF)",
-      "date": "2011"
+      "gdp": "$\u2014 (IMF)",
+      "date": "644"
     }
   },
   {
     "Sudan": {
-      "gdp": "$1,102 (World Bank)",
-      "date": "2022"
+      "gdp": "$547 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Madagascar": {
-      "gdp": "$2024 (IMF)",
-      "date": "517"
+      "gdp": "$538 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Central African Republic": {
-      "gdp": "$2024 (IMF)",
-      "date": "427"
+      "gdp": "$538 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Sierra Leone": {
-      "gdp": "$2024 (IMF)",
-      "date": "476"
+      "gdp": "$527 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Yemen": {
-      "gdp": "$2024 (IMF)",
-      "date": "650"
+      "gdp": "$486 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Malawi": {
-      "gdp": "$2024 (IMF)",
-      "date": "645"
+      "gdp": "$481 (IMF)",
+      "date": "2024"
     }
   },
   {
     "South Sudan": {
-      "gdp": "$1,072 (World Bank)",
-      "date": "2015"
+      "gdp": "$422 (IMF)",
+      "date": "2024"
     }
   },
   {
     "Afghanistan": {
-      "gdp": "$2022 (IMF)",
-      "date": "356"
+      "gdp": "$422 (IMF)",
+      "date": "2022"
     }
   },
   {
     "Syria": {
-      "gdp": "$421 (IMF)",
-      "date": "2021"
+      "gdp": "$\u2014 (IMF)",
+      "date": "421"
     }
   },
   {
     "Burundi": {
-      "gdp": "$2024 (IMF)",
-      "date": "259"
+      "gdp": "$230 (IMF)",
+      "date": "2024"
     }
   },
   {

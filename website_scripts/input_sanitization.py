@@ -1,5 +1,6 @@
 import re
 import bleach
+from unidecode import unidecode
 from urllib.parse import urlparse
 
 
@@ -59,7 +60,7 @@ def sanitize_text(text: str) -> str:
     Returns:
         str: The sanitized text.
     """
-    text = text.strip()
+    text = unidecode(text.strip())
     
     # Define the allowed characters using a regex pattern
     allowed_chars_pattern = re.compile(r'[^a-zA-Z0-9 ,.!?:\-\'"]')

@@ -119,9 +119,9 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
 
         for item in feed.entries:
             # Sanitize text input
-            feed_publisher = input_sanitization.sanitize_text(feed.feed.title)
-            item_title = input_sanitization.sanitize_text(item.get('title', f'No title was provided'))
-            item_description = input_sanitization.sanitize_text(item.get('description', 'No description was provided'))
+            feed_publisher = input_sanitization.sanitize_html(feed.feed.title)
+            item_title = input_sanitization.sanitize_html(item.get('title', f'No title was provided'))
+            item_description = input_sanitization.sanitize_html(item.get('description', 'No description was provided'))
             
             # Gentle cut (without cutting off words)
             feed_publisher = input_sanitization.gentle_cut_text(80, feed_publisher)
