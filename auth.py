@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from passlib.hash import argon2
 from functools import wraps
 
-from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization, cloudflare_util, decorators
+from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization,\
+ cloudflare_util, decorators, auth_util
 from website_scripts.decorators import admin_required, in_maintenance, captcha_required, unauthenticated_only
 
 auth_views = Blueprint('auth', __name__)
@@ -75,7 +76,7 @@ def register():
         return redirect(url_for('auth.register'))
 
     # Tries to send a verification email to the user.
-    send_token = scripts.handle_register_token(email, hashed_email, 
+    send_token = auth_util.handle_register_token(email, hashed_email, 
         username, argon2.hash(password))
     if not send_token:
         flash('We apologize, but something went wrong. Please, try again later.', 'error')
@@ -133,7 +134,7 @@ def forgot_password():
             return render_template('forgot_password.html')
         
         # Checks if the token is valid
-        result = scripts.check_recovery_token(recovery_token)
+        result = auth_util.check_recovery_token(recovery_token)
         if result:
             login_user(result)
 
@@ -154,7 +155,7 @@ def forgot_password():
         return render_template('forgot_password.html')
 
     # Tries to send the recovery token to the user
-    scripts.send_recovery_token(email, scripts.sha256_hash_text(email))
+    auth_util.send_recovery_token(email, scripts.sha256_hash_text(email))
 
     # Generic error message to prevent user enumeration
     flash(f"If {email} is in our database, an email will be sent with instructions.")

@@ -5,7 +5,8 @@ from random import choice, shuffle
 from sqlalchemy import or_, and_
 from hashlib import md5
 
-from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models, cloudflare_util, input_sanitization
+from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
+cloudflare_util, input_sanitization, friends_util
 from website_scripts.decorators import admin_required, in_maintenance, captcha_required
 
 views = Blueprint('views', __name__)
@@ -39,8 +40,48 @@ def admin():
     return render_template('admin.html')
 
 
+@views.route('/user/<friend_id>/friend/<action>', methods=['GET'])
+@login_required
+def handle_friends(friend_id, action):
+    if action == 'add':
+        if friends_util.send_friend_request(current_user.user_id, friend_id):
+            flash('Friend request sent')
+        else:
+            flash('Something went wrong', 'error')
+        
+        return redirect(url_for('views.user_redirect'))
+    
+    elif action == 'accept':
+        if friends_util.accept_friend_request(current_user.user_id, friend_id):
+            flash('Friend request accepted')
+        else:
+            flash('Failed to accept friend request', 'error')
+        
+        return redirect(url_for('views.user_redirect'))
+    
+    elif action == 'reject':
+        if friends_util.reject_friend_request(current_user.user_id, friend_id):
+            flash("Friend request rejected")
+        else:
+            flash('Failed to reject friend request', 'error')
+
+        return redirect(url_for('views.user_redirect'))
+            
+    elif action == 'delete':
+        if friends_util.delete_friend(current_user.user_id, friend_id):
+            flash('Friend request deleted')
+        else:
+            flash('Failed to delete friend request', 'error')
+        
+        return redirect(url_for('views.user_redirect'))
+    
+    else:
+        flash('What?', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+
 @views.route('/profile/<username>', methods=['GET'])
-@admin_required
+#@admin_required
 def user_profile(username):
     user = models.User.query.filter_by(username=username).first()
     if not user:
@@ -49,7 +90,36 @@ def user_profile(username):
     
     short_description = input_sanitization.gentle_cut_text(200, user.profile_description or '')
 
-    return render_template('user_profile.html', user=user, short_description=short_description)
+    pending_friend_request_sent_by_current_user = False
+
+    if user.user_id == current_user.user_id:
+        friend_status = None
+        pending_requests = friends_util.get_pending_friend_requests(current_user.user_id)
+    else:
+        friendship = models.Friendship.query.filter(
+            extensions.db.or_(
+                extensions.db.and_(models.Friendship.user_id == current_user.user_id, models.Friendship.friend_id == user.user_id),
+                extensions.db.and_(models.Friendship.user_id == user.user_id, models.Friendship.friend_id == current_user.user_id)
+            )
+        ).first()
+
+        if friendship:
+            if friendship.status == 'pending':
+                friend_status = 'pending'
+                pending_friend_request_sent_by_current_user = friendship.user_id == current_user.user_id
+            elif friendship.status == 'accepted':
+                friend_status = 'accepted'
+        else:
+            friend_status = 'not_friends'
+            pending_friend_request_sent_by_current_user = False
+
+    return render_template('user_profile.html', user=user, 
+        short_description=short_description, 
+        friend_status=friend_status, 
+        friends_list=friends_util.get_friends_list(user.user_id),
+        pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user, 
+        pending_requests=pending_requests if user.user_id == current_user.user_id else None
+        )
 
 
 @views.route('/profile/<username>/edit', methods=['GET', 'POST'])

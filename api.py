@@ -6,11 +6,18 @@ from datetime import datetime
 from random import choice
 from time import time
 
-from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization
+from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, decorators, friends_util
 from views import make_cache_key
-from auth import admin_required
 
 api = Blueprint('api', __name__)
+
+
+@api.route('/user/friends', methods=['GET'])
+@login_required
+def get_friends():
+    friends = friends_util.get_friends_list(current_user.user_id)
+    friends_data = [{"user_id": friend.user_id, "username": friend.username, "avatar": friend.avatar_url} for friend in friends]
+    return jsonify({"friends": friends_data}), 200
 
 
 @api.route('/get-description', methods=['GET'])

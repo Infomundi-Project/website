@@ -462,7 +462,7 @@
   </div>
 {% endif %}
 
-    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
+    <div class="container-fluid">
       {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %} 
           {% for category, message in messages %} 
@@ -480,6 +480,9 @@
           {% endfor %} 
         {% endif %} 
       {% endwith %}
+    </div>
+
+    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
       {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
@@ -550,9 +553,6 @@
                     </li>
                     <li class="nav-item inf-nav-item">
                         <a class="nav-link {% if request.url.endswith('/avatar') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
-                    </li>
-                    <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/background') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/background"><i class="fa-solid fa-camera me-1"></i>Background Image</a>
                     </li>
                     <li class="nav-item inf-nav-item">
                         <a class="nav-link {% if request.url.endswith('/settings') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>

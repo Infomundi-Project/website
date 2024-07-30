@@ -32,6 +32,12 @@ class User(db.Model, UserMixin):
     recovery_token = db.Column(db.String(40))
     recovery_token_timestamp = db.Column(db.DateTime)
 
+    # Friendships
+    friends = db.relationship('User', secondary='friendships',
+        primaryjoin='User.user_id==Friendship.user_id',
+        secondaryjoin='and_(User.user_id==Friendship.friend_id, Friendship.status=="accepted")',
+        backref='friends_of')
+
     def set_password(self, password):
         self.password = argon2.hash(password)
 
@@ -203,3 +209,17 @@ class City(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     flag = db.Column(db.Boolean, default=True)
     wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
+
+
+class Friendship(db.Model):
+    __tablename__ = 'friendships'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'), nullable=False)
+    friend_id = db.Column(db.String(10), db.ForeignKey('users.user_id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    status = db.Column(db.String(10), nullable=False, default='pending')  # Status: 'pending', 'accepted', 'rejected'
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
+
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('user_friendships', lazy='dynamic'))
+    friend = db.relationship('User', foreign_keys=[friend_id], backref=db.backref('friend_friendships', lazy='dynamic'))
