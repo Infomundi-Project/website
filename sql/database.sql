@@ -33,7 +33,7 @@ CREATE TABLE register_tokens (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create friendships table
+
 CREATE TABLE friendships (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(10) NOT NULL,
@@ -45,4 +45,3 @@ CREATE TABLE friendships (
     CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- No changes needed for the users table

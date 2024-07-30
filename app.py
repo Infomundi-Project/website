@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING
 from website_scripts.extensions import db, login_manager, cache, oauth, limiter
-from website_scripts.scripts import detect_mobile, generate_nonce
+from website_scripts.scripts import is_mobile, generate_nonce
 from website_scripts.input_sanitization import is_safe_url
 from website_scripts.models import User
 
@@ -204,7 +204,7 @@ assets.register('js_news', js_news)
 def inject_variables():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
     referer = is_safe_url(request.headers.get('referer', ''))
-    return dict(is_mobile=detect_mobile(request), nonce=g.get('nonce', ''), referer=referer)
+    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=referer)
 
 
 @app.errorhandler(404)

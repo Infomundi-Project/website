@@ -1,4 +1,9 @@
-import time, hmac, hashlib, binascii, json
+import binascii
+import hashlib
+import time
+import hmac
+import json
+
 from flask import Blueprint, render_template, request, redirect, jsonify, url_for, flash, session, g
 from flask_login import login_user, login_required, current_user, logout_user
 from datetime import datetime, timedelta
@@ -6,7 +11,7 @@ from passlib.hash import argon2
 from functools import wraps
 
 from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization,\
- cloudflare_util, decorators, auth_util
+ cloudflare_util, auth_util
 from website_scripts.decorators import admin_required, in_maintenance, captcha_required, unauthenticated_only
 
 auth_views = Blueprint('auth', __name__)
@@ -207,6 +212,37 @@ def password_change():
 
     flash(f'Your password has been updated, {user.username}. You may log in now.')
     return redirect(url_for('auth.login'))
+
+
+@auth_views.route('/delete', methods=['GET', 'POST'])
+@login_required
+def account_delete():
+    user_email = session.get('email_address', '')
+    if not user_email:
+        flash('Something went wrong. Please log in again.')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'GET':
+        token = request.args.get('token', '')
+        if not auth_util.delete_account(user_email, token):
+            flash('Something went wrong, perhaps your token is invalid or expired', 'error')
+            return redirect(url_for('views.user_redirect'))
+
+        flash('Your account has been deleted.')
+        return redirect(url_for('views.user_redirect'))
+
+    current_password = request.form.get('current_password', '')
+    if not current_password:
+        flash('Something went wrong.', 'error')
+        return redirect(url_for('views.user_redirect'))
+    
+    if not auth_util.send_delete_token(user_email, current_password):
+        flash('Something went wrong. Perhaps your current password is incorrect or you already have a token associated with your account.', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    flash(f"We've sent an email with instructions to {user_email}.")
+    return redirect(url_for('views.user_redirect'))
 
 
 @auth_views.route('/login', methods=['GET', 'POST'])

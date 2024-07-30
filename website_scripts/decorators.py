@@ -20,6 +20,19 @@ def admin_required(func):
     return decorated_function
 
 
+def profile_owner_required(func):
+    """This decorator is used to check if the user is the profile owner."""
+    @wraps(func)
+    def decorated_function(username, *args, **kwargs):
+        if current_user.is_authenticated and (username == current_user.username):
+            return func(username, *args, **kwargs)
+        
+        flash('Only the profile owner can edit their profile.', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    return decorated_function
+
+
 def unauthenticated_only(func):
     """This decorator is used to check if the user is unauthenticated."""
     @wraps(func)

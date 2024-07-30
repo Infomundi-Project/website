@@ -1,15 +1,20 @@
-import uuid, time, langdetect, hashlib, secrets
+import langdetect
+import hashlib
+import secrets
+import base64
+import uuid
+import time
+
 from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
 from requests import get as get_request
-from base64 import b64encode, b64decode
 from json import loads as json_loads
 from difflib import SequenceMatcher
 #from googletrans import Translator
-from random import choice, uniform
 from unidecode import unidecode
 from bs4 import BeautifulSoup
 from os import listdir, path
+from random import choice
 from openai import OpenAI
 
 from . import config, json_util, immutable, notifications, models, extensions
@@ -103,11 +108,11 @@ def news_page_processing(country_name: str) -> dict:
     return news_page_data
 
 
-def generate_nonce():
-    return b64encode(secrets.token_bytes(32)).decode('utf-8')
+def generate_nonce(length: int=32):
+    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode('utf-8')
 
 
-def detect_mobile(request) -> bool:
+def is_mobile(request) -> bool:
     """Uses a request object to check if the user is using a mobile device or not. If mobile, return True. Else, return False."""
     user_agent = request.user_agent.string
 
@@ -275,6 +280,12 @@ def log(text: str, log_type: str='exception') -> bool:
         f.write(f'{text}\n')
 
     return True
+
+
+def is_within_threshold_minutes(timestamp, threshold_minutes: int) -> bool:
+    time_difference = datetime.now() - timestamp
+    
+    return time_difference <= timedelta(minutes=threshold_minutes)
 
 
 def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
@@ -501,14 +512,6 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
     for index, value in enumerate(save_list):
             if list(value.keys())[0].lower() == country_name:
                 return save_list[index]
-
-
-def encode_base64(input_string: str) -> str:
-    return b64encode(input_string.encode('utf-8')).decode('utf-8')
-
-
-def decode_base64(encoded_string: str) -> str:
-    return b64decode(encoded_string).decode('utf-8')
 
 
 def get_link_preview(url: str) -> dict:

@@ -32,6 +32,10 @@ class User(db.Model, UserMixin):
     recovery_token = db.Column(db.String(40))
     recovery_token_timestamp = db.Column(db.DateTime)
 
+    # Account Deletion
+    delete_token = db.Column(db.String(40))
+    delete_token_timestamp = db.Column(db.DateTime)
+
     # Friendships
     friends = db.relationship('User', secondary='friendships',
         primaryjoin='User.user_id==Friendship.user_id',

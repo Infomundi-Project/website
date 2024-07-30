@@ -46,14 +46,11 @@
         background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
     }
     .profile-avatar {
-        width: 140px;
+        width: 100%;
         height: auto;
         border-radius: 15px;
         border: 5px solid white;
         left: 3.5vh;
-    }
-    .edit-profile-btn:hover {
-        background-color: #0056b3;
     }
 </style>
 {% endblock %}
@@ -70,9 +67,9 @@
         <div class="container-fluid">
             {% if pending_requests %}
             {% for request in pending_requests %}
-            <div class="row justify-content-between text-center">
+            <div class="row text-center">
                 <div class="col">
-                    <img src="{{ request.user.avatar_url }}" style="width: 55%; height: auto; border-radius: 15px;">
+                    <img src="{{ request.user.avatar_url }}" style="width: 40%; height: auto; border-radius: 15px;">
                 </div>
                 <div class="col">
                     {% if request.user.display_name %}{{ request.user.display_name }}{% else %}{{ request.user.username }}{% endif %}
@@ -116,13 +113,13 @@
 </div>
 
 <div class="container">
-    <div class="profile-container bg-secondary-subtle opacity-78">
+    <div class="profile-container bg-dark-subtle shadow-lg">
         <div class="profile-header mb-3"></div>
         
         <div class="row">
             <div class="col-8">
                 <div class="row">
-                    <div class="col-2">
+                    <div class="col-3">
                         <img src="{{ user.avatar_url }}" alt="User Avatar" class="profile-avatar">
                     </div>
                     <div class="ms-2 col">
@@ -163,13 +160,13 @@
                     </div>
                     {% else %}
                         {% if friend_status == 'not_friends' %}
-                            <a type="button" role="button" class="w-100 btn btn-lg btn-outline-success mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='add') }}"><i class="fa-solid fa-user-plus me-1"></i>Add Friend</a>
+                            <a type="button" role="button" class="btn btn-lg btn-outline-success mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='add') }}" data-bs-toggle="tooltip" data-bs-title="Add Friend"><i class="fa-solid fa-user-plus"></i></a>
                         {% elif friend_status == 'pending' and pending_friend_request_sent_by_current_user %}
-                            <a type="button" role="button" class="w-100 btn btn-lg btn-outline-warning mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"><i class="fa-solid fa-hourglass-half me-1"></i>Cancel Request</a>
+                            <a type="button" role="button" class="btn btn-lg btn-outline-warning mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Cancel Request"><i class="fa-solid fa-hourglass-half"></i></a>
                         {% elif friend_status == 'pending' %}
-                            <a type="button" role="button" class="w-100 btn btn-lg btn-outline-success mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}"><i class="fa-solid fa-user-check me-1"></i>Accept Request</a>
+                            <a type="button" role="button" class="btn btn-lg btn-outline-success mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}" data-bs-toggle="tooltip" data-bs-title="Accept Request"><i class="fa-solid fa-user-check"></i></a>
                         {% elif friend_status == 'accepted' %}
-                            <a type="button" role="button" class="w-100 btn btn-lg btn-outline-danger mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"><i class="fa-solid fa-user-minus me-1"></i>Remove Friend</a>
+                            <a type="button" role="button" class="btn btn-lg btn-outline-danger mt-2" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i class="fa-solid fa-user-minus"></i></a>
                         {% endif %}
                     {% endif %}
                 {% endif %}
@@ -188,19 +185,19 @@
         
         <!-- Friends -->
         {% if friends_list %}
-        <div class="mt-4">
-            <h3>Friends</h3>
+        <div class="mt-5">
+            <h3>Friends<span class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span></h3>
             <div class="d-flex flex-wrap">
                 {% for friend in friends_list %}
                 <div class="p-2">
-                    <a href="{{ url_for('views.user_profile', username=friend.user.username) }}" target="_blank" class="text-decoration-none"><img src="{{ friend.user.avatar_url }}" alt="{{ friend.user.username }}'s avatar" class="img-fluid" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{% if friend.user.display_name %}{{ friend.user.display_name }}{% else %}{{ friend.user.username }}{% endif %}" style="width: 10%; height: auto; border-radius: 15px;"></a>
+                    <a href="{{ url_for('views.user_profile', username=friend.username) }}" class="text-decoration-none"><img src="{{ friend.avatar_url }}" alt="{{ friend.username }}'s avatar" class="img-fluid" data-bs-toggle="tooltip"  data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}" style="width: 10%; height: auto; border-radius: 15px;"></a>
                 </div>
                 {% endfor %}
             </div> 
         </div>
         {% endif %}
-        <div class="mt-5" style="background-color: white; border-radius: 15px;">
-            <comentario-comments auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.username }}" max-level="5"></comentario-comments>
+        <div class="mt-5">
+            <comentario-comments theme="{{ request.cookies.get('theme', '') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.username }}" max-level="5"></comentario-comments>
         </div>
     </div>
 </div>

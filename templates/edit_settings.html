@@ -3,17 +3,43 @@
 {% block title %}Account Settings{% endblock %}
 
 {% block edit_profile_content %}
-<h3>User's Information</h3>
-<hr>
-<form method="post" action="{{ url_for('views.edit_user_settings', username=user.username) }}">
-   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-   <div class="input-group mb-3">
-      <span class="input-group-text">@</span>
-      <div class="form-floating">
-         <input type="text" name="username" class="form-control" id="floatingInputGroup1" placeholder="Username" value="{{ user.username }}">
-         <label for="floatingInputGroup1">Username</label>
+<form method="post" action="{{ url_for('auth.account_delete') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="descriptionModalLabel">Delete Account</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-   </div>
+      <div class="modal-body">
+            <div class="input-group">
+                <div class="form-floating flex-grow-1">
+                    <input type="password" class="form-control" id="floatInputCurrentPasswordDelete" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
+                    <label for="floatInputCurrentPasswordDelete">Current Password</label>
+                    <div class="invalid-feedback">
+                        Please provide a password with 8 to 50 characters.
+                    </div>
+                </div>
+                <span class="input-group-text password-toggle" id="floatInputCurrentPasswordDeleteIcon">
+                    <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPasswordDelete"></i>
+                </span>
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+<h3>Account Information</h3>
+<hr>
+<form method="post" action="{{ url_for('views.edit_user_settings', username=current_user.username) }}">
+   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
    <div class="mb-3">
       <div class="input-group">
          <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
@@ -23,48 +49,60 @@
          </div>
       </div>
    </div>
-
-   <div class="input-group mt-3">
-            <div class="form-floating flex-grow-1">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="new_password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
-                <label for="floatingPassword">Password</label>
-                <div class="invalid-feedback">
-                    Please provide a password with 8 to 50 characters.
+    <div class="input-group">
+                <div class="form-floating flex-grow-1">
+                    <input type="password" class="form-control" id="floatInputCurrentPassword" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
+                    <label for="floatInputCurrentPassword">Current Password</label>
+                    <div class="invalid-feedback">
+                        Please provide a password with 8 to 50 characters.
+                    </div>
                 </div>
+                <span class="input-group-text password-toggle" id="floatInputCurrentPasswordIcon">
+                    <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPassword"></i>
+                </span>
             </div>
-            <span class="input-group-text password-toggle" id="floatingPasswordIcon">
-                <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
-            </span>
-        </div>
-        <div id="passwordStrengthDisplay" class="mt-1"></div>
 
-
-        <div class="input-group mb-3 mt-3">
-            <div class="form-floating flex-grow-1">
-                <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" name="confirm_password" maxlength="50" minlength="8" required>
-                <label for="floatingConfirmPassword">Confirm Password</label>
-                <div class="invalid-feedback">
-                    Passwords must match.
+    <h3 class="mt-5">Change Password</h3>
+    <hr>
+    <div class="row">
+        <div class="col">
+        
+            <div class="input-group">
+                <div class="form-floating flex-grow-1">
+                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="new_password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon">
+                    <label for="floatingPassword">New Password</label>
+                    <div class="invalid-feedback">
+                        Please provide a password with 8 to 50 characters.
+                    </div>
                 </div>
+                <span class="input-group-text password-toggle" id="floatingPasswordIcon">
+                    <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
+                </span>
             </div>
-            <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon">
-                <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
-            </span>
+            <div id="passwordStrengthDisplay" class="mt-1"></div>
         </div>
-   
-   <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
 
-   <div class="mb-3">
-      <div class="form-floating">
-         <input name="current_password" type="password" class="form-control" id="floatInputCurrentPassword" placeholder="Your current password" required>
-         <label for="floatInputCurrentPassword">Current Password</label>
-      </div>
-   </div>
+        <div class="col">
+            <div class="input-group">
+                <div class="form-floating flex-grow-1">
+                    <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" name="confirm_password" maxlength="50" minlength="8">
+                    <label for="floatingConfirmPassword">Confirm Password</label>
+                    <div class="invalid-feedback">
+                        Passwords must match.
+                    </div>
+                </div>
+                <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon">
+                    <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
+                </span>
+            </div>
+        </div>
+    </div>
    
-   <div class="d-flex justify-content-between mt-4">
+   <div class="cf-turnstile mt-4" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+   <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
         <span class="invisible">.</span>
-        <a type="button" role="button" class="btn btn-outline-danger"><i class="fa-solid fa-trash-can me-1"></i>Delete Account</a>
+        <a type="button" role="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal"><i class="fa-solid fa-trash-can me-1"></i>Delete Account</a>
     </div>
 </form>
 {% endblock %}

@@ -2,9 +2,10 @@ import hashlib
 import secrets
 import time
 from datetime import datetime, timedelta
+from flask_login import logout_user
 
-from . import models, notifications, extensions
-from .scripts import generate_id
+from . import models, notifications, extensions, friends_util
+from .scripts import generate_id, is_within_threshold_minutes, generate_nonce, sha256_hash_text
 
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
@@ -27,7 +28,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
         return False
 
     # Generate a REEEEALLY random verification token.
-    verification_token = hashlib.md5(secrets.token_bytes(32)).hexdigest()
+    verification_token = generate_nonce(24)
 
     message = f"""Hello {username}, 
 
@@ -111,7 +112,7 @@ def send_recovery_token(email: str, hashed_email: str) -> bool:
             return False
 
     # Generates a super random token.
-    verification_token = hashlib.md5(secrets.token_bytes(32)).hexdigest()
+    verification_token = generate_nonce(24)
 
     message = f"""Hello,
 
@@ -134,3 +135,63 @@ The Infomundi Team"""
     # Sleeps for a random time in order to prevent user enumeration based on response time.
     time.sleep(uniform(1.0, 2.5))
     return result
+
+
+def delete_account(email, token):
+    hashed_email = sha256_hash_text(email)
+    user = models.User.query.filter_by(email=hashed_email).first()
+
+    # If the supplied token doesn't match the database record, return False.
+    if user.delete_token != token:
+        return False
+
+    # Checks to see if the token is valid. If the token is invalid, deletes it and return False.
+    created_at = datetime.fromisoformat(user.delete_token_timestamp.isoformat())
+    if not is_within_threshold_minutes(created_at, 30):
+        user.delete_token = None
+        extensions.db.session.commit()
+        return False
+
+    # Logout and delete user from database
+    logout_user()
+    friends_util.delete_all_friends(user.user_id)
+    extensions.db.session.delete(user)
+    extensions.db.session.commit()
+    
+    return True
+
+
+def send_delete_token(email: str, current_password: str) -> bool:
+    hashed_email = sha256_hash_text(email)
+    user = models.User.query.filter_by(email=hashed_email).first()
+
+    if not user.check_password(current_password):
+        return False
+
+    token = generate_nonce(24)
+    
+    subject = "Infomundi - Confirm Account Deletion"
+    message = f"""
+Hello, {user.display_name if user.display_name else user.username}.
+
+If you've received this message in error, feel free to disregard it. However, if you're here to delete your Infomundi account, feel free to click on the link below:
+
+https://infomundi.net/auth/delete?token={token}
+
+This link will expire in 30 minutes. Please, keep in mind that this action is permanent and your account data can't be recovered afterwards.
+
+We're sorry to see you go.
+
+Best regards,
+The Infomundi Team"""
+        
+    result = notifications.send_email(email, subject, message)
+    if not result:
+        return False
+
+    # Saves delete token information
+    user.delete_token = token
+    user.delete_token_timestamp = datetime.now()
+    extensions.db.session.commit()
+
+    return True

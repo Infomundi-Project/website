@@ -15,8 +15,8 @@ api = Blueprint('api', __name__)
 @api.route('/user/friends', methods=['GET'])
 @login_required
 def get_friends():
-    friends = friends_util.get_friends_list(current_user.user_id)
-    friends_data = [{"user_id": friend.user_id, "username": friend.username, "avatar": friend.avatar_url} for friend in friends]
+    friends_data = [x.username for x in friends_util.get_friends_list(current_user.user_id)]
+
     return jsonify({"friends": friends_data}), 200
 
 

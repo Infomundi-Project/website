@@ -7,7 +7,7 @@ from hashlib import md5
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
 cloudflare_util, input_sanitization, friends_util
-from website_scripts.decorators import admin_required, in_maintenance, captcha_required
+from website_scripts.decorators import admin_required, in_maintenance, captcha_required, profile_owner_required
 
 views = Blueprint('views', __name__)
 
@@ -81,7 +81,6 @@ def handle_friends(friend_id, action):
 
 
 @views.route('/profile/<username>', methods=['GET'])
-#@admin_required
 def user_profile(username):
     user = models.User.query.filter_by(username=username).first()
     if not user:
@@ -90,55 +89,27 @@ def user_profile(username):
     
     short_description = input_sanitization.gentle_cut_text(200, user.profile_description or '')
 
-    pending_friend_request_sent_by_current_user = False
-
-    if user.user_id == current_user.user_id:
-        friend_status = None
-        pending_requests = friends_util.get_pending_friend_requests(current_user.user_id)
+    if current_user.is_authenticated:
+        friend_status, pending_friend_request_sent_by_current_user = friends_util.get_friendship_status(current_user.user_id, user.user_id)
     else:
-        friendship = models.Friendship.query.filter(
-            extensions.db.or_(
-                extensions.db.and_(models.Friendship.user_id == current_user.user_id, models.Friendship.friend_id == user.user_id),
-                extensions.db.and_(models.Friendship.user_id == user.user_id, models.Friendship.friend_id == current_user.user_id)
-            )
-        ).first()
+        friend_status = 'not_friends'
+        pending_friend_request_sent_by_current_user = False
 
-        if friendship:
-            if friendship.status == 'pending':
-                friend_status = 'pending'
-                pending_friend_request_sent_by_current_user = friendship.user_id == current_user.user_id
-            elif friendship.status == 'accepted':
-                friend_status = 'accepted'
-        else:
-            friend_status = 'not_friends'
-            pending_friend_request_sent_by_current_user = False
-
+    is_profile_owner = current_user.is_authenticated and (current_user.user_id == user.user_id)
     return render_template('user_profile.html', user=user, 
         short_description=short_description, 
         friend_status=friend_status, 
         friends_list=friends_util.get_friends_list(user.user_id),
         pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user, 
-        pending_requests=pending_requests if user.user_id == current_user.user_id else None
+        pending_requests=friends_util.get_pending_friend_requests(current_user.user_id) if is_profile_owner else None
         )
 
 
 @views.route('/profile/<username>/edit', methods=['GET', 'POST'])
-@admin_required
+@profile_owner_required
 def edit_user_profile(username):
-    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
-    if current_user.username != username:
-        flash('You are not authorized to edit this profile!', 'error')
-        return redirect(url_for('views.user_redirect'))
-    
-    # Fetches the user from the database, making sure it exists
-    user = models.User.query.filter_by(username=username).first()
-    if not user:
-        flash('User not found!', 'error')
-        return redirect(url_for('views.user_redirect'))
-
-    # Returns the edit profile template if request is flat GET :plank:
     if request.method == 'GET':
-        return render_template('edit_profile.html', user=user)
+        return render_template('edit_profile.html')
 
     # At this point, we're dealing with a POST request (nice to mention, duh)
     token = request.form['cf-turnstile-response']
@@ -146,28 +117,38 @@ def edit_user_profile(username):
         flash('Invalid captcha!', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    # Gets user input (dangrous!!!! caution)
-    notifications.post_webhook({'text': 'vai tomar no cu!!'})
-    display_name = request.form.get('display_name', '')
-    description = request.form.get('description', '')
-
-    # Sanitizes the display name allowing only a whitelist of characters
-    display_name = input_sanitization.sanitize_text(display_name)
-
-    # Sanitizes the descriptiong allowing only a whitelist of html tags
-    description = input_sanitization.sanitize_description(description)
+    # Gets first user input
+    description = input_sanitization.sanitize_description(request.form.get('description', ''))
+    display_name = input_sanitization.sanitize_text(request.form.get('display_name', ''))
 
     # Checks if the description is in the allowed range
     if not input_sanitization.is_text_length_between(config.DESCRIPTION_LENGTH_RANGE, description):
-        flash(f'We apologize, but your description is too big. Keep it under {config.MAX_DESCRIPTION_LEN} characters.')
+        flash(f'We apologize, but your description is too big. Keep it under {config.MAX_DESCRIPTION_LEN} characters.', 'error')
         return redirect(url_for('views.user_redirect'))
-    
+
     # Checks if the display name is in the allowed range
     if not input_sanitization.is_text_length_between(config.DISPLAY_NAME_LENGTH_RANGE, display_name):
-        flash(f'We apologize, but your display name is too big. Keep it under {config.MAX_DISPLAY_NAME_LEN} characters.')
+        flash(f'We apologize, but your display name is too big. Keep it under {config.MAX_DISPLAY_NAME_LEN} characters.', 'error')
         return redirect(url_for('views.user_redirect'))
+
+    username = request.form.get('username', '')
+
+    # If the user changed their username, we should make sure it's alright.
+    if current_user.username != username:
+        # Checks if the username is valid
+        if not input_sanitization.is_valid_username(username):
+            flash(f'We apologize, but your username is invalid.', 'error')
+            return redirect(url_for('views.user_redirect'))
+        
+        is_username_available = models.User.query.filter_by(username=username)
+        if not is_username_available:
+            flash(f'The username "{username}" is unavailable. Try making it more unique adding numbers/underscores/hiphens.', 'error')
+            return redirect(url_for('views.user_redirect'))
     
-    # At this point user input should be safe :thumbsup: so we save to the database
+    user = models.User.query.filter_by(username=current_user.username).first()
+    
+    # At this point user input should be safe :thumbsup: so we apply changes
+    user.username = username
     user.display_name = display_name
     user.profile_description = description
 
@@ -175,59 +156,61 @@ def edit_user_profile(username):
     models.db.session.commit()
     
     flash('Profile updated successfully!', 'success')
-    return redirect(url_for('views.user_redirect'))
+    return render_template('edit_profile.html')
 
 
 @views.route('/profile/<username>/edit/avatar', methods=['GET'])
-@admin_required
+@profile_owner_required
 def edit_user_avatar(username):
-    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
-    if current_user.username != username:
-        flash('You are not authorized to edit this profile!', 'error')
-        return redirect(url_for('views.user_profile', username=username))
-    
-    # Fetches the user from the database, making sure it exists
-    user = models.User.query.filter_by(username=username).first()
-    if not user:
-        flash('User not found!', 'error')
-        return redirect(url_for('views.user_redirect'))
-
-    short_description = input_sanitization.gentle_cut_text(25, user.profile_description or '')
-    return render_template('edit_avatar.html', user=user, short_description=short_description)
+    short_description = input_sanitization.gentle_cut_text(25, current_user.profile_description or '')
+    return render_template('edit_avatar.html', short_description=short_description)
 
 
 @views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
-@admin_required
+@profile_owner_required
 def edit_user_settings(username):
-    # If the authenticated user is not the profile owner, they shouldn't have permission to edit
-    if current_user.username != username:
-        flash('You are not authorized to edit this profile!', 'error')
-        return redirect(url_for('views.user_profile', username=username))
-    
-    # Fetches the user from the database, making sure it exists
-    user = models.User.query.filter_by(username=username).first()
-    if not user:
-        flash('User not found!', 'error')
-        return redirect(url_for('views.user_redirect'))
-
-    # Returns the edit profile template
     if request.method == 'GET':
-        return render_template('edit_settings.html', user=user)
+        return render_template('edit_settings.html')
 
     token = request.form['cf-turnstile-response']
     if not cloudflare_util.is_valid_captcha(token):
         flash('Invalid captcha!', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    flash('Profile updated successfully! (só que não!)')
+    # Check if current password is valid
+    current_password = request.form.get('current_password', '')
+    if not current_user.check_password(current_password):
+        flash('Invalid current password.', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    email = request.form.get('email', '')
+    if not input_sanitization.is_valid_email(email):
+        flash('Invalid email address.', 'error')
+        return redirect(url_for('views.user_redirect'))
+
+    user = models.User.query.filter_by(username=username).first()
+
+    new_password = request.form.get('new_password', '')
+    confirm_password = request.form.get('confirm_password', '')
+    if new_password and confirm_password:
+        if not (new_password == confirm_password and scripts.is_strong_password(new_password)):
+            flash("Either the passwords don't match or the password is not long enough. Please keep it 8-50 characters.", 'error')
+            return redirect(url_for('views.user_redirect'))
+
+        hashed_password = user.set_password(new_password)
+
+    user.email = email
+    extensions.db.session.commit()
+    
+    flash('Profile updated successfully!')
     return redirect(url_for('views.user_redirect'))
 
 
 @views.route('/redirect', methods=['GET'])
 def user_redirect():
     target_url = request.headers.get('Referer', '')
-    
-    # If target url is not safe, redirects to the home page.
+
+    # If referer url isn't safe, redirect to the home page.
     if not input_sanitization.is_safe_url(target_url):
         return redirect(url_for('views.home'))
 

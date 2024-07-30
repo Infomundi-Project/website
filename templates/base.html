@@ -462,7 +462,7 @@
   </div>
 {% endif %}
 
-    <div class="container-fluid">
+    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
       {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %} 
           {% for category, message in messages %} 
@@ -480,9 +480,7 @@
           {% endfor %} 
         {% endif %} 
       {% endwith %}
-    </div>
-
-    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
+      
       {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
         <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
@@ -544,18 +542,18 @@
         <div class="row align-items-start">
             
             <div class="col main-container bg-secondary-subtle">
-                <img src="{{ user.avatar_url }}" class="img-thumbnail" style="border-radius: 15px;" alt="{{ user.username }}'s profile picture">
-                <h3 class="mt-2">{{ user.username }}</h3>
-                <a href="https://infomundi.net/profile/{{ user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
+                <img src="{{ current_user.avatar_url }}" class="img-thumbnail" style="border-radius: 15px;" alt="{{ current_user.username }}'s profile picture">
+                <h3 class="mt-2">{{ current_user.username }}</h3>
+                <a href="https://infomundi.net/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
                 <ul class="nav nav-pills flex-column mt-4">
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/edit') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
+                        <a class="nav-link {% if request.url.endswith('/edit') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
                     </li>
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/avatar') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
+                        <a class="nav-link {% if request.url.endswith('/avatar') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
                     </li>
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/settings') %}active{% endif %}" href="https://infomundi.net/profile/{{ user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
+                        <a class="nav-link {% if request.url.endswith('/settings') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
                     </li>
                 </ul>
             </div>
