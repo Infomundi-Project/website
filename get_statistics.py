@@ -38,6 +38,8 @@ def get_statistics() -> dict:
 
         total_clicks = int(models.Story.query.with_entities(extensions.db.func.sum(models.Story.clicks)).scalar())
 
+        total_users = models.User.query.count()
+
         total_comments = 32 # DEBUG!
 
         timestamp_string = current_timestamp.isoformat()
@@ -47,6 +49,7 @@ def get_statistics() -> dict:
             'total_countries_supported': total_countries_supported,
             'total_news': f"{total_news:,}",
             'total_feeds': total_feeds,
+            'total_users': total_users,
             'total_comments': total_comments,
             'last_updated_message': last_updated_message,
             'total_clicks': total_clicks

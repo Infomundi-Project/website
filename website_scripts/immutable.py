@@ -12,9 +12,3 @@ IMAGE_EXTENSIONS = ('png', 'jpg', 'jpeg', 'webp')
 
 HTTP_SCHEMAS = ('http://', 'https://')
 
-TERMCOLORS = {
-	'yellow': '\e[0;33m',
-	'green': '\e[0;32m',
-	'cyan': '\e[0;36m',
-	'red': '\e[0;31m'
-}

@@ -31,29 +31,96 @@
    </div>
    <h4 class="mt-5">Localization</h4>
    <hr>
-   <div class="mb-3">
-      <div class="form-floating">
-         <select class="form-select" id="floatingSelectCountry" aria-label="Country selection">
-            <option selected>Brazil</option>
-            <option value="1">USA</option>
-            <option value="2">Canada</option>
-            <option value="3">Australia</option>
-         </select>
-         <label for="floatingSelectCountry">Country</label>
-      </div>
+   <div>
+          <div class="mb-3">
+              <label for="country" class="form-label">Country</label>
+              <select id="country" class="form-select form-select-lg" aria-label="Select Country">
+                  <option selected disabled>Select your country</option>
+              </select>
+          </div>
+          <div class="mb-3 d-none" id="state-div">
+              <label for="state" class="form-label">State</label>
+              <select id="state" class="form-select form-select-lg" aria-label="Select State">
+                  <option selected disabled>Select your state</option>
+              </select>
+          </div>
+          <div class="mb-3 d-none" id="city-div">
+              <label for="city" class="form-label">City</label>
+              <select id="city" class="form-select form-select-lg" aria-label="Select City">
+                  <option selected disabled>Select your city</option>
+              </select>
+          </div>
+  </div>
+  <div class="mt-5">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
    </div>
-   <div class="mb-3">
-      <div class="form-floating">
-         <select class="form-select" id="floatingSelectState" aria-label="State selection">
-            <option selected>Pernambuco</option>
-            <option value="1">Acre</option>
-            <option value="2">Roraima</option>
-            <option value="3">Rio de Janeiro</option>
-         </select>
-         <label for="floatingSelectState">State</label>
-      </div>
-   </div>
-   <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
-   <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
 </form>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ nonce }}">
+   $(document).ready(function() {
+       // Fetch countries on page load
+       $.ajax({
+           url: 'https://infomundi.net/api/countries',
+           method: 'GET',
+           success: function(data) {
+               let countries = data;
+               let countrySelect = $('#country');
+               countries.forEach(function(country) {
+                   countrySelect.append(new Option(country.name, country.id));
+               });
+           },
+           error: function(error) {
+               console.error('Error fetching countries:', error);
+           }
+       });
+
+       // Fetch states when a country is selected
+       $('#country').change(function() {
+           let countryId = $(this).val();
+           if (countryId) {
+               $.ajax({
+                   url: `https://infomundi.net/api/countries/${countryId}/states`,
+                   method: 'GET',
+                   success: function(data) {
+                       let states = data;
+                       let stateSelect = $('#state');
+                       stateSelect.empty().append(new Option('Select your state', ''));
+                       states.forEach(function(state) {
+                           stateSelect.append(new Option(state.name, state.id));
+                       });
+                       $('#state-div').removeClass('d-none');
+                   },
+                   error: function(error) {
+                       console.error('Error fetching states:', error);
+                   }
+               });
+           }
+       });
+
+       // Fetch cities when a state is selected
+       $('#state').change(function() {
+           let stateId = $(this).val();
+           if (stateId) {
+               $.ajax({
+                   url: `https://infomundi.net/api/states/${stateId}/cities`,
+                   method: 'GET',
+                   success: function(data) {
+                       let cities = data;
+                       let citySelect = $('#city');
+                       citySelect.empty().append(new Option('Select your city', ''));
+                       cities.forEach(function(city) {
+                           citySelect.append(new Option(city.name, city.id));
+                       });
+                       $('#city-div').removeClass('d-none');
+                   },
+                   error: function(error) {
+                       console.error('Error fetching cities:', error);
+                   }
+               });
+           }
+       });
+   });
+</script>
 {% endblock %}

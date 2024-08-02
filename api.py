@@ -6,10 +6,30 @@ from datetime import datetime
 from random import choice
 from time import time
 
-from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, decorators, friends_util
+from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, \
+    decorators, friends_util, country_util
 from views import make_cache_key
 
 api = Blueprint('api', __name__)
+
+
+
+@api.route('/countries', methods=['GET'])
+@login_required
+def get_countries():
+    return jsonify(country_util.get_countries())
+
+
+@api.route('/countries/<int:country_id>/states', methods=['GET'])
+@login_required
+def get_states(country_id):
+    return jsonify(country_util.get_states(country_id))
+
+
+@api.route('/states/<int:state_id>/cities', methods=['GET'])
+@login_required
+def get_cities(state_id):
+    return jsonify(country_util.get_cities(state_id))
 
 
 @api.route('/user/friends', methods=['GET'])

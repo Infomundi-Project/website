@@ -199,7 +199,7 @@ def edit_user_settings(username):
 
         hashed_password = user.set_password(new_password)
 
-    user.email = email
+    user.email = scripts.sha256_hash_text(email)
     extensions.db.session.commit()
     
     flash('Profile updated successfully!')

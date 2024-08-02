@@ -1,84 +1,96 @@
 @font-face {
-  font-family: 'Source Code Pro';
-  src: url('/static/fonts/SourceCodePro-Black.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-.hwrap {
-  overflow: hidden;
-  background: #000;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-
-.hwrap-home {
-  overflow: hidden;
-  background: #000;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  border-radius: 20px; /* Rounded border */
-}
-
-
-.hwrap::-webkit-scrollbar {
-  display: none; /* WebKit browsers */
-}
-
-
-.hitem {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  font-size: 16px;
-  margin: 0 30px;
-  font-family: 'Source Code Pro', monospace;
-  box-sizing: border-box;
-  padding: 5px;
-  text-align: center;
-}
-
-/* -------------- Home ticker */
-.hmove-home { 
-  display: flex; 
-  overflow-x: visible;
-}
-
-@keyframes hometickerh {
-  0% { transform: translate3d(100%, 0, 0); }
-  100% { transform: translate3d(-3000%, 0, 0); }
-}
-
-.hmove-home { animation: hometickerh linear 330s infinite; }
-
-
-/* -------------- News ticker */
-.hmove {
-  display: flex;
-  overflow-x: visible;
-}
-
-@keyframes tickerh {
-  0% { transform: translate3d(100%, 0, 0); }
-  100% { transform: translate3d(-1000%, 0, 0); }
-}
-
-.hmove { animation: tickerh linear 180s infinite; }
-
-
-/* -------------- Adapted for mobile and small screen sizes */
-@media (max-width: 800px) {
-  @keyframes tickerh {
-    0% { transform: translate3d(100%, 0, 0); }
-    100% { transform: translate3d(-4000%, 0, 0); }
+    font-family: 'Source Code Pro';
+    src: url('/static/fonts/SourceCodePro-Black.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  .hwrap {
+    overflow: hidden;
+    background: #000;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .hwrap-home {
+    overflow: hidden;
+    background: #000;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    border-radius: 20px; /* Rounded border */
+  }
+  
+  
+  .hwrap::-webkit-scrollbar {
+    display: none; /* WebKit browsers */
+  }
+  
+  
+  .hitem {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 16px;
+    margin: 0 25px;
+    font-family: 'Source Code Pro', monospace;
+    box-sizing: border-box;
+    padding: 5px;
+    text-align: center;
   }
 
+
+  .hitem .flag {
+    display: inline-block;
+    width: 23px; /* Set the width */
+    height: 12.94px; /* Set the height */
+    background-size: cover; /* Ensure the image covers the entire element */
+    background-position: center; /* Center the image */
+    margin: 0 3px; /* Adjust margin around the image */
+    vertical-align: middle; /* Align the image vertically */
+    border-radius: 2px;
+}
+  
+  /* -------------- Home ticker */
+  .hmove-home { 
+    display: flex; 
+    overflow-x: visible;
+  }
+  
   @keyframes hometickerh {
     0% { transform: translate3d(100%, 0, 0); }
-    100% { transform: translate3d(-4000%, 0, 0); }
+    100% { transform: translate3d(-3000%, 0, 0); }
   }
-
-  .hitem {
-    font-size: 14px;
+  
+  .hmove-home { animation: hometickerh linear 330s infinite; }
+  
+  
+  /* -------------- News ticker */
+  .hmove {
+    display: flex;
+    overflow-x: visible;
   }
-}
+  
+  @keyframes tickerh {
+    0% { transform: translate3d(100%, 0, 0); }
+    100% { transform: translate3d(-1000%, 0, 0); }
+  }
+  
+  .hmove { animation: tickerh linear 180s infinite; }
+  
+  
+  /* -------------- Adapted for mobile and small screen sizes */
+  @media (max-width: 800px) {
+    @keyframes tickerh {
+      0% { transform: translate3d(100%, 0, 0); }
+      100% { transform: translate3d(-4000%, 0, 0); }
+    }
+  
+    @keyframes hometickerh {
+      0% { transform: translate3d(100%, 0, 0); }
+      100% { transform: translate3d(-4000%, 0, 0); }
+    }
+  
+    .hitem {
+      font-size: 14px;
+    }
+  }

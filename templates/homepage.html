@@ -1,279 +1,235 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %}
 {% block styles %}
-<style type="text/css">
-  #chartdiv {
-  height: 100vh;
-  max-width: 100%;
-  }
-  .fa-solid me-1 {
-  color: #ffffff;
-  }
-  {% if request.cookies.get('theme') == 'dark' %}
-  .accordion {
-  --bs-accordion-btn-bg: #202429;
-  --bs-accordion-btn-color: #ffffff;
-  --bs-accordion-active-bg: #202429;
-  --bs-accordion-active-color: #ffffff;
-  --bs-accordion-bg: #131619;
-  --bs-accordion-color: #ffffff;
-  --bs-accordion-btn-focus-box-shadow: none;
-  }
-  .accordion-flush .accordion-button {
-  border-top: 1px solid #000000;
-  }
-  .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
-  .accordion-flush .accordion-item:last-child .accordion-body {
-  border-bottom: 1px solid #000000;
-  }
-  {% else %}
-  .accordion {
-  --bs-accordion-btn-bg: #ffffff;
-  --bs-accordion-active-bg: #ffffff;
-  --bs-accordion-btn-color: #000000;
-  --bs-accordion-active-color: #000000;
-  }
-  {% endif %}
-
-  @media (max-width: 580px) {
+<style>
+    #chartdiv {
+    height: 100vh;
+    max-width: 100%;
+    }
+    .fa-solid me-1 {
+    color: #ffffff;
+    }
+    {% if request.cookies.get('theme') == 'dark' %}
+    .accordion {
+    --bs-accordion-btn-bg: #202429;
+    --bs-accordion-btn-color: #ffffff;
+    --bs-accordion-active-bg: #202429;
+    --bs-accordion-active-color: #ffffff;
+    --bs-accordion-bg: #131619;
+    --bs-accordion-color: #ffffff;
+    --bs-accordion-btn-focus-box-shadow: none;
+    }
+    .accordion-flush .accordion-button {
+    border-top: 1px solid #000000;
+    }
+    .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
+    .accordion-flush .accordion-item:last-child .accordion-body {
+    border-bottom: 1px solid #000000;
+    }
+    {% else %}
+    .accordion {
+    --bs-accordion-btn-bg: #ffffff;
+    --bs-accordion-active-bg: #ffffff;
+    --bs-accordion-btn-color: #000000;
+    --bs-accordion-active-color: #000000;
+    }
+    {% endif %}
+    @media (max-width: 580px) {
     #chartdiv {
     width: 100%;
     height: 50vh;
     margin-top: -3.5vh;
     }
-  }
+    }
 </style>
 {% endblock %}
 {% block content %}
-<div class="row d-flex justify-content-center">
-  <div class="col-lg-6 text-center">
-
-    {% if world_stocks and not is_mobile %}
-    <div class="hwrap-home mt-3" id="ticker" style="margin-bottom: 12vh;">
-      <div class="hmove-home" style="color: white">
-        <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies - {{ stock_date }}</div>
-
-        {% for index, entry in world_stocks %}
-            {% if not entry['symbol'].endswith(':CUR') %}
-        <div class="hitem" style="color: {{ entry['color'] }};">
-            <!-- <span class="fi fi-{{ entry['country']['code'] }} me-1"></span> -->
-            {% if entry['country']['code'] %}
-            <img alt="{{ entry['country']['code'] }} flag" data-src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/flags/4x3/{{ entry['country']['code'] }}.svg" class="lazyload" height="16" width="9" style="width: 2%; height: 50%;">
-            {% endif %}
-            <span style="color: white"> 
-                {{ entry['country']['name'] }}
-                {% if index == 1 %}
-                  {% for index, us_info in us_indexes %}
-                    <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
-                    {% if us_info['color'] == '#FF6666' %}
+<div class="row justify-content-center align-items-center">
+    <div class="col-lg-6 text-center">
+        {% if world_stocks and not is_mobile %}
+        <div class="hwrap-home" id="ticker">
+            <div class="hmove-home" style="color: white">
+                <div class="hitem"><i class="fa-solid fa-arrow-trend-up me-2"></i>World Indexes,<i class="fa-solid fa-money-bill-trend-up me-2 ms-2"></i>World Currencies - {{ stock_date }}</div>
+                {% for index, entry in world_stocks %}
+                {% if not entry['symbol'].endswith(':CUR') %}
+                <div class="hitem" style="color: {{ entry['color'] }};">
+                    <!-- <span class="fi fi-{{ entry['country']['code'] }} me-1"></span> -->
+                    {% if entry['country']['code'] %}
+                    <!--<img alt="{{ entry['country']['code'] }} flag" data-src="https://infomundi.net/static/img/flags/4x3/{{ entry['country']['code'] }}.svg" class="lazyload" height="16" width="9" style="width: 1.5%; height: auto; display: inline">-->
+                    <div class="flag align-middle" style="background-image: url('https://infomundi.net/static/img/flags/4x3/{{ entry['country']['code'] }}.svg');"></div>
+                    {% endif %}
+                    <span style="color: white">
+                        {{ entry['country']['name'] }}
+                        {% if index == 1 %}
+                        {% for index, us_info in us_indexes %}
+                        <span style="color: {{ us_info['color'] }};">{{ us_info['name'] }} {{ us_info['changes']['percent'] }}</span>
+                        {% if us_info['color'] == '#FF6666' %}
                         <span style="color: #FF6666">&#8659;</span> <!-- down -->
-                    {% else %}
+                        {% else %}
                         <span style="color: #00FF00">&#8657;</span>
-                    {% endif %}
-                    {% if index != 2 %}
-                      <span style="color: white">;</span>
-                    {% endif %}
-                  {% endfor %}
-                {% else %}
-                  <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
-                  {% if entry['color'] == '#FF6666' %}
-                    <span style="color: #FF6666">&#8659;</span>
-                  {% else %}
-                    <span style="color: #00FF00">&#8657;</span>
-                  {% endif %}
-                {% endif %}
-                {% if 'currency' in entry.keys() %}
-                    | {{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
-                    <span style="color: {{ entry['currency']['color'] }};" class="me-1">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == '#00FF00' %}<span style="color: #00FF00">&#8657;</span>{% else %}<span style="color: #FF6666">&#8659;</span>{% endif %} | 
-                    {% if entry['currency']['name'].startswith('USD') %}
+                        {% endif %}
+                        {% if index != 2 %}
+                        <span style="color: white">;</span>
+                        {% endif %}
+                        {% endfor %}
+                        {% else %}
+                        <span style="color: {{ entry['color'] }};">{{ entry['name'] }} {{ entry['changes']['percent'] }}</span>
+                        {% if entry['color'] == '#FF6666' %}
+                        <span style="color: #FF6666">&#8659;</span>
+                        {% else %}
+                        <span style="color: #00FF00">&#8657;</span>
+                        {% endif %}
+                        {% endif %}
+                        {% if 'currency' in entry.keys() %}
+                        | {{ entry['currency']['name_plural'] }} ({% if entry['country']['name'] != 'United States' %}{{ entry['currency']['name'].replace('USD', '') }}{% else %}USD{% endif %}) 
+                        <span style="color: {{ entry['currency']['color'] }};" class="me-1">{{ entry['currency']['changes']['percent'] }}</span>{% if entry['currency']['color'] == '#00FF00' %}<span style="color: #00FF00">&#8657;</span>{% else %}<span style="color: #FF6666">&#8659;</span>{% endif %} | 
+                        {% if entry['currency']['name'].startswith('USD') %}
                         1 USD = {{ entry['currency']['price'] }} {{ entry['currency']['symbol'] }}
-                    {% else %}
+                        {% else %}
                         {{ entry['currency']['symbol'] }}1 = </i>${{ entry['currency']['price'] }}
+                        {% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="hitem" style="color: white">
+                    +
+                    </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div style="margin-top: 2vh; margin-bottom: 2vh;">
+            <h1 class="fs-2"><label for="query">Search a Country to View Information About It</label></h1>
+            <form action="{{ url_for('api.search') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="input-group justify-content-center">
+                    <button aria-label="Submit search button" type="submit" class="input-group-text {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" id="search-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <input 
+                        class="form-control autocomplete {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" 
+                        aria-describedby="search-icon"
+                        style="max-width: 360px;"
+                        type="search" 
+                        aria-label="Search Field" 
+                        minlength="3" 
+                        id="query" 
+                        name="query"
+                        />
+                </div>
+            </form>
+            <p class="fs-3 mt-2 mb-2">or</p>
+            <div class="d-inline-flex">
+                <h2 class="fs-1">Use the Globe to Choose It</h2>
+            </div>
+            {% if not is_mobile %}
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                            aria-expanded="true" aria-controls="collapseOne">
+                        <i class="fa-solid me-1 fa-chart-simple"></i><span class="ms-2">Statistics</span>
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile}}" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="d-flex flex-row text-start justify-content-evenly">
+                                <div class="p-2">
+                                    <p class="fs-4"><i class="fa-solid me-1 fa-database"></i>Database</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
+                                </div>
+                                <div class="p-2">
+                                    <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
+                                    <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Views: {{ statistics['total_clicks'] }}</p>
+                                    <p class="fs-6"><i class="fa-solid fa-users me-1"></i>Users: {{ statistics['total_users'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if crypto_data and not is_mobile %}
+        <!-- Container for the cryptocurrency ticker -->
+        <div class="hwrap-home" id="crypto-ticker">
+            <!-- Container for moving/scrolling content with white text color -->
+            <div class="hmove-home" style="color: white">
+                <!-- Static header for the cryptocurrency ticker -->
+                <div class="hitem">
+                    <i class="fa-brands fa-bitcoin me-2"></i>Cryptocurrencies - {{ crypto_data[0]['date'] }}
+                </div>
+                <!-- Loop through each entry in the crypto_data variable -->
+                {% for entry in crypto_data %}
+                <!-- Individual ticker item with dynamic color for each entry -->
+                <div class="hitem" style="color: white">
+                    <!-- Display cryptocurrency name -->
+                    <span style="color: white;">{{ entry['name'] }}</span>
+                    <!-- Display cryptocurrency symbol and percent change with dynamic color -->
+                    <span style="color: {{ entry['color'] }};">
+                    {{ entry['symbol'] }} {{ entry['changes']['percent'] }}
+                    </span>
+                    <!-- Visual indicator for cryptocurrency direction -->
+                    {% if entry['color'] == '#FF6666' %}
+                    <span style="color: #FF6666">&#8659;</span> <!-- down -->
+                    {% else %}
+                    <span style="color: #00FF00">&#8657;</span> <!-- up -->
                     {% endif %}
-                {% endif %}
-            </span>
-        </div>
-            {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <div style="margin-top: 11vh; margin-bottom: 11vh;">
-      <h1 class="fs-2"><label for="query">Search a Country to View Information About It</label></h1>
-        <form action="{{ url_for('api.search') }}" method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          <div class="input-group justify-content-center">
-            <button aria-label="Submit search button" type="submit" class="input-group-text {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" id="search-icon">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-            <input 
-              class="form-control autocomplete {% if request.cookies.get('theme', '') != 'dark' %}border-black border-opacity-50{% endif %}" 
-              aria-describedby="search-icon"
-              style="max-width: 360px;"
-              type="search" 
-              aria-label="Search Field" 
-              minlength="3" 
-              id="query" 
-              name="query"
-              />
-          </div>
-        </form>
-    <p class="fs-3 mt-2 mb-2">or</p>
-    <div class="d-inline-flex">
-      <h2 class="fs-1">Use the Globe to Choose It</h2>
-    </div>
-    {% if not is_mobile %}
-    <div class="accordion" id="accordionExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-            aria-expanded="true" aria-controls="collapseOne">
-          <i class="fa-solid me-1 fa-chart-simple"></i><span class="ms-2">Statistics</span>
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile else ''}}" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <div class="d-flex flex-row flex-wrap text-start justify-content-between">
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-database"></i>Database</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
-              </div>
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success ms-1">New!</span>--></p>
-                <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
-              </div>
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-user"></i>Session</p>
-                
-                {% if current_user.is_authenticated %}
-                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ current_user.username }}!</p>
-                <p class="fs-6"><a href="{{ url_for('auth.logout') }}" class="text-decoration-none"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></p>
-                {% else %}
-                <p class="fs-6"><a href="{{ url_for('auth.register') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-user-pen"></i>Register</a></p>
-                <p class="fs-6"><a href="{{ url_for('auth.login') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-right-to-bracket"></i>Log in</a></p>
-                {% endif %}
-                
-                {% if session.get('last_visited_country', '') %}
-                <p class="fs-6"><a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Last visited country</a></p>
-                {% endif %}
-                {% if session.get('last_visited_news', '') %}
-                <p class="fs-6"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Last visited news</a></p>
-                {% endif %}
-              </div>
+                </div>
+                <div class="hitem" style="color: white">
+                +
+                </div>
+                {% endfor %}
             </div>
-          </div>
         </div>
-      </div>
+        {% endif %}
     </div>
-  </div>
-    {% endif %}
 
-
-    {% if crypto_data and not is_mobile %}
-      <!-- Container for the cryptocurrency ticker -->
-      <div class="hwrap-home" id="crypto-ticker">
-        <!-- Container for moving/scrolling content with white text color -->
-        <div class="hmove-home" style="color: white">
-          <!-- Static header for the cryptocurrency ticker -->
-          <div class="hitem">
-            <i class="fa-brands fa-bitcoin me-2"></i>Cryptocurrencies - {{ crypto_data[0]['date'] }}
-          </div>
-
-          <!-- Loop through each entry in the crypto_data variable -->
-          {% for entry in crypto_data %}
-          <!-- Individual ticker item with dynamic color for each entry -->
-          <div class="hitem" style="color: {{ entry['color'] }};">
-
-            <!-- Display cryptocurrency name -->
-            <span>{{ entry['name'] }}</span>
-
-            <!-- Display cryptocurrency symbol and percent change with dynamic color -->
-            <span style="color: {{ entry['color'] }};">
-              {{ entry['symbol'] }} {{ entry['changes']['percent'] }}
-            </span>
-
-            <!-- Visual indicator for cryptocurrency direction -->
-            {% if entry['color'] == '#FF6666' %}
-            <span style="color: #FF6666">&#8659;</span> <!-- down -->
-            {% else %}
-            <span style="color: #00FF00">&#8657;</span> <!-- up -->
-            {% endif %}
-
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-
-
-  </div>
-  <div class="col-lg-6 p-1">
-    <div id="chartdiv"></div>
-    {% if is_mobile %}
-      <div class="accordion mt-3" id="accordionExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-            aria-expanded="true" aria-controls="collapseOne">
-          <i class="fa-solid me-1 fa-chart-simple"></i><span class="ms-2">Statistics</span>
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile else ''}}" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <div class="d-flex flex-row flex-wrap text-start justify-content-between">
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-database"></i>Database</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
-              </div>
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Clicks: {{ statistics['total_clicks'] }}</p>
-                <p class="fs-6"><i class="fa-solid me-1 fa-code-merge"></i>Version: 1.2.5<!--<span class="badge text-bg-success">New!</span>--></p>
-                <p class="fs-6"><a href="https://github.com/Infomundi-Project" target="_blank" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Latest changelog</a></p>
-              </div>
-              <div class="p-2">
-                <p class="fs-4"><i class="fa-solid me-1 fa-user"></i>Session</p>
-                
-                {% if current_user.is_authenticated %}
-                <p class="fs-6"><i class="fa-solid me-1 fa-circle-user"></i>Welcome, {{ current_user.username }}!</p>
-                <p class="fs-6"><a href="{{ url_for('auth.logout') }}" class="text-decoration-none"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></p>
-                {% else %}
-                <p class="fs-6"><a href="{{ url_for('auth.register') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-user-pen"></i>Register</a></p>
-                <p class="fs-6"><a href="{{ url_for('auth.login') }}" class="text-decoration-none"><i class="fa-solid me-1 fa-right-to-bracket"></i>Log in</a></p>
-                {% endif %}
-                
-                {% if session.get('last_visited_country', '') %}
-                <p class="fs-6"><a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Last visited country</a></p>
-                {% endif %}
-                {% if session.get('last_visited_news', '') %}
-                <p class="fs-6"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="text-decoration-none"><i class="fa-solid me-1 fa-arrow-up-right-from-square"></i>Last visited news</a></p>
-                {% endif %}
-              </div>
+    <div class="col-lg-6 p-1">
+        <div id="chartdiv"></div>
+        {% if is_mobile %}
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                        aria-expanded="true" aria-controls="collapseOne">
+                    <i class="fa-solid me-1 fa-chart-simple"></i><span class="ms-2">Statistics</span>
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile else ''}}" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <div class="d-flex flex-row flex-wrap text-start justify-content-evenly">
+                            <div class="p-2">
+                                <p class="fs-4"><i class="fa-solid me-1 fa-database"></i>Database</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
+                            </div>
+                            <div class="p-2">
+                                <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
+                                <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Views: {{ statistics['total_clicks'] }}</p>
+                                <p class="fs-6"><i class="fa-solid fa-users me-1"></i>Users: {{ statistics['total_users'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
+        {% endif %}
     </div>
-      {% endif %}
-  </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script defer nonce="{{ nonce }}"
-  src="{{ url_for('static', filename='js/amcharts/index.js') }}"
-  ></script>
-
-  {% assets "js_home" %}
-  <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+    src="{{ url_for('static', filename='js/amcharts/index.js') }}"
+    ></script>
+{% assets "js_home" %}
+<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
 {% endblock %}
