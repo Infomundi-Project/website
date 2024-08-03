@@ -1,17 +1,14 @@
-from flask import Blueprint, request, redirect, jsonify, url_for, flash, session, abort
+from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
+from datetime import datetime, timedelta
 from sqlalchemy import or_, and_, cast
 from sqlalchemy.types import Date
-from datetime import datetime
-from random import choice
-from time import time
 
 from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, \
     decorators, friends_util, country_util
 from views import make_cache_key
 
 api = Blueprint('api', __name__)
-
 
 
 @api.route('/countries', methods=['GET'])
@@ -38,6 +35,35 @@ def get_friends():
     friends_data = [x.username for x in friends_util.get_friends_list(current_user.user_id)]
 
     return jsonify({"friends": friends_data}), 200
+
+
+@api.route('/user/<user_id>/status', methods=['GET'])
+def get_user_status(user_id):
+    user = models.User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if not user.last_activity:
+        return jsonify({'is_online': False, 'last_activity': user.last_activity})
+
+    # Consider the user online if the last activity was within the last 5 minutes
+    now = datetime.utcnow()
+    online_threshold = timedelta(minutes=3)
+    is_online = (now - user.last_activity) <= online_threshold
+    
+    return jsonify({'is_online': is_online, 'last_activity': user.last_activity})
+
+
+@api.route('/user/status/update', methods=['GET'])
+@login_required
+def update_user_status():
+    user = models.User.query.get(current_user.user_id)
+    
+    user.is_online = True
+    user.last_activity = datetime.utcnow()
+    
+    extensions.db.session.commit()
+    return jsonify({'message': 'Status updated successfully'})
 
 
 @api.route('/get-description', methods=['GET'])

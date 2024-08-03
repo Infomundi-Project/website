@@ -98,6 +98,7 @@ def user_profile(username):
     is_profile_owner = current_user.is_authenticated and (current_user.user_id == user.user_id)
     return render_template('user_profile.html', user=user, 
         short_description=short_description, 
+        has_too_many_newlines=input_sanitization.has_x_linebreaks(user.profile_description),
         friend_status=friend_status, 
         friends_list=friends_util.get_friends_list(user.user_id),
         pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user, 

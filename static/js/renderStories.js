@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentPage = 1;
     hasMoreStories = true;
     fetchStories(true);
+    linkSafety();
   });
 
   window.addEventListener('scroll', () => {

@@ -70,6 +70,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/solid.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/brands.css') }}">
 
+    {% block header %}
+    {% endblock %}
+
     {% if '/edit' in request.url %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_profile.css') }}">
     {% endif %}
@@ -165,15 +168,19 @@
     </div>
 
     <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
-      <div class="offcanvas-header d-flex justify-content-between">
+      <div class="offcanvas-header d-flex justify-content-evenly">
         {% if current_user.is_authenticated %}
         <div class="container-fluid">
           <div class="row align-items-center">
             <div class="col-auto">
-              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" height="500" width="500" style="height: 5.5vh; width: 5.5vh;">
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none">
+                <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" height="500" width="500" style="height: 5.5vh; width: 5.5vh;">
+              </a>
             </div>
             <div class="col text-center">
-              <p class="offcanvas-title notranslate {% if is_mobile %}fs-6{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{{ current_user.username }}</p>
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none text-reset">
+                <p class="offcanvas-title notranslate {% if is_mobile %}fs-6{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</p>
+              </a>
             </div>
             <div class="col-auto">
               <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -480,6 +487,25 @@
           {% endfor %} 
         {% endif %} 
       {% endwith %}
+
+      <!-- Link Warning Modal -->
+      <div class="modal fade" id="externalLinkModal" tabindex="-1" aria-labelledby="externalLinkModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="externalLinkModalLabel">Leaving Infomundi</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              You are about to leave our site. Are you sure you want to proceed? We don't know what's there ahead.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <a id="proceedLink" type="button" role="button" class="btn btn-primary" href="#">Proceed</a>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
@@ -675,6 +701,15 @@
       src="{{ url_for('static', filename='js/cookieConsent.js') }}"
       async defer
     ></script>
+    <script nonce="{{ nonce }}"
+      src="{{ url_for('static', filename='js/linkSafety.js') }}" 
+    ></script>
+    
+    {% if current_user.is_authenticated %}
+    <script nonce="{{ nonce }}"
+      src="{{ url_for('static', filename='js/updateStatus.js') }}" 
+    ></script>
+    {% endif %}
     
 
     {% assets "js_base" %}
@@ -687,7 +722,7 @@
     ></script>
     {% endif %}
 
-    {% if '/news' in request.url or '/comments' in request.url %}
+    {% if request.endpoint == 'views.comments' %}
     <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
     ></script>

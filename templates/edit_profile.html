@@ -2,6 +2,10 @@
 
 {% block title %}Edit Profile{% endblock %}
 
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/libs/quill.css') }}">
+{% endblock %}
+
 {% block edit_profile_content %}
 <h3>General</h3>
 <hr>
@@ -24,29 +28,35 @@
       </div>
    </div>
    <div class="mb-3">
-      <div class="form-floating">
-         <textarea name="description" class="form-control" placeholder="Add a description to your profile" id="floatingTextarea" style="height: 200px" maxlength="1500">{% if current_user.profile_description %}{{ current_user.profile_description }}{% endif %}</textarea>
-         <label for="floatingTextarea">Description</label>
-      </div>
-   </div>
+    <p>Description</p>
+       <div class="form-floating">
+          <div id="editor" style="height: 200px;">
+             {% if current_user.profile_description %}
+             {{ current_user.profile_description|safe }}
+             {% endif %}
+          </div>
+          <input type="hidden" name="description" id="description-input">
+       </div>
+    </div>
+
    <h4 class="mt-5">Localization</h4>
    <hr>
    <div>
           <div class="mb-3">
               <label for="country" class="form-label">Country</label>
-              <select id="country" class="form-select form-select-lg" aria-label="Select Country">
+              <select id="country" name="country" class="form-select form-select-lg" aria-label="Select Country">
                   <option selected disabled>Select your country</option>
               </select>
           </div>
           <div class="mb-3 d-none" id="state-div">
               <label for="state" class="form-label">State</label>
-              <select id="state" class="form-select form-select-lg" aria-label="Select State">
+              <select id="state" name="state" class="form-select form-select-lg" aria-label="Select State">
                   <option selected disabled>Select your state</option>
               </select>
           </div>
           <div class="mb-3 d-none" id="city-div">
               <label for="city" class="form-label">City</label>
-              <select id="city" class="form-select form-select-lg" aria-label="Select City">
+              <select id="city" name="city" class="form-select form-select-lg" aria-label="Select City">
                   <option selected disabled>Select your city</option>
               </select>
           </div>
@@ -58,6 +68,9 @@
 </form>
 {% endblock %}
 {% block scripts %}
+<script nonce="{{ nonce }}" 
+    src="{{ url_for('static', filename='js/libs/quill.js') }}"
+    ></script>
 <script nonce="{{ nonce }}">
    $(document).ready(function() {
        // Fetch countries on page load
@@ -120,6 +133,16 @@
                    }
                });
            }
+       });
+
+       // Initialize Quill editor
+       var quill = new Quill('#editor', {
+           theme: 'snow'
+       });
+
+       // Handle form submission
+       $('form').submit(function() {
+           $('#description-input').val(quill.root.innerHTML);
        });
    });
 </script>

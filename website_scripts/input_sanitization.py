@@ -4,31 +4,33 @@ from unidecode import unidecode
 from urllib.parse import urlparse
 
 
-def sanitize_description(comment: str) -> str:
+def sanitize_description(description: str) -> str:
     """
-    Sanitize a user comment by using bleach to remove potentially dangerous content
+    Sanitize a user description by using bleach to remove potentially dangerous content
     while allowing safe HTML tags and attributes.
     
     Arguments:
-        comment (str): The comment to sanitize.
+        description (str): The description to sanitize.
     
     Returns:
-        str: The sanitized comment.
+        str: The sanitized description.
     """
+    description = description.strip()
+
     # Define allowed tags and attributes
     allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'br']
     allowed_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES
     allowed_attributes['a'] = ['href', 'title']
     
-    # Sanitize the comment
-    sanitized_comment = bleach.clean(
-        comment,
+    # Sanitize the description
+    sanitized_description = bleach.clean(
+        description,
         tags=allowed_tags,
         attributes=allowed_attributes,
         strip=True  # Strip disallowed tags instead of escaping
     )
     
-    return sanitized_comment
+    return sanitized_description
 
 
 def sanitize_html(text: str) -> str:
@@ -284,3 +286,11 @@ def gentle_cut_text(max_length: int, text: str) -> str:
     
     # Return the truncated text
     return text[:cut_index]
+
+
+def has_x_linebreaks(text: str, newlines: int=2) -> bool:
+    """
+    Check if the given text contains more than specified number of newlines (defaults to 2)
+    """
+    newline_count = text.count('\n') + text.count('<br>')
+    return newline_count >= newlines

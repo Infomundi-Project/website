@@ -36,11 +36,17 @@ class User(db.Model, UserMixin):
     delete_token = db.Column(db.String(40))
     delete_token_timestamp = db.Column(db.DateTime)
 
+    # Is Online?
+    is_online = db.Column(db.Boolean, default=False)
+    last_activity = db.Column(db.DateTime)
+
     # Friendships
+    """
     friends = db.relationship('User', secondary='friendships',
         primaryjoin='User.user_id==Friendship.user_id',
         secondaryjoin='and_(User.user_id==Friendship.friend_id, Friendship.status=="accepted")',
         backref='friends_of')
+    """
 
     def set_password(self, password):
         self.password = argon2.hash(password)
