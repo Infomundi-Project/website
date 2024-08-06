@@ -4,6 +4,7 @@ from flask_login import current_user
 from functools import wraps
 
 from .config import CAPTCHA_CLEARANCE_HOURS
+from .cloudflare_util import is_valid_captcha
 
 
 def admin_required(func):
@@ -74,5 +75,21 @@ def captcha_required(func):
         
         session['clearance_from'] = request.url
         return redirect(url_for('views.captcha'))
+
+    return decorated_function
+
+
+def verify_captcha(func):
+    """This decorator is used to check if a captcha token is valid"""
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if request.method == 'POST':
+            token = request.form.get('cf-turnstile-response', '')
+            if not is_valid_captcha(token):
+                flash('Invalid captcha. Are you a robot?', 'error')
+                return redirect(request.url)
+
+        # If captcha is valid, return the function as usual
+        return func(*args, **kwargs)
 
     return decorated_function

@@ -51,6 +51,10 @@ def get_user_status(user_id):
     online_threshold = timedelta(minutes=3)
     is_online = (now - user.last_activity) <= online_threshold
     
+    # Save to the database
+    user.is_online = is_online
+    extensions.db.session.commit()
+    
     return jsonify({'is_online': is_online, 'last_activity': user.last_activity})
 
 

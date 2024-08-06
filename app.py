@@ -1,24 +1,26 @@
 import os
-from flask import Flask, render_template, request, send_from_directory, abort, g
+from flask import Flask, render_template, request, send_from_directory, abort, g, session
 from flask_assets import Environment, Bundle
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from datetime import timedelta
 
-from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING
+from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY
 from website_scripts.extensions import db, login_manager, cache, oauth, limiter
-from website_scripts.scripts import is_mobile, generate_nonce
+from website_scripts.security_util import generate_nonce
+from website_scripts.qol_util import is_mobile
 from website_scripts.input_sanitization import is_safe_url
+from website_scripts.decorators import admin_required
 from website_scripts.models import User
 
-from auth import auth_views, admin_required
+from auth import auth
 from views import views
 from api import api
 
 
 app = Flask(__name__, static_folder='static')
-app.config['SECRET_KEY'] = '@33-CompletelySecureAppSecretKeyThatShouldBeUncrackable'
+app.config['SECRET_KEY'] = SECRET_KEY
 app.config['WTF_CSRF_SECRET_KEY'] = app.config['SECRET_KEY']  # Optional but recommended
 
 app.config['PREFERRED_URL_SCHEME'] = 'https'
@@ -56,7 +58,7 @@ app.config['UPLOAD_FOLDER'] = 'static/img/users/'
 # Blueprints
 app.register_blueprint(views, url_prefix='/')
 app.register_blueprint(api, url_prefix='/api')
-app.register_blueprint(auth_views, url_prefix='/auth')
+app.register_blueprint(auth, url_prefix='/auth')
 
 # Google OAuth
 oauth.init_app(app)
@@ -133,9 +135,17 @@ def load_user(user_id):
 
 @app.before_request
 def set_nonce():
-    # Generates a nonce using website_scripts.scripts.generate_nonce(). It's basically a base64 string
-    # created out of random values. Saves to flask's g variable to be used in other scripts.
     g.nonce = generate_nonce()
+
+
+@app.before_request
+def check_session_version():
+    if current_user.is_authenticated:
+        user = User.query.get(current_user.user_id)
+        if user and session.get('session_version', '') != user.session_version:
+            session.clear()
+            flash('Your session has been invalidated. Please log in again.', 'warning')
+            return redirect(url_for('auth.login'))
 
 
 @app.after_request
@@ -148,7 +158,7 @@ def add_csp_header(response):
         "default-src 'self' https://*.infomundi.net; "
         "img-src https: data:; "
 
-        "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com https://api.tenor.com; "
+        "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com; "
 
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
         

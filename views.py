@@ -6,8 +6,8 @@ from sqlalchemy import or_, and_
 from hashlib import md5
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util
-from website_scripts.decorators import admin_required, in_maintenance, captcha_required, profile_owner_required
+cloudflare_util, input_sanitization, friends_util, qol_util
+from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required
 
 views = Blueprint('views', __name__)
 
@@ -108,15 +108,10 @@ def user_profile(username):
 
 @views.route('/profile/<username>/edit', methods=['GET', 'POST'])
 @profile_owner_required
+@verify_captcha
 def edit_user_profile(username):
     if request.method == 'GET':
         return render_template('edit_profile.html')
-
-    # At this point, we're dealing with a POST request (nice to mention, duh)
-    token = request.form['cf-turnstile-response']
-    if not cloudflare_util.is_valid_captcha(token):
-        flash('Invalid captcha!', 'error')
-        return redirect(url_for('views.user_redirect'))
 
     # Gets first user input
     description = input_sanitization.sanitize_description(request.form.get('description', ''))
@@ -169,14 +164,10 @@ def edit_user_avatar(username):
 
 @views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
 @profile_owner_required
+@verify_captcha
 def edit_user_settings(username):
     if request.method == 'GET':
         return render_template('edit_settings.html')
-
-    token = request.form['cf-turnstile-response']
-    if not cloudflare_util.is_valid_captcha(token):
-        flash('Invalid captcha!', 'error')
-        return redirect(url_for('views.user_redirect'))
 
     # Check if current password is valid
     current_password = request.form.get('current_password', '')
@@ -191,6 +182,7 @@ def edit_user_settings(username):
 
     user = models.User.query.filter_by(username=username).first()
 
+    # If the user wants to change their password, we do so. Otherwise, we just skip
     new_password = request.form.get('new_password', '')
     confirm_password = request.form.get('confirm_password', '')
     if new_password and confirm_password:
@@ -198,7 +190,7 @@ def edit_user_settings(username):
             flash("Either the passwords don't match or the password is not long enough. Please keep it 8-50 characters.", 'error')
             return redirect(url_for('views.user_redirect'))
 
-        hashed_password = user.set_password(new_password)
+        user.set_password(new_password)
 
     user.email = scripts.sha256_hash_text(email)
     extensions.db.session.commit()
@@ -224,6 +216,7 @@ def be_right_back():
 
 
 @views.route('/captcha', methods=['GET', 'POST'])
+@verify_captcha
 def captcha():
     if request.method == 'GET':
         # If they have clearance (means that they have recently proven they're human)
@@ -237,12 +230,6 @@ def captcha():
                 return redirect(url_for('views.user_redirect'))
 
         return render_template('captcha.html')
-
-    # Checks if the user is a robot
-    token = request.form['cf-turnstile-response']
-    if not cloudflare_util.is_valid_captcha(token):
-        flash('Invalid captcha!', 'error')
-        return redirect(url_for('views.captcha'))
     
     session['clearance'] = datetime.now().isoformat()
     flash('Thanks for verifying! You are not a robot after all.')
@@ -256,9 +243,6 @@ def upload_image():
     if not cloudflare_util.is_valid_captcha(token):
         flash('Invalid captcha!', 'error')
         return redirect(url_for('views.user_redirect'))
-
-    # Update the user's avatar URL in the database
-    user_data = models.User.query.filter_by(username=current_user.username).first()
 
     image_categories = ('profile_picture', 'profile_banner', 'profile_background')
     for image_category in image_categories:
@@ -275,13 +259,13 @@ def upload_image():
         # Changes some variables depending on the image category
         if image_category == 'profile_picture':
             bucket_path = f'users/{current_user.user_id}.jpg'
-            user_data.avatar_url = f'https://bucket.infomundi.net/{bucket_path}'
+            current_user.avatar_url = f'https://bucket.infomundi.net/{bucket_path}'
         elif image_category == 'profile_banner':
             bucket_path = f'banners/{current_user.user_id}.jpg'
-            user_data.profile_banner_url = f'https://bucket.infomundi.net/{bucket_path}'
+            current_user.profile_banner_url = f'https://bucket.infomundi.net/{bucket_path}'
         else:
             bucket_path = f'backgrounds/{current_user.user_id}.jpg'
-            user_data.profile_wallpaper_url = f'https://bucket.infomundi.net/{bucket_path}'
+            current_user.profile_wallpaper_url = f'https://bucket.infomundi.net/{bucket_path}'
 
         convert = image_util.convert_and_save(file.stream, image_category, bucket_path)
         if not convert:
@@ -289,21 +273,16 @@ def upload_image():
             return redirect(url_for('views.user_redirect'))
         
     extensions.db.session.commit()
-    flash('File uploaded successfully! Please wait a few minutes for the changes to be applied.')
+    flash('Profile updated successfully! Please wait a few minutes for the changes to be applied.')
     return redirect(url_for('views.user_redirect'))
 
 
 @views.route('/contact', methods=['GET', 'POST'])
+@verify_captcha
 def contact():
     if request.method == 'GET':
         return render_template('contact.html')
 
-    # Checks if the user is a robot
-    token = request.form['cf-turnstile-response']
-    if not cloudflare_util.is_valid_captcha(token):
-        flash('Invalid captcha. Are you a robot?', 'error')
-        return render_template('contact.html')
-    
     # Get and sanitize input data
     name = input_sanitization.sanitize_text(request.form.get('name', ''))
     message = input_sanitization.sanitize_text(request.form.get('message', ''))
@@ -466,7 +445,7 @@ def comments():
     country_cca2 = story.category_id.split('_')[0]
     return render_template('comments.html', 
         from_country_name=scripts.country_code_to_name(story.category_id.split('_')[0]),
-        page_language=scripts.detect_language(story.title + ' ' + story.description),
+        page_language=qol_util.detect_language(story.title + ' ' + story.description),
         from_country_url=f'https://infomundi.net/news?country={country_cca2}',
         from_country_category=story.category_id.split('_')[1],
         from_country_code=story.category_id.split('_')[0],

@@ -1,15 +1,14 @@
-import hashlib
-import secrets
 import time
+
 from datetime import datetime, timedelta
 from flask_login import logout_user
+from sqlalchemy import or_
 
-from . import models, notifications, extensions, friends_util
-from .scripts import generate_id, is_within_threshold_minutes, generate_nonce, sha256_hash_text
+from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util
 
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
-    """Generates a verification token, stores in a json file and 
+    """Generates a verification token, stores in the database and 
     uses notifications.send_email to send the verification token to the user.
 
     Args:
@@ -21,14 +20,23 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
     Returns:
         bool: False if there's a token associated with the email or if we couldn't get to send the email. Otherwise True.
     """
-    token_lookup = models.RegisterToken.query.filter_by(email=email).first()
+    token_lookup = models.RegisterToken.query.filter(or_(
+        models.RegisterToken.email == hashed_email,
+        models.RegisterToken.email == username
+    )).first()
     
     # This means there's an already issued token for the specified email address.
     if token_lookup:
-        return False
+        created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
+        # If it's within the threshold, return False. Otherwise, delete the token.
+        if qol_util.is_within_threshold_minutes(created_at, 30):
+            return False
+        
+        extensions.db.session.delete(token_lookup)
+        extensions.db.session.commit()
 
     # Generate a REEEEALLY random verification token.
-    verification_token = generate_nonce(24)
+    verification_token = security_util.generate_nonce(24)
 
     message = f"""Hello {username}, 
 
@@ -47,7 +55,7 @@ The Infomundi Team"""
     result = notifications.send_email(email, subject, message)
     if result:
         new_token = models.RegisterToken(email=hashed_email, username=username, 
-            token=verification_token, user_id=generate_id(), password=hashed_password)
+            token=verification_token, user_id=security_util.generate_nonce(10), password=hashed_password)
         extensions.db.session.add(new_token)
         extensions.db.session.commit()
 
@@ -68,12 +76,8 @@ def check_recovery_token(token: str) -> object:
     if not user_lookup:
         return None
 
-    now = datetime.now()
     created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
-    
-    # Checks if the token is expired. If it's expired, we clear it from the database, commit change and return False
-    time_difference = now - created_at
-    if time_difference > timedelta(minutes=30):
+    if not qol_util.is_within_threshold_minutes(created_at, 30):
         user_lookup.recovery_token = None
         extensions.db.session.commit()
         return None
@@ -100,19 +104,14 @@ def send_recovery_token(email: str, hashed_email: str) -> bool:
     if not user_lookup:
         return False
 
-    now = datetime.now()
-
     # If there's a token already issued to the user, check if it's expired. If expired, proceed. If not, return False.
     if user_lookup.recovery_token:
         created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
-        
-        # Checks if the token is expired
-        time_difference = now - created_at
-        if time_difference < timedelta(minutes=30):
+        if not qol_util.is_within_threshold_minutes(created_at, 30):
             return False
 
     # Generates a super random token.
-    verification_token = generate_nonce(24)
+    verification_token = security_util.generate_nonce(24)
 
     message = f"""Hello,
 
@@ -132,6 +131,7 @@ The Infomundi Team"""
         user_lookup.recovery_token = verification_token
         user_lookup.recovery_token_timestamp = now
         extensions.db.session.commit()
+    
     # Sleeps for a random time in order to prevent user enumeration based on response time.
     time.sleep(uniform(1.0, 2.5))
     return result
@@ -147,7 +147,7 @@ def delete_account(email, token):
 
     # Checks to see if the token is valid. If the token is invalid, deletes it and return False.
     created_at = datetime.fromisoformat(user.delete_token_timestamp.isoformat())
-    if not is_within_threshold_minutes(created_at, 30):
+    if not qol_util.is_within_threshold_minutes(created_at, 30):
         user.delete_token = None
         extensions.db.session.commit()
         return False
@@ -168,7 +168,7 @@ def send_delete_token(email: str, current_password: str) -> bool:
     if not user.check_password(current_password):
         return False
 
-    token = generate_nonce(24)
+    token = security_util.generate_nonce(24)
     
     subject = "Infomundi - Confirm Account Deletion"
     message = f"""

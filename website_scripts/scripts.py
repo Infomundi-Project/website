@@ -1,10 +1,3 @@
-import langdetect
-import hashlib
-import secrets
-import base64
-import uuid
-import time
-
 from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
 from requests import get as get_request
@@ -106,60 +99,6 @@ def news_page_processing(country_name: str) -> dict:
         'country_index': country_index
     }
     return news_page_data
-
-
-def generate_nonce(length: int=32):
-    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode('utf-8')
-
-
-def is_mobile(request) -> bool:
-    """Uses a request object to check if the user is using a mobile device or not. If mobile, return True. Else, return False."""
-    user_agent = request.user_agent.string
-
-    mobile_keywords = ('Mobile', 'Android', 'iPhone', 'iPod', 'iPad', 'BlackBerry', 'Phone')
-
-    # Check if any of the mobile keywords appear in the user agent string
-    for keyword in mobile_keywords:
-        if keyword in user_agent:
-            return True
-
-    # If none of the keywords were found, it's likely not a mobile device
-    return False
-
-
-def sha256_hash_text(text: str):
-    """Hashes the given text using SHA-256 and returns the hash in hexadecimal format."""
-    sha256 = hashlib.sha256()
-    sha256.update(text.encode('utf-8'))
-    return sha256.hexdigest()
-
-
-def verify_sha256_hash(text, hash_value):
-    """Verifies that the given text matches the provided SHA-256 hash."""
-    return hash_text(text) == hash_value
-
-
-def detect_language(text: str) -> str:
-    """Tries to detect the language of a text value.
-    
-    Args:
-        text (str): Any given text.
-
-    Returns:
-        str: The text's language code. Defaults to 'en' when fails to detect the actual language.
-    
-    Examples:
-        >>> detect_language('Esse é claramente um texto em português!')
-        'pt'
-        >>> detect_language('This is clearly written in English.')
-        'en'
-    """
-    try:
-        lang = langdetect.detect(text)
-    except Exception:
-        lang = 'en'
-    
-    return lang
 
 
 def scrape_stock_data(country_name: str) -> list:
@@ -280,12 +219,6 @@ def log(text: str, log_type: str='exception') -> bool:
         f.write(f'{text}\n')
 
     return True
-
-
-def is_within_threshold_minutes(timestamp, threshold_minutes: int) -> bool:
-    time_difference = datetime.now() - timestamp
-    
-    return time_difference <= timedelta(minutes=threshold_minutes)
 
 
 def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
@@ -555,11 +488,6 @@ def get_link_preview(url: str) -> dict:
             'description': 'No description was provided',
             'title': 'No title was provided'
         }
-
-
-def generate_id(length: int=8) -> str:
-    """Simply uses uuid to generate an unique ID."""
-    return str(uuid.uuid4())[:length]
 
 
 def string_similarity(s1: str, s2: str) -> float:

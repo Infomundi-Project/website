@@ -168,7 +168,7 @@
     </div>
 
     <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
-      <div class="offcanvas-header d-flex justify-content-evenly">
+      <div class="offcanvas-header d-flex {% if current_user.is_authenticated %}justify-content-evenly{% endif %}">
         {% if current_user.is_authenticated %}
         <div class="container-fluid">
           <div class="row align-items-center">
@@ -218,22 +218,48 @@
           </ul>
         {% endif %}
         {% if current_user.is_authenticated %}
-          <span class="fs-4">Settings</span>
-          <hr>
           <ul class="nav nav-pills flex-column mb-5">
+
             <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.password_change') }}" class="nav-link {{ 'active' if request.url.endswith('/password_change') else '' }}">
-              <i class="fa-solid fa-lock me-1"></i>Change password
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link {% if request.url.endswith(current_user.username) %}active{% endif %}">
+                <i class="fa-solid fa-user me-1"></i>My Profile
               </a>
             </li>
+
           </ul>
+
+          <span class="fs-4">Account</span>
           <hr>
           <ul class="nav nav-pills flex-column mb-5">
+
             <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.logout') }}" class="nav-link">
-              <i class="fa-solid fa-right-from-bracket me-1"></i>Sign out
+              <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}">
+                <i class="fa-solid fa-pen me-1"></i>Edit Profile
               </a>
             </li>
+            <li class="nav-item inf-nav-item">
+              <a href="{{ url_for('views.edit_user_avatar', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}">
+                <i class="fa-solid fa-image me-1"></i>Edit Avatar
+              </a>
+            </li>
+            <li class="nav-item inf-nav-item">
+              <a href="{{ url_for('views.edit_user_settings', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
+                <i class="fa-solid fa-wrench me-1"></i>Account Details
+              </a>
+            </li>
+          
+          </ul>
+
+          <hr>
+
+          <ul class="nav nav-pills flex-column mb-5">
+
+            <li class="nav-item inf-nav-item">
+              <a data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link">
+                <i class="fa-solid fa-right-from-bracket me-1"></i>Sign out
+              </a>
+            </li>
+
           </ul>
         {% else %}
           <span class="fs-4">Access</span>
@@ -469,7 +495,7 @@
   </div>
 {% endif %}
 
-    <div class="container-fluid {% if '/profile/' in request.url %}background-container{% endif %}">
+    <div class="container-fluid {% if request.endpoint == 'views.user_profile' %}background-container{% endif %}">
       {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %} 
           {% for category, message in messages %} 
@@ -496,8 +522,8 @@
               <h5 class="modal-title" id="externalLinkModalLabel">Leaving Infomundi</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-              You are about to leave our site. Are you sure you want to proceed? We don't know what's there ahead.
+            <div class="modal-body" id="externalLinkModalBody">
+              You are about to leave our site. Are you sure you want to proceed?
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -506,6 +532,27 @@
           </div>
         </div>
       </div>
+
+      <!-- Sign out modal -->
+      {% if current_user.is_authenticated %}
+        <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="signOutModalLabel">Sign Out</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                    <p>Hey, {% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}. Do you really want to sign out?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a type="button" role="button" class="btn btn-success" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-check me-1"></i>Confirm</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
       
       {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
       <div class="toast-container position-fixed bottom-0 end-0 p-2">
@@ -567,9 +614,9 @@
       <div class="container mt-5">
         <div class="row align-items-start">
             
-            <div class="col main-container bg-secondary-subtle">
+            <div class="col-md-3 main-container bg-secondary-subtle mb-3">
                 <img src="{{ current_user.avatar_url }}" class="img-thumbnail" style="border-radius: 15px;" alt="{{ current_user.username }}'s profile picture">
-                <h3 class="mt-2">{{ current_user.username }}</h3>
+                <h4 class="mt-2">{{ current_user.username }}</h4>
                 <a href="https://infomundi.net/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
                 <ul class="nav nav-pills flex-column mt-4">
                     <li class="nav-item inf-nav-item">
@@ -661,7 +708,7 @@
             {% if session.get('last_visited_news', '') %}
               <li class="nav-item mb-2"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited story"><i class="fa-solid fa-newspaper me-1"></i>Last visited news</a></li>
             {% endif %}
-            <li class="nav-item mb-2"><a href="{{ url_for('auth.logout') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to log out from your account"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
+            <li class="nav-item mb-2"><a href="#" data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link p-0 text-body-secondary" aria-label="Click to log out from your account"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
           {% endif %}
         </ul>
     </div>

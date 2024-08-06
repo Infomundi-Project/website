@@ -3,6 +3,8 @@ import bleach
 from unidecode import unidecode
 from urllib.parse import urlparse
 
+from . import security_util, config
+
 
 def sanitize_description(description: str) -> str:
     """
@@ -34,7 +36,7 @@ def sanitize_description(description: str) -> str:
 
 
 def sanitize_html(text: str) -> str:
-    """Takes an input string and uses bleach library to sanitize it by escaping html.
+    """Takes an input string and uses bleach library to sanitize it by stripping html.
 
     Arguments:
         text (str): Any user-input text.
@@ -46,9 +48,7 @@ def sanitize_html(text: str) -> str:
         >>> sanitize_html('an <script>evil()</script> example')
         'an &lt;script&gt;evil()&lt;/script&gt; example'
     """
-    text = text.strip()
-    
-    return bleach.clean(text)
+    return bleach.clean(text.strip(), strip=True)
 
 
 def sanitize_text(text: str) -> str:
@@ -71,6 +71,24 @@ def sanitize_text(text: str) -> str:
     sanitized_text = allowed_chars_pattern.sub('', text)
     
     return sanitized_text
+
+
+def sanitize_username(username: str) -> str:
+    allowed_pattern = re.compile(r'[a-zA-Z0-9_-]')
+
+    # Substitute any character not in the allowed set with an empty string
+    return ''.join(allowed_pattern.findall(username))
+
+
+def create_username_out_of_display_name(display_name: str) -> str:
+    nonce = security_util.generate_nonce(5)
+    
+    display_name = nonce + unidecode(display_name.lower().strip())
+    if ' ' not in display_name:
+        return sanitize_username(display_name)[:config.MAX_USERNAME_LEN]
+    
+    # Gets the first name and initial of the last name
+    return sanitize_username(display_name.split(' ')[0][:config.MAX_USERNAME_LEN - 1] + display_name.split(' ')[1][0])
 
 
 def is_valid_email(email: str) -> bool:
@@ -292,5 +310,8 @@ def has_x_linebreaks(text: str, newlines: int=2) -> bool:
     """
     Check if the given text contains more than specified number of newlines (defaults to 2)
     """
+    if not text:
+        return False
+    
     newline_count = text.count('\n') + text.count('<br>')
     return newline_count >= newlines

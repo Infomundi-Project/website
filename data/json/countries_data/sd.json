@@ -26,7 +26,8 @@
     "unMember": true,
     "currencies": {
       "SDG": {
-        "name": "Sudanese pound"
+        "name": "Sudanese pound",
+        "symbol": "\u062c.\u0633"
       }
     },
     "idd": {

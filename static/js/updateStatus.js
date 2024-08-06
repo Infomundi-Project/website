@@ -5,6 +5,8 @@ async function updateUserStatus() {
 }
 
 function startPolling() {
+    updateUserStatus();
+    
     setInterval(async () => {
         await updateUserStatus();
     }, 50000);  // Poll every 50 seconds

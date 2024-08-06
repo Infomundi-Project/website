@@ -1,18 +1,18 @@
 from flask_login import UserMixin
-from passlib.hash import argon2
 from datetime import datetime
 
 from .extensions import db
-
+from .hashing_util import argon2_hash_text, argon2_verify_hash
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
     email = db.Column(db.String(70), nullable=False, unique=True)
-    user_id = db.Column(db.String(10), primary_key=True)
+    user_id = db.Column(db.String(20), primary_key=True)
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(100), nullable=False)
+    session_version = db.Column(db.Integer, default=0)
 
     # Timestamps
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -40,19 +40,23 @@ class User(db.Model, UserMixin):
     is_online = db.Column(db.Boolean, default=False)
     last_activity = db.Column(db.DateTime)
 
-    # Friendships
-    """
-    friends = db.relationship('User', secondary='friendships',
-        primaryjoin='User.user_id==Friendship.user_id',
-        secondaryjoin='and_(User.user_id==Friendship.friend_id, Friendship.status=="accepted")',
-        backref='friends_of')
-    """
 
     def set_password(self, password):
-        self.password = argon2.hash(password)
+        self.password = argon2_hash_text(password)
 
-    def check_password(self, password):
-        return argon2.verify(password, self.password)
+
+    def check_password(self, password: str) -> bool:
+        """Checks to see if the cleartext password matches the user's password hash
+
+        Arguments
+            self: We'll get user's password hash out of this (as stored in the database)
+            password (str): Cleartext password we want to compare
+        
+        Returns
+            bool: True if password is valid, otherwise False.
+        """
+        return argon2_verify_hash(self.password, password)
+
 
     def get_id(self):
         return str(self.user_id)
@@ -60,9 +64,9 @@ class User(db.Model, UserMixin):
 
 class RegisterToken(db.Model):
     __tablename__ = 'register_tokens'
-    user_id = db.Column(db.String(10), primary_key=True)
+    user_id = db.Column(db.String(20), primary_key=True)
     email = db.Column(db.String(70), unique=True, nullable=False)
-    username = db.Column(db.String(30), nullable=False, unique=True)
+    username = db.Column(db.String(25), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
 
     token = db.Column(db.String(40), nullable=False)
