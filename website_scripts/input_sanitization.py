@@ -1,7 +1,10 @@
 import re
 import bleach
-from unidecode import unidecode
+
+from html.parser import HTMLParser
 from urllib.parse import urlparse
+from unidecode import unidecode
+from collections import deque
 
 from . import security_util, config
 
@@ -45,10 +48,21 @@ def sanitize_html(text: str) -> str:
         str: Sanitized input.
 
     Example:
-        >>> sanitize_html('an <script>evil()</script> example')
-        'an &lt;script&gt;evil()&lt;/script&gt; example'
+        >>> sanitize_html('A defesa do ex-presidente \
+            <a href="https://www1.folha.uol.com.br/folha-topicos/jair-bolsonaro/">Jair Bolsonaro</a> \
+            (<a href="https://www1.folha.uol.com.br/folha-topicos/pl/">PL</a>) pediu que o ministro \
+            <a href="https://www1.folha.uol.com.br/folha-topicos/alexandre-de-moraes/">Alexandre de Moraes</a>, \
+            do <a href="https://www1.folha.uol.com.br/folha-topicos/stf/">STF</a>')
+        'A defesa do ex-presidente Jair Bolsonaro (PL) pediu que o ministro Alexandre de Moraes, do STF'
+
+        >>> input_sanitization.sanitize_html('An <script>evil()</script> script')
+        'An evil() script'
     """
-    return bleach.clean(text.strip(), strip=True)
+    return bleach.clean(text.strip(), 
+        tags=[],
+        attributes=[],
+        strip=True
+        )
 
 
 def sanitize_text(text: str) -> str:
@@ -191,7 +205,7 @@ def is_safe_url(target: str) -> bool:
         str: True if the url is safe. False otherwise.
 
     Examples:
-        >>> is_safe_url('https://clearly.malicious.com/collect')
+        >>> is_safe_url('https://malicious.net/collect')
         False
 
         >>> is_safe_url('https://infomundi.net/contact')
@@ -315,3 +329,102 @@ def has_x_linebreaks(text: str, newlines: int=2) -> bool:
     
     newline_count = text.count('\n') + text.count('<br>')
     return newline_count >= newlines
+
+
+def obfuscate_email(email: str) -> str:
+    # Split the email address into local part and domain part
+    local, domain = email.split('@')
+    
+    # Obfuscate part of the local part
+    if len(local) > 2:
+        local_obfuscated = local[0] + '*' * (len(local) - 2) + local[-1]
+    else:
+        local_obfuscated = local[0] + '*'
+    
+    # Split the domain into name and TLD
+    domain_name, domain_tld = domain.split('.')
+    
+    # Obfuscate part of the domain name
+    if len(domain_name) > 2:
+        domain_name_obfuscated = domain_name[0] + '*' * (len(domain_name) - 2) + domain_name[-1]
+    else:
+        domain_name_obfuscated = domain_name[0] + '*'
+    
+    # Combine the obfuscated parts
+    obfuscated_email = f"{local_obfuscated}@{domain_name_obfuscated}.{domain_tld}"
+    
+    return obfuscated_email
+
+
+def close_open_html_tags(html_string: str) -> str:
+    """
+    Closes any unclosed HTML tags in the provided HTML string.
+
+    Args:
+        html_string (str): The HTML string to check and correct for unclosed tags.
+
+    How it works:
+        - The function defines a set of valid HTML tags that it will check for closure.
+        - It uses an inner HTML parser class (`SimpleHTMLParser`) to parse the HTML string.
+        - The parser tracks open tags using a stack.
+        - When it encounters a closing tag, it ensures all open tags up to that point are closed.
+        - After parsing, it ensures any remaining open tags in the stack are closed.
+        - Only specified tags are considered (['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'br']).
+
+    Returns:
+        str: The corrected HTML string with all tags properly closed.
+
+    Examples:
+        >>> close_open_html_tags("<p>Some text<b>bold text<i>italic text</b>unclosed italic<p>Another paragraph")
+        '<p>Some text<b>bold text<i>italic text</i></b>unclosed italic</p><p>Another paragraph</p>'
+    """
+    valid_tags = {'p', 'b', 'i', 'u', 'em', 'strong', 'a', 'br'}
+    self_closing_tags = {'br'}
+    stack = deque()
+    result = []
+
+    class SimpleHTMLParser(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            if tag in valid_tags:
+                result.append(f'<{tag}')
+                for attr, value in attrs:
+                    result.append(f' {attr}="{value}"')
+                result.append('>')
+                if tag not in self_closing_tags:
+                    stack.append(tag)
+
+        def handle_endtag(self, tag):
+            if tag in valid_tags:
+                while stack and stack[-1] != tag:
+                    unclosed_tag = stack.pop()
+                    result.append(f'</{unclosed_tag}>')
+                if stack:
+                    stack.pop()
+                result.append(f'</{tag}>')
+
+        def handle_data(self, data):
+            result.append(data)
+
+        def handle_entityref(self, name):
+            result.append(f'&{name};')
+
+        def handle_charref(self, name):
+            result.append(f'&#{name};')
+
+        def handle_comment(self, data):
+            result.append(f'<!--{data}-->')
+
+        def handle_decl(self, decl):
+            result.append(f'<!{decl}>')
+
+        def handle_pi(self, data):
+            result.append(f'<?{data}>')
+
+    parser = SimpleHTMLParser()
+    parser.feed(html_string)
+    
+    while stack:
+        unclosed_tag = stack.pop()
+        result.append(f'</{unclosed_tag}>')
+    
+    return ''.join(result)

@@ -40,6 +40,9 @@ class User(db.Model, UserMixin):
     is_online = db.Column(db.Boolean, default=False)
     last_activity = db.Column(db.DateTime)
 
+    # IP History
+    ip_history = db.relationship('UserIPHistory', back_populates='user', cascade='all, delete-orphan')
+
 
     def set_password(self, password):
         self.password = argon2_hash_text(password)
@@ -60,6 +63,25 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return str(self.user_id)
+
+
+    def add_ip_history(self, ip_address, user_agent):
+        """Add an entry to the IP history for this user."""
+        new_ip_history = UserIPHistory(user_id=self.user_id, ip_address=ip_address, user_agent=user_agent)
+        db.session.add(new_ip_history)
+        db.session.commit()
+
+
+class UserIPHistory(db.Model):
+    __tablename__ = 'user_ip_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
+    ip_address = db.Column(db.String(45), nullable=False)
+    access_time = db.Column(db.DateTime, default=db.func.current_timestamp())
+    user_agent = db.Column(db.String(255))
+
+    user = db.relationship('User', back_populates='ip_history')
 
 
 class RegisterToken(db.Model):

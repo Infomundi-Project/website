@@ -5,8 +5,7 @@ from sqlalchemy import or_, and_, cast
 from sqlalchemy.types import Date
 
 from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, \
-    decorators, friends_util, country_util
-from views import make_cache_key
+    friends_util, country_util
 
 api = Blueprint('api', __name__)
 

@@ -48,13 +48,13 @@ def is_mobile(request) -> bool:
     return True
 
 
-def is_within_threshold_minutes(timestamp: datetime, threshold_minutes: int) -> bool:
+def is_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hours: bool=False) -> bool:
     """
-    Checks if the given timestamp is within the specified threshold of minutes from the current time.
+    Checks if the given timestamp is within the specified threshold of minutes/hours from the current time.
 
     Args:
         timestamp (datetime): The datetime object representing the timestamp to be checked.
-        threshold_minutes (int): The threshold in minutes to compare the timestamp against.
+        threshold_minutes (int): The threshold in minutes/hours to compare the timestamp against.
 
     Returns:
         bool: True if the timestamp is within the threshold minutes from the current time, False otherwise.
@@ -75,4 +75,8 @@ def is_within_threshold_minutes(timestamp: datetime, threshold_minutes: int) -> 
         False
     """
     time_difference = datetime.now() - timestamp
-    return time_difference <= timedelta(minutes=threshold_minutes)
+
+    if is_hours:
+        return time_difference <= timedelta(hours=threshold_time)
+
+    return time_difference <= timedelta(minutes=threshold_time)

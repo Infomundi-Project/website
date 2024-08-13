@@ -250,6 +250,7 @@ def login():
         # Make the email address last in the session
         session.permanent = True
         session['email_address'] = email
+        session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
         session['session_version'] = user.session_version
             
         flash(f'Welcome back, {current_user.username}!')
@@ -324,6 +325,8 @@ def google_callback():
         extensions.db.session.commit()
     
     session['email_address'] = user_info['email']
+    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
+    session['session_version'] = user.session_version
     login_user(user, remember=True)
 
     flash(f"Hello, {user.username}! Welcome to Infomundi!")

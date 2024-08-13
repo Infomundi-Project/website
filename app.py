@@ -1,9 +1,9 @@
 import os
-from flask import Flask, render_template, request, send_from_directory, abort, g, session
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for
 from flask_assets import Environment, Bundle
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager, current_user, logout_user
 from datetime import timedelta
 
 from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY
@@ -139,13 +139,20 @@ def set_nonce():
 
 
 @app.before_request
+@cache.cached(timeout=60, key_prefix=current_user.user_id if (current_user and current_user.is_authenticated) else 'guest') # 1 minute
 def check_session_version():
     if current_user.is_authenticated:
         user = User.query.get(current_user.user_id)
-        if user and session.get('session_version', '') != user.session_version:
-            session.clear()
-            flash('Your session has been invalidated. Please log in again.', 'warning')
-            return redirect(url_for('auth.login'))
+        
+        session_version = session.get('session_version')
+        if session_version and session_version != user.session_version:
+            flash(f'We hope to see you again soon, {current_user.username}')
+
+            if 'email_address' in session:
+                del session['email_address']
+            session.permanent = False
+
+            logout_user()
 
 
 @app.after_request

@@ -62,7 +62,7 @@
 
 {% block content %}
 <div class="modal fade" id="pendingFriendsModal" tabindex="-1" aria-labelledby="pendingFriendsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="pendingFriendsModalLabel">Friend Requests</h1>
@@ -103,7 +103,7 @@
         <h1 class="modal-title fs-5" id="descriptionModalLabel">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s description</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body text-wrap">
+      <div class="modal-body text-break">
         {{ user.profile_description|safe }}
       </div>
       <div class="modal-footer">
@@ -238,7 +238,7 @@
     </div>
     
     <div class="mt-5">
-      <comentario-comments theme="{{ request.cookies.get('theme', '') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
+      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
     </div>
   </div>
 </div>

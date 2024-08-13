@@ -21,7 +21,7 @@
       </div>
    </div>
    <div class="input-group mb-3">
-      <span class="input-group-text">@</span>
+      <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
       <div class="form-floating">
          <input type="text" name="username" class="form-control" id="floatingInputGroup1" placeholder="Username" value="{{ current_user.username }}">
          <label for="floatingInputGroup1">Username</label>
@@ -32,7 +32,7 @@
        <div class="form-floating">
           <div id="editor" style="height: 200px;">
              {% if current_user.profile_description %}
-             {{ current_user.profile_description|safe }}
+                {{ current_user.profile_description|safe }}
              {% endif %}
           </div>
           <input type="hidden" name="description" id="description-input">

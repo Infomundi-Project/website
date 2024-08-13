@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from feedparser import parse
 from requests import get
 from hashlib import md5
-from sys import exit
 
 from website_scripts import json_util, config, input_sanitization, immutable
 
@@ -118,7 +117,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            # Sanitize text input
+            # Remove dangerous html tags from description
             feed_publisher = input_sanitization.sanitize_html(feed.feed.title)
             item_title = input_sanitization.sanitize_html(item.get('title', f'No title was provided'))
             item_description = input_sanitization.sanitize_html(item.get('description', 'No description was provided'))

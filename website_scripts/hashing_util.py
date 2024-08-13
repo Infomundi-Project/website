@@ -53,3 +53,7 @@ def sha256_verify_hash(text: str, hash_value: str) -> bool:
         False
     """
     return sha256_hash_text(text) == hash_value
+
+
+def md5_hash_text(text: str) -> str:
+    return hashlib.md5(text.encode('utf-8')).hexdigest()

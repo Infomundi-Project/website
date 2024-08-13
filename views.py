@@ -1,12 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, session, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
 from flask_login import current_user, login_required
-from datetime import datetime, timedelta
-from random import choice, shuffle
-from sqlalchemy import or_, and_
-from hashlib import md5
+from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util, qol_util
+cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util
 from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required
 
 views = Blueprint('views', __name__)
@@ -15,7 +12,7 @@ views = Blueprint('views', __name__)
 def make_cache_key(*args, **kwargs):
     user_id = current_user.user_id if current_user.is_authenticated else 'guest'
     args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
-    key = md5(str(args_list).encode('utf-8')).hexdigest()
+    key = hashing_util.md5_hash_text(str(args_list))
     return key
 
 
@@ -87,17 +84,23 @@ def user_profile(username):
         flash('User not found!', 'error')
         return redirect(url_for('views.user_redirect'))
     
-    short_description = input_sanitization.gentle_cut_text(200, user.profile_description or '')
+    # Make sure to add a trailing <p> to avoid breaking the page
+    short_description = input_sanitization.gentle_cut_text(150, user.profile_description or '')
 
     if current_user.is_authenticated:
         friend_status, pending_friend_request_sent_by_current_user = friends_util.get_friendship_status(current_user.user_id, user.user_id)
     else:
         friend_status = 'not_friends'
         pending_friend_request_sent_by_current_user = False
+    
+    seo_title = f"Infomundi - {user.display_name if user.display_name else user.username}'s profile"
+    seo_description = f"{user.profile_description if user.profile_description else 'We don\'t know much about this user, they prefer keeping this air of mystery...'}"
+    seo_image = user.avatar_url
 
     is_profile_owner = current_user.is_authenticated and (current_user.user_id == user.user_id)
     return render_template('user_profile.html', user=user, 
-        short_description=short_description, 
+        seo_data=(seo_title, seo_description, seo_image),
+        short_description=input_sanitization.close_open_html_tags(short_description), 
         has_too_many_newlines=input_sanitization.has_x_linebreaks(user.profile_description),
         friend_status=friend_status, 
         friends_list=friends_util.get_friends_list(user.user_id),
@@ -173,14 +176,52 @@ def edit_user_settings(username):
     current_password = request.form.get('current_password', '')
     if not current_user.check_password(current_password):
         flash('Invalid current password.', 'error')
-        return redirect(url_for('views.user_redirect'))
+        return redirect(url_for('views.edit_user_settings'))
 
-    email = request.form.get('email', '')
-    if not input_sanitization.is_valid_email(email):
-        flash('Invalid email address.', 'error')
-        return redirect(url_for('views.user_redirect'))
+    current_email = request.form.get('email', '').strip().lower()
+    if current_email:
+        if current_email != session.get('email_address', ''):
+            flash('Your current email is invalid.', 'error')
+            return redirect(url_for('views.edit_user_settings'))
 
-    user = models.User.query.filter_by(username=username).first()
+        new_email = request.form.get('new_email', '').strip().lower()
+        confirm_email = request.form.get('confirm_email', '').strip().lower()
+
+        if new_email != confirm_email:
+            flash('Emails must match.', 'error')
+            return redirect(url_for('views.edit_user_settings'))
+
+        hashed_new_email = hashing_util.sha256_hash_text(new_email)
+
+        # If the email format is invalid or email is already being used by other user
+        if not input_sanitization.is_valid_email(new_email) or models.User.query.filter_by(email=hashed_new_email).first():
+            flash('Invalid new email.', 'error')
+            return redirect(url_for('views.edit_user_settings'))
+
+
+        # Send email to the user
+        subject = 'Infomundi - Your Email Has Been Changed'
+        body = f"""Hello, {current_user.display_name if current_user.display_name else current_user.username}.
+
+We wanted to inform you that the email address associated with your Infomundi account has been successfully updated. If you made this change, no further action is needed.
+
+However, if you did not request this change, please secure your account immediately by resetting your password and contacting our support team for assistance.
+
+For your security, we recommend reviewing your account activity and updating your security settings if necessary.
+
+Best regards,
+The Infomundi Team
+"""
+        
+        # Update session information
+        session['email_address'] = new_email
+        session['obfuscated_email_address'] = input_sanitization.obfuscate_email(new_email)
+
+        # Update database information
+        current_user.email = hashed_new_email
+        extensions.db.session.commit()
+
+        flash('Email updated successfully.')
 
     # If the user wants to change their password, we do so. Otherwise, we just skip
     new_password = request.form.get('new_password', '')
@@ -188,15 +229,13 @@ def edit_user_settings(username):
     if new_password and confirm_password:
         if not (new_password == confirm_password and scripts.is_strong_password(new_password)):
             flash("Either the passwords don't match or the password is not long enough. Please keep it 8-50 characters.", 'error')
-            return redirect(url_for('views.user_redirect'))
+            return redirect(url_for('views.edit_user_settings'))
 
         user.set_password(new_password)
-
-    user.email = scripts.sha256_hash_text(email)
-    extensions.db.session.commit()
+        extensions.db.session.commit()
     
     flash('Profile updated successfully!')
-    return redirect(url_for('views.user_redirect'))
+    return redirect(url_for('views.edit_user_settings'))
 
 
 @views.route('/redirect', methods=['GET'])
@@ -222,10 +261,8 @@ def captcha():
         # If they have clearance (means that they have recently proven they're human)
         clearance = session.get('clearance', '')
         if clearance:
-            now = datetime.now()
-
-            time_difference = now - datetime.fromisoformat(clearance)
-            if time_difference < timedelta(hours=config.CAPTCHA_CLEARANCE_HOURS):
+            timestamp = datetime.fromisoformat(clearance)
+            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True):
                 flash("We know you are not a robot, don't worry")
                 return redirect(url_for('views.user_redirect'))
 
@@ -405,11 +442,11 @@ def comments():
     
     # Check if has the length of a md5 hash
     if not input_sanitization.is_md5_hash(news_id):
-        flash('We apologize, but the ID you provided is not valid. Please try again.', 'error')
+        flash('We apologize, but the story ID you provided is not valid. Please try again.', 'error')
         return redirect(url_for('views.user_redirect'))
 
     # Check if story exists.
-    story = models.Story.query.filter_by(story_id=news_id).first()
+    story = models.Story.query.get(news_id)
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(url_for('views.user_redirect'))
@@ -441,6 +478,7 @@ def comments():
     # Create the SEO dataw. Title should be 60 characters, description must be 150 characters
     seo_title = 'Infomundi - ' + input_sanitization.gentle_cut_text(60, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
+    seo_image = story.media_content_url
     
     country_cca2 = story.category_id.split('_')[0]
     return render_template('comments.html', 
@@ -450,7 +488,7 @@ def comments():
         from_country_category=story.category_id.split('_')[1],
         from_country_code=story.category_id.split('_')[0],
         formatted_gpt_summary=formatted_gpt_summary,
-        seo_data=(seo_title, seo_description),
+        seo_data=(seo_title, seo_description, seo_image),
         previous_news='',
         story=story,
         next_news=''

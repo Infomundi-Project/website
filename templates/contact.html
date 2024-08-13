@@ -57,7 +57,7 @@
         </div>
         {% else %}
         <div class="form-floating mb-3">
-          <input type="email" class="form-control" id="floatingEmail" value="{{ session.get('email_address', '') }}" name="email" maxlength="70" placeholder="name@example.com" required>
+          <input type="email" class="form-control" id="floatingEmail" value="{{ session.get('obfuscated_email_address', '') }}" name="email" maxlength="70" placeholder="name@example.com" required>
           <label for="floatingEmail">Email address</label>
         </div>
         {% endif %}

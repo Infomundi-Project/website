@@ -9,7 +9,7 @@
     <!--<meta name="google-adsense-account" content="ca-pub-2416889662324926">-->
     <!--<meta name="msvalidate.01" content="02225A95C7E679E2FCBD558DCA1EFD89">-->
     
-    {% if current_user.is_authenticated and current_user.in_recovery and 'password_change' not in request.url %}
+    {% if current_user.is_authenticated and current_user.in_recovery and request.endpoint != 'auth.change_password' %}
       <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/password_change");</script>
     {% endif %}
 
@@ -45,14 +45,14 @@
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
     <meta property="og:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
-    <meta property="og:image" content="{% if '/comments' in request.url and story %}{{ story.media_content_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
+    <meta property="og:image" content="{% if seo_data %}{{ seo_data[2] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ request.url }}">
     <meta property="twitter:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
     <meta property="twitter:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
-    <meta property="twitter:image" content="{% if '/comments' in request.url and story %}{{ story.media_content_url }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
+    <meta property="twitter:image" content="{% if seo_data %}{{ seo_data[2] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">

@@ -1,4 +1,3 @@
-from pytz import timezone as pytz_timezone
 from datetime import datetime, timedelta
 from requests import get as get_request
 from json import loads as json_loads
