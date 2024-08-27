@@ -32,7 +32,7 @@ def home():
 
 @views.route('/admin', methods=['GET'])
 @admin_required
-@extensions.limiter.limit('1 per minute')
+@extensions.limiter.limit('100 per hour')
 def admin():
     return render_template('admin.html')
 

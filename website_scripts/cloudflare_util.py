@@ -1,5 +1,6 @@
 from requests import post as post_request
 from json import loads as json_loads
+from flask import request
 
 from .config import CAPTCHA_SECRET_KEY
 
@@ -32,7 +33,7 @@ def is_valid_captcha(token: str) -> bool:
     return json_loads(response.content)['success']
 
 
-def get_user_ip(request: object) -> str:
+def get_user_ip() -> str:
     """Uses Cloudflare's headers to obtain the user real IP address.
 
     Arguments:
@@ -46,7 +47,7 @@ def get_user_ip(request: object) -> str:
     return ipv4 or ipv6
 
 
-def get_user_country(request: object) -> str:
+def get_user_country() -> str:
     """Gets the country of the IP making the request. May return an empty string if the appropriate header is not found in the request.
 
     Arguments:

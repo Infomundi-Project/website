@@ -30,7 +30,8 @@
     "unMember": true,
     "currencies": {
       "BAM": {
-        "name": "Bosnia and Herzegovina convertible mark"
+        "name": "Bosnia and Herzegovina convertible mark",
+        "symbol": "KM"
       }
     },
     "idd": {

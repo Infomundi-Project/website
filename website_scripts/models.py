@@ -250,8 +250,8 @@ class City(db.Model):
 class Friendship(db.Model):
     __tablename__ = 'friendships'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'), nullable=False)
-    friend_id = db.Column(db.String(10), db.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
+    friend_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(10), nullable=False, default='pending')  # Status: 'pending', 'accepted', 'rejected'
 

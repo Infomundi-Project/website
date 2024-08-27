@@ -1,33 +1,49 @@
 (() => {
     'use strict';
 
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
     const forms = document.querySelectorAll('.needs-validation');
 
-    // Loop over them and prevent submission
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
+            let isValid = true;
+
+            const emailField = form.querySelector('input[name="email"]');
+            const usernameField = form.querySelector('input[name="username"]');
+            const emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+            const usernamePattern = /^[\-a-zA-Z0-9_]{3,25}$/;
+
+            if (!emailPattern.test(emailField.value)) {
+                emailField.setCustomValidity('Invalid email address.');
+                isValid = false;
+            } else {
+                emailField.setCustomValidity('');
+            }
+
+            if (!usernamePattern.test(usernameField.value)) {
+                usernameField.setCustomValidity('Invalid username.');
+                isValid = false;
+            } else {
+                usernameField.setCustomValidity('');
+            }
+
+            if (!form.checkValidity() || !isValid) {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
-                // If the form is valid, change the button text and disable it
                 const signUpButton = document.getElementById('signUpButton');
-                signUpButton.textContent = 'Loading...'; // Change button text
-                signUpButton.disabled = true; // Disable the button
+                signUpButton.textContent = 'Loading...';
+                signUpButton.disabled = true;
 
-                // Set a timeout to re-enable the button after 5 seconds
                 setTimeout(() => {
-                    signUpButton.textContent = 'Sign up'; // Revert button text to original
-                    signUpButton.disabled = false; // Re-enable the button
-                }, 5000); // 5000 milliseconds = 5 seconds
+                    signUpButton.textContent = 'Sign up';
+                    signUpButton.disabled = false;
+                }, 5000);
             }
 
             form.classList.add('was-validated');
         }, false);
     });
 
-    // Real-time password match validation
     const password = document.getElementById('floatingPassword');
     const confirmPassword = document.getElementById('floatingConfirmPassword');
     const validatePasswords = () => {

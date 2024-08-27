@@ -1,14 +1,20 @@
-{% extends "base.html" %} {% block title %}Error {{ error_code }}{% endblock %}
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}">
-{% endblock %}
+{% extends "base.html" %}{% block title %}{{ contents[0] }}{% endblock %}
 {% block content %}
-<div class="noise"></div>
-<div class="overlay"></div>
-<div class="terminal">
-  <h1>Infomundi> Error <span class="errorcode">{{ error_code }}</span></h1>
-  <p class="output">{{ error_message }}</p>
-  <p class="output">Please try to <a href="{{ url_for('views.home') }}">return to the homepage</a>.</p>
-  <p class="output">Good luck.</p>
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+      <div class="col-10 col-sm-8 col-lg-6">
+        <img fetchpriority="high" class="d-block mx-lg-auto img-fluid" src="{{ contents[2] }}">
+      </div>
+      <div class="col-lg-6">
+        <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">{{ contents[0] }}</h1>
+        <p class="lead">{{ contents[1] }}</p>
+        {% if buttons_enabled %}
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+          <a type="button" role="button" class="btn btn-primary btn-lg px-4 me-md-2" href="{{ url_for('views.contact') }}">Contact Us</a>
+          <a type="button" role="button" class="btn btn-outline-secondary btn-lg px-4" href="{{ url_for('views.home') }}">Return Home</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
 </div>
 {% endblock %}

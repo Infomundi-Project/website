@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 
 from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization,\
- cloudflare_util, auth_util, hashing_util
+ cloudflare_util, auth_util, hashing_util, qol_util
 from website_scripts.decorators import admin_required, in_maintenance, unauthenticated_only, verify_captcha
 
 auth = Blueprint('auth', __name__)
@@ -96,9 +96,6 @@ def invalidate_sessions():
 @unauthenticated_only
 def verify():
     token = request.args.get('token', '')
-    if not input_sanitization.is_md5_hash(token):
-        flash('We apologize, but the token seems to be invalid.', 'error')
-        return redirect(url_for('views.home'))
 
     # Tries to find the token in the database
     token_lookup = models.RegisterToken.query.filter_by(token=token).first()
@@ -263,8 +260,8 @@ def login():
 @auth.route('/commento', methods=['GET'])
 @login_required
 def commento():
-    token = request.args.get("token", '', type=str)
-    received_hmac_hex = request.args.get("hmac", '', type=str)
+    token = request.args.get('token', '', type=str)
+    received_hmac_hex = request.args.get('hmac', '', type=str)
 
     if not token or not received_hmac_hex:
         return "Missing token or hmac", 400
