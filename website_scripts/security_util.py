@@ -29,14 +29,14 @@ def generate_nonce(length: int=32) -> str:
     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode('utf-8')
 
 
-def derive_key(secret: str, initial_salt: str=''):
-    # Takes the initial salt (base64 string), and decodes it to use in the script
+def derive_key(secret: str, initial_salt: str = ''):
+    # Decodes the base64-encoded salt if provided, otherwise generates a new one
     if initial_salt:
         salt = base64.b64decode(initial_salt.encode('utf-8'))
     else:
-        # If the salt was not initially provided, then we generate one!! :D 
-        salt = secrets.token_bytes(16)
-    
+        salt = secrets.token_bytes(16)  # Generate a random salt
+
+    # Derive a key using Scrypt key derivation function
     kdf = Scrypt(
         salt=salt,
         length=32,
@@ -45,35 +45,39 @@ def derive_key(secret: str, initial_salt: str=''):
         p=1,
         backend=default_backend()
     )
-    key = kdf.derive(secret.encode())
-    
-    # Returns tuple if salt was not provided initially. Everything is normalised with base64.
+    key = kdf.derive(secret.encode())  # Derive the key from the secret (binary)
+
+    # Return salt and key both base64-encoded (if new salt is generated)
     if not initial_salt:
-        return (base64.b64encode(salt.decode('utf-8')), base64.b64encode(key.decode('utf-8')))
+        return base64.b64encode(salt).decode('utf-8'), base64.b64encode(key).decode('utf-8')
+    
+    # Return only the key as base64-encoded if salt was provided
+    return base64.b64encode(key).decode('utf-8')
 
-    return base64.b64encode(key.decode('utf-8'))
 
-
-def encrypt(plaintext: str, secret: str='', salt: str='', key: str='') -> str:
-    if not salt and not key and not secret:
-        # Generate a random salt for key derivation
-        salt = secrets.token_bytes(16)
-        key = derive_key(secret, salt)
-    else:
+def encrypt(plaintext: str, secret: str = '', salt: str = '', key: str = '') -> str:
+    if not key and secret:
+        # If key is not provided, derive it along with salt
+        salt, key = derive_key(secret)
+    elif salt and key:
+        # If salt and key are provided, decode them from base64
         salt = base64.b64decode(salt.encode('utf-8'))
         key = base64.b64decode(key.encode('utf-8'))
+    else:
+        raise InfomundiCustomException('Either the secret or both the salt and key must be provided')
 
     # Generate a random IV (initialization vector)
     iv = secrets.token_bytes(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-    
+
     # Padding plaintext to be a multiple of block size
     padder = padding.PKCS7(128).padder()
     padded_data = padder.update(plaintext.encode()) + padder.finalize()
-    
+
+    # Encrypt the padded data
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
-    
+
     # Combine salt, IV, and ciphertext, then encode them into Base64 string
     encrypted_data = base64.b64encode(salt + iv + ciphertext).decode('utf-8')
     return encrypted_data
@@ -81,26 +85,27 @@ def encrypt(plaintext: str, secret: str='', salt: str='', key: str='') -> str:
 
 def decrypt(encrypted_data: str, initial_key: str = '', secret: str = '') -> str:
     encrypted_data = base64.b64decode(encrypted_data.encode('utf-8'))
-    
-    # If the key is not provided, we extract the salt from the cipherdata and generate the key out of the original secret.
+
+    # Extract salt, IV, and ciphertext from the encrypted data
+    salt = encrypted_data[:16]
+    iv = encrypted_data[16:32]
+    ciphertext = encrypted_data[32:]
+
+    # If the key is not provided, derive it from the secret and salt
     if not initial_key:
         if not secret:
-            raise InfomundiCustomException('If no key is provided, then the original secret is required')
-        salt = encrypted_data[:16]
-        key = derive_key(secret, salt)
+            raise InfomundiCustomException('If no key is provided, the original secret is required')
+        key = derive_key(secret, base64.b64encode(salt).decode('utf-8'))
     else:
         key = base64.b64decode(initial_key.encode('utf-8'))
 
-    iv = encrypted_data[16:32]  # Extract IV from the data
-    ciphertext = encrypted_data[32:]  # The remaining is the ciphertext
-    
+    # Decrypt the data using the derived key and IV
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    
+
+    # Decrypt and remove padding
     padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-    
-    # Remove padding
     unpadder = padding.PKCS7(128).unpadder()
     plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
-    
+
     return plaintext.decode()

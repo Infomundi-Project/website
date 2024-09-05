@@ -16,60 +16,48 @@ auth = Blueprint('auth', __name__)
 @unauthenticated_only
 @verify_captcha
 def login():
+    # If user is in totp process, redirect them to the correct page
+    if session.get('user_id', ''):
+        return redirect(url_for('auth.totp'))
+
     if request.method == 'GET':
         return render_template('login.html')
 
-    # Check the two factor status
-    has_twofactor = session.get('has_twofactor', '')
-    twofactor_success = session.get('twofactor_success', '')
+    email = request.form.get('email', '')
+    password = request.form.get('password', '')
+    session['remember_me'] = bool(request.form.get('remember_me', ''))
 
-    # If the user is in two factor stage and didn't succeed, redirect to /auth/totp
-    if has_twofactor and not twofactor_success:
-        return redirect(url_for('auth.totp'))
+    if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
+        flash('Invalid credentials!', 'error')
+        return redirect(url_for('auth.login'))
 
-    # The user only bypasses this if they completed the totp verification
-    if not twofactor_success:
-        email = request.form.get('email', '')
-        password = request.form.get('password', '')
+    user = models.User.query.filter_by(email=hashing_util.sha256_hash_text(email)).first()
+    if not user or not user.check_password(password):
+        flash('Invalid credentials!', 'error')
+        return render_template('login.html')
 
-        if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
-            flash('Invalid credentials!', 'error')
-            return redirect(url_for('auth.login'))
-
-        user = models.User.query.filter_by(email=hashing_util.sha256_hash_text(email)).first()
-        if not user or not user.check_password(password):
-            flash('Invalid credentials!', 'error')
-            return render_template('login.html')
-
-    # If the user has a salt associated with their account already, we simply derive the key out of the salt and the user's
-    # cleartext password. If not, then we derive a key for the user and store the salt.
     if user.derived_key_salt:
-        session['key_data'] = security_util.derive_key(password, user.derived_key_salt)
+        session['key_value'] = security_util.derive_key(password, user.derived_key_salt)
     else:
-        session['key_data'] = security_util.derive_key(password)
-        user.derived_key_salt = session['key_data'][0] # 0 = key_salt // 1 = key_value
+        key_data = security_util.derive_key(password) # returns salt and key value as we don't specify the salt
+        
+        # Index 0 = key_salt // Index 1 = key_value. Save the salt to the database.
+        user.derived_key_salt = key_data[0]
+        # Save the key value to the session
+        session['key_value'] = key_data[1]
+        # Commit changes to the database
         extensions.db.session.commit()
 
-    # If the user was already in two factor stage, we set it to False. Otherwise, it's set to True.
-    session['has_twofactor'] = bool(user.totp_secret)
-    session['user_id'] = user.user_id
-    if session['has_twofactor'] and not twofactor_success:
-        return redirect(url_for('auth.totp'))
-
-    # Save the timestamp of the last login
-    user.last_login = datetime.now()
-    extensions.db.session.commit()
-
-    remember_me = bool(request.form.get('remember_me', ''))
-    login_user(user, remember=remember_me)
-    
-    # Make the email address last in the session
-    session.permanent = True
     session['email_address'] = email
     session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
-    session['session_version'] = user.session_version
 
-    flash(f'Welcome back, {current_user.username}!')
+    # If user has totp enabled, we redirect them to the totp page without effectively logging them in the system
+    if user.totp_secret:
+        session['user_id'] = user.user_id
+        return redirect(url_for('auth.totp'))
+
+    auth_util.perform_login_actions(user)
+    flash(f'Welcome back, {user.username}!')
     return redirect(url_for('views.user_profile', username=user.username))
 
 
@@ -77,7 +65,7 @@ def login():
 @unauthenticated_only
 @verify_captcha
 def totp():
-    if not session['in_twofactor']:
+    if not session.get('user_id', ''):
         flash('Not yet! You should log in first.', 'error')
         return redirect(url_for('auth.login'))
 
@@ -85,20 +73,35 @@ def totp():
     if request.method == 'GET':
         return render_template('twofactor.html', user=user)
     
+    recovery_token = request.form.get('recovery_token', '').strip()
+    if recovery_token:
+        if hashing_util.argon2_verify_hash(user.totp_recovery, recovery_token):
+            totp_util.remove_totp(user)
+            auth_util.perform_login_actions(user)
+            
+            flash(f'We removed your TOTP configuration, {user.username}. Please, re-enable it whenever possible. Welcome back to Infomundi!')
+            return redirect(url_for('views.user_profile', username=user.username))
+        else:
+            flash('Invalid TOTP recovery code!', 'error')
+            return redirect(url_for('auth.totp'))
+
     code = request.form.get('code', '')
 
-    key_salt, key_value = session['key_data']
-
     # Decrypt user's totp secret
-    totp_secret = security_util.decrypt(user.totp_secret, initial_key=key_value)
+    totp_secret = security_util.decrypt(user.totp_secret, initial_key=session['key_value'])
 
     is_valid_totp = totp_util.verify_totp(totp_secret, code)
     if not is_valid_totp:
         flash('Invalid TOTP code!', 'error')
         return redirect(url_for('auth.totp'))
 
-    session['twofactor_success'] = True
-    return redirect(url_for('auth.login'))
+    auth_util.perform_login_actions(user)
+    
+    # This is an indicator that the user has two factor, and we don't use it anywhere after this logic
+    del session['user_id']
+
+    flash(f'Welcome back, {user.username}')
+    return redirect(url_for('views.user_profile', username=user.username))
 
 
 @auth.route('/disable_totp', methods=['POST'])
@@ -123,9 +126,7 @@ def disable_totp():
         return redirect(url_for('views.edit_user_settings'))
 
     # Removes the user's TOTP information from the database
-    current_user.totp_secret = None
-    current_user.totp_recovery = None
-    extensions.db.session.commit()
+    totp_util.remove_totp(current_user)
 
     flash('You removed your two factor authentication!')
     return redirect(url_for('views.edit_user_settings'))

@@ -36,7 +36,7 @@ def setup_totp():
         return jsonify({'valid': False}), 200
 
     # Generates a super random recovery token
-    totp_recovery_token = security_util.generate_nonce(12)
+    totp_recovery_token = security_util.generate_nonce()
 
     # Gets the key information from user's session
     key_salt, key_value = session['key_data']

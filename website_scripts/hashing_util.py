@@ -6,9 +6,9 @@ def argon2_hash_text(cleartext: str) -> str:
     return argon2.PasswordHasher().hash(cleartext)
 
 
-def argon2_verify_hash(hashed_password: str, cleartext: str) -> bool:
+def argon2_verify_hash(hashed_data: str, cleartext: str) -> bool:
     try:
-        argon2.PasswordHasher().verify(hashed_password, cleartext)
+        argon2.PasswordHasher().verify(hashed_data, cleartext)
     except Exception:
         return False
 

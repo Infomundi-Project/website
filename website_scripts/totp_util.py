@@ -3,7 +3,13 @@ import base64
 import pyotp
 import io
 
-from . import security_util
+from . import security_util, extensions
+
+
+def remove_totp(user):
+    user.totp_secret = None
+    user.totp_recovery = None
+    extensions.db.session.commit()
 
 
 def generate_totp_secret():

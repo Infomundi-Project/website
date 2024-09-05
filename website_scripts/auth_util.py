@@ -1,10 +1,20 @@
-import time
-
+from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
-from flask_login import logout_user
+from flask import session
 from sqlalchemy import or_
 
 from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util
+
+
+def perform_login_actions(user):
+    # Save the timestamp of the last login
+    user.last_login = datetime.now()
+    extensions.db.session.commit()
+
+    login_user(user, remember=session['remember_me'])
+    
+    session.permanent = True
+    session['session_version'] = user.session_version
 
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
