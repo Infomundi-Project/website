@@ -44,6 +44,10 @@ class User(db.Model, UserMixin):
     totp_secret = db.Column(db.String(120))
     totp_recovery = db.Column(db.String(120))
 
+    # Email 2fa token
+    mail_twofactor = db.Column(db.String(6))
+    mail_twofactor_timestamp = db.Column(db.DateTime)
+
     # Derived key
     derived_key_salt = db.Column(db.String(120))
 

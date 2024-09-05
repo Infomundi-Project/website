@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS users (
     last_activity DATETIME,
     totp_secret VARCHAR(120),
     totp_recovery VARCHAR(120),
+    mail_twofactor VARCHAR(6),
+    mail_twofactor_timestamp DATETIME,
     derived_key_salt VARCHAR(120)
 );
 

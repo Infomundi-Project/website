@@ -161,7 +161,7 @@ def register():
 
     # Checks if password is strong enough
     if not input_sanitization.is_strong_password(password):
-        flash('Password Policy: The password must be 8-50 characters.', 'error')
+        flash('Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
         return redirect(url_for('auth.register'))
 
     hashed_email = hashing_util.sha256_hash_text(email)
@@ -171,19 +171,20 @@ def register():
         models.User.username == username
     )).first()
     if user_lookup:
-        flash(f'We apologize, but there has been an error.', 'error')
+        # Make no mistake, we use this message here in order to prevent user enumeration
+        flash(f'If everything went smoothly, you should soon receive instructions in your inbox at {email}')
         return redirect(url_for('auth.register'))
 
     # Tries to send a verification email to the user.
     send_token = auth_util.handle_register_token(email, hashed_email, username, hashing_util.argon2_hash_text(password))
     if not send_token:
-        flash('We apologize, but something went wrong. Please, try again later.', 'error')
+        flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
         scripts.log(f'[!] Not able to send verification token to {email}.')
         
         return redirect(url_for('auth.register'))
 
-    flash(f'We sent an email with activation instructions to your address at {email}')
-    return render_template('register.html')
+    flash(f'If everything went smoothly, you should soon receive instructions in your inbox at {email}')
+    return redirect(url_for('auth.register'))
 
 
 @auth.route('/invalidate_sessions', methods=['POST'])

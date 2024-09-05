@@ -32,7 +32,6 @@ def home():
 
 @views.route('/admin', methods=['GET'])
 @admin_required
-#@extensions.limiter.limit('100 per hour')
 def admin():
     return render_template('admin.html')
 
@@ -77,6 +76,16 @@ def handle_friends(friend_id, action):
         return redirect(url_for('views.user_redirect'))
 
 
+@views.route('/id/<user_id>', methods=['GET'])
+def user_profile_by_id(user_id):
+    user = models.User.query.get(user_id)
+    if not user:
+        flash('User not found!', 'error')
+        return redirect(url_for('views.user_redirect'))
+    
+    return redirect(url_for('views.user_profile', username=user.username))
+
+
 @views.route('/profile/<username>', methods=['GET'])
 def user_profile(username):
     user = models.User.query.filter_by(username=username).first()
@@ -117,42 +126,40 @@ def edit_user_profile(username):
         return render_template('edit_profile.html')
 
     # Gets first user input
-    description = input_sanitization.sanitize_description(request.form.get('description', ''))
-    display_name = input_sanitization.sanitize_text(request.form.get('display_name', ''))
+    description = input_sanitization.sanitize_description(request.form.get('description', '')).strip()
+    display_name = input_sanitization.sanitize_text(request.form.get('display_name', '')).strip()
 
     # Checks if the description is in the allowed range
     if not input_sanitization.is_text_length_between(config.DESCRIPTION_LENGTH_RANGE, description):
         flash(f'We apologize, but your description is too big. Keep it under {config.MAX_DESCRIPTION_LEN} characters.', 'error')
-        return redirect(url_for('views.user_redirect'))
+        return render_template('edit_profile.html')
 
     # Checks if the display name is in the allowed range
     if not input_sanitization.is_text_length_between(config.DISPLAY_NAME_LENGTH_RANGE, display_name):
         flash(f'We apologize, but your display name is too big. Keep it under {config.MAX_DISPLAY_NAME_LEN} characters.', 'error')
-        return redirect(url_for('views.user_redirect'))
+        return render_template('edit_profile.html')
 
-    username = request.form.get('username', '')
+    username = request.form.get('username', '').strip()
 
     # If the user changed their username, we should make sure it's alright.
     if current_user.username != username:
         # Checks if the username is valid
         if not input_sanitization.is_valid_username(username):
             flash(f'We apologize, but your username is invalid.', 'error')
-            return redirect(url_for('views.user_redirect'))
+            return render_template('edit_profile.html')
         
-        is_username_available = models.User.query.filter_by(username=username)
+        is_username_available = models.User.query.filter_by(username=username).first()
         if not is_username_available:
             flash(f'The username "{username}" is unavailable. Try making it more unique adding numbers/underscores/hiphens.', 'error')
-            return redirect(url_for('views.user_redirect'))
-    
-    user = models.User.query.filter_by(username=current_user.username).first()
+            return render_template('edit_profile.html')
     
     # At this point user input should be safe :thumbsup: so we apply changes
-    user.username = username
-    user.display_name = display_name
-    user.profile_description = description
+    current_user.username = username
+    current_user.display_name = display_name
+    current_user.profile_description = description
 
     # Commit changes to the database
-    models.db.session.commit()
+    extensions.db.session.commit()
     
     flash('Profile updated successfully!', 'success')
     return render_template('edit_profile.html')
@@ -161,8 +168,7 @@ def edit_user_profile(username):
 @views.route('/profile/<username>/edit/avatar', methods=['GET'])
 @profile_owner_required
 def edit_user_avatar(username):
-    short_description = input_sanitization.gentle_cut_text(25, current_user.profile_description or '')
-    return render_template('edit_avatar.html', short_description=short_description)
+    return render_template('edit_avatar.html')
 
 
 @views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
@@ -258,7 +264,6 @@ def be_right_back():
 
 
 @views.route('/captcha', methods=['GET', 'POST'])
-@extensions.limiter.exempt
 @verify_captcha
 def captcha():
     if request.method == 'GET':
@@ -275,6 +280,26 @@ def captcha():
     session['clearance'] = datetime.now().isoformat()
     flash('Thanks for verifying! You are not a robot after all.')
     return redirect(session.get('clearance_from', url_for('views.home')))
+
+
+@views.route('/sensitive', methods=['GET', 'POST'])
+@verify_captcha
+@login_required
+def sensitive():
+    if request.method == 'GET':
+        # If they have clearance (means that they have recently proven they're human)
+        sensitive_clearance = session.get('sensitive_clearance', '')
+        if sensitive_clearance:
+            timestamp = datetime.fromisoformat(sensitive_clearance)
+            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+                flash("We know you are who you say you are, don't worry!")
+                return redirect(url_for('views.user_redirect'))
+
+        return render_template('sensitive.html')
+    
+    session['sensitive_clearance'] = datetime.now().isoformat()
+    flash('Thanks for verifying! You are who you say you are after all.')
+    return redirect(url_for('auth.edit_user_settings', username=current_user.username))
 
 
 @views.route('/upload_image', methods=['POST'])

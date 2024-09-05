@@ -1,5 +1,6 @@
 import secrets
 import base64
+from random import randint
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -8,6 +9,10 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 from .custom_exceptions import InfomundiCustomException
+
+
+def generate_2fa_token() -> str:
+    return str(randint(100000, 999999))  # 6-digit code
 
 
 def generate_nonce(length: int=32) -> str:

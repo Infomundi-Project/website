@@ -52,9 +52,9 @@
         border: 5px solid white;
     }
     .user-description {
-        max-height: 150px; /* Adjust this value as needed */
+        max-height: 150px;
         overflow: hidden;
-        white-space: pre-wrap; /* Preserve whitespace but wrap text */
+        white-space: pre-wrap;
         word-wrap: break-word;
     }
 </style>
@@ -121,7 +121,7 @@
       <div class="col-8">
         <div class="row">
           <div class="col-3">
-            <img src="{{ user.avatar_url }}" alt="User Avatar" class="profile-avatar">
+            <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s profile picture" class="profile-avatar">
           </div>
           <div class="ms-2 col">
             {% if user.display_name %}
@@ -194,12 +194,14 @@
     <div class="row mt-4">
       <!-- Recent Activity -->
       <div class="col-9">
+        <!--
         <h3>Recent Activity</h3>
         <div class="list-group">
           <a href="#" class="list-group-item list-group-item-action">Lorem Ipsum #1</a>
           <a href="#" class="list-group-item list-group-item-action">Lorem Ipsum #2</a>
           <a href="#" class="list-group-item list-group-item-action">Lorem Ipsum #3</a>
         </div>
+      -->
         
         <!-- Friends -->
         {% if friends_list %}

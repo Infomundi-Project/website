@@ -16,6 +16,8 @@ def perform_login_actions(user):
     session.permanent = True
     session['session_version'] = user.session_version
 
+    
+
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
     """Generates a verification token, stores in the database and 

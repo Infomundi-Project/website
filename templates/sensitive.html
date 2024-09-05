@@ -1,0 +1,97 @@
+{% extends "base.html" %}{% block title %}Two Factor Authentication{% endblock %}
+{% block styles %}
+<style>
+	.profile-avatar {
+        width: 80%;
+        height: auto;
+        border-radius: 15px;
+        border: 5px solid white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container col-xl-10 col-xxl-8 px-4 py-2">
+    <div class="row align-items-center g-lg-5 py-5">
+      <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
+        <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Sensitive Page</h1>
+        <h2 class="col-lg-10 fs-5">Hey, {{ current_user.username }}. Looks like you've found a sensitive page, that may allow strangers to change vital settings in your Infomundi account. For your safety, please, prove that you are indeed who you say you are. <br><br>If you encounter any issues, please don't hesitate to <a href="{{ url_for('views.contact') }}">contact our team</a> for assistance.</h2>
+      </div>
+      <div class="col-md-10 mx-auto col-lg-5">
+      	<img fetchpriority="high" src="{{ current_user.avatar_url }}" class="profile-avatar" alt="{{ current_user.username }}'s profile picture">
+        <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('views.sensitive') }}">
+	        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+	        <!-- TOTP Input Group -->
+	        <div id="totp-input-group">
+		        <div class="input-group mt-2">
+		            <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
+		            <div class="form-floating">
+		                <input name="code" type="text" class="form-control" id="floatingInputCurrentTOTP" placeholder="TOTP" maxlength="6" minlength="6" required>
+		                <label for="floatingInputCurrentTOTP">Code</label>
+		            </div>
+		        </div>
+	    	</div>
+
+	        <!-- Recovery Token Input Group (Initially Hidden) -->
+	        <div id="recovery-token-input-group" style="display: none;">
+		        <div class="input-group mt-2">
+		            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+		            <div class="form-floating">
+		                <input name="recovery_token" type="text" class="form-control" id="floatingInputRecoveryToken" placeholder="Recovery Token">
+		                <label for="floatingInputRecoveryToken">Recovery Token</label>
+		            </div>
+		        </div>
+		    </div>
+
+	        <div class="cf-turnstile mt-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+
+	        <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Submit</button>
+	        <hr class="my-4">
+	        <small class="text-muted">
+	            <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.
+	        </small>
+	    </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ nonce }}">
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleDeviceLink = document.getElementById('toggle-device-link');
+        const totpInputGroup = document.getElementById('totp-input-group');
+        const recoveryTokenInputGroup = document.getElementById('recovery-token-input-group');
+
+        toggleDeviceLink.addEventListener('click', function (event) {
+		    event.preventDefault(); // Prevent default link behavior
+
+		    if (totpInputGroup.style.display === 'none') {
+		        // Show TOTP input group, hide Recovery Token input group
+		        totpInputGroup.style.display = 'block';
+		        recoveryTokenInputGroup.style.display = 'none';
+		        
+		        // Add 'required' to TOTP input and remove from recovery token
+		        document.getElementById('floatingInputCurrentTOTP').setAttribute('required', true);
+		        document.getElementById('floatingInputRecoveryToken').removeAttribute('required');
+		        
+		        toggleDeviceLink.textContent = "I don't have access to my two factor device";
+		    } else {
+		        // Hide TOTP input group, show Recovery Token input group
+		        totpInputGroup.style.display = 'none';
+		        recoveryTokenInputGroup.style.display = 'block';
+		        
+		        // Add 'required' to recovery token and remove from TOTP input
+		        document.getElementById('floatingInputRecoveryToken').setAttribute('required', true);
+		        document.getElementById('floatingInputCurrentTOTP').removeAttribute('required');
+		        
+		        toggleDeviceLink.textContent = "Nevermind, I have access to my two factor device";
+		    }
+		});
+    });
+</script>
+<script nonce="{{ nonce }}"
+    src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"
+></script>
+{% endblock %}
