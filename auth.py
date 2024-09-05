@@ -1,18 +1,134 @@
 import binascii
-import hashlib
-import hmac
 import json
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
 from flask_login import login_user, login_required, current_user, logout_user
-from datetime import datetime, timedelta
+from datetime import datetime
 from sqlalchemy import or_
 
-from website_scripts import config, json_util, scripts, immutable, extensions, models, input_sanitization,\
- cloudflare_util, auth_util, hashing_util, qol_util
+from website_scripts import config, json_util, scripts, extensions, models, input_sanitization,\
+ cloudflare_util, auth_util, hashing_util, qol_util, security_util, totp_util
 from website_scripts.decorators import admin_required, in_maintenance, unauthenticated_only, verify_captcha
 
 auth = Blueprint('auth', __name__)
+
+
+@auth.route('/login', methods=['GET', 'POST'])
+@unauthenticated_only
+@verify_captcha
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    # Check the two factor status
+    has_twofactor = session.get('has_twofactor', '')
+    twofactor_success = session.get('twofactor_success', '')
+
+    # If the user is in two factor stage and didn't succeed, redirect to /auth/totp
+    if has_twofactor and not twofactor_success:
+        return redirect(url_for('auth.totp'))
+
+    # The user only bypasses this if they completed the totp verification
+    if not twofactor_success:
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+
+        if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
+            flash('Invalid credentials!', 'error')
+            return redirect(url_for('auth.login'))
+
+        user = models.User.query.filter_by(email=hashing_util.sha256_hash_text(email)).first()
+        if not user or not user.check_password(password):
+            flash('Invalid credentials!', 'error')
+            return render_template('login.html')
+
+    # If the user has a salt associated with their account already, we simply derive the key out of the salt and the user's
+    # cleartext password. If not, then we derive a key for the user and store the salt.
+    if user.derived_key_salt:
+        session['key_data'] = security_util.derive_key(password, user.derived_key_salt)
+    else:
+        session['key_data'] = security_util.derive_key(password)
+        user.derived_key_salt = session['key_data'][0] # 0 = key_salt // 1 = key_value
+        extensions.db.session.commit()
+
+    # If the user was already in two factor stage, we set it to False. Otherwise, it's set to True.
+    session['has_twofactor'] = bool(user.totp_secret)
+    session['user_id'] = user.user_id
+    if session['has_twofactor'] and not twofactor_success:
+        return redirect(url_for('auth.totp'))
+
+    # Save the timestamp of the last login
+    user.last_login = datetime.now()
+    extensions.db.session.commit()
+
+    remember_me = bool(request.form.get('remember_me', ''))
+    login_user(user, remember=remember_me)
+    
+    # Make the email address last in the session
+    session.permanent = True
+    session['email_address'] = email
+    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
+    session['session_version'] = user.session_version
+
+    flash(f'Welcome back, {current_user.username}!')
+    return redirect(url_for('views.user_profile', username=user.username))
+
+
+@auth.route('/totp', methods=['GET', 'POST'])
+@unauthenticated_only
+@verify_captcha
+def totp():
+    if not session['in_twofactor']:
+        flash('Not yet! You should log in first.', 'error')
+        return redirect(url_for('auth.login'))
+
+    user = models.User.query.get(session['user_id'])
+    if request.method == 'GET':
+        return render_template('twofactor.html', user=user)
+    
+    code = request.form.get('code', '')
+
+    key_salt, key_value = session['key_data']
+
+    # Decrypt user's totp secret
+    totp_secret = security_util.decrypt(user.totp_secret, initial_key=key_value)
+
+    is_valid_totp = totp_util.verify_totp(totp_secret, code)
+    if not is_valid_totp:
+        flash('Invalid TOTP code!', 'error')
+        return redirect(url_for('auth.totp'))
+
+    session['twofactor_success'] = True
+    return redirect(url_for('auth.login'))
+
+
+@auth.route('/disable_totp', methods=['POST'])
+@login_required
+def disable_totp():
+    current_password = request.form.get('current_password', '')
+    if not current_user.check_password(current_password):
+        flash('Invalid current password', 'error')
+        return redirect(url_for('views.edit_user_settings'))
+
+    code = request.form.get('code', '')
+    
+    # Get the user key information from their session
+    key_salt, key_value = session['key_data']
+
+    # Decrypt user's totp secret
+    totp_secret = security_util.decrypt(current_user.totp_secret, initial_key=key_value)
+
+    is_valid_totp = totp_util.verify_totp(totp_secret, code)
+    if not is_valid_totp:
+        flash('Invalid TOTP code!', 'error')
+        return redirect(url_for('views.edit_user_settings'))
+
+    # Removes the user's TOTP information from the database
+    current_user.totp_secret = None
+    current_user.totp_recovery = None
+    extensions.db.session.commit()
+
+    flash('You removed your two factor authentication!')
+    return redirect(url_for('views.edit_user_settings'))
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -43,7 +159,7 @@ def register():
         return redirect(url_for('auth.register'))
 
     # Checks if password is strong enough
-    if not scripts.is_strong_password(password):
+    if not input_sanitization.is_strong_password(password):
         flash('Password Policy: The password must be 8-50 characters.', 'error')
         return redirect(url_for('auth.register'))
 
@@ -133,9 +249,10 @@ def forgot_password():
             return render_template('forgot_password.html')
         
         # Checks if the token is valid
-        result = auth_util.check_recovery_token(recovery_token)
-        if result:
-            login_user(result)
+        user = auth_util.check_recovery_token(recovery_token)
+        if user:
+            session['session_version'] = user.session_version
+            login_user(user)
 
             flash('Success! You may be able to change your password now.')
             return redirect(url_for('auth.password_change'))
@@ -149,7 +266,7 @@ def forgot_password():
         return render_template('forgot_password.html')
 
     # Tries to send the recovery token to the user
-    auth_util.send_recovery_token(email, scripts.sha256_hash_text(email))
+    auth_util.send_recovery_token(email, hashing_util.sha256_hash_text(email))
 
     # Generic error message to prevent user enumeration
     flash(f"If {email} is in our database, an email will be sent with instructions.")
@@ -173,7 +290,7 @@ def password_change():
         message = 'Incorrect old password.'
     elif new_password != confirm_password:
         message = 'Passwords must match!'
-    elif not scripts.is_strong_password(new_password):
+    elif not input_sanitization.is_strong_password(new_password):
         message = "Password Policy: The password should be 8-50 characers long."
     else:
         message = ''
@@ -190,10 +307,34 @@ def password_change():
     
     # Commits to the database
     extensions.db.session.commit()
-        
-    logout_user()
 
-    flash(f'Your password has been updated, {user.username}. You may log in now.')
+    ip_address = cloudflare_util.get_user_ip()
+    country = cloudflare_util.get_user_country()
+
+    message = f"""Hello,
+
+We wanted to inform you that the password for your Infomundi account has been successfully changed. If you made this change, there's nothing else you need to do.
+
+The change was made from the following location:
+- IP Address: {ip_address}
+- Country: {country}
+
+However, if you did not authorize this change, please take immediate action to secure your account. You can recover your account by clicking the link below:
+
+https://infomundi.net/auth/forgot_password
+
+If you encounter any issues or need further assistance, feel free to contact us using the form at:
+
+https://infomundi.net/contact
+
+Best regards,
+The Infomundi Team"""
+    subject = 'Infomundi - Password Change Notification'
+
+    notifications.send_email()
+
+    flash(f'Your password has been updated, {current_user.username}. You may log in now.')
+    logout_user()
     return redirect(url_for('auth.login'))
 
 
@@ -220,57 +361,13 @@ def account_delete():
     return redirect(url_for('views.user_redirect'))
 
 
-@auth.route('/login', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
-def login():
-    if request.method == 'GET':
-        return render_template('login.html')
-
-    email = request.form.get('email', '')
-    password = request.form.get('password', '')
-
-    if not input_sanitization.is_valid_email(email) or not scripts.is_strong_password(password):
-        flash('Invalid credentials!', 'error')
-        return redirect(url_for('auth.login'))
-
-    # Hash the email address before querying
-    user = models.User.query.filter_by(email=hashing_util.sha256_hash_text(email)).first()
-    if user and user.check_password(password):
-        # Save the timestamp of the last login
-        user.last_login = datetime.now()
-        extensions.db.session.commit()
-
-        remember_me = bool(request.form.get('remember_me', ''))
-        login_user(user, remember=remember_me)
-            
-        # Make the email address last in the session
-        session.permanent = True
-        session['email_address'] = email
-        session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
-        session['session_version'] = user.session_version
-            
-        flash(f'Welcome back, {current_user.username}!')
-        return redirect(url_for('views.home'))
-
-    flash('Invalid credentials!', 'error')
-    return render_template('login.html')
-
-
 @auth.route('/commento', methods=['GET'])
 @login_required
 def commento():
     token = request.args.get('token', '', type=str)
     received_hmac_hex = request.args.get('hmac', '', type=str)
 
-    if not token or not received_hmac_hex:
-        return "Missing token or hmac", 400
-
-    secret_key = binascii.unhexlify(config.COMMENTO_SSO_KEY)
-
-    # Validate HMAC
-    expected_hmac = hmac.new(secret_key, binascii.unhexlify(token), hashlib.sha256).digest()
-    if not hmac.compare_digest(binascii.unhexlify(received_hmac_hex), expected_hmac):
+    if not hashing_util.is_hmac_authentic(config.COMMENTO_SSO_KEY, token, received_hmac_hex):
         return "Invalid HMAC", 403
 
     payload = {
@@ -282,7 +379,7 @@ def commento():
 
     # Generate HMAC for the response payload
     payload_json = json.dumps(payload, separators=(',', ':')).encode()
-    response_hmac = hmac.new(secret_key, payload_json, hashlib.sha256).hexdigest()
+    response_hmac = hashing_util.generate_hmac_signature(secret_key, payload_json)
     payload_hex = binascii.hexlify(payload_json).decode()
 
     # Redirect to Commento's SSO callback
@@ -317,7 +414,7 @@ def google_callback():
         # Generate a super random password and argon2 hash it. 
         # The user can only log in using google integration or if they want to recover their account for some reason.
         random_hashed_password = hashing_util.argon2_hash_text(security_util.generate_nonce(24))
-        user = models.User(user_id=scripts.generate_id(), display_name=display_name, username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
+        user = models.User(user_id=security_util.generate_nonce(10), display_name=display_name, username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
         extensions.db.session.add(user)
         extensions.db.session.commit()
     
@@ -335,11 +432,7 @@ def google_callback():
 def logout():
     flash(f'We hope to see you again soon, {current_user.username}')
 
-    # Removes email from the user's session. 
-    # It'd be creepy to see your email address in the contact form when you're logged out, wouldn't it?
-    if 'email_address' in session:
-        del session['email_address']
-    session.permanent = False
+    session.clear()
 
     logout_user()
     return redirect(url_for('views.home'))

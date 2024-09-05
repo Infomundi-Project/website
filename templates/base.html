@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{% if '/comments' in request.url and story %}{{ page_language }}{% else %}en{% endif %}" data-bs-theme="{% if request.cookies.get('theme') == 'dark' %}dark{% else %}light{% endif %}">
+<html lang="{% if request.endpoint == 'views.comments' %}{{ page_language }}{% else %}en{% endif %}" data-bs-theme="{% if request.cookies.get('theme') == 'dark' %}dark{% else %}light{% endif %}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +9,7 @@
     <!--<meta name="google-adsense-account" content="ca-pub-2416889662324926">-->
     <!--<meta name="msvalidate.01" content="02225A95C7E679E2FCBD558DCA1EFD89">-->
     
-    {% if current_user.is_authenticated and current_user.in_recovery and request.endpoint != 'auth.change_password' %}
+    {% if current_user.is_authenticated and current_user.in_recovery and request.endpoint != 'auth.password_change' %}
       <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/password_change");</script>
     {% endif %}
 
@@ -73,7 +73,7 @@
     {% block header %}
     {% endblock %}
 
-    {% if '/edit' in request.url %}
+    {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_profile.css') }}">
     {% endif %}
     
@@ -120,27 +120,27 @@
         <hr>
         <ul class="nav nav-pills flex-column mb-5">
           <li class="nav-item inf-nav-item">
-            <a href="/" class="nav-link {{ 'active' if request.url.endswith('/') else '' }}">
+            <a href="/" class="nav-link {{ 'active' if request.endpoint == 'views.home' }}">
             <i class="fa-solid fa-house me-1"></i>Home
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.about') }}" class="nav-link {{ 'active' if request.url.endswith('/about') else '' }}">
+            <a href="{{ url_for('views.about') }}" class="nav-link {{ 'active' if request.endpoint == 'views.about' }}">
             <i class="fa-solid fa-address-card me-1"></i>About
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.team') }}" class="nav-link {{ 'active' if request.url.endswith('/team') else '' }}">
+            <a href="{{ url_for('views.team') }}" class="nav-link {{ 'active' if request.endpoint == 'views.team' }}">
             <i class="fa-solid fa-people-group me-1"></i>Team
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.contact') }}" class="nav-link {{ 'active' if request.url.endswith('/contact') else '' }}">
+            <a href="{{ url_for('views.contact') }}" class="nav-link {{ 'active' if request.endpoint == 'views.contact' }}">
             <i class="fa-solid fa-phone me-1"></i>Contact
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.policies') }}" class="nav-link {{ 'active' if request.url.endswith('/policies') else '' }}">
+            <a href="{{ url_for('views.policies') }}" class="nav-link {{ 'active' if request.endpoint == 'views.policies' }}">
             <i class="fa-solid fa-building-shield me-1"></i>Policies
             </a>
           </li>
@@ -266,20 +266,20 @@
           <hr>
           <ul class="nav nav-pills flex-column mb-5">
             <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.forgot_password') }}" class="nav-link {{ 'active' if request.url.endswith('/forgot_password') else '' }}">
+              <a href="{{ url_for('auth.forgot_password') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.forgot_password' }}">
                 <i class="fa-solid fa-person-circle-question me-1"></i>Account Recovery
               </a>
             </li>
             <hr>
 
             <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.url.endswith('/login') else '' }}">
+              <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.login' }}">
                 <i class="fa-solid me-1 fa-right-to-bracket"></i>Sign in
               </a>
             </li>
 
             <li class="nav-item inf-nav-item">
-              <a href="{{ url_for('auth.register') }}" class="nav-link {{ 'active' if request.url.endswith('/register') else '' }}">
+              <a href="{{ url_for('auth.register') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.register' }}">
                 <i class="fa-solid me-1 fa-user-pen"></i>Sign up
               </a>
             </li>
@@ -410,7 +410,7 @@
     {% endif %}
 
 
-{% if '/news' in request.url %}
+{% if request.endpoint == 'views.news' %}
   <div class="hwrap" id="ticker">
     <div class="hmove">
 
@@ -620,13 +620,13 @@
                 <a href="https://infomundi.net/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
                 <ul class="nav nav-pills flex-column mt-4">
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/edit') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
+                        <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
                     </li>
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/avatar') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
+                        <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Avatar</a>
                     </li>
                     <li class="nav-item inf-nav-item">
-                        <a class="nav-link {% if request.url.endswith('/settings') %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
+                        <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
                     </li>
                 </ul>
             </div>
@@ -741,6 +741,7 @@
     ></script>
 
 
+    <!--
     <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/libs/cookieconsent-3.0.1.js') }}"
     ></script>
@@ -751,6 +752,7 @@
     <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/linkSafety.js') }}" 
     ></script>
+  -->
     
     {% if current_user.is_authenticated %}
     <script nonce="{{ nonce }}"

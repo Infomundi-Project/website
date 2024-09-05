@@ -129,11 +129,9 @@ The Infomundi Team"""
     result = notifications.send_email(email, subject, message)
     if result:
         user_lookup.recovery_token = verification_token
-        user_lookup.recovery_token_timestamp = now
+        user_lookup.recovery_token_timestamp = datetime.now()
         extensions.db.session.commit()
     
-    # Sleeps for a random time in order to prevent user enumeration based on response time.
-    time.sleep(uniform(1.0, 2.5))
     return result
 
 

@@ -1,11 +1,10 @@
-import time, threading, os, pymysql
-
-from datetime import datetime, timedelta
+import threading, os, pymysql
+from requests import get as get_request
 from random import shuffle, choice
 from unidecode import unidecode
 from bs4 import BeautifulSoup
+from datetime import datetime
 from feedparser import parse
-from requests import get
 from hashlib import md5
 
 from website_scripts import json_util, config, input_sanitization, immutable
@@ -88,17 +87,21 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         news_filter (str): A filter keyword for news items.
         result_list (list): A list to store the fetched and processed news items.
 
-    Returns:
-        None: Appends the fetched and processed news items to the result_list.
+    Appends the fetched and processed news items to the result_list.
     """
     headers = {
-        'User-Agent': choice(immutable.USER_AGENTS)
+        'User-Agent': choice(immutable.USER_AGENTS),
+        'Referer': 'www.google.com'
     }
+
+    if not input_sanitization.is_valid_url(rss_url):
+        print(f'Invalid url: {rss_url}')
+        return {}
     
     try:
-        response = get(rss_url, timeout=7, headers=headers)
-        if response.status_code != 200:
-            print(f"[!] {rss_url} // {response.status_code}")
+        response = get_request(rss_url, timeout=6, headers=headers)
+        if response.status_code not in [200, 301, 302]:
+            print(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
             return {}
     except Exception:
         return {}
@@ -117,7 +120,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            # Remove dangerous html tags from description
+            # Remove dangerous html tags from items
             feed_publisher = input_sanitization.sanitize_html(feed.feed.title)
             item_title = input_sanitization.sanitize_html(item.get('title', f'No title was provided'))
             item_description = input_sanitization.sanitize_html(item.get('description', 'No description was provided'))
@@ -148,13 +151,10 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
             # Creates the publisher id based on a MD5 summary of the feed link.
             publisher_id = md5(unidecode(feed_link).encode()).hexdigest()
             
-            # Defines default image path.
-            item_image = 'static/img/infomundi-white-darkbg-square.webp'
-            
             # Tries to format pubdate
             pubdate = format_date(pubdate)
             if 'error' in pubdate.keys():
-                # If errors out, well... We use today's date, what else could we do?
+                # If errors out, well... We use today's date, what else could we do? :D 
                 pubdate_full = datetime.now().date().strftime('%Y/%m/%d')
             else:
                 pubdate_full = pubdate['full']
@@ -169,7 +169,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
                 'link': item_link,
                 'pub_date': pubdate_full,
                 'media_content': {
-                    'url': item_image
+                    'url': 'static/img/infomundi-white-darkbg-square.webp'
                     }
                 }
 
@@ -250,14 +250,9 @@ def format_date(date) -> dict:
 
 
 def main():
-    """Main function to fetch and cache RSS feeds."""
-
-    # Get the list of categories by reading the filenames in the feeds path
-    categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
-
     total_done = 0
     
-    # Loop over each category to handle its RSS feeds
+    categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
     for selected_filter in categories:
         percentage = (total_done // 100) * len(categories)
         print(f"\n[{round(percentage, 2)}%] Handling cache for {selected_filter}...")
@@ -309,6 +304,5 @@ def main():
     print('[+] Finished!')
 
 
-# Ensure main() is called when the script is run directly
 if __name__ == "__main__":
     main()

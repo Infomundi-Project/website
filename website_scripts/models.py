@@ -40,6 +40,13 @@ class User(db.Model, UserMixin):
     is_online = db.Column(db.Boolean, default=False)
     last_activity = db.Column(db.DateTime)
 
+    # Totp
+    totp_secret = db.Column(db.String(120))
+    totp_recovery = db.Column(db.String(120))
+
+    # Derived key
+    derived_key_salt = db.Column(db.String(120))
+
     # IP History
     ip_history = db.relationship('UserIPHistory', back_populates='user', cascade='all, delete-orphan')
 
@@ -70,6 +77,13 @@ class User(db.Model, UserMixin):
         new_ip_history = UserIPHistory(user_id=self.user_id, ip_address=ip_address, user_agent=user_agent)
         db.session.add(new_ip_history)
         db.session.commit()
+
+
+class CommonPasswords(db.Model):
+    __tablename__ = 'common_passwords'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    password = db.Column(db.String(30), nullable=False)
 
 
 class UserIPHistory(db.Model):
@@ -127,15 +141,15 @@ class Story(db.Model):
     __tablename__ = 'stories'
     story_id = db.Column(db.String(40), primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    title = db.Column(db.String(255), nullable=False) # too big! change to 120
+    title = db.Column(db.String(255), nullable=False) # Too big! Change to 120
     description = db.Column(db.String(550))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
     link = db.Column(db.String(512), nullable=False)
-    pub_date = db.Column(db.String(30), nullable=False)
+    pub_date = db.Column(db.String(30), nullable=False) # too big!
     category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
     publisher_id = db.Column(db.String(40), db.ForeignKey('publishers.publisher_id'), nullable=False)
-    media_content_url = db.Column(db.String(100))
+    media_content_url = db.Column(db.String(100)) # Do we need this? We can guess the image url. Should be Bool instead.
 
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)

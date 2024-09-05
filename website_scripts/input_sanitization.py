@@ -1,6 +1,5 @@
 import re
 import bleach
-
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from unidecode import unidecode
@@ -132,6 +131,16 @@ def is_valid_email(email: str) -> bool:
     return False
 
 
+def is_strong_password(password: str) -> bool:
+    # One regex check for all conditions:
+    # - At least 8 characters long and no more than 50 characters
+    # - Contains at least one uppercase letter
+    # - Contains at least one lowercase letter
+    # - Contains at least one digit
+    # - Contains at least one special character
+    return bool(re.match(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,50}$", password))
+
+
 def is_valid_username(username: str) -> bool:
     """
     Sanitize a username by ensuring it conforms to a set of rules:
@@ -159,8 +168,12 @@ def is_valid_text(text: str) -> bool:
     """
     Sanitize text by ensuring it conforms to a set of rules:
     - Only contains alphanumeric characters, spaces, and selected special characters.
+    - Is >= 3 characters and <= 1500 characters.
     
     """
+    if not is_text_length_between((3, 1500), text):
+        return False
+
     text_regex = re.compile(r'^[a-zA-Z0-9 ,.!?:\-\'"]*$')
     return bool(text_regex.match(text))
 

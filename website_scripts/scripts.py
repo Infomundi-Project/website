@@ -527,19 +527,6 @@ def get_supported_categories(country_code: str) -> list:
     return [file.split('_')[1].replace('.json', '') for file in listdir(config.FEEDS_PATH) if file.startswith(country_code)]
 
 
-def is_strong_password(password: str) -> bool:
-    """Checks if password is valid. Password is valid if it's between 8 and 50 characters.
-    
-    Args:
-        password (str): A simple string. User's password. For example, '#SuperSecurePassword123'
-    
-    Returns:
-        bool: True if password is valid, otherwise False.
-    """
-
-    return 8 < len(password) <= 50
-
-
 """
 def translate(dest_lang: str, msg: str) -> str:
     Uses google translate to... yes, you guessed correctly, translate some text. Identifies the source language

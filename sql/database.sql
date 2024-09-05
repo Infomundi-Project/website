@@ -2,27 +2,33 @@ DROP TABLE IF EXISTS account_recovery_tokens;
 DROP TABLE IF EXISTS register_tokens;
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id VARCHAR(10) PRIMARY KEY,
+    user_id VARCHAR(20) NOT NULL PRIMARY KEY,
     username VARCHAR(25) NOT NULL UNIQUE,
+    email VARCHAR(70) NOT NULL UNIQUE,
     role VARCHAR(15) DEFAULT 'user',
     password VARCHAR(100) NOT NULL,
-    email VARCHAR(70) NOT NULL UNIQUE,
+    session_version INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME,
+    display_name VARCHAR(40),
     avatar_url VARCHAR(80),
-
-    display_name VARCHAR(40) NOT NULL,
-    
     profile_description VARCHAR(1500),
     profile_banner_url VARCHAR(80),
     profile_wallpaper_url VARCHAR(80),
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
-    
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_login DATETIME,
-    in_recovery TINYINT(1) DEFAULT 0,
+    in_recovery BOOLEAN DEFAULT FALSE,
     recovery_token VARCHAR(40),
-    recovery_token_timestamp TIMESTAMP
+    recovery_token_timestamp DATETIME,
+    delete_token VARCHAR(40),
+    delete_token_timestamp DATETIME,
+    is_online BOOLEAN DEFAULT FALSE,
+    last_activity DATETIME,
+    totp_secret VARCHAR(120),
+    totp_recovery VARCHAR(120),
+    derived_key_salt VARCHAR(120)
 );
+
 
 CREATE TABLE register_tokens (
     user_id VARCHAR(10) PRIMARY KEY,
@@ -45,3 +51,7 @@ CREATE TABLE friendships (
     CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+CREATE TABLE common_passwords (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    password VARCHAR(30) NOT NULL
+);

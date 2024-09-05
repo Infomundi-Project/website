@@ -13,7 +13,9 @@ cache = Cache()
 
 limiter = Limiter(
     key_func=get_user_ip,
-    storage_uri=REDIS_CONNECTION_STRING
+    storage_uri=REDIS_CONNECTION_STRING,
+    meta_limits=["4/hour", "5/day"],
+    default_limits=["20 per minute"]
 )
 
 # Google OAuth
@@ -34,7 +36,7 @@ google = oauth.register(
     authorize_redirect_uri=None,
     authorize_scope='openid profile email',
     base_url='https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
     client_kwargs={'scope': 'openid profile email'},
     server_metadata_url=GOOGLE_DISCOVERY_URL
 )

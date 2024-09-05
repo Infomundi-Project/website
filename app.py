@@ -194,7 +194,7 @@ css_base = Bundle(
     output='gen/base_packed.css')
 # base.html
 js_base = Bundle(
-    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js',
+    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js', 'js/cookieConsent.js', 'js/linkSafety.js',
     filters='jsmin', 
     output='gen/base_packed.js')
 # homepage.html
@@ -204,7 +204,7 @@ js_home = Bundle(
     output='gen/home_packed.js')
 # rss_template.html
 js_news = Bundle(
-    'js/submitSearch.js', 'js/languageMenu.js',
+    'js/submitSearch.js', 'js/languageMenu.js', 
     filters='jsmin', 
     output='gen/news_packed.js')
 
@@ -230,26 +230,26 @@ def error_handler(error):
     error_code = getattr(error, 'code', 500)
 
     if error_code == 404:
-        title = '404 Error: Page Not Found'
+        title = 'Page Not Found'
         description = "It seems you've stumbled upon a page that even the ancient Greek philosophers couldn't find! Our esteemed statue is deep in thought, pondering over an ancient scroll, but alas, the wisdom to locate this page eludes even him."
-        image_path = 'static/img/illustrations/scroll.webp'
+        image_path = 'https://infomundi.net/static/img/illustrations/scroll.webp'
 
         buttons_enabled = True
     elif error_code == 429:
-        title = '429 Error: Too Many Requests'
-        description = "Even Greek gods can’t handle this much paperwork! It looks like our server is feeling a bit overwhelmed—just like this sculpture with too many papers. Give it a moment to catch its breath, and try again soon. Trust us, it’s working hard to process all your requests!"
-        image_path = 'static/img/illustrations/struggling.webp'
+        title = 'Too Many Requests'
+        description = f"Even Greek gods can’t handle this much paperwork! It looks like our server is feeling a bit overwhelmed—just like this sculpture with too many papers. Give it a moment to catch its breath, and try again soon. Trust us, it’s working hard to process all your requests!"
+        image_path = 'https://infomundi.net/static/img/illustrations/struggling.webp'
 
         buttons_enabled = False
     elif error_code == 500:
-        title = "500 Error: Internal Server Error"
+        title = "Internal Server Error"
         description = "While we pick up the pieces, why not explore other parts of the site? We'll have this page standing tall again soon!"
-        image_path = 'static/img/illustrations/ruins.webp'
+        image_path = 'https://infomundi.net/static/img/illustrations/ruins.webp'
 
         buttons_enabled = True
     
     contents = (title, description, image_path)
-    return render_template('error.html', contents=contents, buttons_enabled=buttons_enabled), error_code
+    return render_template('error.html', contents=contents, buttons_enabled=buttons_enabled, error_code=error_code), error_code
 
 
 if __name__ == '__main__':

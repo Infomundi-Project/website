@@ -32,7 +32,7 @@ def home():
 
 @views.route('/admin', methods=['GET'])
 @admin_required
-@extensions.limiter.limit('100 per hour')
+#@extensions.limiter.limit('100 per hour')
 def admin():
     return render_template('admin.html')
 
@@ -94,7 +94,7 @@ def user_profile(username):
         pending_friend_request_sent_by_current_user = False
     
     seo_title = f"Infomundi - {user.display_name if user.display_name else user.username}'s profile"
-    seo_description = f"{user.profile_description if user.profile_description else 'We don\'t know much about this user, they prefer keeping this air of mystery...'}"
+    seo_description = f"{user.profile_description if user.profile_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
     is_profile_owner = current_user.is_authenticated and (current_user.user_id == user.user_id)
@@ -227,8 +227,8 @@ The Infomundi Team
     new_password = request.form.get('new_password', '')
     confirm_password = request.form.get('confirm_password', '')
     if new_password and confirm_password:
-        if not (new_password == confirm_password and scripts.is_strong_password(new_password)):
-            flash("Either the passwords don't match or the password is not long enough. Please keep it 8-50 characters.", 'error')
+        if not (new_password == confirm_password and input_sanitization.is_strong_password(new_password)):
+            flash("Either the passwords don't match or the password is not strong enough.", 'error')
             return redirect(url_for('views.edit_user_settings'))
 
         user.set_password(new_password)
@@ -246,6 +246,9 @@ def user_redirect():
     if not input_sanitization.is_safe_url(target_url):
         return redirect(url_for('views.home'))
 
+    if target_url == 'https://infomundi.net/redirect':
+        target_url = 'https://infomundi.net/'
+
     return redirect(target_url)
 
 
@@ -255,6 +258,7 @@ def be_right_back():
 
 
 @views.route('/captcha', methods=['GET', 'POST'])
+@extensions.limiter.exempt
 @verify_captcha
 def captcha():
     if request.method == 'GET':
@@ -391,7 +395,7 @@ def donate():
 
 
 @views.route('/news', methods=['GET'])
-def get_latest_feed():
+def news():
     """Serving the /news endpoint. 
 
     Arguments:

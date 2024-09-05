@@ -1,6 +1,6 @@
 import hashlib
 import argon2
-
+import hmac
 
 def argon2_hash_text(cleartext: str) -> str:
     return argon2.PasswordHasher().hash(cleartext)
@@ -57,3 +57,42 @@ def sha256_verify_hash(text: str, hash_value: str) -> bool:
 
 def md5_hash_text(text: str) -> str:
     return hashlib.md5(text.encode('utf-8')).hexdigest()
+
+
+def generate_hmac_signature(key: str, message: str, algorithm: str = 'sha256') -> str:
+    """
+    Generate an HMAC signature for a given message and key.
+    
+    Parameters:
+        key (str): The secret key used for signing.
+        message (str): The message to be signed.
+        algorithm (str): The hashing algorithm to use ('sha256', 'sha1', 'md5', etc.). Default is 'sha256'.
+    
+    Returns:
+        str: The generated HMAC signature as a hexadecimal string.
+    """
+    key_bytes = key.encode('utf-8')
+    message_bytes = message.encode('utf-8')
+    hash_function = getattr(hashlib, algorithm)
+    hmac_obj = hmac.new(key_bytes, message_bytes, hash_function)
+    return hmac_obj.hexdigest()
+
+
+def is_hmac_authentic(key: str, message: str, provided_signature: str, algorithm: str = 'sha256') -> bool:
+    """
+    Verify if the provided HMAC signature matches the expected signature for the given message and key.
+    
+    Parameters:
+        key (str): The secret key used for signing.
+        message (str): The message to be verified.
+        provided_signature (str): The HMAC signature to verify.
+        algorithm (str): The hashing algorithm to use ('sha256', 'sha1', 'md5', etc.). Default is 'sha256'.
+    
+    Returns:
+        bool: True if the signature is authentic, False otherwise.
+    """
+    # Generate the correct signature
+    expected_signature = generate_hmac_signature(key, message, algorithm)
+    
+    # Use hmac.compare_digest for constant-time comparison to prevent timing attacks
+    return hmac.compare_digest(expected_signature, provided_signature)

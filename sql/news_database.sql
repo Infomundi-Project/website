@@ -43,7 +43,10 @@ CREATE TABLE stories (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_pub_date (pub_date),
+    INDEX idx_clicks (clicks),
+    INDEX idx_title (title)
 );
 
 CREATE TABLE story_reactions (

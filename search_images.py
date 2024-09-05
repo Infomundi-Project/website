@@ -1,11 +1,9 @@
 import concurrent.futures
+import pillow_avif
 import requests
 import pymysql
 import logging
 import boto3
-import sys
-import os
-
 from requests.exceptions import ProxyError, ConnectionError, Timeout
 from random import shuffle, choice
 from sqlalchemy import or_, and_
@@ -14,8 +12,10 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 
-from website_scripts import json_util, config, scripts, immutable, models, extensions, input_sanitization
+from website_scripts import config, immutable, input_sanitization
+
 WORKERS = 2
+DEFAULT_IMAGE = 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp'
 
 # Define proxies variable as global and load proxy list from file
 with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
@@ -42,13 +42,13 @@ db_params = {
         'password': config.MYSQL_PASSWORD,
         'db': 'infomundi',
         'charset': 'utf8mb4',
-        'cursorclass': pymysql.cursors.DictCursor  # Ensure DictCursor is used
+        'cursorclass': pymysql.cursors.DictCursor
     }
 db_connection = pymysql.connect(**db_params)
 
 
 # Setup logging
-logging.basicConfig(filename='/var/www/infomundi/logs/search_images.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
+logging.basicConfig(filename=f'{config.WEBSITE_ROOT}/logs/search_images.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
 
 
 def log_message(message):
@@ -120,8 +120,11 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
         url = data
     else:
         url = data['link']
+
+    if not input_sanitization.is_valid_url(url):
+        log_message(f'Invalid url at {url}, returning default image')
+        return DEFAULT_IMAGE
     
-    default_image = 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp'
     try:
         while True:
             # Randomly select a user agent to simulate browser requests
@@ -131,16 +134,16 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
             proxies = [x for x in proxies if x not in bad_proxies]
 
             if not proxies:
-                # Return default image if no proxies are left
-                return default_image
+                log_message('No proxies left! Returning default image!')
+                return DEFAULT_IMAGE
             
             chosen_proxy = choice(proxies)
             
             try:
-                response = requests.get(url, timeout=8, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
+                response = requests.get(url, timeout=6, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
                 if response.status_code not in [200, 301, 302]:
                     log_message(f'[Invalid HTTP Response] {response.status_code} from {url}. Returning default image.')
-                    return default_image
+                    return DEFAULT_IMAGE
             except requests.exceptions.ProxyError:
                 # Handle proxy errors by marking proxy as bad and retrying
                 bad_proxies.append(chosen_proxy)
@@ -149,14 +152,14 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
                 # Connection and timeout errors handling
                 log_message(f'[Timeout] {err} from {url}')
-                return default_image
+                return DEFAULT_IMAGE
             except Exception as err:
                 # General error handling
                 log_message(f'[Unexpected Error] {err}')
                 if isinstance(data, object):
                     log_message(f'Story: {data['story_id']} from: {data['publisher_id']} ({data['publisher']['name']})')
                 
-                return default_image
+                return DEFAULT_IMAGE
             
             break  # Break the loop if the request was successful
 
@@ -169,7 +172,7 @@ def get_link_preview(data, source: str='default', selected_filter: str='None'):
     except Exception as e:
         # Log unexpected errors encountered during execution
         log_message(f'[Unexpected] From get_link_preview: {e}')
-        return default_image
+        return DEFAULT_IMAGE
 
 
 def extract_image_from_response(response: requests.Response, url: str, story: dict, selected_filter: str):
@@ -284,8 +287,9 @@ def download_and_convert_image(data: dict) -> list:
             image.thumbnail((1280, 720))
             image = image.convert("RGB")
             # Let's be real here, alright? We have no money to spend storing a bunch of images so we optimize them as much as we can
-            image.save(output_buffer, format="webp", optimize=True, quality=15, method=6)
-            s3_object_key = data[item]['output_path'] + ".webp"
+            # AVIF be my savior
+            image.save(output_buffer, format="avif", optimize=True, quality=20, method=6)
+            s3_object_key = data[item]['output_path'] + ".avif"
         else:
             # Processing favicon images as before, saving to buffer
             image = image.resize((32, 32))

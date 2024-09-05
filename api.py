@@ -4,10 +4,52 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_, and_, cast
 from sqlalchemy.types import Date
 
-from website_scripts import config, json_util, scripts, notifications, models, extensions, immutable, input_sanitization, \
-    friends_util, country_util
+from website_scripts import config, json_util, scripts, notifications,\
+    models, extensions, immutable, input_sanitization, friends_util, country_util, totp_util, security_util, hashing_util
 
 api = Blueprint('api', __name__)
+
+
+@api.route('/totp/generate', methods=['GET'])
+@login_required
+def generate_totp():
+    #if current_user.totp_secret:
+    #    return jsonify({'status': 'Not Allowed'}), 403
+
+    session['totp_secret'] = totp_util.generate_totp_secret()
+    return jsonify({'secret_key': session['totp_secret'],\
+        'qr_code': totp_util.generate_qr_code(session['totp_secret'], session['email_address'])}), 200
+
+
+@api.route('/totp/setup', methods=['GET'])
+@login_required
+def setup_totp():
+    # If the user already has a secret, then they don't need to finish setup again
+    #if current_user.totp_secret:
+    #    return jsonify({'status': 'Not Allowed'}), 403
+
+    code = request.args.get('code', '')
+    totp_secret = session['totp_secret']
+
+    is_valid = totp_util.verify_totp(totp_secret, code)
+    if not is_valid:
+        return jsonify({'valid': False}), 200
+
+    # Generates a super random recovery token
+    totp_recovery_token = security_util.generate_nonce(12)
+
+    # Gets the key information from user's session
+    key_salt, key_value = session['key_data']
+
+    # Saves the TOTP information encrypted in the database
+    current_user.totp_secret = security_util.encrypt(totp_secret, salt=key_salt, key=key_value)
+    current_user.totp_recovery = hashing_util.argon2_hash_text(totp_recovery_token)
+    extensions.db.session.commit()
+
+    # There's no need to keep this info in the user's session
+    del session['totp_secret']
+
+    return jsonify({'valid': True, 'totp_recovery_token': totp_recovery_token}), 200
 
 
 @api.route('/countries', methods=['GET'])
