@@ -1,58 +1,62 @@
 (() => {
-    'use strict';
+  'use strict'
 
-    const forms = document.querySelectorAll('.needs-validation');
+  // Password strength check function
+  const isStrongPassword = (password) => {
+    const strongPasswordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,50}$/;
+    return strongPasswordPattern.test(password);
+  };
 
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-            let isValid = true;
+  // Username validation function
+  const isValidUsername = (username) => {
+    const usernamePattern = /^[a-zA-Z0-9_-]{3,25}$/;
+    return usernamePattern.test(username);
+  };
 
-            const emailField = form.querySelector('input[name="email"]');
-            const usernameField = form.querySelector('input[name="username"]');
-            const emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-            const usernamePattern = /^[\-a-zA-Z0-9_]{3,25}$/;
+  // Function to handle validation feedback
+  const handleValidation = (field, isValid, message) => {
+    if (isValid) {
+      field.setCustomValidity('');
+      field.classList.remove('is-invalid');
+      field.classList.add('is-valid');
+    } else {
+      field.setCustomValidity(message);
+      field.classList.remove('is-valid');
+      field.classList.add('is-invalid');
+    }
+  };
 
-            if (!emailPattern.test(emailField.value)) {
-                emailField.setCustomValidity('Invalid email address.');
-                isValid = false;
-            } else {
-                emailField.setCustomValidity('');
-            }
+  // Fetch the form and input fields
+  const form = document.querySelector('.needs-validation');
+  const passwordField = form.querySelector('#floatingPassword');
+  const confirmPasswordField = form.querySelector('#floatingConfirmPassword');
+  const usernameField = form.querySelector('#floatingUsername');
+  
+  // Password field input event
+  passwordField.addEventListener('input', () => {
+    const isValid = isStrongPassword(passwordField.value);
+    handleValidation(passwordField, isValid, 'Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
+  });
 
-            if (!usernamePattern.test(usernameField.value)) {
-                usernameField.setCustomValidity('Invalid username.');
-                isValid = false;
-            } else {
-                usernameField.setCustomValidity('');
-            }
+  // Confirm password field input event
+  confirmPasswordField.addEventListener('input', () => {
+    const isValid = passwordField.value === confirmPasswordField.value;
+    handleValidation(confirmPasswordField, isValid, 'Passwords must match.');
+  });
 
-            if (!form.checkValidity() || !isValid) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                const signUpButton = document.getElementById('signUpButton');
-                signUpButton.textContent = 'Loading...';
-                signUpButton.disabled = true;
+  // Username field input event
+  usernameField.addEventListener('input', () => {
+    const isValid = isValidUsername(usernameField.value);
+    handleValidation(usernameField, isValid, 'Username must be 3-25 characters long and contain only alphanumeric characters, underscores, or hyphens.');
+  });
 
-                setTimeout(() => {
-                    signUpButton.textContent = 'Sign up';
-                    signUpButton.disabled = false;
-                }, 5000);
-            }
+  // Form submit event to prevent submission if invalid
+  form.addEventListener('submit', (event) => {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+  }, false);
 
-            form.classList.add('was-validated');
-        }, false);
-    });
-
-    const password = document.getElementById('floatingPassword');
-    const confirmPassword = document.getElementById('floatingConfirmPassword');
-    const validatePasswords = () => {
-        if (password.value !== confirmPassword.value) {
-            confirmPassword.setCustomValidity('Passwords do not match');
-        } else {
-            confirmPassword.setCustomValidity('');
-        }
-    };
-    password.addEventListener('input', validatePasswords);
-    confirmPassword.addEventListener('input', validatePasswords);
 })();

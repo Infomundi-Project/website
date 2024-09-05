@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% block title %}Two Factor Authentication{% endblock %}
 {% block content %}
-<div class="container col-xl-10 col-xxl-8 px-4 py-3">
+<div class="container col-xl-10 col-xxl-8 px-4 py-2">
     <div class="row align-items-center g-lg-5 py-5">
       <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
         <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Whooo Goes There?</h1>
@@ -54,20 +54,30 @@
         const recoveryTokenInputGroup = document.getElementById('recovery-token-input-group');
 
         toggleDeviceLink.addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent default link behavior
+		    event.preventDefault(); // Prevent default link behavior
 
-            if (totpInputGroup.style.display === 'none') {
-                // Show TOTP input group, hide Recovery Token input group
-                totpInputGroup.style.display = 'block';
-                recoveryTokenInputGroup.style.display = 'none';
-                toggleDeviceLink.textContent = "I don't have access to my two factor device";
-            } else {
-                // Hide TOTP input group, show Recovery Token input group
-                totpInputGroup.style.display = 'none';
-                recoveryTokenInputGroup.style.display = 'block';
-                toggleDeviceLink.textContent = "Nevermind, I have access to my two factor device";
-            }
-        });
+		    if (totpInputGroup.style.display === 'none') {
+		        // Show TOTP input group, hide Recovery Token input group
+		        totpInputGroup.style.display = 'block';
+		        recoveryTokenInputGroup.style.display = 'none';
+		        
+		        // Add 'required' to TOTP input and remove from recovery token
+		        document.getElementById('floatingInputCurrentTOTP').setAttribute('required', true);
+		        document.getElementById('floatingInputRecoveryToken').removeAttribute('required');
+		        
+		        toggleDeviceLink.textContent = "I don't have access to my two factor device";
+		    } else {
+		        // Hide TOTP input group, show Recovery Token input group
+		        totpInputGroup.style.display = 'none';
+		        recoveryTokenInputGroup.style.display = 'block';
+		        
+		        // Add 'required' to recovery token and remove from TOTP input
+		        document.getElementById('floatingInputRecoveryToken').setAttribute('required', true);
+		        document.getElementById('floatingInputCurrentTOTP').removeAttribute('required');
+		        
+		        toggleDeviceLink.textContent = "Nevermind, I have access to my two factor device";
+		    }
+		});
     });
 </script>
 <script nonce="{{ nonce }}"

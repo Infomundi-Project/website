@@ -1,165 +1,151 @@
 {% extends "base.html" %}
-
 {% block title %}Edit Avatar{% endblock %}
 {% block styles %}
 <style>
-.profile-background {
-   background-image: url('{{ current_user.profile_wallpaper_url }}');
-   width: 100%;
-   height: 400px;
-   border-radius: 15px;
-   background-size: cover;
-   background-position: center;
-   position: relative;
-}
-.avatar-img {
-   border-radius: 15px;
-}
-.profile-mockup {
-   position: absolute;
-   top: 10%;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 80%;
-   height: 80%;
-   border-radius: 15px;
-   padding: 20px;
-   color: white;
-   display: flex;
-   flex-direction: column;
-   z-index: 2;
-}
-.profile-mockup .avatar {
-   width: 50px;
-   height: 50px;
-   border-radius: 50%;
-   margin-bottom: 10px;
-}
-.profile-mockup .username {
-   font-size: 1.5em;
-   font-weight: bold;
-   margin-bottom: 5px;
-}
-.profile-mockup .description {
-   font-size: 1em;
-}
-
-
-
+    .profile-background {
+    background-image: url('{{ current_user.profile_wallpaper_url }}');
+    width: 100%;
+    height: 400px;
+    border-radius: 15px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    }
+    .avatar-img {
+    border-radius: 15px;
+    }
+    .profile-mockup {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 80%;
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    }
+    .profile-mockup .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    }
+    .profile-mockup .username {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    }
+    .profile-mockup .description {
+    font-size: 1em;
+    }
     .profile-header {
-        background: url('{{ current_user.profile_banner_url }}') no-repeat center center;
-        background-size: cover;
-        height: 200px;
-        position: relative;
-        border-radius: 15px 15px 15px 15px;
-        overflow: hidden;
+    background: url('{{ current_user.profile_banner_url }}') no-repeat center center;
+    background-size: cover;
+    height: 200px;
+    position: relative;
+    border-radius: 15px 15px 15px 15px;
+    overflow: hidden;
     }
     .profile-header::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
     }
     .profile-avatar {
-        width: 75px;
-        height: auto;
-        border-radius: 15px;
-        border: 5px solid white;
-        /*position: absolute;*/
-        /*top: 160px; */
-        left: 3.5vh;
-        /*z-index: 3; */
+    width: 75px;
+    height: auto;
+    border-radius: 15px;
+    border: 5px solid white;
+    /*position: absolute;*/
+    /*top: 160px; */
+    left: 3.5vh;
+    /*z-index: 3; */
     }
 </style>
 {% endblock %}
-
 {% block edit_profile_content %}
 <form id="backgroundForm" method="POST" action="{{ url_for('views.upload_image') }}" enctype="multipart/form-data">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<div>
-    <h3>Background Image</h3>
-    <hr>
-    <div class="row">
-        <div class="col-md-12 justify-content-start">
-            <div id="profileBackground" class="profile-background bg-secondary">
-                <div class="profile-mockup bg-secondary-subtle opacity-78">
-                  <div class="profile-header mb-3" id="profileHeader"></div>
-
-                    <div class="row">
-            <div class="col-8">
-                <div class="row">
-                    <div class="col-2">
-                        <img src="{{ current_user.avatar_url }}" alt="User Avatar" class="profile-avatar">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+        <h3>Background Image</h3>
+        <hr>
+        <div class="row">
+            <div class="col-md-12 justify-content-start">
+                <div id="profileBackground" class="profile-background bg-secondary">
+                    <div class="profile-mockup bg-secondary-subtle opacity-78">
+                        <div class="profile-header mb-3" id="profileHeader"></div>
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <img src="{{ current_user.avatar_url }}" alt="User Avatar" class="profile-avatar">
+                                    </div>
+                                    <div class="ms-2 col">
+                                        {% if current_user.display_name %}
+                                        <span class="fs-2 fw-bold">{{ current_user.display_name }}</span>
+                                        <br>
+                                        <span class="fs-6 text-muted">@{{ current_user.username }}</span>
+                                        {% else %}
+                                        <h3>{{ current_user.username }}</h3>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <p class="fs-4">
+                                    <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">{{ current_user.level }}</span>
+                                </p>
+                                <span>{{ current_user.level_progress }}/1000</span>
+                                <div class="progress" role="progressbar" aria-valuenow="{{ current_user.level_progress }}" aria-valuemin="0" aria-valuemax="100" style="height: 3px">
+                                    <div class="progress-bar bg-info" style="width: 25%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ms-2 col">
-                        {% if current_user.display_name %}
-                            <span class="fs-2 fw-bold">{{ current_user.display_name }}</span>
-                            <br>
-                            <span class="fs-6 text-muted">@{{ current_user.username }}</span>
-                        {% else %}
-                            <h2>{{ current_user.username }}</h2>
-                        {% endif %}
-
-                        {% if current_user.profile_description %}
-                            <p class="fs-6 text-wrap mt-1">{{ short_description }}...</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-4">
-                <p class="fs-4">
-                    <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">5</span>
-                </p>
-                <span>250/1000</span>
-                <div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 3px">
-                  <div class="progress-bar bg-info" style="width: 25%"></div>
                 </div>
             </div>
         </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="row mt-4">
+            <div class="col-md-6">
                 <div class="mb-3">
                     <label for="backgroundImage" class="form-label">Select Background Image</label>
                     <input class="form-control" type="file" id="backgroundImage" name="profile_background" accept="image/*">
                 </div>
-        </div>
-        <div class="col-md-6">
+            </div>
+            <div class="col-md-6">
                 <div class="mb-3">
                     <label for="bannerImage" class="form-label">Select Banner Image</label>
                     <input class="form-control" type="file" id="bannerImage" name="profile_banner" accept="image/*">
                 </div>
+            </div>
         </div>
     </div>
-</div>
-
-<div>
-    <h3>Avatar</h3>
-    <hr>
-    <div class="d-flex align-items-center mb-3">
-        <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar" class="avatar-img me-3" style="width: 184px; height: 184px;">
-        <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar" class="avatar-img me-3" style="width: 64px; height: 64px;">
-        <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar" class="avatar-img" style="width: 32px; height: 32px;">
-    </div>
+    <div>
+        <h3>Avatar</h3>
+        <hr>
+        <div class="d-flex align-items-center mb-3">
+            <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar" class="avatar-img me-3" style="width: 184px; height: 184px;">
+            <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar" class="avatar-img me-3" style="width: 64px; height: 64px;">
+            <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar" class="avatar-img" style="width: 32px; height: 32px;">
+        </div>
         <div class="mb-3">
             <input type="file" accept="image/*" class="form-control" id="profilePhoto" name="profile_picture" style="max-width: 50%;">
         </div>
         <small class="text-muted d-block mt-2"><i class="fa-solid fa-file-circle-plus me-1"></i>Maximum size: 2 mb</small>
         <small class="text-muted d-block mt-2"><i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Minimum dimension: 300x300</small>
-</div>
-
-<div class="cf-turnstile mt-5" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
-<button type="submit" class="btn btn-primary" id="saveAvatar" disabled><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
+    </div>
+    <div class="cf-turnstile mt-5" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+    <button type="submit" class="btn btn-primary" id="saveAvatar" disabled><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
 </form>
 {% endblock %}
-
 {% block scripts %}
 <script nonce="{{ nonce }}">
     function checkIfFilesSelected() {
@@ -168,54 +154,54 @@
         const bannerImage = document.getElementById('bannerImage').files.length > 0;
         document.getElementById('saveAvatar').disabled = !(profilePhoto || backgroundImage || bannerImage);
     }
-
+    
     document.getElementById('backgroundImage').addEventListener('change', function() {
         const input = this;
         const profileBackground = document.getElementById('profileBackground');
-
+    
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
+    
             reader.onload = function(e) {
                 profileBackground.style.backgroundImage = 'url(' + e.target.result + ')';
             };
-
+    
             reader.readAsDataURL(input.files[0]);
         }
         checkIfFilesSelected();
     });
-
+    
     document.getElementById('bannerImage').addEventListener('change', function() {
         const input = this;
         const profileHeader = document.getElementById('profileHeader');
-
+    
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
+    
             reader.onload = function(e) {
                 profileHeader.style.backgroundImage = 'url(' + e.target.result + ')';
             };
-
+    
             reader.readAsDataURL(input.files[0]);
         }
         checkIfFilesSelected();
     });
-
+    
     document.getElementById('profilePhoto').addEventListener('change', function() {
         const input = this;
         const largeAvatar = document.getElementById('largeAvatar');
         const mediumAvatar = document.getElementById('mediumAvatar');
         const smallAvatar = document.getElementById('smallAvatar');
-
+    
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
+    
             reader.onload = function(e) {
                 largeAvatar.src = e.target.result;
                 mediumAvatar.src = e.target.result;
                 smallAvatar.src = e.target.result;
             };
-
+    
             reader.readAsDataURL(input.files[0]);
         }
         checkIfFilesSelected();

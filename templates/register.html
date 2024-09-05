@@ -28,7 +28,7 @@
             <input type="text" class="form-control" id="floatingUsername" placeholder="john" name="username" required>
             <label for="floatingUsername">Username</label>
             <div class="invalid-feedback">
-                Please choose a username between 3 to 25 characters.
+                Username must be 3-25 characters long and contain only alphanumeric characters, underscores, or hyphens.
             </div>
         </div>
 
@@ -37,11 +37,11 @@
                 <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
                 <label for="floatingPassword">Password</label>
                 <div class="invalid-feedback">
-                    Please provide a password with 8 to 50 characters.
+                    Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
                 </div>
             </div>
 
-            <span class="input-group-text password-toggle" id="floatingPasswordIcon">
+            <span class="input-group-text password-toggle" id="floatingPasswordIcon" style="max-height: 60px;">
                 <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
             </span>
         </div>
@@ -56,7 +56,7 @@
                     Passwords must match.
                 </div>
             </div>
-            <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon">
+            <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon" style="max-height: 60px;">
                 <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
             </span>
         </div>

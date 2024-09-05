@@ -13,8 +13,8 @@ api = Blueprint('api', __name__)
 @api.route('/totp/generate', methods=['GET'])
 @login_required
 def generate_totp():
-    #if current_user.totp_secret:
-    #    return jsonify({'status': 'Not Allowed'}), 403
+    if current_user.totp_secret:
+        return jsonify({'status': 'Not Allowed'}), 403
 
     session['totp_secret'] = totp_util.generate_totp_secret()
     return jsonify({'secret_key': session['totp_secret'],\
@@ -25,8 +25,8 @@ def generate_totp():
 @login_required
 def setup_totp():
     # If the user already has a secret, then they don't need to finish setup again
-    #if current_user.totp_secret:
-    #    return jsonify({'status': 'Not Allowed'}), 403
+    if current_user.totp_secret:
+        return jsonify({'status': 'Not Allowed'}), 403
 
     code = request.args.get('code', '')
     totp_secret = session['totp_secret']
@@ -39,7 +39,8 @@ def setup_totp():
     totp_recovery_token = security_util.generate_nonce()
 
     # Gets the key information from user's session
-    key_salt, key_value = session['key_data']
+    key_salt = current_user.derived_key_salt
+    key_value = session['key_value']
 
     # Saves the TOTP information encrypted in the database
     current_user.totp_secret = security_util.encrypt(totp_secret, salt=key_salt, key=key_value)
