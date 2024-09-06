@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 from flask import session
 from sqlalchemy import or_
 
-from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util
+from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization
 
 
-def perform_login_actions(user):
+def perform_login_actions(user, cleartext_email: str):
     # Save the timestamp of the last login
     user.last_login = datetime.now()
     extensions.db.session.commit()
@@ -14,9 +14,39 @@ def perform_login_actions(user):
     login_user(user, remember=session['remember_me'])
     
     session.permanent = True
+    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(cleartext_email)
     session['session_version'] = user.session_version
+    session['email_address'] = cleartext_email
 
-    
+
+def configure_key(user, cleartext_password, cleartext_email: str = '') -> str:
+    """
+    Here's the deal, when the user creates an account through Google, we don't know their cleartext password, ever.
+    However, we still need to encrypt the TOTP secret if the user choses to enable 2FA authentication via TOTP. To make this work,
+    we can use the user's cleartext email address, it's better than nothing, as the email itself is stored in hash format (argon2) in
+    the database.
+
+    Arguments
+        user (UserMixin): The user, so we can change/read value for them in the database
+        cleartext_password (str): User's cleartext password
+        cleartext_email (str): Optional. User's cleartext email.
+
+    Return
+        str: The user's key.
+    """
+    if user.derived_key_salt:
+        session['key_value'] = security_util.derive_key(cleartext_password, user.derived_key_salt)
+    else:
+        # Returns salt and key value as we don't specify the salt
+        key_data = security_util.derive_key(cleartext_password)
+        
+        # Index 0 = key_salt // Index 1 = key_value. Save the salt to the database.
+        user.derived_key_salt = key_data[0]
+        # Save the key value to the session
+        session['key_value'] = key_data[1]
+        # Commit changes to the database
+        extensions.db.session.commit()
+
 
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:

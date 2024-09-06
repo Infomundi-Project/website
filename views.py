@@ -4,7 +4,7 @@ from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
 cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util
-from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required
+from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required, sensitive_area
 
 views = Blueprint('views', __name__)
 
@@ -173,7 +173,7 @@ def edit_user_avatar(username):
 
 @views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
 @profile_owner_required
-@verify_captcha
+@sensitive_area
 def edit_user_settings(username):
     if request.method == 'GET':
         return render_template('edit_settings.html')
@@ -289,9 +289,10 @@ def sensitive():
     if request.method == 'GET':
         # If they have clearance (means that they have recently proven they're human)
         sensitive_clearance = session.get('sensitive_clearance', '')
+        is_trusted_session = session.get('is_trusted_session', '')
         if sensitive_clearance:
             timestamp = datetime.fromisoformat(sensitive_clearance)
-            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True) or is_trusted_session:
                 flash("We know you are who you say you are, don't worry!")
                 return redirect(url_for('views.user_redirect'))
 
@@ -300,14 +301,20 @@ def sensitive():
     recovery_token = request.form.get('recovery_token', '').strip()
     code = request.form.get('code', '').strip()
 
-    is_valid, message = totp_util.deal_with_it(current_user, code, recovery_token, session['key_value'])
+    # If user provided the code or recovery token, then we check it. If not, check the password instead
+    if code or recovery_token:
+        is_valid, message = totp_util.deal_with_it(current_user, code, recovery_token, session['key_value'])
+    else:
+        is_valid = current_user.check_password(request.form.get('current_password', ''))
+        message = 'Invalid password!'
+    
     if not is_valid:
         flash(message, 'error')
         return redirect(url_for('views.sensitive'))
 
-
-
     session['sensitive_clearance'] = datetime.now().isoformat()
+    session['is_trusted_session'] = bool(request.form.get('trust_session', ''))
+
     flash('Thanks for verifying! You are who you say you are after all.')
     return redirect(url_for('views.edit_user_settings', username=current_user.username))
 

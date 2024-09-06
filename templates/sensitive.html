@@ -33,18 +33,18 @@
 	        {% if current_user.totp_secret %}
 		        <!-- TOTP Input Group -->
 		        <div id="totp-input-group">
-			        <div class="input-group mt-2">
+			        <div class="input-group">
 			            <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
 			            <div class="form-floating">
 			                <input name="code" type="text" class="form-control" id="floatingInputCurrentTOTP" placeholder="TOTP" maxlength="6" minlength="6" required>
-			                <label for="floatingInputCurrentTOTP">2FA 6-digit Code</label>
+			                <label for="floatingInputCurrentTOTP">Code</label>
 			            </div>
 			        </div>
 		    	</div>
 
 		        <!-- Recovery Token Input Group (Initially Hidden) -->
 		        <div id="recovery-token-input-group" style="display: none;">
-			        <div class="input-group mt-2">
+			        <div class="input-group">
 			            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
 			            <div class="form-floating">
 			                <input name="recovery_token" type="text" class="form-control" id="floatingInputRecoveryToken" placeholder="Recovery Token">
@@ -67,9 +67,15 @@
 	            </div>
             {% endif %}
 
-	        <div class="cf-turnstile mt-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+            <div class="checkbox mt-2">
+	            <label>
+	                <input type="checkbox" value="yes" name="trust_session"> Trust this session
+	            </label>
+	        </div>
 
-	        <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Submit</button>
+	        <div class="cf-turnstile my-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
+
+	        <button class="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
 	        <hr class="my-4">
 	        <small class="text-muted">
 	            <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.

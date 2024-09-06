@@ -13,9 +13,8 @@ auth = Blueprint('auth', __name__)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-#@unauthenticated_only
-#@verify_captcha
-@in_maintenance
+@unauthenticated_only
+@verify_captcha
 def login():
     # If user is in totp process, redirect them to the correct page
     if session.get('user_id', ''):
@@ -28,6 +27,7 @@ def login():
     password = request.form.get('password', '')
     session['remember_me'] = bool(request.form.get('remember_me', ''))
 
+    # To avoid making unecessary queries to the database, first check to see if the credentials match our sandards
     if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
         flash('Invalid credentials!', 'error')
         return redirect(url_for('auth.login'))
@@ -49,15 +49,12 @@ def login():
         # Commit changes to the database
         extensions.db.session.commit()
 
-    session['email_address'] = email
-    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
-
     # If user has totp enabled, we redirect them to the totp page without effectively logging them in the system
     if user.totp_secret:
         session['user_id'] = user.user_id
         return redirect(url_for('auth.totp'))
 
-    auth_util.perform_login_actions(user)
+    auth_util.perform_login_actions(user, email)
     flash(f'Welcome back, {user.username}!')
     return redirect(url_for('views.user_profile', username=user.username))
 
@@ -283,7 +280,7 @@ def password_change():
     elif new_password != confirm_password:
         message = 'Passwords must match!'
     elif not input_sanitization.is_strong_password(new_password):
-        message = "Password Policy: The password should be 8-50 characers long."
+        message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
     else:
         message = ''
 
@@ -296,20 +293,21 @@ def password_change():
     
     # Make sure the user is not in recovery mode
     current_user.in_recovery = False
+
+    # As the user password has changed, we can no longer decrypt the totp secret!
+    current_user.totp_secret = None
+    current_user.totp_recovery = None
     
     # Commits to the database
     extensions.db.session.commit()
-
-    ip_address = cloudflare_util.get_user_ip()
-    country = cloudflare_util.get_user_country()
 
     message = f"""Hello,
 
 We wanted to inform you that the password for your Infomundi account has been successfully changed. If you made this change, there's nothing else you need to do.
 
 The change was made from the following location:
-- IP Address: {ip_address}
-- Country: {country}
+- IP Address: {cloudflare_util.get_user_ip()}
+- Country: {cloudflare_util.get_user_country()}
 
 However, if you did not authorize this change, please take immediate action to secure your account. You can recover your account by clicking the link below:
 
@@ -396,7 +394,7 @@ def google_callback():
     user_info = extensions.google.parse_id_token(token, nonce=session['nonce'])
 
     # Get user details
-    display_name = user_info['name']
+    display_name = input_sanitization.sanitize_text(user_info['name'])
     username = input_sanitization.create_username_out_of_display_name(display_name)
     hashed_email = hashing_util.sha256_hash_text(user_info['email'])
     
@@ -406,14 +404,12 @@ def google_callback():
         # Generate a super random password and argon2 hash it. 
         # The user can only log in using google integration or if they want to recover their account for some reason.
         random_hashed_password = hashing_util.argon2_hash_text(security_util.generate_nonce(24))
-        user = models.User(user_id=security_util.generate_nonce(10), display_name=display_name, username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
+        user = models.User(user_id=security_util.generate_nonce(10), display_name=display_name,\
+            username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
         extensions.db.session.add(user)
         extensions.db.session.commit()
     
-    session['email_address'] = user_info['email']
-    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(email)
-    session['session_version'] = user.session_version
-    login_user(user, remember=True)
+    auth_util.perform_login_actions(user, user_info['email'])
 
     flash(f"Hello, {user.username}! Welcome to Infomundi!")
     return redirect(url_for('views.home'))
