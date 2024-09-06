@@ -31,8 +31,8 @@ CREATE TABLE category_tags (
 
 CREATE TABLE stories (
     story_id VARCHAR(40) PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description VARCHAR(550),
+    title VARCHAR(120) NOT NULL,
+    description VARCHAR(500),
     gpt_summary TEXT,
     clicks INT DEFAULT 0,
     link VARCHAR(512) NOT NULL,

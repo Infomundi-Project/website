@@ -3,7 +3,7 @@ import base64
 import pyotp
 import io
 
-from . import security_util, extensions
+from . import security_util, extensions, hashing_util
 
 
 def remove_totp(user):
@@ -40,3 +40,35 @@ def generate_qr_code(secret_key, account_name) -> str:
 def verify_totp(secret_key, token) -> bool:
     totp = pyotp.TOTP(secret_key)
     return totp.verify(token)
+
+
+def deal_with_it(user, code: str, recovery_token: str, key_value: str) -> tuple:
+    """
+    Deals with the entire process of verifying the TOTP code. If the recovery code is supplied instead, we make sure to remove
+    the TOTP configuration for the user.
+
+    Arguments
+        user (flask_login.UserMixin): The user performing the interaction
+        code (str): 6-digit two factor authentication code
+        recovery_token (str): TOTP recovery token
+        key_Value (str): A base64-encoded string that represents the key derivation out of the user's password and stored salt.
+            We get this info when the user logs in using their password.
+
+    Returns
+        tuple: A tuple containg the status and message regarding the performed action. Example: (False, 'Invalid TOTP recovery code!')
+    """
+    if recovery_token:
+        if hashing_util.argon2_verify_hash(user.totp_recovery, recovery_token):
+            remove_totp(user)
+            return (True, f'We removed your TOTP configuration, {user.username}. Please, re-enable it whenever possible. Welcome back to Infomundi!')
+        else:
+            return (False, 'Invalid TOTP recovery code!')
+
+    # Decrypt user's totp secret
+    totp_secret = security_util.decrypt(user.totp_secret, initial_key=key_value)
+
+    is_valid_totp = verify_totp(totp_secret, code)
+    if not is_valid_totp:
+        return (False, 'Invalid TOTP code!')
+    
+    return (True, 'Success!')

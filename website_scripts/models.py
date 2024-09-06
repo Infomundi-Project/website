@@ -4,6 +4,7 @@ from datetime import datetime
 from .extensions import db
 from .hashing_util import argon2_hash_text, argon2_verify_hash
 
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # Really important stuff
@@ -145,8 +146,8 @@ class Story(db.Model):
     __tablename__ = 'stories'
     story_id = db.Column(db.String(40), primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    title = db.Column(db.String(255), nullable=False) # Too big! Change to 120
-    description = db.Column(db.String(550))
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(500))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
     link = db.Column(db.String(512), nullable=False)

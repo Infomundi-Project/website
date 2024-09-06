@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util
+cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util
 from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required
 
 views = Blueprint('views', __name__)
@@ -297,9 +297,19 @@ def sensitive():
 
         return render_template('sensitive.html')
     
+    recovery_token = request.form.get('recovery_token', '').strip()
+    code = request.form.get('code', '').strip()
+
+    is_valid, message = totp_util.deal_with_it(current_user, code, recovery_token, session['key_value'])
+    if not is_valid:
+        flash(message, 'error')
+        return redirect(url_for('views.sensitive'))
+
+
+
     session['sensitive_clearance'] = datetime.now().isoformat()
     flash('Thanks for verifying! You are who you say you are after all.')
-    return redirect(url_for('auth.edit_user_settings', username=current_user.username))
+    return redirect(url_for('views.edit_user_settings', username=current_user.username))
 
 
 @views.route('/upload_image', methods=['POST'])
@@ -363,24 +373,18 @@ def contact():
     name = input_sanitization.gentle_cut_text(30, name)
     message = input_sanitization.gentle_cut_text(1000, message)
 
-    # Gets the user ipv4 or ipv6
-    user_ip = cloudflare_util.get_user_ip(request)
-
     if current_user.is_authenticated:
         email = session.get('email_address', '')
         login_message = f"Yes, as {email}"
     else:
         login_message = 'No'
 
-    # Formats the from message
-    from_formatted = f'{name} - {email}'
-
     email_body = f"""This message was sent through the contact form in our website.
 
 Authenticated: {login_message}
-From: {from_formatted}
-IP: {user_ip}
-Country: {cloudflare_util.get_user_country(request)}
+From: {name} - {email}
+IP: {cloudflare_util.get_user_ip()}
+Country: {cloudflare_util.get_user_country()}
 Timestamp: {scripts.get_current_date_and_time()} UTC
 
 

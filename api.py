@@ -282,9 +282,19 @@ def get_stories():
 
     stories_per_page = 9
     start_index = (page - 1) * stories_per_page
-    stories = models.Story.query.filter(
+    stories = models.Story.query.with_entities(
+        models.Story.story_id,
+        models.Story.title,
+        models.Story.clicks,
+        models.Story.pub_date,
+        models.Story.media_content_url,
+        models.Story.publisher_id,
+        models.Publisher.name,
+        models.Publisher.link,
+        models.Publisher.favicon
+    ).join(models.Publisher, models.Story.publisher_id == models.Publisher.publisher_id).filter(
         and_(*query_filters)
-        ).order_by(order_criterion).offset(start_index).limit(stories_per_page).all()
+    ).order_by(order_criterion).offset(start_index).limit(stories_per_page).all()
 
     if not stories:
         return jsonify({'error': 'No stories found!'}), 501
@@ -292,18 +302,13 @@ def get_stories():
     stories_list = [
         {
             'story_id': story.story_id,
-            #'created_at': story.created_at,
             'title': story.title,
-            'description': story.description,
-            #'gpt_summary': story.gpt_summary,
             'clicks': story.clicks,
-            'link': story.link,
             'pub_date': story.pub_date,
-            #'category_id': story.category_id,
             'publisher': {
-                'name': story.publisher.name,
-                'link': story.publisher.link,
-                'favicon': story.publisher.favicon
+                'name': story.name,
+                'link': story.link,
+                'favicon': story.favicon
             },
             'media_content_url': story.media_content_url,
         }

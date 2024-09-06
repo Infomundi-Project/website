@@ -125,14 +125,14 @@
           </div>
           <div class="ms-2 col">
             {% if user.display_name %}
-              <span class="fs-2 fw-bold">{{ user.display_name }}</span>
+              <span class="fs-2 fw-bold me-2">{{ user.display_name }}</span>
               <br>
-              <span class="fs-6 text-muted">@{{ user.username }}</span>
+              <span class="fs-6 text-muted me-2">@{{ user.username }}</span>
             {% else %}
-              <h2>{{ user.username }}</h2>
+              <h2 class="me-2">{{ user.username }}</h2>
             {% endif %}
             {% if user.role == 'admin' %}
-              <span class="badge rounded-pill text-bg-danger ms-2" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Administrator"><i class="fa-solid fa-user-tie"></i></span>
+              <span class="badge rounded-pill text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Administrator"><i class="fa-solid fa-user-tie"></i></span>
             {% endif %}
             {% if user.profile_description %}
             <div class="mt-1 user-description">
@@ -205,7 +205,7 @@
         
         <!-- Friends -->
         {% if friends_list %}
-          <div class="mt-5">
+          <div>
             <h3>Friends<span class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span></h3>
             <div class="row">
               {% for friend in friends_list %}

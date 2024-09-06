@@ -13,8 +13,9 @@ auth = Blueprint('auth', __name__)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
+#@unauthenticated_only
+#@verify_captcha
+@in_maintenance
 def login():
     # If user is in totp process, redirect them to the correct page
     if session.get('user_id', ''):
@@ -73,34 +74,23 @@ def totp():
     if request.method == 'GET':
         return render_template('twofactor.html', user=user)
     
+    # Get information from the form
     recovery_token = request.form.get('recovery_token', '').strip()
-    if recovery_token:
-        if hashing_util.argon2_verify_hash(user.totp_recovery, recovery_token):
-            totp_util.remove_totp(user)
-            auth_util.perform_login_actions(user)
-            
-            flash(f'We removed your TOTP configuration, {user.username}. Please, re-enable it whenever possible. Welcome back to Infomundi!')
-            return redirect(url_for('views.user_profile', username=user.username))
-        else:
-            flash('Invalid TOTP recovery code!', 'error')
-            return redirect(url_for('auth.totp'))
+    code = request.form.get('code', '').strip()
 
-    code = request.form.get('code', '')
-
-    # Decrypt user's totp secret
-    totp_secret = security_util.decrypt(user.totp_secret, initial_key=session['key_value'])
-
-    is_valid_totp = totp_util.verify_totp(totp_secret, code)
-    if not is_valid_totp:
-        flash('Invalid TOTP code!', 'error')
+    # Perform all necessary checks
+    is_valid, message = totp_util.deal_with_it(user, code, recovery_token, session['key_value'])
+    if not is_valid:
+        flash(message, 'error')
         return redirect(url_for('auth.totp'))
 
+    # Logs the user and performs some other actions
     auth_util.perform_login_actions(user)
     
     # This is an indicator that the user has two factor, and we don't use it anywhere after this logic
     del session['user_id']
 
-    flash(f'Welcome back, {user.username}')
+    flash(message)
     return redirect(url_for('views.user_profile', username=user.username))
 
 

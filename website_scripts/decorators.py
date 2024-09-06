@@ -68,10 +68,8 @@ def captcha_required(func):
     def decorated_function(*args, **kwargs):
         clearance = session.get('clearance', '')
         if clearance:
-            now = datetime.now()
-            
-            time_difference = now - datetime.fromisoformat(clearance)
-            if time_difference < timedelta(hours=CAPTCHA_CLEARANCE_HOURS):
+            timestamp = datetime.fromisoformat(clearance)
+            if is_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
                 return func(*args, **kwargs)
         
         session['clearance_from'] = request.url
@@ -103,10 +101,10 @@ def sensitive_area(func):
         sensitive_clearance = session.get('sensitive_clearance', '')
         if sensitive_clearance:
             timestamp = datetime.fromisoformat(sensitive_clearance)
-            if qol_util.is_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+            if is_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
                 return func(*args, **kwargs)
         
-        if 
+        # if? 
         return redirect(url_for('views.sensitive'))
 
     return decorated_function
