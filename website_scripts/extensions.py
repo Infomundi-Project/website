@@ -14,7 +14,7 @@ cache = Cache()
 limiter = Limiter(
     key_func=get_user_ip,
     storage_uri=REDIS_CONNECTION_STRING,
-    meta_limits=["4/hour", "5/day"],
+    meta_limits=["3/hour", "4/day"],
     default_limits=["20 per minute"]
 )
 

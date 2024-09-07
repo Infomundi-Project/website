@@ -13,6 +13,10 @@
       <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/password_change");</script>
     {% endif %}
 
+    {% if session.get('user_id', '') and request.endpoint != 'auth.totp' %}
+      <script nonce="{{ nonce }}">window.location.replace("https://infomundi.net/auth/totp");</script>
+    {% endif %}
+
     <script type="application/ld+json" nonce="{{ nonce }}">
       {
         "@context": "https://schema.org",

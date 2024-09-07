@@ -231,13 +231,13 @@ def error_handler(error):
 
     if error_code == 404:
         title = 'Page Not Found'
-        description = "It seems you've stumbled upon a page that even the ancient Greek philosophers couldn't find! Our esteemed statue is deep in thought, pondering over an ancient scroll, but alas, the wisdom to locate this page eludes even him."
+        description = "It seems you've stumbled upon a page that even the ancient Greek philosophers couldn't find! Our esteemed statue is deep in thought, pondering over an ancient scroll, but the wisdom to locate this page eludes even him."
         image_path = 'https://infomundi.net/static/img/illustrations/scroll.webp'
 
         buttons_enabled = True
     elif error_code == 429:
         title = 'Too Many Requests'
-        description = f"Even Greek gods can’t handle this much paperwork! It looks like our server is feeling a bit overwhelmed—just like this sculpture with too many papers. Give it a moment to catch its breath, and try again soon. Trust us, it’s working hard to process all your requests!"
+        description = f"Even Greek gods can’t handle this much paperwork! It looks like our server is feeling a bit overwhelmed. Give it a moment to catch its breath, and try again soon. Trust us, it’s working hard to process all your requests!"
         image_path = 'https://infomundi.net/static/img/illustrations/struggling.webp'
 
         buttons_enabled = False

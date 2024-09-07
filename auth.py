@@ -1,6 +1,6 @@
 import binascii
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
 from flask_login import login_user, login_required, current_user, logout_user
 from datetime import datetime
 from sqlalchemy import or_
@@ -37,20 +37,11 @@ def login():
         flash('Invalid credentials!', 'error')
         return render_template('login.html')
 
-    if user.derived_key_salt:
-        session['key_value'] = security_util.derive_key(password, user.derived_key_salt)
-    else:
-        key_data = security_util.derive_key(password) # returns salt and key value as we don't specify the salt
-        
-        # Index 0 = key_salt // Index 1 = key_value. Save the salt to the database.
-        user.derived_key_salt = key_data[0]
-        # Save the key value to the session
-        session['key_value'] = key_data[1]
-        # Commit changes to the database
-        extensions.db.session.commit()
+    session['key_value'] = auth_util.configure_key(user, password)
 
     # If user has totp enabled, we redirect them to the totp page without effectively logging them in the system
     if user.totp_secret:
+        session['email_address'] = email
         session['user_id'] = user.user_id
         return redirect(url_for('auth.totp'))
 
@@ -64,8 +55,7 @@ def login():
 @verify_captcha
 def totp():
     if not session.get('user_id', ''):
-        flash('Not yet! You should log in first.', 'error')
-        return redirect(url_for('auth.login'))
+        abort(404)
 
     user = models.User.query.get(session['user_id'])
     if request.method == 'GET':
@@ -82,7 +72,7 @@ def totp():
         return redirect(url_for('auth.totp'))
 
     # Logs the user and performs some other actions
-    auth_util.perform_login_actions(user)
+    auth_util.perform_login_actions(user, session['email_address'])
     
     # This is an indicator that the user has two factor, and we don't use it anywhere after this logic
     del session['user_id']
@@ -127,13 +117,13 @@ def register():
         return render_template('register.html')
     
     # Checks if email is valid
-    email = request.form.get('email', '')
+    email = request.form.get('email', '').strip()
     if not input_sanitization.is_valid_email(email):
         flash('We apologize, but your email address format is invalid.', 'error')
         return redirect(url_for('auth.register'))
 
     # Checks if username is valid
-    username = request.form.get('username', '')
+    username = request.form.get('username', '').strip()
     if not input_sanitization.is_valid_username(username):
         flash('We apologize, but your username is invalid. Must be 3-25 characters long and contain only letters, numbers, underscores, or hyphens.', 'error')
         return redirect(url_for('auth.register'))
@@ -354,10 +344,17 @@ def account_delete():
 @auth.route('/commento', methods=['GET'])
 @login_required
 def commento():
-    token = request.args.get('token', '', type=str)
-    received_hmac_hex = request.args.get('hmac', '', type=str)
+    token = request.args.get("token", '', type=str)
+    received_hmac_hex = request.args.get("hmac", '', type=str)
 
-    if not hashing_util.is_hmac_authentic(config.COMMENTO_SSO_KEY, token, received_hmac_hex):
+    if not token or not received_hmac_hex:
+        return "Missing token or hmac", 400
+
+    secret_key = binascii.unhexlify(config.COMMENTO_SSO_KEY)
+
+    # Validate HMAC
+    expected_hmac = hmac.new(secret_key, binascii.unhexlify(token), hashlib.sha256).digest()
+    if not hmac.compare_digest(binascii.unhexlify(received_hmac_hex), expected_hmac):
         return "Invalid HMAC", 403
 
     payload = {
@@ -369,7 +366,7 @@ def commento():
 
     # Generate HMAC for the response payload
     payload_json = json.dumps(payload, separators=(',', ':')).encode()
-    response_hmac = hashing_util.generate_hmac_signature(secret_key, payload_json)
+    response_hmac = hmac.new(secret_key, payload_json, hashlib.sha256).hexdigest()
     payload_hex = binascii.hexlify(payload_json).decode()
 
     # Redirect to Commento's SSO callback

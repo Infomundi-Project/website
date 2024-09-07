@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
 from flask_login import current_user, login_required
 from datetime import datetime
 
@@ -28,6 +28,14 @@ def home():
         statistics=home_data['statistics'],
         crypto_data=home_data['crypto_data']
     )
+
+
+@views.route('/error/<code>', methods=['GET'])
+def show_error(code):
+    code = int(code)
+    if code not in (404, 429, 500):
+        abort(404)
+    abort(code)
 
 
 @views.route('/admin', methods=['GET'])
@@ -287,14 +295,10 @@ def captcha():
 @login_required
 def sensitive():
     if request.method == 'GET':
-        # If they have clearance (means that they have recently proven they're human)
-        sensitive_clearance = session.get('sensitive_clearance', '')
         is_trusted_session = session.get('is_trusted_session', '')
-        if sensitive_clearance:
-            timestamp = datetime.fromisoformat(sensitive_clearance)
-            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True) or is_trusted_session:
-                flash("We know you are who you say you are, don't worry!")
-                return redirect(url_for('views.user_redirect'))
+        if is_trusted_session:
+            flash("We know you are who you say you are, don't worry!")
+            return redirect(url_for('views.user_redirect'))
 
         return render_template('sensitive.html')
     
@@ -312,7 +316,11 @@ def sensitive():
         flash(message, 'error')
         return redirect(url_for('views.sensitive'))
 
-    session['sensitive_clearance'] = datetime.now().isoformat()
+    current_password = request.form.get('current_password', '')
+    if not current_user.check_password(current_password):
+        flash('Invalid current password!', 'error')
+        return redirect(url_for('views.sensitive'))
+
     session['is_trusted_session'] = bool(request.form.get('trust_session', ''))
 
     flash('Thanks for verifying! You are who you say you are after all.')

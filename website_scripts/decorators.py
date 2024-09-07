@@ -3,9 +3,9 @@ from flask_login import current_user
 from datetime import datetime
 from functools import wraps
 
-from .config import CAPTCHA_CLEARANCE_HOURS, SENSITIVE_CLEARANCE_HOURS
 from .qol_util import is_within_threshold_minutes
 from .cloudflare_util import is_valid_captcha
+from .config import CAPTCHA_CLEARANCE_HOURS
 
 
 
@@ -99,11 +99,9 @@ def sensitive_area(func):
     """This decorator is used to check if the user needs to resolve a proof of life first."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        sensitive_clearance = session.get('sensitive_clearance', '')
-        if sensitive_clearance:
-            timestamp = datetime.fromisoformat(sensitive_clearance)
-            if is_within_threshold_minutes(timestamp, SENSITIVE_CLEARANCE_HOURS, is_hours=True):
-                return func(*args, **kwargs)
+        is_trusted_session = session.get('is_trusted_session', '')
+        if is_trusted_session:
+            return func(*args, **kwargs)
         
         return redirect(url_for('views.sensitive'))
 

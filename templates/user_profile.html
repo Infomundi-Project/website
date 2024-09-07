@@ -191,7 +191,7 @@
       </div>
     </div>
 
-    <div class="row mt-4">
+    <div class="row mt-5">
       <!-- Recent Activity -->
       <div class="col-9">
         <!--
@@ -231,6 +231,10 @@
             </div> 
           </div>
         {% endif %}
+
+        <div class="mt-5">
+      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
+    </div>
       </div>
 
       <div class="col-3 p-2" style="border-radius: 5px;">
@@ -239,9 +243,11 @@
     
     </div>
     
+    <!--
     <div class="mt-5">
       <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
     </div>
+  -->
   </div>
 </div>
 {% endblock %}

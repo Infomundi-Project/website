@@ -83,7 +83,7 @@ def is_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hou
     return time_difference <= timedelta(minutes=threshold_time)
 
 
-def get_device_info(user_agent_string: str) -> dict:
+def get_device_info(user_agent_string: str):
     """Parses the user agent string and extracts device information out of it. It can't be 100% accurate, as
     the user agent is user-supplied input. However, it may be beneficial for us to use it, as we don't have CASH
     to buy FingerprintJS' license.
@@ -92,17 +92,20 @@ def get_device_info(user_agent_string: str) -> dict:
         user_agent_string (str): The user agent string (obviously)
 
     Returns:
-        dict: Device details.
+        dict or str: Device details.
 
     Examples:
         >>> get_device_info("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36")
         {'browser': 'Chrome', 'os': 'Windows 10', 'device_type': 'PC'}
     """
-    user_agent = parse_user_agent(user_agent_string)
+    try:
+        user_agent = parse_user_agent(user_agent_string)
     
-    # Extract information (we can get the browser version with user_agent.browser.version_string)
-    browser = user_agent.browser.family
-    os = f"{user_agent.os.family} {user_agent.os.version_string}"
-    device = "Mobile" if user_agent.is_mobile else "Tablet" if user_agent.is_tablet else "PC" if user_agent.is_pc else "Other"
-    
-    return {"browser": browser, "os": os, "device_type": device}
+        # Extract information (we can get the browser version with user_agent.browser.version_string)
+        browser = user_agent.browser.family
+        os = f"{user_agent.os.family} {user_agent.os.version_string}"
+        device = "Mobile" if user_agent.is_mobile else "Tablet" if user_agent.is_tablet else "PC" if user_agent.is_pc else "Other"
+    except Exception:
+        return 'No information'
+
+    return f'Browser: {browser}, OS: {os}, device type: {device}'

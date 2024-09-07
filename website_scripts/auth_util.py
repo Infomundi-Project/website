@@ -1,9 +1,9 @@
 from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
-from flask import session
+from flask import session, request
 from sqlalchemy import or_
 
-from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization
+from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
 
 
 def perform_login_actions(user, cleartext_email: str):
@@ -18,34 +18,56 @@ def perform_login_actions(user, cleartext_email: str):
     session['session_version'] = user.session_version
     session['email_address'] = cleartext_email
 
+    message = f"""Hello, {user.username}.
 
-def configure_key(user, cleartext_password, cleartext_email: str = '') -> str:
+It appears that someone has logged into your Infomundi account from a new device. But fear not, we have kept a watchful eye! Here are the details:
+
+Device: {qol_util.get_device_info(request.headers.get('User-Agent'))}
+IP Address: {cloudflare_util.get_user_ip()}
+Country: {cloudflare_util.get_user_country()}
+
+It's always wise to make sure that you recognize this login. If this was unexpected, it might be time to change your password.
+
+Should you need to take any action, you can recover your account at: https://infomundi.net/auth/forgot_password
+
+If you encounter any issues, please don't hesitate to contact our team for assistance at: https://infomundi.net/contact
+
+Best regards,
+The Infomundi Team
+    """
+    subject = 'Infomundi - Login From a New Device'
+    notifications.send_email(cleartext_email, subject, message)
+
+
+def configure_key(user, cleartext_password, cleartext_email: str = ''):
     """
     Here's the deal, when the user creates an account through Google, we don't know their cleartext password, ever.
     However, we still need to encrypt the TOTP secret if the user choses to enable 2FA authentication via TOTP. To make this work,
     we can use the user's cleartext email address, it's better than nothing, as the email itself is stored in hash format (argon2) in
     the database.
 
-    Arguments
+    We check to see if the user has a salt associated with their account, if they do, we generate their key and simply return. If they do not,
+    we call the derive_key function without specifying the salt. This way, we'll get a random salt generated and the user's derived key based on
+    the details (cleartext_password or cleartext_email) that we passed along. The salt is associated with the user and saved to the database, and we
+    return the derived key as usual.
+
+    Arguments:
         user (UserMixin): The user, so we can change/read value for them in the database
         cleartext_password (str): User's cleartext password
         cleartext_email (str): Optional. User's cleartext email.
 
-    Return
-        str: The user's key.
+    Returns:
+        str: We return the user's key
     """
     if user.derived_key_salt:
-        session['key_value'] = security_util.derive_key(cleartext_password, user.derived_key_salt)
-    else:
-        # Returns salt and key value as we don't specify the salt
-        key_data = security_util.derive_key(cleartext_password)
-        
-        # Index 0 = key_salt // Index 1 = key_value. Save the salt to the database.
-        user.derived_key_salt = key_data[0]
-        # Save the key value to the session
-        session['key_value'] = key_data[1]
-        # Commit changes to the database
-        extensions.db.session.commit()
+        return security_util.derive_key(cleartext_email if cleartext_email else cleartext_password, user.derived_key_salt)
+
+    # Return key salt and key value as the salt wasn't specified!
+    key_salt, key_value = security_util.derive_key(cleartext_email if cleartext_email else cleartext_password)
+    user.derived_key_salt = key_salt
+    extensions.db.session.commit()
+    
+    return key_value
 
 
 
@@ -53,7 +75,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
     """Generates a verification token, stores in the database and 
     uses notifications.send_email to send the verification token to the user.
 
-    Args:
+    Arguments:
         email (str): User's email address.
         hashed_email (str): User's sha256 hashed email.
         username (str): User's username.
@@ -80,7 +102,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
     # Generate a REEEEALLY random verification token.
     verification_token = security_util.generate_nonce(24)
 
-    message = f"""Hello {username}, 
+    message = f"""Hello, {username}.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
@@ -155,7 +177,7 @@ def send_recovery_token(email: str, hashed_email: str) -> bool:
     # Generates a super random token.
     verification_token = security_util.generate_nonce(24)
 
-    message = f"""Hello,
+    message = f"""Hello.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to recover your Infomundi account, feel free to click on the link below:
 
@@ -178,7 +200,7 @@ The Infomundi Team"""
 
 
 def delete_account(email, token):
-    hashed_email = sha256_hash_text(email)
+    hashed_email = hashing_util.sha256_hash_text(email)
     user = models.User.query.filter_by(email=hashed_email).first()
 
     # If the supplied token doesn't match the database record, return False.
@@ -202,7 +224,7 @@ def delete_account(email, token):
 
 
 def send_delete_token(email: str, current_password: str) -> bool:
-    hashed_email = sha256_hash_text(email)
+    hashed_email = hashing_util.sha256_hash_text(email)
     user = models.User.query.filter_by(email=hashed_email).first()
 
     if not user.check_password(current_password):
@@ -211,8 +233,7 @@ def send_delete_token(email: str, current_password: str) -> bool:
     token = security_util.generate_nonce(24)
     
     subject = "Infomundi - Confirm Account Deletion"
-    message = f"""
-Hello, {user.display_name if user.display_name else user.username}.
+    message = f"""Hello, {user.display_name if user.display_name else user.username}.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to delete your Infomundi account, feel free to click on the link below:
 
