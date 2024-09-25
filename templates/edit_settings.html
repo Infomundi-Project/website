@@ -11,11 +11,20 @@
                 <p>Scan the QR code below with your TOTP app or use the secret key directly.</p>
                 <!-- TOTP QR Code and Secret -->
                 <div id="totp-info">
-                    <img id="totp-qr-code" src="" alt="TOTP QR Code" class="img-fluid mb-2" style="height: auto; width: 50%">
-                    <p><strong>Secret Key: </strong><span id="totp-secret"></span></p>
+                    <img id="totp-qr-code" src="" alt="TOTP QR Code" class="img-fluid my-2" style="height: auto; width: 50%">
+                    <div class="input-group">
+                        <div class="form-floating flex-grow-1">
+                            <input type="password" class="form-control" id="floatInputSecretKey" placeholder="Secret Key" disabled>
+                            <label for="floatInputSecretKey">Secret Key</label>
+                        </div>
+                        <span class="input-group-text password-toggle" id="floatInputSecretKeyIcon">
+                        <i class="fa-solid fa-eye" data-toggle="floatInputSecretKey"></i>
+                        </span>
+                    </div>
+
                 </div>
                 <!-- TOTP Code Input -->
-                <div class="input-group">
+                <div class="input-group mt-5">
                     <div class="form-floating flex-grow-1">
                         <input type="text" class="form-control" id="totpCodeInput" placeholder="Enter TOTP Code" name="totp_code" maxlength="6" minlength="6" required>
                         <label for="totpCodeInput">TOTP Code</label>
@@ -23,6 +32,10 @@
                             Please provide a valid 6-digit code.
                         </div>
                     </div>
+                </div>
+                <!-- Loading message -->
+                <div id="totp-loading-message" class="text-info mt-2" style="display: none;">
+                    Processing your TOTP code, please wait...
                 </div>
                 <!-- Error message for invalid TOTP -->
                 <div id="totp-error-message" class="text-danger mt-2" style="display: none;">
@@ -55,30 +68,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Input your password and the current TOTP, and we'll disable it</p>
-                    <div class="input-group">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="floatInputCurrentPasswordConfigureTotp" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
-                            <label for="floatInputCurrentPasswordConfigureTotp">Current Password</label>
-                            <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
-                            </div>
-                        </div>
-                        <span class="input-group-text password-toggle" id="floatInputCurrentPasswordConfigureTotpIcon">
-                        <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPasswordConfigureTotp"></i>
-                        </span>
-                    </div>
-                    <div class="input-group mt-2">
-                        <span class="input-group-text"><i class="fa-solid fa-mobile-screen-button"></i></span>
-                        <div class="form-floating">
-                            <input name="code" type="text" class="form-control" id="floatingInputCurrentTOTP" placeholder="TOTP" maxlength="6" minlength="6" required>
-                            <label for="floatingInputCurrentTOTP">TOTP</label>
-                        </div>
-                    </div>
+                    <p>Disabling two-factor authentication is like leaving your shield at home before battle. Are you sure you wish to proceed?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Confirm</button>
+                    <button type="submit" class="btn btn-danger mx-3"><i class="fa-solid fa-lock-open me-1"></i>Disable</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -96,19 +90,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Input your current password, and we'll send you instructions to your email address at <code>{{ session.get('obfuscated_email_address', '') }}</code>.</p>
-                    <div class="input-group">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="floatInputCurrentPasswordDelete" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
-                            <label for="floatInputCurrentPasswordDelete">Current Password</label>
-                            <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
-                            </div>
-                        </div>
-                        <span class="input-group-text password-toggle" id="floatInputCurrentPasswordDeleteIcon">
-                        <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPasswordDelete"></i>
-                        </span>
-                    </div>
+                    <p>Are you sure? We'll send you instructions to your email address at <code>{{ session.get('obfuscated_email_address', '') }}</code>.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -130,23 +112,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Input your current password, and we'll invalidate all your sessions. You won't have to log in again in your current session.</p>
-                    <div class="input-group">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="floatInputCurrentPasswordInvalidateSessions" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
-                            <label for="floatInputCurrentPasswordInvalidateSessions">Current Password</label>
-                            <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
-                            </div>
-                        </div>
-                        <span class="input-group-text password-toggle" id="floatInputCurrentPasswordInvalidateSessionsIcon">
-                        <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPasswordInvalidateSessions"></i>
-                        </span>
-                    </div>
+                    <p>All other sessions will be banished—except for this one. Are you sure you want to proceed with this action?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Confirm</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Proceed</button>
                 </div>
             </div>
         </div>
@@ -164,30 +134,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>In order to change your email, please fill in the information below</p>
-                    <div class="input-group mb-2">
-                        <span class="input-group-text"><i class="fa-solid fa-envelope-circle-check"></i></span>
-                        <div class="form-floating">
-                            <input name="email" type="email" class="form-control" id="floatingInputEmailChange" placeholder="Email" required>
-                            <label for="floatingInputEmailChange">Current Email</label>
-                        </div>
-                    </div>
-                    <!-- Current Password -->
-                    <div class="input-group">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="floatInputCurrentPasswordChangeEmailModal" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
-                            <label for="floatInputCurrentPasswordChangeEmailModal">Current Password</label>
-                            <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
-                            </div>
-                        </div>
-                        <span class="input-group-text password-toggle" id="floatInputCurrentPasswordChangeEmailModalIcon">
-                        <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPasswordChangeEmailModal"></i>
-                        </span>
-                    </div>
-                    <div class="my-4">
-                        <hr>
-                    </div>
+                    <p>In order to change your email address, please fill in the following</p>
                     <!-- New Email -->
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
@@ -202,7 +149,6 @@
                             <label for="floatingInputEmailConfirm">Confirm New Email</label>
                         </div>
                     </div>
-                    <div class="cf-turnstile mt-4" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -214,7 +160,7 @@
 </form>
 
 
-<form method="post" action="{{ url_for('views.edit_user_settings', username=current_user.username) }}">
+<form method="post" action="{{ url_for('views.edit_user_settings', username=current_user.username) }}" class="needs-validation">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -224,32 +170,16 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>In order to change your password, please fill in the information below</p>
-                    <!-- Current Password -->
-                    <div class="input-group">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="CurrentPasswordChangePasswordModal" placeholder="Current Password" name="current_password" maxlength="50" minlength="8" required>
-                            <label for="CurrentPasswordChangePasswordModal">Current Password</label>
-                            <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
-                            </div>
-                        </div>
-                        <span class="input-group-text password-toggle" id="CurrentPasswordChangePasswordModalIcon">
-                        <i class="fa-solid fa-eye" data-toggle="CurrentPasswordChangePasswordModal"></i>
-                        </span>
-                    </div>
-                    <div class="my-4">
-                        <hr>
-                    </div>
+                    <p>In order to change your password, please fill in the following</p>
                     <div class="input-group mb-2">
                         <div class="form-floating flex-grow-1">
-                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="new_password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
-                            <label for="floatingPassword">Password</label>
+                            <input type="password" class="form-control" id="floatingPassword" placeholder="New Password" name="new_password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
+                            <label for="floatingPassword">New Password</label>
                             <div class="invalid-feedback">
-                                Please provide a password with 8 to 50 characters.
+                                Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
                             </div>
                         </div>
-                        <span class="input-group-text password-toggle" id="floatingPasswordIcon">
+                        <span class="input-group-text password-toggle" id="floatingPasswordIcon" style="max-height: 60px;">
                         <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
                         </span>
                     </div>
@@ -262,11 +192,10 @@
                                 Passwords must match.
                             </div>
                         </div>
-                        <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon">
+                        <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon" style="max-height: 60px;">
                         <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
                         </span>
                     </div>
-                    <div class="cf-turnstile mt-4" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -327,20 +256,28 @@
         </label>
     </div>
     <span class="input-group-text">
-    {% if current_user.totp_secret %}
-    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#totpConfigureModal">Settings</button>
-    {% else %}
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#totpSetupModal">Setup</button>
-    {% endif %}
+        {% if current_user.totp_secret %}
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#totpConfigureModal">Change</button>
+        {% else %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#totpSetupModal">Setup</button>
+        {% endif %}
     </span>
 </div>
+
+
 <div class="input-group">
     <span class="input-group-text" style="width: 40px;"><i class="fa-solid fa-envelope-circle-check"></i></span>
     <div class="form-floating">
-        <input type="text" class="form-control" id="floatingInputEmail2fa" placeholder="Email" value="You'll receive authentication in your email inbox" disabled>
+        <input type="text" class="form-control" id="floatingInputEmail2fa" placeholder="Email" value="You'll receive authentication codes in your email inbox" disabled>
         <label for="floatingInputEmail2fa">Email</label>
     </div>
-    <span class="input-group-text"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mail2faSetupModal">Setup</button></span>
+    <span class="input-group-text">
+        {% if current_user.totp_secret %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Disable TOTP-based two factor if you want to setup this" disabled>Setup</button>
+        {% else %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mail2faSetupModal">Setup</button>
+        {% endif %}
+    </span>
 </div>
 {% endblock %}
 {% block scripts %}
@@ -355,13 +292,14 @@
         // Elements
         const totpModal = document.getElementById('totpSetupModal');
         const totpQRCode = document.getElementById('totp-qr-code');
-        const totpSecret = document.getElementById('totp-secret');
+        const totpSecret = document.getElementById('floatInputSecretKey');
         const totpCodeInput = document.getElementById('totpCodeInput');
         const totpErrorMessage = document.getElementById('totp-error-message');
         const recoveryTokenSection = document.getElementById('recoveryTokenSection');
         const recoveryTokenInput = document.getElementById('recoveryToken');
         const copyTokenBtn = document.getElementById('copyTokenBtn');
         const totpConfirmButton = document.getElementById('totpConfirmButton');
+        const loadingMessage = document.getElementById('totp-loading-message'); // Loading message element
     
         // Fetch TOTP details when the modal is shown
         totpModal.addEventListener('show.bs.modal', async function() {
@@ -371,7 +309,7 @@
                     const data = await response.json();
                     // Populate QR code and secret key
                     totpQRCode.src = `data:image/png;base64,${data.qr_code}`;
-                    totpSecret.textContent = data.secret_key;
+                    totpSecret.value = data.secret_key;
                 } else {
                     console.error('Failed to generate TOTP.');
                 }
@@ -385,11 +323,17 @@
             const totpCode = totpCodeInput.value;
     
             if (totpCode.length === 6) {
+                // Show loading message
+                loadingMessage.style.display = 'block';
+
                 // Call the API to check if the TOTP code is valid
                 try {
                     const response = await fetch(`/api/totp/setup?code=${totpCode}`);
                     const result = await response.json();
     
+                    // Hide loading message after response
+                    loadingMessage.style.display = 'none';
+
                     if (response.ok && result.valid) {
                         // Show recovery token field and fill in the token
                         recoveryTokenInput.value = result.totp_recovery_token;
@@ -405,6 +349,8 @@
                         totpCodeInput.value = ''; // Clear input
                     }
                 } catch (error) {
+                    // Hide loading message if error occurs
+                    loadingMessage.style.display = 'none';
                     console.error('Error checking TOTP code:', error);
                 }
             }
@@ -426,4 +372,5 @@
 
     });
 </script>
+
 {% endblock %}

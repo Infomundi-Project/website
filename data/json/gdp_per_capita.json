@@ -198,6 +198,12 @@
     }
   },
   {
+    "Sint Maarten (Dutch part)": {
+      "gdp": "$39,433 (IMF)",
+      "date": "2023"
+    }
+  },
+  {
     "Aruba": {
       "gdp": "$33,301 (World Bank)",
       "date": "2022"
@@ -213,12 +219,6 @@
     "Cyprus": {
       "gdp": "$34,701 (World Bank)",
       "date": "[n 2]2023"
-    }
-  },
-  {
-    "Sint Maarten (Dutch part)": {
-      "gdp": "$39,433 (IMF)",
-      "date": "2023"
     }
   },
   {
@@ -282,6 +282,12 @@
     }
   },
   {
+    "Turks and Caicos Islands": {
+      "gdp": "$30,438 (IMF)",
+      "date": "2023"
+    }
+  },
+  {
     "Czech Republic": {
       "gdp": "$30,427 (World Bank)",
       "date": "2023"
@@ -314,12 +320,6 @@
   {
     "Slovakia": {
       "gdp": "$24,470 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Turks and Caicos Islands": {
-      "gdp": "$30,438 (IMF)",
       "date": "2023"
     }
   },
@@ -858,6 +858,12 @@
     }
   },
   {
+    "Sri Lanka": {
+      "gdp": "$3,828 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Vanuatu": {
       "gdp": "$3,367 (World Bank)",
       "date": "2023"
@@ -873,12 +879,6 @@
     "Palestine": {
       "gdp": "$3,368 (World Bank)",
       "date": "[n 9]2023"
-    }
-  },
-  {
-    "Sri Lanka": {
-      "gdp": "$3,828 (World Bank)",
-      "date": "2023"
     }
   },
   {

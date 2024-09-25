@@ -9,10 +9,10 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.String(70), nullable=False, unique=True)
+    email = db.Column(db.String(150), nullable=False, unique=True)
     user_id = db.Column(db.String(20), primary_key=True)
     role = db.Column(db.String(15), default='user')
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(150), nullable=False)
     session_version = db.Column(db.Integer, default=0)
 
     # Timestamps
@@ -55,6 +55,9 @@ class User(db.Model, UserMixin):
     # IP History
     ip_history = db.relationship('UserIPHistory', back_populates='user', cascade='all, delete-orphan')
 
+    # This is only used in certain circumnstances
+    cleartext_email = db.Column(db.String(80))
+
 
     def set_password(self, password):
         self.password = argon2_hash_text(password)
@@ -73,8 +76,21 @@ class User(db.Model, UserMixin):
         return argon2_verify_hash(self.password, password)
 
 
+    def set_email(self, email):
+        self.email = argon2_hash_text(email)
+
+
     def get_id(self):
         return str(self.user_id)
+
+
+    def purge_totp(self):
+        self.totp_secret = None
+        self.totp_recovery = None
+
+
+    def purge_key(self):
+        self.derived_key_salt = None
 
 
     def add_ip_history(self, ip_address, user_agent):
@@ -82,6 +98,7 @@ class User(db.Model, UserMixin):
         new_ip_history = UserIPHistory(user_id=self.user_id, ip_address=ip_address, user_agent=user_agent)
         db.session.add(new_ip_history)
         db.session.commit()
+    
 
 
 class CommonPasswords(db.Model):

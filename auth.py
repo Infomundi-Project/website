@@ -1,6 +1,5 @@
-import binascii
-import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
+import binascii, json, hmac, hashlib
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort, make_response
 from flask_login import login_user, login_required, current_user, logout_user
 from datetime import datetime
 from sqlalchemy import or_
@@ -84,29 +83,10 @@ def totp():
 @auth.route('/disable_totp', methods=['POST'])
 @login_required
 def disable_totp():
-    current_password = request.form.get('current_password', '')
-    if not current_user.check_password(current_password):
-        flash('Invalid current password', 'error')
-        return redirect(url_for('views.edit_user_settings'))
-
-    code = request.form.get('code', '')
-    
-    # Get the user key information from their session
-    key_salt, key_value = session['key_data']
-
-    # Decrypt user's totp secret
-    totp_secret = security_util.decrypt(current_user.totp_secret, initial_key=key_value)
-
-    is_valid_totp = totp_util.verify_totp(totp_secret, code)
-    if not is_valid_totp:
-        flash('Invalid TOTP code!', 'error')
-        return redirect(url_for('views.edit_user_settings'))
-
-    # Removes the user's TOTP information from the database
     totp_util.remove_totp(current_user)
 
     flash('You removed your two factor authentication!')
-    return redirect(url_for('views.edit_user_settings'))
+    return redirect(url_for('views.edit_user_settings', username=current_user.username))
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -141,7 +121,7 @@ def register():
         flash('Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
         return redirect(url_for('auth.register'))
 
-    hashed_email = hashing_util.sha256_hash_text(email)
+    hashed_email = hashing_util.argon2_hash_text(email)
     
     user_lookup = models.User.query.filter(or_(
         models.User.email == hashed_email,
@@ -167,23 +147,14 @@ def register():
 @auth.route('/invalidate_sessions', methods=['POST'])
 @login_required
 def invalidate_sessions():
-    current_password = request.form.get('current_password', '')
-    if not current_user.check_password(current_password):
-        flash('Invalid current password', 'error')
-        return redirect(url_for('views.user_redirect'))
-
-    try:
-        # Change state in the database
-        current_user.session_version += 1
-        # Change user's session version in the session cookie so they won't have to log in again
-        session['session_version'] = current_user.session_version
-        # Commit changes to the database
-        extensions.db.session.commit()
-        flash('All sessions have been invalidated.')
-    except Exception:
-        extensions.db.session.rollback()
-        flash('An error occurred while invalidating sessions.', 'error')
+    # Change state in the database
+    current_user.session_version += 1
+    # Change user's session version in the session cookie so they won't have to log in again
+    session['session_version'] = current_user.session_version
+    # Commit changes to the database
+    extensions.db.session.commit()
     
+    flash('All sessions have been invalidated.')
     return redirect(url_for('views.user_redirect'))
 
 
@@ -245,7 +216,7 @@ def forgot_password():
         return render_template('forgot_password.html')
 
     # Tries to send the recovery token to the user
-    auth_util.send_recovery_token(email, hashing_util.sha256_hash_text(email))
+    auth_util.send_recovery_token(email, hashing_util.argon2_hash_text(email))
 
     # Generic error message to prevent user enumeration
     flash(f"If {email} is in our database, an email will be sent with instructions.")
@@ -271,6 +242,8 @@ def password_change():
         message = 'Passwords must match!'
     elif not input_sanitization.is_strong_password(new_password):
         message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+    elif models.CommonPasswords.query.get(new_password):
+        message = 'Your password is too common, please, make sure to create a unique one.'
     else:
         message = ''
 
@@ -278,43 +251,7 @@ def password_change():
         flash(message, 'error')
         return render_template('password_change.html')
         
-    # Update the user's password
-    current_user.set_password(new_password)
-    
-    # Make sure the user is not in recovery mode
-    current_user.in_recovery = False
-
-    # As the user password has changed, we can no longer decrypt the totp secret!
-    current_user.totp_secret = None
-    current_user.totp_recovery = None
-    
-    # Commits to the database
-    extensions.db.session.commit()
-
-    message = f"""Hello,
-
-We wanted to inform you that the password for your Infomundi account has been successfully changed. If you made this change, there's nothing else you need to do.
-
-The change was made from the following location:
-- IP Address: {cloudflare_util.get_user_ip()}
-- Country: {cloudflare_util.get_user_country()}
-
-However, if you did not authorize this change, please take immediate action to secure your account. You can recover your account by clicking the link below:
-
-https://infomundi.net/auth/forgot_password
-
-If you encounter any issues or need further assistance, feel free to contact us using the form at:
-
-https://infomundi.net/contact
-
-Best regards,
-The Infomundi Team"""
-    subject = 'Infomundi - Password Change Notification'
-
-    notifications.send_email()
-
-    flash(f'Your password has been updated, {current_user.username}. You may log in now.')
-    logout_user()
+    auth_util.change_password(current_user, new_password)
     return redirect(url_for('auth.login'))
 
 
@@ -332,12 +269,11 @@ def account_delete():
         flash('Your account has been deleted.')
         return redirect(url_for('views.user_redirect'))
 
-    current_password = request.form.get('current_password', '')
-    if not auth_util.send_delete_token(user_email, current_password):
-        flash('Something went wrong. Perhaps your current password is incorrect or you already have a token associated with your account.', 'error')
+    if not auth_util.send_delete_token(user_email):
+        flash('You already have a delete token associated with your account.', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    flash(f"We've sent an email with instructions to {user_email}.")
+    flash(f"We've sent an email with instructions to your email address at {session.get('obfuscated_email_address', '')}.")
     return redirect(url_for('views.user_redirect'))
 
 
@@ -416,8 +352,25 @@ def google_callback():
 @login_required
 def logout():
     flash(f'We hope to see you again soon, {current_user.username}')
-
+    session.permanent = False
     session.clear()
-
     logout_user()
-    return redirect(url_for('views.home'))
+
+    return redirect(url_for('auth.delete_cookies'))
+
+
+@auth.route('/delete_cookies', methods=['GET'])
+def delete_cookies():
+    response = make_response(redirect(url_for('auth.login')))
+    
+    # List of cookie names to delete
+    cookies_to_delete = ['XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session']
+    
+    # Specify the domain for which cookies were set (your main domain)
+    domain = '.infomundi.net'  # Include the dot to delete from subdomains as well
+    
+    # Delete each cookie
+    for cookie in cookies_to_delete:
+        response.delete_cookie(cookie, domain=domain)
+
+    return response

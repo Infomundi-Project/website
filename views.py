@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util
+cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util
 from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required, sensitive_area
 
 views = Blueprint('views', __name__)
@@ -29,14 +29,14 @@ def home():
         crypto_data=home_data['crypto_data']
     )
 
-
+"""
 @views.route('/error/<code>', methods=['GET'])
 def show_error(code):
     code = int(code)
     if code not in (404, 429, 500):
         abort(404)
     abort(code)
-
+"""
 
 @views.route('/admin', methods=['GET'])
 @admin_required
@@ -169,7 +169,7 @@ def edit_user_profile(username):
     # Commit changes to the database
     extensions.db.session.commit()
     
-    flash('Profile updated successfully!', 'success')
+    flash('Profile updated successfully!')
     return render_template('edit_profile.html')
 
 
@@ -186,32 +186,19 @@ def edit_user_settings(username):
     if request.method == 'GET':
         return render_template('edit_settings.html')
 
-    # Check if current password is valid
-    current_password = request.form.get('current_password', '')
-    if not current_user.check_password(current_password):
-        flash('Invalid current password.', 'error')
-        return redirect(url_for('views.edit_user_settings'))
-
-    current_email = request.form.get('email', '').strip().lower()
-    if current_email:
-        if current_email != session.get('email_address', ''):
-            flash('Your current email is invalid.', 'error')
-            return redirect(url_for('views.edit_user_settings'))
-
-        new_email = request.form.get('new_email', '').strip().lower()
-        confirm_email = request.form.get('confirm_email', '').strip().lower()
-
+    new_email = request.form.get('new_email', '').strip().lower()
+    confirm_email = request.form.get('confirm_email', '').strip().lower()
+    if new_email or confirm_email:
         if new_email != confirm_email:
             flash('Emails must match.', 'error')
-            return redirect(url_for('views.edit_user_settings'))
+            return render_template('edit_settings.html')
 
         hashed_new_email = hashing_util.sha256_hash_text(new_email)
 
         # If the email format is invalid or email is already being used by other user
         if not input_sanitization.is_valid_email(new_email) or models.User.query.filter_by(email=hashed_new_email).first():
-            flash('Invalid new email.', 'error')
-            return redirect(url_for('views.edit_user_settings'))
-
+            flash('The email you provided is invalid.', 'error')
+            return render_template('edit_settings.html')
 
         # Send email to the user
         subject = 'Infomundi - Your Email Has Been Changed'
@@ -235,35 +222,32 @@ The Infomundi Team
         current_user.email = hashed_new_email
         extensions.db.session.commit()
 
-        flash('Email updated successfully.')
+        flash('Your email has been updated.')
+        return render_template('edit_settings.html')
 
     # If the user wants to change their password, we do so. Otherwise, we just skip
     new_password = request.form.get('new_password', '')
     confirm_password = request.form.get('confirm_password', '')
-    if new_password and confirm_password:
+    if new_password or confirm_password:
         if not (new_password == confirm_password and input_sanitization.is_strong_password(new_password)):
             flash("Either the passwords don't match or the password is not strong enough.", 'error')
-            return redirect(url_for('views.edit_user_settings'))
+            return render_template('edit_settings.html')
 
-        user.set_password(new_password)
-        extensions.db.session.commit()
-    
-    flash('Profile updated successfully!')
-    return redirect(url_for('views.edit_user_settings'))
+        auth_util.change_password(current_user, new_password)
+        flash('Your password has been updated, and you may log in again.')
+        return redirect(url_for('auth.login'))
 
 
 @views.route('/redirect', methods=['GET'])
 def user_redirect():
     target_url = request.headers.get('Referer', '')
 
-    # If referer url isn't safe, redirect to the home page.
-    if not input_sanitization.is_safe_url(target_url):
-        return redirect(url_for('views.home'))
-
     if target_url == 'https://infomundi.net/redirect':
-        target_url = 'https://infomundi.net/'
-
-    return redirect(target_url)
+        return redirect('https://infomundi.net/')
+    elif not input_sanitization.is_safe_url(target_url):
+        return redirect(url_for('views.home'))
+    else:
+        return redirect(target_url)
 
 
 @views.route('/be-right-back', methods=['GET'])
@@ -314,11 +298,6 @@ def sensitive():
     
     if not is_valid:
         flash(message, 'error')
-        return redirect(url_for('views.sensitive'))
-
-    current_password = request.form.get('current_password', '')
-    if not current_user.check_password(current_password):
-        flash('Invalid current password!', 'error')
         return redirect(url_for('views.sensitive'))
 
     session['is_trusted_session'] = bool(request.form.get('trust_session', ''))
@@ -509,7 +488,7 @@ def comments():
             formatted_gpt_summary.append({'header': header, 'paragraph': value})
 
     # Add a click to the story.
-    if story.clicks is None:
+    if story.clicks == None:
         story.clicks = 1
     else:
         story.clicks += 1
@@ -524,7 +503,7 @@ def comments():
     session['visited_news'] = news_id
     
     # Create the SEO dataw. Title should be 60 characters, description must be 150 characters
-    seo_title = 'Infomundi - ' + input_sanitization.gentle_cut_text(60, story.title)
+    seo_title = 'Infomundi - ' + input_sanitization.gentle_cut_text(45, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
     seo_image = story.media_content_url
     

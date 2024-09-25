@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}Two Factor Authentication{% endblock %}
+{% extends "base.html" %}{% block title %}Sensitive Page{% endblock %}
 {% block styles %}
 <style>
 	.profile-avatar {
@@ -76,10 +76,12 @@
 	        <div class="cf-turnstile my-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
 
 	        <button class="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
-	        <hr class="my-4">
-	        <small class="text-muted">
-	            <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.
-	        </small>
+	        {% if current_user.totp_secret %}
+		        <hr class="my-4">
+		        <small class="text-muted">
+		            <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.
+		        </small>
+	        {% endif %}
 	    </form>
       </div>
     </div>
@@ -89,15 +91,14 @@
 {% block scripts %}
 
 {% if current_user.totp_secret %}
-<script nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/codeTokenChanger.js') }}"
-></script>
+	<script nonce="{{ nonce }}"
+	    src="{{ url_for('static', filename='js/codeTokenChanger.js') }}"
+	></script>
 {% else %}
-<script defer nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/passwordUtility.js') }}"
-    ></script>
+	<script defer nonce="{{ nonce }}"
+	    src="{{ url_for('static', filename='js/passwordUtility.js') }}"
+	></script>
 {% endif %}
-
 
 <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"

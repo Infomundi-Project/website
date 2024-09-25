@@ -99,6 +99,12 @@ def ads_txt():
         'ads.txt', mimetype='text/plain')
 
 
+@app.route('/favicon.ico')
+def favicon_ico():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'favicon.ico', mimetype='image/x-icon')
+
+
 @app.route('/robots.txt')
 def robots_txt():
     return send_from_directory(os.path.join(app.root_path, 'static'),
@@ -189,7 +195,7 @@ def add_cache_header(response):
 
 # base.html
 css_base = Bundle(
-    'css/main.css', 'css/navbar.css', 'css/ticker.css', 
+    'css/main.css', 'css/navbar.css', 'css/ticker.css', 'fontawesome/css/brands.min.css', 'fontawesome/css/solid.min.css', 'fontawesome/css/fontawesome.min.css', 'css/cookieconsent.css',
     filters='cssmin', 
     output='gen/base_packed.css')
 # base.html
@@ -202,17 +208,11 @@ js_home = Bundle(
     'js/amcharts/map.js', 'js/amcharts/worldLow.js', 'js/amcharts/animated.js', 'js/chart.js', 
     filters='jsmin', 
     output='gen/home_packed.js')
-# rss_template.html
-js_news = Bundle(
-    'js/submitSearch.js', 'js/languageMenu.js', 
-    filters='jsmin', 
-    output='gen/news_packed.js')
 
 assets = Environment(app)
 assets.register('css_base', css_base)
 assets.register('js_base', js_base)
 assets.register('js_home', js_home)
-assets.register('js_news', js_news)
 
 
 @app.context_processor

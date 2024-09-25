@@ -39,6 +39,37 @@ The Infomundi Team
     notifications.send_email(cleartext_email, subject, message)
 
 
+def change_password(user, new_password: str):
+    user.set_password(new_password)
+    user.purge_totp()
+    user.in_recovery = False
+    extensions.db.session.commit()
+
+    message = f"""Hello, {user.username}.
+
+We wanted to inform you that the password for your Infomundi account has been successfully changed. If you made this change, there's nothing else you need to do.
+
+The change was made from the following location:
+- IP Address: {cloudflare_util.get_user_ip()}
+- Country: {cloudflare_util.get_user_country()}
+- Device: {qol_util.get_device_info(request.headers.get('User-Agent'))}
+
+However, if you did not authorize this change, please take immediate action to secure your account. You can recover your account by clicking the link below:
+
+https://infomundi.net/auth/forgot_password
+
+If you encounter any issues or need further assistance, feel free to contact us using the form at:
+
+https://infomundi.net/contact
+
+Best regards,
+The Infomundi Team"""
+    subject = 'Infomundi - Your Password Has Been Reset'
+    notifications.send_email(session['email_address'], subject, message)
+    session.clear()
+    logout_user()
+
+
 def configure_key(user, cleartext_password, cleartext_email: str = ''):
     """
     Here's the deal, when the user creates an account through Google, we don't know their cleartext password, ever.
@@ -68,7 +99,6 @@ def configure_key(user, cleartext_password, cleartext_email: str = ''):
     extensions.db.session.commit()
     
     return key_value
-
 
 
 def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
@@ -146,7 +176,6 @@ def check_recovery_token(token: str) -> object:
         extensions.db.session.commit()
         return None
 
-    # If passes the above checks, we clear from the database and return the user's sha256 hashed email address.
     user_lookup.in_recovery = True
     user_lookup.recovery_token = None
     extensions.db.session.commit()
@@ -194,6 +223,7 @@ The Infomundi Team"""
     if result:
         user_lookup.recovery_token = verification_token
         user_lookup.recovery_token_timestamp = datetime.now()
+        user_lookup.cleartext_email = email
         extensions.db.session.commit()
     
     return result
@@ -223,12 +253,9 @@ def delete_account(email, token):
     return True
 
 
-def send_delete_token(email: str, current_password: str) -> bool:
+def send_delete_token(email: str) -> bool:
     hashed_email = hashing_util.sha256_hash_text(email)
     user = models.User.query.filter_by(email=hashed_email).first()
-
-    if not user.check_password(current_password):
-        return False
 
     token = security_util.generate_nonce(24)
     
