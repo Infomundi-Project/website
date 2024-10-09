@@ -186,6 +186,7 @@
 
 
 <div class="container justify-content-center">
+
   <div class="row justify-content-center mb-4">
     <div class="col-md-10">
       <form id="filterForm" class="form-inline">
@@ -323,8 +324,8 @@
         </div>
 
         <button type="submit" class="btn btn-primary mb-2" id="filterButton">
-          <span id="filterButtonText">Filter</span>
           <span class="spinner-border spinner-border-sm" id="filterSpinner" style="display: none;" aria-hidden="true"></span>
+          <span id="filterButtonText">Filter</span>
         </button>
       </form>
     </div>
@@ -333,6 +334,13 @@
   <div class="row justify-content-center" id="storiesContainer">
     <!-- Stories will be inserted here -->
   </div>
+
+  <div class="d-flex justify-content-center my-5">
+    <div class="spinner-border" id="endPageSpinner" style="display: none; width: 3rem; height: 3rem;" aria-hidden="true" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}

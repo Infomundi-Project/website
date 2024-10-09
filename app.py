@@ -160,7 +160,7 @@ def check_session_version():
 
 
 @app.after_request
-def add_csp_header(response):
+def add_headers(response):
     nonce = g.get('nonce', '')
 
     # https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://commento.infomundi.net https://static.cloudflareinsights.com https://translate-pa.googleapis.com https://translate.googleapis.com https://challenges.cloudflare.com https://ajax.cloudflare.com https://kit.fontawesome.com https://translate.google.com; 
@@ -180,16 +180,11 @@ def add_csp_header(response):
         "base-uri 'self' https://*.infomundi.net; "
         "font-src 'self' https://*.infomundi.net"
     )
-    
-    return response
 
-
-@app.after_request
-def add_cache_header(response):
     if request.path.startswith('/static'):
         # Set Cache-Control header for static files
         response.headers['Cache-Control'] = 'public, max-age=2592000'  # 30 days
-
+    
     return response
 
 

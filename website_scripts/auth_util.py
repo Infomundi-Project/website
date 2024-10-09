@@ -1,6 +1,6 @@
 from flask_login import logout_user, login_user
-from datetime import datetime, timedelta
 from flask import session, request
+from datetime import datetime
 from sqlalchemy import or_
 
 from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
@@ -11,7 +11,7 @@ def perform_login_actions(user, cleartext_email: str):
     user.last_login = datetime.now()
     extensions.db.session.commit()
 
-    login_user(user, remember=session['remember_me'])
+    login_user(user, remember=session.get('remember_me', True))
     
     session.permanent = True
     session['obfuscated_email_address'] = input_sanitization.obfuscate_email(cleartext_email)

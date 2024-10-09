@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const filterButton = document.getElementById("filterButton");
   const filterButtonText = document.getElementById("filterButtonText");
   const filterSpinner = document.getElementById("filterSpinner");
+  const endPageSpinner = document.getElementById("endPageSpinner");
 
   const urlParams = new URLSearchParams(window.location.search);
   const country = urlParams.get('country');
@@ -37,14 +38,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function showLoading() {
     filterButton.disabled = true;
-    filterButtonText.style.display = 'none';
+    filterButtonText.innerHTML = 'Loading...';
     filterSpinner.style.display = 'inline-block';
+    endPageSpinner.style.display = 'inline-block';
   }
 
   function hideLoading() {
     filterButton.disabled = false;
-    filterButtonText.style.display = 'inline';
+    filterButtonText.innerHTML = 'Filter';
     filterSpinner.style.display = 'none';
+    endPageSpinner.style.display = 'none';
   }
 
   function fetchStories(reset) {
@@ -169,11 +172,11 @@ document.addEventListener("DOMContentLoaded", function() {
       <small>
         <a href="${item.publisher.link}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
           ${item.publisher.favicon ? 
-            `<img src="${item.publisher.favicon}" class="rounded me-1" alt="${item.publisher.name} favicon image" width="24" height="24">` : 
-            `<i class="fa-solid fa-rss me-1""></i>`
+            `<img src="${item.publisher.favicon}" class="rounded" alt="${item.publisher.name} favicon image" width="24" height="24">` : 
+            `<i class="fa-solid fa-rss"></i>`
           }
         </a>
-        <span class="ms-1 me-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">${item.pub_date}</span>
+        <span class="mx-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">${item.pub_date}</span>
       </small>
     `;
 

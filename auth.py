@@ -22,7 +22,7 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    email = request.form.get('email', '')
+    email = request.form.get('email', '').strip()
     password = request.form.get('password', '')
     session['remember_me'] = bool(request.form.get('remember_me', ''))
 
@@ -31,7 +31,8 @@ def login():
         flash('Invalid credentials!', 'error')
         return redirect(url_for('auth.login'))
 
-    user = models.User.query.filter_by(email=hashing_util.sha256_hash_text(email)).first()
+    # THis is completely broken
+    user = models.User.query.filter_by(email=hashing_util.argon2_hash_text(email)).first()
     if not user or not user.check_password(password):
         flash('Invalid credentials!', 'error')
         return render_template('login.html')
@@ -90,8 +91,9 @@ def disable_totp():
 
 
 @auth.route('/register', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
+#@unauthenticated_only
+#@verify_captcha
+@in_maintenance
 def register():
     if request.method == 'GET':
         return render_template('register.html')

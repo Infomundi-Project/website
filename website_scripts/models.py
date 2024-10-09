@@ -123,9 +123,9 @@ class UserIPHistory(db.Model):
 class RegisterToken(db.Model):
     __tablename__ = 'register_tokens'
     user_id = db.Column(db.String(20), primary_key=True)
-    email = db.Column(db.String(70), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
     username = db.Column(db.String(25), nullable=False, unique=True)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(150), nullable=False)
 
     token = db.Column(db.String(40), nullable=False)
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -134,8 +134,8 @@ class RegisterToken(db.Model):
 class Publisher(db.Model):
     __tablename__ = 'publishers'
     publisher_id = db.Column(db.String(40), primary_key=True)
-    name = db.Column(db.String(255), nullable=False) # too big! change to 80
-    link = db.Column(db.String(512), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    link = db.Column(db.String(120), nullable=False)
     favicon = db.Column(db.String(100), nullable=True)
     stories = db.relationship('Story', backref='publisher', lazy=True)
 

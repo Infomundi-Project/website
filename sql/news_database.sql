@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS tags;
 
 CREATE TABLE publishers (
     publisher_id VARCHAR(40) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    link VARCHAR(512) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    link VARCHAR(120) NOT NULL,
     favicon VARCHAR(100) NOT NULL
 );
 
