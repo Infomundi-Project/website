@@ -8,13 +8,14 @@ def get_statistics() -> dict:
     current_timestamp = datetime.now()
     formatted_time = current_timestamp.strftime('%Y/%m/%d %H:%M')  # Local Time
 
-    statistics = json_util.read_json(config.STATISTICS_PATH)
-    saved_timestamp = datetime.fromisoformat(statistics['timestamp'])
+    statistics = models.SiteStatistics.query.first()
+    saved_timestamp = datetime.fromisoformat(statistics.timestamp)
     
     time_difference = current_timestamp - saved_timestamp
     if time_difference < timedelta(hours=1):
         # Return cache if it's less than 1 hour old
-        statistics['current_time'] = formatted_time
+        statistics.current_time = formatted_time
+        extensions.db.session.commit()
         return statistics
 
     with app.app_context():
@@ -43,6 +44,10 @@ def get_statistics() -> dict:
         total_comments = 32 # DEBUG!
 
         timestamp_string = current_timestamp.isoformat()
+
+        updated_statistics = models.SiteStatistics(current_time=formatted_time, timestamp=timestamp_string, total_countries_supported=total_countries_supported, total_news=f"{total_news:,}", total_feeds=total_feeds, total_users=total_users, total_comments=total_comments, last_updated_message=last_updated_message, total_clicks=total_clicks)
+        extensions.db.session.add()
+
         data = {
             'current_time': formatted_time,
             'timestamp': timestamp_string,  # this will be used to check if the statistics are ready for an update

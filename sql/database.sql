@@ -57,3 +57,16 @@ CREATE TABLE common_passwords (
     id INT AUTO_INCREMENT PRIMARY KEY,
     password VARCHAR(30) NOT NULL
 );
+
+CREATE TABLE site_statistics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    current_time DATETIME NOT NULL,
+    timestamp DATETIME NOT NULL,
+    total_countries_supported INT NOT NULL,
+    total_news VARCHAR(15) NOT NULL,
+    total_feeds INT NOT NULL,
+    total_users INT NOT NULL,
+    total_comments INT NOT NULL,
+    last_updated_message VARCHAR(15) NOT NULL,
+    total_clicks BIGINT NOT NULL
+);

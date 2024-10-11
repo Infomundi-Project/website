@@ -172,6 +172,7 @@ class Story(db.Model):
     category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
     publisher_id = db.Column(db.String(40), db.ForeignKey('publishers.publisher_id'), nullable=False)
     media_content_url = db.Column(db.String(100)) # Do we need this? We can guess the image url. Should be Bool instead.
+    has_media_content = db.Column(db.Boolean, default=False)
 
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)
@@ -295,3 +296,18 @@ class Friendship(db.Model):
 
     user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('user_friendships', lazy='dynamic'))
     friend = db.relationship('User', foreign_keys=[friend_id], backref=db.backref('friend_friendships', lazy='dynamic'))
+
+
+class SiteStatistics(db.Model):
+    __tablename__ = 'site_statistics'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    current_time = db.Column(db.DateTime, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    total_countries_supported = db.Column(db.Integer, nullable=False)
+    total_news = db.Column(db.String(15), nullable=False)
+    total_feeds = db.Column(db.Integer, nullable=False)
+    total_users = db.Column(db.Integer, nullable=False)
+    total_comments = db.Column(db.Integer, nullable=False)
+    last_updated_message = db.Column(db.String(15), nullable=False)
+    total_clicks = db.Column(db.BigInteger, nullable=False)

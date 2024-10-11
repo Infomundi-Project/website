@@ -2,6 +2,7 @@ from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
 from datetime import datetime, timedelta
 from sqlalchemy import or_, and_, cast
+from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
 
 from website_scripts import config, json_util, scripts, notifications,\
@@ -256,16 +257,13 @@ def get_stories():
     # Basic filtering. Category id should match and story should have image.
     query_filters = [
         models.Story.category_id == selected_filter,
-        models.Story.media_content_url.contains('bucket.infomundi.net')
+        models.Story.has_media_content == True
     ]
 
     # Filter by search query
     if query:
         query_filters.append(
-            or_(
-                models.Story.title.ilike(f'%{query}%'),
-                models.Story.description.ilike(f'%{query}%')
-            )
+            func.match(models.Story.title, models.Story.description, query)
         )
 
     # Filter by date range
@@ -280,35 +278,38 @@ def get_stories():
             )
         )
 
-    stories_per_page = 9
+    stories_per_page = 6
     start_index = (page - 1) * stories_per_page
-    stories = models.Story.query.with_entities(
-        models.Story.story_id,
-        models.Story.title,
-        models.Story.clicks,
-        models.Story.pub_date,
-        models.Story.media_content_url,
-        models.Story.publisher_id,
-        models.Publisher.name,
-        models.Publisher.link,
-        models.Publisher.favicon
-    ).join(models.Publisher, models.Story.publisher_id == models.Publisher.publisher_id).filter(
+    stories = models.Story.query.filter(
         and_(*query_filters)
-    ).order_by(order_criterion).offset(start_index).limit(stories_per_page).all()
+    ).options(
+        joinedload(models.Story.publisher)
+    ).order_by(
+        order_criterion
+    ).offset(
+        start_index
+    ).limit(
+        stories_per_page
+    ).all()
 
     if not stories:
-        return jsonify({'error': 'No stories found!'}), 501
+        return jsonify([]), 200
 
     stories_list = [
         {
             'story_id': story.story_id,
+            #'created_at': story.created_at,
             'title': story.title,
+            'description': story.description,
+            #'gpt_summary': story.gpt_summary,
             'clicks': story.clicks,
+            'link': story.link,
             'pub_date': story.pub_date,
+            #'category_id': story.category_id,
             'publisher': {
-                'name': story.name,
-                'link': story.link,
-                'favicon': story.favicon
+                'name': story.publisher.name,
+                'link': story.publisher.link,
+                'favicon': story.publisher.favicon
             },
             'media_content_url': story.media_content_url,
         }
@@ -316,3 +317,24 @@ def get_stories():
     ]
 
     return jsonify(stories_list)
+
+
+@api.route('/currencies')
+@extensions.cache.cached(timeout=60*60) # 1h cached
+def get_currencies():
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+    return jsonify(currencies)
+
+
+@api.route('/stocks')
+@extensions.cache.cached(timeout=60*60) # 1h cached
+def get_stocks():
+    stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    return jsonify(stocks)
+
+
+@api.route('/crypto')
+@extensions.cache.cached(timeout=60*60) # 1h cached
+def get_crypto():
+    crypto = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
+    return jsonify(crypto)

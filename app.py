@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 
-from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY
+from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY, MYSQL_HOST, MYSQL_DATABASE, REDIS_HOST, REDIS_PORT, REDIS_DATABASE
 from website_scripts.extensions import db, login_manager, cache, oauth, limiter
 from website_scripts.input_sanitization import is_safe_url
 from website_scripts.security_util import generate_nonce
@@ -34,15 +34,15 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
 
 # SQLAlchemy Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@localhost/infomundi'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Cache
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = 'localhost'
-app.config['CACHE_REDIS_PORT'] = 6379
-app.config['CACHE_REDIS_DB'] = 0
+app.config['CACHE_REDIS_HOST'] = REDIS_HOST
+app.config['CACHE_REDIS_PORT'] = REDIS_PORT
+app.config['CACHE_REDIS_DB'] = REDIS_DATABASE
 app.config['CACHE_REDIS_URL'] = REDIS_CONNECTION_STRING
 cache.init_app(app)
 
@@ -247,5 +247,5 @@ def error_handler(error):
     return render_template('error.html', contents=contents, buttons_enabled=buttons_enabled, error_code=error_code), error_code
 
 
-if __name__ == '__main__':
-    app.run(debug=False)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')

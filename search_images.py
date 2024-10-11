@@ -37,7 +37,7 @@ bucket_name = 'infomundi'
 bucket_base_url = 'https://bucket.infomundi.net'
 
 db_params = {
-        'host': 'localhost',
+        'host': '127.0.0.1',
         'user': config.MYSQL_USERNAME,
         'password': config.MYSQL_PASSWORD,
         'db': 'infomundi',
@@ -369,7 +369,7 @@ def update_story_media_content_url(story_id, image_url):
     log_message(f"Updating image for story {story_id} image url to {image_url}...")
     try:
         with db_connection.cursor() as cursor:
-            update_query = "UPDATE stories SET media_content_url = %s WHERE story_id = %s"
+            update_query = "UPDATE stories SET media_content_url = %s, has_media_content = 1 WHERE story_id = %s"
             cursor.execute(update_query, (image_url, story_id))
             db_connection.commit()
     except pymysql.MySQLError as e:

@@ -39,6 +39,7 @@ Flask-Login==0.6.3
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 greenlet==3.1.1
+gunicorn==23.0.0
 h11==0.14.0
 h2==4.1.0
 hpack==4.0.0
@@ -83,7 +84,6 @@ pexpect==4.9.0
 pickleshare==0.7.5
 pillow==10.4.0
 pillow-avif-plugin==1.4.6
-pipreqs==0.5.0
 platformdirs==4.3.6
 prompt_toolkit==3.0.48
 ptyprocess==0.7.0
