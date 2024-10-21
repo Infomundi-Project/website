@@ -1,13 +1,13 @@
 from requests import get as get_request
 from bs4 import BeautifulSoup
 
-from website_scripts import json_util, config, immutable
+from website_scripts import json_util, immutable
 
 
 def format_world_data():
-    path = f'{config.WEBSITE_ROOT}/data/json'
+    path = f'data/json'
 
-    common_currency = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/common_currency')
+    common_currency = json_util.read_json(f'{path}/common_currency')
     currencies = json_util.read_json(f'{path}/currencies')
     for currency in currencies:
         name = currency['name']
@@ -25,7 +25,7 @@ def format_world_data():
             currency['symbol'] = '$'
             currency['name_plural'] = 'US Dollars'
   
-    countries = config.COUNTRY_LIST
+    countries = json_util.read_json(f'{path}/countries')
     stocks = json_util.read_json(f'{path}/stocks')
     for stock in stocks:
         stock_country = stock['country']['name'].lower()
@@ -69,7 +69,7 @@ def scrape_data(url:str, endpoint: str):
 
     trs = soup.find_all('tr')
 
-    # Iterate through each row
+    countries = json_util.read_json(f'data/json/countries')
     for row in trs:
         # Extract the needed data using the appropriate selectors
         symbol = row.get('data-symbol', '')
@@ -113,11 +113,18 @@ def scrape_data(url:str, endpoint: str):
             'color': '#FF6666' if '-' in percent_change else '#00FF00', # HEX code for red and green respectively
             'date': date
         }
+
+        for item in countries:
+            if item['name'].lower() == country_name.lower():
+                data['country']['code'] = item['code'].lower()
+                break
+        else:
+            data['country']['code'] = 'eu'
         
         # Add the item to the list
         all_data.append(data)
     
-    json_util.write_json(all_data, f'{config.WEBSITE_ROOT}/data/json/{endpoint}')
+    json_util.write_json(all_data, f'data/json/{endpoint}')
     print(f'[+] {endpoint.title()} data has been collected.')
 
 

@@ -15,7 +15,7 @@ limiter = Limiter(
     key_func=get_user_ip,
     storage_uri=REDIS_CONNECTION_STRING,
     meta_limits=["3/hour", "4/day"],
-    default_limits=["20 per minute"]
+    default_limits=["30 per minute"]
 )
 
 # Google OAuth

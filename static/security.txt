@@ -1,23 +1,7 @@
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA512
-
+Contact: mailto:contact@infomundi.net
 Contact: https://infomundi.net/contact
-Expires: 2025-01-01T13:00:00.000Z
+Expires: 2026-10-14T04:00:00.000Z
 Encryption: https://infomundi.net/pubkey.asc
+Acknowledgments: https://infomundi.net/hall-of-fame
 Preferred-Languages: en, pt
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCgAdFiEEKhodLKcZv0toVxI1EN5lGurhTGwFAmYw/HEACgkQEN5lGurh
-TGxaNA//ZLyDotA3hDIVB9PqZvrbZ3dtCs35gW3FjWuVWEYY1l/uWP/USFcNKA/f
-tMjvCC6pf/1bPZj7LFh3lfKRXf63Xe4SgbEUKZfSPlgwWa9+BPlNmdjeVgY/iu7L
-HusAgVvKUYPkTcExKWTmGomv6pAZmfniBqqSg/eQm8Ly7EZ+ViyEFKdcYDt74crD
-fluHJnziubmRd6p+1ylfEtqcTyt4zWHOBOv28mI6krBILYJEOJdPSMIbB8QdNR+H
-bG46DVG8CXdG0kmvnAKkETxwf3oAWI+wD2qdPjkbPzExdWZuhRFoV5QiHT+DQLNt
-X1EBDcQPNKyV0bC2SD8C2DQ9sg6IaeqqA8EQuZ+LLr/8mA6h2xsOH1qcC6hPZxMV
-WZCnjt75NlwHLuKjEJc2nxPFROplK/XJHPhEYRMzunBIJQwIqBvQq0YNHyHg6d2T
-fZ7McvctNi1NWuQE4KCaeLTaDBbIAtcLm5cnRqI3TucSYC3AIFqTpHGUja2OfRH7
-YSq1kKX0piAHdQ/TR4QCKGXkiYjwnKiMKhP7J73KXvaCQ+lZ0pgcJlkF8oVcHl56
-zde5usHCD3e2OckF8pNzc+8XyeKsjM358OeSEJzDIX/o8eG+wK+CQktq52hOGR2U
-e0xX2rxjOOkKm3hrLjZ2MW6haOIKoxlzzf8KmTw7cQwFzxR8jPE=
-=ZW64
------END PGP SIGNATURE-----
+Canonical: https://infomundi.net/security.txt

@@ -735,10 +735,12 @@
     ></script>
     
 
+    {% if request.endpoint in ('views.captcha', 'views.contact', 'auth.login', 'auth.register', 'auth.forgot_password') %}
     <script nonce="{{ nonce }}"
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer
     ></script>
+    {% endif %}
 
 
     <!--
