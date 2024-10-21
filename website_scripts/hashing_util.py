@@ -55,6 +55,46 @@ def sha256_verify_hash(text: str, hash_value: str) -> bool:
     return sha256_hash_text(text) == hash_value
 
 
+def sha512_hash_text(text: str) -> str:
+    """
+    Hashes the given text using SHA-512 and returns the hash in hexadecimal format.
+
+    Args:
+        text (str): The input text to be hashed.
+
+    Returns:
+        str: The resulting SHA-512 hash in hexadecimal format.
+
+    Example:
+        >>> sha512_hash_text('hello world')
+        '570ea4d47019c5f953442981d994c7c936341de56cdda26dde54055b96e811c03464038a4178d514107244b632fa73c941075006c60dadc8d0cbb6ab15b599aa'
+    """
+    sha512 = hashlib.sha512()
+    sha512.update(text.encode('utf-8'))
+    return sha512.hexdigest()
+
+
+def sha512_verify_hash(text: str, hash_value: str) -> bool:
+    """
+    Verifies that the given text matches the provided SHA-512 hash.
+
+    Args:
+        text (str): The input text to be verified.
+        hash_value (str): The SHA-512 hash to compare against.
+
+    Returns:
+        bool: True if the text matches the hash, False otherwise.
+
+    Example:
+        >>> hash_value = sha512_hash_text('hello world')
+        >>> verify_sha512_hash('hello world', hash_value)
+        True
+        >>> verify_sha512_hash('hello', hash_value)
+        False
+    """
+    return sha512_hash_text(text) == hash_value
+
+
 def md5_hash_text(text: str) -> str:
     return hashlib.md5(text.encode('utf-8')).hexdigest()
 

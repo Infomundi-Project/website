@@ -31,8 +31,7 @@ def login():
         flash('Invalid credentials!', 'error')
         return redirect(url_for('auth.login'))
 
-    # THis is completely broken
-    user = models.User.query.filter_by(email=hashing_util.argon2_hash_text(email)).first()
+    user = auth_util.search_user_email_in_database(email)
     if not user or not user.check_password(password):
         flash('Invalid credentials!', 'error')
         return render_template('login.html')
@@ -91,9 +90,8 @@ def disable_totp():
 
 
 @auth.route('/register', methods=['GET', 'POST'])
-#@unauthenticated_only
-#@verify_captcha
-@in_maintenance
+@unauthenticated_only
+@verify_captcha
 def register():
     if request.method == 'GET':
         return render_template('register.html')
@@ -123,24 +121,15 @@ def register():
         flash('Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
         return redirect(url_for('auth.register'))
 
-    hashed_email = hashing_util.argon2_hash_text(email)
-    
-    user_lookup = models.User.query.filter(or_(
-        models.User.email == hashed_email,
-        models.User.username == username
-    )).first()
-    if user_lookup:
-        # Make no mistake, we use this message here in order to prevent user enumeration
-        flash(f'If everything went smoothly, you should soon receive instructions in your inbox at {email}')
-        return redirect(url_for('auth.register'))
-
-    # Tries to send a verification email to the user.
-    send_token = auth_util.handle_register_token(email, hashed_email, username, hashing_util.argon2_hash_text(password))
-    if not send_token:
-        flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
-        scripts.log(f'[!] Not able to send verification token to {email}.')
-        
-        return redirect(url_for('auth.register'))
+    email_lookup = auth_util.search_user_email_in_database(email)
+    username_lookup = auth_util.search_username_in_database(username)
+    if not (email_lookup and username_lookup):
+        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_lastest_salt(email), username, hashing_util.argon2_hash_text(password))
+        if not send_token:
+            flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
+            scripts.log(f'[!] Not able to send verification token to {email}.')
+            
+            return redirect(url_for('auth.register'))
 
     flash(f'If everything went smoothly, you should soon receive instructions in your inbox at {email}')
     return redirect(url_for('auth.register'))

@@ -158,6 +158,9 @@ def check_session_version():
 
             logout_user()
 
+    if session.get('user_id', '') and request.endpoint != 'auth.totp':
+        return redirect('https://infomundi.net/auth/totp')
+
 
 @app.after_request
 def add_headers(response):

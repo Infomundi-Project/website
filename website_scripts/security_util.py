@@ -15,11 +15,12 @@ def generate_2fa_token() -> str:
     return str(randint(100000, 999999))  # 6-digit code
 
 
-def generate_nonce(length: int=32) -> str:
+def generate_nonce(length: int=32, limit: int=0) -> str:
     """Uses the 'base64' library to base64 encode (url safe) a secure random sequence of bytes provided by the 'secrets' library. Used to generate safe random values.
 
     Arguments
         length (int): Optional. Byte sequence length. Does not mean that the returning string is going to match the specified length, but the byte sequence will be of X (int) bytes. Higher = safer.
+        limit (int): Optional. Limits the token to a specific length.
 
     Returns
         str: A safe random string.
@@ -30,7 +31,13 @@ def generate_nonce(length: int=32) -> str:
 
         >>> generate_nonce(24)
         'jjuXC1xv2idEsxGhmw-3tNraGtDKQxGI'
+
+        >>> generate_nonce(limit=10)
+        'fQCq3CBNNL'
     """
+    if limit:
+        return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode('utf-8')[:limit]
+    
     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode('utf-8')
 
 

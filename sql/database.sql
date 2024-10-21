@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS register_tokens;
 CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(20) NOT NULL PRIMARY KEY,
     username VARCHAR(25) NOT NULL UNIQUE,
-    email VARCHAR(70) NOT NULL UNIQUE,
+    email VARCHAR(128) NOT NULL UNIQUE,
     role VARCHAR(15) DEFAULT 'user',
     password VARCHAR(100) NOT NULL,
     session_version INT DEFAULT 0,
@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS users (
     totp_recovery VARCHAR(120),
     mail_twofactor VARCHAR(6),
     mail_twofactor_timestamp DATETIME,
-    derived_key_salt VARCHAR(120)
+    derived_key_salt VARCHAR(120),
+    INDEX idx_username (username),
+    INDEX idx_email (email)
 );
 
 
@@ -60,7 +62,7 @@ CREATE TABLE common_passwords (
 
 CREATE TABLE site_statistics (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    current_time DATETIME NOT NULL,
+    now DATETIME NOT NULL,
     timestamp DATETIME NOT NULL,
     total_countries_supported INT NOT NULL,
     total_news VARCHAR(15) NOT NULL,
@@ -69,4 +71,26 @@ CREATE TABLE site_statistics (
     total_comments INT NOT NULL,
     last_updated_message VARCHAR(15) NOT NULL,
     total_clicks BIGINT NOT NULL
+);
+
+CREATE TABLE stocks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    country_name VARCHAR(40) NOT NULL,
+    data TEXT
+);
+
+CREATE TABLE currencies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data TEXT
+);
+
+CREATE TABLE crypto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data TEXT
+);
+
+CREATE TABLE global_salts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    salt VARCHAR(64) NOT NULL
 );

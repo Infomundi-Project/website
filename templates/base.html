@@ -606,7 +606,7 @@
 
       {% endblock %}
       
-      {% endif %}
+    {% endif %}
 
 
       {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
@@ -735,7 +735,7 @@
     ></script>
     
 
-    {% if request.endpoint in ('views.captcha', 'views.contact', 'auth.login', 'auth.register', 'auth.forgot_password') %}
+    {% if request.endpoint in ('views.captcha', 'views.contact', 'auth.login', 'auth.register', 'auth.forgot_password', 'views.sensitive') %}
     <script nonce="{{ nonce }}"
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer

@@ -9,7 +9,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.String(150), nullable=False, unique=True)
+    email = db.Column(db.String(128), nullable=False, unique=True) # SHA-512 hashed email
     user_id = db.Column(db.String(20), primary_key=True)
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
@@ -162,16 +162,16 @@ class CategoryTag(db.Model):
 class Story(db.Model):
     __tablename__ = 'stories'
     story_id = db.Column(db.String(40), primary_key=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.String(500))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
     link = db.Column(db.String(512), nullable=False)
-    pub_date = db.Column(db.String(30), nullable=False) # too big!
+    pub_date = db.Column(db.String(30), nullable=False)
     category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
     publisher_id = db.Column(db.String(40), db.ForeignKey('publishers.publisher_id'), nullable=False)
-    media_content_url = db.Column(db.String(100)) # Do we need this? We can guess the image url. Should be Bool instead.
+    media_content_url = db.Column(db.String(100))
     has_media_content = db.Column(db.Boolean, default=False)
 
     # Relationships
@@ -302,12 +302,42 @@ class SiteStatistics(db.Model):
     __tablename__ = 'site_statistics'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    current_time = db.Column(db.DateTime, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)
     total_countries_supported = db.Column(db.Integer, nullable=False)
+    current_time = db.Column(db.DateTime, nullable=False)
+    now = db.Column(db.DateTime, nullable=False)
     total_news = db.Column(db.String(15), nullable=False)
     total_feeds = db.Column(db.Integer, nullable=False)
     total_users = db.Column(db.Integer, nullable=False)
     total_comments = db.Column(db.Integer, nullable=False)
     last_updated_message = db.Column(db.String(15), nullable=False)
     total_clicks = db.Column(db.BigInteger, nullable=False)
+
+
+class Stocks(db.Model):
+    __tablename__ = 'stocks'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    country_name = db.Column(db.String(40), nullable=False)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class Currencies(db.Model):
+    __tablename__ = 'currencies'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class Crypto(db.Model):
+    __tablename__ = 'crypto'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class GlobalSalts(db.Model):
+    __tablename__ = 'global_salts'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    salt = db.Column(db.String(64), nullable=False)

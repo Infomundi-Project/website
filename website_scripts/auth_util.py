@@ -6,6 +6,31 @@ from sqlalchemy import or_
 from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
 
 
+def search_user_email_in_database(email: str):
+    salts = models.GlobalSalts.query.all()
+    for salt in salts:
+        salted_email = salt.salt + email
+        hashed_email = hashing_util.sha512_hash_text(salted_email)
+        
+        user = models.User.query.filter_by(email=hashed_email).first()
+        if user:
+            return user
+    else:
+        return None
+
+
+def search_username_in_database(username: str):
+    return models.User.query.filter_by(username=username).first()
+
+
+def hash_user_email_using_lastest_salt(email: str):
+    # Queries the latest salt in the database ordering by ID
+    last_salt = models.GlobalSalts.query.order_by(models.GlobalSalts.id.desc()).first()
+    salted_email = last_salt.salt + email
+
+    return hashing_util.sha512_hash_text(salted_email)
+
+
 def perform_login_actions(user, cleartext_email: str):
     # Save the timestamp of the last login
     user.last_login = datetime.now()
@@ -35,7 +60,7 @@ If you encounter any issues, please don't hesitate to contact our team for assis
 Best regards,
 The Infomundi Team
     """
-    subject = 'Infomundi - Login From a New Device'
+    subject = 'Infomundi - New Login'
     notifications.send_email(cleartext_email, subject, message)
 
 
@@ -74,7 +99,7 @@ def configure_key(user, cleartext_password, cleartext_email: str = ''):
     """
     Here's the deal, when the user creates an account through Google, we don't know their cleartext password, ever.
     However, we still need to encrypt the TOTP secret if the user choses to enable 2FA authentication via TOTP. To make this work,
-    we can use the user's cleartext email address, it's better than nothing, as the email itself is stored in hash format (argon2) in
+    we can use the user's cleartext email address, it's better than nothing, as the email itself is stored in hash format in
     the database.
 
     We check to see if the user has a salt associated with their account, if they do, we generate their key and simply return. If they do not,
@@ -88,7 +113,7 @@ def configure_key(user, cleartext_password, cleartext_email: str = ''):
         cleartext_email (str): Optional. User's cleartext email.
 
     Returns:
-        str: We return the user's key
+        str: The user's key
     """
     if user.derived_key_salt:
         return security_util.derive_key(cleartext_email if cleartext_email else cleartext_password, user.derived_key_salt)
@@ -116,7 +141,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
     """
     token_lookup = models.RegisterToken.query.filter(or_(
         models.RegisterToken.email == hashed_email,
-        models.RegisterToken.email == username
+        models.RegisterToken.username == username
     )).first()
     
     # This means there's an already issued token for the specified email address.
