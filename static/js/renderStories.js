@@ -118,45 +118,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function createStoryCard(item, index) {
     const colDiv = document.createElement('div');
-    colDiv.classList.add('col-md-6', 'col-xxl-4');
+    colDiv.classList.add('col-md-6', 'col-lg-4', 'my-5');
 
     const cardDiv = document.createElement('div');
-    cardDiv.classList.add('card', 'mt-4', 'border-opacity-10');
-    cardDiv.style.minHeight = '65vh';
-    cardDiv.style.height = 'auto';
+    cardDiv.classList.add('card', 'image-card', 'border', 'border-0');
+    cardDiv.style.position = 'relative';
     cardDiv.id = `${item.story_id}-${item.category_id}`;
 
-    const cardHeader = document.createElement('div');
-    cardHeader.classList.add('card-header');
-    cardHeader.innerHTML = `
-      <ul class="nav nav-pills nav-fill card-header-pills inf-card-header">
-        <li class="nav-item">
-          <a class="nav-link active inf-card-header-link" href="#">Preview</a>
-        </li>
-        ${item.description && item.description.length > 10 ? 
-          `<li class="nav-item">
-            <a class="nav-link description-btn inf-card-header-link" href="#">Description</a>
-          </li>` : ''
-        }
-      </ul>
-    `;
-
-    const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body');
-    cardBody.innerHTML = `
-      <a href="/comments?id=${item.story_id}" class="text-reset text-decoration-none">
-        <h6 class="card-title">${item.title}</h6>
-      </a>
-    `;
-
+    // Image link
     const imageLink = document.createElement('a');
     imageLink.href = `/comments?id=${item.story_id}`;
-    
+
+    // Image tag
     const imgTag = document.createElement('img');
-    imgTag.alt = 'News image';
-    imgTag.width = 500;
-    imgTag.height = 333;
-    imgTag.style = 'aspect-ratio: 16 / 9;width: 100%;object-fit: cover;';
+    imgTag.classList.add('card-img-top', 'rounded');
+    imgTag.alt = item.title;
+    imgTag.style = 'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
     if (index < 3) {
       imgTag.src = item.media_content_url;
       imgTag.setAttribute('fetchpriority', 'high');
@@ -166,57 +143,52 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     imageLink.appendChild(imgTag);
 
-    const cardFooter = document.createElement('div'); 
-    cardFooter.classList.add('card-footer', 'text-body-secondary');
-    cardFooter.innerHTML = `
-      <small>
+    // Tip logo overlay
+    const tipLogoDiv = document.createElement('div');
+    tipLogoDiv.classList.add('tip-logo');
+    
+    const tipLogoImg = document.createElement('div');
+    tipLogoImg.innerHTML = `
         <a href="${item.publisher.link}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
           ${item.publisher.favicon ? 
-            `<img src="${item.publisher.favicon}" class="rounded" alt="${item.publisher.name} favicon image" width="24" height="24">` : 
+            `<img src="${item.publisher.favicon}" class="rounded" alt="${item.publisher.name} favicon image" width="30">` : 
             `<i class="fa-solid fa-rss"></i>`
           }
         </a>
-        <span class="mx-2">&#x2022;</span><span><i class="fa-solid fa-calendar-days me-1"></i></span><span class="date-info">${item.pub_date}</span>
-      </small>
+    `;
+    tipLogoDiv.appendChild(tipLogoImg);
+
+    // Card body
+    const cardBody = document.createElement('div');
+    cardBody.classList.add('card-body', 'mt-3');
+    cardBody.innerHTML = `
+      <p class="card-title fw-bold fs-6 line-clamp-3">
+        ${item.title}
+      </p>
+      <small><p class="card-text text-muted line-clamp-4">
+        ${item.description || ''}
+      </p></small>
     `;
 
-    cardDiv.appendChild(cardHeader);
+    // Card footer
+    const cardFooter = document.createElement('div');
+    cardFooter.classList.add('card-footer', 'bg-transparent', 'border', 'border-0', 'd-flex', 'justify-content-between');
+    cardFooter.innerHTML = `
+      <small class="text-muted fw-bold">${item.pub_date}</small>
+      <a href="/comments?id=${item.story_id}" class="btn btn-primary px-4 text-uppercase">Read More</a>
+    `;
+
+    // Assembling the card
     cardDiv.appendChild(imageLink);
+    cardDiv.appendChild(tipLogoDiv);
     cardDiv.appendChild(cardBody);
-
-    if (item.tags || item.total_comments || item.clicks) {
-      const listGroup = document.createElement('ul');
-      listGroup.classList.add('list-group', 'list-group-flush', 'mt-3');
-
-      const listItem = document.createElement('li');
-      listItem.classList.add('list-group-item');
-
-      if (item.tags) {
-        item.tags.forEach(tag => {
-          const badge = document.createElement('a');
-          badge.href = `https://infomundi.net/news?country=${item.country_code}&query=${tag}&section=${item.news_filter}`;
-          badge.innerHTML = `<span class="badge text-bg-secondary">${tag}</span>`;
-          listItem.appendChild(badge);
-        });
-      }
-
-      if (item.clicks) {
-        listItem.innerHTML += `<span class="badge text-bg-info"><i class="fa-solid fa-eye"></i> ${item.clicks}</span>`;
-      }
-
-      if (item.total_comments) {
-        listItem.innerHTML += `<span class="badge text-bg-dark"><i class="fa fa-comment"></i> ${item.total_comments}</span>`;
-      }
-
-      listGroup.appendChild(listItem);
-      cardDiv.appendChild(listGroup);
-    }
-
     cardDiv.appendChild(cardFooter);
+
     colDiv.appendChild(cardDiv);
 
     return colDiv;
   }
+
 
   // Initialize event listeners for card buttons
   function initializeEventListeners() {

@@ -69,30 +69,6 @@ def is_safe_path(basedir, path, follow_symlinks=False):
     return os.path.abspath(path).startswith(basedir)
 
 
-@app.route('/download-backup/<filename>', methods=['GET'])
-@admin_required
-def download_backup(filename):
-    BACKUP_DIRECTORY = '/var/www/infomundi/backups'
-    try:
-        # Securely join the directory and the requested file
-        file_path = os.path.join(BACKUP_DIRECTORY, filename)
-        
-        # Ensure the file is within the backup directory
-        if is_safe_path(BACKUP_DIRECTORY, file_path) and (filename.endswith('.enc') or filename == 'backup_log.txt'):
-            # Ensure the file exists
-            if os.path.exists(file_path):
-                return send_from_directory(BACKUP_DIRECTORY, filename, as_attachment=True)
-            else:
-                abort(404)  # Not Found
-
-        # If not valid, abort
-        abort(403)
-
-    except Exception as e:
-        # Internal Server Error
-        abort(500)
-
-
 @app.route('/ads.txt')
 def ads_txt():
     return send_from_directory(os.path.join(app.root_path, 'static'),

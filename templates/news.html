@@ -1,6 +1,44 @@
 {% extends "base.html" %} {% block title %}{{ country_name }}{% endblock %}
 {% block styles %}
 <style>
+    .image-card {
+      position: relative;
+    }
+    .tip-logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(255, 255, 255, 0.3);
+      padding: 4px;
+      border-radius: 5px;
+      z-index: 10;
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .line-clamp-4 {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-body {
+      margin-right: -15px;
+      margin-left: -15px;
+    }
+    .card-footer {
+      margin-right: -15px;
+      margin-left: -15px;
+    }
+
   .description-text {
     overflow-y: auto;
     max-height: 20vh;

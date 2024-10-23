@@ -278,7 +278,7 @@ def get_stories():
             )
         )
 
-    stories_per_page = 6
+    stories_per_page = 9
     start_index = (page - 1) * stories_per_page
     stories = models.Story.query.filter(
         and_(*query_filters)
