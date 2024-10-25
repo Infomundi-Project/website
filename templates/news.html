@@ -1,392 +1,514 @@
 {% extends "base.html" %} {% block title %}{{ country_name }}{% endblock %}
 {% block styles %}
 <style>
-    .image-card {
-      position: relative;
-    }
-    .tip-logo {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: rgba(255, 255, 255, 0.3);
-      padding: 4px;
-      border-radius: 5px;
-      z-index: 10;
-    }
-
-    .line-clamp-3 {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .line-clamp-4 {
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .card-body {
-      margin-right: -15px;
-      margin-left: -15px;
-    }
-    .card-footer {
-      margin-right: -15px;
-      margin-left: -15px;
-    }
-
-  .description-text {
-    overflow-y: auto;
-    max-height: 20vh;
+  {% if request.cookies.get('theme') == 'light' %}
+  .nav-tabs{
+  --bs-nav-tabs-border-color: #6c757d;
   }
-  
-  @media (max-width: 600px) {
-    .description-text {
-      max-height: 30vh;
-    }
-    
-    /* Smaller search button and dropdown */
-    .btn-outline-primary {
-        font-size: 0.9rem; /* Smaller font size */
-        padding: 5px 10px; /* Smaller padding */
-    }
-
-    /* Smaller input field */
-    .form-control {
-        font-size: 0.8rem; /* Smaller font size */
-        padding: 5px 10px; /* Smaller padding */
-    }
-
-    /* Ensure the dropdown items match the new button size */
-    .dropdown-item {
-        font-size: 0.9rem; /* Smaller font size */
-        padding: 3px 10px; /* Smaller padding */
-    }
-    .nav-item .nav-link {
-      font-size: 0.9rem; /* Smaller font size */
-      padding: 5px 10px; /* Smaller padding */
-    }
-
-    .nav-item {
-        margin-right: 5px; /* Adjust space between nav items */
-    }
+  {% else %}
+  .nav-tabs{
+  --bs-nav-tabs-border-color: #ced4da;
   }
-
-  #offcanvasWithBothOptions {
-    border-radius: 1%;
-    width: 95%;
-    height: 85vh;
-    margin: auto;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    bottom: auto;
-    left: 50%;
-    right: auto;
+  {% endif %}
+  .image-card {
+  position: relative;
   }
-
-.list-group {
+  .tip-logo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 4px;
+  border-radius: 5px;
+  z-index: 10;
+  }
+  .line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
+  .line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
+  .card {
+  position: relative;
+  min-height: 475px;
+  }
+  .card-body {
+  margin-right: -15px;
+  margin-left: -15px;
+  }
+  .card-footer {
+  margin-right: -15px;
+  margin-left: -15px;
+  }
+  @media (max-width: 1060px) {
+  .card {
+  position: relative;
+  min-height: 450px;
+  }
+  /* Smaller search button and dropdown */
+  .btn-outline-primary {
+  font-size: 0.9rem; /* Smaller font size */
+  padding: 5px 10px; /* Smaller padding */
+  }
+  /* Smaller input field */
+  .form-control {
+  font-size: 0.8rem; /* Smaller font size */
+  padding: 5px 10px; /* Smaller padding */
+  }
+  /* Ensure the dropdown items match the new button size */
+  .dropdown-item {
+  font-size: 0.9rem; /* Smaller font size */
+  padding: 3px 10px; /* Smaller padding */
+  }
+  .nav-item .nav-link {
+  font-size: 0.9rem; /* Smaller font size */
+  padding: 5px 10px; /* Smaller padding */
+  }
+  .nav-item {
+  margin-right: 5px; /* Adjust space between nav items */
+  }
+  }
+  .list-group {
   width: 100%;
   max-width: 460px;
   /* margin-inline: 1.5rem; */
-}
-
-.form-check-input:checked + .form-checked-content {
+  }
+  .form-check-input:checked + .form-checked-content {
   opacity: .5;
-}
-
-.form-check-input-placeholder {
+  }
+  .form-check-input-placeholder {
   border-style: dashed;
-}
-[contenteditable]:focus {
+  }
+  [contenteditable]:focus {
   outline: 0;
-}
-
-.list-group-checkable .list-group-item {
+  }
+  .list-group-checkable .list-group-item {
   cursor: pointer;
-}
-.list-group-item-check {
+  }
+  .list-group-item-check {
   position: absolute;
   clip: rect(0, 0, 0, 0);
-}
-.list-group-item-check:hover + .list-group-item {
+  }
+  .list-group-item-check:hover + .list-group-item {
   background-color: var(--bs-secondary-bg);
-}
-.list-group-item-check:checked + .list-group-item {
+  }
+  .list-group-item-check:checked + .list-group-item {
   color: #fff;
   background-color: var(--bs-primary);
   border-color: var(--bs-primary);
-}
-.list-group-item-check[disabled] + .list-group-item,
-.list-group-item-check:disabled + .list-group-item {
+  }
+  .list-group-item-check[disabled] + .list-group-item,
+  .list-group-item-check:disabled + .list-group-item {
   pointer-events: none;
   filter: none;
   opacity: .5;
-}
-
-.list-group-radio .list-group-item {
+  }
+  .list-group-radio .list-group-item {
   cursor: pointer;
   border-radius: .5rem;
-}
-.list-group-radio .form-check-input {
+  }
+  .list-group-radio .form-check-input {
   z-index: 2;
   margin-top: -.5em;
-}
-.list-group-radio .list-group-item:hover,
-.list-group-radio .list-group-item:focus {
+  }
+  .list-group-radio .list-group-item:hover,
+  .list-group-radio .list-group-item:focus {
   background-color: var(--bs-secondary-bg);
-}
-
-.list-group-radio .form-check-input:checked + .list-group-item {
+  }
+  .list-group-radio .form-check-input:checked + .list-group-item {
   background-color: var(--bs-body);
   border-color: var(--bs-primary);
   box-shadow: 0 0 0 2px var(--bs-primary);
-}
-.list-group-radio .form-check-input[disabled] + .list-group-item,
-.list-group-radio .form-check-input:disabled + .list-group-item {
+  }
+  .list-group-radio .form-check-input[disabled] + .list-group-item,
+  .list-group-radio .form-check-input:disabled + .list-group-item {
   pointer-events: none;
   filter: none;
   opacity: .5;
-}
+  }
 </style>
 {% endblock %}
 {% block content %}
-<div class="row mt-4">
-  <div class="col">
-  
-  </div>
-  <div class="col-sm-6 text-center">
-    <a class="fs-1 fw-bold text-decoration-none" href="/news?country={{ country_code }}">
-      <img src="https://infomundi.net/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
-    </a><br>
-    
-    {% if nation_data %}
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Area</strong>: {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}<br><strong>Borders</strong>: {{ nation_data['borders'] }}"
-    ><i class="fa-solid fa-chart-area"></i></span>
-    
-    {% if gdp_per_capita != None and gdp != None %}
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Population</strong>: {{ nation_data['population'] }}<br><strong>HDI</strong>: {{ nation_data['hdi'] }}<br><strong>GDP Per Capita</strong>: {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}{% if main_religion %}<br><strong>Main Religion</strong>: {{ main_religion }}{% endif %}"
-    ><i class="fa-solid fa-users"></i></span>
-    {% endif %}
-    
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Capital</strong>: {{ nation_data['capital'] }}<br><strong>Leader</strong>: {{ nation_data['leader'] }}<br><strong>Member of the United Nations</strong>: {{ nation_data['united_nations_member'] }}"
-    ><i class="fa-solid fa-landmark-flag"></i></span>
-    
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Languages</strong>: {{ nation_data['languages'] }}<br><strong>Top Level Domain</strong>: {{ nation_data['top_level_domain'] }}"
-    ><i class="fa-solid fa-language"></i></span>
-    
-    {% if gdp_per_capita != None and gdp != None %}
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Currency</strong>: {{ nation_data['currency'] }}<br><strong>GDP</strong>: {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}"
-    ><i class="fa-solid fa-dollar-sign"></i></span>
-    {% endif %}
-    
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="<strong>Time in {{ nation_data['capital'] }} (Capital)</strong>: {{ current_time }}<br><strong>Time Zones</strong>: {{ nation_data['timezones'] }}"
-    ><i class="fa-solid fa-clock"></i></span>
-    
-    {% else %}
-    
-    <span class="badge text-bg-primary mt-3" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="top" 
-    data-bs-title="We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible."
-    ><i class="fa-solid fa-circle-info"></i></span>
-    {% endif %}
-    
-    {% if tags %}
-      <span class="badge text-bg-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" 
-      data-bs-title="The most popular terms in {{ country_name.title() }} {{ news_filter.title() }} as of this week">
-        <i class="fa-solid fa-fire"></i>
-      </span>
-      {% for tag in tags %}
-        <a href="https://infomundi.net/news?country={{ country_code }}&section={{ news_filter }}&query={{ tag }}"><span class="badge text-bg-secondary">{{ tag }}</span></a>
-      {% endfor %}
-    {% endif %}
-    
-{% if query %}
-  <div class="d-flex justify-content-center mt-3">
-    <p>
-    {% if session.get('want_translate', '') %}<span class="badge text-bg-success fw-normal" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="This query has been translated from '{{ original_query }}'."><i class="fa-solid fa-language me-1"></i>Translated</span>{% endif %}<span class="ms-1 fw-light">{{ feed_length }} results for "{{ query }}"</span>
-    </p>
-  </div>
-{% endif %}
-  </div>
-  <div class="col">
-  
+<div class="container mb-5">
+  <div class="row mt-4 align-items-center justify-content-center">
+    <div class="col-md-3">
+
+      <!-- Left Column Accordions -->
+      <div class="accordion" id="accordionLeft">
+
+        <!-- Accordion Item 1: Geographic Information -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingGeography">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
+              Geographic Information
+            </button>
+          </h2>
+          <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
+            <div class="accordion-body">
+              <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
+              <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
+              <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
+              <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 2: Demographics and Society -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingDemographics">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
+              Demographics and Society
+            </button>
+          </h2>
+          <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
+            <div class="accordion-body">
+              <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
+              <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
+              {% if main_religion %}
+              <p><strong>Main Religion:</strong> {{ main_religion }}</p>
+              {% endif %}
+              <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
+              <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="col-md-6 text-center my-4">
+      <a class="fs-1 fw-bold text-decoration-none text-reset" href="/news?country={{ country_code }}">
+        <img src="https://infomundi.net/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
+      </a>
+      <br>
+      {% if not nation_data %}
+      <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
+      {% endif %}
+
+      <div class="input-group justify-content-center mt-3">
+          <button aria-label="Submit search button" type="submit" class="input-group-text {% if is_light_mode %}border-black border-opacity-50{% endif %}" id="search-icon">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <input 
+            class="form-control {% if is_light_mode %}border-black border-opacity-50{% endif %}" 
+            aria-describedby="search-icon"
+            style="max-width: 400px;" 
+            type="search" 
+            aria-label="Search Field" 
+            minlength="3" 
+            id="query" 
+            name="query"
+            />
+        </div>
+    </div>
+    <div class="col-md-3">
+
+      <!-- Right Column Accordions -->
+      <div class="accordion" id="accordionRight">
+
+        <!-- Accordion Item 3: Government and Politics -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingGovernment">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
+              Government and Politics
+            </button>
+          </h2>
+          <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionRight">
+            <div class="accordion-body">
+              <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
+              <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
+              <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 4: Economy -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingEconomy">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
+              Economy
+            </button>
+          </h2>
+          <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionRight">
+            <div class="accordion-body">
+              {% if gdp_per_capita != None and gdp != None %}
+              <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
+              <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
+              {% endif %}
+              <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
   </div>
 </div>
 
-
 <div class="container justify-content-center">
-
-  <div class="row justify-content-center mb-4">
-    <div class="col-md-10">
-      <form id="filterForm" class="form-inline">
-        <input type="hidden" id="country" name="country">
-
-        <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center">
+  <!-- Category Modal -->
+  <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="categoryModalLabel">Select Category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Category Options -->
           <div class="list-group list-group-checkable d-grid gap-2 border-0">
             <input class="list-group-item-check pe-none" type="radio" name="category" id="category1" value="general" checked>
             <label class="list-group-item rounded-3 py-3" for="category1">
-              <i class="fa-solid fa-globe"></i> General
-              <span class="d-block small opacity-50">All general news</span>
+            <i class="fa-solid fa-users me-2"></i><span class="label-text">Society</span>
+            <span class="d-block small opacity-50">Social issues, culture, and community trends.</span>
             </label>
-
-
-            {% if 'politics' in supported_categories %}
+            {% if 'politics' in supported_categories or 'economy' in supported_categories %}
             <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics">
             <label class="list-group-item rounded-3 py-3" for="category2">
-              <i class="fa-solid fa-landmark"></i> Politics
-                <span class="d-block small opacity-50">News related to politics</span>
+            <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics & Economy</span>
+            <span class="d-block small opacity-50">Politics, government policies, and economic developments.</span>
             </label>
             {% else %}
             <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics" disabled>
             <label class="list-group-item rounded-3 py-3" for="category2">
-              <i class="fa-solid fa-landmark"></i> Politics
-                <span class="d-block small opacity-50">Not yet available in this country</span>
+              <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics</span>
+              <p class="d-block small"><span class="opacity-75">Updates on politics, government policies, and economic developments.</span> Not yet available in this country.</p>
             </label>
             {% endif %}
-
-
-            {% if 'economy' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="economy">
-            <label class="list-group-item rounded-3 py-3" for="category3">
-              <i class="fa-solid fa-chart-line"></i> Economy
-                <span class="d-block small opacity-50">News on economy and finance</span>
-            </label>
-            {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="economy" disabled>
-            <label class="list-group-item rounded-3 py-3" for="category3">
-              <i class="fa-solid fa-chart-line"></i> Economy
-              <span class="d-block small opacity-50">Not yet available in this country</span>
-            </label>
-            {% endif %}
-
-
             {% if 'technology' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="technology">
-            <label class="list-group-item rounded-3 py-3" for="category4">
-              <i class="fa-solid fa-microchip"></i> Technology
-                <span class="d-block small opacity-50">Latest in tech and gadgets</span>
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology">
+            <label class="list-group-item rounded-3 py-3" for="category3">
+            <i class="fa-solid fa-microchip me-2"></i><span class="label-text">Technology</span>
+            <span class="d-block small opacity-50">Tech innovations, digital trends, and industry breakthroughs.</span>
             </label>
             {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="technology" disabled>
-            <label class="list-group-item rounded-3 py-3" for="category4">
-              <i class="fa-solid fa-microchip"></i> Technology
-                <span class="d-block small opacity-50">Not yet available in this country</span>
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology" disabled>
+            <label class="list-group-item rounded-3 py-3" for="category3">
+              <i class="fa-solid fa-microchip me-2"></i><span class="label-text">Technology</span>
+              <p class="d-block small"><span class="opacity-75">Tech innovations, digital trends, and industry breakthroughs.</span> Not yet available in this country.</p>
             </label>
             {% endif %}
-
-
-          {% if 'sports' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category5" value="sports">
-              <label class="list-group-item rounded-3 py-3" for="category5">
-                <i class="fa-solid fa-football-ball"></i> Sports
-                <span class="d-block small opacity-50">Sports news and updates</span>
+            {% if 'world' in supported_categories %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world">
+            <label class="list-group-item rounded-3 py-3" for="category4">
+            <i class="fa-solid fa-globe me-2"></i><span class="label-text">World</span>
+            <span class="d-block small opacity-50">Local sources covering major international events and geopolitical issues.</span>
             </label>
-          {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category5" value="sports" disabled>
-              <label class="list-group-item rounded-3 py-3" for="category5">
-                <i class="fa-solid fa-football-ball"></i> Sports
-                <span class="d-block small opacity-50">Not yet available in this country</span>
-              </label>
-          {% endif %}
+            {% else %}
+            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world" disabled>
+            <label class="list-group-item rounded-3 py-3" for="category4">
+              <i class="fa-solid fa-globe me-2"></i><span class="label-text">World</span>
+              <p class="d-block small"><span class="opacity-75">Local sources covering major international events and geopolitical issues.</span> Not yet available in this country.</p>
+            </label>
+            {% endif %}
           </div>
-
-          <!-- Filters -->
+        </div>
+        <div class="modal-footer">
+          <!-- Close Button -->
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Order By Modal -->
+  <div class="modal fade" id="orderByModal" tabindex="-1" aria-labelledby="orderByModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderByModalLabel">Select Order By</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Order By Options -->
           <div class="list-group list-group-checkable d-grid gap-2 border-0">
-            <!--
-            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy1" value="created_at" checked>
+            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy1" value="pub_date" checked>
             <label class="list-group-item rounded-3 py-3" for="orderBy1">
-              <i class="fa-solid fa-calendar-alt"></i> Created At
-              <span class="d-block small opacity-50">Sort by creation date</span>
+            <i class="fa-solid fa-calendar-day"></i> <span class="label-text">Publication Date</span>
+            <span class="d-block small opacity-50">Sort by publication date</span>
             </label>
-            -->
-            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy4" value="pub_date" checked>
-            <label class="list-group-item rounded-3 py-3" for="orderBy4">
-              <i class="fa-solid fa-calendar-day"></i> Publication Date
-              <span class="d-block small opacity-50">Sort by publication date</span>
-            </label>
-
             <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy2" value="clicks">
             <label class="list-group-item rounded-3 py-3" for="orderBy2">
-              <i class="fa-solid fa-mouse-pointer"></i> Clicks
-              <span class="d-block small opacity-50">Sort by number of clicks</span>
+            <i class="fa-solid fa-eye me-2"></i><span class="label-text">Views</span>
+            <span class="d-block small opacity-50">Sort by number of views</span>
             </label>
-
-            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy3" value="title">
-            <label class="list-group-item rounded-3 py-3" for="orderBy3">
-              <i class="fa-solid fa-heading"></i> Title
-              <span class="d-block small opacity-50">Sort by title</span>
-            </label>
+            <!-- Add other order options similarly -->
           </div>
-
+        </div>
+        <div class="modal-footer">
+          <!-- Close Button -->
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Period Modal -->
+  <div class="modal fade" id="periodModal" tabindex="-1" aria-labelledby="periodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="periodModalLabel">Select Period</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Date selection inputs -->
+          <div class="row">
+            <div class="col-6">
+              <label for="modalStartDate" class="form-label">Start Date</label>
+              <input type="date" id="modalStartDate" name="modal_start_date" class="form-control">
+            </div>
+            <div class="col-6">
+              <label for="modalEndDate" class="form-label">End Date</label>
+              <input type="date" id="modalEndDate" name="modal_end_date" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="applyPeriodButton">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Order Direction Modal -->
+  <div class="modal fade" id="orderDirModal" tabindex="-1" aria-labelledby="orderDirModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderDirModalLabel">Select Order Direction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Order Direction Options -->
           <div class="list-group list-group-checkable d-grid gap-2 border-0">
             <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir1" value="desc" checked>
             <label class="list-group-item rounded-3 py-3" for="orderDir1">
-              <i class="fa-solid fa-sort-amount-down"></i> Descending
-              <span class="d-block small opacity-50">Newest first</span>
+            <i class="fa-solid fa-sort-amount-down"></i> <span class="label-text">Descending</span>
+            <span class="d-block small opacity-50">Newest/highest first</span>
             </label>
-
             <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir2" value="asc">
             <label class="list-group-item rounded-3 py-3" for="orderDir2">
-              <i class="fa-solid fa-sort-amount-up"></i> Ascending
-              <span class="d-block small opacity-50">Oldest first</span>
+            <i class="fa-solid fa-sort-amount-up"></i> <span class="label-text">Ascending</span>
+            <span class="d-block small opacity-50">Oldest/lowest first</span>
             </label>
           </div>
         </div>
-
-        <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center">
-          <div>
-            <label for="query" class="form-label">Search</label>
-            <input type="text" id="query" name="query" class="form-control" placeholder="Search terms...">
-          </div>
-          <div>
-            <label for="specificDate" class="form-label">Specific Date</label>
-            <input type="date" id="specificDate" name="specific_date" class="form-control">
-          </div>
-          <div>
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" id="startDate" name="start_date" class="form-control">
-          </div>
-          <div>
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" id="endDate" name="end_date" class="form-control">
-          </div>
+        <div class="modal-footer">
+          <!-- Close Button -->
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
-
-        <button type="submit" class="btn btn-primary mb-2" id="filterButton">
-          <span class="spinner-border spinner-border-sm" id="filterSpinner" style="display: none;" aria-hidden="true"></span>
-          <span id="filterButtonText">Filter</span>
-        </button>
-      </form>
+      </div>
     </div>
   </div>
-
+  <form id="filterForm" class="form-inline">
+    <input type="hidden" id="country" name="country">
+    <ul class="nav nav-fill mt-5">
+      <!-- Existing nav items -->
+      <li class="nav-item">
+        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#categoryModal" id="categoryButton">
+        {% if not is_mobile %}Category: {% endif %}<span class="dropdown-toggle text-primary"><span id="categoryButtonText" class="text-primary">General</span></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderByModal" id="orderByButton">
+        {% if not is_mobile %}Order By: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderByButtonText" class="text-primary">Publication Date</span></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderDirModal" id="orderDirButton">
+        {% if not is_mobile %}Order Direction: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderDirButtonText" class="text-primary">Descending</span></span>
+        </a>
+      </li>
+      <!-- New nav item for Period -->
+      <li class="nav-item">
+        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#periodModal" id="periodButton">
+        {% if not is_mobile %}Period: {% endif %}<span class="dropdown-toggle text-primary"><span id="periodButtonText" class="text-primary">Start Date - End Date</span></span>
+        </a>
+      </li>
+    </ul>
+  </form>
+  <hr class="opacity-75">
+  <div class="d-flex justify-content-end mt-4">
+    <button type="button" class="btn btn-outline-danger btn-sm" id="clearFiltersButton">
+    <i class="fa-solid fa-filter-circle-xmark me-2"></i>Clear Filters
+    </button>
+  </div>
   <div class="row justify-content-center" id="storiesContainer">
     <!-- Stories will be inserted here -->
   </div>
-
   <div class="d-flex justify-content-center my-5">
     <div class="spinner-border" id="endPageSpinner" style="display: none; width: 3rem; height: 3rem;" aria-hidden="true" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
-
 </div>
-
 {% endblock %}
-
 {% block scripts %}
-  
-  <script nonce="{{ nonce }}" defer 
-    src="{{ url_for('static', filename='js/renderStories.js') }}"
+<script nonce="{{ nonce }}" defer 
+  src="{{ url_for('static', filename='js/renderStories.js') }}"
   ></script>
-
+<!-- JavaScript to Update Button Texts -->
+<script nonce="{{ nonce }}">
+  document.addEventListener('DOMContentLoaded', function() {
+    function updateButtonText(inputName, buttonTextId) {
+      var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
+      var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
+      document.getElementById(buttonTextId).textContent = selectedText;
+    }
+  
+    // Initialize Button Texts
+    updateButtonText('category', 'categoryButtonText');
+    updateButtonText('order_by', 'orderByButtonText');
+    updateButtonText('order_dir', 'orderDirButtonText');
+  
+    // Event Listeners for Category
+    document.querySelectorAll('input[name="category"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('category', 'categoryButtonText');
+      });
+    });
+  
+    // Event Listeners for Order By
+    document.querySelectorAll('input[name="order_by"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('order_by', 'orderByButtonText');
+      });
+    });
+  
+    // Event Listeners for Order Direction
+    document.querySelectorAll('input[name="order_dir"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('order_dir', 'orderDirButtonText');
+      });
+    });
+  
+    // Event listener for the Apply button in Period Modal
+  document.getElementById('applyPeriodButton').addEventListener('click', function() {
+  // Update the periodButton text
+  let startDate = document.getElementById('modalStartDate').value;
+  let endDate = document.getElementById('modalEndDate').value;
+  let periodText = 'Start Date - End Date';
+  if (startDate && endDate) {
+    periodText = `${startDate} to ${endDate}`;
+  }
+  document.getElementById('periodButtonText').textContent = periodText;
+  
+  // Close the modal
+  document.getElementById('periodModal').classList.remove('show');
+  document.querySelector('.modal-backdrop').remove();
+  
+  // Apply the filters
+  applyFilters();
+  });
+  
+  });
+</script>
 {% endblock %}

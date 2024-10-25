@@ -285,7 +285,8 @@ def get_stories():
     ).options(
         joinedload(models.Story.publisher)
     ).order_by(
-        order_criterion
+        order_criterion,
+        models.Story.story_id
     ).offset(
         start_index
     ).limit(

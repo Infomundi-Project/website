@@ -56,6 +56,8 @@ const toggleTheme = () => {
 
   // Update Cloudflare Turnstile theme
   updateTurnstileTheme(newTheme);
+
+  window.location.reload();
 };
 
 const updateButtonClasses = (theme) => {

@@ -193,7 +193,7 @@ assets.register('js_home', js_home)
 def inject_variables():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
     referer = is_safe_url(request.headers.get('referer', ''))
-    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=referer)
+    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=referer, is_light_mode=True if request.cookies.get('theme', '') == 'light' else False)
 
 
 @app.errorhandler(404)

@@ -12,10 +12,10 @@ from website_scripts import json_util, config, input_sanitization, immutable
 
 # Database connection parameters
 db_params = {
-    'host': 'localhost',
+    'host': '127.0.0.1'
     'user': config.MYSQL_USERNAME,
     'password': config.MYSQL_PASSWORD,
-    'db': 'infomundi',
+    'db': config.MYSQL_DATABASE,
     'charset': 'utf8mb4'
 }
 
