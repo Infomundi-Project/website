@@ -320,14 +320,14 @@ def google_callback():
     # Get user details
     display_name = input_sanitization.sanitize_text(user_info['name'])
     username = input_sanitization.create_username_out_of_display_name(display_name)
-    hashed_email = hashing_util.sha256_hash_text(user_info['email'])
+    hashed_email = auth_util.hash_user_email_using_lastest_salt(user_info['email'])
     
     # If the user is not already in the database, we create an entry for them
-    user = models.User.query.filter_by(email=hashed_email).first()
+    user = auth_util.search_user_email_in_database(user_info['email'])
     if not user:
         # Generate a super random password and argon2 hash it. 
         # The user can only log in using google integration or if they want to recover their account for some reason.
-        random_hashed_password = hashing_util.argon2_hash_text(security_util.generate_nonce(24))
+        random_hashed_password = hashing_util.argon2_hash_text(security_util.generate_nonce())
         user = models.User(user_id=security_util.generate_nonce(10), display_name=display_name,\
             username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
         extensions.db.session.add(user)
@@ -362,6 +362,6 @@ def delete_cookies():
     
     # Delete each cookie
     for cookie in cookies_to_delete:
-        response.delete_cookie(cookie, domain=domain)
+        response.set_cookie(cookie, '', expires=0)
 
     return response

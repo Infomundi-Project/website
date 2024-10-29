@@ -174,7 +174,7 @@ css_base = Bundle(
     output='gen/base_packed.css')
 # base.html
 js_base = Bundle(
-    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js', 'js/cookieConsent.js', 'js/linkSafety.js',
+    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js', 'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js', 'js/captchaWaitSubmit.js',
     filters='jsmin', 
     output='gen/base_packed.js')
 # homepage.html

@@ -73,9 +73,13 @@
 	            </label>
 	        </div>
 
-	        <div class="cf-turnstile my-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
-
-	        <button class="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
+	        <div class="my-3">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
+    </div>
+    <p id="captchaMessage" class="mb-2 small">
+      <i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the submit button.
+    </p>
+    <button class="btn btn btn-secondary" type="submit" id="captchaSubmitButton" disabled>Submit</button>
 	        {% if current_user.totp_secret %}
 		        <hr class="my-4">
 		        <small class="text-muted">

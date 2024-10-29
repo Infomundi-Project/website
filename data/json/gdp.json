@@ -216,26 +216,26 @@
     }
   },
   {
-    "Denmark": {
-      "gdp": "$404,199,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Hong Kong": {
-      "gdp": "$382,055,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Colombia": {
       "gdp": "$363,540,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
+    "Denmark": {
+      "gdp": "$404,199,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "South Africa": {
       "gdp": "$377,782,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Hong Kong": {
+      "gdp": "$382,055,000,000 (World Bank)",
       "date": "2023"
     }
   },

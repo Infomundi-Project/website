@@ -188,27 +188,28 @@ def edit_user_settings(username):
 
     new_email = request.form.get('new_email', '').strip().lower()
     confirm_email = request.form.get('confirm_email', '').strip().lower()
-    if new_email or confirm_email:
+    if (new_email or confirm_email) and (new_email != session['email_address']):
         if new_email != confirm_email:
             flash('Emails must match.', 'error')
             return render_template('edit_settings.html')
 
-        hashed_new_email = hashing_util.sha256_hash_text(new_email)
-
-        # If the email format is invalid or email is already being used by other user
-        if not input_sanitization.is_valid_email(new_email) or models.User.query.filter_by(email=hashed_new_email).first():
+        if not input_sanitization.is_valid_email(new_email) or auth_util.search_user_email_in_database(new_email):
             flash('The email you provided is invalid.', 'error')
             return render_template('edit_settings.html')
+
+        hashed_new_email = auth_util.hash_user_email_using_lastest_salt(new_email)
 
         # Send email to the user
         subject = 'Infomundi - Your Email Has Been Changed'
         body = f"""Hello, {current_user.display_name if current_user.display_name else current_user.username}.
 
-We wanted to inform you that the email address associated with your Infomundi account has been successfully updated. If you made this change, no further action is needed.
+We wanted to inform you that the email address associated with your Infomundi account has been successfully updated. Here are the details:
 
-However, if you did not request this change, please secure your account immediately by resetting your password and contacting our support team for assistance.
+Device: {qol_util.get_device_info(request.headers.get('User-Agent'))}
+IP Address: {cloudflare_util.get_user_ip()}
+Country: {cloudflare_util.get_user_country()}
 
-For your security, we recommend reviewing your account activity and updating your security settings if necessary.
+If you made this change, no further action is needed. However, if you did not request this change, please secure your account immediately by contacting our support team for assistance.
 
 Best regards,
 The Infomundi Team
@@ -358,7 +359,7 @@ def contact():
     message = input_sanitization.sanitize_text(request.form.get('message', ''))
 
     # Checks if email is valid
-    email = request.form.get('email', '')
+    email = request.form.get('email', '') if not current_user.is_authenticated else session.get('email_address', '')
     if not input_sanitization.is_valid_email(email):
         flash('We apologize, but your email address format is invalid.')
         return render_template('contact.html')
@@ -368,7 +369,6 @@ def contact():
     message = input_sanitization.gentle_cut_text(1000, message)
 
     if current_user.is_authenticated:
-        email = session.get('email_address', '')
         login_message = f"Yes, as {email}"
     else:
         login_message = 'No'
@@ -391,6 +391,14 @@ Timestamp: {scripts.get_current_date_and_time()} UTC
         flash("We apologize, but looks like that the contact form isn't working. We'll look into that as soon as possible. In the meantime, feel free to send us an email directly at contact@infomundi.net", 'error')
         notifications.post_webhook({'text': f"It wasn't possible to get a contact message for some reason, so... here's the email body: {email_body}"})
     
+
+    receive_message = """Hello there,
+
+Your message has been received, thank you for reaching out! We'll review your inquiry with care and respond within 3 business days.
+
+Regards,
+The Infomundi Team"""
+    notifications.send_email(email, 'Infomundi - Your Message Has Been Received', receive_message)
     return render_template('contact.html')
 
 
