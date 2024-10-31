@@ -474,14 +474,14 @@
     }
   },
   {
-    "Serbia": {
-      "gdp": "$75,187,000,000 (World Bank)",
+    "Lithuania": {
+      "gdp": "$77,836,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Lithuania": {
-      "gdp": "$77,836,000,000 (World Bank)",
+    "Serbia": {
+      "gdp": "$75,187,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -504,12 +504,6 @@
     }
   },
   {
-    "DR Congo": {
-      "gdp": "$66,383,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Slovenia": {
       "gdp": "$68,217,000,000 (World Bank)",
       "date": "2023"
@@ -518,6 +512,12 @@
   {
     "Belarus": {
       "gdp": "$71,857,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "DR Congo": {
+      "gdp": "$66,383,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -534,20 +534,8 @@
     }
   },
   {
-    "Tunisia": {
-      "gdp": "$48,530,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Macau": {
       "gdp": "$47,062,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Jordan": {
-      "gdp": "$50,814,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -558,14 +546,20 @@
     }
   },
   {
-    "Bolivia": {
-      "gdp": "$45,850,000,000 (World Bank)",
+    "Jordan": {
+      "gdp": "$50,814,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Libya": {
-      "gdp": "$50,492,000,000 (World Bank)",
+    "Tunisia": {
+      "gdp": "$48,530,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Bolivia": {
+      "gdp": "$45,850,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -576,8 +570,8 @@
     }
   },
   {
-    "Paraguay": {
-      "gdp": "$42,956,000,000 (World Bank)",
+    "Cambodia": {
+      "gdp": "$31,773,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -588,8 +582,14 @@
     }
   },
   {
-    "Cambodia": {
-      "gdp": "$31,773,000,000 (World Bank)",
+    "Paraguay": {
+      "gdp": "$42,956,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Libya": {
+      "gdp": "$50,492,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -612,8 +612,8 @@
     }
   },
   {
-    "Senegal": {
-      "gdp": "$31,014,000,000 (World Bank)",
+    "Zimbabwe": {
+      "gdp": "$26,538,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -624,20 +624,14 @@
     }
   },
   {
-    "Zimbabwe": {
-      "gdp": "$26,538,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Cyprus": {
       "gdp": "$32,230,000,000 (World Bank)",
       "date": "[n 9]2023"
     }
   },
   {
-    "Iceland": {
-      "gdp": "$31,020,000,000 (World Bank)",
+    "Senegal": {
+      "gdp": "$31,014,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -645,6 +639,12 @@
     "Georgia": {
       "gdp": "$30,536,000,000 (World Bank)",
       "date": "[n 10]2023"
+    }
+  },
+  {
+    "Iceland": {
+      "gdp": "$31,020,000,000 (World Bank)",
+      "date": "2023"
     }
   },
   {

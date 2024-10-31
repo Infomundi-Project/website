@@ -13,6 +13,40 @@
   .image-card {
   position: relative;
   }
+.left-pillar-wrapper {
+}
+  .right-pillar-wrapper {
+  }
+  .pillar-container {
+  text-align: center;
+}
+
+.pillar-top,
+.pillar-bottom {
+  width: 70%;
+  display: block;
+}
+
+
+.pillar-bottom {
+  margin-top: -1px;
+}
+
+.pillar-middle {
+  width: 70%;
+  display: block;
+  margin-top: -1px;
+  border-radius: 35px;
+}
+
+.mirrored {
+  transform: scaleY(-1);
+}
+
+.horizontally-mirrored {
+  transform: scaleX(-1);
+}
+
   .tip-logo {
   position: absolute;
   top: 10px;
@@ -48,7 +82,7 @@
   margin-right: -15px;
   margin-left: -15px;
   }
-  @media (max-width: 1060px) {
+  @media (max-width: 1200px) {
   .card {
   position: relative;
   min-height: 450px;
@@ -137,8 +171,18 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="container mb-5">
-  <div class="row mt-4 align-items-center justify-content-center">
+<div class="row">
+  <div class="col-lg-2">
+    <div class="left-pillar-wrapper">
+      <div class="pillar-container-left pillar-container">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Pillar" class="pillar-top">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-middle2.webp') }}" alt="Middle of the Pillar" class="pillar-middle">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Pillar" class="pillar-bottom">
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+  <div class="row my-5 align-items-center justify-content-center">
     <div class="col-md-3">
 
       <!-- Left Column Accordions -->
@@ -252,9 +296,7 @@
 
     </div>
   </div>
-</div>
 
-<div class="container justify-content-center">
   <!-- Category Modal -->
   <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -449,13 +491,22 @@
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
+  </div>
+  <div class="col-lg-2">
+    <div class="right-pillar-wrapper">
+      <div class="pillar-container-right pillar-container">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Top Pillar" class="pillar-top horizontally-mirrored">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-middle2.webp') }}" alt="Middle of the Right Pillar" class="pillar-middle horizontally-mirrored">
+        <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Right Pillar" class="pillar-bottom horizontally-mirrored">
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script nonce="{{ nonce }}" defer 
   src="{{ url_for('static', filename='js/renderStories.js') }}"
   ></script>
-<!-- JavaScript to Update Button Texts -->
 <script nonce="{{ nonce }}">
   document.addEventListener('DOMContentLoaded', function() {
     function updateButtonText(inputName, buttonTextId) {

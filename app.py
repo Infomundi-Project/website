@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint
 from flask_login import LoginManager, current_user, logout_user
 from flask_assets import Environment, Bundle
 from flask_sqlalchemy import SQLAlchemy
@@ -60,13 +60,6 @@ app.register_blueprint(views, url_prefix='/')
 
 # Google OAuth
 oauth.init_app(app)
-
-
-def is_safe_path(basedir, path, follow_symlinks=False):
-    # Resolves the absolute path and ensures it is within the base directory
-    if follow_symlinks:
-        return os.path.realpath(path).startswith(basedir)
-    return os.path.abspath(path).startswith(basedir)
 
 
 @app.route('/ads.txt')
@@ -133,9 +126,6 @@ def check_session_version():
             session.permanent = False
 
             logout_user()
-
-    if session.get('user_id', '') and request.endpoint != 'auth.totp':
-        return redirect('https://infomundi.net/auth/totp')
 
 
 @app.after_request

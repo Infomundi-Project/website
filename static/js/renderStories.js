@@ -1,6 +1,46 @@
-// renderStories.js
-
 document.addEventListener("DOMContentLoaded", function() {
+  let middleSectionCount = 1;
+
+  function addMiddleSection() {
+    // Left Pillar
+    const leftPillar = document.querySelector('.pillar-container-left');
+    const leftPillarMiddle = document.createElement('img');
+    leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+    leftPillarMiddle.alt = 'Middle of the Pillar';
+    leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
+
+    // Apply flipped class to every other section in the left pillar for alternating effect
+    if (middleSectionCount % 2 !== 0) {
+      leftPillarMiddle.classList.add('mirrored');
+    }
+
+    leftPillar.insertBefore(leftPillarMiddle, leftPillar.querySelector('.pillar-bottom'));
+
+    // Right Pillar (Mirrored)
+    const rightPillar = document.querySelector('.pillar-container-right');
+    const rightPillarMiddle = document.createElement('img');
+    rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+    rightPillarMiddle.alt = 'Middle of the Pillar';
+    rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
+
+    // Apply flipped class to every other section in the right pillar for alternating effect
+    if (middleSectionCount % 2 !== 0) {
+      rightPillarMiddle.classList.add('mirrored');
+    }
+
+    rightPillar.insertBefore(rightPillarMiddle, rightPillar.querySelector('.pillar-bottom'));
+
+    middleSectionCount++; // Increment counter after adding to both pillars
+  }
+
+  function initializePillar(initialCount = 70) {
+    for (let i = 0; i < initialCount; i++) {
+      addMiddleSection();
+    }
+  }
+
+  initializePillar();
+
   // Event listener for the Clear Filters button
   document.getElementById('clearFiltersButton').addEventListener('click', function() {
     // Reset form fields to their default values
@@ -109,8 +149,9 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   window.addEventListener('scroll', () => {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 3000 && !isLoading && hasMoreStories) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 2000 && !isLoading && hasMoreStories) {
       fetchStories(false);
+      initializePillar();
     }
   });
 
