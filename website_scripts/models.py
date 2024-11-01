@@ -55,7 +55,7 @@ class User(db.Model, UserMixin):
     # IP History
     ip_history = db.relationship('UserIPHistory', back_populates='user', cascade='all, delete-orphan')
 
-    # This is only used in certain circumnstances
+    # This is only used if the user prefers to receive feed emails
     cleartext_email = db.Column(db.String(80))
 
 
@@ -93,7 +93,7 @@ class User(db.Model, UserMixin):
         self.derived_key_salt = None
 
 
-    def check_is_online():
+    def check_is_online(self):
         now = datetime.utcnow()
         online_threshold = timedelta(minutes=3)
         return (now - self.last_activity) <= online_threshold
@@ -188,7 +188,7 @@ class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     story_id = db.Column(db.String(40), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id'))
+    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id')) # change
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 

@@ -232,7 +232,7 @@ def get_stories():
 
     # br_general, us_general and so on
     selected_filter = f'{country}_{category}'
-    if not scripts.valid_category(selected_filter):
+    if not scripts.is_valid_category(selected_filter):
         return jsonify({'error': 'This category is not yet supported!'}), 501
 
     valid_order_columns = ('created_at', 'clicks', 'title', 'pub_date')
@@ -322,6 +322,10 @@ def get_currencies():
 @extensions.cache.cached(timeout=60*60) # 1h cached
 def get_stocks():
     stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    
+    # Removes unused US stocks
+    del stocks[1:3]
+    
     return jsonify(stocks)
 
 

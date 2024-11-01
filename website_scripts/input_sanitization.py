@@ -208,32 +208,27 @@ def is_valid_url(url: str) -> bool:
 
 def is_safe_url(target: str) -> bool:
     """
-    Checks if the target url is safe.
-    - Should be under the domain infomundi.net
-
+    Checks if the target URL is safe by confirming it matches a specific domain.
+    
     Arguments:
-        target (str): A target url.
-
+        target (str): A target URL.
+    
     Returns:
-        str: True if the url is safe. False otherwise.
-
-    Examples:
-        >>> is_safe_url('https://malicious.net/collect')
-        False
-
-        >>> is_safe_url('https://infomundi.net/contact')
-        True
-
-        >>> is_safe_url('https://commento.infomundi.net/en/dashboard')
-        True
+        bool: True if the URL is safe, False otherwise.
     """
+    allowed_domains = ("infomundi.net", "commento.infomundi.net", "bucket.infomundi.net")
+    
     try:
         test_url = urlparse(target)
     except ValueError:
         return False
     
-    # Checks to see if the url ends with the infomundi.net trusted domain
-    if not test_url.netloc.endswith('infomundi.net'):
+    # Ensure the URL scheme is http or https
+    if test_url.scheme != 'https':
+        return False
+    
+    # Check if the netloc is exactly in the allowed domains
+    if test_url.netloc not in allowed_domains:
         return False
 
     return True

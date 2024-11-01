@@ -182,13 +182,14 @@ assets.register('js_home', js_home)
 @app.context_processor
 def inject_variables():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
-    referer = is_safe_url(request.headers.get('referer', ''))
-    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=referer, is_light_mode=True if request.cookies.get('theme', '') == 'light' else False)
+    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=is_safe_url(request.headers.get('referer', '')),\
+        is_light_mode=False if request.cookies.get('theme', '') == 'dark' else True
+    )
 
 
-@app.errorhandler(404)
-@app.errorhandler(429)
 @app.errorhandler(500)
+@app.errorhandler(429)
+@app.errorhandler(404)
 def error_handler(error):
     # Gets the error code, defaults to 500
     error_code = getattr(error, 'code', 500)

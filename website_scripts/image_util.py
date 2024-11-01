@@ -98,7 +98,7 @@ def has_valid_mime_type(file_stream: bytes) -> bool:
     return mime in ('image/png', 'image/jpeg', 'image/jpg', 'image/webp')
 
 
-def has_allowed_dimensions(image_stream: bytes, min_width: int=300, min_height: int=300) -> bool:
+def has_allowed_dimensions(image_stream: bytes, min_width: int=200, min_height: int=200) -> bool:
     """Checks if image dimension is in range. The image should not be bigger than 3000x3000 to
     avoid pixel bomb DoS attack.
     

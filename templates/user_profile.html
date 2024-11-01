@@ -233,7 +233,7 @@
         {% endif %}
 
         <div class="mt-5">
-      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
+      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/id/{{ user.user_id }}" max-level="5"></comentario-comments>
     </div>
       </div>
 
@@ -242,12 +242,6 @@
       </div>
     
     </div>
-    
-    <!--
-    <div class="mt-5">
-      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/profile/{{ user.user_id }}" max-level="5"></comentario-comments>
-    </div>
-  -->
   </div>
 </div>
 {% endblock %}

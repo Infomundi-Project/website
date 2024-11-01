@@ -38,10 +38,11 @@ def login():
 
     session['key_value'] = auth_util.configure_key(user, password)
 
-    # If user has totp enabled, we redirect them to the totp page without effectively logging them in the system
+    # If user has totp enabled, we redirect them to the totp page without effectively performing log in actions
     if user.totp_secret:
         session['email_address'] = email
         session['user_id'] = user.user_id
+        session['in_totp_process'] = True
         return redirect(url_for('auth.totp'))
 
     auth_util.perform_login_actions(user, email)
@@ -50,10 +51,9 @@ def login():
 
 
 @auth.route('/totp', methods=['GET', 'POST'])
-@unauthenticated_only
 @verify_captcha
 def totp():
-    if not session.get('user_id', ''):
+    if not session.get('in_totp_process', ''):
         abort(404)
 
     user = models.User.query.get(session['user_id'])
@@ -73,11 +73,23 @@ def totp():
     # Logs the user and performs some other actions
     auth_util.perform_login_actions(user, session['email_address'])
     
-    # This is an indicator that the user has two factor, and we don't use it anywhere after this logic
+    # Deletes variables related to the totp process
     del session['user_id']
+    del session['in_totp_process']
 
     flash(message)
-    return redirect(url_for('views.user_profile', username=user.username))
+    return redirect(url_for('views.user_profile', user=user))
+
+
+@auth.route('/reset_totp', methods=['GET'])
+def reset_totp():
+    if not session.get('in_totp_process', ''):
+        return abort(404)
+
+    del session['in_totp_process']
+    del session['user_id']
+
+    return redirect(url_for('views.home'))
 
 
 @auth.route('/disable_totp', methods=['POST'])
@@ -124,7 +136,7 @@ def register():
     email_lookup = auth_util.search_user_email_in_database(email)
     username_lookup = auth_util.search_username_in_database(username)
     if not (email_lookup and username_lookup):
-        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_lastest_salt(email), username, hashing_util.argon2_hash_text(password))
+        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_salt(email), username, hashing_util.argon2_hash_text(password))
         if not send_token:
             flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
             scripts.log(f'[!] Not able to send verification token to {email}.')
@@ -191,45 +203,51 @@ def forgot_password():
         
         # Checks if the token is valid
         user = auth_util.check_recovery_token(recovery_token)
-        if user:
-            session['session_version'] = user.session_version
-            login_user(user)
-
-            flash('Success! You may be able to change your password now.')
-            return redirect(url_for('auth.password_change'))
-
-        flash('We apologize, but the token seems to be invalid.', 'error')
-        return render_template('forgot_password.html')
+        if not user:
+            flash('We apologize, but the token seems to be invalid.', 'error')
+            return render_template('forgot_password.html')    
         
-    email = request.form.get('email', '')
+        # We don't need to log the user in yet. Save the user id to the session cookie to use in the password_change endpoint.
+        session['user_id'] = user.user_id
+
+        # Set user in recovery mode
+        user.in_recovery = True
+        extensions.db.session.commit()
+
+        flash('Success! You may be able to change your password now.')
+        return redirect(url_for('auth.password_change'))
+        
+    email = request.form.get('email', '').lower().strip()
     if not input_sanitization.is_valid_email(email):
         flash('We apologize, but your email address format is invalid.', 'error')
         return render_template('forgot_password.html')
 
     # Tries to send the recovery token to the user
-    auth_util.send_recovery_token(email, hashing_util.argon2_hash_text(email))
+    auth_util.send_recovery_token(email)
 
-    # Generic error message to prevent user enumeration
+    # Generic message to prevent user enumeration
     flash(f"If {email} is in our database, an email will be sent with instructions.")
     return render_template('forgot_password.html')
 
 
 @auth.route('/password_change', methods=['GET', 'POST'])
-@login_required
-@verify_captcha
+@unauthenticated_only
 def password_change():
+    if not session.get('user_id', ''):
+        return abort(404)
+
+    user = models.User.query.get(session['user_id'])
+    if not user.in_recovery:
+        return abort(404)
+
     if request.method == 'GET':
-        return render_template('password_change.html')
+        return render_template('password_change.html', username=user.username)
     
     # Get form data
-    old_password = request.form.get('old_password', '')
     new_password = request.form.get('new_password', '')
     confirm_password = request.form.get('confirm_password', '')
     
-    # If the user is in recovery mode, they should bypass the old password check
-    if not current_user.in_recovery and not current_user.check_password(old_password):
-        message = 'Incorrect old password.'
-    elif new_password != confirm_password:
+    if new_password != confirm_password:
         message = 'Passwords must match!'
     elif not input_sanitization.is_strong_password(new_password):
         message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
@@ -240,9 +258,15 @@ def password_change():
 
     if message:
         flash(message, 'error')
-        return render_template('password_change.html')
-        
-    auth_util.change_password(current_user, new_password)
+        return render_template('password_change.html', username=user.username)
+    
+    auth_util.change_password(user, new_password)
+    
+    # ????????
+    if session.get('user_id', ''):
+        del session['user_id']
+
+    flash('Your password has been changed! You may log in now.')
     return redirect(url_for('auth.login'))
 
 
@@ -320,7 +344,7 @@ def google_callback():
     # Get user details
     display_name = input_sanitization.sanitize_text(user_info['name'])
     username = input_sanitization.create_username_out_of_display_name(display_name)
-    hashed_email = auth_util.hash_user_email_using_lastest_salt(user_info['email'])
+    hashed_email = auth_util.hash_user_email_using_salt(user_info['email'])
     
     # If the user is not already in the database, we create an entry for them
     user = auth_util.search_user_email_in_database(user_info['email'])

@@ -1,6 +1,7 @@
 from flask_login import logout_user, login_user
 from flask import session, request
 from datetime import datetime
+from random import shuffle
 from sqlalchemy import or_
 
 from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
@@ -14,19 +15,22 @@ def search_user_email_in_database(email: str):
         
         user = models.User.query.filter_by(email=hashed_email).first()
         if user:
-            return user
+            break
     else:
         return None
+
+    return user
 
 
 def search_username_in_database(username: str):
     return models.User.query.filter_by(username=username).first()
 
 
-def hash_user_email_using_lastest_salt(email: str):
-    # Queries the latest salt in the database ordering by ID
-    last_salt = models.GlobalSalts.query.order_by(models.GlobalSalts.id.desc()).first()
-    salted_email = last_salt.salt + email
+def hash_user_email_using_salt(email: str) -> str:
+    salts = models.GlobalSalts.query.all()
+
+    selected_salt = shuffle([x.salt for x in salts])[0]
+    salted_email = selected_salt + email
 
     return hashing_util.sha512_hash_text(salted_email)
 
@@ -34,7 +38,6 @@ def hash_user_email_using_lastest_salt(email: str):
 def perform_login_actions(user, cleartext_email: str):
     # Save the timestamp of the last login
     user.last_login = datetime.now()
-    extensions.db.session.commit()
 
     login_user(user, remember=session.get('remember_me', True))
     
@@ -90,7 +93,8 @@ https://infomundi.net/contact
 Best regards,
 The Infomundi Team"""
     subject = 'Infomundi - Your Password Has Been Reset'
-    notifications.send_email(session['email_address'], subject, message)
+    if session.get('email_address', ''):
+        notifications.send_email(session['email_address'], subject, message)
     session.clear()
     logout_user()
 
@@ -208,17 +212,16 @@ def check_recovery_token(token: str) -> object:
     return user_lookup
 
 
-def send_recovery_token(email: str, hashed_email: str) -> bool:
+def send_recovery_token(email: str) -> bool:
     """Tries to send the account recovery token to the user requesting account recovery.
 
     Args:
         email (str): The user's email address.
-        hashed_email (str): The user's sha256 hashed email address.
 
     Returns:
         bool: True if user can proceed with account recovery. Otherwise, False.
     """
-    user_lookup = models.User.query.filter_by(email=hashed_email).first()
+    user_lookup = search_user_email_in_database(email)
     if not user_lookup:
         return False
 
@@ -248,7 +251,6 @@ The Infomundi Team"""
     if result:
         user_lookup.recovery_token = verification_token
         user_lookup.recovery_token_timestamp = datetime.now()
-        user_lookup.cleartext_email = email
         extensions.db.session.commit()
     
     return result

@@ -197,7 +197,7 @@ def edit_user_settings(username):
             flash('The email you provided is invalid.', 'error')
             return render_template('edit_settings.html')
 
-        hashed_new_email = auth_util.hash_user_email_using_lastest_salt(new_email)
+        hashed_new_email = auth_util.hash_user_email_using_salt(new_email)
 
         # Send email to the user
         subject = 'Infomundi - Your Email Has Been Changed'

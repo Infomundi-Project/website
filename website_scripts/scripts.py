@@ -12,7 +12,7 @@ from openai import OpenAI
 from . import config, json_util, immutable, notifications, models, extensions
 
 
-@extensions.cache.memoize(timeout=60*60*8) # 8 hours
+#@extensions.cache.memoize(timeout=60*60*8) # 8 hours
 def home_processing() -> dict:
     """This function processes data for the home endpoint and caches it to speed up performance"""
     statistics = get_statistics()
@@ -23,9 +23,8 @@ def home_processing() -> dict:
 
     us_indexes = world_stocks[:3]
 
-    # We remove unused US stock data
-    world_stocks.pop(1)
-    world_stocks.pop(1)
+    # Removes unused US stocks
+    del world_stocks[1:3]
 
     home_data = {
         'stock_date': world_stocks[0]['date'],
@@ -37,6 +36,11 @@ def home_processing() -> dict:
     }
 
     return home_data
+
+
+def get_statistics() -> dict:
+    """Handles the statistics for Infomundi. Returns a dict with related information."""
+    return json_util.read_json(config.STATISTICS_PATH)
 
 
 @extensions.cache.memoize(timeout=60*60*6) # 6 hours
@@ -220,6 +224,7 @@ def log(text: str, log_type: str='exception') -> bool:
     return True
 
 
+@extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
     """Checks the modification date of a desired file and compares it with a default threshold of 24 hours. 
 
@@ -495,12 +500,8 @@ def string_similarity(s1: str, s2: str) -> float:
     return matcher.ratio() * 100
 
 
-def get_statistics() -> dict:
-    """Handles the statistics for Infomundi. Returns a dict with related information."""
-    return json_util.read_json(config.STATISTICS_PATH)
-
-
-def valid_category(category: str) -> bool:
+@extensions.cache.memoize(timeout=60*60*12) # 12 hours
+def is_valid_category(category: str) -> bool:
     """Takes a category and checks if it is a valid category based on existing JSON files."""
     categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
     
@@ -510,6 +511,7 @@ def valid_category(category: str) -> bool:
     return True
 
 
+@extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def country_code_to_name(cca2: str) -> str:
     countries = config.COUNTRY_LIST
     for item in countries:
@@ -522,9 +524,12 @@ def country_code_to_name(cca2: str) -> str:
     return country_name
 
 
+@extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def get_supported_categories(country_code: str) -> list:
     """Returns a list of supported categories"""
-    return [file.split('_')[1].replace('.json', '') for file in listdir(config.FEEDS_PATH) if file.startswith(country_code)]
+    categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
+    
+    return [category.split('_')[1] for category in categories if category.startswith(country_code)]
 
 
 """

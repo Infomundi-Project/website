@@ -4,7 +4,7 @@ from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_caching import Cache
 
-from .config import REDIS_CONNECTION_STRING
+from .config import REDIS_CONNECTION_STRING, GOOGLE_CLIENT_ID, GOOGLE_DISCOVERY_URL, GOOGLE_CLIENT_SECRET
 from .cloudflare_util import get_user_ip
 
 login_manager = LoginManager()
@@ -17,11 +17,6 @@ limiter = Limiter(
     meta_limits=["3/hour", "4/day"],
     default_limits=["30 per minute"]
 )
-
-# Google OAuth
-GOOGLE_CLIENT_ID = '785668376905-3mg53g7tod24g7hi5ams2gteq7752tl8.apps.googleusercontent.com'
-GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
-GOOGLE_CLIENT_SECRET = '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'
 
 oauth = OAuth()
 
