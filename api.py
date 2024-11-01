@@ -89,16 +89,11 @@ def get_user_status(user_id):
     if not user.last_activity:
         return jsonify({'is_online': False, 'last_activity': user.last_activity})
 
-    # Consider the user online if the last activity was within the last 5 minutes
-    now = datetime.utcnow()
-    online_threshold = timedelta(minutes=3)
-    is_online = (now - user.last_activity) <= online_threshold
-    
     # Save to the database
-    user.is_online = is_online
+    user.is_online = user.check_is_online()
     extensions.db.session.commit()
     
-    return jsonify({'is_online': is_online, 'last_activity': user.last_activity})
+    return jsonify({'is_online': user.is_online, 'last_activity': user.last_activity})
 
 
 @api.route('/user/status/update', methods=['GET'])
@@ -116,9 +111,10 @@ def update_user_status():
 @api.route('/get-description', methods=['GET'])
 @extensions.cache.cached(timeout=60*60*24*15, query_string=True) # 15 days
 def get_description():
+    # is this still needed?
     news_id = request.args.get('id', '')
 
-    story = models.Story.query.filter_by(story_id=news_id).first()
+    story = models.Story.query.get(news_id)
     if story:
         data = {}
         data['title'] = input_sanitization.sanitize_html(story.title)
@@ -190,24 +186,22 @@ def search():
     
     results = [x.lower() for x in countries if scripts.string_similarity(query, x) > 80]
     if results:
-        code = [x['code'] for x in config.COUNTRY_LIST if x['name'].lower() == results[0]][0]
+        code = [x['code'].lower() for x in config.COUNTRY_LIST if x['name'].lower() == results[0]][0]
     else:
         code = 'ERROR'
 
-    url = f'https://infomundi.net/news?country={code}'
-    return redirect(url)
+    return redirect(f'https://infomundi.net/news?country={code}')
 
 
 @api.route('/summarize_story', methods=['GET'])
 def summarize_story():
-    # This is safe because only who has access to the secret key can control the session variables.
+    # This avoids abusive behavior. People can't simply pass a GET argument with the story id.
     news_id = session.get('visited_news', '')
     if not news_id:
         # 406 = Not acceptable
         return jsonify({'success': False}), 406
 
-    story = models.Story.query.filter_by(story_id=news_id).first()
-    # If the story has a summary, there's no point continuing.
+    story = models.Story.query.get(news_id)
     if story.gpt_summary:
         return jsonify({'success': False}), 406
 
@@ -292,9 +286,6 @@ def get_stories():
     ).limit(
         stories_per_page
     ).all()
-
-    if not stories:
-        return jsonify([]), 200
 
     stories_list = [
         {

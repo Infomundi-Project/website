@@ -4,34 +4,49 @@ document.addEventListener("DOMContentLoaded", function() {
   function addMiddleSection() {
     // Left Pillar
     const leftPillar = document.querySelector('.pillar-container-left');
-    const leftPillarMiddle = document.createElement('img');
-    leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
-    leftPillarMiddle.alt = 'Middle of the Pillar';
-    leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
+    if (leftPillar) {
+        const leftPillarMiddle = document.createElement('img');
+        leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+        leftPillarMiddle.alt = 'Middle of the Pillar';
+        leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
 
-    // Apply flipped class to every other section in the left pillar for alternating effect
-    if (middleSectionCount % 2 !== 0) {
-      leftPillarMiddle.classList.add('mirrored');
+        // Apply flipped class to every other section in the left pillar for alternating effect
+        if (middleSectionCount % 2 !== 0) {
+            leftPillarMiddle.classList.add('mirrored');
+        }
+
+        const leftPillarBottom = leftPillar.querySelector('.pillar-bottom');
+        if (leftPillarBottom) {
+            leftPillar.insertBefore(leftPillarMiddle, leftPillarBottom);
+        } else {
+            leftPillar.appendChild(leftPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+        }
     }
-
-    leftPillar.insertBefore(leftPillarMiddle, leftPillar.querySelector('.pillar-bottom'));
 
     // Right Pillar (Mirrored)
     const rightPillar = document.querySelector('.pillar-container-right');
-    const rightPillarMiddle = document.createElement('img');
-    rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
-    rightPillarMiddle.alt = 'Middle of the Pillar';
-    rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
+    if (rightPillar) {
+        const rightPillarMiddle = document.createElement('img');
+        rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+        rightPillarMiddle.alt = 'Middle of the Pillar';
+        rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
 
-    // Apply flipped class to every other section in the right pillar for alternating effect
-    if (middleSectionCount % 2 !== 0) {
-      rightPillarMiddle.classList.add('mirrored');
+        // Apply flipped class to every other section in the right pillar for alternating effect
+        if (middleSectionCount % 2 !== 0) {
+            rightPillarMiddle.classList.add('mirrored');
+        }
+
+        const rightPillarBottom = rightPillar.querySelector('.pillar-bottom');
+        if (rightPillarBottom) {
+            rightPillar.insertBefore(rightPillarMiddle, rightPillarBottom);
+        } else {
+            rightPillar.appendChild(rightPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+        }
     }
-
-    rightPillar.insertBefore(rightPillarMiddle, rightPillar.querySelector('.pillar-bottom'));
 
     middleSectionCount++; // Increment counter after adding to both pillars
   }
+
 
   function initializePillar(initialCount = 70) {
     for (let i = 0; i < initialCount; i++) {

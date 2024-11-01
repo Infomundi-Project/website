@@ -1,4 +1,8 @@
-import threading, os, pymysql
+import threading
+import logging
+import pymysql
+import os
+
 from requests import get as get_request
 from random import shuffle, choice
 from unidecode import unidecode
@@ -6,20 +10,30 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from feedparser import parse
 from hashlib import md5
+from sys import exit
 
 from website_scripts import json_util, config, input_sanitization, immutable
 
 
 # Database connection parameters
 db_params = {
-    'host': '127.0.0.1'
+    'host': '127.0.0.1',
     'user': config.MYSQL_USERNAME,
     'password': config.MYSQL_PASSWORD,
     'db': config.MYSQL_DATABASE,
-    'charset': 'utf8mb4'
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
 }
 
 db_connection = pymysql.connect(**db_params)
+
+# Setup logging
+logging.basicConfig(filename=f'{config.LOCAL_ROOT}/logs/create_cache.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
+
+
+def log_message(message):
+    print(f'[~] {message}')
+    logging.info(message)
 
 
 def insert_to_database(stories: list, category_id: str) -> int:
@@ -70,7 +84,7 @@ def insert_to_database(stories: list, category_id: str) -> int:
             except Exception as err:
                 # Handle any exceptions that occur during insertion
                 exceptions_count += 1
-                print(f"[-] {err}")
+                log_message(f"[-] {err}")
 
     # Commit all changes to the database
     db_connection.commit()
@@ -95,13 +109,13 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     }
 
     if not input_sanitization.is_valid_url(rss_url):
-        print(f'Invalid url: {rss_url}')
+        log_message(f'Invalid url: {rss_url}')
         return {}
     
     try:
         response = get_request(rss_url, timeout=6, headers=headers)
-        if response.status_code not in [200, 301, 302]:
-            print(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
+        if response.status_code not in (200, 301, 302):
+            log_message(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
             return {}
     except Exception:
         return {}
@@ -135,7 +149,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
 
             # Checks to see if the url is valid
             if not input_sanitization.is_valid_url(feed_link) or not input_sanitization.is_valid_url(item_link):
-                print(f'[-] Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
+                log_message(f'Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
                 continue
 
             if item.has_key('published_parsed'):
@@ -176,7 +190,7 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
             data['items'].append(new_story)
     
     except Exception as err:
-        print(f"[!] Exception getting {rss_url} ({news_filter}) // {err}")
+        log_message(f"[!] Exception getting {rss_url} ({news_filter}) // {err}")
         data = {}
 
     result_list.append(data)
@@ -249,16 +263,54 @@ def format_date(date) -> dict:
     return date_result
 
 
+def fetch_categories():
+    log_message('Fetching categories from the database')
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query to fetch category IDs
+            sql_query = "SELECT category_id FROM categories"
+            cursor.execute(sql_query)
+            categories = cursor.fetchall()
+
+            category_database = [row['category_id'] for row in categories]
+            shuffle(category_database)
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching categories: {e}")
+        return []
+    
+    log_message(f'Got a total of {len(category_database)} categories from the database')
+    return category_database
+
+
+def fetch_feed(category_id: str):
+    log_message(f'Fetching feeds from {category_id}')
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query to fetch category IDs
+            sql_query = """
+                SELECT site, url FROM feeds 
+                WHERE category_id = %s
+            """
+            cursor.execute(sql_query, (category_id))
+            categories = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching categories: {e}")
+        return []
+    
+    log_message(f'Got categories from the database')
+    return categories
+
+
 def main():
     total_done = 0
     
-    categories = [file.replace(".json", "") for file in os.listdir(f"{config.FEEDS_PATH}")]
+    categories = fetch_categories()
     for selected_filter in categories:
-        percentage = (total_done // 100) * len(categories)
-        print(f"\n[{round(percentage, 2)}%] Handling cache for {selected_filter}...")
+        percentage = (total_done // len(categories)) * 100
+        log_message(f"\n[{round(percentage, 2)}%] Handling cache for {selected_filter}...")
         
         # Read the RSS feeds configuration for the current category
-        rss_feeds = json_util.read_json(f"{config.FEEDS_PATH}/{selected_filter}")
+        rss_feeds = fetch_feed(selected_filter)
         all_rss_data = []
 
         # Use threads to fetch RSS feeds concurrently
@@ -289,7 +341,7 @@ def main():
 
         # Skip if no articles were found
         if not merged_articles:
-            print(f"[-] Empty cache: {selected_filter}")
+            log_message(f"[-] Empty cache: {selected_filter}")
             continue
 
         # Shuffle merged articles to mix them up
@@ -299,9 +351,9 @@ def main():
         exceptions_count = insert_to_database(merged_articles, selected_filter)
         total_done += 1
         
-        print(f"[{len(merged_articles) - exceptions_count} articles] Saved for {selected_filter}.")
+        log_message(f"[{len(merged_articles) - exceptions_count} articles] Saved for {selected_filter}.")
     
-    print('[+] Finished!')
+    log_message('Finished!')
 
 
 if __name__ == "__main__":

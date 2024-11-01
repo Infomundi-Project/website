@@ -62,8 +62,13 @@
         </div>
 
 
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
-        <button class="w-100 btn btn-lg btn-primary mb-2" type="submit" id="signUpButton">Sign up</button>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
+
+        <p id="captchaMessage" class="my-2 small">
+            <i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign up button.
+        </p>
+        <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Sign up</button>
+
         <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}"><img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30">Sign up with Google<span class="invisible">.</span></a>
 
         <p>I already have an account. <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Sign in</a>.</p>

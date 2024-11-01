@@ -18,7 +18,7 @@ WORKERS = 2
 DEFAULT_IMAGE = 'https://infomundi.net/static/img/infomundi-white-darkbg-square.webp'
 
 # Define proxies variable as global and load proxy list from file
-with open(f'{config.WEBSITE_ROOT}/http-proxies.txt') as f:
+with open(f'{config.LOCAL_ROOT}/http-proxies.txt') as f:
     proxies = [x.rstrip() for x in f.readlines()]
     shuffle(proxies)
 
@@ -48,7 +48,7 @@ db_connection = pymysql.connect(**db_params)
 
 
 # Setup logging
-logging.basicConfig(filename=f'{config.WEBSITE_ROOT}/logs/search_images.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
+logging.basicConfig(filename=f'{config.LOCAL_ROOT}/logs/search_images.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
 
 
 def log_message(message):
@@ -288,7 +288,7 @@ def download_and_convert_image(data: dict) -> list:
             image = image.convert("RGB")
             # Let's be real here, alright? We have no money to spend storing a bunch of images so we optimize them as much as we can
             # AVIF be my savior
-            image.save(output_buffer, format="avif", optimize=True, quality=20, method=6)
+            image.save(output_buffer, format="avif", optimize=True, quality=60, method=6)
             s3_object_key = data[item]['output_path'] + ".avif"
         else:
             # Processing favicon images as before, saving to buffer
@@ -348,12 +348,12 @@ def fetch_stories(selected_filter: str, limit: int=500):
             # Construct the SQL query with a LIMIT clause
             sql_query = """
                 SELECT * FROM stories 
-                WHERE category_id = %s AND media_content_url NOT LIKE %s 
+                WHERE category_id = %s AND NOT has_media_content 
                 ORDER BY created_at DESC
                 LIMIT %s
             """
             # Execute the query
-            cursor.execute(sql_query, (selected_filter, '%stories%', limit))
+            cursor.execute(sql_query, (selected_filter, limit))
             
             # Fetch all the results
             stories = cursor.fetchall()

@@ -94,3 +94,12 @@ CREATE TABLE global_salts (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     salt VARCHAR(64) NOT NULL
 );
+
+CREATE TABLE feeds (
+    id VARCHAR(32) PRIMARY KEY,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    category_id VARCHAR(15) NOT NULL,
+    site VARCHAR(120) NOT NULL,
+    url VARCHAR(150) NOT NULL,
+    favicon VARCHAR(150)
+);

@@ -1,5 +1,5 @@
+from datetime import datetime, timedelta
 from flask_login import UserMixin
-from datetime import datetime
 
 from .extensions import db
 from .hashing_util import argon2_hash_text, argon2_verify_hash
@@ -91,6 +91,12 @@ class User(db.Model, UserMixin):
 
     def purge_key(self):
         self.derived_key_salt = None
+
+
+    def check_is_online():
+        now = datetime.utcnow()
+        online_threshold = timedelta(minutes=3)
+        return (now - self.last_activity) <= online_threshold
 
 
     def add_ip_history(self, ip_address, user_agent):
@@ -311,6 +317,18 @@ class SiteStatistics(db.Model):
     total_comments = db.Column(db.Integer, nullable=False)
     last_updated_message = db.Column(db.String(15), nullable=False)
     total_clicks = db.Column(db.BigInteger, nullable=False)
+
+
+class Feeds(db.Model):
+    __tablename__ = 'feeds'
+    
+    id = db.Column(db.String(32), primary_key=True)
+    category_id = db.Column(db.String(15), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    site = db.Column(db.String(120), nullable=False)
+    url = db.Column(db.String(150), nullable=False)
+    favicon = db.Column(db.String(150))
 
 
 class Stocks(db.Model):

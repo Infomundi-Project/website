@@ -1,25 +1,23 @@
 {% extends "base.html" %} {% block title %}{{ country_name }}{% endblock %}
 {% block styles %}
 <style>
-  {% if request.cookies.get('theme') == 'light' %}
-  .nav-tabs{
-  --bs-nav-tabs-border-color: #6c757d;
-  }
-  {% else %}
-  .nav-tabs{
-  --bs-nav-tabs-border-color: #ced4da;
-  }
-  {% endif %}
   .image-card {
   position: relative;
   }
-.left-pillar-wrapper {
+
+/* Pillar Wrapper fills the parent column's height */
+.left-pillar-wrapper,
+.right-pillar-wrapper {
+  height: 100%;
 }
-  .right-pillar-wrapper {
-  }
   .pillar-container {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Vertically centers the pillars */
+  height: 100%;
 }
+
 
 .pillar-top,
 .pillar-bottom {
@@ -87,28 +85,6 @@
   position: relative;
   min-height: 450px;
   }
-  /* Smaller search button and dropdown */
-  .btn-outline-primary {
-  font-size: 0.9rem; /* Smaller font size */
-  padding: 5px 10px; /* Smaller padding */
-  }
-  /* Smaller input field */
-  .form-control {
-  font-size: 0.8rem; /* Smaller font size */
-  padding: 5px 10px; /* Smaller padding */
-  }
-  /* Ensure the dropdown items match the new button size */
-  .dropdown-item {
-  font-size: 0.9rem; /* Smaller font size */
-  padding: 3px 10px; /* Smaller padding */
-  }
-  .nav-item .nav-link {
-  font-size: 0.9rem; /* Smaller font size */
-  padding: 5px 10px; /* Smaller padding */
-  }
-  .nav-item {
-  margin-right: 5px; /* Adjust space between nav items */
-  }
   }
   .list-group {
   width: 100%;
@@ -173,18 +149,23 @@
 {% block content %}
 <div class="row">
   <div class="col-lg-2">
-    <div class="left-pillar-wrapper">
+
+    {% if not is_mobile %}
+    <div class="left-pillar-wrapper h-100">
       <div class="pillar-container-left pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Pillar" class="pillar-top">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-middle2.webp') }}" alt="Middle of the Pillar" class="pillar-middle">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Pillar" class="pillar-bottom">
       </div>
     </div>
+    {% endif %}
+
   </div>
   <div class="col-lg-8">
-  <div class="row my-5 align-items-center justify-content-center">
+  <div class="row my-3 align-items-center justify-content-center">
     <div class="col-md-3">
 
+      {% if not is_mobile %}
       <!-- Left Column Accordions -->
       <div class="accordion" id="accordionLeft">
 
@@ -226,6 +207,7 @@
         </div>
 
       </div>
+      {% endif %}
 
     </div>
     <div class="col-md-6 text-center my-4">
@@ -255,6 +237,7 @@
     </div>
     <div class="col-md-3">
 
+      {% if not is_mobile %}
       <!-- Right Column Accordions -->
       <div class="accordion" id="accordionRight">
 
@@ -293,6 +276,105 @@
         </div>
 
       </div>
+      {% else %}
+      <div class="accordion" id="accordionMain">
+
+  <!-- Accordion Item 1: Geographic Information -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingCountry">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCountry" aria-expanded="false" aria-controls="collapseCountry">
+        Country's Information
+      </button>
+    </h2>
+    <div id="collapseCountry" class="accordion-collapse collapse" aria-labelledby="headingCountry" data-bs-parent="#accordionMain">
+      <div class="accordion-body">
+        
+
+
+        <div class="accordion" id="accordionLeft">
+
+  <!-- Accordion Item 1: Geographic Information -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingGeography">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
+        Geographic Information
+      </button>
+    </h2>
+    <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
+      <div class="accordion-body">
+        <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
+        <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
+        <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
+        <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accordion Item 2: Demographics and Society -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingDemographics">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
+        Demographics and Society
+      </button>
+    </h2>
+    <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
+      <div class="accordion-body">
+        <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
+        <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
+        {% if main_religion %}
+        <p><strong>Main Religion:</strong> {{ main_religion }}</p>
+        {% endif %}
+        <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
+        <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingGovernment">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
+        Government and Politics
+      </button>
+    </h2>
+    <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionLeft">
+      <div class="accordion-body">
+        <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
+        <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
+        <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accordion Item 4: Economy -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingEconomy">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
+        Economy
+      </button>
+    </h2>
+    <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionLeft">
+      <div class="accordion-body">
+        {% if gdp_per_capita != None and gdp != None %}
+        <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
+        <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
+        {% endif %}
+        <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
     </div>
   </div>
@@ -493,13 +575,17 @@
   </div>
   </div>
   <div class="col-lg-2">
-    <div class="right-pillar-wrapper">
+
+    {% if not is_mobile %}
+    <div class="right-pillar-wrapper h-100">
       <div class="pillar-container-right pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Top Pillar" class="pillar-top horizontally-mirrored">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-middle2.webp') }}" alt="Middle of the Right Pillar" class="pillar-middle horizontally-mirrored">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Right Pillar" class="pillar-bottom horizontally-mirrored">
       </div>
     </div>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}

@@ -112,6 +112,3 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
-.modal-backdrop.show {
-    opacity: 0 !important; /* Set the opacity to the modal backdrop */
-}

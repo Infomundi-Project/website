@@ -511,7 +511,7 @@ def comments():
     session['visited_news'] = news_id
     
     # Create the SEO dataw. Title should be 60 characters, description must be 150 characters
-    seo_title = 'Infomundi - ' + input_sanitization.gentle_cut_text(45, story.title)
+    seo_title = input_sanitization.gentle_cut_text(45, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
     seo_image = story.media_content_url
     
