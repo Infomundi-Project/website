@@ -134,3 +134,4 @@ wrapt==1.16.0
 WTForms==3.2.1
 yarg==0.1.10
 zstandard==0.23.0
+htmlmin==0.1.12

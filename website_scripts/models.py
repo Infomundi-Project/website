@@ -169,7 +169,7 @@ class Story(db.Model):
     __tablename__ = 'stories'
     story_id = db.Column(db.String(40), primary_key=True) # should be 32
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    title = db.Column(db.String(120), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.String(500))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
@@ -309,8 +309,7 @@ class SiteStatistics(db.Model):
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     total_countries_supported = db.Column(db.Integer, nullable=False)
-    current_time = db.Column(db.DateTime, nullable=False)
-    now = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     total_news = db.Column(db.String(15), nullable=False)
     total_feeds = db.Column(db.Integer, nullable=False)
     total_users = db.Column(db.Integer, nullable=False)

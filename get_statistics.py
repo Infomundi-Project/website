@@ -23,14 +23,14 @@ def get_statistics() -> dict:
         with connection.cursor() as cursor:
             
             # Fetching current statistics record
-            cursor.execute("SELECT * FROM site_statistics LIMIT 1 ORDER BY id DESC")
+            cursor.execute("SELECT * FROM site_statistics ORDER BY id DESC LIMIT 1")
             statistics = cursor.fetchone()
             
-            saved_timestamp = datetime.fromisoformat(statistics['created_at'])
-            
-            # Check if cache is less than 1 hour old
-            if current_timestamp - saved_timestamp < timedelta(hours=24):
-                return statistics  # Return if data is fresh
+            saved_timestamp = statistics['created_at'] if statistics else None
+            if saved_timestamp:
+                # Check if cache is less than 1 hour old
+                if current_timestamp - saved_timestamp < timedelta(hours=24):
+                    return statistics  # Return if data is fresh
             
             # Calculating statistics
             cursor.execute("SELECT COUNT(*) FROM categories")
@@ -70,26 +70,23 @@ def get_statistics() -> dict:
             if statistics:
                 cursor.execute(
                     """
-                    UPDATE SiteStatistics SET current_time=%s, timestamp=%s, 
-                    total_countries_supported=%s, total_news=%s, total_feeds=%s, 
+                    UPDATE site_statistics SET total_countries_supported=%s, total_news=%s, total_feeds=%s, 
                     total_users=%s, total_comments=%s, last_updated_message=%s, 
                     total_clicks=%s WHERE id=%s
                     """,
-                    (
-                        formatted_time, timestamp_string, total_countries_supported, 
-                        f"{total_news:,}", total_feeds, total_users, total_comments, 
+                    (total_countries_supported, f"{total_news:,}", total_feeds, total_users, total_comments, 
                         last_updated_message, total_clicks, statistics['id']
                     )
                 )
             else:
                 cursor.execute(
                     """
-                    INSERT INTO SiteStatistics (current_time, timestamp, total_countries_supported, 
+                    INSERT INTO site_statistics (total_countries_supported, 
                     total_news, total_feeds, total_users, total_comments, last_updated_message, 
-                    total_clicks) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    total_clicks) VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
-                        formatted_time, timestamp_string, total_countries_supported, 
+                        total_countries_supported, 
                         f"{total_news:,}", total_feeds, total_users, total_comments, 
                         last_updated_message, total_clicks
                     )

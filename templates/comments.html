@@ -3,7 +3,9 @@
 <style>
    .story-img {
    border-radius: 30px;
-   width: 100%;
+   max-width: 70%;
+   aspect-ratio: 16 / 9;
+   object-fit: cover;
    height: auto;
    }
 </style>
@@ -19,7 +21,7 @@
    </nav>
    <h1 class="fw-bold mt-3 mb-3 text-uppercase">{{ story.title }}</h1>
    <p class="text-body-secondary small">Published by <a href="{{ story.link }}" target="_blank">{{ story.publisher.name }}</a>, on {{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.clicks }} view{% if story.clicks > 1 or story.clicks == 0 %}s{% endif %}</span></p>
-   <div class="my-5 d-flex justify-content-center p-3">
+   <div class="my-5 d-flex justify-content-center p-3" style="max-height: 50%;">
       <img fetchpriority="high" src="{{ story.media_content_url }}" class="story-img" alt="The image for this story">
    </div>
    <h2 class="fs-6 fw-light">{{ story.description|safe }}</h2>

@@ -12,7 +12,7 @@ from openai import OpenAI
 from . import config, json_util, immutable, notifications, models, extensions
 
 
-#@extensions.cache.memoize(timeout=60*60*8) # 8 hours
+@extensions.cache.memoize(timeout=60*60*8) # 8 hours
 def home_processing() -> dict:
     """This function processes data for the home endpoint and caches it to speed up performance"""
     statistics = get_statistics()
@@ -40,7 +40,8 @@ def home_processing() -> dict:
 
 def get_statistics() -> dict:
     """Handles the statistics for Infomundi. Returns a dict with related information."""
-    return json_util.read_json(config.STATISTICS_PATH)
+    last_statistic = models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
+    return last_statistic
 
 
 @extensions.cache.memoize(timeout=60*60*6) # 6 hours
@@ -574,7 +575,7 @@ def gpt_summarize(url: str) -> str:
 
     r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
     
-    if r.status_code != 200:
+    if r.status_code not in (200, 301, 302):
         return '{}'
     
     html_content = r.content
@@ -600,11 +601,11 @@ def gpt_summarize(url: str) -> str:
 
 Produce a comprehensive response based on the topic, structured into three sections, and output the result in valid JSON format, using the following keys:
 
-    "maximus_noted_some_important_things": Opinion Article - Write an extended, nuanced opinion article that remains neutral and balanced regarding the news presented. Delve into the complexities and multiple perspectives surrounding the issue, offering a thoughtful analysis without taking a definitive stance. Aim for a thorough exploration that considers various angles and the broader implications.
+    "addressed_topics": Key Takeaways - Provide a concise summary of the key points in the article using a bulleted list format. Each bullet point should capture an essential aspect of the news, ensuring clarity and succinctness while covering all major details.
 
-    "the_context_behind_this_news": Contextual Analysis - Provide an extensive background analysis from an external viewpoint, not directly involved in the news. This should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding.
+    "context_around": Provide an extensive background analysis from an external viewpoint, not directly involved in the news. This should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding.
 
-    "where_can_i_find_more_information?": Research Directions - Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
+    "where_can_i_find_more_information?": Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
 
 Ensure that the JSON output is valid, with proper syntax, and that the output is in the language "{lang}". """
 
@@ -616,8 +617,8 @@ Ensure that the JSON output is valid, with proper syntax, and that the output is
                 "role": "system",
                 "content": (
                     f'You are a helpful and comprehensive assistant designed to output in JSON format. '
-                    f'The output JSON must include three keys: "maximus_noted_some_important_things" for the Opinion Article, '
-                    f'"the_context_behind_this_news" for the Contextual Analysis, and '
+                    f'The output JSON must include three keys: "addressed_topics" for the Key Takeaways as a bulleted list, '
+                    f'"context_around" for the Contextual Analysis, and '
                     f'"where_can_i_find_more_information?" for the Research Directions. Each section should contain well-elaborated, '
                     f'insightful paragraphs, offering a deep dive into the respective topics. Ensure that the output is in the language '
                     f'"{lang}" and adheres to a valid JSON structure, with clear separation between keys and their corresponding textual content.'

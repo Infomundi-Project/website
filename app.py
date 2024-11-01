@@ -1,7 +1,8 @@
 import os
-from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint, Response
 from flask_login import LoginManager, current_user, logout_user
 from flask_assets import Environment, Bundle
+from htmlmin import minify as html_minify
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
@@ -154,6 +155,13 @@ def add_headers(response):
         # Set Cache-Control header for static files
         response.headers['Cache-Control'] = 'public, max-age=2592000'  # 30 days
     
+    return response
+
+
+@app.after_request
+def minify_html(response: Response) -> Response:
+    if response.content_type == "text/html; charset=utf-8":
+        response.set_data(html_minify(response.get_data(as_text=True), remove_comments=True, remove_empty_space=True))
     return response
 
 

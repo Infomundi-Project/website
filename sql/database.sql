@@ -62,9 +62,8 @@ CREATE TABLE common_passwords (
 
 CREATE TABLE site_statistics (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    now DATETIME NOT NULL,
-    timestamp DATETIME NOT NULL,
     total_countries_supported INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total_news VARCHAR(15) NOT NULL,
     total_feeds INT NOT NULL,
     total_users INT NOT NULL,
