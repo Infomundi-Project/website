@@ -29,7 +29,7 @@ app.config['PREFERRED_URL_SCHEME'] = 'https'
 # Session Cookie Configuration
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=15)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=15)
-app.config['SESSION_COOKIE_NAME'] = 'infomundi-session'
+app.config['SESSION_COOKIE_NAME'] = 'infomundi_session'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = True

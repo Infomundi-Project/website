@@ -34,7 +34,14 @@
 
 body {
   font-family: RobotoMono, sans-serif;
+  top: 0px !important;
 }
+
+
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+  display: none !important;
+}
+
 
 .infomundi-logo {
   width: 60%;
