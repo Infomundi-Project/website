@@ -27,10 +27,10 @@ def search_username_in_database(username: str):
 
 
 def hash_user_email_using_salt(email: str) -> str:
-    salts = models.GlobalSalts.query.all()
+    salts = [salt.salt for salt in models.GlobalSalts.query.all()]
 
-    selected_salt = shuffle([x.salt for x in salts])[0]
-    salted_email = selected_salt + email
+    shuffle(salts)
+    salted_email = salts[0] + email
 
     return hashing_util.sha512_hash_text(salted_email)
 

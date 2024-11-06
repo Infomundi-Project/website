@@ -22,11 +22,6 @@
   font-display: swap;
 }
 
-
-body {
-  font-family: RobotoMono, sans-serif;
-}
-
 #scrollProgressBar {
     position: fixed;
     bottom: 0;
@@ -35,6 +30,10 @@ body {
     height: 8px; /* Adjust the height of the progress bar */
     background-color: #0c6ffd; /* Adjust the color of the progress bar */
     z-index: 9999;
+}
+
+body {
+  font-family: RobotoMono, sans-serif;
 }
 
 .infomundi-logo {
@@ -83,17 +82,14 @@ body {
   transform: translateX(24px);
 }
 
-@media (max-width: 800px) {
-  .infomundi-logo {
-  margin-bottom: 20px;
-  width: 100%;
-  height: auto;
-  }
-}
-
 .inf-fixed-button {
   opacity: 0.9;
   transition: opacity 0.3s;
+}
+
+.inf-nav-item .nav-link {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
 }
 
 .inf-fixed-button:hover {
@@ -112,3 +108,10 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
+@media (max-width: 1000px) {
+  .infomundi-logo {
+  margin-bottom: 20px;
+  width: 100%;
+  height: auto;
+  }
+}

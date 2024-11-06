@@ -149,16 +149,27 @@
           <div class="row align-items-center">
             <div class="col-auto">
               <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none">
-              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" height="500" width="500" style="height: 5.5vh; width: 5.5vh;">
+              {% if not is_mobile %}
+                <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" style="width: 4rem; height: 4rem;">
+              {% else %}
+                <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded" style="width: 2.5rem; height: 2.5rem;">
+              {% endif %}
               </a>
             </div>
             <div class="col text-center">
+              {% if current_user.display_name %}
               <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none text-reset">
-                <p class="offcanvas-title notranslate {% if is_mobile %}fs-6{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</p>
+                <p class="offcanvas-title notranslate {% if is_mobile %}small{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{{ current_user.display_name }}</p>
+                <p class="text-muted small">(@{{ current_user.username }})</p>
               </a>
+              {% else %}
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none text-reset">
+                <p class="offcanvas-title notranslate {% if is_mobile %}small{% else %}fs-5{% endif %}" id="offcanvasRightLabel">{{ current_user.username }}</p>
+              </a>
+              {% endif %}
             </div>
             <div class="col-auto">
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              <button type="button" class="btn-close small" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
           </div>
         </div>
@@ -170,50 +181,23 @@
         {% endif %}
       </div>
       <div class="offcanvas-body">
-        {% if session.get('last_visited_country', '') or session.get('last_visited_news', '') %}
-        <span class="fs-4">Session</span>
-        <hr>
-        <ul class="nav nav-pills flex-column mb-5">
-          {% if session.get('last_visited_country', '') %}
-          <li class="nav-item inf-nav-item">
-            <a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country']) else '' }}">
-            <i class="fa-solid fa-earth-americas me-1"></i>Last visited country
-            </a>
-          </li>
-          {% endif %}
-          {% if session.get('last_visited_news', '') %}
-          <li class="nav-item inf-nav-item">
-            <a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_news']) else '' }}">
-            <i class="fa-solid fa-newspaper me-1"></i>Last visited news
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-        {% endif %}
         {% if current_user.is_authenticated %}
-        <ul class="nav nav-pills flex-column mb-5">
-          <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link {% if request.url.endswith(current_user.username) %}active{% endif %}">
-            <i class="fa-solid fa-user me-1"></i>My Profile
-            </a>
-          </li>
-        </ul>
         <span class="fs-4">Account</span>
         <hr>
         <ul class="nav nav-pills flex-column mb-5">
           <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link {% if request.url.endswith(current_user.username) and 'profile' in request.url %}active{% endif %}">
+            <i class="fa-solid fa-user"></i><div class="vr mx-2"></div>My Profile
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link">
+            <i class="fa-solid fa-bell"></i><div class="vr mx-2"></div>Notifications
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
             <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}">
-            <i class="fa-solid fa-pen me-1"></i>Edit Profile
-            </a>
-          </li>
-          <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.edit_user_avatar', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}">
-            <i class="fa-solid fa-image me-1"></i>Edit Avatar
-            </a>
-          </li>
-          <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.edit_user_settings', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
-            <i class="fa-solid fa-wrench me-1"></i>Account Details
+            <i class="fa-solid fa-gear"></i><div class="vr mx-2"></div>Settings
             </a>
           </li>
         </ul>
@@ -221,7 +205,7 @@
         <ul class="nav nav-pills flex-column mb-5">
           <li class="nav-item inf-nav-item">
             <a data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link">
-            <i class="fa-solid fa-right-from-bracket me-1"></i>Sign out
+            <i class="fa-solid fa-right-from-bracket"></i><div class="vr mx-2"></div>Sign out
             </a>
           </li>
         </ul>
@@ -231,25 +215,45 @@
         <ul class="nav nav-pills flex-column mb-5">
           <li class="nav-item inf-nav-item">
             <a href="{{ url_for('auth.forgot_password') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.forgot_password' }}">
-            <i class="fa-solid fa-person-circle-question me-1"></i>Account Recovery
+            <i class="fa-solid fa-person-circle-question"></i><div class="vr mx-2"></div>Account Recovery
             </a>
           </li>
           <hr>
           <li class="nav-item inf-nav-item">
             <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.login' }}">
-            <i class="fa-solid me-1 fa-right-to-bracket"></i>Sign in
+            <i class="fa-solid fa-right-to-bracket"></i><div class="vr mx-2"></div>Sign in
             </a>
           </li>
           <li class="nav-item inf-nav-item">
             <a href="{{ url_for('auth.register') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.register' }}">
-            <i class="fa-solid me-1 fa-user-pen"></i>Sign up
+            <i class="fa-solid fa-user-pen"></i><div class="vr mx-2"></div>Sign up
             </a>
           </li>
         </ul>
         {% endif %}
+        {% if session.get('last_visited_country', '') or session.get('last_visited_news', '') %}
+        <span class="fs-4">Session</span>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-5">
+          {% if session.get('last_visited_country', '') %}
+          <li class="nav-item inf-nav-item">
+            <a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country']) else '' }}">
+            <i class="fa-solid fa-earth-americas"></i><div class="vr mx-2"></div>Last visited country
+            </a>
+          </li>
+          {% endif %}
+          {% if session.get('last_visited_news', '') %}
+          <li class="nav-item inf-nav-item">
+            <a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_news']) else '' }}">
+            <i class="fa-solid fa-newspaper"></i><div class="vr mx-2"></div>Last visited news
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+        {% endif %}
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="maximusTranslationSwitch">
-          <label class="form-check-label" for="maximusTranslationSwitch"><i class="fa-solid fa-language me-1"></i>Enable Maximus translation</label>
+          <label class="form-check-label" for="maximusTranslationSwitch"><i class="fa-solid me-1 fa-language"></i>Enable Maximus translation</label>
         </div>
         <div class="position-fixed bottom-0 end-0 m-3">
           <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if not is_light_mode %}checked{% endif %}>
@@ -262,32 +266,28 @@
       </div>
     </div>
     <nav class="navbar bg-body-tertiary shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar" id="mainNavbar">
-      <div class="container">
+      <div class="container-fluid {% if not is_mobile %}px-5{% endif %}">
         <span class="navbar-brand">
-        <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3" style="height: 1.7rem; width: 1.7rem;" aria-label="Click to expand the site navigation"></a>
-        {% if not is_mobile %}
-        <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-4">
-        <img 
-          fetchpriority="high" 
-          src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" 
-          class="me-2 infomundi-icon"
-          width="380" 
-          height="380" 
-          style="height: auto; width: 7vh;" 
-          alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">infomundi
-        </a>
-        {% else %}
-        <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-5">
-        <img 
-          fetchpriority="high" 
-          src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" 
-          class="me-2 infomundi-icon"
-          width="380" 
-          height="380" 
-          style="height: auto; width: 6vh;" 
-          alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">infomundi
-        </a>
-        {% endif %}
+          <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3" style="height: 1.7rem; width: 1.7rem;" aria-label="Click to expand the site navigation"></a>
+          {% if not is_mobile %}
+          <a href="/" class="text-decoration-none">
+            <img 
+              fetchpriority="high" 
+              src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg" 
+              style="height: 3.5rem; width: 3.5rem" 
+              alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">
+          </a>
+          <a class="ms-4 text-uppercase small text-reset text-decoration-none" href="{{ url_for('views.home') }}">Home</a><a class="ms-4 text-uppercase small text-reset text-decoration-none" href="{{ url_for('views.home') }}">Community</a><a class="ms-4 text-uppercase small text-reset text-decoration-none" href="{{ url_for('views.home') }}">World Trackers</a>
+          {% else %}
+          <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-5">
+          <img 
+            fetchpriority="high" 
+            src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg" 
+            class="me-2"
+            style="height: 3rem; width: 3rem" 
+            alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">infomundi
+          </a>
+          {% endif %}
         </span>
         <div class="dropdown text-end">
           <a 
@@ -299,12 +299,27 @@
             aria-label="Click here to expand the user navigation"
             >
           {% if current_user.is_authenticated %}
-          {% if not is_mobile %}
-          <span class="dropdown-toggle notranslate">{{ current_user.username }}</span>
-          {% endif %}
-          <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: auto; width: 6.7vh;" class="rounded border border-1 border-dark">
+            {% if not is_mobile %}
+            <div class="row">
+              {% if current_user.display_name %}
+              <div class="col">
+                <span class="dropdown-toggle me-2"></span><span class="notranslate me-2">{{ current_user.display_name }}</span><br>
+                <span class="text-muted small">(@{{ current_user.username }})</span>
+              </div>
+              {% else %}
+              <div class="col dropdown-toggle">
+                <span class="notranslate {% if is_mobile %}small{% endif %} me-2">{{ current_user.username }}</span>
+              </div>
+              {% endif %}
+            <div class="col-auto">
+              <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded border border-1 border-dark"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">1<span class="visually-hidden">friend requests</span></span>
+            </div>
+            {% else %}
+            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3rem; width: 3rem;" class="rounded border border-1 border-dark"><span class="position-absolute top-0 start-80 translate-middle badge rounded-pill bg-danger border border-light">1<span class="visually-hidden">friend requests</span></span>
+            {% endif %}
+          </div>
           {% else %}
-          <span class="dropdown-toggle"><i class="fa-solid fa-user me-1"></i>{% if not is_mobile %}Account{% endif %}</span>
+            <span class="dropdown-toggle"><i class="fa-solid fa-user me-2"></i>{% if not is_mobile %}Account{% endif %}</span>
           {% endif %}
           </a>
         </div>
@@ -505,7 +520,7 @@
         </div>
       </div>
       {% endif %}
-      {% if request.endpoint in ['views.about', 'views.contact', 'views.policies', 'views.team'] %}
+      {% if request.endpoint in ('views.about', 'views.contact', 'views.policies', 'views.team') %}
       <div class="container">
         <div class="row">
           <div class="my-5 text-center">
@@ -549,13 +564,13 @@
             <a href="https://infomundi.net/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
             <ul class="nav nav-pills flex-column mt-4">
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>User Info</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>Info</a>
               </li>
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>User Media</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Media</a>
               </li>
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-gear me-1"></i>Settings</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-address-card me-1"></i>Details</a>
               </li>
             </ul>
           </div>
@@ -653,11 +668,6 @@
     {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
     <script nonce="{{ nonce }}"
       src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-      ></script>
-    {% endif %}
-    {% if request.endpoint == 'views.comments' %}
-    <script nonce="{{ nonce }}"
-      src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
       ></script>
     {% endif %}
     {% block scripts %} {% endblock %}

@@ -46,58 +46,77 @@
         background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
     }
     .profile-avatar {
-        width: 100%;
+        max-width: 10rem;
         height: auto;
         border-radius: 15px;
-        border: 5px solid white;
+        border: 3px solid white;
     }
+
+    .friend-avatar {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 15px;
+        border: 3px solid white;
+    }
+
     .user-description {
         max-height: 150px;
         overflow: hidden;
         white-space: pre-wrap;
         word-wrap: break-word;
     }
+
+    @media (max-width: 1000px) {
+      .profile-avatar {
+      max-width: 5rem;
+      }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+{% if pending_requests %}
 <div class="modal fade" id="pendingFriendsModal" tabindex="-1" aria-labelledby="pendingFriendsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="pendingFriendsModalLabel">Friend Requests</h1>
+      <div class="modal-header align-items-center justify-content-center">
+        <p class="modal-title fs-5" id="pendingFriendsModalLabel"><i class="fa-solid fa-user-group fa-xs"></i><div class="vr mx-2"></div>Friend Requests<span class="badge text-bg-secondary ms-3">{{ pending_requests|length }}</span></p>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="container-fluid">
-          {% if pending_requests %}
           {% for request in pending_requests %}
-          <div class="row text-center">
-            <div class="col">
-              <img src="{{ request.user.avatar_url }}" style="width: 40%; height: auto; border-radius: 15px;">
+          <div class="row">
+            <div class="col-md-3">
+              <img src="{{ request.user.avatar_url }}" class="lazyload rounded" style="height: 6rem; width: 6rem;">
             </div>
-            <div class="col">
-              {% if request.user.display_name %}{{ request.user.display_name }}{% else %}{{ request.user.username }}{% endif %}
+            <div class="col-md-6">
+              {% if request.user.display_name %}
+                <span class="notranslate">{{ request.user.display_name }}</span><br>
+                <span class="notranslate text-muted small">(@{{ request.user.username }})</span>
+              {% else %}
+                <span class="notranslate">{{ request.user.username }}</span>
+              {% endif %}
             </div>
-            <div class="col">
-              <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='accept') }}" type="button" role="button" class="btn btn-sm btn-success me-2">
-                <i class="fa-solid fa-check"></i>
-              </a>
-              <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='reject') }}" type="button" role="button" class="btn btn-sm btn-danger">
-                <i class="fa-solid fa-xmark"></i>
-              </a>
+            <div class="col-md-3">
+              <div class="d-flex justify-content-center">
+                <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='accept') }}" type="button" role="button" class="btn btn-sm btn-success me-2">
+                  <i class="fa-solid fa-check"></i>
+                </a>
+                <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='reject') }}" type="button" role="button" class="btn btn-sm btn-danger">
+                  <i class="fa-solid fa-xmark"></i>
+                </a>
+              </div>
             </div>
           </div>
           {% endfor %}
-          {% endif %}
-        </div>
       </div>
     </div>
   </div>
 </div>
+{% endif %}
 
 <div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="descriptionModalLabel">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s description</h1>
@@ -113,30 +132,31 @@
   </div>
 </div>
 
-<div class="container">
+
+<div class="{% if is_mobile %}container-fluid{% else %}container{% endif %}">
   <div class="profile-container bg-dark-subtle shadow-lg" style="opacity: 90%;">
     <div class="profile-header mb-3"></div>
     
     <div class="row">
-      <div class="col-8">
+      <div class="col-md-8">
         <div class="row">
-          <div class="col-3">
+          <div class="col-auto me-2">
             <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s profile picture" class="profile-avatar">
           </div>
-          <div class="ms-2 col">
+          <div class="col">
             {% if user.display_name %}
-              <span class="fs-2 fw-bold me-2">{{ user.display_name }}</span>
+              <span class="{% if not is_mobile %}fs-2{% else %}fs-5{% endif %} fw-bold">{{ user.display_name }}</span>
               <br>
-              <span class="fs-6 text-muted me-2">@{{ user.username }}</span>
+              <span class="fs-6 text-muted me-1">@{{ user.username }}</span>
             {% else %}
-              <h2 class="me-2">{{ user.username }}</h2>
+              <span class="{% if not is_mobile %}fs-2{% else %}fs-5{% endif %} me-1">{{ user.username }}</span>
             {% endif %}
             {% if user.role == 'admin' %}
-              <span class="badge rounded-pill text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Administrator"><i class="fa-solid fa-user-tie"></i></span>
+              <span class="badge rounded-pill text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Infomundi Administrator"><i class="fa-solid fa-user-tie"></i></span>
             {% endif %}
             {% if user.profile_description %}
             <div class="mt-1 user-description">
-                {% if has_too_many_newlines %}
+                {% if has_too_many_newlines or is_mobile %}
                   <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>
                 {% else %}
                   {{ short_description|safe }} 
@@ -150,7 +170,7 @@
         </div>
       </div>
       
-      <div class="col-4">
+      <div class="col-md-4{% if is_mobile %} mt-5{% endif %}">
         <p class="fs-4">
           <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">{{ user.level }}</span>
         </p>
@@ -193,7 +213,7 @@
 
     <div class="row mt-5">
       <!-- Recent Activity -->
-      <div class="col-9">
+      <div class="col-md-9">
         <!--
         <h3>Recent Activity</h3>
         <div class="list-group">
@@ -211,13 +231,13 @@
               {% for friend in friends_list %}
                 <div class="col">
                   <div class="row row-cols-auto">
-                    <div class="col">
+                    <div class="col-auto">
                       <a href="{{ url_for('views.user_profile', username=friend.username) }}" class="text-decoration-none">
-                        <img src="{{ friend.avatar_url }}" alt="{{ friend.username }}'s avatar" data-bs-toggle="tooltip" data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}" style="width: 60px; height: auto; border-radius: 10px;">
+                        <img src="{{ friend.avatar_url }}" alt="{{ friend.username }}'s avatar" data-bs-toggle="tooltip" data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}" class="friend-avatar">
                       </a>
                     </div>
-                    <div class="col">
-                      <p class="{% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} fs-5" style="margin-bottom: -5px;">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</p>
+                    <div class="col-md-9">
+                      <p class="fw-bold {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}" style="margin-bottom: -5px;">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</p>
                       {% if friend.is_online %}
                         <p class="text-primary-emphasis fs-6">Currently Online</p>
                       {% else %}
@@ -237,7 +257,7 @@
     </div>
       </div>
 
-      <div class="col-3 p-2" style="border-radius: 5px;">
+      <div class="col-md-3 p-2" style="border-radius: 5px;">
         <div id="user-status" class="text-center"></div>
       </div>
     

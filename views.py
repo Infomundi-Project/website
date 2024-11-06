@@ -156,8 +156,8 @@ def edit_user_profile(username):
             flash(f'We apologize, but your username is invalid.', 'error')
             return render_template('edit_profile.html')
         
-        is_username_available = models.User.query.filter_by(username=username).first()
-        if not is_username_available:
+        username_query = models.User.query.filter_by(username=username).first()
+        if username_query:
             flash(f'The username "{username}" is unavailable. Try making it more unique adding numbers/underscores/hiphens.', 'error')
             return render_template('edit_profile.html')
     

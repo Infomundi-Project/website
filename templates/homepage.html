@@ -134,6 +134,8 @@
 <script defer nonce="{{ nonce }}"
   src="{{ url_for('static', filename='js/amcharts/index.js') }}"
   ></script>
+
+{% if not is_mobile %}
 <script nonce="{{ nonce }}">
   document.addEventListener('DOMContentLoaded', () => {
       fetchDataAndRenderTicker('/api/currencies', 'currencies-ticker', 'Currencies', 'fa-money-bill-trend-up');
@@ -221,8 +223,8 @@
           container.innerHTML = html;
       }
   });
-  
 </script>
+{% endif %}
 {% assets "js_home" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}

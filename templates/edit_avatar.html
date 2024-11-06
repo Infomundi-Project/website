@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Edit Avatar{% endblock %}
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/libs/cropper.min.css') }}">
+{% endblock %}
 {% block styles %}
 <style>
     .profile-background {
@@ -90,11 +93,10 @@
                                     </div>
                                     <div class="ms-2 col">
                                         {% if current_user.display_name %}
-                                        <span class="fs-2 fw-bold">{{ current_user.display_name }}</span>
-                                        <br>
-                                        <span class="fs-6 text-muted">@{{ current_user.username }}</span>
+                                        <p class="fs-6 fw-bold">{{ current_user.display_name }}</p>
+                                        <p class="small text-muted">@{{ current_user.username }}</p>
                                         {% else %}
-                                        <h3>{{ current_user.username }}</h3>
+                                        <p class="fs-6 text-bold">{{ current_user.username }}</p>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -152,64 +154,103 @@
 </form>
 {% endblock %}
 {% block scripts %}
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/cropper.min.js') }}"></script>
 <script nonce="{{ nonce }}">
-    function checkIfFilesSelected() {
-        const profilePhoto = document.getElementById('profilePhoto').files.length > 0;
-        const backgroundImage = document.getElementById('backgroundImage').files.length > 0;
-        const bannerImage = document.getElementById('bannerImage').files.length > 0;
-        document.getElementById('saveAvatar').disabled = !(profilePhoto || backgroundImage || bannerImage);
-    }
+let cropper;  // Global cropper instance
+let currentInputId;  // To track which input is currently being edited
+
+function initializeCropper(input, previewElement, isBackground) {
+    const file = input.files[0];
+    const img = document.createElement('img');
     
-    document.getElementById('backgroundImage').addEventListener('change', function() {
-        const input = this;
-        const profileBackground = document.getElementById('profileBackground');
-    
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-    
-            reader.onload = function(e) {
-                profileBackground.style.backgroundImage = 'url(' + e.target.result + ')';
-            };
-    
-            reader.readAsDataURL(input.files[0]);
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        img.src = e.target.result;
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "400px";
+        
+        // Destroy any existing cropper instance
+        if (cropper) {
+            cropper.destroy();
         }
-        checkIfFilesSelected();
-    });
-    
-    document.getElementById('bannerImage').addEventListener('change', function() {
-        const input = this;
-        const profileHeader = document.getElementById('profileHeader');
-    
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-    
-            reader.onload = function(e) {
-                profileHeader.style.backgroundImage = 'url(' + e.target.result + ')';
-            };
-    
-            reader.readAsDataURL(input.files[0]);
-        }
-        checkIfFilesSelected();
-    });
-    
-    document.getElementById('profilePhoto').addEventListener('change', function() {
-        const input = this;
+
+        // Display the image on the page for cropping
+        previewElement.innerHTML = '';  // Clear any existing image
+        previewElement.appendChild(img);
+        cropper = new Cropper(img, {
+            aspectRatio: isBackground ? 16 / 9 : 1,
+            viewMode: 1,
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+function updatePreviewElements(croppedDataUrl) {
+    // Different previews depending on which image is being cropped
+    if (currentInputId === 'backgroundImage') {
+        document.getElementById('profileBackground').style.backgroundImage = 'url(' + croppedDataUrl + ')';
+    } else if (currentInputId === 'bannerImage') {
+        document.getElementById('profileHeader').style.backgroundImage = 'url(' + croppedDataUrl + ')';
+    } else if (currentInputId === 'profilePhoto') {
         const largeAvatar = document.getElementById('largeAvatar');
         const mediumAvatar = document.getElementById('mediumAvatar');
         const smallAvatar = document.getElementById('smallAvatar');
-    
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-    
-            reader.onload = function(e) {
-                largeAvatar.src = e.target.result;
-                mediumAvatar.src = e.target.result;
-                smallAvatar.src = e.target.result;
-            };
-    
-            reader.readAsDataURL(input.files[0]);
-        }
-        checkIfFilesSelected();
-    });
+
+        if (largeAvatar) largeAvatar.src = croppedDataUrl;
+        if (mediumAvatar) mediumAvatar.src = croppedDataUrl;
+        if (smallAvatar) smallAvatar.src = croppedDataUrl;
+    }
+}
+
+document.getElementById('backgroundImage').addEventListener('change', function () {
+    currentInputId = 'backgroundImage';
+    initializeCropper(this, document.getElementById('profileBackground'), true);
+});
+
+document.getElementById('bannerImage').addEventListener('change', function () {
+    currentInputId = 'bannerImage';
+    initializeCropper(this, document.getElementById('profileHeader'), true);
+});
+
+document.getElementById('profilePhoto').addEventListener('change', function () {
+    currentInputId = 'profilePhoto';
+    initializeCropper(this, document.getElementById('largeAvatar').parentNode, false);
+});
+
+async function cropAndSubmit(form) {
+    if (cropper) {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        const croppedBlob = await new Promise((resolve) => croppedCanvas.toBlob(resolve, 'image/jpeg'));
+
+        // Create a new File from the Blob with the same name as the original file
+        const croppedFile = new File([croppedBlob], `${currentInputId}.jpg`, {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+        });
+
+        // Replace the file input with the cropped file
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(croppedFile);
+
+        const inputElement = document.getElementById(currentInputId);
+        inputElement.files = dataTransfer.files; // Update input files with cropped file
+
+        // Update the preview elements with the cropped data
+        updatePreviewElements(croppedCanvas.toDataURL('image/jpeg'));
+
+        // Cleanup
+        cropper.destroy();
+        cropper = null;
+    }
+
+    form.submit();  // Submit the form with the updated file input
+}
+
+// Attach cropAndSubmit to the form submission event
+document.getElementById('captcha-wait-form').addEventListener('submit', function (event) {
+    event.preventDefault();  // Prevent default submission
+    cropAndSubmit(this);  // Perform cropping, replace file input, and submit
+});
+
 </script>
 {% endblock %}

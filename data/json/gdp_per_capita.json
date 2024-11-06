@@ -714,14 +714,8 @@
     }
   },
   {
-    "Guatemala": {
-      "gdp": "$5,797 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Fiji": {
-      "gdp": "$5,868 (World Bank)",
+    "Iran": {
+      "gdp": "$4,502 (World Bank)",
       "date": "2023"
     }
   },
@@ -732,14 +726,14 @@
     }
   },
   {
-    "Paraguay": {
-      "gdp": "$6,260 (World Bank)",
+    "El Salvador": {
+      "gdp": "$5,344 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "El Salvador": {
-      "gdp": "$5,344 (World Bank)",
+    "Paraguay": {
+      "gdp": "$6,260 (World Bank)",
       "date": "2023"
     }
   },
@@ -768,6 +762,12 @@
     }
   },
   {
+    "Fiji": {
+      "gdp": "$5,868 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Micronesia": {
       "gdp": "$3,992 (World Bank)",
       "date": "2023"
@@ -776,12 +776,6 @@
   {
     "Samoa": {
       "gdp": "$4,139 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Iran": {
-      "gdp": "$4,502 (World Bank)",
       "date": "2023"
     }
   },
@@ -806,6 +800,12 @@
   {
     "Lebanon": {
       "gdp": "$3,350 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Guatemala": {
+      "gdp": "$5,797 (World Bank)",
       "date": "2023"
     }
   },
@@ -1164,6 +1164,12 @@
     }
   },
   {
+    "Syria": {
+      "gdp": "$421 (IMF)",
+      "date": "2021"
+    }
+  },
+  {
     "Somalia": {
       "gdp": "$2024 (IMF)",
       "date": "644"
@@ -1182,15 +1188,15 @@
     }
   },
   {
-    "Mozambique": {
-      "gdp": "$2024 (IMF)",
-      "date": "608"
-    }
-  },
-  {
     "Eritrea": {
       "gdp": "$644 (IMF)",
       "date": "2011"
+    }
+  },
+  {
+    "Mozambique": {
+      "gdp": "$2024 (IMF)",
+      "date": "608"
     }
   },
   {
@@ -1221,12 +1227,6 @@
     "Malawi": {
       "gdp": "$2024 (IMF)",
       "date": "673"
-    }
-  },
-  {
-    "Syria": {
-      "gdp": "$421 (IMF)",
-      "date": "2021"
     }
   },
   {

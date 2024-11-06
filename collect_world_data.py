@@ -4,9 +4,10 @@ from bs4 import BeautifulSoup
 from website_scripts import json_util, immutable
 
 
-def format_world_data():
-    path = f'data/json'
+path = f'/root/docker/infomundi-app/data/json'
 
+
+def format_world_data():
     common_currency = json_util.read_json(f'{path}/common_currency')
     currencies = json_util.read_json(f'{path}/currencies')
     for currency in currencies:
@@ -69,7 +70,7 @@ def scrape_data(url:str, endpoint: str):
 
     trs = soup.find_all('tr')
 
-    countries = json_util.read_json(f'data/json/countries')
+    countries = json_util.read_json(f'{path}/countries')
     for row in trs:
         # Extract the needed data using the appropriate selectors
         symbol = row.get('data-symbol', '')
@@ -124,7 +125,7 @@ def scrape_data(url:str, endpoint: str):
         # Add the item to the list
         all_data.append(data)
     
-    json_util.write_json(all_data, f'data/json/{endpoint}')
+    json_util.write_json(all_data, f'{path}/{endpoint}')
     print(f'[+] {endpoint.title()} data has been collected.')
 
 
