@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function() {
     cardFooter.innerHTML = `
       <div class="row d-flex justify-content-between">
         <div class="col">
-          <small class="text-muted fw-bold">${item.pub_date}<span class="mx-1">&#x2022;</span>${item.clicks} views</small>
+          <span class="text-muted fw-bold small"><span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">&#x2022;</span>${item.clicks} views</span>
         </div>
         <div class="col d-flex justify-content-end">
           <i class="fa-regular fa-thumbs-up"></i>

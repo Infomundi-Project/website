@@ -367,25 +367,6 @@ def google_callback():
 @login_required
 def logout():
     flash(f'We hope to see you again soon, {current_user.username}')
-    session.permanent = False
-    session.clear()
-    logout_user()
-
-    return redirect(url_for('auth.delete_cookies'))
-
-
-@auth.route('/delete_cookies', methods=['GET'])
-def delete_cookies():
-    response = make_response(redirect(url_for('auth.login')))
     
-    # List of cookie names to delete
-    cookies_to_delete = ['XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session']
-    
-    # Specify the domain for which cookies were set (your main domain)
-    domain = '.infomundi.net'  # Include the dot to delete from subdomains as well
-    
-    # Delete each cookie
-    for cookie in cookies_to_delete:
-        response.set_cookie(cookie, '', expires=0)
-
+    response = auth_util.perform_logout_actions()
     return response

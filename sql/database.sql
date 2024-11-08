@@ -50,6 +50,7 @@ CREATE TABLE friendships (
     friend_id VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(10) NOT NULL DEFAULT 'pending',
+    accepted_at TIMESTAMP,
     CONSTRAINT unique_friendship UNIQUE (user_id, friend_id),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(user_id) ON DELETE CASCADE

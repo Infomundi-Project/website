@@ -73,11 +73,35 @@ def get_cities(state_id):
 
 
 @api.route('/user/friends', methods=['GET'])
+@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
 @login_required
 def get_friends():
-    friends_data = [x.username for x in friends_util.get_friends_list(current_user.user_id)]
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
 
-    return jsonify({"friends": friends_data}), 200
+    friends_list = friends_util.get_friends_list(current_user.user_id)
+    total_friends = len(friends_list)
+    online_friends = sum(1 for friend in friends_list if friend.is_online)
+    paginated_friends = friends_list[(page - 1) * per_page: page * per_page]
+
+    friends_data = [{
+        'username': friend.username,
+        'display_name': friend.display_name,
+        'user_id': friend.user_id,
+        'avatar_url': friend.avatar_url,
+        'level': friend.level,
+        'is_online': friend.is_online,
+        'last_activity': friend.last_activity
+    } for friend in paginated_friends]
+
+    return jsonify({
+        "friends": friends_data,
+        "total_friends": total_friends,
+        "online_friends": online_friends,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": (total_friends + per_page - 1) // per_page
+    }), 200
 
 
 @api.route('/user/<user_id>/status', methods=['GET'])
@@ -217,7 +241,7 @@ def summarize_story():
 
 
 @api.route('/get_stories', methods=['GET'])
-@extensions.cache.cached(timeout=60*60, query_string=True) # 1h cached
+@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
 def get_stories():
     """Returns jsonified list of stories based on certain criteria. Cached for 1h (60s * 60)."""
     country = request.args.get('country', 'br', type=str).lower()

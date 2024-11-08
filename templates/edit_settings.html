@@ -257,9 +257,9 @@
     </div>
     <span class="input-group-text">
         {% if current_user.totp_secret %}
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#totpConfigureModal">Change</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#totpConfigureModal">Change</button>
         {% else %}
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#totpSetupModal">Setup</button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#totpSetupModal">Setup</button>
         {% endif %}
     </span>
 </div>
@@ -273,7 +273,7 @@
     </div>
     <span class="input-group-text">
         {% if current_user.totp_secret %}
-            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Disable TOTP-based two factor if you want to setup this" disabled>Setup</button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Disable TOTP-based two factor if you want to setup this" disabled>Setup</button>
         {% else %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mail2faSetupModal">Setup</button>
         {% endif %}

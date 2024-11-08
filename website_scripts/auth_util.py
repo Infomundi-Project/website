@@ -1,5 +1,5 @@
+from flask import session, request, make_response, url_for, redirect
 from flask_login import logout_user, login_user
-from flask import session, request
 from datetime import datetime
 from random import shuffle
 from sqlalchemy import or_
@@ -65,6 +65,26 @@ The Infomundi Team
     """
     subject = 'Infomundi - New Login'
     notifications.send_email(cleartext_email, subject, message)
+
+
+def perform_logout_actions():
+    session.permanent = False
+    session.clear()
+    logout_user()
+
+    response = make_response(redirect(url_for('auth.login')))
+    
+    # List of cookie names to delete
+    cookies_to_delete = ('XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session')
+    
+    # Includes all subdomains as well
+    domain = '.infomundi.net'
+    
+    # Delete each cookie
+    for cookie in cookies_to_delete:
+        response.set_cookie(cookie, '', expires=0)
+
+    return response
 
 
 def change_password(user, new_password: str):
@@ -256,9 +276,8 @@ The Infomundi Team"""
     return result
 
 
-def delete_account(email, token):
-    hashed_email = hashing_util.sha256_hash_text(email)
-    user = models.User.query.filter_by(email=hashed_email).first()
+def delete_account(email, token) -> bool:
+    user = search_user_email_in_database(email)
 
     # If the supplied token doesn't match the database record, return False.
     if user.delete_token != token:
@@ -281,8 +300,7 @@ def delete_account(email, token):
 
 
 def send_delete_token(email: str) -> bool:
-    hashed_email = hashing_util.sha256_hash_text(email)
-    user = models.User.query.filter_by(email=hashed_email).first()
+    user = search_user_email_in_database(email)
 
     token = security_util.generate_nonce(24)
     
@@ -299,7 +317,7 @@ We're sorry to see you go.
 
 Best regards,
 The Infomundi Team"""
-        
+
     result = notifications.send_email(email, subject, message)
     if not result:
         return False

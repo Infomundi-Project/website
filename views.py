@@ -9,13 +9,6 @@ from website_scripts.decorators import verify_captcha, admin_required, profile_o
 views = Blueprint('views', __name__)
 
 
-def make_cache_key(*args, **kwargs):
-    user_id = current_user.user_id if current_user.is_authenticated else 'guest'
-    args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
-    key = hashing_util.md5_hash_text(str(args_list))
-    return key
-
-
 @views.route('/', methods=['GET'])
 def home():
     home_data = scripts.home_processing()
@@ -29,14 +22,6 @@ def home():
         crypto_data=home_data['crypto_data']
     )
 
-"""
-@views.route('/error/<code>', methods=['GET'])
-def show_error(code):
-    code = int(code)
-    if code not in (404, 429, 500):
-        abort(404)
-    abort(code)
-"""
 
 @views.route('/admin', methods=['GET'])
 @admin_required
@@ -384,7 +369,7 @@ Timestamp: {scripts.get_current_date_and_time()} UTC
 
 {message}"""
 
-    sent_message = notifications.send_email('contact@infomundi.net', 'Infomundi - Contact Form', email_body, email, f'{name} <{email}>')
+    sent_message = notifications.send_email('contact@infomundi.net', f"Infomundi{' [PRIORITY]' if current_user.is_authenticated else ''} - Contact Form", email_body, email, f'{name} <{email}>')
     if sent_message:
         flash("Your message has been sent, thank you! Expect a return from us shortly.")
     else:
@@ -392,7 +377,15 @@ Timestamp: {scripts.get_current_date_and_time()} UTC
         notifications.post_webhook({'text': f"It wasn't possible to get a contact message for some reason, so... here's the email body: {email_body}"})
     
 
-    receive_message = """Hello there,
+    if not current_user.is_authenticated:
+        receive_message = """Hello there,
+
+Someone used this email to send a message to us at Infomundi. If you didn't perform this action, please ignore this email. However, if you did perform this action, your message has been received, thank you for reaching out! We'll review your inquiry with care and respond within 5 business days.
+
+Regards,
+The Infomundi Team"""
+    else:
+        receive_message = f"""Hello {current_user.display_name if current_user.display_name else current_user.username},
 
 Your message has been received, thank you for reaching out! We'll review your inquiry with care and respond within 3 business days.
 

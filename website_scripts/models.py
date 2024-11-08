@@ -9,7 +9,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.String(128), nullable=False, unique=True) # SHA-512 hashed email
+    email = db.Column(db.String(128), nullable=False, unique=True) # SHA-512 + salt hashed email
     user_id = db.Column(db.String(20), primary_key=True)
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
@@ -297,6 +297,7 @@ class Friendship(db.Model):
     friend_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(10), nullable=False, default='pending')  # Status: 'pending', 'accepted', 'rejected'
+    accepted_at = db.Column(db.DateTime)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
 

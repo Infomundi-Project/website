@@ -37,6 +37,16 @@ body {
   top: 0px !important;
 }
 
+.nav-link i {
+  font-size: 1rem;
+}
+
+.icon-wrapper {
+  width: 1.5em; /* Ensures consistent space for the icon */
+  display: flex;
+  justify-content: center; /* Center aligns the icon */
+  align-items: center;
+}
 
 .VIpgJd-ZVi9od-ORHb-OEVmcd {
   display: none !important;
