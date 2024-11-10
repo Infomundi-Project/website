@@ -301,9 +301,9 @@
       </div>
     </div>
     <nav class="navbar bg-body-tertiary shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar" id="mainNavbar">
-      <div class="container-fluid {% if not is_mobile %}px-5{% endif %}">
+      <div class="container-fluid {% if not is_mobile %}px-3{% endif %}">
         <div class="row w-100">
-          <div class="col-md-6">
+          <div class="col-md-6 col-9">
             <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3" style="height: 1.7rem; width: 1.7rem;" aria-label="Click to expand the site navigation"></a>
             {% if not is_mobile %}
             <a href="/" class="text-decoration-none">
@@ -325,41 +325,49 @@
             </a>
             {% endif %}
           </div>
-          <div class="col-md-6 {% if not current_user.is_authenticated %}align-items-center justify-content-end{% endif %}">
-            <div class="dropdown">
-              {% if current_user.is_authenticated %}
+          <div class="col-md-6 col-3 {% if not current_user.is_authenticated or is_mobile %}d-inline-flex text-end align-items-center justify-content-end{% endif %} d-block p-0">
+            {% if current_user.is_authenticated %}
               {% if not is_mobile %}
-              <div class="d-flex flex-row-reverse">
+              <div class="d-flex flex-row-reverse" style="margin-right: -10px;">
                 <div class="col-auto">
-                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-{% if is_light_mode %}dark{% else %}light{% endif %}">1<span class="visually-hidden">friend requests</span></span>
-                </div>
-                  {% if current_user.display_name %}
-                  <div class="col-3 mt-2">
-                    <a 
+                  <a 
                   href="#" 
-                  class="text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}" 
+                  class="text-decoration-none text-reset" 
                   data-bs-toggle="offcanvas" 
                   data-bs-target="#offcanvasUserNavigation" 
                   aria-controls="offcanvasUserNavigation"
                   aria-label="Click here to expand the user navigation">
-                    <span class="dropdown-toggle me-2"></span><span class="notranslate me-2">{{ current_user.display_name }}</span><br>
-                    <span class="text-muted small notranslate">(@{{ current_user.username }})</span>
+
+                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}"><span class="position-absolute translate-middle badge rounded-pill bg-danger border border-light" style="top: 8%; start: 80%;">1<span class="visually-hidden">notifications</span></span>
+                </a>
+                </div>
+                  {% if current_user.display_name %}
+                  <div class="col-auto text-end mt-2 me-2">
+                    <a 
+                  href="#" 
+                  class="text-decoration-none text-reset" 
+                  data-bs-toggle="offcanvas" 
+                  data-bs-target="#offcanvasUserNavigation" 
+                  aria-controls="offcanvasUserNavigation"
+                  aria-label="Click here to expand the user navigation">
+                    <span class="me-2"></span><span class="notranslate">{{ current_user.display_name }}</span><br>
+                    <span class="text-muted small notranslate">@{{ current_user.username }}</span>
                   </a>
                   </div>
                   {% else %}
-                  <div class="col-2 dropdown-toggle">
+                  <div class="col-auto mt-2 me-2">
                     <a 
                   href="#" 
-                  class="text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}" 
+                  class="text-decoration-none text-reset" 
                   data-bs-toggle="offcanvas" 
                   data-bs-target="#offcanvasUserNavigation" 
                   aria-controls="offcanvasUserNavigation"
                   aria-label="Click here to expand the user navigation">
-                    <span class="notranslate {% if is_mobile %}small{% endif %} me-2">{{ current_user.username }}</span>
+                    <span class="notranslate {% if is_mobile %}small{% endif %}">{{ current_user.username }}</span>
                   </a>
                   </div>
                   {% endif %}
-                  <div class="col-3 me-2" data-bs-toggle="modal" data-bs-target="#friendsModal">
+                  <div class="col-auto me-5 mt-2" data-bs-toggle="modal" data-bs-target="#friendsModal">
                     <span id="totalFriends" class="d-block"></span>
                     <span id="onlineFriends" class="text-muted small">
                     <span class="dot" style="height: 8px; width: 8px; background-color: gray; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>
@@ -368,16 +376,15 @@
                   {% else %}
                   <a 
                   href="#" 
-                  class="text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}" 
+                  class="text-decoration-none text-reset" 
                   data-bs-toggle="offcanvas" 
                   data-bs-target="#offcanvasUserNavigation" 
                   aria-controls="offcanvasUserNavigation"
                   aria-label="Click here to expand the user navigation">
-                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3rem; width: 3rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}"><span class="position-absolute top-0 start-80 translate-middle badge rounded-pill bg-danger border border-{% if is_light_mode %}dark{% else %}light{% endif %}">1<span class="visually-hidden">friend requests</span></span>
+                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3rem; width: 3rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}">
                 </a>
                   {% endif %}
               </div>
-            </div>
             {% else %}
             <a 
               href="#" 
@@ -752,7 +759,7 @@
     <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}" 
       ></script>
-    {% if request.endpoint in ('views.captcha', 'views.contact', 'auth.login', 'auth.register', 'auth.forgot_password', 'views.sensitive', 'views.edit_user_avatar', 'views.edit_user_profile') %}
+    {% if request.endpoint in ('auth.totp', 'auth.login', 'auth.register', 'auth.forgot_password', 'views.captcha', 'views.contact', 'views.sensitive', 'views.edit_user_avatar', 'views.edit_user_profile') %}
     <script nonce="{{ nonce }}"
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer
@@ -764,30 +771,13 @@
       ></script>
     {% endif %}
     {% assets "js_base" %}
-    <script nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
+    <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
     {% endassets %}
     {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
     <script nonce="{{ nonce }}"
       src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
       ></script>
     {% endif %}
-    <script nonce="{{ nonce }}">
-      document.addEventListener('DOMContentLoaded', () => {
-      // Fetch friend counts on load
-      fetch('/api/user/friends?page=1&per_page=1')
-        .then(response => response.json())
-        .then(data => {
-          // Update friend count in the navbar
-          document.getElementById('totalFriends').textContent = `${data.total_friends} friends`;
-          const onlineFriendsElement = document.getElementById('onlineFriends');
-          onlineFriendsElement.innerHTML = `
-            <span class="dot" style="height: 8px; width: 8px; background-color: ${data.online_friends > 0 ? 'green' : 'gray'}; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>
-            ${data.online_friends} online
-          `;
-        })
-        .catch(error => console.error('Error fetching friend counts:', error));
-      });
-    </script>
     {% block scripts %} {% endblock %}
   </body>
 </html>

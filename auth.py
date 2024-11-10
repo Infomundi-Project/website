@@ -78,7 +78,7 @@ def totp():
     del session['in_totp_process']
 
     flash(message)
-    return redirect(url_for('views.user_profile', user=user))
+    return redirect(url_for('views.user_profile', username=user.username))
 
 
 @auth.route('/reset_totp', methods=['GET'])

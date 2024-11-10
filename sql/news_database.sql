@@ -35,6 +35,8 @@ CREATE TABLE stories (
     description VARCHAR(500),
     gpt_summary TEXT,
     clicks INT DEFAULT 0,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
     link VARCHAR(512) NOT NULL,
     pub_date VARCHAR(30) NOT NULL,
     category_id VARCHAR(20) NOT NULL,
@@ -60,7 +62,7 @@ CREATE TABLE stories (
 CREATE TABLE story_reactions (
     reaction_id INT AUTO_INCREMENT PRIMARY KEY,
     story_id VARCHAR(40),
-    user_id VARCHAR(10),
+    user_id VARCHAR(20),
     action VARCHAR(10),  -- 'like' or 'dislike'
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (story_id) REFERENCES stories(story_id),

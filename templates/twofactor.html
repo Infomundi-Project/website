@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% block title %}Two Factor Authentication{% endblock %}
 {% block content %}
 <div class="container col-xl-10 col-xxl-8 px-4 py-2">
-    <div class="row align-items-center g-lg-5 py-5">
+    <div class="row align-items-center g-lg-5 py-2">
       <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
         <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Whooo Goes There?</h1>
         <h2 class="col-lg-10 fs-5">To gain access, you must first prove your wisdom. Enter your 2FA code below to show you're as sharp as the owl's gaze. <br><br>If you encounter any issues, please don't hesitate to <a href="{{ url_for('views.contact') }}">contact our team</a> for assistance.</h2>
@@ -11,13 +11,12 @@
         <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('auth.totp') }}">
 	        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-	        <span class="badge d-inline-flex align-items-center p-1 pe-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-pill mb-4">
+			<span class="badge d-flex align-items-center p-1 pe-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-pill mb-3">
+			    <img class="rounded-circle me-1" width="24" height="24" src="{{ user.avatar_url }}" alt="{{ user.username }} profile picture">
 			    Two factor for {{ user.username }}
 			    <span class="vr mx-2"></span>
-			    <a href="{{ url_for('auth.reset_totp') }}">
-                	<i class="fa-solid fa-right-from-bracket me-1"></i>Not you?
-              	</a>
-			</span>
+			    <a href="{{ url_for('auth.reset_totp') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>Not you?</a>
+			  </span>
 
 	        <!-- TOTP Input Group -->
 	        <div id="totp-input-group">
@@ -40,11 +39,15 @@
 		            </div>
 		        </div>
 		    </div>
-
-	        <div class="cf-turnstile mt-2" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}"></div>
-
-	        <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Submit</button>
+		    
+		    <div class="cf-turnstile mt-3" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
+	        <p id="captchaMessage" class="mb-2 small">
+            	<i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the submit button.
+	        </p>
+	        <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Submit</button>
+	        
 	        <hr class="my-4">
+	        
 	        <small class="text-muted">
 	            <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.
 	        </small>

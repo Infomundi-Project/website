@@ -1,4 +1,3 @@
-import os
 from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint, Response
 from flask_login import LoginManager, current_user, logout_user
 from flask_assets import Environment, Bundle
@@ -6,6 +5,7 @@ from htmlmin import minify as html_minify
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
+from os import path as os_path
 
 from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY, MYSQL_HOST, MYSQL_DATABASE, REDIS_HOST, REDIS_PORT, REDIS_DATABASE
 from website_scripts.extensions import db, login_manager, cache, oauth, limiter
@@ -21,8 +21,8 @@ from api import api
 
 
 app = Flask(__name__, static_folder='static')
+app.config['WTF_CSRF_SECRET_KEY'] = SECRET_KEY
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['WTF_CSRF_SECRET_KEY'] = app.config['SECRET_KEY']  # Optional but recommended
 
 app.config['PREFERRED_URL_SCHEME'] = 'https'
 
@@ -40,11 +40,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Cache
-app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_URL'] = REDIS_CONNECTION_STRING
+app.config['CACHE_REDIS_DB'] = REDIS_DATABASE
 app.config['CACHE_REDIS_HOST'] = REDIS_HOST
 app.config['CACHE_REDIS_PORT'] = REDIS_PORT
-app.config['CACHE_REDIS_DB'] = REDIS_DATABASE
-app.config['CACHE_REDIS_URL'] = REDIS_CONNECTION_STRING
+app.config['CACHE_TYPE'] = 'RedisCache'
 cache.init_app(app)
 
 # Rate Limiting
@@ -63,38 +63,16 @@ app.register_blueprint(views, url_prefix='/')
 oauth.init_app(app)
 
 
-@app.route('/ads.txt')
-def ads_txt():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        'ads.txt', mimetype='text/plain')
-
-
-@app.route('/favicon.ico')
-def favicon_ico():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        'favicon.ico', mimetype='image/x-icon')
-
-
-@app.route('/robots.txt')
-def robots_txt():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        'robots.txt', mimetype='text/plain')
-
-
-@app.route('/security.txt')
-def security_txt():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        'security.txt', mimetype='text/plain')
-
-
-@app.route('/pubkey.asc')
-def pubkey_asc():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        'pubkey.asc', mimetype='text/plain')
+@app.route('/<filename>')
+def serve_file(filename):
+    if filename in ('ads.txt', 'favicon.ico', 'robots.txt', 'security.txt', 'pubkey.asc'):
+        return send_from_directory(os_path.join(app.root_path, 'static'),
+            filename, mimetype='image/x-icon' if filename == 'favicon.ico' else 'text/plain')
 
 
 # CSRF Configuration
 csrf = CSRFProtect(app)
+csrf.exempt('api.story_reaction')
 # Remove protection to endpoint --> csrf.exempt('api.comments')
 
 # Login manager
@@ -167,7 +145,7 @@ def minify_html(response: Response) -> Response:
 
 # base.html
 css_base = Bundle(
-    'css/main.css', 'css/navbar.css', 'css/ticker.css', 'fontawesome/css/brands.min.css', 'fontawesome/css/solid.min.css', 'fontawesome/css/fontawesome.min.css', 'css/cookieconsent.css',
+    'css/main.css', 'css/navbar.css', 'css/ticker.css', 'fontawesome/css/all.min.css', 'fontawesome/css/fontawesome.min.css', 'css/cookieconsent.css',
     filters='cssmin', 
     output='gen/base_packed.css')
 # base.html

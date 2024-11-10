@@ -173,6 +173,8 @@ class Story(db.Model):
     description = db.Column(db.String(500))
     gpt_summary = db.Column(db.JSON)
     clicks = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+    dislikes = db.Column(db.Integer, default=0)
     link = db.Column(db.String(512), nullable=False)
     pub_date = db.Column(db.String(30), nullable=False)
     category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
@@ -186,9 +188,9 @@ class Story(db.Model):
 
 class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    reaction_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     story_id = db.Column(db.String(40), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(10), db.ForeignKey('users.user_id')) # change
+    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'))
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 

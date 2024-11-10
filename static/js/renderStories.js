@@ -221,8 +221,6 @@ document.addEventListener("DOMContentLoaded", function() {
           if (window.lazyload) {
             lazyload();
           }
-          // Reinitialize event listeners for the newly added content
-          initializeEventListeners();
           // Update time ago for newly added content
           updateTimeAgo();
           currentPage += 1;
@@ -241,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function createStoryCard(item, index) {
     const colDiv = document.createElement('div');
-    colDiv.classList.add('col-md-6', 'col-lg-4', 'my-5');
+    colDiv.classList.add('col-lg-6', 'col-xl-4', 'my-5');
 
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('card', 'image-card', 'border', 'border-0');
@@ -257,18 +255,18 @@ document.addEventListener("DOMContentLoaded", function() {
     imgTag.alt = item.title;
     imgTag.style = 'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
     if (index < 3) {
-      imgTag.src = item.media_content_url;
-      imgTag.setAttribute('fetchpriority', 'high');
+        imgTag.src = item.media_content_url;
+        imgTag.setAttribute('fetchpriority', 'high');
     } else {
-      imgTag.setAttribute('data-src', item.media_content_url);
-      imgTag.classList.add('lazyload');
+        imgTag.setAttribute('data-src', item.media_content_url);
+        imgTag.classList.add('lazyload');
     }
     imageLink.appendChild(imgTag);
 
     // Tip logo overlay
     const tipLogoDiv = document.createElement('div');
     tipLogoDiv.classList.add('tip-logo');
-    
+
     const tipLogoImg = document.createElement('div');
     tipLogoImg.innerHTML = `
         <a href="${item.publisher.link}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
@@ -284,44 +282,78 @@ document.addEventListener("DOMContentLoaded", function() {
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
     cardBody.innerHTML = `
-    <a href="/comments?id=${item.story_id}" class="text-decoration-none text-reset">
-      <p class="card-title fw-bold fs-6 line-clamp-3">
-        ${item.title}
-      </p>
-      <small><p class="card-text text-muted line-clamp-4">
-        ${item.description || ''}
-      </p></small>
-    </a>
+        <a href="/comments?id=${item.story_id}" class="text-decoration-none text-reset">
+          <p class="card-title fw-bold fs-6 line-clamp-3">
+            ${item.title}
+          </p>
+          <small><p class="card-text text-muted line-clamp-4">
+            ${item.description || ''}
+          </p></small>
+        </a>
     `;
 
     // Card footer
     const cardFooter = document.createElement('div');
     cardFooter.classList.add('card-footer', 'bg-transparent', 'border', 'border-0');
-    cardFooter.innerHTML = `
-      <div class="row d-flex justify-content-between">
-        <div class="col">
-          <span class="text-muted fw-bold small"><span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">&#x2022;</span>${item.clicks} views</span>
-        </div>
-        <div class="col d-flex justify-content-end">
-          <i class="fa-regular fa-thumbs-up"></i>
-          <i class="fa-regular fa-thumbs-down mx-4"></i>
-          <i class="fa-solid fa-thumbtack"></i>
-          <i class="fa-solid fa-satellite-dish ms-4 satellite-share-button"></i>
-        </div>
-      </div>
-    `;
 
-    // Assembling the card
-    cardDiv.appendChild(imageLink);
-    cardDiv.appendChild(tipLogoDiv);
-    cardDiv.appendChild(cardBody);
-    cardDiv.appendChild(cardFooter);
+    const rowDiv = document.createElement('div');
+    rowDiv.classList.add('row', 'd-flex', 'justify-content-between');
 
-    colDiv.appendChild(cardDiv);
+    const colLeft = document.createElement('div');
+    colLeft.classList.add('col');
+
+    const dateSpan = document.createElement('span');
+    dateSpan.classList.add('text-muted', 'fw-bold', 'small');
+    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">&#x2022;</span>${item.clicks} views`;
+
+    colLeft.appendChild(dateSpan);
+
+    const colRight = document.createElement('div');
+    colRight.classList.add('col', 'd-flex', 'justify-content-end');
+
+    // Like Icon with Count
+    const likeIcon = document.createElement('i');
+    likeIcon.classList.add(item.is_liked ? 'fa-solid' : 'fa-regular', 'fa-thumbs-up');
+    likeIcon.style.cursor = 'pointer';
+    likeIcon.dataset.storyId = item.story_id;
+    likeIcon.dataset.liked = item.is_liked ? 'true' : 'false';
+
+    const likeCount = document.createElement('span');
+    likeCount.textContent = ` ${item.likes || 0}`; // Display the like count
+    likeIcon.appendChild(likeCount);
+
+    // Dislike Icon with Count
+    const dislikeIcon = document.createElement('i');
+    dislikeIcon.classList.add(item.is_disliked ? 'fa-solid' : 'fa-regular', 'fa-thumbs-down', 'mx-4');
+    dislikeIcon.style.cursor = 'pointer';
+    dislikeIcon.dataset.storyId = item.story_id;
+    dislikeIcon.dataset.disliked = item.is_disliked ? 'true' : 'false';
+
+    const dislikeCount = document.createElement('span');
+    dislikeCount.textContent = ` ${item.dislikes || 0}`; // Display the dislike count
+    dislikeIcon.appendChild(dislikeCount);
+
+    // Event listeners for like and dislike icons
+    likeIcon.addEventListener('click', function() {
+      handleLikeDislike('like', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
+    });
+
+    dislikeIcon.addEventListener('click', function() {
+      handleLikeDislike('dislike', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
+    });
+
+    // Bookmark Icon
+    const thumbtackIcon = document.createElement('i');
+    thumbtackIcon.classList.add('fa-regular', 'fa-bookmark');
+    thumbtackIcon.style.cursor = 'pointer';
+
+    // Satellite Share Icon
+    const satelliteIcon = document.createElement('i');
+    satelliteIcon.classList.add('fa-solid', 'fa-satellite-dish', 'ms-4', 'satellite-share-button');
+    satelliteIcon.style.cursor = 'pointer';
 
     // Satellite share button functionality
-    const satelliteButton = cardFooter.querySelector('.satellite-share-button');
-    satelliteButton.addEventListener('click', () => {
+    satelliteIcon.addEventListener('click', () => {
         if (navigator.share) {
             navigator.share({
                 title: item.title,
@@ -336,78 +368,82 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // Append icons to the right column
+    colRight.appendChild(likeIcon);
+    colRight.appendChild(dislikeIcon);
+    colRight.appendChild(thumbtackIcon);
+    colRight.appendChild(satelliteIcon);
+
+    // Assemble the footer
+    rowDiv.appendChild(colLeft);
+    rowDiv.appendChild(colRight);
+    cardFooter.appendChild(rowDiv);
+
+    // Assembling the card
+    cardDiv.appendChild(imageLink);
+    cardDiv.appendChild(tipLogoDiv);
+    cardDiv.appendChild(cardBody);
+    cardDiv.appendChild(cardFooter);
+
+    colDiv.appendChild(cardDiv);
+
     return colDiv;
   }
 
-  // Initialize event listeners for card buttons
-  function initializeEventListeners() {
-    document.querySelectorAll('.inf-card-header-link').forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const card = this.closest('.card');
-        const cardId = card.id.split('-')[0];
-        const newsCategory = card.id.split('-')[1];
+  // Function to handle like and dislike actions
+  function handleLikeDislike(action, storyId, likeIcon, dislikeIcon, likeCount, dislikeCount) {
+  const url = `/api/story/${action}`;
 
-        toggleActiveClass(this);
-
-        if (this.classList.contains('description-btn')) {
-          // Description button clicked
-          fetchDescription(cardId, newsCategory, card);
-        } else {
-          // Preview button clicked
-          updateCardWithPreview(card);
-        }
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id: storyId })
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(errorData => {
+        throw new Error(errorData.message || 'Error performing action');
       });
-    });
-  }
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Update data attributes
+    likeIcon.dataset.liked = data.is_liked ? 'true' : 'false';
+    dislikeIcon.dataset.disliked = data.is_disliked ? 'true' : 'false';
 
-  function toggleActiveClass(clickedButton) {
-    const navLinks = clickedButton.closest('.inf-card-header').querySelectorAll('.nav-link');
-    navLinks.forEach(link => link.classList.remove('active'));
-    clickedButton.classList.add('active');
-  }
+    // Update the like icon and count
+    if (data.is_liked) {
+      likeIcon.classList.remove('fa-regular');
+      likeIcon.classList.add('fa-solid');
+      likeCount.textContent = ` ${data.likes}`; // Update the like count
+    } else {
+      likeIcon.classList.remove('fa-solid');
+      likeIcon.classList.add('fa-regular');
+      likeCount.textContent = ` ${data.likes}`; // Update the like count
+    }
 
-  function fetchDescription(cardId, newsCategory, card) {
-    fetch(`/api/get-description?id=${cardId}`)
-      .then(response => response.json())
-      .then(data => {
-        updateCardWithDescription(data, card);
-      })
-      .catch(error => console.error('Error:', error));
-  }
+    // Update the dislike icon and count
+    if (data.is_disliked) {
+      dislikeIcon.classList.remove('fa-regular');
+      dislikeIcon.classList.add('fa-solid');
+      dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
+    } else {
+      dislikeIcon.classList.remove('fa-solid');
+      dislikeIcon.classList.add('fa-regular');
+      dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
+    }
+  })
+  .catch(error => {
+    // Display the error message to the user
+    alert(error.message);
+  });
+}
 
-  function updateCardWithDescription(data, card) {
-    const cardTitle = card.querySelector('.card-title');
-    const cardText = card.querySelector('.card-text'); // Ensure this selector matches your actual elements
-    if (cardTitle) {
-        cardTitle.style.display = 'none';
-    }
-    if (cardText) { // Check if cardText exists before trying to manipulate it
-        cardText.style.display = 'none';
-    }
-    const cardBody = card.querySelector('.card-body');
-    if (cardBody && !cardBody.querySelector('.description-text')) {
-        cardBody.innerHTML += `<p class="description-text">${data.description}</p>`;
-    }
-  }
 
-  function updateCardWithPreview(card) {
-    const cardTitle = card.querySelector('.card-title');
-    const cardText = card.querySelector('.card-text'); // Ensure this selector matches your actual elements
-    if (cardTitle) {
-        cardTitle.style.display = 'block';
-    }
-    if (cardText) { // Check if cardText exists before trying to manipulate it
-        cardText.style.display = 'block';
-    }
-    const cardBody = card.querySelector('.card-body');
-    if (cardBody) {
-        const descriptionElement = cardBody.querySelector('.description-text');
-        if (descriptionElement) {
-            descriptionElement.remove();
-        }
-    }
-  }
+
 
   // Function to calculate relative time
   function timeAgo(dateString) {

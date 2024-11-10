@@ -4,11 +4,95 @@ from sqlalchemy import or_, and_, cast, func
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
+from random import shuffle
 
 from website_scripts import config, json_util, scripts, notifications,\
     models, extensions, immutable, input_sanitization, friends_util, country_util, totp_util, security_util, hashing_util
 
 api = Blueprint('api', __name__)
+
+
+@api.route('/story/<action>', methods=['POST'])
+@login_required
+def story_reaction(action):
+    # Validate the action
+    if action not in ('like', 'dislike'):
+        return jsonify({"error": "Invalid action. Use 'like' or 'dislike'."}), 400
+
+    # Get the story_id from the JSON body
+    data = request.get_json()
+    story_id = data.get('id')
+    if not story_id:
+        return jsonify({"error": "Story ID is required."}), 400
+
+    # Find the story
+    story = models.Story.query.get(story_id)
+    if not story:
+        return jsonify({"error": "Story not found."}), 404
+
+    # Check if a reaction already exists for this story and user
+    existing_reaction = models.StoryReaction.query.filter_by(
+        story_id=story_id, user_id=current_user.user_id).first()
+
+    # Initialize response flags
+    is_liked = is_disliked = False
+
+    # If a reaction exists, update it; otherwise, create a new one
+    if existing_reaction:
+        if existing_reaction.action == action:
+            # If the reaction is already the same as the requested action, delete it (unreact)
+            extensions.db.session.delete(existing_reaction)
+            
+            if action == 'like':
+                story.likes -= 1
+            elif action == 'dislike':
+                story.dislikes -= 1
+            
+            message = f"{action.capitalize()} removed"
+        else:
+            # If the reaction is different, update it
+            existing_reaction.action = action
+            
+            if action == 'like':
+                story.likes += 1
+                story.dislikes -= 1
+                is_liked = True
+            elif action == 'dislike':
+                story.dislikes += 1
+                story.likes -= 1
+                is_disliked = True
+
+            message = f"Reaction updated to {action}"
+            is_liked = action == 'like'
+            is_disliked = action == 'dislike'
+    else:
+        # Create a new reaction
+        new_reaction = models.StoryReaction(
+            story_id=story_id,
+            user_id=current_user.user_id,
+            action=action
+        )
+        extensions.db.session.add(new_reaction)
+
+        if action == 'like':
+            story.likes += 1
+            is_liked = True
+        elif action == 'dislike':
+            story.dislikes += 1
+            is_disliked = True
+
+        message = f"Story {action}d"
+        is_liked = action == 'like'
+        is_disliked = action == 'dislike'
+
+    extensions.db.session.commit()
+    return jsonify({
+        "message": message,
+        "is_liked": is_liked,
+        "likes": story.likes,
+        "dislikes": story.dislikes,
+        "is_disliked": is_disliked
+    }), 201 if not existing_reaction else 200
 
 
 @api.route('/totp/generate', methods=['GET'])
@@ -73,7 +157,7 @@ def get_cities(state_id):
 
 
 @api.route('/user/friends', methods=['GET'])
-@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
+@extensions.cache.cached(timeout=60*5, query_string=True)
 @login_required
 def get_friends():
     page = request.args.get('page', 1, type=int)
@@ -123,31 +207,11 @@ def get_user_status(user_id):
 @api.route('/user/status/update', methods=['GET'])
 @login_required
 def update_user_status():
-    user = models.User.query.get(current_user.user_id)
-    
-    user.is_online = True
-    user.last_activity = datetime.utcnow()
+    current_user.is_online = True
+    current_user.last_activity = datetime.utcnow()
     
     extensions.db.session.commit()
     return jsonify({'message': 'Status updated successfully'})
-
-
-@api.route('/get-description', methods=['GET'])
-@extensions.cache.cached(timeout=60*60*24*15, query_string=True) # 15 days
-def get_description():
-    # is this still needed?
-    news_id = request.args.get('id', '')
-
-    story = models.Story.query.get(news_id)
-    if story:
-        data = {}
-        data['title'] = input_sanitization.sanitize_html(story.title)
-        data['description'] = input_sanitization.sanitize_html(story.description)
-        data['publisher'] = input_sanitization.sanitize_html(story.publisher.name)
-    else:
-        data = {}
-
-    return jsonify(data)
 
 
 @api.route('/get_country_code', methods=['GET'])
@@ -241,7 +305,7 @@ def summarize_story():
 
 
 @api.route('/get_stories', methods=['GET'])
-@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
+#@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
 def get_stories():
     """Returns jsonified list of stories based on certain criteria. Cached for 1h (60s * 60)."""
     country = request.args.get('country', 'br', type=str).lower()
@@ -319,6 +383,8 @@ def get_stories():
             'description': story.description,
             #'gpt_summary': story.gpt_summary,
             'clicks': story.clicks,
+            'likes': story.likes,
+            'dislikes': story.dislikes,
             'link': story.link,
             'pub_date': story.pub_date,
             #'category_id': story.category_id,
@@ -331,7 +397,7 @@ def get_stories():
         }
         for story in stories
     ]
-
+    shuffle(stories_list)
     return jsonify(stories_list)
 
 
