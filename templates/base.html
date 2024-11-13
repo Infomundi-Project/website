@@ -328,7 +328,7 @@
           <div class="col-md-6 col-3 {% if not current_user.is_authenticated or is_mobile %}d-inline-flex text-end align-items-center justify-content-end{% endif %} d-block p-0">
             {% if current_user.is_authenticated %}
               {% if not is_mobile %}
-              <div class="d-flex flex-row-reverse" style="margin-right: -10px;">
+              <div class="d-flex flex-row-reverse align-items-center" style="margin-right: -10px;">
                 <div class="col-auto">
                   <a 
                   href="#" 
@@ -338,7 +338,7 @@
                   aria-controls="offcanvasUserNavigation"
                   aria-label="Click here to expand the user navigation">
 
-                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}"><span class="position-absolute translate-middle badge rounded-pill bg-danger border border-light" style="top: 8%; start: 80%;">1<span class="visually-hidden">notifications</span></span>
+                  <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}">
                 </a>
                 </div>
                   {% if current_user.display_name %}
@@ -367,6 +367,14 @@
                   </a>
                   </div>
                   {% endif %}
+
+                  <div class="col-auto me-5 mt-2">
+                    <button type="button" class="btn btn-outline-{% if is_light_mode %}dark{% else %}light{% endif %} position-relative btn-sm border-0">
+                      <i class="fa-solid fa-tower-cell fa-xl"></i>
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1<span class="visually-hidden">notifications</span></span>
+                    </button>
+                  </div>
+
                   <div class="col-auto me-5 mt-2" data-bs-toggle="modal" data-bs-target="#friendsModal">
                     <span id="totalFriends" class="d-block"></span>
                     <span id="onlineFriends" class="text-muted small">

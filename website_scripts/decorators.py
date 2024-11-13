@@ -1,4 +1,4 @@
-from flask import flash, redirect, url_for, session, request, abort
+from flask import flash, redirect, url_for, session, request, abort, jsonify
 from flask_login import current_user
 from datetime import datetime
 from functools import wraps
@@ -10,21 +10,28 @@ from .config import CAPTCHA_CLEARANCE_HOURS
 
 
 def admin_required(func):
-    """This decorator is used to check if the user is an admin."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        # Check if the user is an admin based on the role
         if current_user.is_authenticated and current_user.role == 'admin':
             return func(*args, **kwargs)
         
-        # Return not found page
         return abort(404)
 
     return decorated_function
 
 
+def api_login_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated:
+            return func(*args, **kwargs)
+        
+        return jsonify({'status': 'Not Allowed'}), 403
+
+    return decorated_function
+
+
 def profile_owner_required(func):
-    """This decorator is used to check if the user is the profile owner."""
     @wraps(func)
     def decorated_function(username, *args, **kwargs):
         if current_user.is_authenticated and (username == current_user.username):
@@ -37,7 +44,6 @@ def profile_owner_required(func):
 
 
 def unauthenticated_only(func):
-    """This decorator is used to check if the user is unauthenticated."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
         # Check if the user is an authenticated
@@ -51,7 +57,6 @@ def unauthenticated_only(func):
 
 
 def in_maintenance(func):
-    """This decorator is used when the endpoint is in maintenance."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
         # If the user is admin, maintenance is bypassed
@@ -96,7 +101,7 @@ def verify_captcha(func):
 
 
 def sensitive_area(func):
-    """This decorator is used to check if the user needs to resolve a proof of life first."""
+    """This decorator is used to check if the user is allowed to access their account's sensitive area"""
     @wraps(func)
     def decorated_function(*args, **kwargs):
         is_trusted_session = session.get('is_trusted_session', '')

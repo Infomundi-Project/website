@@ -12,6 +12,13 @@ from website_scripts import config, json_util, scripts, notifications,\
 api = Blueprint('api', __name__)
 
 
+def make_cache_key(*args, **kwargs):
+    user_id = current_user.user_id if current_user.is_authenticated else 'guest'
+    args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
+    key = hashing_util.md5_hash_text(str(args_list))
+    return key
+
+
 @api.route('/story/<action>', methods=['POST'])
 @login_required
 def story_reaction(action):
@@ -157,7 +164,7 @@ def get_cities(state_id):
 
 
 @api.route('/user/friends', methods=['GET'])
-@extensions.cache.cached(timeout=60*5, query_string=True)
+@extensions.cache.cached(timeout=60*5, query_string=True, make_cache_key=make_cache_key)
 @login_required
 def get_friends():
     page = request.args.get('page', 1, type=int)
