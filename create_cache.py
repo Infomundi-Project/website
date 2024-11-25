@@ -134,18 +134,18 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         }
 
         for item in feed.entries:
-            # Remove dangerous html tags from items
-            feed_publisher = input_sanitization.sanitize_html(feed.feed.title)
-            item_title = input_sanitization.sanitize_html(item.get('title', f'No title was provided'))
-            item_description = input_sanitization.sanitize_html(item.get('description', 'No description was provided'))
+            # Decodes and removes html entities from text
+            feed_publisher = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(feed.feed.title.strip()))
+            item_title = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('title', f'No title was provided').strip()))
+            item_description = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('description', 'No description was provided').strip()))
             
             # Gentle cut (without cutting off words)
             feed_publisher = input_sanitization.gentle_cut_text(80, feed_publisher)
             item_title = input_sanitization.gentle_cut_text(120, item_title)
             item_description = input_sanitization.gentle_cut_text(500, item_description)
             
-            feed_link = feed.feed.link
-            item_link = item.link
+            feed_link = feed.feed.link.strip()
+            item_link = item.link.strip()
 
             # Checks to see if the url is valid
             if not input_sanitization.is_valid_url(feed_link) or not input_sanitization.is_valid_url(item_link):

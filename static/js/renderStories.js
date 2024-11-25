@@ -3,10 +3,46 @@ document.addEventListener("DOMContentLoaded", function() {
   const modalTitle = document.querySelector("#infomundiStoryModal .modal-header h1");
   const modalImage = document.querySelector("#infomundiStoryModal .modal-header img");
   const modalDescription = document.querySelector("#infomundiStoryModal .modal-body p");
-  const modalCast = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(1) span:last-child");
-  const modalGenres = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(2) span:last-child");
-  const modalAttributes = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(3) span:last-child");
-  const modalPlayButton = document.querySelector("#infomundiStoryModal .modal-header .btn.btn-light");
+  const modalPublishedBy = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(1) span:last-child");
+  const modalTags = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(2) span:last-child");
+
+  // Additional modal elements
+  const modalLikeIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-thumbs-up");
+  const modalDislikeIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-thumbs-down");
+  const modalLikeCount = modalLikeIcon.querySelector('span');
+  const modalDislikeCount = modalDislikeIcon.querySelector('span');
+  const modalSatelliteIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-satellite-dish");
+  const modalPublishedDate = document.getElementById('publishedDateStoryModal');
+  const modalViewCount = document.getElementById('viewCountStoryModal');
+
+  // Define event listeners for modal icons
+  modalLikeIcon.addEventListener('click', function() {
+    const storyId = this.dataset.storyId;
+    handleLikeDislike('like', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
+  });
+
+  modalDislikeIcon.addEventListener('click', function() {
+    const storyId = this.dataset.storyId;
+    handleLikeDislike('dislike', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
+  });
+
+  // Satellite share button functionality
+  modalSatelliteIcon.addEventListener('click', function() {
+    const storyId = this.dataset.storyId;
+    const storyTitle = this.dataset.storyTitle;
+    const storyDescription = this.dataset.storyDescription || '';
+    if (navigator.share) {
+        navigator.share({
+            title: storyTitle,
+            text: storyDescription,
+            url: window.location.origin + `/comments?id=${storyId}`
+        }).then(() => {
+            console.log('Thanks for sharing!');
+        }).catch(console.error);
+    } else {
+        alert('Sharing is not supported on this browser.');
+    }
+  });
 
   // Attach event listener to dynamically created story cards
   function attachModalEvents() {
@@ -17,28 +53,50 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault(); // Prevent navigation
 
         // Extract story data from the clicked card
-        const storyId = this.id.split("-")[0];
-        const storyTitle = this.querySelector(".card-title").textContent.trim();
-        const storyDescription = this.querySelector(".card-text").textContent.trim();
-        const storyImage = this.querySelector("img").src;
-
-        // Fetch or predefine additional information for the modal
-        const storyCast = this.dataset.cast || "Unknown cast";
-        const storyGenres = this.dataset.genres || "Unknown genres";
-        const storyAttributes = this.dataset.attributes || "No attributes provided";
+        const storyData = JSON.parse(this.dataset.storyData);
 
         // Update modal content
-        modalTitle.textContent = storyTitle;
-        modalImage.src = storyImage;
-        modalDescription.textContent = storyDescription;
-        modalCast.textContent = storyCast;
-        modalGenres.textContent = storyGenres;
-        modalAttributes.textContent = storyAttributes;
+        modalTitle.textContent = storyData.title;
+        modalImage.src = storyData.media_content_url;
+        modalDescription.textContent = storyData.description || '';
+        modalPublishedBy.textContent = storyData.publisher.name;
+        modalTags.textContent = storyData.tags || '';
 
-        // Set play button action (replace URL as needed)
-        modalPlayButton.addEventListener("click", () => {
-          window.location.href = `/comments?id=${storyId}`;
-        });
+        // Update data attributes for the icons
+        modalLikeIcon.dataset.storyId = storyData.story_id;
+        modalLikeIcon.dataset.liked = storyData.is_liked ? 'true' : 'false';
+        modalDislikeIcon.dataset.storyId = storyData.story_id;
+        modalDislikeIcon.dataset.disliked = storyData.is_disliked ? 'true' : 'false';
+
+        // Update like/dislike counts
+        modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
+        modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
+
+        // Update icons based on is_liked/is_disliked
+        if (storyData.is_liked) {
+          modalLikeIcon.classList.remove('fa-regular');
+          modalLikeIcon.classList.add('fa-solid');
+        } else {
+          modalLikeIcon.classList.remove('fa-solid');
+          modalLikeIcon.classList.add('fa-regular');
+        }
+
+        if (storyData.is_disliked) {
+          modalDislikeIcon.classList.remove('fa-regular');
+          modalDislikeIcon.classList.add('fa-solid');
+        } else {
+          modalDislikeIcon.classList.remove('fa-solid');
+          modalDislikeIcon.classList.add('fa-regular');
+        }
+
+        // Update the satellite icon data attributes
+        modalSatelliteIcon.dataset.storyId = storyData.story_id;
+        modalSatelliteIcon.dataset.storyTitle = storyData.title;
+        modalSatelliteIcon.dataset.storyDescription = storyData.description || '';
+
+        // Update published date and view count
+        modalPublishedDate.innerHTML = `${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
+        modalViewCount.innerHTML = `${storyData.clicks}&nbsp;views`;
 
         // Show the modal
         const infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"));
@@ -46,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
+
   let middleSectionCount = 1;
 
   function addMiddleSection() {
@@ -435,62 +494,62 @@ document.addEventListener("DOMContentLoaded", function() {
 
     colDiv.appendChild(cardDiv);
 
+    cardDiv.dataset.storyData = JSON.stringify(item);
     return colDiv;
   }
 
+
   // Function to handle like and dislike actions
   function handleLikeDislike(action, storyId, likeIcon, dislikeIcon, likeCount, dislikeCount) {
-  const url = `/api/story/${action}`;
+    const url = `/api/story/${action}`;
 
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ id: storyId })
-  })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(errorData => {
-        throw new Error(errorData.message || 'Error performing action');
-      });
-    }
-    return response.json();
-  })
-  .then(data => {
-    // Update data attributes
-    likeIcon.dataset.liked = data.is_liked ? 'true' : 'false';
-    dislikeIcon.dataset.disliked = data.is_disliked ? 'true' : 'false';
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: storyId })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errorData => {
+          throw new Error(errorData.message || 'Error performing action');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Update data attributes
+      likeIcon.dataset.liked = data.is_liked ? 'true' : 'false';
+      dislikeIcon.dataset.disliked = data.is_disliked ? 'true' : 'false';
 
-    // Update the like icon and count
-    if (data.is_liked) {
-      likeIcon.classList.remove('fa-regular');
-      likeIcon.classList.add('fa-solid');
-      likeCount.textContent = ` ${data.likes}`; // Update the like count
-    } else {
-      likeIcon.classList.remove('fa-solid');
-      likeIcon.classList.add('fa-regular');
-      likeCount.textContent = ` ${data.likes}`; // Update the like count
-    }
+      // Update the like icon and count
+      if (data.is_liked) {
+        likeIcon.classList.remove('fa-regular');
+        likeIcon.classList.add('fa-solid');
+        likeCount.textContent = ` ${data.likes}`; // Update the like count
+      } else {
+        likeIcon.classList.remove('fa-solid');
+        likeIcon.classList.add('fa-regular');
+        likeCount.textContent = ` ${data.likes}`; // Update the like count
+      }
 
-    // Update the dislike icon and count
-    if (data.is_disliked) {
-      dislikeIcon.classList.remove('fa-regular');
-      dislikeIcon.classList.add('fa-solid');
-      dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
-    } else {
-      dislikeIcon.classList.remove('fa-solid');
-      dislikeIcon.classList.add('fa-regular');
-      dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
-    }
-  })
-  .catch(error => {
-    // Display the error message to the user
-    alert(error.message);
-  });
-}
-
-
+      // Update the dislike icon and count
+      if (data.is_disliked) {
+        dislikeIcon.classList.remove('fa-regular');
+        dislikeIcon.classList.add('fa-solid');
+        dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
+      } else {
+        dislikeIcon.classList.remove('fa-solid');
+        dislikeIcon.classList.add('fa-regular');
+        dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
+      }
+    })
+    .catch(error => {
+      // Display the error message to the user
+      alert(error.message);
+    });
+  }
 
 
   // Function to calculate relative time
@@ -511,9 +570,10 @@ document.addEventListener("DOMContentLoaded", function() {
     } else if (differenceInDays === 1) {
         return 'Yesterday';
     } else {
-        return `<span class="me-1">${differenceInDays}</span> days ago`;
+        return `${differenceInDays}&nbsp;days&nbsp;ago`;
     }
   }
+
 
   // Function to update time ago for all date-info elements
   function updateTimeAgo() {
@@ -524,6 +584,7 @@ document.addEventListener("DOMContentLoaded", function() {
       element.innerHTML = relativeDateString; // Update the element content
     });
   }
+
 
   // Function to save filter settings to localStorage
   function saveFiltersToLocalStorage() {
@@ -540,25 +601,75 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Function to load filter settings from localStorage
   function loadSavedFilters() {
-  const savedFilters = JSON.parse(localStorage.getItem('newsFilters'));
-  if (savedFilters) {
-    const { category, orderBy, orderDir, startDate, endDate, query } = savedFilters;
-    document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
-    document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
-    document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
-    document.getElementById("modalStartDate").value = startDate;
-    document.getElementById("modalEndDate").value = endDate;
-    document.getElementById("query").value = query;
+    const savedFilters = JSON.parse(localStorage.getItem('newsFilters'));
+    if (savedFilters) {
+      const { category, orderBy, orderDir, startDate, endDate, query } = savedFilters;
+      document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
+      document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
+      document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
+      document.getElementById("modalStartDate").value = startDate;
+      document.getElementById("modalEndDate").value = endDate;
+      document.getElementById("query").value = query;
 
-    // Update periodButtonText
+      // Update periodButtonText
+      let periodText = 'Start Date - End Date';
+      if (startDate && endDate) {
+        periodText = `${startDate} to ${endDate}`;
+      }
+      document.getElementById('periodButtonText').textContent = periodText;
+    }
+  }
+
+  function updateButtonText(inputName, buttonTextId) {
+      var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
+      var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
+      document.getElementById(buttonTextId).textContent = selectedText;
+    }
+  
+    // Initialize Button Texts
+    updateButtonText('category', 'categoryButtonText');
+    updateButtonText('order_by', 'orderByButtonText');
+    updateButtonText('order_dir', 'orderDirButtonText');
+  
+    // Event Listeners for Category
+    document.querySelectorAll('input[name="category"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('category', 'categoryButtonText');
+      });
+    });
+  
+    // Event Listeners for Order By
+    document.querySelectorAll('input[name="order_by"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('order_by', 'orderByButtonText');
+      });
+    });
+  
+    // Event Listeners for Order Direction
+    document.querySelectorAll('input[name="order_dir"]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        updateButtonText('order_dir', 'orderDirButtonText');
+      });
+    });
+  
+    // Event listener for the Apply button in Period Modal
+  document.getElementById('applyPeriodButton').addEventListener('click', function() {
+    // Update the periodButton text
+    let startDate = document.getElementById('modalStartDate').value;
+    let endDate = document.getElementById('modalEndDate').value;
     let periodText = 'Start Date - End Date';
     if (startDate && endDate) {
       periodText = `${startDate} to ${endDate}`;
     }
     document.getElementById('periodButtonText').textContent = periodText;
-  }
-}
-
+    
+    // Close the modal
+    document.getElementById('periodModal').classList.remove('show');
+    document.querySelector('.modal-backdrop').remove();
+    
+    // Apply the filters
+    applyFilters();
+  });
 
   // Initial fetch to populate stories on page load
   showLoading();

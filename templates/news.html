@@ -17,11 +17,9 @@
             <div class="position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(to top, #181818, transparent);">
               <h1 class="text-uppercase fw-bold">Votação transcorre no Uruguai após campanha morna, mas acirrada</h1>
               <div class="row d-flex align-items-center mt-3">
-                  <div class="col-6 d-block">
-                <button class="btn btn-light me-3">
-                  <i class="fa-solid fa-newspaper me-1"></i>Details
-                </button>
-              </div>
+                <div class="col-6 d-block">
+                <span id="publishedDateStoryModal">24/11/2024</span><span class="mx-1">&#x2022;</span><span id="viewCountStoryModal">X views</span>
+                </div>
               <div class="col-6 d-flex justify-content-end d-block">
                 <span class="fs-4">
                 <i class="fa-regular fa-thumbs-up" data-story-id="008951a432d6e8ad89a361c043cedd11" data-liked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-thumbs-down mx-4" data-story-id="008951a432d6e8ad89a361c043cedd11" data-disliked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-bookmark" style="cursor: pointer;"></i><i class="fa-solid fa-satellite-dish ms-4 satellite-share-button" style="cursor: pointer;"></i></span>
@@ -36,22 +34,17 @@
               <div class="col-md-8">
                 <div class="d-flex align-items-center mb-3">
                   <span class="match-rate me-3">54% Match</span>
-                  <span>Published</span>
                 </div>
                 <p>The film's premise is about a group of warriors and scientists, who gathered at the “Oude Kerk” in Amsterdam to stage a crucial event from the past, in a desperate attempt to rescue the world from destructive robots.</p>
               </div>
               <div class="col-md-4">
                 <div class="mb-2">
-                  <span>Cast: </span>
+                  <span>Published By: </span>
                   <span>Vanja Rukavina, Denise Rebergen, Rogier Schippers, Derek de Lint, Sergio Hasselbaink</span>
                 </div>
                 <div class="mb-2">
-                  <span>Genres: </span>
+                  <span>Tags: </span>
                   <span>Science Fiction</span>
-                </div>
-                <div>
-                  <span>This show is: </span>
-                  <span>Fictional war, killer robot, man vs machine</span>
                 </div>
               </div>
             </div>
@@ -518,62 +511,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ nonce }}" defer 
-  src="{{ url_for('static', filename='js/renderStories.js') }}"
-  ></script>
-<script nonce="{{ nonce }}">
-  document.addEventListener('DOMContentLoaded', function() {
-    function updateButtonText(inputName, buttonTextId) {
-      var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
-      var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
-      document.getElementById(buttonTextId).textContent = selectedText;
-    }
-  
-    // Initialize Button Texts
-    updateButtonText('category', 'categoryButtonText');
-    updateButtonText('order_by', 'orderByButtonText');
-    updateButtonText('order_dir', 'orderDirButtonText');
-  
-    // Event Listeners for Category
-    document.querySelectorAll('input[name="category"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('category', 'categoryButtonText');
-      });
-    });
-  
-    // Event Listeners for Order By
-    document.querySelectorAll('input[name="order_by"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('order_by', 'orderByButtonText');
-      });
-    });
-  
-    // Event Listeners for Order Direction
-    document.querySelectorAll('input[name="order_dir"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('order_dir', 'orderDirButtonText');
-      });
-    });
-  
-    // Event listener for the Apply button in Period Modal
-  document.getElementById('applyPeriodButton').addEventListener('click', function() {
-  // Update the periodButton text
-  let startDate = document.getElementById('modalStartDate').value;
-  let endDate = document.getElementById('modalEndDate').value;
-  let periodText = 'Start Date - End Date';
-  if (startDate && endDate) {
-    periodText = `${startDate} to ${endDate}`;
-  }
-  document.getElementById('periodButtonText').textContent = periodText;
-  
-  // Close the modal
-  document.getElementById('periodModal').classList.remove('show');
-  document.querySelector('.modal-backdrop').remove();
-  
-  // Apply the filters
-  applyFilters();
-  });
-  
-  });
-</script>
+{% assets "js_news" %}
+<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
 {% endblock %}

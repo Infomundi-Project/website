@@ -161,11 +161,17 @@ js_home = Bundle(
     'js/amcharts/map.js', 'js/amcharts/worldLow.js', 'js/amcharts/animated.js', 'js/chart.js', 
     filters='jsmin', 
     output='gen/home_packed.js')
+# news.html
+js_news = Bundle(
+    'js/renderStories.js',
+    filters='jsmin', 
+    output='gen/news_packed.js')
 
 assets = Environment(app)
 assets.register('css_base', css_base)
 assets.register('js_base', js_base)
 assets.register('js_home', js_home)
+assets.register('js_news', js_news)
 
 
 @app.context_processor

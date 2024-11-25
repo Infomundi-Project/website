@@ -81,7 +81,6 @@ def news_page_processing(country_name: str) -> dict:
         currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x['country']['name'].lower() == country_name.replace(' ', '-')][0]
         country_index['currency'] = currency_info
     except IndexError as err:
-        log(f'[!] Error at /views: {err} // {country_name}')
         country_index = ''
 
     # Get page language
@@ -197,32 +196,6 @@ def scrape_stock_data(country_name: str) -> list:
 
     json_util.write_json(stock_data, filepath)
     return stock_data
-
-
-def log(text: str, log_type: str='exception') -> bool:
-    """Writes to a log file. Used for debug purposes.
-    
-    Args:
-        text (str): Any given text. The log content.
-        log_type (str, optional): The log type. Must be one of ['exception', 'mail']. Defaults to 'exception'.
-
-    Returns:
-        bool: False if log type is not in ['exception', 'mail']. Otherwise, True.
-    
-    Example:
-        >>> log(f'[+] User admin failed to log in with the IP of 10.10.11.10 because of {exception}')
-        True
-    """
-    log_type = log_type.lower()
-    if log_type not in ['exception', 'mail']:
-        return False
-
-    log_file = f'{config.LOGS_PATH}/{log_type}.log'
-    
-    with open(log_file, 'a') as f:
-        f.write(f'{text}\n')
-
-    return True
 
 
 @extensions.cache.memoize(timeout=60*60*12) # 12 hours
@@ -350,7 +323,6 @@ def get_current_time_in_timezone(cca2: str) -> str:
         else:
             timezone = ''
     except Exception as err:
-        log(f'Exception trying to get {cca2} time zone: {err}')
         timezone = ''
 
     if '+' in timezone or '-' in timezone:

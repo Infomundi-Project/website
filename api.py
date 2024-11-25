@@ -386,8 +386,8 @@ def get_stories():
         {
             'story_id': story.story_id,
             #'created_at': story.created_at,
-            'title': story.title,
-            'description': story.description,
+            'title': input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.title.strip())),
+            'description': input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.description.strip())),
             #'gpt_summary': story.gpt_summary,
             'clicks': story.clicks,
             'likes': story.likes,
@@ -396,7 +396,7 @@ def get_stories():
             'pub_date': story.pub_date,
             #'category_id': story.category_id,
             'publisher': {
-                'name': story.publisher.name,
+                'name': input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.publisher.name.strip())),
                 'link': story.publisher.link,
                 'favicon': story.publisher.favicon
             },

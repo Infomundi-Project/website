@@ -1,11 +1,34 @@
-import re
 import bleach
+import html
+import re
+
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from unidecode import unidecode
 from collections import deque
 
 from . import security_util, config
+
+
+def decode_html_entities(text):
+    """
+    Decodes a string of HTML entities until it no longer changes. Returns the decoded string.
+    """
+    # Check if the text changes after the first decode
+    decoded_once = html.unescape(text)
+    
+    if text == decoded_once:
+        # No change after first decode, text is plain
+        return text
+    
+    # Check if the text changes again after a second decode
+    decoded_twice = html.unescape(decoded_once)
+    if decoded_once == decoded_twice:
+        # No change after the second decode, text is single-encoded
+        return decoded_once
+    
+    # Text changes after second decode, text is double-encoded
+    return decoded_twice
 
 
 def sanitize_description(description: str) -> str:
