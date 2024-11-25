@@ -1,19 +1,36 @@
 document.addEventListener("DOMContentLoaded", function() {
-  // Modal element selectors
-  const modalTitle = document.querySelector("#infomundiStoryModal .modal-header h1");
-  const modalImage = document.querySelector("#infomundiStoryModal .modal-header img");
-  const modalDescription = document.querySelector("#infomundiStoryModal .modal-body p");
-  const modalPublishedBy = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(1) span:last-child");
-  const modalTags = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(2) span:last-child");
+  let infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"), {
+    keyboard: false,
+  });
 
-  // Additional modal elements
-  const modalLikeIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-thumbs-up");
-  const modalDislikeIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-thumbs-down");
-  const modalLikeCount = modalLikeIcon.querySelector('span');
-  const modalDislikeCount = modalDislikeIcon.querySelector('span');
-  const modalSatelliteIcon = document.querySelector("#infomundiStoryModal .modal-header .fa-satellite-dish");
-  const modalPublishedDate = document.getElementById('publishedDateStoryModal');
-  const modalViewCount = document.getElementById('viewCountStoryModal');
+  // Modal element selectors
+  const modalElement = document.getElementById("infomundiStoryModal");
+  const modalTitle = modalElement.querySelector(".modal-header h1");
+  const modalImage = modalElement.querySelector(".modal-header img");
+  const modalDescription = modalElement.querySelector(".modal-body p");
+  const modalPublishedBy = modalElement.querySelector(".modal-body .col-md-4 div:nth-child(1) span:last-child");
+  const modalTagsContainer = modalElement.querySelector(".modal-body .d-flex.align-items-center");
+  const modalLikeIcon = modalElement.querySelector(".fa-thumbs-up");
+  const modalDislikeIcon = modalElement.querySelector(".fa-thumbs-down");
+  const modalLikeCount = modalLikeIcon.querySelector("span");
+  const modalDislikeCount = modalDislikeIcon.querySelector("span");
+  const modalSatelliteIcon = modalElement.querySelector(".fa-satellite-dish");
+  const modalPublishedDate = modalElement.querySelector("#publishedDateStoryModal");
+  const modalViewCount = modalElement.querySelector("#viewCountStoryModal");
+
+  // Function to initialize like/dislike icons based on localStorage
+  function initializeLikeDislikeIcons(storyId, likeIcon, dislikeIcon) {
+      const savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+      const userAction = savedInteractions[storyId]?.action;
+
+      const isLiked = userAction === 'like';
+      const isDisliked = userAction === 'dislike';
+
+      likeIcon.classList.toggle('fa-solid', isLiked);
+      likeIcon.classList.toggle('fa-regular', !isLiked);
+      dislikeIcon.classList.toggle('fa-solid', isDisliked);
+      dislikeIcon.classList.toggle('fa-regular', !isDisliked);
+  }
 
   // Define event listeners for modal icons
   modalLikeIcon.addEventListener('click', function() {
@@ -32,16 +49,33 @@ document.addEventListener("DOMContentLoaded", function() {
     const storyTitle = this.dataset.storyTitle;
     const storyDescription = this.dataset.storyDescription || '';
     if (navigator.share) {
-        navigator.share({
-            title: storyTitle,
-            text: storyDescription,
-            url: window.location.origin + `/comments?id=${storyId}`
-        }).then(() => {
-            console.log('Thanks for sharing!');
-        }).catch(console.error);
+      navigator.share({
+        title: storyTitle,
+        text: storyDescription,
+        url: window.location.origin + `/comments?id=${storyId}`
+      }).then(() => {
+        console.log('Thanks for sharing!');
+      }).catch(console.error);
     } else {
-        alert('Sharing is not supported on this browser.');
+      alert('Sharing is not supported on this browser.');
     }
+  });
+
+  modalElement.addEventListener("hidden.bs.modal", function () {
+    modalTitle.textContent = "";
+    modalImage.src = "";
+    modalDescription.textContent = "";
+    modalPublishedBy.textContent = "";
+    modalTagsContainer.innerHTML = ""; // Clear the tags container
+    modalLikeCount.innerHTML = "&nbsp;0";
+    modalDislikeCount.innerHTML = "&nbsp;0";
+    modalPublishedDate.innerHTML = "";
+    modalViewCount.innerHTML = "";
+    modalLikeIcon.dataset.storyId = "";
+    modalDislikeIcon.dataset.storyId = "";
+    modalSatelliteIcon.dataset.storyId = "";
+    modalSatelliteIcon.dataset.storyTitle = "";
+    modalSatelliteIcon.dataset.storyDescription = "";
   });
 
   // Attach event listener to dynamically created story cards
@@ -50,57 +84,64 @@ document.addEventListener("DOMContentLoaded", function() {
 
     storyCards.forEach((card) => {
       card.addEventListener("click", function(event) {
-        event.preventDefault(); // Prevent navigation
+        const clickedElement = event.target; // Get the clicked element
 
-        // Extract story data from the clicked card
-        const storyData = JSON.parse(this.dataset.storyData);
+        // Check if the click is on the image or card body (title + description)
+        if (
+          clickedElement.classList.contains("card-img-top") || // Image
+          clickedElement.closest(".card-body") // Card body (title + description)
+        ) {
+          event.preventDefault(); // Prevent navigation
 
-        // Update modal content
-        modalTitle.textContent = storyData.title;
-        modalImage.src = storyData.media_content_url;
-        modalDescription.textContent = storyData.description || '';
-        modalPublishedBy.textContent = storyData.publisher.name;
-        modalTags.textContent = storyData.tags || '';
+          // Extract story data from the clicked card
+          const storyData = JSON.parse(this.dataset.storyData);
 
-        // Update data attributes for the icons
-        modalLikeIcon.dataset.storyId = storyData.story_id;
-        modalLikeIcon.dataset.liked = storyData.is_liked ? 'true' : 'false';
-        modalDislikeIcon.dataset.storyId = storyData.story_id;
-        modalDislikeIcon.dataset.disliked = storyData.is_disliked ? 'true' : 'false';
+          // Update modal content
+          modalTitle.textContent = storyData.title;
+          modalImage.src = storyData.media_content_url;
+          modalDescription.textContent = storyData.description || "";
 
-        // Update like/dislike counts
-        modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
-        modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
+          // Update tags as links
+          modalTagsContainer.innerHTML = ""; // Clear previous tags
+          if (storyData.tags && Array.isArray(storyData.tags)) {
+            storyData.tags.forEach((tag) => {
+              const tagLink = document.createElement("a");
+              tagLink.href = `${window.location.origin}?search=${encodeURIComponent(tag)}`;
+              tagLink.className = "badge text-bg-primary mx-1";
+              tagLink.textContent = tag;
+              modalTagsContainer.appendChild(tagLink);
+            });
+          }
 
-        // Update icons based on is_liked/is_disliked
-        if (storyData.is_liked) {
-          modalLikeIcon.classList.remove('fa-regular');
-          modalLikeIcon.classList.add('fa-solid');
-        } else {
-          modalLikeIcon.classList.remove('fa-solid');
-          modalLikeIcon.classList.add('fa-regular');
+          // Update data attributes for the icons
+          modalLikeIcon.dataset.storyId = storyData.story_id;
+          modalLikeIcon.dataset.liked = storyData.is_liked ? "true" : "false";
+          modalDislikeIcon.dataset.storyId = storyData.story_id;
+          modalDislikeIcon.dataset.disliked = storyData.is_disliked ? "true" : "false";
+
+          // Update like/dislike counts
+          modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
+          modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
+
+          // Update icons based on is_liked/is_disliked
+          modalLikeIcon.classList.toggle("fa-solid", storyData.is_liked);
+          modalLikeIcon.classList.toggle("fa-regular", !storyData.is_liked);
+          modalDislikeIcon.classList.toggle("fa-solid", storyData.is_disliked);
+          modalDislikeIcon.classList.toggle("fa-regular", !storyData.is_disliked);
+
+          // Update satellite icon data attributes
+          modalSatelliteIcon.dataset.storyId = storyData.story_id;
+          modalSatelliteIcon.dataset.storyTitle = storyData.title;
+          modalSatelliteIcon.dataset.storyDescription = storyData.description || "";
+
+          // Update published date and view count
+          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar"></i>&nbsp;${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
+          modalViewCount.innerHTML = `<i class="fa-regular fa-eye"></i>&nbsp;${storyData.clicks}&nbsp;views`;
+
+          initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
+          // Show the modal
+          infomundiStoryModal.show();
         }
-
-        if (storyData.is_disliked) {
-          modalDislikeIcon.classList.remove('fa-regular');
-          modalDislikeIcon.classList.add('fa-solid');
-        } else {
-          modalDislikeIcon.classList.remove('fa-solid');
-          modalDislikeIcon.classList.add('fa-regular');
-        }
-
-        // Update the satellite icon data attributes
-        modalSatelliteIcon.dataset.storyId = storyData.story_id;
-        modalSatelliteIcon.dataset.storyTitle = storyData.title;
-        modalSatelliteIcon.dataset.storyDescription = storyData.description || '';
-
-        // Update published date and view count
-        modalPublishedDate.innerHTML = `${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
-        modalViewCount.innerHTML = `${storyData.clicks}&nbsp;views`;
-
-        // Show the modal
-        const infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"));
-        infomundiStoryModal.show();
       });
     });
   }
@@ -495,62 +536,110 @@ document.addEventListener("DOMContentLoaded", function() {
     colDiv.appendChild(cardDiv);
 
     cardDiv.dataset.storyData = JSON.stringify(item);
+
+    // Initialize like/dislike states
+    initializeLikeDislikeIcons(item.story_id, likeIcon, dislikeIcon);
+
     return colDiv;
   }
 
 
   // Function to handle like and dislike actions
   function handleLikeDislike(action, storyId, likeIcon, dislikeIcon, likeCount, dislikeCount) {
+    // Fetch the saved likes/dislikes data from localStorage
+    let savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+
+    // Determine the new state for localStorage
+    let newAction = null;
+    if (action === 'like') {
+        if (savedInteractions[storyId]?.action === 'like') {
+            // Toggle off like
+            delete savedInteractions[storyId];
+        } else {
+            // Set to like
+            savedInteractions[storyId] = { action: 'like' };
+            newAction = 'like';
+        }
+    } else if (action === 'dislike') {
+        if (savedInteractions[storyId]?.action === 'dislike') {
+            // Toggle off dislike
+            delete savedInteractions[storyId];
+        } else {
+            // Set to dislike
+            savedInteractions[storyId] = { action: 'dislike' };
+            newAction = 'dislike';
+        }
+    }
+
+    // Save the updated interactions to localStorage
+    localStorage.setItem('storyInteractions', JSON.stringify(savedInteractions));
+
+    // Update the UI optimistically
+    const isLiked = savedInteractions[storyId]?.action === 'like';
+    const isDisliked = savedInteractions[storyId]?.action === 'dislike';
+
+    likeIcon.classList.toggle('fa-solid', isLiked);
+    likeIcon.classList.toggle('fa-regular', !isLiked);
+    dislikeIcon.classList.toggle('fa-solid', isDisliked);
+    dislikeIcon.classList.toggle('fa-regular', !isDisliked);
+
+    // Update counts optimistically
+    let likes = parseInt(likeCount.textContent.trim()) || 0;
+    let dislikes = parseInt(dislikeCount.textContent.trim()) || 0;
+
+    if (newAction === 'like') {
+        likes++;
+        if (isDisliked) dislikes--; // Remove previous dislike
+    } else if (newAction === 'dislike') {
+        dislikes++;
+        if (isLiked) likes--; // Remove previous like
+    }
+
+    likeCount.textContent = ` ${Math.max(likes, 0)}`;
+    dislikeCount.textContent = ` ${Math.max(dislikes, 0)}`;
+
+    // Inform the server about the action
     const url = `/api/story/${action}`;
 
     fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: storyId })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: storyId })
     })
     .then(response => {
-      if (!response.ok) {
-        return response.json().then(errorData => {
-          throw new Error(errorData.message || 'Error performing action');
-        });
-      }
-      return response.json();
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || 'Error performing action');
+            });
+        }
+        return response.json();
     })
     .then(data => {
-      // Update data attributes
-      likeIcon.dataset.liked = data.is_liked ? 'true' : 'false';
-      dislikeIcon.dataset.disliked = data.is_disliked ? 'true' : 'false';
-
-      // Update the like icon and count
-      if (data.is_liked) {
-        likeIcon.classList.remove('fa-regular');
-        likeIcon.classList.add('fa-solid');
-        likeCount.textContent = ` ${data.likes}`; // Update the like count
-      } else {
-        likeIcon.classList.remove('fa-solid');
-        likeIcon.classList.add('fa-regular');
-        likeCount.textContent = ` ${data.likes}`; // Update the like count
-      }
-
-      // Update the dislike icon and count
-      if (data.is_disliked) {
-        dislikeIcon.classList.remove('fa-regular');
-        dislikeIcon.classList.add('fa-solid');
-        dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
-      } else {
-        dislikeIcon.classList.remove('fa-solid');
-        dislikeIcon.classList.add('fa-regular');
-        dislikeCount.textContent = ` ${data.dislikes}`; // Update the dislike count
-      }
+        // Update counts based on server response
+        likeCount.textContent = ` ${data.likes}`;
+        dislikeCount.textContent = ` ${data.dislikes}`;
     })
     .catch(error => {
-      // Display the error message to the user
-      alert(error.message);
+        // Rollback the optimistic UI update if the server request fails
+        alert(error.message);
+
+        // Revert to the previous state from localStorage
+        const previousState = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+        const wasLiked = previousState[storyId]?.action === 'like';
+        const wasDisliked = previousState[storyId]?.action === 'dislike';
+
+        likeIcon.classList.toggle('fa-solid', wasLiked);
+        likeIcon.classList.toggle('fa-regular', !wasLiked);
+        dislikeIcon.classList.toggle('fa-solid', wasDisliked);
+        dislikeIcon.classList.toggle('fa-regular', !wasDisliked);
+
+        // Revert counts
+        likeCount.textContent = ` ${likes}`;
+        dislikeCount.textContent = ` ${dislikes}`;
     });
   }
-
 
   // Function to calculate relative time
   function timeAgo(dateString) {
@@ -573,7 +662,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return `${differenceInDays}&nbsp;days&nbsp;ago`;
     }
   }
-
 
   // Function to update time ago for all date-info elements
   function updateTimeAgo() {

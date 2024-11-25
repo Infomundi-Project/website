@@ -8,56 +8,48 @@
 
 
 <div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <!-- Modal Header -->
-          <div class="modal-header position-relative p-0">
-            <img src="https://bucket.infomundi.net/stories/br_general/00fb9c4fbce03fcd8fb49c180cf35445.avif" alt="Modal Header Image">
-            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
-            <div class="position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(to top, #181818, transparent);">
-              <h1 class="text-uppercase fw-bold">Votação transcorre no Uruguai após campanha morna, mas acirrada</h1>
-              <div class="row d-flex align-items-center mt-3">
-                <div class="col-6 d-block">
-                <span id="publishedDateStoryModal">24/11/2024</span><span class="mx-1">&#x2022;</span><span id="viewCountStoryModal">X views</span>
-                </div>
-              <div class="col-6 d-flex justify-content-end d-block">
-                <span class="fs-4">
-                <i class="fa-regular fa-thumbs-up" data-story-id="008951a432d6e8ad89a361c043cedd11" data-liked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-thumbs-down mx-4" data-story-id="008951a432d6e8ad89a361c043cedd11" data-disliked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-bookmark" style="cursor: pointer;"></i><i class="fa-solid fa-satellite-dish ms-4 satellite-share-button" style="cursor: pointer;"></i></span>
-              </div>
-              </div>
+  <div class="modal-dialog modal-{% if is_mobile %}lg{% else %}xl{% endif %} modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header position-relative p-0">
+        <!-- Image -->
+        <img 
+          src="https://bucket.infomundi.net/stories/br_general/00fb9c4fbce03fcd8fb49c180cf35445.avif" 
+          alt="Modal Header Image"
+          >
+        <!-- Close Button -->
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Headline Container -->
+        <div class="headline-container">
+          <h1 class="text-uppercase fw-bold">Story Title</h1>
+          <div class="row d-flex align-items-center mt-3">
+            <div class="col-lg-6 d-block">
+              <span id="publishedDateStoryModal">24/11/2024</span><span class="mx-2">&#x2022;</span><span id="viewCountStoryModal">X views</span>
+            </div>
+            <div class="col-lg-6 {% if is_mobile %}mt-2{% else %}d-flex justify-content-end d-block{% endif %}">
+              <span class="fs-4">
+              <i class="fa-regular fa-thumbs-up" data-story-id="008951a432d6e8ad89a361c043cedd11" data-liked="false" style="cursor: pointer;"><span> 0</span></i>
+              <i class="fa-regular fa-thumbs-down mx-4" data-story-id="008951a432d6e8ad89a361c043cedd11" data-disliked="false" style="cursor: pointer;"><span> 0</span></i>
+              <i class="fa-regular fa-bookmark" style="cursor: pointer;"></i>
+              <i class="fa-solid fa-satellite-dish ms-4 satellite-share-button" style="cursor: pointer;"></i>
+              </span>
             </div>
           </div>
-
-          <!-- Modal Body -->
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-8">
-                <div class="d-flex align-items-center mb-3">
-                  <span class="match-rate me-3">54% Match</span>
-                </div>
-                <p>The film's premise is about a group of warriors and scientists, who gathered at the “Oude Kerk” in Amsterdam to stage a crucial event from the past, in a desperate attempt to rescue the world from destructive robots.</p>
-              </div>
-              <div class="col-md-4">
-                <div class="mb-2">
-                  <span>Published By: </span>
-                  <span>Vanja Rukavina, Denise Rebergen, Rogier Schippers, Derek de Lint, Sergio Hasselbaink</span>
-                </div>
-                <div class="mb-2">
-                  <span>Tags: </span>
-                  <span>Science Fiction</span>
-                </div>
-              </div>
+        </div>
+      </div>
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="row">
+          <div class="col">
+            <div class="d-flex align-items-center mb-3">
+              <span class="badge text-bg-primary">Tag 1</span><span class="badge text-bg-primary mx-2">Tag 2</span><span class="badge text-bg-primary">Tag 3</span>
             </div>
+            <p>Story Description</p>
           </div>
-
-          <!-- Modal Footer
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>-->
         </div>
       </div>
     </div>
+  </div>
+</div>
 
 
 
@@ -511,7 +503,9 @@
 </div>
 {% endblock %}
 {% block scripts %}
+
 {% assets "js_news" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
+
 {% endblock %}

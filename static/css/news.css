@@ -1,3 +1,49 @@
+  /* Modal header image styles */
+  #infomundiStoryModal .modal-header {
+    position: relative;
+    padding: 0;
+  }
+
+  #infomundiStoryModal .modal-header img {
+    width: 100%;
+    max-height: 650px; /* Constrain maximum image height */
+    min-height: 200px; /* Ensure minimum space for text */
+    object-fit: cover; /* Maintain aspect ratio without distortion */
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  /* Headline container */
+  #infomundiStoryModal .modal-header .headline-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(24, 24, 24, 0.9), transparent);
+    color: white;
+  }
+
+  /* Multi-line headline text */
+  #infomundiStoryModal .modal-header h1 {
+    font-size: 1.25rem; /* Default size for smaller screens */
+    line-height: 1.4;
+    max-height: 4rem; /* Allow for 3 lines of text */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  /* Adjustments for larger screens */
+  @media (min-width: 768px) {
+    #infomundiStoryModal .modal-header h1 {
+      font-size: 1.75rem; /* Larger font for desktop */
+      max-height: 5.25rem; /* Allow for 3 lines of larger text */
+    }
+  }
+
 .modal-content {
   background-color: #181818;
   border-radius: 0.5rem;
@@ -11,13 +57,8 @@
   color: #46d369;
   font-weight: bold;
 }
-.description-badge {
-  display: inline-block;
-  border: 1px solid;
-  border-radius: 0.3rem;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.9rem;
-}
+
+
 
 
 .image-card {
