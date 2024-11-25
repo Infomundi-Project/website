@@ -2,15 +2,46 @@
 {% block styles %}
 <style>
    .story-img {
-   border-radius: 30px;
-   max-width: 70%;
-   aspect-ratio: 16 / 9;
-   object-fit: cover;
-   height: auto;
+      border-radius: 30px;
+      max-width: 70%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      height: auto;
+      position: relative; /* Ensures the logos are behind the story image */
+      z-index: 1; /* Keep story image on top of logos */
    }
 
    .inf-image-wrapper {
       max-height: 50%;
+      position: relative; /* Enables absolute positioning for pseudo-elements */
+   }
+
+   /* Left and right logos behind the image */
+   .inf-image-wrapper::before,
+   .inf-image-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-image: url('{{ url_for('static', filename='img/logos/logo-icon-dark.webp') }}');
+      background-repeat: no-repeat;
+      background-size: contain;
+      opacity: 0.75; /* Set low opacity for subtle effect */
+      width: 40%; /* Adjust size as needed */
+      height: 100%;
+      z-index: 0; /* Behind the story image */
+   }
+
+   /* Left logo */
+   .inf-image-wrapper::before {
+      left: 0;
+      background-position: left center;
+   }
+
+   /* Right logo */
+   .inf-image-wrapper::after {
+      right: 0;
+      background-position: right center;
    }
 
    @media (max-width: 968px) {
@@ -20,7 +51,11 @@
       .story-img {
          max-width: 100%;
       }
-  }
+      .inf-image-wrapper::before, .inf-image-wrapper::after {
+         background-size: 60%; /* Adjust for smaller screens */
+         width: 50%; /* Fit logos better on mobile */
+      }
+   }
 </style>
 {% endblock %}
 {% block content %}
@@ -34,9 +69,11 @@
    </nav>
    <h1 class="fw-bold mt-3 mb-3 text-uppercase">{{ story.title }}</h1>
    <p class="text-body-secondary small">Published by <a href="{{ story.link }}" target="_blank">{{ story.publisher.name }}</a>, on {{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.clicks }} view{% if story.clicks > 1 or story.clicks == 0 %}s{% endif %}</span></p>
+   
    <div class="my-5 d-flex justify-content-center inf-image-wrapper">
       <img fetchpriority="high" src="{{ story.media_content_url }}" class="story-img" alt="The image for this story">
    </div>
+
    <h2 class="fs-6 fw-light">{{ story.description|safe }}</h2>
    <hr class="mt-5 mb-3">
    {% if not story.gpt_summary %}

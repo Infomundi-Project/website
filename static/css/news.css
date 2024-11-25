@@ -1,4 +1,30 @@
-  .image-card {
+.modal-content {
+  background-color: #181818;
+  border-radius: 0.5rem;
+  color: white;
+}
+.modal-header img {
+  width: 100%;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+.match-rate {
+  color: #46d369;
+  font-weight: bold;
+}
+.description-badge {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.9rem;
+}
+.cast span:hover, .genres span:hover, .show span:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+.image-card {
   position: relative;
   }
 

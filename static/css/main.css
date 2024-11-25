@@ -7,14 +7,6 @@
 }
 
 @font-face {
-  font-family: 'Alexandria';
-  src: url('/static/fonts/Alexandria-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'RobotoMono';
   src: url('/static/fonts/RobotoMono-Medium.ttf') format('truetype');
   font-weight: normal;

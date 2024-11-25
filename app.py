@@ -68,6 +68,8 @@ def serve_file(filename):
     if filename in ('ads.txt', 'favicon.ico', 'robots.txt', 'security.txt', 'pubkey.asc'):
         return send_from_directory(os_path.join(app.root_path, 'static'),
             filename, mimetype='image/x-icon' if filename == 'favicon.ico' else 'text/plain')
+    else:
+        abort(404)
 
 
 # CSRF Configuration
@@ -126,7 +128,8 @@ def add_headers(response):
         "style-src 'self' 'unsafe-inline' https://*.infomundi.net https://fonts.googleapis.com https://www.gstatic.com; "
         
         "base-uri 'self' https://*.infomundi.net; "
-        "font-src 'self' https://*.infomundi.net"
+        "font-src 'self' https://*.infomundi.net; "
+        "frame-ancestors 'self' https://*.infomundi.net"
     )
 
     if request.path.startswith('/static'):

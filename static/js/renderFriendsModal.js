@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(response => response.json())
       .then(data => {
         // Adjust message based on friend count
-        totalFriendsElement.innerHTML = `${data.total_friends}&nbsp;<i class="fa-solid fa-user-group"></i>`;
+        totalFriendsElement.innerHTML = `${data.total_friends}<i class="fa-solid fa-user-group ms-2 fa-sm"></i>`;
 
         const onlineFriendsElement = document.getElementById('onlineFriends');
         if (onlineFriendsElement) {

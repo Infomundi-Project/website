@@ -1,4 +1,51 @@
 document.addEventListener("DOMContentLoaded", function() {
+  // Modal element selectors
+  const modalTitle = document.querySelector("#infomundiStoryModal .modal-header h1");
+  const modalImage = document.querySelector("#infomundiStoryModal .modal-header img");
+  const modalDescription = document.querySelector("#infomundiStoryModal .modal-body p");
+  const modalCast = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(1) span:last-child");
+  const modalGenres = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(2) span:last-child");
+  const modalAttributes = document.querySelector("#infomundiStoryModal .modal-body .col-md-4 div:nth-child(3) span:last-child");
+  const modalPlayButton = document.querySelector("#infomundiStoryModal .modal-header .btn.btn-light");
+
+  // Attach event listener to dynamically created story cards
+  function attachModalEvents() {
+    const storyCards = document.querySelectorAll(".card.image-card");
+
+    storyCards.forEach((card) => {
+      card.addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent navigation
+
+        // Extract story data from the clicked card
+        const storyId = this.id.split("-")[0];
+        const storyTitle = this.querySelector(".card-title").textContent.trim();
+        const storyDescription = this.querySelector(".card-text").textContent.trim();
+        const storyImage = this.querySelector("img").src;
+
+        // Fetch or predefine additional information for the modal
+        const storyCast = this.dataset.cast || "Unknown cast";
+        const storyGenres = this.dataset.genres || "Unknown genres";
+        const storyAttributes = this.dataset.attributes || "No attributes provided";
+
+        // Update modal content
+        modalTitle.textContent = storyTitle;
+        modalImage.src = storyImage;
+        modalDescription.textContent = storyDescription;
+        modalCast.textContent = storyCast;
+        modalGenres.textContent = storyGenres;
+        modalAttributes.textContent = storyAttributes;
+
+        // Set play button action (replace URL as needed)
+        modalPlayButton.addEventListener("click", () => {
+          window.location.href = `/comments?id=${storyId}`;
+        });
+
+        // Show the modal
+        const infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"));
+        infomundiStoryModal.show();
+      });
+    });
+  }
   let middleSectionCount = 1;
 
   function addMiddleSection() {
@@ -217,6 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const storyCard = createStoryCard(item, index);
             storiesContainer.appendChild(storyCard);
           });
+          attachModalEvents(); // Attach modal events to newly created cards
           // Initialize lazy loading after new content is loaded
           if (window.lazyload) {
             lazyload();

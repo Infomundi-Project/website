@@ -436,18 +436,19 @@ def news():
         flash("We apologize, but we couldn't find the country you are looking for.")
         return redirect(url_for('views.user_redirect'))
     
-    GET_PARAMETERS = f'news?country={contry_cca2}'
-    session['last_visited_country'] = GET_PARAMETERS
+    session['last_visited_country'] = f'news?country={contry_cca2}'
 
     supported_categories = scripts.get_supported_categories(contry_cca2)
 
     seo_title = f'Infomundi - {country_name.title()} Stories'
     seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news."
 
+    modal_example = models.Story.query.get('0253bb432c95e42d8d639c301dec5608')
+
     news_page_data = scripts.news_page_processing(country_name)
     return render_template('news.html', 
-        current_time=scripts.get_current_time_in_timezone(contry_cca2),
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
+        current_time=scripts.get_current_time_in_timezone(contry_cca2),
         nation_data=scripts.get_nation_data(contry_cca2),
         supported_categories=supported_categories, 
         seo_data=(seo_title, seo_description),
@@ -461,6 +462,7 @@ def news():
         stock_date=news_page_data['stocks']['date'],
         is_global=news_page_data['is_global'],
         area_rank=news_page_data['area_rank'],
+        modal_example=modal_example
     )
 
 

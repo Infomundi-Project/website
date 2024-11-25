@@ -1,8 +1,80 @@
 {% extends "base.html" %} {% block title %}{{ country_name }}{% endblock %}
 {% block header %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/news.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}">
 {% endblock %}
 {% block content %}
+
+
+
+
+<div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header position-relative p-0">
+            <img src="https://bucket.infomundi.net/stories/br_general/00fb9c4fbce03fcd8fb49c180cf35445.avif" alt="Modal Header Image">
+            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(to top, #181818, transparent);">
+              <h1 class="text-uppercase fw-bold">Votação transcorre no Uruguai após campanha morna, mas acirrada</h1>
+              <div class="row d-flex align-items-center mt-3">
+                  <div class="col-6 d-block">
+                <button class="btn btn-light me-3">
+                  <i class="fa-solid fa-newspaper me-1"></i>Details
+                </button>
+              </div>
+              <div class="col-6 d-flex justify-content-end d-block">
+                <span class="fs-4">
+                <i class="fa-regular fa-thumbs-up" data-story-id="008951a432d6e8ad89a361c043cedd11" data-liked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-thumbs-down mx-4" data-story-id="008951a432d6e8ad89a361c043cedd11" data-disliked="false" style="cursor: pointer;"><span> 0</span></i><i class="fa-regular fa-bookmark" style="cursor: pointer;"></i><i class="fa-solid fa-satellite-dish ms-4 satellite-share-button" style="cursor: pointer;"></i></span>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="d-flex align-items-center mb-3">
+                  <span class="match-rate me-3">54% Match</span>
+                  <span>Published</span>
+                </div>
+                <p>The film's premise is about a group of warriors and scientists, who gathered at the “Oude Kerk” in Amsterdam to stage a crucial event from the past, in a desperate attempt to rescue the world from destructive robots.</p>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-2">
+                  <span>Cast: </span>
+                  <span>Vanja Rukavina, Denise Rebergen, Rogier Schippers, Derek de Lint, Sergio Hasselbaink</span>
+                </div>
+                <div class="mb-2">
+                  <span>Genres: </span>
+                  <span>Science Fiction</span>
+                </div>
+                <div>
+                  <span>This show is: </span>
+                  <span>Fictional war, killer robot, man vs machine</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>-->
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
 <div class="row">
   <div class="col-lg-2">
 

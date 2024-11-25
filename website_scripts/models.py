@@ -96,7 +96,11 @@ class User(db.Model, UserMixin):
     def check_is_online(self):
         now = datetime.utcnow()
         online_threshold = timedelta(minutes=3)
-        return (now - self.last_activity) <= online_threshold
+        
+        self.is_online = (now - self.last_activity) <= online_threshold
+        db.session.commit()
+
+        return self.is_online
 
 
     def add_ip_history(self, ip_address, user_agent):
