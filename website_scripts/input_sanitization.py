@@ -10,6 +10,18 @@ from collections import deque
 from . import security_util, config
 
 
+
+def clean_publisher_name(name):
+    # Remove common patterns
+    name = re.sub(r' - Latest.*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r' - Breaking.*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\|.*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'–.*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'News24.*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\s+', ' ', name).strip()  # Clean up extra spaces
+    return name
+
+
 def decode_html_entities(text):
     """
     Decodes a string of HTML entities until it no longer changes. Returns the decoded string.

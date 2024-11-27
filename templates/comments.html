@@ -131,8 +131,8 @@
    </div>
    {% endif %}
    {% endif %}
-   <div class="mt-5">
       <!--<script defer src="https://commento.infomundi.net/comentario.js"></script>-->
+   <div class="mt-5">
       <comentario-comments auto-init="false" live-update="true" lang="{% if page_language == 'pt' %}pt-BR{% else %}{{ page_language }}{% endif %}" page-id="/comments?id={{ story.story_id }}" max-level="5" theme="{{ request.cookies.get('theme', 'light') }}"></comentario-comments>
    </div>
    <div class="container">
@@ -162,9 +162,6 @@
    src="{{ url_for('static', filename='js/fetchGptSummary.js') }}"
    ></script>
 {% endif %}
-<script nonce="{{ nonce }}">
-   window.userAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
-</script>
 <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
       ></script>

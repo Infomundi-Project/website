@@ -112,13 +112,16 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
         log_message(f'Invalid url: {rss_url}')
         return {}
     
-    try:
-        response = get_request(rss_url, timeout=6, headers=headers)
-        if response.status_code not in (200, 301, 302):
-            log_message(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
-            return {}
-    except Exception:
-        return {}
+    for possibility in ('', 'feed', 'rss'):
+        try:
+            response = get_request(rss_url + f'/{possibility}' if not rss_url.endswith('/') else possibility, timeout=5, headers=headers)
+            if response.status_code not in (200, 301, 302):
+                log_message(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
+                continue
+
+            feed = parse(response.content)
+        except Exception:
+            continue
 
     # Tries to parse the content
     try:

@@ -22,10 +22,14 @@
         <div class="headline-container">
           <h1 class="text-uppercase fw-bold">Story Title</h1>
           <div class="row d-flex align-items-center mt-3">
-            <div class="col-lg-6 d-block">
+            <div class="col-lg-8 d-block">
+              <div id="publisherContainer" class="d-flex align-items-center mb-2">
+                <img id="publisherLogo" src="" alt="Publisher Logo" class="rounded me-2" style="width: 30px; display: none;">
+                <span id="publisherName" class="fw-bold"></span>
+              </div>
               <span id="publishedDateStoryModal">24/11/2024</span><span class="mx-2">&#x2022;</span><span id="viewCountStoryModal">X views</span>
             </div>
-            <div class="col-lg-6 {% if is_mobile %}mt-2{% else %}d-flex justify-content-end d-block{% endif %}">
+            <div class="col-lg-4 {% if is_mobile %}mt-2{% else %}d-flex justify-content-end d-block{% endif %}">
               <span class="fs-4">
               <i class="fa-regular fa-thumbs-up" data-story-id="008951a432d6e8ad89a361c043cedd11" data-liked="false" style="cursor: pointer;"><span> 0</span></i>
               <i class="fa-regular fa-thumbs-down mx-4" data-story-id="008951a432d6e8ad89a361c043cedd11" data-disliked="false" style="cursor: pointer;"><span> 0</span></i>
@@ -44,6 +48,9 @@
               <span class="badge text-bg-primary">Tag 1</span><span class="badge text-bg-primary mx-2">Tag 2</span><span class="badge text-bg-primary">Tag 3</span>
             </div>
             <p>Story Description</p>
+            <div id="commentsSection" class="mt-5">
+              
+           </div>
           </div>
         </div>
       </div>

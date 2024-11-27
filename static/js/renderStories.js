@@ -8,7 +8,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const modalTitle = modalElement.querySelector(".modal-header h1");
   const modalImage = modalElement.querySelector(".modal-header img");
   const modalDescription = modalElement.querySelector(".modal-body p");
-  const modalPublishedBy = modalElement.querySelector(".modal-body .col-md-4 div:nth-child(1) span:last-child");
+  const modalPublisherContainer = modalElement.querySelector("#publisherContainer");
+  const modalPublisherLogo = modalElement.querySelector("#publisherLogo");
+  const modalPublisherName = modalElement.querySelector("#publisherName");
+
   const modalTagsContainer = modalElement.querySelector(".modal-body .d-flex.align-items-center");
   const modalLikeIcon = modalElement.querySelector(".fa-thumbs-up");
   const modalDislikeIcon = modalElement.querySelector(".fa-thumbs-down");
@@ -31,6 +34,62 @@ document.addEventListener("DOMContentLoaded", function() {
       dislikeIcon.classList.toggle('fa-solid', isDisliked);
       dislikeIcon.classList.toggle('fa-regular', !isDisliked);
   }
+
+  function initializeComments(storyId, language) {
+    const commentsContainer = document.querySelector("#commentsSection");
+    if (commentsContainer) {
+        const commentsElements = document.querySelectorAll("comentario-comments");
+        commentsElements.forEach((element) => element.remove());
+        console.log("Comentario-related elements removed.");
+
+        const newCommentsElement = document.createElement("comentario-comments");
+        newCommentsElement.setAttribute("lang", language || "en");
+        newCommentsElement.setAttribute("page-id", `/comments?id=${storyId}`);
+        newCommentsElement.setAttribute("auto-init", "false");
+        newCommentsElement.setAttribute("live-update", "true");
+        newCommentsElement.setAttribute("theme", document.cookie.includes("theme=dark") ? "dark" : "light");
+
+        commentsContainer.appendChild(newCommentsElement);
+
+        if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
+            Comentario.main().then(() => {
+                console.log("Comentario reinitialized.");
+            });
+        }
+    }
+  }
+
+  function unloadComentarioScript() {
+    // Remove the script tag for comentario.js
+    const existingScript = document.querySelector('script[src="https://commento.infomundi.net/comentario.js"]');
+    if (existingScript) {
+        existingScript.remove();
+        console.log("Comentario script removed.");
+    }
+
+    // Clean up global variables/functions if Comentario exposes them
+    if (typeof window.Comentario !== "undefined") {
+        delete window.Comentario;
+        console.log("Comentario global object removed.");
+    }
+
+    // Remove any associated DOM elements if necessary
+    const commentsElements = document.querySelectorAll("comentario-comments");
+    commentsElements.forEach((element) => element.remove());
+    console.log("Comentario-related elements removed.");
+  }
+
+
+  function reinitializeComentario(commentsElement) {
+      if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
+          Comentario.main().then(() => {
+              if (window.userAuthenticated && typeof commentsElement.nonInteractiveSsoLogin === "function") {
+                  commentsElement.nonInteractiveSsoLogin();
+              }
+          }).catch((error) => console.error("Failed to initialize Comentario:", error));
+      }
+  }
+
 
   // Define event listeners for modal icons
   modalLikeIcon.addEventListener('click', function() {
@@ -65,12 +124,14 @@ document.addEventListener("DOMContentLoaded", function() {
     modalTitle.textContent = "";
     modalImage.src = "";
     modalDescription.textContent = "";
-    modalPublishedBy.textContent = "";
     modalTagsContainer.innerHTML = ""; // Clear the tags container
     modalLikeCount.innerHTML = "&nbsp;0";
     modalDislikeCount.innerHTML = "&nbsp;0";
     modalPublishedDate.innerHTML = "";
     modalViewCount.innerHTML = "";
+    modalPublisherName.textContent = "";
+    modalPublisherLogo.src = "";
+    modalPublisherLogo.style.display = "none";
     modalLikeIcon.dataset.storyId = "";
     modalDislikeIcon.dataset.storyId = "";
     modalSatelliteIcon.dataset.storyId = "";
@@ -113,6 +174,23 @@ document.addEventListener("DOMContentLoaded", function() {
             });
           }
 
+          // Update publisher logo and name
+          if (storyData.publisher) {
+            const { name, favicon } = storyData.publisher;
+
+            modalPublisherName.textContent = name || "Unknown Publisher";
+
+            if (favicon) {
+              modalPublisherLogo.src = favicon;
+              modalPublisherLogo.style.display = "inline"; // Show the logo if available
+            } else {
+              modalPublisherLogo.style.display = "none"; // Hide the logo if not available
+            }
+          } else {
+            modalPublisherName.textContent = "Unknown Publisher";
+            modalPublisherLogo.style.display = "none"; // Hide the logo if publisher info is not provided
+          }
+
           // Update data attributes for the icons
           modalLikeIcon.dataset.storyId = storyData.story_id;
           modalLikeIcon.dataset.liked = storyData.is_liked ? "true" : "false";
@@ -137,6 +215,8 @@ document.addEventListener("DOMContentLoaded", function() {
           // Update published date and view count
           modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar"></i>&nbsp;${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
           modalViewCount.innerHTML = `<i class="fa-regular fa-eye"></i>&nbsp;${storyData.clicks}&nbsp;views`;
+          // Initialize comments section for the selected story
+          initializeComments(storyData.story_id, storyData.language);
 
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
           // Show the modal
@@ -146,6 +226,33 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  function loadScript(src, callback) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.onload = callback;
+    document.body.appendChild(script);
+  }
+
+  function loadComentarioScript() {
+    const existingScript = document.querySelector('script[src="https://commento.infomundi.net/comentario.js"]');
+    if (!existingScript) {
+      loadScript('https://commento.infomundi.net/comentario.js', () => {
+        const cc = document.getElementsByTagName('comentario-comments').item(0);
+        if (cc) {
+          if (window.userAuthenticated) {
+            cc.main().then(() => cc.nonInteractiveSsoLogin());
+          } else {
+            cc.main();
+          }
+        }
+        console.log("Comentario script loaded.");
+      });
+    }
+  }
+
+  loadComentarioScript();
+  
   let middleSectionCount = 1;
 
   function addMiddleSection() {
