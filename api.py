@@ -288,22 +288,16 @@ def search():
     return redirect(f'https://infomundi.net/news?country={code}')
 
 
-@api.route('/summarize_story', methods=['GET'])
-def summarize_story():
-    # This avoids abusive behavior. People can't simply pass a GET argument with the story id.
-    news_id = session.get('visited_news', '')
-    if not news_id:
-        # 406 = Not acceptable
-        return jsonify({'success': False}), 406
-
-    story = models.Story.query.get(news_id)
+@api.route('/story/summarize/<story_id>', methods=['GET'])
+def summarize_story(story_id):
+    story = models.Story.query.get(story_id)
     if story.gpt_summary:
-        return jsonify({'success': False}), 406
+        return jsonify({'response': story.gpt_summary}), 200
 
     response = scripts.gpt_summarize(story.link)
     if response:
         # We convert the json response to a dict in order to store it in the database
-        story.gpt_summary = json_util.loads_json(response)
+        story.gpt_summary = response
         extensions.db.session.commit()
     else:
         return jsonify({'response': response}), 500
@@ -312,7 +306,7 @@ def summarize_story():
 
 
 @api.route('/get_stories', methods=['GET'])
-#@extensions.cache.cached(timeout=60*10, query_string=True) # 10 min cached
+@extensions.cache.cached(timeout=60*5, query_string=True) # 5 min cached
 def get_stories():
     """Returns jsonified list of stories based on certain criteria. Cached for 1h (60s * 60)."""
     country = request.args.get('country', 'br', type=str).lower()

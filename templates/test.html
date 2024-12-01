@@ -1,289 +1,74 @@
 {% extends "base.html" %}{% block title %}Testing Page{% endblock %}
 {% block styles %}
 <style type="text/css">
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-
-
-.dropdown-menu{
-    &.show{
-        -webkit-animation: fadeIn 0.3s alternate; /* Safari 4.0 - 8.0 */
-         animation: fadeIn 0.3s alternate;
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
     }
-}
-
-
-.nav-item.dropdown.dropdown-mega{
-    position: static;
-    .dropdown-menu{
-        width: 90%;
-        top: auto;
-        left: 5%;
+    .header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+      margin-right: 10px;
     }
-}
-
-.hamburger-button{
-    border: none;
-    padding: 0;
-    outline: none;
-    &:focus{
-        box-shadow: none;
+    .content {
+      position: relative;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
     }
-    .hamburger-toggle{
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 50px;
-        z-index: 11;
-        float: right;
-        .hamburger {
-            position: absolute;
-            transform: translate(-50%, -50%) rotate(0deg);
-            left: 50%;
-            top: 50%;
-            width: 50%;
-            height: 50%;
-            pointer-events: none;
-            span {
-                width: 100%;
-                height: 4px;
-                position: absolute;
-                background: #333;
-                border-radius: 2px;
-                z-index: 1;
-                transition: transform 0.2s cubic-bezier(0.77,0.2,0.05,1.0), background 0.2s cubic-bezier(0.77,0.2,0.05,1.0), all 0.2s ease-in-out;
-                left: 0px;
-                &:first-child{
-                    top: 10%;
-                    transform-origin: 50% 50%;
-                    transform: translate(0% -50%) !important;
-                }
-                &:nth-child(2){
-                    top: 50%;
-                    transform: translate(0,-50%);
-                }
-                &:last-child{
-                    left: 0px;
-                    top: auto;
-                    bottom: 10%;
-                    transform-origin: 50% 50%;
-                }
-            }
-            &.active{
-                span {
-                    position: absolute;
-                    margin: 0;
-                    &:first-child{
-                        top: 45%;
-                        transform: rotate(45deg);
-                    }
-                    &:nth-child(2){
-                        left: 50%;
-                        width: 0px;
-                    }
-                    &:last-child{
-                        top: 45%;
-                        transform: rotate(-45deg);
-                    }
-                }
-            }
-        }
+    .blurred-text {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      color: #6c757d;
+      font-size: 16px;
+      filter: blur(5px);
+      user-select: none; /* Prevents text selection */
+      pointer-events: none; /* Prevents interactions */
+      white-space: pre-wrap; /* Ensures text wraps properly */
     }
-}
-
-
-.icons{
-  display: inline-flex;
-  margin-left: auto;
-  a{
-    transition: all 0.2s ease-in-out;
-    padding: 0.2rem 0.4rem;
-    color: #ccc !important;
-    text-decoration: none;
-    &:hover{
-      color: white;
-      text-shadow: 0 0 30px white;
+    .progress {
+      width: 80%;
+      position: absolute;
+      bottom: 100px;
     }
-  }
-}
 </style>
 {% endblock %}
 {% block content %}
 
 
-<nav class="navbar navbar-expand-lg sticky-top shadow">
-    <div class="container">
-      <a class="navbar-brand" href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation">
-        <img src="https://infomundi.net/static/img/logos/logo-icon-dark.webp" height="500" width="500" style="height: auto; width: 10%;"> <span class="logo-text">infomundi</span>
-      </a>
-      <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
-        <div class="hamburger-toggle">
-          <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+<div class="container my-4 p-4">
+  <div class="maximus">
+    <!-- Header Section -->
+    <div class="header row align-items-start">
+      <div class="col-auto mt-2">
+        <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Profile Picture" class="border border-3 p-2">
+      </div>
+      <div class="col-6">
+        <span class="fs-3">MAXIMUS</span><span class="ms-3 small text-uppercase">Infomundi's AI</span>
+        <div class="mt-3 mb-3 border rounded">
+          <ul class="text-muted p-3 ms-3"><li>Maximus is powered by GPT 4.0</li><li>He'll access the story and gather important content</li><li>He'll separate the information in three: <strong>Important topics</strong>, <strong>context behind it</strong>, and <strong>where can I find more information</strong>.</li></ul>
         </div>
-      </button>
-      <div class="collapse navbar-collapse" id="navbar-content">
-        <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Multilevel</a>
-            <ul class="dropdown-menu shadow">
-              <li><a class="dropdown-item" href="#">Gallery</a></li>
-              <li><a class="dropdown-item" href="blog.html">Blog</a></li>
-              <li class="dropstart">
-                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Submenu Left</a>
-                <ul class="dropdown-menu shadow">
-                  <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                </ul>
-              </li>
-              <li class="dropend">
-                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Submenu Right</a>
-                <ul class="dropdown-menu shadow">
-                  <li><a class="dropdown-item" href=""> Second level 1</a></li>
-                  <li><a class="dropdown-item" href=""> Second level 2</a></li>
-                  <li><a class="dropdown-item" href=""> Second level 3</a></li>
-                  <li class="dropend">
-                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Let's go deeper!</a>
-                    <ul class="dropdown-menu dropdown-submenu shadow">
-                      <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                      <li class="dropend">
-                        <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Still don't have enough? Go much deeper!</a>
-                        <ul class="dropdown-menu dropdown-submenu shadow">
-                          <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                </ul>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item dropdown dropdown-mega position-static">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Megamenu</a>
-            <div class="dropdown-menu shadow">
-              <div class="mega-content px-4">
-                <div class="container-fluid">
-                  <div class="row">
-                    <div class="col-12 col-sm-4 col-md-3 py-4">
-                      <h5>Pages</h5>
-                      <div class="list-group">
-                        <a class="list-group-item" href="#">Accomodations</a>
-                        <a class="list-group-item" href="#">Terms & Conditions</a>
-                        <a class="list-group-item" href="#">Privacy</a>
-                      </div>
-                    </div>
-                    <div class="col-12 col-sm-4 col-md-3 py-4">
-                      <h5>Card</h5>
-                      <div class="card">
-                  <img src="https://via.placeholder.com/320x180" class="img-fluid" alt="image">
-                  <div class="card-body">
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  </div>
-                </div>
-                    </div>
-                    <div class="col-12 col-sm-4 col-md-3 py-4">
-                      <h5>Lot of Pages</h5>
-                      <p>Lorem ipsum dolo sit achmet muhamed borlan de irtka.
-                    </div>
-                    <div class="col-12 col-sm-12 col-md-3 py-4">
-                      <h5>Damn, so many</h5>
-                      <div class="list-group">
-                        <a class="list-group-item" href="#">Accomodations</a>
-                        <a class="list-group-item" href="#">Terms & Conditions</a>
-                        <a class="list-group-item" href="#">Privacy</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
-        </ul>
-        
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#" tabindex="-1" data-bs-toggle-theme="true" aria-disabled="true"><i class="fa fa-adjust"></i></a>
-          </li>
+      </div>
 
-          <li class="nav-item">
-            <img src="{{ current_user.avatar_url }}" class="rounded-circle" height="500" width="333" style="height: auto; width:10%" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation" aria-controls="offcanvasUserNavigation">
-          </li>
-        
-
-        </ul>
-
-        
-
-
-
-
-
-        <form class="d-flex">
-            <div class="input-group">
-                <input class="form-control mr-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-primary border-0" type="submit">Search</button>
-            </div>
-        </form>
-
-
+    </div>
+    <!-- Content Section -->
+    <div class="content">
+      <!-- Blurred Text -->
+      <p class="blurred-text" id="blurred-text"></p>
+      <!-- Progress Bar -->
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="progress-bar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     </div>
-  </nav>
-
-
-
-<div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center">
-  <div class="list-group list-group-checkable d-grid gap-2 border-0">
-    <input class="list-group-item-check pe-none" type="radio" name="listGroupCheckableRadios" id="listGroupCheckableRadios1" value="" checked>
-    <label class="list-group-item rounded-3 py-3" for="listGroupCheckableRadios1">
-      First radio
-      <span class="d-block small opacity-50">With support text underneath to add more detail</span>
-    </label>
-
-    <input class="list-group-item-check pe-none" type="radio" name="listGroupCheckableRadios" id="listGroupCheckableRadios2" value="">
-    <label class="list-group-item rounded-3 py-3" for="listGroupCheckableRadios2">
-      Second radio
-      <span class="d-block small opacity-50">Some other text goes here</span>
-    </label>
-
-    <input class="list-group-item-check pe-none" type="radio" name="listGroupCheckableRadios" id="listGroupCheckableRadios3" value="">
-    <label class="list-group-item rounded-3 py-3" for="listGroupCheckableRadios3">
-      Third radio
-      <span class="d-block small opacity-50">And we end with another snippet of text</span>
-    </label>
-
-    <input class="list-group-item-check pe-none" type="radio" name="listGroupCheckableRadios" id="listGroupCheckableRadios4" value="" disabled>
-    <label class="list-group-item rounded-3 py-3" for="listGroupCheckableRadios4">
-      Fourth disabled radio
-      <span class="d-block small opacity-50">This option is disabled</span>
-    </label>
   </div>
 </div>
 
@@ -291,14 +76,32 @@
 
 
 {% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function(event) {
+<script nonce="{{ nonce }}">
+const loremIpsum =
+      `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tristique dui nec ipsum varius luctus. In hendrerit molestie ante, vel imperdiet quam porta eget. Sed sodales aliquet lectus, quis suscipit dolor malesuada non. Aliquam a leo id arcu sodales sagittis. Praesent porttitor luctus hendrerit. Pellentesque sollicitudin diam gravida, sodales ante pulvinar, iaculis quam. Duis neque nisi, volutpat sit amet pretium vitae, ultricies sit amet urna. Vivamus vel nisi elit. Maecenas dapibus, ipsum eleifend posuere consectetur, neque nisl pulvinar turpis, eu eleifend nulla mauris vel leo. Proin a urna facilisis, accumsan orci et, ultricies dolor. Phasellus ut viverra dolor. Morbi mattis ligula nunc, non varius orci vehicula ac. Sed et faucibus diam. Duis et diam massa.`;
+    const textElement = document.getElementById("blurred-text");
+    const progressBar = document.getElementById("progress-bar");
+    const totalCharacters = loremIpsum.length;
+    const progressRate = 1; // Number of characters for 1% progress
+    let currentIndex = 0;
 
-  // Hamburger menu
-  var navbarToggler = document.querySelectorAll('.hamburger-button')[0];
-  navbarToggler.addEventListener('click', function(e) {
-    e.target.children[0].classList.toggle('active');
-  });
-}); 
+    function typeText() {
+      if (currentIndex < totalCharacters) {
+        // Append the next character to the text
+        textElement.textContent += loremIpsum[currentIndex];
+        currentIndex++;
+
+        // Update the progress bar
+        const progress = Math.min((currentIndex / totalCharacters) * 100, 100);
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
+
+        // Continue typing with a delay
+        setTimeout(typeText, 15); // Adjust speed
+      }
+    }
+
+    // Start the typing and progress bar update
+    typeText();
 </script>
 {% endblock %}

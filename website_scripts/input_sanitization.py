@@ -232,7 +232,7 @@ def is_valid_url(url: str) -> bool:
     """
     try:
         result = urlparse(url)
-        if all([result.scheme == "https", result.netloc]):
+        if all([result.scheme in ("http", "https"), result.netloc]):
             # Check if the netloc (domain) is valid using a regex
             netloc_regex = re.compile(r'^([A-Za-z0-9-]+\.)+[A-Za-z]{2,6}$')
             return bool(netloc_regex.match(result.netloc))

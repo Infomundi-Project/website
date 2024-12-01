@@ -395,6 +395,11 @@ The Infomundi Team"""
     return render_template('contact.html')
 
 
+@views.route('/1239102301293021930', methods=['GET'])
+def test():
+    return render_template('test.html')
+
+
 @views.route('/about', methods=['GET'])
 @captcha_required
 def about():
@@ -443,8 +448,6 @@ def news():
     seo_title = f'Infomundi - {country_name.title()} Stories'
     seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news."
 
-    modal_example = models.Story.query.get('0253bb432c95e42d8d639c301dec5608')
-
     news_page_data = scripts.news_page_processing(country_name)
     return render_template('news.html', 
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
@@ -461,8 +464,7 @@ def news():
         stock_data=news_page_data['stocks']['data'],
         stock_date=news_page_data['stocks']['date'],
         is_global=news_page_data['is_global'],
-        area_rank=news_page_data['area_rank'],
-        modal_example=modal_example
+        area_rank=news_page_data['area_rank']
     )
 
 

@@ -1,6 +1,6 @@
+import json
 from datetime import datetime, timedelta
 from requests import get as get_request
-from json import loads as json_loads
 from difflib import SequenceMatcher
 #from googletrans import Translator
 from unidecode import unidecode
@@ -233,7 +233,7 @@ def get_nation_data(cca2: str) -> dict:
     else:
         URL = f"https://restcountries.com/v3.1/alpha/{cca2.lower()}"
         r = get_request(URL)
-        data = json_loads(r.text)
+        data = json.loads(r.text)
         json_util.write_json(data, config_filepath)
     
     for country in config.HDI_DATA:
@@ -532,77 +532,112 @@ def translate(dest_lang: str, msg: str) -> str:
 """
 
 
-def gpt_summarize(url: str) -> str:
-    """This function performs an in-depth summarization of a news article found at the specified URL, 
-    and the the prompt includes the article's title and a snippet of its text to give the GPT model context.
+
+def gpt_summarize(url: str) -> dict:
+    """Summarize a news article from the provided URL and structure the response for integration with the JavaScript.
 
     Args:
         url (str): The URL of the news article to summarize.
 
-    Returns: 
-        str: A string dictionary containing the detailed analysis of the article. The dictionary includes 
-        three keys corresponding to the sections of the analysis. If the operation is unsuccessful for any reason, 
-        an empty dictionary is returned.
+    Returns:
+        dict: A dictionary with the structured summary:
+            - "addressed_topics": List of key points
+            - "context_around": Background analysis
+            - "where_can_i_find_more_information?": Additional resources
+        If the operation fails, returns an error message with details.
     """
 
-    r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
-    
-    if r.status_code not in (200, 301, 302):
-        return '{}'
-    
-    html_content = r.content
-
-    # Use BeautifulSoup to extract text
-    soup = BeautifulSoup(html_content, 'lxml')
-
-    news_title = soup.title.string.strip() if soup.title else "News Article"
-
-    # Extract relevant text from paragraphs and headings
-    article_text = ' '.join([p.get_text().strip() for p in soup.find_all(['p'])])[:1300]
-
     try:
-        lang = detect_language(article_text)
-    except Exception:
-        lang = 'en'  # Default to English if language detection fails
+        # Fetch the article content
+        r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
+        if r.status_code not in (200, 301, 302):
+            return {"error": "Failed to fetch the article. Invalid status code."}
 
-    prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
+        # Parse the article content
+        soup = BeautifulSoup(r.content, 'lxml')
+        news_title = soup.title.string.strip() if soup.title else "News Article"
+        article_text = ' '.join([p.get_text().strip() for p in soup.find_all('p')])[:1300]
+
+        # Detect the language
+        try:
+            lang = detect_language(article_text)
+        except Exception:
+            lang = 'en'  # Default to English if detection fails
+
+        # GPT prompt
+        prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
 
 ```text
 {article_text}
 ```
 
-Produce a comprehensive response based on the topic, structured into three sections, and output the result in valid JSON format, using the following keys:
+Produce a comprehensive response based on the topic. You should:
 
-    "addressed_topics": Key Takeaways - Provide a concise summary of the key points in the article using a bulleted list format. Each bullet point should capture an essential aspect of the news, ensuring clarity and succinctness while covering all major details.
+    1. Provide a concise summary of the key points in the article using a bulleted list format. Each bullet point should capture an essential aspect of the news, ensuring clarity and succinctness while covering all major details. There should be only 3 bullet points.
 
-    "context_around": Provide an extensive background analysis from an external viewpoint, not directly involved in the news. This should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding.
+    2. Provide a concise background analysis from an external viewpoint, not directly involved in the news, using a bulleted list format. Each bullet point should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding. There should be only 3 bullet points.
 
-    "where_can_i_find_more_information?": Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
+    3. Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
 
 Ensure that the JSON output is valid, with proper syntax, and that the output is in the language "{lang}". """
 
-    client = OpenAI(api_key=config.OPENAI_API_KEY)
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo-0125",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    f'You are a helpful and comprehensive assistant designed to output in JSON format. '
-                    f'The output JSON must include three keys: "addressed_topics" for the Key Takeaways as a bulleted list, '
-                    f'"context_around" for the Contextual Analysis, and '
-                    f'"where_can_i_find_more_information?" for the Research Directions. Each section should contain well-elaborated, '
-                    f'insightful paragraphs, offering a deep dive into the respective topics. Ensure that the output is in the language '
-                    f'"{lang}" and adheres to a valid JSON structure, with clear separation between keys and their corresponding textual content.'
-                )
-            },
-            {"role": "user", "content": prompt}
-        ],
-        n=1,
-        temperature=0.1
-    )
+        # Send the request to GPT
+        client = OpenAI(api_key=config.OPENAI_API_KEY)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        f"You are a helpful and comprehensive assistant designed to output in JSON format. "
+                        f"Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
+                        f"into the respective topics. Ensure that the output is in the language '{lang}' and adheres "
+                        f"to a valid JSON structure, with clear separation between keys and their corresponding textual content."
+                    )
+                },
+                {"role": "user", "content": prompt}
+            ],
+            n=1,
+            response_format={"type": "json_object"},
+            temperature=0
+        )
 
-    return response.choices[0].message.content
+        # Parse and validate JSON output
+        output = response.choices[0].message.content
+        try:
+            summary_data = json.loads(output)
+            return summary_data
+        except json.JSONDecodeError:
+            return {"error": "GPT response is not valid JSON.", "response": output}
+
+    except Exception as e:
+        return {"error": "An error occurred during summarization.", "details": str(e)}
+
+
+def transform_response(api_response: dict) -> dict:
+    """Transform the API response into the expected frontend format."""
+    try:
+        response = api_response.get("response", {})
+
+        addressed_topics = response.get("addressed_topics", {}).get("Key Takeaways", [])
+        context_around = response.get("context_around", {}).get("Background Analysis", "")
+        more_info = response.get("where_can_i_find_more_information?", {}).get("Further Investigation Guide", {})
+
+        # Extract methodologies and sources
+        methodologies = more_info.get("Methodologies", [])
+        sources = more_info.get("Sources", [])
+
+        return {
+            "addressed_topics": addressed_topics,
+            "context_around": context_around,
+            "where_can_i_find_more_information": {
+                "methodologies": methodologies,
+                "sources": sources,
+            }
+        }
+    except Exception as e:
+        return {"error": "Failed to transform API response.", "details": str(e)}
+
 
 def get_current_date_and_time() -> str:
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')

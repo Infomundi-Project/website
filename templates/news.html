@@ -2,11 +2,51 @@
 {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}">
 {% endblock %}
+{% block styles %}
+<style type="text/css">
+  .maximus-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  }
+  .maximus-header img {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  margin-right: 10px;
+  }
+  .content-placeholder {
+  display: none;
+  position: relative;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  height: 300px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  }
+  .blurred-text {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  color: #6c757d;
+  font-size: 16px;
+  filter: blur(5px);
+  user-select: none; /* Prevents text selection */
+  pointer-events: none; /* Prevents interactions */
+  white-space: pre-wrap; /* Ensures text wraps properly */
+  }
+  .progress {
+  width: 80%;
+  position: absolute;
+  bottom: 200px;
+  }
+</style>
+{% endblock %}
 {% block content %}
-
-
-
-
 <div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-{% if is_mobile %}lg{% else %}xl{% endif %} modal-dialog-centered">
     <div class="modal-content">
@@ -48,29 +88,46 @@
               <span class="badge text-bg-primary">Tag 1</span><span class="badge text-bg-primary mx-2">Tag 2</span><span class="badge text-bg-primary">Tag 3</span>
             </div>
             <p>Story Description</p>
+            <hr class="my-5">
+            <div class="maximus">
+              <!-- Header Section -->
+              <div class="maximus-header row align-items-start">
+                <div class="col-auto mt-2">
+                  <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Profile Picture" class="border border-3 p-2">
+                </div>
+                <div class="col-md-10">
+                  <span class="fs-3">MAXIMUS</span><span class="ms-3 small text-uppercase">Infomundi's AI</span>
+                  <div class="mt-3 mb-3 border rounded">
+                    <ul class="p-3 ms-3">
+                      <li>Maximus is powered by GPT 4.0</li>
+                      <li>He'll access the story and gather important content</li>
+                      <li>He'll separate the information in three: <strong>Important topics</strong>, <strong>context behind it</strong>, and <strong>where can I find more information</strong></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <!-- Content Section -->
+              <div class="content-placeholder">
+                <!-- Blurred Text -->
+                <p class="blurred-text" id="blurred-text"></p>
+                <!-- Progress Bar -->
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="progress-bar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+              <div class="maximus-api-response"></div>
+            </div>
             <div id="commentsSection" class="mt-5">
-              
-           </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
-
-
-
 <div class="row">
+  {% if not is_mobile %}
   <div class="col-lg-2">
-
-    {% if not is_mobile %}
     <div class="left-pillar-wrapper h-100">
       <div class="pillar-container-left pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Pillar" class="pillar-top">
@@ -78,68 +135,61 @@
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Pillar" class="pillar-bottom">
       </div>
     </div>
-    {% endif %}
-
   </div>
-  <div class="col-lg-8">
-  <div class="row my-3 align-items-center justify-content-center">
-    <div class="col-md-3">
-
-      {% if not is_mobile %}
-      <!-- Left Column Accordions -->
-      <div class="accordion" id="accordionLeft">
-
-        <!-- Accordion Item 1: Geographic Information -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingGeography">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
+  {% endif %}
+  <div class="col-lg-{% if not is_mobile %}8{% else %}12{% endif %}">
+    <div class="row my-3 align-items-center justify-content-center">
+      <div class="col-md-3">
+        {% if not is_mobile %}
+        <!-- Left Column Accordions -->
+        <div class="accordion" id="accordionLeft">
+          <!-- Accordion Item 1: Geographic Information -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGeography">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
               Geographic Information
-            </button>
-          </h2>
-          <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
-            <div class="accordion-body">
-              <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
-              <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
-              <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
-              <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
+              </button>
+            </h2>
+            <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
+              <div class="accordion-body">
+                <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
+                <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
+                <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
+                <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- Accordion Item 2: Demographics and Society -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingDemographics">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
+          <!-- Accordion Item 2: Demographics and Society -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDemographics">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
               Demographics and Society
-            </button>
-          </h2>
-          <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
-            <div class="accordion-body">
-              <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
-              <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
-              {% if main_religion %}
-              <p><strong>Main Religion:</strong> {{ main_religion }}</p>
-              {% endif %}
-              <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
-              <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
+              </button>
+            </h2>
+            <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
+              <div class="accordion-body">
+                <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
+                <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
+                {% if main_religion %}
+                <p><strong>Main Religion:</strong> {{ main_religion }}</p>
+                {% endif %}
+                <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
+                <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
+              </div>
             </div>
           </div>
         </div>
-
+        {% endif %}
       </div>
-      {% endif %}
-
-    </div>
-    <div class="col-md-6 text-center my-4">
-      <a class="fs-1 fw-bold text-decoration-none text-reset" href="/news?country={{ country_code }}">
+      <div class="col-md-6 text-center my-4">
+        <a class="fs-1 fw-bold text-decoration-none text-reset" href="/news?country={{ country_code }}">
         <img src="https://infomundi.net/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
-      </a>
-      <br>
-      {% if not nation_data %}
-      <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
-      {% endif %}
-
-      <div class="input-group justify-content-center mt-3">
+        </a>
+        <br>
+        {% if not nation_data %}
+        <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
+        {% endif %}
+        <div class="input-group justify-content-center mt-3">
           <button aria-label="Submit search button" type="submit" class="input-group-text {% if is_light_mode %}border-black border-opacity-50{% endif %}" id="search-icon">
           <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -154,349 +204,327 @@
             name="query"
             />
         </div>
-    </div>
-    <div class="col-md-3">
-
-      {% if not is_mobile %}
-      <!-- Right Column Accordions -->
-      <div class="accordion" id="accordionRight">
-
-        <!-- Accordion Item 3: Government and Politics -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingGovernment">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
+      </div>
+      <div class="col-md-3">
+        {% if not is_mobile %}
+        <!-- Right Column Accordions -->
+        <div class="accordion" id="accordionRight">
+          <!-- Accordion Item 3: Government and Politics -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGovernment">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
               Government and Politics
-            </button>
-          </h2>
-          <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionRight">
-            <div class="accordion-body">
-              <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
-              <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
-              <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
+              </button>
+            </h2>
+            <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionRight">
+              <div class="accordion-body">
+                <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
+                <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
+                <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- Accordion Item 4: Economy -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingEconomy">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
+          <!-- Accordion Item 4: Economy -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEconomy">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
               Economy
-            </button>
-          </h2>
-          <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionRight">
-            <div class="accordion-body">
-              {% if gdp_per_capita != None and gdp != None %}
-              <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
-              <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
+              </button>
+            </h2>
+            <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionRight">
+              <div class="accordion-body">
+                {% if gdp_per_capita != None and gdp != None %}
+                <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
+                <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
+                {% endif %}
+                <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="accordion" id="accordionMain">
+          <!-- Accordion Item 1: Geographic Information -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCountry">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCountry" aria-expanded="false" aria-controls="collapseCountry">
+              Country's Information
+              </button>
+            </h2>
+            <div id="collapseCountry" class="accordion-collapse collapse" aria-labelledby="headingCountry" data-bs-parent="#accordionMain">
+              <div class="accordion-body">
+                <div class="accordion" id="accordionLeft">
+                  <!-- Accordion Item 1: Geographic Information -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGeography">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
+                      Geographic Information
+                      </button>
+                    </h2>
+                    <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
+                      <div class="accordion-body">
+                        <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
+                        <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
+                        <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
+                        <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Accordion Item 2: Demographics and Society -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDemographics">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
+                      Demographics and Society
+                      </button>
+                    </h2>
+                    <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
+                      <div class="accordion-body">
+                        <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
+                        <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
+                        {% if main_religion %}
+                        <p><strong>Main Religion:</strong> {{ main_religion }}</p>
+                        {% endif %}
+                        <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
+                        <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGovernment">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
+                      Government and Politics
+                      </button>
+                    </h2>
+                    <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionLeft">
+                      <div class="accordion-body">
+                        <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
+                        <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
+                        <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Accordion Item 4: Economy -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingEconomy">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
+                      Economy
+                      </button>
+                    </h2>
+                    <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionLeft">
+                      <div class="accordion-body">
+                        {% if gdp_per_capita != None and gdp != None %}
+                        <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
+                        <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
+                        {% endif %}
+                        <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="categoryModalLabel">Select Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Category Options -->
+            <div class="list-group list-group-checkable d-grid gap-2 border-0">
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category1" value="general" checked>
+              <label class="list-group-item rounded-3 py-3" for="category1">
+              <i class="fa-solid fa-users me-2"></i><span class="label-text">Society</span>
+              <span class="d-block small opacity-50">Social issues, culture, and community trends.</span>
+              </label>
+              {% if 'politics' in supported_categories or 'economy' in supported_categories %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics">
+              <label class="list-group-item rounded-3 py-3" for="category2">
+              <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics & Economy</span>
+              <span class="d-block small opacity-50">Politics, government policies, and economic developments.</span>
+              </label>
+              {% else %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics" disabled>
+              <label class="list-group-item rounded-3 py-3" for="category2">
+                <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics</span>
+                <p class="d-block small"><span class="opacity-75">Updates on politics, government policies, and economic developments.</span> Not yet available in this country.</p>
+              </label>
               {% endif %}
-              <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      {% else %}
-      <div class="accordion" id="accordionMain">
-
-  <!-- Accordion Item 1: Geographic Information -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingCountry">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCountry" aria-expanded="false" aria-controls="collapseCountry">
-        Country's Information
-      </button>
-    </h2>
-    <div id="collapseCountry" class="accordion-collapse collapse" aria-labelledby="headingCountry" data-bs-parent="#accordionMain">
-      <div class="accordion-body">
-        
-
-
-        <div class="accordion" id="accordionLeft">
-
-  <!-- Accordion Item 1: Geographic Information -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingGeography">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
-        Geographic Information
-      </button>
-    </h2>
-    <div id="collapseGeography" class="accordion-collapse collapse" aria-labelledby="headingGeography" data-bs-parent="#accordionLeft">
-      <div class="accordion-body">
-        <p><strong>Area:</strong> {{ nation_data['area'] }} {% if area_rank %}(#{{ area_rank['rank'] }}){% endif %}</p>
-        <p><strong>Borders:</strong> {{ nation_data['borders'] }}</p>
-        <p><strong>Time in {{ nation_data['capital'] }} (Capital):</strong> {{ current_time }}</p>
-        <p><strong>Time Zones:</strong> {{ nation_data['timezones'] }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Accordion Item 2: Demographics and Society -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingDemographics">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
-        Demographics and Society
-      </button>
-    </h2>
-    <div id="collapseDemographics" class="accordion-collapse collapse" aria-labelledby="headingDemographics" data-bs-parent="#accordionLeft">
-      <div class="accordion-body">
-        <p><strong>Population:</strong> {{ nation_data['population'] }}</p>
-        <p><strong>HDI:</strong> {{ nation_data['hdi'] }}</p>
-        {% if main_religion %}
-        <p><strong>Main Religion:</strong> {{ main_religion }}</p>
-        {% endif %}
-        <p><strong>Languages:</strong> {{ nation_data['languages'] }}</p>
-        <p><strong>Top Level Domain:</strong> {{ nation_data['top_level_domain'] }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingGovernment">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
-        Government and Politics
-      </button>
-    </h2>
-    <div id="collapseGovernment" class="accordion-collapse collapse" aria-labelledby="headingGovernment" data-bs-parent="#accordionLeft">
-      <div class="accordion-body">
-        <p><strong>Capital:</strong> {{ nation_data['capital'] }}</p>
-        <p><strong>Leader:</strong> {{ nation_data['leader'] }}</p>
-        <p><strong>Member of the United Nations:</strong> {{ nation_data['united_nations_member'] }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Accordion Item 4: Economy -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingEconomy">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
-        Economy
-      </button>
-    </h2>
-    <div id="collapseEconomy" class="accordion-collapse collapse" aria-labelledby="headingEconomy" data-bs-parent="#accordionLeft">
-      <div class="accordion-body">
-        {% if gdp_per_capita != None and gdp != None %}
-        <p><strong>GDP Per Capita:</strong> {{ gdp_per_capita[country_name]['gdp'] }} - From {{ gdp_per_capita[country_name]['date'] }}</p>
-        <p><strong>GDP:</strong> {{ gdp[country_name]['gdp'] }} - From {{ gdp[country_name]['date'] }}</p>
-        {% endif %}
-        <p><strong>Currency:</strong> {{ nation_data['currency'] }}</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-
-
-
-
-
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-    </div>
-  </div>
-
-  <!-- Category Modal -->
-  <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="categoryModalLabel">Select Category</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Category Options -->
-          <div class="list-group list-group-checkable d-grid gap-2 border-0">
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category1" value="general" checked>
-            <label class="list-group-item rounded-3 py-3" for="category1">
-            <i class="fa-solid fa-users me-2"></i><span class="label-text">Society</span>
-            <span class="d-block small opacity-50">Social issues, culture, and community trends.</span>
-            </label>
-            {% if 'politics' in supported_categories or 'economy' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics">
-            <label class="list-group-item rounded-3 py-3" for="category2">
-            <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics & Economy</span>
-            <span class="d-block small opacity-50">Politics, government policies, and economic developments.</span>
-            </label>
-            {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category2" value="politics" disabled>
-            <label class="list-group-item rounded-3 py-3" for="category2">
-              <i class="fa-solid fa-landmark me-2"></i><span class="label-text">Politics</span>
-              <p class="d-block small"><span class="opacity-75">Updates on politics, government policies, and economic developments.</span> Not yet available in this country.</p>
-            </label>
-            {% endif %}
-            {% if 'technology' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology">
-            <label class="list-group-item rounded-3 py-3" for="category3">
-            <i class="fa-solid fa-microchip me-2"></i><span class="label-text">Technology</span>
-            <span class="d-block small opacity-50">Tech innovations, digital trends, and industry breakthroughs.</span>
-            </label>
-            {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology" disabled>
-            <label class="list-group-item rounded-3 py-3" for="category3">
+              {% if 'technology' in supported_categories %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology">
+              <label class="list-group-item rounded-3 py-3" for="category3">
               <i class="fa-solid fa-microchip me-2"></i><span class="label-text">Technology</span>
-              <p class="d-block small"><span class="opacity-75">Tech innovations, digital trends, and industry breakthroughs.</span> Not yet available in this country.</p>
-            </label>
-            {% endif %}
-            {% if 'world' in supported_categories %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world">
-            <label class="list-group-item rounded-3 py-3" for="category4">
-            <i class="fa-solid fa-globe me-2"></i><span class="label-text">World</span>
-            <span class="d-block small opacity-50">Local sources covering major international events and geopolitical issues.</span>
-            </label>
-            {% else %}
-            <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world" disabled>
-            <label class="list-group-item rounded-3 py-3" for="category4">
+              <span class="d-block small opacity-50">Tech innovations, digital trends, and industry breakthroughs.</span>
+              </label>
+              {% else %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category3" value="technology" disabled>
+              <label class="list-group-item rounded-3 py-3" for="category3">
+                <i class="fa-solid fa-microchip me-2"></i><span class="label-text">Technology</span>
+                <p class="d-block small"><span class="opacity-75">Tech innovations, digital trends, and industry breakthroughs.</span> Not yet available in this country.</p>
+              </label>
+              {% endif %}
+              {% if 'world' in supported_categories %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world">
+              <label class="list-group-item rounded-3 py-3" for="category4">
               <i class="fa-solid fa-globe me-2"></i><span class="label-text">World</span>
-              <p class="d-block small"><span class="opacity-75">Local sources covering major international events and geopolitical issues.</span> Not yet available in this country.</p>
-            </label>
-            {% endif %}
-          </div>
-        </div>
-        <div class="modal-footer">
-          <!-- Close Button -->
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Order By Modal -->
-  <div class="modal fade" id="orderByModal" tabindex="-1" aria-labelledby="orderByModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderByModalLabel">Select Order By</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Order By Options -->
-          <div class="list-group list-group-checkable d-grid gap-2 border-0">
-            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy1" value="pub_date" checked>
-            <label class="list-group-item rounded-3 py-3" for="orderBy1">
-            <i class="fa-solid fa-calendar-day"></i> <span class="label-text">Publication Date</span>
-            <span class="d-block small opacity-50">Sort by publication date</span>
-            </label>
-            <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy2" value="clicks">
-            <label class="list-group-item rounded-3 py-3" for="orderBy2">
-            <i class="fa-solid fa-eye me-2"></i><span class="label-text">Views</span>
-            <span class="d-block small opacity-50">Sort by number of views</span>
-            </label>
-            <!-- Add other order options similarly -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <!-- Close Button -->
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Period Modal -->
-  <div class="modal fade" id="periodModal" tabindex="-1" aria-labelledby="periodModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="periodModalLabel">Select Period</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Date selection inputs -->
-          <div class="row">
-            <div class="col-6">
-              <label for="modalStartDate" class="form-label">Start Date</label>
-              <input type="date" id="modalStartDate" name="modal_start_date" class="form-control">
-            </div>
-            <div class="col-6">
-              <label for="modalEndDate" class="form-label">End Date</label>
-              <input type="date" id="modalEndDate" name="modal_end_date" class="form-control">
+              <span class="d-block small opacity-50">Local sources covering major international events and geopolitical issues.</span>
+              </label>
+              {% else %}
+              <input class="list-group-item-check pe-none" type="radio" name="category" id="category4" value="world" disabled>
+              <label class="list-group-item rounded-3 py-3" for="category4">
+                <i class="fa-solid fa-globe me-2"></i><span class="label-text">World</span>
+                <p class="d-block small"><span class="opacity-75">Local sources covering major international events and geopolitical issues.</span> Not yet available in this country.</p>
+              </label>
+              {% endif %}
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="applyPeriodButton">Apply</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Order Direction Modal -->
-  <div class="modal fade" id="orderDirModal" tabindex="-1" aria-labelledby="orderDirModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderDirModalLabel">Select Order Direction</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Order Direction Options -->
-          <div class="list-group list-group-checkable d-grid gap-2 border-0">
-            <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir1" value="desc" checked>
-            <label class="list-group-item rounded-3 py-3" for="orderDir1">
-            <i class="fa-solid fa-sort-amount-down"></i> <span class="label-text">Descending</span>
-            <span class="d-block small opacity-50">Newest/highest first</span>
-            </label>
-            <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir2" value="asc">
-            <label class="list-group-item rounded-3 py-3" for="orderDir2">
-            <i class="fa-solid fa-sort-amount-up"></i> <span class="label-text">Ascending</span>
-            <span class="d-block small opacity-50">Oldest/lowest first</span>
-            </label>
+          <div class="modal-footer">
+            <!-- Close Button -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
-        <div class="modal-footer">
-          <!-- Close Button -->
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+    <!-- Order By Modal -->
+    <div class="modal fade" id="orderByModal" tabindex="-1" aria-labelledby="orderByModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="orderByModalLabel">Select Order By</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Order By Options -->
+            <div class="list-group list-group-checkable d-grid gap-2 border-0">
+              <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy1" value="pub_date" checked>
+              <label class="list-group-item rounded-3 py-3" for="orderBy1">
+              <i class="fa-solid fa-calendar-day"></i> <span class="label-text">Publication Date</span>
+              <span class="d-block small opacity-50">Sort by publication date</span>
+              </label>
+              <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy2" value="clicks">
+              <label class="list-group-item rounded-3 py-3" for="orderBy2">
+              <i class="fa-solid fa-eye me-2"></i><span class="label-text">Views</span>
+              <span class="d-block small opacity-50">Sort by number of views</span>
+              </label>
+              <!-- Add other order options similarly -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <!-- Close Button -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <form id="filterForm" class="form-inline">
-    <input type="hidden" id="country" name="country">
-    <ul class="nav nav-fill mt-5">
-      <!-- Existing nav items -->
-      <li class="nav-item">
-        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#categoryModal" id="categoryButton">
-        {% if not is_mobile %}Category: {% endif %}<span class="dropdown-toggle text-primary"><span id="categoryButtonText" class="text-primary">General</span></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderByModal" id="orderByButton">
-        {% if not is_mobile %}Order By: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderByButtonText" class="text-primary">Publication Date</span></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderDirModal" id="orderDirButton">
-        {% if not is_mobile %}Order Direction: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderDirButtonText" class="text-primary">Descending</span></span>
-        </a>
-      </li>
-      <!-- New nav item for Period -->
-      <li class="nav-item">
-        <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#periodModal" id="periodButton">
-        {% if not is_mobile %}Period: {% endif %}<span class="dropdown-toggle text-primary"><span id="periodButtonText" class="text-primary">Start Date - End Date</span></span>
-        </a>
-      </li>
-    </ul>
-  </form>
-  <hr class="opacity-75">
-  <div class="d-flex justify-content-end mt-4">
-    <button type="button" class="btn btn-outline-danger btn-sm" id="clearFiltersButton">
-    <i class="fa-solid fa-filter-circle-xmark me-2"></i>Clear Filters
-    </button>
-  </div>
-  <div class="row justify-content-center" id="storiesContainer">
-    <!-- Stories will be inserted here -->
-  </div>
-  <div class="d-flex justify-content-center my-5">
-    <div class="spinner-border" id="endPageSpinner" style="display: none; width: 3rem; height: 3rem;" aria-hidden="true" role="status">
-      <span class="visually-hidden">Loading...</span>
+    <!-- Period Modal -->
+    <div class="modal fade" id="periodModal" tabindex="-1" aria-labelledby="periodModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="periodModalLabel">Select Period</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Date selection inputs -->
+            <div class="row">
+              <div class="col-6">
+                <label for="modalStartDate" class="form-label">Start Date</label>
+                <input type="date" id="modalStartDate" name="modal_start_date" class="form-control">
+              </div>
+              <div class="col-6">
+                <label for="modalEndDate" class="form-label">End Date</label>
+                <input type="date" id="modalEndDate" name="modal_end_date" class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="applyPeriodButton">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Order Direction Modal -->
+    <div class="modal fade" id="orderDirModal" tabindex="-1" aria-labelledby="orderDirModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="orderDirModalLabel">Select Order Direction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Order Direction Options -->
+            <div class="list-group list-group-checkable d-grid gap-2 border-0">
+              <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir1" value="desc" checked>
+              <label class="list-group-item rounded-3 py-3" for="orderDir1">
+              <i class="fa-solid fa-sort-amount-down"></i> <span class="label-text">Descending</span>
+              <span class="d-block small opacity-50">Newest/highest first</span>
+              </label>
+              <input class="list-group-item-check pe-none" type="radio" name="order_dir" id="orderDir2" value="asc">
+              <label class="list-group-item rounded-3 py-3" for="orderDir2">
+              <i class="fa-solid fa-sort-amount-up"></i> <span class="label-text">Ascending</span>
+              <span class="d-block small opacity-50">Oldest/lowest first</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <!-- Close Button -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form id="filterForm" class="form-inline">
+      <input type="hidden" id="country" name="country">
+      <ul class="nav nav-fill mt-5">
+        <!-- Existing nav items -->
+        <li class="nav-item">
+          <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#categoryModal" id="categoryButton">
+          {% if not is_mobile %}Category: {% endif %}<span class="dropdown-toggle text-primary"><span id="categoryButtonText" class="text-primary">General</span></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderByModal" id="orderByButton">
+          {% if not is_mobile %}Order By: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderByButtonText" class="text-primary">Publication Date</span></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#orderDirModal" id="orderDirButton">
+          {% if not is_mobile %}Order Direction: {% endif %}<span class="dropdown-toggle text-primary"><span id="orderDirButtonText" class="text-primary">Descending</span></span>
+          </a>
+        </li>
+        <!-- New nav item for Period -->
+        <li class="nav-item">
+          <a type="button" class="nav-link text-reset text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#periodModal" id="periodButton">
+          {% if not is_mobile %}Period: {% endif %}<span class="dropdown-toggle text-primary"><span id="periodButtonText" class="text-primary">Start Date - End Date</span></span>
+          </a>
+        </li>
+      </ul>
+    </form>
+    <hr class="opacity-75">
+    <div class="d-flex justify-content-end mt-4">
+      <button type="button" class="btn btn-outline-danger btn-sm" id="clearFiltersButton">
+      <i class="fa-solid fa-filter-circle-xmark me-2"></i>Clear Filters
+      </button>
+    </div>
+    <div class="row justify-content-center" id="storiesContainer">
+      <!-- Stories will be inserted here -->
+    </div>
+    <div class="d-flex justify-content-center my-5">
+      <div class="spinner-border" id="endPageSpinner" style="display: none; width: 3rem; height: 3rem;" aria-hidden="true" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
   </div>
-  </div>
+  {% if not is_mobile %}
   <div class="col-lg-2">
-
-    {% if not is_mobile %}
     <div class="right-pillar-wrapper h-100">
       <div class="pillar-container-right pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Top Pillar" class="pillar-top horizontally-mirrored">
@@ -504,15 +532,40 @@
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Right Pillar" class="pillar-bottom horizontally-mirrored">
       </div>
     </div>
-    {% endif %}
-
   </div>
+  {% endif %}
 </div>
 {% endblock %}
 {% block scripts %}
-
 {% assets "js_news" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
-
+<script nonce="{{ nonce }}">
+  const loremIpsum =
+        `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tristique dui nec ipsum varius luctus. In hendrerit molestie ante, vel imperdiet quam porta eget. Sed sodales aliquet lectus, quis suscipit dolor malesuada non. Aliquam a leo id arcu sodales sagittis. Praesent porttitor luctus hendrerit. Pellentesque sollicitudin diam gravida, sodales ante pulvinar, iaculis quam. Duis neque nisi, volutpat sit amet pretium vitae, ultricies sit amet urna. Vivamus vel nisi elit. Maecenas dapibus, ipsum eleifend posuere consectetur, neque nisl pulvinar turpis, eu eleifend nulla mauris vel leo. Proin a urna facilisis, accumsan orci et, ultricies dolor. Phasellus ut viverra dolor. Morbi mattis ligula nunc, non varius orci vehicula ac. Sed et faucibus diam. Duis et diam massa.`;
+      const textElement = document.getElementById("blurred-text");
+      const progressBar = document.getElementById("progress-bar");
+      const totalCharacters = loremIpsum.length;
+      const progressRate = 1; // Number of characters for 1% progress
+      let currentIndex = 0;
+  
+      function typeText() {
+        if (currentIndex < totalCharacters) {
+          // Append the next character to the text
+          textElement.textContent += loremIpsum[currentIndex];
+          currentIndex++;
+  
+          // Update the progress bar
+          const progress = Math.min((currentIndex / totalCharacters) * 100, 100);
+          progressBar.style.width = `${progress}%`;
+          progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
+  
+          // Continue typing with a delay
+          setTimeout(typeText, 15); // Adjust speed
+        }
+      }
+  
+      // Start the typing and progress bar update
+      typeText();
+</script>
 {% endblock %}

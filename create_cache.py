@@ -92,7 +92,7 @@ def insert_to_database(stories: list, category_id: str) -> int:
     return exceptions_count
 
 
-def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
+def fetch_feed(rss_url: str, news_filter: str, result_list: list):
     """
     Fetch RSS feed and store relevant information in a result list.
 
@@ -114,20 +114,14 @@ def fetch_rss_feed(rss_url: str, news_filter: str, result_list: list):
     
     for possibility in ('', 'feed', 'rss'):
         try:
+            print(f'Possibility: {possibility}')
+            print(rss_url + f'/{possibility}' if not rss_url.endswith('/') else possibility)
             response = get_request(rss_url + f'/{possibility}' if not rss_url.endswith('/') else possibility, timeout=5, headers=headers)
-            if response.status_code not in (200, 301, 302):
-                log_message(f"[Invalid HTTP Status Code] {rss_url} --> Status: {response.status_code}")
-                continue
 
             feed = parse(response.content)
+            break
         except Exception:
             continue
-
-    # Tries to parse the content
-    try:
-        feed = parse(response.content)
-    except Exception:
-        return {}
 
     try:
         data = {
@@ -285,7 +279,7 @@ def fetch_categories():
     return category_database
 
 
-def fetch_feed(category_id: str):
+def fetch_feeds_from_database(category_id: str):
     log_message(f'Fetching feeds from {category_id}')
     try:
         with db_connection.cursor() as cursor:
@@ -310,18 +304,18 @@ def main():
     categories = fetch_categories()
     for selected_filter in categories:
         percentage = (total_done // len(categories)) * 100
-        log_message(f"\n[{round(percentage, 2)}%] Handling cache for {selected_filter}...")
+        log_message(f"\n[{round(percentage, 2)}%] Handling {selected_filter}...")
         
-        # Read the RSS feeds configuration for the current category
-        rss_feeds = fetch_feed(selected_filter)
+        # Read the feeds for current category
+        rss_feeds = fetch_feeds_from_database(selected_filter)
         all_rss_data = []
 
-        # Use threads to fetch RSS feeds concurrently
+        # Use threads to fetch concurrently
         threads = []
         result_list = []
 
         for feed_info in rss_feeds:
-            thread = threading.Thread(target=fetch_rss_feed, args=(feed_info["url"], selected_filter, result_list))
+            thread = threading.Thread(target=fetch_feed, args=(feed_info["url"], selected_filter, result_list))
             threads.append(thread)
             thread.start()
 

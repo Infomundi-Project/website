@@ -1,7 +1,10 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   let infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"), {
     keyboard: false,
   });
+
+  // Lock to prevent multiple requests
+  let isFetchingSummary = false;
 
   // Modal element selectors
   const modalElement = document.getElementById("infomundiStoryModal");
@@ -21,41 +24,179 @@ document.addEventListener("DOMContentLoaded", function() {
   const modalPublishedDate = modalElement.querySelector("#publishedDateStoryModal");
   const modalViewCount = modalElement.querySelector("#viewCountStoryModal");
 
+  const textElement = document.getElementById("blurred-text");
+  const progressBar = document.getElementById("progress-bar");
+  const loremIpsum =
+    `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tristique dui nec ipsum varius luctus. In hendrerit molestie ante, vel imperdiet quam porta eget. Sed sodales aliquet lectus, quis suscipit dolor malesuada non. Aliquam a leo id arcu sodales sagittis. Praesent porttitor luctus hendrerit. Pellentesque sollicitudin diam gravida, sodales ante pulvinar, iaculis quam. Duis neque nisi, volutpat sit amet pretium vitae, ultricies sit amet urna. Vivamus vel nisi elit. Maecenas dapibus, ipsum eleifend posuere consectetur, neque nisl pulvinar turpis, eu eleifend nulla mauris vel leo. Proin a urna facilisis, accumsan orci et, ultricies dolor. Phasellus ut viverra dolor. Morbi mattis ligula nunc, non varius orci vehicula ac. Sed et faucibus diam. Duis et diam massa.`;
+
+  let currentIndex = 0;
+  let totalCharacters = loremIpsum.length;
+  let progressRate = 1; // Characters per 1% progress
+
+  // Function to reset and play placeholder animation
+  function resetAndPlayPlaceholder() {
+    textElement.textContent = ""; // Clear any existing text
+    currentIndex = 0;
+    progressBar.style.width = "0%";
+    progressBar.setAttribute("aria-valuenow", "0");
+
+    function typeText() {
+      if (currentIndex < totalCharacters) {
+        textElement.textContent += loremIpsum[currentIndex];
+        currentIndex++;
+
+        const progress = Math.min((currentIndex / totalCharacters) * 100, 100);
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
+
+        setTimeout(typeText, 15); // Time in ms
+      }
+    }
+
+    typeText();
+  }
+
+  // Function to fetch story summary and update Maximus content
+  function fetchAndRenderStorySummary(storyId) {
+    if (isFetchingSummary) return; // Prevent duplicate requests
+    isFetchingSummary = true; // Set lock
+
+    const contentPlaceholder = document.querySelector(".content-placeholder");
+    const maximusApiResponse = document.querySelector(".maximus-api-response");
+
+    // Reset: Show the placeholder and clear the response container
+    contentPlaceholder.style.display = "block";
+    maximusApiResponse.innerHTML = "";
+
+    resetAndPlayPlaceholder(); // Play loading animation
+
+    fetch(`/api/story/summarize/${storyId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch story summary.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const {
+          response
+        } = data;
+
+        if (!response) {
+          maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
+          contentPlaceholder.style.display = "none"; // Hide placeholder
+          return;
+        }
+
+        const {
+          summary,
+          background_analysis,
+          investigation_guide
+        } = response;
+
+        // Construct content dynamically, skipping empty sections
+        let contentHTML = "";
+
+        // Add "Important Topics" if available
+        if (summary?.key_points?.length) {
+          contentHTML += `
+          <h4>Important Topics</h4>
+          <ul>${summary.key_points.map((point) => `<li>${point}</li>`).join("")}</ul>
+          <hr>
+        `;
+        }
+
+        // Add "Background Analysis" if at least one subsection has content
+        const culturalContext = background_analysis?.cultural_context;
+        const historicalContext = background_analysis?.historical_context;
+        const socioEconomicFactors = background_analysis?.socio_economic_factors;
+
+        if (culturalContext || historicalContext || socioEconomicFactors) {
+          contentHTML += `<h4>Background Analysis</h4>`;
+          if (culturalContext) contentHTML += `<p><strong>Cultural Context:</strong></p><ul>${culturalContext.map((cultCont) => `<li>${cultCont}</li>`).join("")}</ul>`;
+          if (historicalContext) contentHTML += `<p><strong>Historical Context:</strong></p><ul>${historicalContext.map((histCont) => `<li>${histCont}</li>`).join("")}</ul>`;
+          if (socioEconomicFactors) contentHTML += `<p><strong>Socio-economic Factors:</strong> ${socioEconomicFactors}</p>`;
+          contentHTML += `<hr>`;
+        }
+
+        // Add "Further Investigation" if at least one subsection has content
+        const questionsToAsk = investigation_guide?.further_investigation?.critical_engagement?.questions_to_ask || [];
+        const methodologies = investigation_guide?.further_investigation?.methodologies || [];
+        const sources = investigation_guide?.further_investigation?.sources || [];
+
+        if (questionsToAsk.length || methodologies.length || sources.length) {
+          contentHTML += `<h4>Further Investigation</h4>`;
+          if (questionsToAsk.length) {
+            contentHTML += `
+            <p><strong>Critical Engagement - Questions to Ask</strong>:</p>
+            <ul>${questionsToAsk.map((question) => `<li>${question}</li>`).join("")}</ul>
+          `;
+          }
+          if (methodologies.length) {
+            contentHTML += `
+            <p><strong>Methodologies</strong>:</p>
+            <ul>${methodologies.map((method) => `<li>${method}</li>`).join("")}</ul>
+          `;
+          }
+          if (sources.length) {
+            contentHTML += `
+            <p><strong>Sources</strong>:</p>
+            <ul>${sources.map((source) => `<li>${source}</li>`).join("")}</ul>
+          `;
+          }
+        }
+
+        // Update Maximus API Response
+        maximusApiResponse.innerHTML = contentHTML;
+
+        // Hide the placeholder and show the API content
+        contentPlaceholder.style.display = "none";
+      })
+      .catch((error) => {
+        console.error(error);
+        maximusApiResponse.innerHTML = "<p>An error occurred while fetching the story summary. Please try again.</p>";
+        contentPlaceholder.style.display = "none"; // Hide placeholder
+      })
+      .finally(() => {
+        isFetchingSummary = false; // Release lock
+      });
+  }
+
   // Function to initialize like/dislike icons based on localStorage
   function initializeLikeDislikeIcons(storyId, likeIcon, dislikeIcon) {
-      const savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
-      const userAction = savedInteractions[storyId]?.action;
+    const savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+    const userAction = savedInteractions[storyId]?.action;
 
-      const isLiked = userAction === 'like';
-      const isDisliked = userAction === 'dislike';
+    const isLiked = userAction === 'like';
+    const isDisliked = userAction === 'dislike';
 
-      likeIcon.classList.toggle('fa-solid', isLiked);
-      likeIcon.classList.toggle('fa-regular', !isLiked);
-      dislikeIcon.classList.toggle('fa-solid', isDisliked);
-      dislikeIcon.classList.toggle('fa-regular', !isDisliked);
+    likeIcon.classList.toggle('fa-solid', isLiked);
+    likeIcon.classList.toggle('fa-regular', !isLiked);
+    dislikeIcon.classList.toggle('fa-solid', isDisliked);
+    dislikeIcon.classList.toggle('fa-regular', !isDisliked);
   }
 
   function initializeComments(storyId, language) {
     const commentsContainer = document.querySelector("#commentsSection");
     if (commentsContainer) {
-        const commentsElements = document.querySelectorAll("comentario-comments");
-        commentsElements.forEach((element) => element.remove());
-        console.log("Comentario-related elements removed.");
+      const commentsElements = document.querySelectorAll("comentario-comments");
+      commentsElements.forEach((element) => element.remove());
+      console.log("Comentario-related elements removed.");
 
-        const newCommentsElement = document.createElement("comentario-comments");
-        newCommentsElement.setAttribute("lang", language || "en");
-        newCommentsElement.setAttribute("page-id", `/comments?id=${storyId}`);
-        newCommentsElement.setAttribute("auto-init", "false");
-        newCommentsElement.setAttribute("live-update", "true");
-        newCommentsElement.setAttribute("theme", document.cookie.includes("theme=dark") ? "dark" : "light");
+      const newCommentsElement = document.createElement("comentario-comments");
+      newCommentsElement.setAttribute("lang", language || "en");
+      newCommentsElement.setAttribute("page-id", `/comments?id=${storyId}`);
+      newCommentsElement.setAttribute("auto-init", "false");
+      newCommentsElement.setAttribute("live-update", "true");
+      newCommentsElement.setAttribute("theme", document.cookie.includes("theme=dark") ? "dark" : "light");
 
-        commentsContainer.appendChild(newCommentsElement);
+      commentsContainer.appendChild(newCommentsElement);
 
-        if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
-            Comentario.main().then(() => {
-                console.log("Comentario reinitialized.");
-            });
-        }
+      if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
+        Comentario.main().then(() => {
+          console.log("Comentario reinitialized.");
+        });
+      }
     }
   }
 
@@ -63,14 +204,14 @@ document.addEventListener("DOMContentLoaded", function() {
     // Remove the script tag for comentario.js
     const existingScript = document.querySelector('script[src="https://commento.infomundi.net/comentario.js"]');
     if (existingScript) {
-        existingScript.remove();
-        console.log("Comentario script removed.");
+      existingScript.remove();
+      console.log("Comentario script removed.");
     }
 
     // Clean up global variables/functions if Comentario exposes them
     if (typeof window.Comentario !== "undefined") {
-        delete window.Comentario;
-        console.log("Comentario global object removed.");
+      delete window.Comentario;
+      console.log("Comentario global object removed.");
     }
 
     // Remove any associated DOM elements if necessary
@@ -81,29 +222,29 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   function reinitializeComentario(commentsElement) {
-      if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
-          Comentario.main().then(() => {
-              if (window.userAuthenticated && typeof commentsElement.nonInteractiveSsoLogin === "function") {
-                  commentsElement.nonInteractiveSsoLogin();
-              }
-          }).catch((error) => console.error("Failed to initialize Comentario:", error));
-      }
+    if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
+      Comentario.main().then(() => {
+        if (window.userAuthenticated && typeof commentsElement.nonInteractiveSsoLogin === "function") {
+          commentsElement.nonInteractiveSsoLogin();
+        }
+      }).catch((error) => console.error("Failed to initialize Comentario:", error));
+    }
   }
 
 
   // Define event listeners for modal icons
-  modalLikeIcon.addEventListener('click', function() {
+  modalLikeIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
     handleLikeDislike('like', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
   });
 
-  modalDislikeIcon.addEventListener('click', function() {
+  modalDislikeIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
     handleLikeDislike('dislike', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
   });
 
   // Satellite share button functionality
-  modalSatelliteIcon.addEventListener('click', function() {
+  modalSatelliteIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
     const storyTitle = this.dataset.storyTitle;
     const storyDescription = this.dataset.storyDescription || '';
@@ -125,8 +266,8 @@ document.addEventListener("DOMContentLoaded", function() {
     modalImage.src = "";
     modalDescription.textContent = "";
     modalTagsContainer.innerHTML = ""; // Clear the tags container
-    modalLikeCount.innerHTML = "&nbsp;0";
-    modalDislikeCount.innerHTML = "&nbsp;0";
+    modalLikeCount.innerHTML = " 0";
+    modalDislikeCount.innerHTML = " 0";
     modalPublishedDate.innerHTML = "";
     modalViewCount.innerHTML = "";
     modalPublisherName.textContent = "";
@@ -144,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const storyCards = document.querySelectorAll(".card.image-card");
 
     storyCards.forEach((card) => {
-      card.addEventListener("click", function(event) {
+      card.addEventListener("click", function (event) {
         const clickedElement = event.target; // Get the clicked element
 
         // Check if the click is on the image or card body (title + description)
@@ -176,7 +317,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
           // Update publisher logo and name
           if (storyData.publisher) {
-            const { name, favicon } = storyData.publisher;
+            const {
+              name,
+              favicon
+            } = storyData.publisher;
 
             modalPublisherName.textContent = name || "Unknown Publisher";
 
@@ -198,8 +342,8 @@ document.addEventListener("DOMContentLoaded", function() {
           modalDislikeIcon.dataset.disliked = storyData.is_disliked ? "true" : "false";
 
           // Update like/dislike counts
-          modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
-          modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
+          modalLikeCount.innerHTML = ` ${storyData.likes || 0}`;
+          modalDislikeCount.innerHTML = ` ${storyData.dislikes || 0}`;
 
           // Update icons based on is_liked/is_disliked
           modalLikeIcon.classList.toggle("fa-solid", storyData.is_liked);
@@ -213,10 +357,14 @@ document.addEventListener("DOMContentLoaded", function() {
           modalSatelliteIcon.dataset.storyDescription = storyData.description || "";
 
           // Update published date and view count
-          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar"></i>&nbsp;${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
-          modalViewCount.innerHTML = `<i class="fa-regular fa-eye"></i>&nbsp;${storyData.clicks}&nbsp;views`;
+          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar"></i> ${storyData.pub_date} (${timeAgo(storyData.pub_date)})`;
+          modalViewCount.innerHTML = `<i class="fa-regular fa-eye"></i> ${storyData.clicks} views`;
+
           // Initialize comments section for the selected story
           initializeComments(storyData.story_id, storyData.language);
+
+          // Load Maximus content
+          fetchAndRenderStorySummary(storyData.story_id);
 
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
           // Show the modal
@@ -252,50 +400,50 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   loadComentarioScript();
-  
+
   let middleSectionCount = 1;
 
   function addMiddleSection() {
     // Left Pillar
     const leftPillar = document.querySelector('.pillar-container-left');
     if (leftPillar) {
-        const leftPillarMiddle = document.createElement('img');
-        leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
-        leftPillarMiddle.alt = 'Middle of the Pillar';
-        leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
+      const leftPillarMiddle = document.createElement('img');
+      leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+      leftPillarMiddle.alt = 'Middle of the Pillar';
+      leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
 
-        // Apply flipped class to every other section in the left pillar for alternating effect
-        if (middleSectionCount % 2 !== 0) {
-            leftPillarMiddle.classList.add('mirrored');
-        }
+      // Apply flipped class to every other section in the left pillar for alternating effect
+      if (middleSectionCount % 2 !== 0) {
+        leftPillarMiddle.classList.add('mirrored');
+      }
 
-        const leftPillarBottom = leftPillar.querySelector('.pillar-bottom');
-        if (leftPillarBottom) {
-            leftPillar.insertBefore(leftPillarMiddle, leftPillarBottom);
-        } else {
-            leftPillar.appendChild(leftPillarMiddle); // Fallback if .pillar-bottom doesn't exist
-        }
+      const leftPillarBottom = leftPillar.querySelector('.pillar-bottom');
+      if (leftPillarBottom) {
+        leftPillar.insertBefore(leftPillarMiddle, leftPillarBottom);
+      } else {
+        leftPillar.appendChild(leftPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+      }
     }
 
     // Right Pillar (Mirrored)
     const rightPillar = document.querySelector('.pillar-container-right');
     if (rightPillar) {
-        const rightPillarMiddle = document.createElement('img');
-        rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
-        rightPillarMiddle.alt = 'Middle of the Pillar';
-        rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
+      const rightPillarMiddle = document.createElement('img');
+      rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+      rightPillarMiddle.alt = 'Middle of the Pillar';
+      rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
 
-        // Apply flipped class to every other section in the right pillar for alternating effect
-        if (middleSectionCount % 2 !== 0) {
-            rightPillarMiddle.classList.add('mirrored');
-        }
+      // Apply flipped class to every other section in the right pillar for alternating effect
+      if (middleSectionCount % 2 !== 0) {
+        rightPillarMiddle.classList.add('mirrored');
+      }
 
-        const rightPillarBottom = rightPillar.querySelector('.pillar-bottom');
-        if (rightPillarBottom) {
-            rightPillar.insertBefore(rightPillarMiddle, rightPillarBottom);
-        } else {
-            rightPillar.appendChild(rightPillarMiddle); // Fallback if .pillar-bottom doesn't exist
-        }
+      const rightPillarBottom = rightPillar.querySelector('.pillar-bottom');
+      if (rightPillarBottom) {
+        rightPillar.insertBefore(rightPillarMiddle, rightPillarBottom);
+      } else {
+        rightPillar.appendChild(rightPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+      }
     }
 
     middleSectionCount++; // Increment counter after adding to both pillars
@@ -311,17 +459,17 @@ document.addEventListener("DOMContentLoaded", function() {
   initializePillar();
 
   // Event listener for the Clear Filters button
-  document.getElementById('clearFiltersButton').addEventListener('click', function() {
+  document.getElementById('clearFiltersButton').addEventListener('click', function () {
     // Reset form fields to their default values
     document.getElementById('query').value = '';
     document.getElementById('modalStartDate').value = '';
     document.getElementById('modalEndDate').value = '';
-    
+
     // Reset radio buttons to default
     document.querySelector(`input[name="category"][value="general"]`).checked = true;
     document.querySelector(`input[name="order_by"][value="pub_date"]`).checked = true;
     document.querySelector(`input[name="order_dir"][value="desc"]`).checked = true;
-    
+
     // Reset button texts
     document.getElementById('categoryButtonText').textContent = 'General';
     document.getElementById('orderByButtonText').textContent = 'Publication Date';
@@ -341,7 +489,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const country = urlParams.get('country');
-  
+
   if (country) {
     document.getElementById('country').value = country;
   }
@@ -364,48 +512,48 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Prevent form submission
-  filterForm.addEventListener('submit', function(event) {
+  filterForm.addEventListener('submit', function (event) {
     event.preventDefault();
   });
 
   // Event listeners for filter inputs
   // Category Radio Buttons
-  document.querySelectorAll('input[name="category"]').forEach(function(el) {
-    el.addEventListener('change', function() {
+  document.querySelectorAll('input[name="category"]').forEach(function (el) {
+    el.addEventListener('change', function () {
       applyFilters();
     });
   });
 
   // Order By Radio Buttons
-  document.querySelectorAll('input[name="order_by"]').forEach(function(el) {
-    el.addEventListener('change', function() {
+  document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
+    el.addEventListener('change', function () {
       applyFilters();
     });
   });
 
   // Order Direction Radio Buttons
-  document.querySelectorAll('input[name="order_dir"]').forEach(function(el) {
-    el.addEventListener('change', function() {
+  document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
+    el.addEventListener('change', function () {
       applyFilters();
     });
   });
 
   // Date Inputs
-  document.getElementById('modalStartDate').addEventListener('change', function() {
+  document.getElementById('modalStartDate').addEventListener('change', function () {
     applyFilters();
   });
 
-  document.getElementById('modalEndDate').addEventListener('change', function() {
+  document.getElementById('modalEndDate').addEventListener('change', function () {
     applyFilters();
   });
 
   // Debounce Function
   function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
       const context = this;
       clearTimeout(timeout);
-      timeout = setTimeout(function() {
+      timeout = setTimeout(function () {
         func.apply(context, args);
       }, wait);
     };
@@ -413,7 +561,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Debounced Apply Filters for Search Input
   const debounceApplyFilters = debounce(applyFilters, 500);
-  document.getElementById('query').addEventListener('input', function() {
+  document.getElementById('query').addEventListener('input', function () {
     debounceApplyFilters();
   });
 
@@ -510,11 +658,11 @@ document.addEventListener("DOMContentLoaded", function() {
     imgTag.alt = item.title;
     imgTag.style = 'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
     if (index < 3) {
-        imgTag.src = item.media_content_url;
-        imgTag.setAttribute('fetchpriority', 'high');
+      imgTag.src = item.media_content_url;
+      imgTag.setAttribute('fetchpriority', 'high');
     } else {
-        imgTag.setAttribute('data-src', item.media_content_url);
-        imgTag.classList.add('lazyload');
+      imgTag.setAttribute('data-src', item.media_content_url);
+      imgTag.classList.add('lazyload');
     }
     imageLink.appendChild(imgTag);
 
@@ -559,7 +707,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const dateSpan = document.createElement('span');
     dateSpan.classList.add('text-muted', 'fw-bold', 'small');
-    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">&#x2022;</span>${item.clicks} views`;
+    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.clicks} views`;
 
     colLeft.appendChild(dateSpan);
 
@@ -589,11 +737,11 @@ document.addEventListener("DOMContentLoaded", function() {
     dislikeIcon.appendChild(dislikeCount);
 
     // Event listeners for like and dislike icons
-    likeIcon.addEventListener('click', function() {
+    likeIcon.addEventListener('click', function () {
       handleLikeDislike('like', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
     });
 
-    dislikeIcon.addEventListener('click', function() {
+    dislikeIcon.addEventListener('click', function () {
       handleLikeDislike('dislike', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
     });
 
@@ -609,18 +757,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Satellite share button functionality
     satelliteIcon.addEventListener('click', () => {
-        if (navigator.share) {
-            navigator.share({
-                title: item.title,
-                text: item.description || '',
-                url: window.location.origin + `/comments?id=${item.story_id}`
-            }).then(() => {
-                console.log('Thanks for sharing!');
-            }).catch(console.error);
-        } else {
-            // Fallback for browsers that don't support the Web Share API
-            alert('Sharing is not supported on this browser.');
-        }
+      if (navigator.share) {
+        navigator.share({
+          title: item.title,
+          text: item.description || '',
+          url: window.location.origin + `/comments?id=${item.story_id}`
+        }).then(() => {
+          console.log('Thanks for sharing!');
+        }).catch(console.error);
+      } else {
+        // Fallback for browsers that don't support the Web Share API
+        alert('Sharing is not supported on this browser.');
+      }
     });
 
     // Append icons to the right column
@@ -659,23 +807,27 @@ document.addEventListener("DOMContentLoaded", function() {
     // Determine the new state for localStorage
     let newAction = null;
     if (action === 'like') {
-        if (savedInteractions[storyId]?.action === 'like') {
-            // Toggle off like
-            delete savedInteractions[storyId];
-        } else {
-            // Set to like
-            savedInteractions[storyId] = { action: 'like' };
-            newAction = 'like';
-        }
+      if (savedInteractions[storyId]?.action === 'like') {
+        // Toggle off like
+        delete savedInteractions[storyId];
+      } else {
+        // Set to like
+        savedInteractions[storyId] = {
+          action: 'like'
+        };
+        newAction = 'like';
+      }
     } else if (action === 'dislike') {
-        if (savedInteractions[storyId]?.action === 'dislike') {
-            // Toggle off dislike
-            delete savedInteractions[storyId];
-        } else {
-            // Set to dislike
-            savedInteractions[storyId] = { action: 'dislike' };
-            newAction = 'dislike';
-        }
+      if (savedInteractions[storyId]?.action === 'dislike') {
+        // Toggle off dislike
+        delete savedInteractions[storyId];
+      } else {
+        // Set to dislike
+        savedInteractions[storyId] = {
+          action: 'dislike'
+        };
+        newAction = 'dislike';
+      }
     }
 
     // Save the updated interactions to localStorage
@@ -695,11 +847,11 @@ document.addEventListener("DOMContentLoaded", function() {
     let dislikes = parseInt(dislikeCount.textContent.trim()) || 0;
 
     if (newAction === 'like') {
-        likes++;
-        if (isDisliked) dislikes--; // Remove previous dislike
+      likes++;
+      if (isDisliked) dislikes--; // Remove previous dislike
     } else if (newAction === 'dislike') {
-        dislikes++;
-        if (isLiked) likes--; // Remove previous like
+      dislikes++;
+      if (isLiked) likes--; // Remove previous like
     }
 
     likeCount.textContent = ` ${Math.max(likes, 0)}`;
@@ -711,24 +863,26 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(url, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: storyId })
-    })
-    .then(response => {
+        body: JSON.stringify({
+          id: storyId
+        })
+      })
+      .then(response => {
         if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || 'Error performing action');
-            });
+          return response.json().then(errorData => {
+            throw new Error(errorData.message || 'Error performing action');
+          });
         }
         return response.json();
-    })
-    .then(data => {
+      })
+      .then(data => {
         // Update counts based on server response
         likeCount.textContent = ` ${data.likes}`;
         dislikeCount.textContent = ` ${data.dislikes}`;
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         // Rollback the optimistic UI update if the server request fails
         alert(error.message);
 
@@ -745,7 +899,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Revert counts
         likeCount.textContent = ` ${likes}`;
         dislikeCount.textContent = ` ${dislikes}`;
-    });
+      });
   }
 
   // Function to calculate relative time
@@ -762,18 +916,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Adjusting logic to only return "today", "yesterday", or "X days ago"
     if (differenceInDays === 0) {
-        return 'Today';
+      return 'Today';
     } else if (differenceInDays === 1) {
-        return 'Yesterday';
+      return 'Yesterday';
     } else {
-        return `${differenceInDays}&nbsp;days&nbsp;ago`;
+      return `${differenceInDays} days ago`;
     }
   }
 
   // Function to update time ago for all date-info elements
   function updateTimeAgo() {
     const dateElements = document.querySelectorAll('.date-info');
-    dateElements.forEach(function(element) {
+    dateElements.forEach(function (element) {
       const originalDateString = element.textContent.trim(); // Extract the date string
       const relativeDateString = timeAgo(originalDateString); // Convert to relative format
       element.innerHTML = relativeDateString; // Update the element content
@@ -790,7 +944,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const endDate = document.getElementById("modalEndDate").value;
     const query = document.getElementById("query").value;
 
-    localStorage.setItem('newsFilters', JSON.stringify({ category, orderBy, orderDir, startDate, endDate, query }));
+    localStorage.setItem('newsFilters', JSON.stringify({
+      category,
+      orderBy,
+      orderDir,
+      startDate,
+      endDate,
+      query
+    }));
   }
 
 
@@ -798,7 +959,14 @@ document.addEventListener("DOMContentLoaded", function() {
   function loadSavedFilters() {
     const savedFilters = JSON.parse(localStorage.getItem('newsFilters'));
     if (savedFilters) {
-      const { category, orderBy, orderDir, startDate, endDate, query } = savedFilters;
+      const {
+        category,
+        orderBy,
+        orderDir,
+        startDate,
+        endDate,
+        query
+      } = savedFilters;
       document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
       document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
       document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
@@ -816,39 +984,39 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function updateButtonText(inputName, buttonTextId) {
-      var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
-      var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
-      document.getElementById(buttonTextId).textContent = selectedText;
-    }
-  
-    // Initialize Button Texts
-    updateButtonText('category', 'categoryButtonText');
-    updateButtonText('order_by', 'orderByButtonText');
-    updateButtonText('order_dir', 'orderDirButtonText');
-  
-    // Event Listeners for Category
-    document.querySelectorAll('input[name="category"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('category', 'categoryButtonText');
-      });
+    var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
+    var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
+    document.getElementById(buttonTextId).textContent = selectedText;
+  }
+
+  // Initialize Button Texts
+  updateButtonText('category', 'categoryButtonText');
+  updateButtonText('order_by', 'orderByButtonText');
+  updateButtonText('order_dir', 'orderDirButtonText');
+
+  // Event Listeners for Category
+  document.querySelectorAll('input[name="category"]').forEach(function (el) {
+    el.addEventListener('change', function () {
+      updateButtonText('category', 'categoryButtonText');
     });
-  
-    // Event Listeners for Order By
-    document.querySelectorAll('input[name="order_by"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('order_by', 'orderByButtonText');
-      });
+  });
+
+  // Event Listeners for Order By
+  document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
+    el.addEventListener('change', function () {
+      updateButtonText('order_by', 'orderByButtonText');
     });
-  
-    // Event Listeners for Order Direction
-    document.querySelectorAll('input[name="order_dir"]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        updateButtonText('order_dir', 'orderDirButtonText');
-      });
+  });
+
+  // Event Listeners for Order Direction
+  document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
+    el.addEventListener('change', function () {
+      updateButtonText('order_dir', 'orderDirButtonText');
     });
-  
-    // Event listener for the Apply button in Period Modal
-  document.getElementById('applyPeriodButton').addEventListener('click', function() {
+  });
+
+  // Event listener for the Apply button in Period Modal
+  document.getElementById('applyPeriodButton').addEventListener('click', function () {
     // Update the periodButton text
     let startDate = document.getElementById('modalStartDate').value;
     let endDate = document.getElementById('modalEndDate').value;
@@ -857,11 +1025,11 @@ document.addEventListener("DOMContentLoaded", function() {
       periodText = `${startDate} to ${endDate}`;
     }
     document.getElementById('periodButtonText').textContent = periodText;
-    
+
     // Close the modal
     document.getElementById('periodModal').classList.remove('show');
     document.querySelector('.modal-backdrop').remove();
-    
+
     // Apply the filters
     applyFilters();
   });
