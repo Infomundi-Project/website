@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint, Response
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint, Response, jsonify
 from flask_login import LoginManager, current_user, logout_user
 from flask_assets import Environment, Bundle
 from htmlmin import minify as html_minify
@@ -47,9 +47,6 @@ app.config['CACHE_REDIS_PORT'] = REDIS_PORT
 app.config['CACHE_TYPE'] = 'RedisCache'
 cache.init_app(app)
 
-# Rate Limiting
-limiter.init_app(app)
-
 # Uploads
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 Megabytes
 app.config['UPLOAD_FOLDER'] = 'static/img/users/'
@@ -61,6 +58,9 @@ app.register_blueprint(views, url_prefix='/')
 
 # Google OAuth
 oauth.init_app(app)
+
+# Rate Limiting
+limiter.init_app(app)
 
 
 @app.route('/<filename>')
@@ -196,12 +196,10 @@ def error_handler(error):
 
         buttons_enabled = True
     elif error_code == 429:
-        title = 'Too Many Requests'
-        description = f"Even Greek gods can’t handle this much paperwork! It looks like our server is feeling a bit overwhelmed. Give it a moment to catch its breath, and try again soon. Trust us, it’s working hard to process all your requests!"
-        image_path = 'https://infomundi.net/static/img/illustrations/struggling.webp'
-
-        buttons_enabled = False
-    elif error_code == 500:
+        return jsonify({
+            "response": f"We need a breather! Your lightning-fast requests have exceeded the speed limit. The limit is: {str(error.description)}",
+        }), 429
+    else:
         title = "Internal Server Error"
         description = "While we pick up the pieces, why not explore other parts of the site? We'll have this page standing tall again soon!"
         image_path = 'https://infomundi.net/static/img/illustrations/ruins.webp'

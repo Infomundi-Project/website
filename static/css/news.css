@@ -28,7 +28,6 @@
   object-fit: unset;
   /* Remove object-fit applied globally */
   border-radius: 50%;
-  /* Optional: Make it round */
 }
 
 /* Headline container */
@@ -38,40 +37,14 @@
   left: 0;
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(to top, rgba(24, 24, 24, 0.9), transparent);
   color: white;
+  background: linear-gradient(to top, #000, transparent);
 }
 
-/* Multi-line headline text */
-#infomundiStoryModal .modal-header h1 {
-  font-size: 1.25rem;
-  /* Default size for smaller screens */
-  line-height: 1.4;
-  max-height: 4rem;
-  /* Allow for 3 lines of text */
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  /* Limit to 3 lines */
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
-  margin: 0;
-}
 
-/* Adjustments for larger screens */
-@media (min-width: 768px) {
-  #infomundiStoryModal .modal-header h1 {
-    font-size: 1.75rem;
-    /* Larger font for desktop */
-    max-height: 6rem;
-    /* Allow for 3 lines of larger text */
-  }
-}
 
 .modal-content {
-  background-color: #181818;
   border-radius: 0.5rem;
-  color: white;
 }
 
 .match-rate {
@@ -124,9 +97,8 @@
 .progress {
   width: 80%;
   position: absolute;
-  bottom: 200px;
+  bottom: 150px;
 }
-
 
 .image-card {
   position: relative;

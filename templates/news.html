@@ -2,50 +2,6 @@
 {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}">
 {% endblock %}
-{% block styles %}
-<style type="text/css">
-  .maximus-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  }
-  .maximus-header img {
-  width: 100px;
-  height: 100px;
-  border-radius: 10px;
-  margin-right: 10px;
-  }
-  .content-placeholder {
-  display: none;
-  position: relative;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  height: 300px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  }
-  .blurred-text {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  color: #6c757d;
-  font-size: 16px;
-  filter: blur(5px);
-  user-select: none; /* Prevents text selection */
-  pointer-events: none; /* Prevents interactions */
-  white-space: pre-wrap; /* Ensures text wraps properly */
-  }
-  .progress {
-  width: 80%;
-  position: absolute;
-  bottom: 200px;
-  }
-</style>
-{% endblock %}
 {% block content %}
 <div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-{% if is_mobile %}lg{% else %}xl{% endif %} modal-dialog-centered">
@@ -57,10 +13,10 @@
           alt="Modal Header Image"
           >
         <!-- Close Button -->
-        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="background-color: #ffffff"></button>
         <!-- Headline Container -->
         <div class="headline-container">
-          <h1 class="text-uppercase fw-bold">Story Title</h1>
+          <h1 class="text-uppercase fw-bold fs-2">Story Title</h1>
           <div class="row d-flex align-items-center mt-3">
             <div class="col-lg-8 d-block">
               <div id="publisherContainer" class="d-flex align-items-center mb-2">
@@ -97,12 +53,15 @@
                 </div>
                 <div class="col-md-10">
                   <span class="fs-3">MAXIMUS</span><span class="ms-3 small text-uppercase">Infomundi's AI</span>
-                  <div class="mt-3 mb-3 border rounded">
-                    <ul class="p-3 ms-3">
-                      <li>Maximus is powered by GPT 4.0</li>
-                      <li>He'll access the story and gather important content</li>
-                      <li>He'll separate the information in three: <strong>Important topics</strong>, <strong>context behind it</strong>, and <strong>where can I find more information</strong></li>
-                    </ul>
+                  <div class="my-3 border rounded">
+                    <p class="p-3 m-0">Hi, my name is Maximus, and I'm Infomundi's AI. I'm powered by GPT 4.0, and my job is to help you make sense of complex stories and ideas. Here's how I work:</p>
+                      <ul class="p-3 m-0 ms-3">
+                        <li><strong>Addressed Topics:</strong> I'll highlight the key themes and main ideas for you.</li>
+                        <li><strong>Context Around:</strong> I'll provide the background and connect the dots so you get the full picture.</li>
+                        <li><strong>Methods for Investigation:</strong> I'll suggest ways to explore further, like useful resources and actionable tools.</li>
+                        <li><strong>Questioning the Subject:</strong> I'll help you critically analyze key questions about the subject.</li>
+                      </ul>
+                      <p class="p-3 m-0">Think of me as your guide to turning bulk information into clear and actionable insights.</p>
                   </div>
                 </div>
               </div>
@@ -537,35 +496,9 @@
 </div>
 {% endblock %}
 {% block scripts %}
+
 {% assets "js_news" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
-<script nonce="{{ nonce }}">
-  const loremIpsum =
-        `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tristique dui nec ipsum varius luctus. In hendrerit molestie ante, vel imperdiet quam porta eget. Sed sodales aliquet lectus, quis suscipit dolor malesuada non. Aliquam a leo id arcu sodales sagittis. Praesent porttitor luctus hendrerit. Pellentesque sollicitudin diam gravida, sodales ante pulvinar, iaculis quam. Duis neque nisi, volutpat sit amet pretium vitae, ultricies sit amet urna. Vivamus vel nisi elit. Maecenas dapibus, ipsum eleifend posuere consectetur, neque nisl pulvinar turpis, eu eleifend nulla mauris vel leo. Proin a urna facilisis, accumsan orci et, ultricies dolor. Phasellus ut viverra dolor. Morbi mattis ligula nunc, non varius orci vehicula ac. Sed et faucibus diam. Duis et diam massa.`;
-      const textElement = document.getElementById("blurred-text");
-      const progressBar = document.getElementById("progress-bar");
-      const totalCharacters = loremIpsum.length;
-      const progressRate = 1; // Number of characters for 1% progress
-      let currentIndex = 0;
-  
-      function typeText() {
-        if (currentIndex < totalCharacters) {
-          // Append the next character to the text
-          textElement.textContent += loremIpsum[currentIndex];
-          currentIndex++;
-  
-          // Update the progress bar
-          const progress = Math.min((currentIndex / totalCharacters) * 100, 100);
-          progressBar.style.width = `${progress}%`;
-          progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
-  
-          // Continue typing with a delay
-          setTimeout(typeText, 15); // Adjust speed
-        }
-      }
-  
-      // Start the typing and progress bar update
-      typeText();
-</script>
+
 {% endblock %}

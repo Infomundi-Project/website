@@ -564,22 +564,47 @@ def gpt_summarize(url: str) -> dict:
         except Exception:
             lang = 'en'  # Default to English if detection fails
 
-        # GPT prompt
         prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
 
 ```text
 {article_text}
 ```
 
-Produce a comprehensive response based on the topic. You should:
+Produce a JSON response with the following static keys and corresponding structured data:
 
-    1. Provide a concise summary of the key points in the article using a bulleted list format. Each bullet point should capture an essential aspect of the news, ensuring clarity and succinctness while covering all major details. There should be only 3 bullet points.
+- "addressed_topics": A list of exactly 3 key points summarizing the core aspects of the article. Each key point should be concise and insightful.
+- "context_around": A list of exactly 3 bullet points that provide background analysis. This should include historical, cultural, or socio-economic factors relevant to the topic, offering external viewpoints for richer context.
+- "questioning_the_subject": A list of at least 3 critical questions readers should ask to deepen their understanding of the topic.
+- "methods_for_inquiry": A list of at least 3 recommended sources, NOT including websites, but including books, or other reference materials and suggested methodologies for critical engagement with the topic, such as specific tools, techniques, or frameworks.
 
-    2. Provide a concise background analysis from an external viewpoint, not directly involved in the news, using a bulleted list format. Each bullet point should include a detailed examination of the historical, cultural, or socio-economic factors at play. Highlight relevant events, trends, or precedents that shed light on the current situation, offering readers a richer understanding of the context in which the news is unfolding. There should be only 3 bullet points.
+Ensure the response is strictly in JSON format and adheres to the following template:
 
-    3. Offer an in-depth guide on how to further investigate the topic and the related subjects mentioned in the news. This should not only include potential sources and references but also suggest methodologies for critical analysis and inquiry. Discuss how readers can engage with the information critically, identify reliable sources, and what kind of questions they should be asking to gain a deeper understanding of the topic.
+```json
+{{
+    "addressed_topics": [
+        "Bullet point 1",
+        "Bullet point 2",
+        "Bullet point 3"
+    ],
+    "context_around": [
+        "Bullet point 1",
+        "Bullet point 2",
+        "Bullet point 3"
+    ],
+    "questioning_the_subject": [
+        "Question 1",
+        "Question 2",
+        "Question 3"
+    ],
+    "methods_for_inquiry": [
+        "Method 1",
+        "Method 2",
+        "Method 3"
+    ]
+}}
+```
 
-Ensure that the JSON output is valid, with proper syntax, and that the output is in the language "{lang}". """
+The output must strictly conform to this structure and contain valid JSON. The text should be in the language "{lang}". """
 
         # Send the request to GPT
         client = OpenAI(api_key=config.OPENAI_API_KEY)

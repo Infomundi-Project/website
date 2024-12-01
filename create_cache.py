@@ -114,25 +114,23 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
     
     for possibility in ('', 'feed', 'rss'):
         try:
-            print(f'Possibility: {possibility}')
-            print(rss_url + f'/{possibility}' if not rss_url.endswith('/') else possibility)
-            response = get_request(rss_url + f'/{possibility}' if not rss_url.endswith('/') else possibility, timeout=5, headers=headers)
+            response = get_request(f'{rss_url}/{possibility}' if not rss_url.endswith('/') else f'{rss_url}{possibility}', timeout=5, headers=headers)
 
             feed = parse(response.content)
             break
-        except Exception:
+        except Exception as e:
             continue
 
     try:
         data = {
-            'title': feed.feed.title,
-            'link': feed.feed.link,
+            'title': getattr(feed.feed, 'title', 'Unknown Publisher').strip(),
+            'link': getattr(feed.feed, 'link', 'Unknown Link').strip(),
             'items': []
         }
 
         for item in feed.entries:
             # Decodes and removes html entities from text
-            feed_publisher = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(feed.feed.title.strip()))
+            feed_publisher = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(data['title']))
             item_title = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('title', f'No title was provided').strip()))
             item_description = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('description', 'No description was provided').strip()))
             
@@ -187,7 +185,7 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             data['items'].append(new_story)
     
     except Exception as err:
-        log_message(f"[!] Exception getting {rss_url} ({news_filter}) // {err}")
+        log_message(f"Exception getting {rss_url} ({news_filter}) // {err}")
         data = {}
 
     result_list.append(data)

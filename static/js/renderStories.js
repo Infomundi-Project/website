@@ -27,7 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const textElement = document.getElementById("blurred-text");
   const progressBar = document.getElementById("progress-bar");
   const loremIpsum =
-    `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tristique dui nec ipsum varius luctus. In hendrerit molestie ante, vel imperdiet quam porta eget. Sed sodales aliquet lectus, quis suscipit dolor malesuada non. Aliquam a leo id arcu sodales sagittis. Praesent porttitor luctus hendrerit. Pellentesque sollicitudin diam gravida, sodales ante pulvinar, iaculis quam. Duis neque nisi, volutpat sit amet pretium vitae, ultricies sit amet urna. Vivamus vel nisi elit. Maecenas dapibus, ipsum eleifend posuere consectetur, neque nisl pulvinar turpis, eu eleifend nulla mauris vel leo. Proin a urna facilisis, accumsan orci et, ultricies dolor. Phasellus ut viverra dolor. Morbi mattis ligula nunc, non varius orci vehicula ac. Sed et faucibus diam. Duis et diam massa.`;
+    `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas fermentum lorem consequat diam tempor malesuada. Nunc id odio lorem. Duis quis cursus nisi. Curabitur cursus eget augue a rutrum. Maecenas vestibulum nunc id eros ultrices, id sollicitudin diam lacinia. Proin eget eros ultrices, vestibulum est et, vestibulum nisi. Vivamus erat odio, convallis nec efficitur dapibus, imperdiet sit amet libero. Donec sed molestie urna. Praesent pretium metus id augue tristique, eget elementum mi convallis. Nullam ex dui, scelerisque eget dui in, rutrum maximus diam. Donec elementum efficitur est, in imperdiet diam scelerisque eu. Mauris maximus risus mi, at pellentesque tellus congue ut. Morbi libero nulla, dapibus eget ex aliquam, rhoncus tincidunt leo. Cras tempor purus at mauris tempus posuere. Donec ultricies tellus risus, vel aliquam nulla tristique et. Morbi vehicula augue ut iaculis sodales.
+
+Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem magna et ex. Ut feugiat, mauris quis suscipit vulputate, ante quam porta dolor, ac eleifend neque risus non tellus. Vestibulum sit amet velit nibh. Etiam quis tortor id turpis condimentum tempor ut eu metus. Pellentesque in fermentum massa. Donec elit magna, dictum ut tellus ac, blandit fringilla magna. Sed pulvinar non mauris eget aliquet. Vivamus lectus nibh, porta sed leo in, lobortis sollicitudin erat. Nullam eu lorem vehicula, sodales massa vitae, tempus velit. Morbi at consequat ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vestibulum scelerisque libero in odio vulputate lacinia.
+
+`;
 
   let currentIndex = 0;
   let totalCharacters = loremIpsum.length;
@@ -49,14 +53,13 @@ document.addEventListener("DOMContentLoaded", function () {
         progressBar.style.width = `${progress}%`;
         progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
 
-        setTimeout(typeText, 15); // Time in ms
+        setTimeout(typeText, 5); // Time in ms
       }
     }
 
     typeText();
   }
 
-  // Function to fetch story summary and update Maximus content
   function fetchAndRenderStorySummary(storyId) {
     if (isFetchingSummary) return; // Prevent duplicate requests
     isFetchingSummary = true; // Set lock
@@ -65,102 +68,99 @@ document.addEventListener("DOMContentLoaded", function () {
     const maximusApiResponse = document.querySelector(".maximus-api-response");
 
     // Reset: Show the placeholder and clear the response container
-    contentPlaceholder.style.display = "block";
+    contentPlaceholder.style.display = "flex";
     maximusApiResponse.innerHTML = "";
 
     resetAndPlayPlaceholder(); // Play loading animation
 
     fetch(`/api/story/summarize/${storyId}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch story summary.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const {
-          response
-        } = data;
+        .then((response) => {
+            if (!response.ok) {
+                // If the response isn't OK, parse the JSON and throw the error
+                return response.json().then((errorData) => {
+                    throw new Error(errorData.response || "Failed to fetch story summary.");
+                });
+            }
+            return response.json();
+        })
+        .then((data) => {
+            const responseData = data.response;
 
-        if (!response) {
-          maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
-          contentPlaceholder.style.display = "none"; // Hide placeholder
-          return;
-        }
+            if (!responseData) {
+                maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
+                contentPlaceholder.style.display = "none"; // Hide placeholder
+                return;
+            }
 
-        const {
-          summary,
-          background_analysis,
-          investigation_guide
-        } = response;
+            const {
+                addressed_topics,
+                context_around,
+                questioning_the_subject,
+                methods_for_inquiry
+            } = responseData;
 
-        // Construct content dynamically, skipping empty sections
-        let contentHTML = "";
+            if (!addressed_topics && !context_around && !questioning_the_subject && !methods_for_inquiry) {
+                maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
+                contentPlaceholder.style.display = "none"; // Hide placeholder
+                return;
+            }
 
-        // Add "Important Topics" if available
-        if (summary?.key_points?.length) {
-          contentHTML += `
-          <h4>Important Topics</h4>
-          <ul>${summary.key_points.map((point) => `<li>${point}</li>`).join("")}</ul>
-          <hr>
-        `;
-        }
+            // Construct content dynamically
+            let contentHTML = "";
 
-        // Add "Background Analysis" if at least one subsection has content
-        const culturalContext = background_analysis?.cultural_context;
-        const historicalContext = background_analysis?.historical_context;
-        const socioEconomicFactors = background_analysis?.socio_economic_factors;
+            // Add "Addressed Topics"
+            if (addressed_topics?.length) {
+                contentHTML += `
+                    <h4>Addressed Topics</h4>
+                    <ul>${addressed_topics.map((topic) => `<li>${topic}</li>`).join("")}</ul>
+                    <hr class="my-3">
+                `;
+            }
 
-        if (culturalContext || historicalContext || socioEconomicFactors) {
-          contentHTML += `<h4>Background Analysis</h4>`;
-          if (culturalContext) contentHTML += `<p><strong>Cultural Context:</strong></p><ul>${culturalContext.map((cultCont) => `<li>${cultCont}</li>`).join("")}</ul>`;
-          if (historicalContext) contentHTML += `<p><strong>Historical Context:</strong></p><ul>${historicalContext.map((histCont) => `<li>${histCont}</li>`).join("")}</ul>`;
-          if (socioEconomicFactors) contentHTML += `<p><strong>Socio-economic Factors:</strong> ${socioEconomicFactors}</p>`;
-          contentHTML += `<hr>`;
-        }
+            // Add "Context Around"
+            if (context_around?.length) {
+                contentHTML += `
+                    <h4>Context Around</h4>
+                    <ul>${context_around.map((context) => `<li>${context}</li>`).join("")}</ul>
+                    <hr class="my-3">
+                `;
+            }
 
-        // Add "Further Investigation" if at least one subsection has content
-        const questionsToAsk = investigation_guide?.further_investigation?.critical_engagement?.questions_to_ask || [];
-        const methodologies = investigation_guide?.further_investigation?.methodologies || [];
-        const sources = investigation_guide?.further_investigation?.sources || [];
+            // Add "Methods for Inquiry"
+            if (methods_for_inquiry?.length) {
+                contentHTML += `
+                    <h4>Methods for Investigation</h4>
+                    <ul>${methods_for_inquiry.map((method) => `<li>${method}</li>`).join("")}</ul>
+                    <hr class="my-3">
+                `;
+            }
 
-        if (questionsToAsk.length || methodologies.length || sources.length) {
-          contentHTML += `<h4>Further Investigation</h4>`;
-          if (questionsToAsk.length) {
-            contentHTML += `
-            <p><strong>Critical Engagement - Questions to Ask</strong>:</p>
-            <ul>${questionsToAsk.map((question) => `<li>${question}</li>`).join("")}</ul>
-          `;
-          }
-          if (methodologies.length) {
-            contentHTML += `
-            <p><strong>Methodologies</strong>:</p>
-            <ul>${methodologies.map((method) => `<li>${method}</li>`).join("")}</ul>
-          `;
-          }
-          if (sources.length) {
-            contentHTML += `
-            <p><strong>Sources</strong>:</p>
-            <ul>${sources.map((source) => `<li>${source}</li>`).join("")}</ul>
-          `;
-          }
-        }
+            // Add "Questioning the Subject"
+            if (questioning_the_subject?.length) {
+                contentHTML += `
+                    <h4>Questioning the Subject</h4>
+                    <ul>${questioning_the_subject.map((question) => `<li>${question}</li>`).join("")}</ul>
+                `;
+            }
 
-        // Update Maximus API Response
-        maximusApiResponse.innerHTML = contentHTML;
+            // Update Maximus API Response
+            maximusApiResponse.innerHTML = contentHTML;
 
-        // Hide the placeholder and show the API content
-        contentPlaceholder.style.display = "none";
-      })
-      .catch((error) => {
-        console.error(error);
-        maximusApiResponse.innerHTML = "<p>An error occurred while fetching the story summary. Please try again.</p>";
-        contentPlaceholder.style.display = "none"; // Hide placeholder
-      })
-      .finally(() => {
-        isFetchingSummary = false; // Release lock
-      });
+            // Hide the placeholder and show the API content
+            contentPlaceholder.style.display = "none";
+        })
+        .catch((error) => {
+            console.error(error);
+
+            // Display the error message from the API response
+            maximusApiResponse.innerHTML = `<p>${error.message}</p>`;
+            contentPlaceholder.style.display = "none"; // Hide placeholder
+        })
+        .finally(() => {
+            isFetchingSummary = false; // Release lock
+        });
   }
+
 
   // Function to initialize like/dislike icons based on localStorage
   function initializeLikeDislikeIcons(storyId, likeIcon, dislikeIcon) {
@@ -230,7 +230,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }).catch((error) => console.error("Failed to initialize Comentario:", error));
     }
   }
-
 
   // Define event listeners for modal icons
   modalLikeIcon.addEventListener('click', function () {
@@ -342,8 +341,8 @@ document.addEventListener("DOMContentLoaded", function () {
           modalDislikeIcon.dataset.disliked = storyData.is_disliked ? "true" : "false";
 
           // Update like/dislike counts
-          modalLikeCount.innerHTML = ` ${storyData.likes || 0}`;
-          modalDislikeCount.innerHTML = ` ${storyData.dislikes || 0}`;
+          modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
+          modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
 
           // Update icons based on is_liked/is_disliked
           modalLikeIcon.classList.toggle("fa-solid", storyData.is_liked);
@@ -357,8 +356,8 @@ document.addEventListener("DOMContentLoaded", function () {
           modalSatelliteIcon.dataset.storyDescription = storyData.description || "";
 
           // Update published date and view count
-          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar"></i> ${storyData.pub_date} (${timeAgo(storyData.pub_date)})`;
-          modalViewCount.innerHTML = `<i class="fa-regular fa-eye"></i> ${storyData.clicks} views`;
+          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar me-2"></i>${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
+          modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.clicks}&nbsp;views`;
 
           // Initialize comments section for the selected story
           initializeComments(storyData.story_id, storyData.language);
@@ -707,7 +706,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const dateSpan = document.createElement('span');
     dateSpan.classList.add('text-muted', 'fw-bold', 'small');
-    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.clicks} views`;
+    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.clicks}&nbsp;views`;
 
     colLeft.appendChild(dateSpan);
 
@@ -722,7 +721,7 @@ document.addEventListener("DOMContentLoaded", function () {
     likeIcon.dataset.liked = item.is_liked ? 'true' : 'false';
 
     const likeCount = document.createElement('span');
-    likeCount.textContent = ` ${item.likes || 0}`; // Display the like count
+    likeCount.innerHTML = `&nbsp;${item.likes || 0}`; // Display the like count
     likeIcon.appendChild(likeCount);
 
     // Dislike Icon with Count
@@ -733,7 +732,7 @@ document.addEventListener("DOMContentLoaded", function () {
     dislikeIcon.dataset.disliked = item.is_disliked ? 'true' : 'false';
 
     const dislikeCount = document.createElement('span');
-    dislikeCount.textContent = ` ${item.dislikes || 0}`; // Display the dislike count
+    dislikeCount.innerHTML = `&nbsp;${item.dislikes || 0}`; // Display the dislike count
     dislikeIcon.appendChild(dislikeCount);
 
     // Event listeners for like and dislike icons
@@ -920,7 +919,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else if (differenceInDays === 1) {
       return 'Yesterday';
     } else {
-      return `${differenceInDays} days ago`;
+      return `${differenceInDays}&nbsp;days&nbsp;ago`;
     }
   }
 

@@ -289,6 +289,7 @@ def search():
 
 
 @api.route('/story/summarize/<story_id>', methods=['GET'])
+@extensions.limiter.limit("100/day;13/minute", override_defaults=True, meta_limits=["3/day"])
 def summarize_story(story_id):
     story = models.Story.query.get(story_id)
     if story.gpt_summary:
@@ -306,7 +307,7 @@ def summarize_story(story_id):
 
 
 @api.route('/get_stories', methods=['GET'])
-@extensions.cache.cached(timeout=60*5, query_string=True) # 5 min cached
+@extensions.cache.cached(timeout=60*1, query_string=True) # 1 min cached
 def get_stories():
     """Returns jsonified list of stories based on certain criteria. Cached for 1h (60s * 60)."""
     country = request.args.get('country', 'br', type=str).lower()
