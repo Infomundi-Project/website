@@ -341,10 +341,20 @@
                   <img src="{{ current_user.avatar_url }}" fetchpriority="high" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded">
                 </a>
                 </div>
-                  <div class="col-auto me-4 mt-2">
-                    <span class="d-block text-center">1<i class="fa-solid fa-tower-cell ms-2"></i></span>
-                    <span class="text-muted small text-capitalize">notification</span>
-                  </div>
+
+                  <div class="col-auto me-4 mt-2 position-relative">
+                  <!-- Notification Bubble -->
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    99+
+                    <span class="visually-hidden">unread messages</span>
+                  </span>
+                  
+                  <!-- Icon and Text -->
+                  <span class="d-block text-center">
+                    <i class="fa-solid fa-inbox"></i>
+                  </span>
+                  <span class="text-muted small text-capitalize">inbox</span>
+                </div>
 
 
                   <div class="col-auto me-4 mt-2" data-bs-toggle="modal" data-bs-target="#friendsModal">

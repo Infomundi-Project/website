@@ -289,7 +289,7 @@ def search():
 
 
 @api.route('/story/summarize/<story_id>', methods=['GET'])
-@extensions.limiter.limit("100/day;13/minute", override_defaults=True, meta_limits=["3/day"])
+@extensions.limiter.limit("120/day;60/hour;10/minute", override_defaults=True)
 def summarize_story(story_id):
     story = models.Story.query.get(story_id)
     if story.gpt_summary:

@@ -26,16 +26,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const textElement = document.getElementById("blurred-text");
   const progressBar = document.getElementById("progress-bar");
-  const loremIpsum =
-    `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas fermentum lorem consequat diam tempor malesuada. Nunc id odio lorem. Duis quis cursus nisi. Curabitur cursus eget augue a rutrum. Maecenas vestibulum nunc id eros ultrices, id sollicitudin diam lacinia. Proin eget eros ultrices, vestibulum est et, vestibulum nisi. Vivamus erat odio, convallis nec efficitur dapibus, imperdiet sit amet libero. Donec sed molestie urna. Praesent pretium metus id augue tristique, eget elementum mi convallis. Nullam ex dui, scelerisque eget dui in, rutrum maximus diam. Donec elementum efficitur est, in imperdiet diam scelerisque eu. Mauris maximus risus mi, at pellentesque tellus congue ut. Morbi libero nulla, dapibus eget ex aliquam, rhoncus tincidunt leo. Cras tempor purus at mauris tempus posuere. Donec ultricies tellus risus, vel aliquam nulla tristique et. Morbi vehicula augue ut iaculis sodales.
+  const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas fermentum lorem consequat diam tempor malesuada. Nunc id odio lorem. Duis quis cursus nisi. Curabitur cursus eget augue a rutrum. Maecenas vestibulum nunc id eros ultrices, id sollicitudin diam lacinia. Proin eget eros ultrices, vestibulum est et, vestibulum nisi. Vivamus erat odio, convallis nec efficitur dapibus, imperdiet sit amet libero. Donec sed molestie urna. Praesent pretium metus id augue tristique, eget elementum mi convallis. Nullam ex dui, scelerisque eget dui in, rutrum maximus diam. Donec elementum efficitur est, in imperdiet diam scelerisque eu. Mauris maximus risus mi, at pellentesque tellus congue ut. Morbi libero nulla, dapibus eget ex aliquam, rhoncus tincidunt leo. Cras tempor purus at mauris tempus posuere. Donec ultricies tellus risus, vel aliquam nulla tristique et. Morbi vehicula augue ut iaculis sodales.
 
-Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem magna et ex. Ut feugiat, mauris quis suscipit vulputate, ante quam porta dolor, ac eleifend neque risus non tellus. Vestibulum sit amet velit nibh. Etiam quis tortor id turpis condimentum tempor ut eu metus. Pellentesque in fermentum massa. Donec elit magna, dictum ut tellus ac, blandit fringilla magna. Sed pulvinar non mauris eget aliquet. Vivamus lectus nibh, porta sed leo in, lobortis sollicitudin erat. Nullam eu lorem vehicula, sodales massa vitae, tempus velit. Morbi at consequat ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vestibulum scelerisque libero in odio vulputate lacinia.
-
-`;
+  Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem magna et ex. Ut feugiat, mauris quis suscipit vulputate, ante quam porta dolor, ac eleifend neque risus non tellus. Vestibulum sit amet velit nibh. Etiam quis tortor id turpis condimentum tempor ut eu metus. Pellentesque in fermentum massa. Donec elit magna, dictum ut tellus ac, blandit fringilla magna. Sed pulvinar non mauris eget aliquet. Vivamus lectus nibh, porta sed leo in, lobortis sollicitudin erat. Nullam eu lorem vehicula, sodales massa vitae, tempus velit. Morbi at consequat ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vestibulum scelerisque libero in odio vulputate lacinia.`;
 
   let currentIndex = 0;
-  let totalCharacters = loremIpsum.length;
-  let progressRate = 1; // Characters per 1% progress
+  let totalCharacters = loremIpsum.replace(/\s+/g, "").length; // Exclude spaces
 
   // Function to reset and play placeholder animation
   function resetAndPlayPlaceholder() {
@@ -45,20 +41,27 @@ Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem
     progressBar.setAttribute("aria-valuenow", "0");
 
     function typeText() {
-      if (currentIndex < totalCharacters) {
-        textElement.textContent += loremIpsum[currentIndex];
+      if (currentIndex < loremIpsum.length) {
+        const currentChar = loremIpsum[currentIndex];
+        if (currentChar.trim()) {
+          textElement.textContent += currentChar;
+          const progress = Math.min(
+            (textElement.textContent.replace(/\s+/g, "").length /
+              totalCharacters) *
+              100,
+            100
+          );
+          progressBar.style.width = `${progress}%`;
+          progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
+        }
         currentIndex++;
-
-        const progress = Math.min((currentIndex / totalCharacters) * 100, 100);
-        progressBar.style.width = `${progress}%`;
-        progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
-
-        setTimeout(typeText, 5); // Time in ms
+        setTimeout(typeText, 0.07); // Time in ms
       }
     }
 
     typeText();
   }
+
 
   function fetchAndRenderStorySummary(storyId) {
     if (isFetchingSummary) return; // Prevent duplicate requests
@@ -300,7 +303,18 @@ Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem
           // Update modal content
           modalTitle.textContent = storyData.title;
           modalImage.src = storyData.media_content_url;
-          modalDescription.textContent = storyData.description || "";
+          // Set the story description and link dynamically
+          modalDescription.textContent = storyData.description || "No description available.";
+
+          // Update the link to the original story
+          const originalStoryLink = modalElement.querySelector("#originalStoryLink");
+          if (storyData.link) {
+            originalStoryLink.href = storyData.link;
+            originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>Access the original story`;
+            originalStoryLink.style.display = "inline";
+          } else {
+            originalStoryLink.style.display = "none"; // Hide the link if no URL is available
+          }
 
           // Update tags as links
           modalTagsContainer.innerHTML = ""; // Clear previous tags
@@ -507,7 +521,6 @@ Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem
     currentPage = 1;
     hasMoreStories = true;
     fetchStories(true);
-    linkSafety();
   }
 
   // Prevent form submission
@@ -625,6 +638,7 @@ Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem
           }
           // Update time ago for newly added content
           updateTimeAgo();
+          linkSafety();
           currentPage += 1;
         } else {
           hasMoreStories = false;

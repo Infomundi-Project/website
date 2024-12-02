@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const onlineFriendsElement = document.getElementById('onlineFriends');
         if (onlineFriendsElement) {
           onlineFriendsElement.innerHTML = `
-            <span class="dot" style="height: 8px; width: 8px; background-color: ${data.online_friends > 0 ? '#00FF00' : 'gray'}; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>
+            <span class="dot" style="height: 8px; width: 8px; background-color: ${data.online_friends > 0 ? '#00FF00' : 'gray'}; display: inline-block; border-radius: 5px; margin-right: 4px;"></span>
             ${data.online_friends}&nbsp;online
           `;
         }
