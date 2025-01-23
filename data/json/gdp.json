@@ -72,12 +72,6 @@
     }
   },
   {
-    "Mexico": {
-      "gdp": "$1,788,887,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Australia": {
       "gdp": "$1,723,827,000,000 (World Bank)",
       "date": "2023"
@@ -86,6 +80,12 @@
   {
     "Spain": {
       "gdp": "$1,580,695,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Mexico": {
+      "gdp": "$1,788,887,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -156,20 +156,14 @@
     }
   },
   {
-    "Austria": {
-      "gdp": "$516,034,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Singapore": {
       "gdp": "$501,428,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Thailand": {
-      "gdp": "$514,945,000,000 (World Bank)",
+    "Austria": {
+      "gdp": "$516,034,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -180,14 +174,8 @@
     }
   },
   {
-    "Norway": {
-      "gdp": "$485,513,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Philippines": {
-      "gdp": "$437,146,000,000 (World Bank)",
+    "Thailand": {
+      "gdp": "$514,945,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -198,8 +186,8 @@
     }
   },
   {
-    "Bangladesh": {
-      "gdp": "$437,415,000,000 (World Bank)",
+    "Norway": {
+      "gdp": "$485,513,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -210,14 +198,26 @@
     }
   },
   {
+    "Philippines": {
+      "gdp": "$437,146,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Iran": {
       "gdp": "$401,505,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Colombia": {
-      "gdp": "$363,540,000,000 (World Bank)",
+    "Bangladesh": {
+      "gdp": "$437,415,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Czech Republic": {
+      "gdp": "$330,858,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -228,14 +228,20 @@
     }
   },
   {
-    "South Africa": {
-      "gdp": "$377,782,000,000 (World Bank)",
+    "Hong Kong": {
+      "gdp": "$382,055,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Hong Kong": {
-      "gdp": "$382,055,000,000 (World Bank)",
+    "Colombia": {
+      "gdp": "$363,540,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "South Africa": {
+      "gdp": "$377,782,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -258,12 +264,6 @@
     }
   },
   {
-    "Czech Republic": {
-      "gdp": "$330,858,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Chile": {
       "gdp": "$335,533,000,000 (World Bank)",
       "date": "2023"
@@ -278,6 +278,12 @@
   {
     "Portugal": {
       "gdp": "$287,080,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Hungary": {
+      "gdp": "$212,389,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -300,14 +306,14 @@
     }
   },
   {
-    "Algeria": {
-      "gdp": "$239,899,000,000 (World Bank)",
+    "Greece": {
+      "gdp": "$238,206,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Greece": {
-      "gdp": "$238,206,000,000 (World Bank)",
+    "Algeria": {
+      "gdp": "$239,899,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -318,15 +324,15 @@
     }
   },
   {
-    "Hungary": {
-      "gdp": "$212,389,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Qatar": {
       "gdp": "$235,770,000,000 (World Bank)",
       "date": "2022"
+    }
+  },
+  {
+    "Ethiopia": {
+      "gdp": "$163,698,000,000 (World Bank)",
+      "date": "2023"
     }
   },
   {
@@ -342,20 +348,14 @@
     }
   },
   {
-    "Kuwait": {
-      "gdp": "$161,772,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Morocco": {
       "gdp": "$141,109,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Ethiopia": {
-      "gdp": "$163,698,000,000 (World Bank)",
+    "Kuwait": {
+      "gdp": "$161,772,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -368,6 +368,18 @@
   {
     "Dominican Republic": {
       "gdp": "$121,444,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Uzbekistan": {
+      "gdp": "$90,889,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Bulgaria": {
+      "gdp": "$101,584,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -396,12 +408,6 @@
     }
   },
   {
-    "Uzbekistan": {
-      "gdp": "$90,889,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Guatemala": {
       "gdp": "$102,050,000,000 (World Bank)",
       "date": "2023"
@@ -410,12 +416,6 @@
   {
     "Oman": {
       "gdp": "$108,192,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Bulgaria": {
-      "gdp": "$101,584,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -462,12 +462,6 @@
     }
   },
   {
-    "Uruguay": {
-      "gdp": "$77,241,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Turkmenistan": {
       "gdp": "$59,887,000,000 (World Bank)",
       "date": "2023"
@@ -476,6 +470,12 @@
   {
     "Lithuania": {
       "gdp": "$77,836,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Uruguay": {
+      "gdp": "$77,241,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -558,6 +558,12 @@
     }
   },
   {
+    "Cambodia": {
+      "gdp": "$31,773,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Bolivia": {
       "gdp": "$45,850,000,000 (World Bank)",
       "date": "2023"
@@ -566,12 +572,6 @@
   {
     "Bahrain": {
       "gdp": "$43,205,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Cambodia": {
-      "gdp": "$31,773,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -654,6 +654,12 @@
     }
   },
   {
+    "Sudan": {
+      "gdp": "$109,327,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Zambia": {
       "gdp": "$28,163,000,000 (World Bank)",
       "date": "2023"
@@ -668,12 +674,6 @@
   {
     "Trinidad and Tobago": {
       "gdp": "$28,140,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Sudan": {
-      "gdp": "$109,327,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -822,6 +822,12 @@
     }
   },
   {
+    "Brunei": {
+      "gdp": "$15,128,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "North Macedonia": {
       "gdp": "$14,761,000,000 (World Bank)",
       "date": "2023"
@@ -860,12 +866,6 @@
   {
     "Rwanda": {
       "gdp": "$14,098,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Brunei": {
-      "gdp": "$15,128,000,000 (World Bank)",
       "date": "2023"
     }
   },

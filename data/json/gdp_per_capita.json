@@ -756,14 +756,8 @@
     }
   },
   {
-    "Tonga": {
-      "gdp": "$4,682 (World Bank)",
-      "date": "2022"
-    }
-  },
-  {
-    "Cape Verde": {
-      "gdp": "$4,322 (World Bank)",
+    "Iran": {
+      "gdp": "$4,502 (World Bank)",
       "date": "2023"
     }
   },
@@ -780,14 +774,20 @@
     }
   },
   {
-    "Iran": {
-      "gdp": "$4,502 (World Bank)",
+    "Indonesia": {
+      "gdp": "$4,940 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Indonesia": {
-      "gdp": "$4,940 (World Bank)",
+    "Tonga": {
+      "gdp": "$4,682 (World Bank)",
+      "date": "2022"
+    }
+  },
+  {
+    "Cape Verde": {
+      "gdp": "$4,322 (World Bank)",
       "date": "2023"
     }
   },
