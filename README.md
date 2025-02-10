@@ -30,11 +30,15 @@ At Infomundi, we recognize the transformative value of information. Designed to 
 
 ### Built With:
 - [Flask](https://flask.palletsprojects.com/en/stable/)
+- [SQL Alchemy](https://flask-sqlalchemy.readthedocs.io/en/stable/)
 - [Bootstrap 5](https://getbootstrap.com/)
 
 ---
 
 ## ✨ **Features**
+
+✅ = Implemented
+🚧 = Under Development
 
 - ✅ User Account
 	- Register, login, update, delete
@@ -42,12 +46,26 @@ At Infomundi, we recognize the transformative value of information. Designed to 
 	- 2FA authentication via TOTP
 - ✅ Profile Customization
 	- Display name, description, profile picture, banner and background images
+- ✅ AI Story Summarization (Maximus)
+	- Users are presented with a free AI sumarization for the story they're reading, including **Addressed Topics**, **Context Around**, **Methods for Investigation** and **Questioning the Subject**
 - 🚧 Profile Statistics
 	- Daily, weekly, monthly stories read
 	- Most read news sources
 	- Most related topics and people
 	- Countries you've read news about
-- 🚧 
+- 🚧 Commenting System
+	- User avatar display (when logged in)
+	- User username/display name showcase (when logged in)
+	- Comment actions when logged in (like, dislike, sharing, mentioning, replying, reporting, saving)
+	- Rich text functionality (bold, italic, links, images, lists, etc) when adding a comment
+	- User reputation display (when logged in)
+	- Anonymous commenting
+- 🚧 User / Publisher Reputation
+	- Users should obtain reputation by performing actions in the platform
+	- Users and publishers should be able to obtain reputation by being upvoted by other users
+- 🚧 Direct Messages
+	- Users should be able to use the platform to send direct messages to other users
+	- Users should be able to create groups in the platform with other users to chat
 
 ---
 

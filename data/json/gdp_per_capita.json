@@ -36,26 +36,26 @@
     }
   },
   {
-    "Norway": {
-      "gdp": "$87,962 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Singapore": {
       "gdp": "$84,734 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "United States": {
-      "gdp": "$81,695 (World Bank)",
+    "Norway": {
+      "gdp": "$87,962 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Iceland": {
       "gdp": "$78,811 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "United States": {
+      "gdp": "$81,695 (World Bank)",
       "date": "2023"
     }
   },
@@ -144,6 +144,12 @@
     }
   },
   {
+    "Andorra": {
+      "gdp": "$46,545 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "United Kingdom": {
       "gdp": "$48,867 (World Bank)",
       "date": "2023"
@@ -174,14 +180,14 @@
     }
   },
   {
-    "Andorra": {
-      "gdp": "$46,545 (World Bank)",
+    "Malta": {
+      "gdp": "$37,882 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Malta": {
-      "gdp": "$37,882 (World Bank)",
+    "Estonia": {
+      "gdp": "$29,824 (World Bank)",
       "date": "2023"
     }
   },
@@ -258,26 +264,14 @@
     }
   },
   {
-    "Saudi Arabia": {
-      "gdp": "$28,895 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Japan": {
       "gdp": "$33,834 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Kuwait": {
-      "gdp": "$37,533 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Estonia": {
-      "gdp": "$29,824 (World Bank)",
+    "Saudi Arabia": {
+      "gdp": "$28,895 (World Bank)",
       "date": "2023"
     }
   },
@@ -288,14 +282,14 @@
     }
   },
   {
-    "Turks and Caicos Islands": {
-      "gdp": "$30,438 (IMF)",
+    "Kuwait": {
+      "gdp": "$37,533 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Bahrain": {
-      "gdp": "$29,084 (World Bank)",
+    "Turks and Caicos Islands": {
+      "gdp": "$30,438 (IMF)",
       "date": "2023"
     }
   },
@@ -314,6 +308,12 @@
   {
     "Lithuania": {
       "gdp": "$27,103 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Bahrain": {
+      "gdp": "$29,084 (World Bank)",
       "date": "2023"
     }
   },
@@ -1044,7 +1044,7 @@
     }
   },
   {
-    "East Timor": {
+    "Timor-Leste": {
       "gdp": "$1,648 (World Bank)",
       "date": "2023"
     }

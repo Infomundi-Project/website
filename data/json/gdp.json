@@ -180,6 +180,12 @@
     }
   },
   {
+    "Philippines": {
+      "gdp": "$437,146,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Vietnam": {
       "gdp": "$429,717,000,000 (World Bank)",
       "date": "2023"
@@ -198,26 +204,14 @@
     }
   },
   {
-    "Philippines": {
-      "gdp": "$437,146,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Iran": {
-      "gdp": "$401,505,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Bangladesh": {
       "gdp": "$437,415,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Czech Republic": {
-      "gdp": "$330,858,000,000 (World Bank)",
+    "Iran": {
+      "gdp": "$401,505,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -252,12 +246,6 @@
     }
   },
   {
-    "Egypt": {
-      "gdp": "$395,926,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Pakistan": {
       "gdp": "$338,368,000,000 (World Bank)",
       "date": "2023"
@@ -266,6 +254,18 @@
   {
     "Chile": {
       "gdp": "$335,533,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Czech Republic": {
+      "gdp": "$330,858,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Egypt": {
+      "gdp": "$395,926,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -378,12 +378,6 @@
     }
   },
   {
-    "Bulgaria": {
-      "gdp": "$101,584,000,000 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
     "Ecuador": {
       "gdp": "$118,845,000,000 (World Bank)",
       "date": "2023"
@@ -396,8 +390,8 @@
     }
   },
   {
-    "Kenya": {
-      "gdp": "$107,441,000,000 (World Bank)",
+    "Guatemala": {
+      "gdp": "$102,050,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -408,8 +402,14 @@
     }
   },
   {
-    "Guatemala": {
-      "gdp": "$102,050,000,000 (World Bank)",
+    "Kenya": {
+      "gdp": "$107,441,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
+    "Bulgaria": {
+      "gdp": "$101,584,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -421,7 +421,7 @@
   },
   {
     "Venezuela": {
-      "gdp": "$2,024,000,000 (IMF)",
+      "gdp": "$2,025,000,000 (IMF)",
       "date": "\u2014"
     }
   },
@@ -1110,7 +1110,7 @@
     }
   },
   {
-    "East Timor": {
+    "Timor-Leste": {
       "gdp": "$2,243,000,000 (World Bank)",
       "date": "2023"
     }

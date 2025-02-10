@@ -75,7 +75,7 @@
 </style>
 {% endblock %}
 {% block edit_profile_content %}
-<form method="POST" action="{{ url_for('views.upload_image') }}" enctype="multipart/form-data" id="captcha-wait-form">
+<form method="POST" action="{{ url_for('views.upload_image') }}" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div>
         <h3>Background Image</h3>
@@ -144,13 +144,7 @@
         <small class="text-muted d-block mt-2"><i class="fa-solid fa-file-circle-plus me-1"></i>Maximum size: 2 mb</small>
         <small class="text-muted d-block mt-2"><i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Minimum dimension: 300x300</small>
     </div>
-    <div class="my-3">
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
-    </div>
-    <p id="captchaMessage" class="mb-2 small">
-      <i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the submit button.
-    </p>
-    <button class="btn btn btn-secondary" type="submit" id="captchaSubmitButton" disabled>Submit</button>
+    <button class="btn btn-primary" type="submit">Submit</button>
 </form>
 {% endblock %}
 {% block scripts %}
@@ -245,12 +239,6 @@ async function cropAndSubmit(form) {
 
     form.submit();  // Submit the form with the updated file input
 }
-
-// Attach cropAndSubmit to the form submission event
-document.getElementById('captcha-wait-form').addEventListener('submit', function (event) {
-    event.preventDefault();  // Prevent default submission
-    cropAndSubmit(this);  // Perform cropping, replace file input, and submit
-});
 
 </script>
 {% endblock %}

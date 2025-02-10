@@ -209,14 +209,14 @@
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link">
+            <a href="#" class="nav-link disabled" aria-disabled="true">
               <span class="icon-wrapper me-2"><i class="fa-solid fa-bell"></i></span>
               <div class="vr me-2"></div>
               Notifications
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}">
+            <a href="{{ url_for('views.edit_user_profile') }}" class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}">
               <span class="icon-wrapper me-2"><i class="fa-solid fa-gear"></i></span>
               <div class="vr me-2"></div>
               Settings
@@ -313,7 +313,7 @@
               style="height: 3.5rem; width: 3.5rem" 
               alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">
             </a>
-            <a class="ms-4 text-uppercase text-reset text-decoration-none" href="{{ url_for('views.about') }}">About</a><a class="ms-4 text-uppercase text-reset text-decoration-none" href="{{ url_for('views.home') }}">Community</a><a class="ms-4 text-uppercase text-reset text-decoration-none" href="{{ url_for('views.home') }}">World Trackers</a>
+            <a class="ms-4 text-uppercase text-reset text-decoration-none" href="{{ url_for('views.about') }}" >About</a><a class="ms-4 text-uppercase text-reset text-decoration-none" aria-disabled="true">Community</a><a class="ms-4 text-uppercase text-reset text-decoration-none" aria-disabled="true">World Trackers</a>
             {% else %}
             <a href="/" class="logo-text notranslate text-decoration-none text-reset fs-5">
             <img 
@@ -648,13 +648,13 @@
             <a href="https://infomundi.net/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to your profile</a>
             <ul class="nav nav-pills flex-column mt-4">
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit"><i class="fa-solid fa-user me-1"></i>Info</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="https://infomundi.net/profile/edit"><i class="fa-solid fa-user me-1"></i>Info</a>
               </li>
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/avatar"><i class="fa-solid fa-image me-1"></i>Media</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="https://infomundi.net/profile/edit/avatar"><i class="fa-solid fa-image me-1"></i>Media</a>
               </li>
               <li class="nav-item inf-nav-item">
-                <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="https://infomundi.net/profile/{{ current_user.username }}/edit/settings"><i class="fa-solid fa-address-card me-1"></i>Details</a>
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="https://infomundi.net/profile/edit/settings"><i class="fa-solid fa-address-card me-1"></i>Details</a>
               </li>
             </ul>
           </div>
@@ -710,12 +710,12 @@
               </a>
             </li>
             <li class="nav-item mb-2">
-              <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link p-0 text-body-secondary">
+              <a href="#" class="nav-link p-0 text-body-secondary disabled" aria-disabled="true">
               <i class="fa-solid fa-bell me-1"></i>Notifications
               </a>
             </li>
             <li class="nav-item mb-2">
-              <a href="{{ url_for('views.edit_user_profile', username=current_user.username) }}" class="nav-link p-0 text-body-secondary">
+              <a href="{{ url_for('views.edit_user_profile') }}" class="nav-link p-0 text-body-secondary">
               <i class="fa-solid fa-gear me-1"></i>Settings
               </a>
             </li>
@@ -749,7 +749,7 @@
     <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}" 
       ></script>
-    {% if request.endpoint in ('auth.totp', 'auth.login', 'auth.register', 'auth.forgot_password', 'views.captcha', 'views.contact', 'views.sensitive', 'views.edit_user_avatar', 'views.edit_user_profile') %}
+    {% if request.endpoint in ('auth.totp', 'auth.login', 'auth.register', 'auth.forgot_password', 'views.captcha', 'views.contact', 'views.sensitive') %}
     <script nonce="{{ nonce }}"
       src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
       async defer

@@ -111,10 +111,9 @@ def user_profile(username):
         )
 
 
-@views.route('/profile/<username>/edit', methods=['GET', 'POST'])
-@profile_owner_required
-@verify_captcha
-def edit_user_profile(username):
+@views.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_user_profile():
     if request.method == 'GET':
         return render_template('edit_profile.html')
 
@@ -158,16 +157,16 @@ def edit_user_profile(username):
     return render_template('edit_profile.html')
 
 
-@views.route('/profile/<username>/edit/avatar', methods=['GET'])
-@profile_owner_required
-def edit_user_avatar(username):
+@views.route('/profile/edit/avatar', methods=['GET'])
+@login_required
+def edit_user_avatar():
     return render_template('edit_avatar.html')
 
 
-@views.route('/profile/<username>/edit/settings', methods=['GET', 'POST'])
-@profile_owner_required
+@views.route('/profile/edit/settings', methods=['GET', 'POST'])
+@login_required
 @sensitive_area
-def edit_user_settings(username):
+def edit_user_settings():
     if request.method == 'GET':
         return render_template('edit_settings.html')
 
@@ -295,11 +294,6 @@ def sensitive():
 @views.route('/upload_image', methods=['POST'])
 @login_required
 def upload_image():
-    token = request.form['cf-turnstile-response']
-    if not cloudflare_util.is_valid_captcha(token):
-        flash('Invalid captcha!', 'error')
-        return redirect(url_for('views.user_redirect'))
-
     image_categories = ('profile_picture', 'profile_banner', 'profile_background')
     for image_category in image_categories:
         file = request.files.get(image_category, '')
