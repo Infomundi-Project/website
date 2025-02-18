@@ -36,7 +36,7 @@ def get_statistics() -> dict:
             cursor.execute("SELECT COUNT(*) FROM categories")
             total_countries_supported = cursor.fetchone()['COUNT(*)']
             
-            cursor.execute("SELECT COUNT(*) FROM publishers")
+            cursor.execute("SELECT COUNT(*) FROM feeds")
             total_feeds = cursor.fetchone()['COUNT(*)']
             
             cursor.execute("SELECT COUNT(*) FROM stories")

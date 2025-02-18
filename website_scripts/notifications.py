@@ -1,7 +1,7 @@
 import requests
 from email.mime.multipart import MIMEMultipart
-from smtplib import SMTP_SSL, SMTPException
 from email.mime.text import MIMEText
+from smtplib import SMTP
 
 from . import config
 
@@ -47,13 +47,6 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str='nor
         bool: True if we were able to send the message, otherwise False.
     """
     
-    # Email credentials
-    sender_email = "contact@infomundi.net"
-
-    # Server information
-    smtp_server = config.SMTP_SERVER
-    smtp_port = config.SMTP_PORT
-
     # Create a message
     message = MIMEMultipart()
     message['From'] = from_email
@@ -63,13 +56,14 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str='nor
     message.attach(MIMEText(body, 'plain'))
 
     try:
-        with SMTP_SSL(smtp_server, smtp_port) as server:
+        with SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
+            server.starttls()  # Upgrade the connection to secure TLS
             # Log in to the email account
-            server.login(sender_email, config.EMAIL_PASSWORD)
+            server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
 
             # Send the email
-            server.sendmail(sender_email, recipient_email, message.as_string())
-    except SMTPException as e:
+            server.sendmail(config.SMTP_USERNAME, recipient_email, message.as_string())
+    except Exception as e:
         return False
 
     return True

@@ -614,10 +614,10 @@ The output must strictly conform to this structure and contain valid JSON. The t
                 {
                     "role": "system",
                     "content": (
-                        f"You are a helpful and comprehensive assistant designed to output in JSON format. "
-                        f"Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
+                        "You are a helpful and comprehensive assistant designed to output in JSON format. "
+                        "Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
                         f"into the respective topics. Ensure that the output is in the language '{lang}' and adheres "
-                        f"to a valid JSON structure, with clear separation between keys and their corresponding textual content."
+                        "to a valid JSON structure, with clear separation between keys and their corresponding textual content."
                     )
                 },
                 {"role": "user", "content": prompt}

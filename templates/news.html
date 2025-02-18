@@ -90,6 +90,7 @@
 <div class="row">
   {% if not is_mobile %}
   <div class="col-lg-2">
+    <!--
     <div class="left-pillar-wrapper h-100">
       <div class="pillar-container-left pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Pillar" class="pillar-top">
@@ -97,6 +98,8 @@
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Pillar" class="pillar-bottom">
       </div>
     </div>
+    -->
+
   </div>
   {% endif %}
   <div class="col-lg-{% if not is_mobile %}8{% else %}12{% endif %}">
@@ -487,6 +490,8 @@
   </div>
   {% if not is_mobile %}
   <div class="col-lg-2">
+
+    <!--
     <div class="right-pillar-wrapper h-100">
       <div class="pillar-container-right pillar-container">
         <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Top Pillar" class="pillar-top horizontally-mirrored">
@@ -494,6 +499,9 @@
         <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Right Pillar" class="pillar-bottom horizontally-mirrored">
       </div>
     </div>
+    -->
+
+
   </div>
   {% endif %}
 </div>

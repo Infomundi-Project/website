@@ -58,14 +58,14 @@
         </div>
         <ul class="list-group list-group-flush mt-3">
           <li class="list-group-item">
-            <a href="mailto:socialsDB@proton.me" target="_blank" class="text-decoration-none">
-              <i class="fa-solid fa-envelope me-1"></i>socialsDB@proton.me
+            <a href="mailto:barros@infomundi.net" target="_blank" class="text-decoration-none">
+              <i class="fa-solid fa-envelope me-2"></i>barros@infomundi.net
             </a>
           </li>
         </ul>
         <div class="card-footer text-body-secondary">
           <small>
-            <i class="fa-solid fa-location-dot me-1"></i>
+            <i class="fa-regular fa-clock me-1"></i>
             <span class="date-info"></span>
           </small>
         </div>
@@ -96,21 +96,21 @@
           <img src="{{ url_for('static', filename='img/galves.webp') }}" class="card-img-top" alt="Infomundi CTO">
         </a>
         <div class="card-body">
-          <h5 class="card-title">Guilherme Alves</h5>
+          <h5 class="card-title">Guilherme A.</h5>
           <p class="card-text">CTO, Fullstack Dev & Co-Founder</p>
           <p class="card-text">I create things, and I break things.</p>
         </div>
         <ul class="list-group list-group-flush mt-3">
           <li class="list-group-item">
-            <a href="mailto:behindsecurity@proton.me" target="_blank" class="text-decoration-none">
-              <i class="fa-solid fa-envelope me-1"></i>behindsecurity@proton.me
+            <a href="mailto:gui.alves@infomundi.net" target="_blank" class="text-decoration-none">
+              <i class="fa-solid fa-envelope me-2"></i>gui.alves@infomundi.net
             </a>
           </li>
         </ul>
         <div class="card-footer text-body-secondary">
           <small>
-            <i class="fa-solid fa-location-dot me-1"></i>
-            <span class="date-info"></span>
+            <i class="fa-regular fa-clock me-1"></i>
+            <span class="date-info-eu"></span>
           </small>
         </div>
       </div>
@@ -123,16 +123,27 @@
 <script nonce="{{ nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
   const dateElements = document.querySelectorAll('.date-info');
+  const dateElementsEu = document.querySelectorAll('.date-info-eu');
   
   const date = new Date();
   const dateTimezone = new Intl.DateTimeFormat('pt-BR', {
       dateStyle: 'short',
-      timeStyle: 'long',
+      timeStyle: 'short',
       timeZone: 'America/Belem',
+  });
+
+  const dateEu = new Date();
+  const dateTimezoneEu = new Intl.DateTimeFormat('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+      timeZone: 'Europe/Lisbon',
   });
 
   dateElements.forEach(function(element) {
     element.innerHTML = dateTimezone.format(date); // Update the element content
+  });
+  dateElementsEu.forEach(function(element) {
+    element.innerHTML = dateTimezoneEu.format(dateEu); // Update the element content
   });
 });
 </script>

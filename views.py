@@ -389,11 +389,6 @@ The Infomundi Team"""
     return render_template('contact.html')
 
 
-@views.route('/1239102301293021930', methods=['GET'])
-def test():
-    return render_template('test.html')
-
-
 @views.route('/about', methods=['GET'])
 @captcha_required
 def about():

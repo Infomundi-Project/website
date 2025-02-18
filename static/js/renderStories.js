@@ -469,7 +469,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  initializePillar();
+  //initializePillar();
 
   // Event listener for the Clear Filters button
   document.getElementById('clearFiltersButton').addEventListener('click', function () {
