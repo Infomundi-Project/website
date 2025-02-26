@@ -9,11 +9,13 @@ from . import models, notifications, extensions, friends_util, security_util, ha
 
 def search_user_email_in_database(email: str):
     salts = models.GlobalSalts.query.all()
+    # We try every salt to see if there's a match in the database
     for salt in salts:
         salted_email = salt.salt + email
         hashed_email = hashing_util.sha512_hash_text(salted_email)
         
         user = models.User.query.filter_by(email=hashed_email).first()
+        # If the user is found, there's no need to continue in the loop
         if user:
             break
     else:
@@ -27,6 +29,10 @@ def search_username_in_database(username: str):
 
 
 def hash_user_email_using_salt(email: str) -> str:
+    """Grabs a random salt from the database and hashes the salted email address with SHA-512.
+    
+        
+    """
     salts = [salt.salt for salt in models.GlobalSalts.query.all()]
 
     shuffle(salts)
@@ -68,13 +74,15 @@ The Infomundi Team
 
 
 def perform_logout_actions():
+    """To facilitate, we perform all logout actions in a single function. Clears user's session, and delete cookies related to Comentario's (https://commento.infomundi.net/) authentication.
+    """
     session.permanent = False
     session.clear()
     logout_user()
 
     response = make_response(redirect(url_for('auth.login')))
     
-    # List of cookie names to delete
+    # List of cookie names to delete, related to Comentario
     cookies_to_delete = ('XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session')
     
     # Includes all subdomains as well
@@ -88,6 +96,7 @@ def perform_logout_actions():
 
 
 def change_password(user, new_password: str):
+    # This function should be refactored
     user.set_password(new_password)
     user.purge_totp()
     user.in_recovery = False

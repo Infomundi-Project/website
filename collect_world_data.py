@@ -2,9 +2,9 @@ from requests import get as get_request
 from bs4 import BeautifulSoup
 
 from website_scripts import json_util, immutable
+from website_scripts.config import LOCAL_ROOT
 
-
-path = f'/root/docker/infomundi-app/data/json'
+path = f'{LOCAL_ROOT}/data/json'
 
 
 def format_world_data():

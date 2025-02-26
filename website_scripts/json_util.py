@@ -1,5 +1,6 @@
 import json
 
+
 def read_json(filepath: str) -> dict:
     """Takes only one argument, the path to the .json file on the system. Opens the requested file in a pythonic format (dictionary)"""
     try:
@@ -16,6 +17,7 @@ def read_json(filepath: str) -> dict:
         print(f"An error occurred while reading the file: {e}")
         return {}
 
+
 def write_json(data: dict, filepath: str):
     """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is saved in a 'filepath' file in json format."""
     try:
@@ -24,6 +26,7 @@ def write_json(data: dict, filepath: str):
     except Exception as e:
         print(f"An error occurred while writing to the file: {e}")
 
+
 def append_json(data: dict, filepath: str):
     """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is added to 'filepath' in json format."""
     try:
@@ -31,6 +34,7 @@ def append_json(data: dict, filepath: str):
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"An error occurred while appending to the file: {e}")
+
 
 def loads_json(data: str) -> dict:
     """Returns a dictionary made from a json string"""
@@ -42,6 +46,7 @@ def loads_json(data: str) -> dict:
     except Exception as e:
         print(f"An error occurred while loading JSON data: {e}")
         return {}
+
 
 def dumps_json(data: dict) -> str:
     """Returns a json string made from a dict"""

@@ -216,7 +216,7 @@
             </a>
           </li>
           <li class="nav-item inf-nav-item">
-            <a href="{{ url_for('views.edit_user_profile') }}" class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}">
+            <a href="{{ url_for('views.edit_user_settings') }}" class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
               <span class="icon-wrapper me-2"><i class="fa-solid fa-gear"></i></span>
               <div class="vr me-2"></div>
               Settings
@@ -343,11 +343,11 @@
                 </div>
 
                   <div class="col-auto me-4 mt-2 position-relative">
-                  <!-- Notification Bubble -->
+                  <!-- Notification Bubble 
                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                     99+
                     <span class="visually-hidden">unread messages</span>
-                  </span>
+                  </span>-->
                   
                   <!-- Icon and Text -->
                   <span class="d-block text-center">
@@ -622,7 +622,7 @@
           </div>
           <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'views.about' %}active{% endif %}" aria-current="page" href="{{ url_for('views.about') }}">Website</a>
+              <a class="nav-link {% if request.endpoint == 'views.about' %}active{% endif %}" href="{{ url_for('views.about') }}">Website</a>
             </li>
             <li class="nav-item">
               <a class="nav-link {% if request.endpoint == 'views.team' %}active{% endif %}" href="{{ url_for('views.team') }}">Team</a>

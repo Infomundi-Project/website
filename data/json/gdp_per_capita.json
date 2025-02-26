@@ -1,43 +1,43 @@
 [
   {
     "Liechtenstein": {
-      "gdp": "$187,267 (IMF)",
+      "gdp": "$186,400 (IMF)",
       "date": "2022"
     }
   },
   {
     "Luxembourg": {
-      "gdp": "$128,259 (World Bank)",
+      "gdp": "$128,678 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Bermuda": {
-      "gdp": "$123,091 (IMF)",
-      "date": "2022"
+      "gdp": "$125,841 (IMF)",
+      "date": "2023"
     }
   },
   {
     "Switzerland": {
-      "gdp": "$99,995 (World Bank)",
+      "gdp": "$99,564 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Ireland": {
-      "gdp": "$103,685 (World Bank)",
+      "gdp": "$103,887 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Cayman Islands": {
-      "gdp": "$96,074 (IMF)",
-      "date": "2022"
+      "gdp": "$97,749 (IMF)",
+      "date": "2023"
     }
   },
   {
     "Norway": {
-      "gdp": "$87,962 (World Bank)",
+      "gdp": "$87,925 (World Bank)",
       "date": "2023"
     }
   },
@@ -49,50 +49,50 @@
   },
   {
     "United States": {
-      "gdp": "$81,695 (World Bank)",
+      "gdp": "$82,769 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Iceland": {
-      "gdp": "$78,811 (World Bank)",
+      "gdp": "$79,637 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Macau": {
-      "gdp": "$66,835 (World Bank)",
+      "gdp": "$66,476 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Qatar": {
-      "gdp": "$87,480 (World Bank)",
-      "date": "2022"
+      "gdp": "$80,195 (World Bank)",
+      "date": "2023"
     }
   },
   {
     "Denmark": {
-      "gdp": "$67,967 (World Bank)",
+      "gdp": "$68,453 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Netherlands": {
-      "gdp": "$62,537 (World Bank)",
+      "gdp": "$64,572 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Australia": {
-      "gdp": "$64,712 (World Bank)",
+      "gdp": "$64,820 (World Bank)",
       "date": "2023"
     }
   },
   {
     "San Marino": {
-      "gdp": "$54,982 (World Bank)",
-      "date": "2021"
+      "gdp": "$54,264 (World Bank)",
+      "date": "2022"
     }
   },
   {
@@ -678,6 +678,12 @@
     }
   },
   {
+    "Kosovo": {
+      "gdp": "$5,943 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Marshall Islands": {
       "gdp": "$6,762 (World Bank)",
       "date": "2023"
@@ -704,12 +710,6 @@
   {
     "South Africa": {
       "gdp": "$6,253 (World Bank)",
-      "date": "2023"
-    }
-  },
-  {
-    "Kosovo": {
-      "gdp": "$5,943 (World Bank)",
       "date": "2023"
     }
   },
@@ -847,7 +847,7 @@
   },
   {
     "Bhutan": {
-      "gdp": "$3,704 (World Bank)",
+      "gdp": "$3,711 (World Bank)",
       "date": "2022"
     }
   },
@@ -931,13 +931,13 @@
   },
   {
     "India": {
-      "gdp": "$2,485 (World Bank)",
+      "gdp": "$2,480 (World Bank)",
       "date": "2023"
     }
   },
   {
     "Bangladesh": {
-      "gdp": "$2,529 (World Bank)",
+      "gdp": "$2,551 (World Bank)",
       "date": "2023"
     }
   },
@@ -1033,7 +1033,7 @@
   },
   {
     "Pakistan": {
-      "gdp": "$1,407 (World Bank)",
+      "gdp": "$1,365 (World Bank)",
       "date": "2023"
     }
   },
@@ -1051,7 +1051,7 @@
   },
   {
     "Nepal": {
-      "gdp": "$1,324 (World Bank)",
+      "gdp": "$1,377 (World Bank)",
       "date": "2023"
     }
   },

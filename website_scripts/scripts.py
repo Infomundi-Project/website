@@ -38,12 +38,6 @@ def home_processing() -> dict:
     return home_data
 
 
-def get_statistics() -> dict:
-    """Handles the statistics for Infomundi. Returns a dict with related information."""
-    last_statistic = models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
-    return last_statistic
-
-
 @extensions.cache.memoize(timeout=60*60*6) # 6 hours
 def news_page_processing(country_name: str) -> dict:
     country_name = country_name.lower()
@@ -102,6 +96,12 @@ def news_page_processing(country_name: str) -> dict:
         'country_index': country_index
     }
     return news_page_data
+
+
+def get_statistics() -> dict:
+    """Handles the statistics for Infomundi. Returns a dict with related information."""
+    last_statistic = models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
+    return last_statistic
 
 
 def scrape_stock_data(country_name: str) -> list:
@@ -304,7 +304,6 @@ def parse_utc_offset(offset_str: str):
     return utc_offset
 
 
-@extensions.cache.memoize(timeout=60*60*16) # 16 hours
 def get_current_time_in_timezone(cca2: str) -> str:
     data = json_util.read_json(f'{config.COUNTRIES_DATA_PATH}/{cca2}')
     current_utc_time = datetime.utcnow()

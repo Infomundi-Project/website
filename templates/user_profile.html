@@ -183,7 +183,7 @@
           {% if current_user.username == user.username %}
           <div class="row align-items-center">
             <div class="col">
-              <a type="button" role="button" class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2" href="{{ url_for('views.edit_user_profile', username=user.username) }}">
+              <a type="button" role="button" class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2" href="{{ url_for('views.edit_user_profile') }}">
                 <i class="fa-solid fa-pen me-1"></i>Edit Profile
               </a>
             </div>
@@ -204,7 +204,7 @@
             {% elif friend_status == 'pending' %}
               <a type="button" role="button" class="btn btn-lg btn-outline-success" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}" data-bs-toggle="tooltip" data-bs-title="Accept Request"><i class="fa-solid fa-user-check"></i></a>
             {% elif friend_status == 'accepted' %}
-              <a type="button" role="button" class="btn btn-lg btn-outline-danger" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i class="fa-solid fa-user-minus"></i></a>
+              <a type="button" role="button" class="btn btn-sm btn-outline-danger" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i class="fa-solid fa-user-minus"></i></a>
             {% endif %}
           {% endif %}
         {% endif %}

@@ -65,17 +65,23 @@ limiter.init_app(app)
 
 @app.route('/<filename>')
 def serve_file(filename):
-    if filename in ('ads.txt', 'favicon.ico', 'robots.txt', 'security.txt', 'pubkey.asc'):
-        return send_from_directory(os_path.join(app.root_path, 'static'),
-            filename, mimetype='image/x-icon' if filename == 'favicon.ico' else 'text/plain')
-    else:
+    if filename not in ('ads.txt', 'favicon.ico', 'robots.txt', 'security.txt', 'pubkey.asc', 'sitemap.xml', 'countries.xml'):
         abort(404)
+    
+    if filename.endswith('.xml'):
+        mimetype = 'text/xml'
+    elif filename == 'favicon.ico':
+        mimetype = 'image/x-icon'
+    else:
+        mimetype = 'text/plain'
+    
+    return send_from_directory(os_path.join(app.root_path, 'static'),
+        filename, mimetype=mimetype)
 
 
 # CSRF Configuration
 csrf = CSRFProtect(app)
-csrf.exempt('api.story_reaction')
-# Remove protection to endpoint --> csrf.exempt('api.comments')
+csrf.exempt('api.story_reaction') # remove protection to specific endpoint
 
 # Login manager
 login_manager.init_app(app)
@@ -89,12 +95,14 @@ def load_user(user_id):
 
 @app.before_request
 def set_nonce():
+    # Generates nonce to be used in the CSP
     g.nonce = generate_nonce()
 
 
 @app.before_request
-@cache.cached(timeout=60, key_prefix=current_user.user_id if (current_user and current_user.is_authenticated) else 'guest') # 1 minute
+@cache.cached(timeout=300, key_prefix=current_user.user_id if (current_user and current_user.is_authenticated) else 'guest')
 def check_session_version():
+    # We check the session version every 5 minutes, to see if session is valid.
     if current_user.is_authenticated:
         user = User.query.get(current_user.user_id)
         

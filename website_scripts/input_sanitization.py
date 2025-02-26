@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 from urllib.parse import urlparse
 from unidecode import unidecode
 from collections import deque
+from bs4 import BeautifulSoup
 
 from . import security_util, config
 
@@ -22,25 +23,16 @@ def clean_publisher_name(name):
     return name
 
 
-def decode_html_entities(text):
+def decode_html_entities(text: str):
     """
-    Decodes a string of HTML entities until it no longer changes. Returns the decoded string.
+    Decodes a string of HTML entities iteratively until it no longer changes. 
+    Returns the fully decoded string.
     """
-    # Check if the text changes after the first decode
-    decoded_once = html.unescape(text)
-    
-    if text == decoded_once:
-        # No change after first decode, text is plain
-        return text
-    
-    # Check if the text changes again after a second decode
-    decoded_twice = html.unescape(decoded_once)
-    if decoded_once == decoded_twice:
-        # No change after the second decode, text is single-encoded
-        return decoded_once
-    
-    # Text changes after second decode, text is double-encoded
-    return decoded_twice
+    while True:
+        decoded = html.unescape(str(text))
+        if decoded == text:  # Stop if no further changes occur
+            return text
+        text = decoded
 
 
 def sanitize_description(description: str) -> str:
@@ -96,7 +88,7 @@ def sanitize_html(text: str) -> str:
         tags=[],
         attributes=[],
         strip=True
-        )
+        ).strip()
 
 
 def sanitize_text(text: str) -> str:
@@ -110,70 +102,16 @@ def sanitize_text(text: str) -> str:
     Returns:
         str: The sanitized text.
     """
-    text = unidecode(text.strip())
-    
-    # Define the allowed characters using a regex pattern
-    allowed_chars_pattern = re.compile(r'[^a-zA-Z0-9 ,.!?:\-\'"]')
-    
-    # Substitute any character not in the allowed set with an empty string
+    text = unidecode(text.strip())  # Convert non-ASCII to closest ASCII representation
+
+    # Define allowed characters and remove disallowed ones
+    allowed_chars_pattern = re.compile(r'[^a-zA-Z0-9 ,.!?\-\'"]+')
     sanitized_text = allowed_chars_pattern.sub('', text)
-    
+
+    # Collapse multiple spaces caused by removed characters
+    sanitized_text = re.sub(r'\s+', ' ', sanitized_text).strip()
+
     return sanitized_text
-
-
-def sanitize_username(username: str) -> str:
-    allowed_pattern = re.compile(r'[a-zA-Z0-9_-]')
-
-    # Substitute any character not in the allowed set with an empty string
-    return ''.join(allowed_pattern.findall(username))
-
-
-def create_username_out_of_display_name(display_name: str) -> str:
-    nonce = security_util.generate_nonce(5)
-    
-    display_name = nonce + unidecode(display_name.lower().strip())
-    if ' ' not in display_name:
-        return sanitize_username(display_name)[:config.MAX_USERNAME_LEN]
-    
-    # Gets the first name and initial of the last name
-    return sanitize_username(display_name.split(' ')[0][:config.MAX_USERNAME_LEN - 1] + display_name.split(' ')[1][0])
-
-
-def is_valid_email(email: str) -> bool:
-    """
-    Sanitize an email address by ensuring it conforms to a basic pattern and removing extraneous whitespace.
-    
-    Arguments:
-        email (str): The email address to sanitize.
-    
-    Returns:
-        bool: True if email is valid, False otherwise.
-
-    Examples:
-        >>> is_valid_email('behindsecurity@proton.me')
-        True
-
-        >>> is_valid_email('$h()uld not be_valid@mail.com')
-        False
-    """
-    # Define a regular expression pattern for a basic email format
-    email_pattern = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-    
-    # Match the email against the pattern
-    if email_pattern.match(email):
-        return True
-    
-    return False
-
-
-def is_strong_password(password: str) -> bool:
-    # One regex check for all conditions:
-    # - At least 8 characters long and no more than 50 characters
-    # - Contains at least one uppercase letter
-    # - Contains at least one lowercase letter
-    # - Contains at least one digit
-    # - Contains at least one special character
-    return bool(re.match(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,50}$", password))
 
 
 def is_valid_username(username: str) -> bool:
@@ -189,14 +127,82 @@ def is_valid_username(username: str) -> bool:
     Returns:
         bool: True if username is valid, False otherwise.
     """
-    # Define a regular expression pattern for a valid username
-    username_pattern = re.compile(r'^[a-zA-Z0-9_-]{3,25}$')
+    return re.compile(r'^[a-zA-Z0-9_-]{3,25}$').match(username)
+
+
+def sanitize_username(username: str) -> str:
+    allowed_pattern = re.compile(r'[a-zA-Z0-9_-]')
+
+    # Substitute any character not in the allowed set with an empty string
+    return ''.join(allowed_pattern.findall(username))[:25]
+
+
+def create_username_out_of_display_name(display_name: str) -> str:
+    nonce = security_util.generate_nonce(5)
     
-    # Match the username against the pattern
-    if not username_pattern.match(username):
+    display_name = nonce + unidecode(display_name.lower().strip())
+    if ' ' not in display_name:
+        return sanitize_username(display_name)[:config.MAX_USERNAME_LEN]
+    
+    # Gets the first name and initial of the last name
+    return sanitize_username(display_name.split(' ')[0][:config.MAX_USERNAME_LEN - 1] + display_name.split(' ')[1][0])
+
+
+def is_valid_email(email):
+    # Regular expression for validating the local part of the email
+    local_part_regex = r"^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
+    
+    # Regular expression for validating the domain part of the email
+    domain_regex = r"^[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
+    
+    # Check if the email contains only one '@' symbol
+    if '@' not in email or email.count('@') != 1:
+        return False
+    
+    # Split the email into local-part and domain
+    local_part, domain = email.split('@')
+
+    # Check if the local part length is within the allowed limit
+    if len(local_part) > 64:
+        return False
+
+    # Check if the local part is valid
+    if not re.match(local_part_regex, local_part):
+        return False
+
+    # Check if the domain length is within the allowed limit
+    if len(domain) > 255:
+        return False
+
+    # Check if the domain is valid and has at least one period (.) to separate domain and TLD
+    if not re.match(domain_regex, domain) or '.' not in domain:
+        return False
+
+    # Check if domain labels are within the limit of 63 characters each
+    domain_labels = domain.split('.')
+    for label in domain_labels:
+        if len(label) > 63:
+            return False
+
+    # Additional check for disallowed patterns in the email
+    # Check for consecutive dots or invalid characters like spaces or special symbols
+    if '..' in email or ' ' in email or '!' in email or '@' in domain[0] or '@' in domain[-1]:
         return False
 
     return True
+
+
+def is_strong_password(password: str) -> bool:
+    """One regex check for all conditions:
+    
+    - At least 8 characters long and no more than 100 characters
+    - Contains at least one uppercase letter
+    - Contains at least one lowercase letter
+    - Contains at least one digit
+    - Contains at least one special character
+
+    """
+    return bool(re.match(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,100}$", password))
 
 
 def is_valid_text(text: str) -> bool:
@@ -242,29 +248,30 @@ def is_valid_url(url: str) -> bool:
 
 
 def is_safe_url(target: str) -> bool:
-    """
-    Checks if the target URL is safe by confirming it matches a specific domain.
-    
-    Arguments:
-        target (str): A target URL.
-    
-    Returns:
-        bool: True if the URL is safe, False otherwise.
-    """
-    allowed_domains = ("infomundi.net", "commento.infomundi.net", "bucket.infomundi.net")
+    allowed_domain = "infomundi.net"
     
     try:
         test_url = urlparse(target)
     except ValueError:
         return False
     
-    # Ensure the URL scheme is http or https
     if test_url.scheme != 'https':
         return False
-    
-    # Check if the netloc is exactly in the allowed domains
-    if test_url.netloc not in allowed_domains:
+
+    netloc = test_url.netloc.split(":")[0]  # Strip port
+
+    # Ensure netloc ends with .infomundi.net
+    if not netloc.endswith(f".{allowed_domain}"):
         return False
+
+    # Extract the subdomain part (everything before ".infomundi.net")
+    subdomain = netloc.removesuffix(f".{allowed_domain}")
+
+    # Validate subdomain structure
+    subdomain_regex = re.compile(r"^(?!-)(?!.*--)[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*(?<!-)$")
+
+    if not subdomain or not subdomain_regex.fullmatch(subdomain):
+        return False  # Reject malformed subdomains
 
     return True
 
@@ -399,75 +406,9 @@ def obfuscate_email(email: str) -> str:
     return obfuscated_email
 
 
-def close_open_html_tags(html_string: str) -> str:
+def close_open_html_tags(html: str) -> str:
     """
-    Closes any unclosed HTML tags in the provided HTML string.
-
-    Args:
-        html_string (str): The HTML string to check and correct for unclosed tags.
-
-    How it works:
-        - The function defines a set of valid HTML tags that it will check for closure.
-        - It uses an inner HTML parser class (`SimpleHTMLParser`) to parse the HTML string.
-        - The parser tracks open tags using a stack.
-        - When it encounters a closing tag, it ensures all open tags up to that point are closed.
-        - After parsing, it ensures any remaining open tags in the stack are closed.
-        - Only specified tags are considered (['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'br']).
-
-    Returns:
-        str: The corrected HTML string with all tags properly closed.
-
-    Examples:
-        >>> close_open_html_tags("<p>Some text<b>bold text<i>italic text</b>unclosed italic<p>Another paragraph")
-        '<p>Some text<b>bold text<i>italic text</i></b>unclosed italic</p><p>Another paragraph</p>'
+    Ensures all open HTML tags are properly closed.
     """
-    valid_tags = {'p', 'b', 'i', 'u', 'em', 'strong', 'a', 'br'}
-    self_closing_tags = {'br'}
-    stack = deque()
-    result = []
-
-    class SimpleHTMLParser(HTMLParser):
-        def handle_starttag(self, tag, attrs):
-            if tag in valid_tags:
-                result.append(f'<{tag}')
-                for attr, value in attrs:
-                    result.append(f' {attr}="{value}"')
-                result.append('>')
-                if tag not in self_closing_tags:
-                    stack.append(tag)
-
-        def handle_endtag(self, tag):
-            if tag in valid_tags:
-                while stack and stack[-1] != tag:
-                    unclosed_tag = stack.pop()
-                    result.append(f'</{unclosed_tag}>')
-                if stack:
-                    stack.pop()
-                result.append(f'</{tag}>')
-
-        def handle_data(self, data):
-            result.append(data)
-
-        def handle_entityref(self, name):
-            result.append(f'&{name};')
-
-        def handle_charref(self, name):
-            result.append(f'&#{name};')
-
-        def handle_comment(self, data):
-            result.append(f'<!--{data}-->')
-
-        def handle_decl(self, decl):
-            result.append(f'<!{decl}>')
-
-        def handle_pi(self, data):
-            result.append(f'<?{data}>')
-
-    parser = SimpleHTMLParser()
-    parser.feed(html_string)
-    
-    while stack:
-        unclosed_tag = stack.pop()
-        result.append(f'</{unclosed_tag}>')
-    
-    return ''.join(result)
+    soup = BeautifulSoup(html, "html.parser")
+    return str(soup)

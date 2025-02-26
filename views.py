@@ -80,10 +80,11 @@ def user_profile_by_id(user_id):
 
 
 @views.route('/profile/<username>', methods=['GET'])
+@views.route('/p/<username>', methods=['GET'])
 def user_profile(username):
     user = models.User.query.filter_by(username=username).first()
     if not user:
-        flash('User not found!', 'error')
+        flash("We apologize, but the user you're looking for could not be found.", 'error')
         return redirect(url_for('views.user_redirect'))
     
     # Make sure to add a trailing <p> to avoid breaking the page

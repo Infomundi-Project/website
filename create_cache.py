@@ -33,7 +33,7 @@ logging.basicConfig(filename=f'{config.LOCAL_ROOT}/logs/create_cache.log', level
 
 def log_message(message):
     print(f'[~] {message}')
-    logging.info(message)
+    #logging.info(message)
 
 
 def insert_to_database(stories: list, category_id: str) -> int:
