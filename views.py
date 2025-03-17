@@ -4,7 +4,7 @@ from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
 cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util
-from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required, sensitive_area
+from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required, sensitive_area, in_maintenance
 
 views = Blueprint('views', __name__)
 
@@ -249,7 +249,7 @@ def captcha():
         clearance = session.get('clearance', '')
         if clearance:
             timestamp = datetime.fromisoformat(clearance)
-            if qol_util.is_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+            if qol_util.is_date_within_threshold_minutes(timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True):
                 flash("We know you are not a robot, don't worry")
                 return redirect(url_for('views.user_redirect'))
 
@@ -414,6 +414,7 @@ def donate():
 
 
 @views.route('/news', methods=['GET'])
+@in_maintenance
 def news():
     """Serving the /news endpoint. 
 
@@ -497,7 +498,7 @@ def comments():
     # Used in the api.
     session['visited_news'] = news_id
     
-    # Create the SEO dataw. Title should be 60 characters, description must be 150 characters
+    # Create the SEO data. Title should be 60 characters, description should be 150 characters
     seo_title = input_sanitization.gentle_cut_text(45, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
     seo_image = story.media_content_url

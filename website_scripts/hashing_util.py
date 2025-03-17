@@ -2,6 +2,7 @@ import hashlib
 import argon2
 import hmac
 
+
 def argon2_hash_text(cleartext: str) -> str:
     return argon2.PasswordHasher().hash(cleartext)
 
@@ -95,8 +96,56 @@ def sha512_verify_hash(text: str, hash_value: str) -> bool:
     return sha512_hash_text(text) == hash_value
 
 
-def md5_hash_text(text: str) -> str:
-    return hashlib.md5(text.encode('utf-8')).hexdigest()
+def binary_to_md5_hex(binary_data: bytes) -> str:
+    """Convert a string to MD5 hash (hex format)
+
+    Example:
+        >>> binary_md5 = md5_hex_to_binary("5d41402abc4b2a76b9719d911017c592")
+        >>> print(binary_to_md5_hex(binary_md5))
+        5d41402abc4b2a76b9719d911017c592
+    """
+    return binary_data.hex()
+
+
+def md5_binary_to_string(binary_data: bytes) -> str:
+    """Convert MD5 hash (binary) to a 32-character hex string
+
+    Example:
+        >>> binary_md5 = md5_hex_to_binary("5d41402abc4b2a76b9719d911017c592")
+        >>> print(md5_binary_to_string(binary_md5))
+        52df1db4ad8b6c8a1c98e92b3ea1aada
+    """
+    return hashlib.md5(binary_data).hexdigest()
+
+
+def md5_hex_to_binary(md5_hex: str) -> bytes:
+    """Convert MD5 hex to binary (16-byte BLOB equivalent)
+    
+    Example:
+        >>> print(md5_hex_to_binary("5d41402abc4b2a76b9719d911017c592"))
+        b']A@\\x02\\xab\\xc4\\xb2\\xa7k\\x97\\x19\\xd9\\x11\\x01|Y'
+    """
+    return bytes.fromhex(md5_hex)
+
+
+def string_to_md5_binary(input_string: str) -> bytes:
+    """Convert an MD5 hash from a string to binary in one step
+
+    Example:
+        >>> print(string_to_md5_binary("hello"))
+        b']A@\\x02\\xab\\xc4\\xb2\\xa7k\\x97\\x19\\xd9\\x11\\x01|Y'
+    """
+    return hashlib.md5(input_string.encode()).digest()
+
+
+def string_to_md5_hex(input_string: str) -> str:
+    """
+
+    Example:
+        >>> print(string_to_md5_hex("hello"))  
+        5d41402abc4b2a76b9719d911017c592
+    """
+    return hashlib.md5(input_string.encode()).hexdigest()
 
 
 def generate_hmac_signature(key: str, message: str, algorithm: str = 'sha256') -> str:

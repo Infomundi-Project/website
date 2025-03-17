@@ -21,10 +21,14 @@ class User(db.Model, UserMixin):
 
     # Profile Customization
     display_name = db.Column(db.String(40))
-    avatar_url = db.Column(db.String(80))
     profile_description = db.Column(db.String(1500))
+
+    
+    
+    avatar_url = db.Column(db.String(80))
     profile_banner_url = db.Column(db.String(80))
     profile_wallpaper_url = db.Column(db.String(80))
+    
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
 

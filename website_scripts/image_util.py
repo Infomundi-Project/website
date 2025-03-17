@@ -2,7 +2,7 @@ import magic, boto3
 from io import BytesIO
 from PIL import Image
 
-from . import immutable, config
+from . import immutable, config, llm_util
 
 # r2 configuration
 s3_client = boto3.client(
@@ -65,13 +65,14 @@ def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: st
     except Exception as e:
         return False
         
-    # Close the buffer for god's sake
+    # Close the buffer for God's sake
     output_buffer.close()
     return True
 
 
 def is_extension_allowed(filename: str) -> bool:
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in immutable.IMAGE_EXTENSIONS
+    return ('.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in immutable.IMAGE_EXTENSIONS)
 
 
 def is_really_an_image(file_stream) -> bool:
@@ -82,10 +83,10 @@ def is_really_an_image(file_stream) -> bool:
         
         # Reset file stream position
         file_stream.seek(0)
-        
-        return True
     except Exception:
         return False
+
+    return True
 
 
 def has_valid_mime_type(file_stream: bytes) -> bool:
@@ -119,6 +120,7 @@ def has_allowed_dimensions(image_stream: bytes, min_width: int=200, min_height: 
     return minimum_dimensions and maximum_dimensions
 
 
-def perform_all_checks(image_stream: bytes, filename: str):
+def perform_all_checks(image_stream: bytes, filename: str) -> bool:
+    """Performs all checks to make sure the user-supplied image is safe"""
     return (is_extension_allowed(filename) and has_valid_mime_type(image_stream) \
-        and is_really_an_image(image_stream) and has_allowed_dimensions(image_stream))
+        and is_really_an_image(image_stream) and has_allowed_dimensions(image_stream) and not llm_util.is_inappropriate(image_stream))

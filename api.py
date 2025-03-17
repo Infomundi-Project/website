@@ -7,7 +7,8 @@ from sqlalchemy.types import Date
 from random import shuffle
 
 from website_scripts import config, json_util, scripts, notifications,\
-    models, extensions, immutable, input_sanitization, friends_util, country_util, totp_util, security_util, hashing_util
+    models, extensions, immutable, input_sanitization, friends_util, \
+    country_util, totp_util, security_util, hashing_util, llm_util
 
 api = Blueprint('api', __name__)
 
@@ -295,7 +296,7 @@ def summarize_story(story_id):
     if story.gpt_summary:
         return jsonify({'response': story.gpt_summary}), 200
 
-    response = scripts.gpt_summarize(story.link)
+    response = llm_util.gpt_summarize(story.link)
     if response:
         # We convert the json response to a dict in order to store it in the database
         story.gpt_summary = response
@@ -424,5 +425,4 @@ def get_stocks():
 @api.route('/crypto')
 @extensions.cache.cached(timeout=60*60) # 1h cached
 def get_crypto():
-    crypto = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
-    return jsonify(crypto)
+    return jsonify(json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto'))

@@ -3,7 +3,7 @@ from flask_login import current_user
 from datetime import datetime
 from functools import wraps
 
-from .qol_util import is_within_threshold_minutes
+from .qol_util import is_date_within_threshold_minutes
 from .cloudflare_util import is_valid_captcha
 from .config import CAPTCHA_CLEARANCE_HOURS
 
@@ -75,7 +75,7 @@ def captcha_required(func):
         clearance = session.get('clearance', '')
         if clearance:
             timestamp = datetime.fromisoformat(clearance)
-            if is_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+            if is_date_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
                 return func(*args, **kwargs)
         
         session['clearance_from'] = request.url

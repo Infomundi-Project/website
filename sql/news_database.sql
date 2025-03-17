@@ -30,15 +30,19 @@ CREATE TABLE category_tags (
 );
 
 CREATE TABLE stories (
-    story_id VARCHAR(40) PRIMARY KEY,
+    story_id BINARY(16) PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
     description VARCHAR(500),
     gpt_summary TEXT,
+    
+    -- soon to be removed
     clicks INT DEFAULT 0,
     likes INT DEFAULT 0,
     dislikes INT DEFAULT 0,
+    
+    
     link VARCHAR(512) NOT NULL,
-    pub_date VARCHAR(30) NOT NULL,
+    pub_date DATETIME NOT NULL,
     category_id VARCHAR(20) NOT NULL,
     publisher_id VARCHAR(40) NOT NULL,
     media_content_url VARCHAR(100),
@@ -46,14 +50,10 @@ CREATE TABLE stories (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id),
-    INDEX idx_category_media_created_at_asc (category_id, has_media_content, created_at ASC),
     INDEX idx_category_media_created_at (category_id, has_media_content, created_at DESC),
-    INDEX idx_category_media_clicks_asc (category_id, has_media_content, clicks ASC),
     INDEX idx_category_media_clicks (category_id, has_media_content, clicks DESC),
     FULLTEXT INDEX ft_title_description (title, description),
     INDEX idx_has_media_content (has_media_content),
-    INDEX idx_publisher_id (publisher_id),
-    INDEX idx_category_id (category_id),
     INDEX idx_created_at (created_at),
     INDEX idx_pub_date (pub_date),
     INDEX idx_clicks (clicks),
@@ -61,11 +61,20 @@ CREATE TABLE stories (
 
 CREATE TABLE story_reactions (
     reaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    story_id VARCHAR(40),
+    story_id BINARY(16),
     user_id VARCHAR(20),
     action VARCHAR(10),  -- 'like' or 'dislike'
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (story_id) REFERENCES stories(story_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     UNIQUE KEY unique_reaction (story_id, user_id, action)
+);
+
+-- yet to be created
+CREATE TABLE story_stats (
+    story_id BINARY(16) PRIMARY KEY,
+    clicks INT DEFAULT 0,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
+    FOREIGN KEY (story_id) REFERENCES stories(story_id) ON DELETE CASCADE
 );

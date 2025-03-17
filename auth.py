@@ -174,7 +174,7 @@ def verify():
 
     # Checks if the token is expired or the user already exist
     created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
-    if not qol_util.is_within_threshold_minutes(created_at, 30) or models.User.query.filter_by(email=token_lookup.email).first():
+    if not qol_util.is_date_within_threshold_minutes(created_at, 30) or models.User.query.filter_by(email=token_lookup.email).first():
         extensions.db.session.delete(token_lookup)
         extensions.db.session.commit()
         

@@ -1,6 +1,9 @@
 from user_agents import parse as parse_user_agent
 from langdetect import detect as lang_detect
 from datetime import datetime, timedelta
+from os import path as os_path
+
+from .custom_exceptions import InfomundiCustomException
 
 
 def detect_language(text: str) -> str:
@@ -49,7 +52,7 @@ def is_mobile(request) -> bool:
     return True
 
 
-def is_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hours: bool=False) -> bool:
+def is_date_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hours: bool=False) -> bool:
     """
     Checks if the given timestamp is within the specified threshold of minutes/hours from the current time.
 
@@ -64,15 +67,15 @@ def is_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hou
         >>> from datetime import datetime, timedelta
         >>> now = datetime.now()
         >>> past_time = now - timedelta(minutes=5)
-        >>> is_within_threshold_minutes(past_time, 10)
+        >>> is_date_within_threshold_minutes(past_time, 10)
         True
-        >>> is_within_threshold_minutes(past_time, 3)
+        >>> is_date_within_threshold_minutes(past_time, 3)
         False
 
         >>> future_time = now + timedelta(minutes=5)
-        >>> is_within_threshold_minutes(future_time, 10)
+        >>> is_date_within_threshold_minutes(future_time, 10)
         True
-        >>> is_within_threshold_minutes(future_time, 3)
+        >>> is_date_within_threshold_minutes(future_time, 3)
         False
     """
     time_difference = datetime.now() - timestamp
@@ -81,6 +84,34 @@ def is_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hou
         return time_difference <= timedelta(hours=threshold_time)
 
     return time_difference <= timedelta(minutes=threshold_time)
+
+
+def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: int, is_hours: bool=False) -> bool:
+    """Checks if the creation of the given file, pointed by file_path, is within the specified threshold of minutes/hours from the current time.
+
+    Args:
+        file_path (str): File path to compare.
+        threshold_time (int): Time to compare. Defaults to minutes.
+        is_hours (bool, optional): Time in hours to compare.
+
+
+    Returns: 
+        bool: False if cache is not old, meaning that there's less than 24 hours since last modification. Otherwise, True.
+    """
+
+    try:
+        # Get the modification time of the file using os.path
+        file_mtime = datetime.fromtimestamp(os_path.getmtime(file_path))
+    except Exception:
+        return True
+    
+    # Calculate the time difference between now and the file modification time
+    time_difference = datetime.now() - file_mtime
+    
+    if is_hours:
+        return time_difference <= timedelta(hours=threshold_time)
+
+    return time_difference > timedelta(minutes=threshold_time)
 
 
 def get_device_info(user_agent_string: str):

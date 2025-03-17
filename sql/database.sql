@@ -10,24 +10,36 @@ CREATE TABLE IF NOT EXISTS users (
     session_version INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME,
+    
+    -- Customization
     display_name VARCHAR(40),
-    avatar_url VARCHAR(80),
     profile_description VARCHAR(1500),
+    avatar_url VARCHAR(80),
     profile_banner_url VARCHAR(80),
     profile_wallpaper_url VARCHAR(80),
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
+
+    -- Recovery
     in_recovery BOOLEAN DEFAULT FALSE,
     recovery_token VARCHAR(40),
     recovery_token_timestamp DATETIME,
+
+    -- Account deletion
     delete_token VARCHAR(40),
     delete_token_timestamp DATETIME,
+
+    -- Activity
     is_online BOOLEAN DEFAULT FALSE,
     last_activity DATETIME,
+
+    -- Totp
     totp_secret VARCHAR(120),
     totp_recovery VARCHAR(120),
     mail_twofactor VARCHAR(6),
     mail_twofactor_timestamp DATETIME,
+
+    -- Encryption
     derived_key_salt VARCHAR(120),
     INDEX idx_username (username),
     INDEX idx_email (email)

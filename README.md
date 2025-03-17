@@ -1,7 +1,6 @@
-# 🌐 **Infomundi**
-> Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.
-
 <img src="https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp" style="height: auto; width: 50%;">  
+
+> Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.
 
 ![Infomundi](https://img.shields.io/badge/Infomundi-2.0-blue?style=social)
 ![Python](https://img.shields.io/badge/Python-3.12.7-blue?style=social&logo=python)
@@ -11,13 +10,12 @@
 
 ## 🌟**About the Project**
 
-Infomundi was created by two university students, with the mission of simplifying access to reliable, detailed information about countries worldwide. Our platform spans topics from geopolitics to economics, continuously updated to keep our community informed and engaged.
-
-At Infomundi, we recognize the transformative value of information. Designed to be user-friendly and accessible, our platform supports meaningful discussions and fosters a deeper understanding of the world around us.
+Infomundi was created with the mission of simplifying access to reliable, detailed information about countries worldwide. Our platform spans topics from geopolitics to economics, continuously updated to keep our community informed and engaged. We recognize the transformative value of information. Designed to be user-friendly and accessible, our platform supports meaningful discussions and fosters a deeper understanding of the world around us.
 
 ### Built With:
 - [Python](https://www.python.org/)
 - [Flask](https://flask.palletsprojects.com/en/stable/)
+- [SQL Alchemy](https://www.sqlalchemy.org/)
 - [Bootstrap 5](https://getbootstrap.com/)
 - Vanilla JS/CSS
 
@@ -80,4 +78,4 @@ Distributed under the X License. See `LICENSE` for more information.
 
 ## 📬 **Contact**
 
-Maintainer - Guilherme Alves ([@behindsecurity](https://github.com/behindsecurity)) - gui.alves@infomundi.net
+https://infomundi.net/team

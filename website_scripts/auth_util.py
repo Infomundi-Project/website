@@ -8,6 +8,7 @@ from . import models, notifications, extensions, friends_util, security_util, ha
 
 
 def search_user_email_in_database(email: str):
+    # Gets all salts from the database
     salts = models.GlobalSalts.query.all()
     # We try every salt to see if there's a match in the database
     for salt in salts:
@@ -181,7 +182,7 @@ def handle_register_token(email: str, hashed_email: str, username: str, hashed_p
     if token_lookup:
         created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
         # If it's within the threshold, return False. Otherwise, delete the token.
-        if qol_util.is_within_threshold_minutes(created_at, 30):
+        if qol_util.is_date_within_threshold_minutes(created_at, 30):
             return False
         
         extensions.db.session.delete(token_lookup)
@@ -229,7 +230,7 @@ def check_recovery_token(token: str) -> object:
         return None
 
     created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
-    if not qol_util.is_within_threshold_minutes(created_at, 30):
+    if not qol_util.is_date_within_threshold_minutes(created_at, 30):
         user_lookup.recovery_token = None
         extensions.db.session.commit()
         return None
@@ -257,7 +258,7 @@ def send_recovery_token(email: str) -> bool:
     # If there's a token already issued to the user, check if it's expired. If expired, proceed. If not, return False.
     if user_lookup.recovery_token:
         created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
-        if not qol_util.is_within_threshold_minutes(created_at, 30):
+        if not qol_util.is_date_within_threshold_minutes(created_at, 30):
             return False
 
     # Generates a super random token.
@@ -294,7 +295,7 @@ def delete_account(email, token) -> bool:
 
     # Checks to see if the token is valid. If the token is invalid, deletes it and return False.
     created_at = datetime.fromisoformat(user.delete_token_timestamp.isoformat())
-    if not qol_util.is_within_threshold_minutes(created_at, 30):
+    if not qol_util.is_date_within_threshold_minutes(created_at, 30):
         user.delete_token = None
         extensions.db.session.commit()
         return False

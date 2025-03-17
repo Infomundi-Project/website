@@ -2,14 +2,12 @@ import json
 from datetime import datetime, timedelta
 from requests import get as get_request
 from difflib import SequenceMatcher
-#from googletrans import Translator
 from unidecode import unidecode
 from bs4 import BeautifulSoup
-from os import listdir, path
 from random import choice
-from openai import OpenAI
+from os import path
 
-from . import config, json_util, immutable, notifications, models, extensions
+from . import config, json_util, immutable, notifications, models, extensions, qol_util
 
 
 @extensions.cache.memoize(timeout=60*60*8) # 8 hours
@@ -62,7 +60,7 @@ def news_page_processing(country_name: str) -> dict:
 
     # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
-    stock_data = scrape_stock_data(country_name)
+    stock_data = json_util.read_json(f'{config.APP_ROOT}/data/json/stock_data/{country_name}_stock')
     if not stock_data or stock_data[0]['market_cap'] == None:
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
         is_global = True
@@ -100,126 +98,7 @@ def news_page_processing(country_name: str) -> dict:
 
 def get_statistics() -> dict:
     """Handles the statistics for Infomundi. Returns a dict with related information."""
-    last_statistic = models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
-    return last_statistic
-
-
-def scrape_stock_data(country_name: str) -> list:
-    """Uses tradingeconomics website to scrape stock info.
-
-    Args:
-        country_name (str): The country name.
-
-    Returns:
-        list: A list contaning all the stock data for the specified country.
-
-    Example:
-        >>> scrape_stock_data('Brazil')
-        [
-          {
-            "symbol": "PETR3:BS",
-            "name": "Petrobras",
-            "price": "42.58",
-            "day_change": "1.36%",
-            "year_change": "65.62%",
-            "date": "May/06",
-            "market_cap": "63.42B"
-          },
-          {
-            "symbol": "VALE3:BZ",
-            "name": "Vale",
-            "price": "64.40",
-            "day_change": "0.64%",
-            "year_change": "-7.96%",
-            "date": "May/06",
-            "market_cap": "52.39B"
-          },
-
-          <output shortened for brevity>
-        ]
-    """
-    country_name = country_name.lower().replace(' ', '-')
-
-    # Checks if cache is old enough (4 hours)
-    filepath = f'{config.STOCK_PATH}/{country_name}_stock'
-    if not is_cache_old(f'{filepath}.json', 4):
-        stock_data = json_util.read_json(filepath)
-        return stock_data
-
-    url = f"https://tradingeconomics.com/{country_name}/stock-market"
-    
-    # We need to use a fake header, otherwise we'll get blocked (code 403)
-    headers = {
-        'User-Agent': choice(immutable.USER_AGENTS)
-    }
-
-    response = get_request(url, headers=headers)
-    if response.status_code != 200:
-        return []
-
-    stock_data = []
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    for tr in soup.find_all('tr', {'data-decimals': '2'}):  # Filter based on the data-decimals attribute
-        symbol = tr.get('data-symbol')
-
-        name_element = tr.find('td', style="max-width: 150px;")
-        name = name_element.text.strip() if name_element else None
-
-        price_element = tr.find('td', id="p")
-        price = price_element.text.strip() if price_element else None
-
-        day_element = tr.find('td', id="pch")
-        day = day_element.text.strip() if day_element else None
-
-        date_element = tr.find('td', id="date")
-        date = date_element.text.strip() if date_element else None
-
-        year_element = tr.find('td', class_='d-none d-sm-table-cell', style='text-align: center;')
-        year = year_element.text.strip() if year_element else None
-
-        # Check if the 'market_cap' element is present
-        market_cap_element = tr.find('td', {'class': 'd-none d-md-table-cell', 'data-value': True})
-        market_cap = market_cap_element.text.strip() if market_cap_element else None
-
-        stock_info = {
-            'symbol': symbol,
-            'name': name,
-            'price': price,
-            'day_change': day,
-            'year_change': year,
-            'date': date,
-            'market_cap': market_cap
-        }
-
-        stock_data.append(stock_info)
-
-    json_util.write_json(stock_data, filepath)
-    return stock_data
-
-
-@extensions.cache.memoize(timeout=60*60*12) # 12 hours
-def is_cache_old(file_path: str, threshold_hours: int=24) -> bool:
-    """Checks the modification date of a desired file and compares it with a default threshold of 24 hours. 
-
-    Args:
-        file_path (str): File path to compare
-        threshold_hours (int, optional): Time in hours to compare. Defaults to 24.
-
-    Returns: 
-        bool: False if cache is not old, meaning that there's less than 24 hours since last modification. Otherwise, True.
-    """
-    try:
-        # Get the modification time of the file using os.path
-        file_mtime = datetime.fromtimestamp(path.getmtime(file_path))
-    except Exception:
-        return True
-    
-    # Calculate the time difference between now and the file modification time
-    time_difference = datetime.now() - file_mtime
-    
-    # Compare with the threshold
-    return time_difference > timedelta(hours=threshold_hours)
+    return models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
 
 
 @extensions.cache.memoize(timeout=60*60*16) # 16 hours
@@ -228,7 +107,7 @@ def get_nation_data(cca2: str) -> dict:
     config_filepath = f'{config.COUNTRIES_DATA_PATH}/{cca2}'
     
     # 720 hours = 30 days
-    if not is_cache_old(f'{config_filepath}.json', 720):
+    if not qol_util.is_file_creation_within_threshold_minutes(f'{config_filepath}.json', 720, is_hours=True):
         data = json_util.read_json(config_filepath)
     else:
         URL = f"https://restcountries.com/v3.1/alpha/{cca2.lower()}"
@@ -359,7 +238,7 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
     country_name = country_name.lower()
     cache_filepath = f"{config.WEBSITE_ROOT}/data/json/gdp{'_per_capita' if is_per_capita else ''}"
     
-    if not is_cache_old(f'{cache_filepath}.json', 720):
+    if not qol_util.is_file_creation_within_threshold_minutes(f'{cache_filepath}.json', 720, is_hours=True):
         cache_data = json_util.read_json(cache_filepath)
         for index, value in enumerate(cache_data):
             if list(value.keys())[0].lower() == country_name:
@@ -502,165 +381,6 @@ def get_supported_categories(country_code: str) -> list:
     categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
     
     return [category.split('_')[1] for category in categories if category.startswith(country_code)]
-
-
-"""
-def translate(dest_lang: str, msg: str) -> str:
-    Uses google translate to... yes, you guessed correctly, translate some text. Identifies the source language
-    automatically.
-
-    Args:
-        dest_lang (str): Destination language.
-        msg (str): Message to translate.
-
-    Returns:
-        str: Translated text.
-
-    Examples:
-        >>> translate('pt', 'Hello, how are you?')
-        'Olá, como você está?'
-    
-    
-    translator = Translator()
-
-    try:
-        translation = translator.translate(msg, dest=dest_lang)
-        return translation.text
-    except Exception as err:
-        return ''
-"""
-
-
-
-def gpt_summarize(url: str) -> dict:
-    """Summarize a news article from the provided URL and structure the response for integration with the JavaScript.
-
-    Args:
-        url (str): The URL of the news article to summarize.
-
-    Returns:
-        dict: A dictionary with the structured summary:
-            - "addressed_topics": List of key points
-            - "context_around": Background analysis
-            - "where_can_i_find_more_information?": Additional resources
-        If the operation fails, returns an error message with details.
-    """
-
-    try:
-        # Fetch the article content
-        r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
-        if r.status_code not in (200, 301, 302):
-            return {"error": "Failed to fetch the article. Invalid status code."}
-
-        # Parse the article content
-        soup = BeautifulSoup(r.content, 'lxml')
-        news_title = soup.title.string.strip() if soup.title else "News Article"
-        article_text = ' '.join([p.get_text().strip() for p in soup.find_all('p')])[:1300]
-
-        # Detect the language
-        try:
-            lang = detect_language(article_text)
-        except Exception:
-            lang = 'en'  # Default to English if detection fails
-
-        prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
-
-```text
-{article_text}
-```
-
-Produce a JSON response with the following static keys and corresponding structured data:
-
-- "addressed_topics": A list of exactly 3 key points summarizing the core aspects of the article. Each key point should be concise and insightful.
-- "context_around": A list of exactly 3 bullet points that provide background analysis. This should include historical, cultural, or socio-economic factors relevant to the topic, offering external viewpoints for richer context.
-- "questioning_the_subject": A list of at least 3 critical questions readers should ask to deepen their understanding of the topic.
-- "methods_for_inquiry": A list of at least 3 recommended sources, NOT including websites, but including books, or other reference materials and suggested methodologies for critical engagement with the topic, such as specific tools, techniques, or frameworks.
-
-Ensure the response is strictly in JSON format and adheres to the following template:
-
-```json
-{{
-    "addressed_topics": [
-        "Bullet point 1",
-        "Bullet point 2",
-        "Bullet point 3"
-    ],
-    "context_around": [
-        "Bullet point 1",
-        "Bullet point 2",
-        "Bullet point 3"
-    ],
-    "questioning_the_subject": [
-        "Question 1",
-        "Question 2",
-        "Question 3"
-    ],
-    "methods_for_inquiry": [
-        "Method 1",
-        "Method 2",
-        "Method 3"
-    ]
-}}
-```
-
-The output must strictly conform to this structure and contain valid JSON. The text should be in the language "{lang}". """
-
-        # Send the request to GPT
-        client = OpenAI(api_key=config.OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a helpful and comprehensive assistant designed to output in JSON format. "
-                        "Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
-                        f"into the respective topics. Ensure that the output is in the language '{lang}' and adheres "
-                        "to a valid JSON structure, with clear separation between keys and their corresponding textual content."
-                    )
-                },
-                {"role": "user", "content": prompt}
-            ],
-            n=1,
-            response_format={"type": "json_object"},
-            temperature=0
-        )
-
-        # Parse and validate JSON output
-        output = response.choices[0].message.content
-        try:
-            summary_data = json.loads(output)
-            return summary_data
-        except json.JSONDecodeError:
-            return {"error": "GPT response is not valid JSON.", "response": output}
-
-    except Exception as e:
-        return {"error": "An error occurred during summarization.", "details": str(e)}
-
-
-def transform_response(api_response: dict) -> dict:
-    """Transform the API response into the expected frontend format."""
-    try:
-        response = api_response.get("response", {})
-
-        addressed_topics = response.get("addressed_topics", {}).get("Key Takeaways", [])
-        context_around = response.get("context_around", {}).get("Background Analysis", "")
-        more_info = response.get("where_can_i_find_more_information?", {}).get("Further Investigation Guide", {})
-
-        # Extract methodologies and sources
-        methodologies = more_info.get("Methodologies", [])
-        sources = more_info.get("Sources", [])
-
-        return {
-            "addressed_topics": addressed_topics,
-            "context_around": context_around,
-            "where_can_i_find_more_information": {
-                "methodologies": methodologies,
-                "sources": sources,
-            }
-        }
-    except Exception as e:
-        return {"error": "Failed to transform API response.", "details": str(e)}
 
 
 def get_current_date_and_time() -> str:

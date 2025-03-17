@@ -1,8 +1,10 @@
 from requests import get as get_request
 from bs4 import BeautifulSoup
+from random import choice
 
 from website_scripts import json_util, immutable
 from website_scripts.config import LOCAL_ROOT
+from website_scripts.qol_util import is_file_creation_within_threshold_minutes
 
 path = f'{LOCAL_ROOT}/data/json'
 
@@ -129,10 +131,70 @@ def scrape_data(url:str, endpoint: str):
     print(f'[+] {endpoint.title()} data has been collected.')
 
 
-if __name__ == '__main__':
-    endpoints = ['currencies', 'crypto', 'stocks']
+def scrape_stock_data(country_name: str):
+    """Uses tradingeconomics website to scrape stock info."""
 
-    #endpoints = ['stocks'] # DEBUG
+    # Checks if cache is old enough (4 hours)
+    filepath = f'{path}/stock_data/{country_name}_stock'
+    if not is_file_creation_within_threshold_minutes(f'{filepath}.json', 4, is_hours=True):
+        stock_data = json_util.read_json(filepath)
+        return stock_data
+
+    response = get_request(
+        f"https://tradingeconomics.com/{country_name}/stock-market", 
+        headers = {
+            'User-Agent': choice(immutable.USER_AGENTS)
+            }
+    )
+    if response.status_code != 200:
+        return []
+
+    stock_data = []
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    for tr in soup.find_all('tr', {'data-decimals': '2'}):  # Filter based on the data-decimals attribute
+        symbol = tr.get('data-symbol')
+
+        name_element = tr.find('td', style="max-width: 150px;")
+        name = name_element.text.strip() if name_element else None
+
+        price_element = tr.find('td', id="p")
+        price = price_element.text.strip() if price_element else None
+
+        day_element = tr.find('td', id="pch")
+        day = day_element.text.strip() if day_element else None
+
+        date_element = tr.find('td', id="date")
+        date = date_element.text.strip() if date_element else None
+
+        year_element = tr.find('td', class_='d-none d-sm-table-cell', style='text-align: center;')
+        year = year_element.text.strip() if year_element else None
+
+        # Check if the 'market_cap' element is present
+        market_cap_element = tr.find('td', {'class': 'd-none d-md-table-cell', 'data-value': True})
+        market_cap = market_cap_element.text.strip() if market_cap_element else None
+
+        stock_info = {
+            'symbol': symbol,
+            'name': name,
+            'price': price,
+            'day_change': day,
+            'year_change': year,
+            'date': date,
+            'market_cap': market_cap
+        }
+
+        stock_data.append(stock_info)
+
+    json_util.write_json(stock_data, filepath)
+
+
+if __name__ == '__main__':
+    countries = [x['name'] for x in json_util.read_json(f'{path}/countries')]
+    for country_name in countries:
+        scrape_stock_data(country_name)
+
+    endpoints = ['currencies', 'crypto', 'stocks']
     for endpoint in endpoints:
         scrape_data(f'https://tradingeconomics.com/{endpoint}', endpoint)
 

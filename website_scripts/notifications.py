@@ -20,7 +20,6 @@ def post_webhook(data: dict) -> bool:
         bool: True if we were able to POST the webhook, otherwise False.
     """
 
-    # Make the HTTP POST request to the Discord webhook URL
     try:
         response = requests.post(config.WEBHOOK_URL, json=data)
         response.raise_for_status()
@@ -58,7 +57,6 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str='nor
     try:
         with SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
             server.starttls()  # Upgrade the connection to secure TLS
-            # Log in to the email account
             server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
 
             # Send the email

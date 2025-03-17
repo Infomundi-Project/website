@@ -9,10 +9,9 @@ from unidecode import unidecode
 from bs4 import BeautifulSoup
 from datetime import datetime
 from feedparser import parse
-from hashlib import md5
 from sys import exit
 
-from website_scripts import json_util, config, input_sanitization, immutable
+from website_scripts import json_util, config, input_sanitization, immutable, hashing_util
 
 
 # Database connection parameters
@@ -155,18 +154,17 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
                 pubdate = item.updated
             
             # Creates the item ID based on a MD5 summary of item title + item link.
-            item_id = md5(unidecode( item_title.lower() + item_link.lower() ).encode()).hexdigest()
+            item_id = hashing_util.string_to_md5_hex(unidecode(
+                item_title.lower() + item_link.lower())
+            )
 
             # Creates the publisher id based on a MD5 summary of the feed link.
-            publisher_id = md5(unidecode(feed_link).encode()).hexdigest()
+            publisher_id = hashing_util.string_to_md5_hex(unidecode(
+                feed_link)
+            )
             
             # Tries to format pubdate
-            pubdate = format_date(pubdate)
-            if 'error' in pubdate.keys():
-                # If errors out, well... We use today's date, what else could we do? :D 
-                pubdate_full = datetime.now().date().strftime('%Y/%m/%d')
-            else:
-                pubdate_full = pubdate['full']
+            pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             new_story = {
                 'title': item_title,
@@ -176,9 +174,9 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
                 'publisher_link': feed_link,
                 'publisher_id': publisher_id,
                 'link': item_link,
-                'pub_date': pubdate_full,
+                'pub_date': pubdate,
                 'media_content': {
-                    'url': 'static/img/infomundi-white-darkbg-square.webp'
+                    'url': ''
                     }
                 }
 
@@ -198,33 +196,7 @@ def iso_to_tuple(date_str: str) -> tuple:
 
 def format_date(date) -> dict:
     """
-    Converts a date object or ISO formatted date string into a readable string format 
-    for displaying on the news page. Returns a dictionary with both short and full date formats.
-
-    Args:
-        date (str or tuple): A date in ISO format string ('YYYY-MM-DD') or a 9-tuple date.
-
-    Returns:
-        dict: A dictionary with 'short' and 'full' keys containing the formatted date strings.
-
-    Examples:
-        >>> format_date('2024-06-24')
-        {'short': 'Today', 'full': '2024/06/24'}
-
-        >>> format_date('2024-06-19')
-        {'short': '5 days ago', 'full': '2024/06/19'}
-
-        >>> format_date('2024-05-01')
-        {'full': '2024/05/01'}
-
-        >>> format_date((2024, 6, 24, 0, 0, 0, 0, 0, 0))
-        {'short': 'Today', 'full': '2024/06/24'}
-
-        >>> format_date('24-06-2024')
-        {'error': 'Invalid date format'}
-
-        >>> format_date((2024, 6, 19, 0, 0, 0, 0, 0, 0))
-        {'short': '5 days ago', 'full': '2024/06/19'}
+    Converts a date object or ISO formatted date string into a readable MySQL DATETIME format.
     """
 
     # Convert date to a 9-tuple if it's a string in ISO format
@@ -232,30 +204,17 @@ def format_date(date) -> dict:
         try:
             date = iso_to_tuple(date)
         except ValueError:
-            # Handle invalid date string format
             return {'error': 'Invalid date format'}
 
-    # Convert the 9-tuple date to a datetime.date object
+    # Convert the 9-tuple date to a datetime object
     if isinstance(date, tuple):
-        date = datetime(*date[:6]).date()
+        date = datetime(*date[:6])
 
-    date_result = {}  # Dictionary to hold the formatted date strings
+    # Ensure it's a datetime object
+    if not isinstance(date, datetime):
+        return {'error': 'Invalid date format'}
 
-    today = datetime.now().date()  # Get today's date
-
-    # Check if the date is today
-    if date == today:
-        date_result['short'] = 'Today'
-    else:
-        # Calculate the difference in days from today
-        days_diff = (today - date).days
-        if 1 <= days_diff <= 15:
-            date_result['short'] = f"{days_diff} day{'s' if days_diff > 1 else ''} ago"
-
-    # Set the 'full' format to 'YYYY/MM/DD'
-    date_result['full'] = date.strftime('%Y/%m/%d')
-    
-    return date_result
+    return {'datetime': date.strftime('%Y-%m-%d %H:%M:%S')}
 
 
 def fetch_categories():

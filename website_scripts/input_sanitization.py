@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 from . import security_util, config
 
 
-
 def clean_publisher_name(name):
     # Remove common patterns
     name = re.sub(r' - Latest.*', '', name, flags=re.IGNORECASE)
