@@ -110,8 +110,10 @@ def generate_totp():
         return jsonify({'status': 'Not Allowed'}), 403
 
     session['totp_secret'] = totp_util.generate_totp_secret()
-    return jsonify({'secret_key': session['totp_secret'],\
-        'qr_code': totp_util.generate_qr_code(session['totp_secret'], session['email_address'])}), 200
+    return jsonify({
+        'secret_key': session['totp_secret'],
+        'qr_code': totp_util.generate_qr_code(session['totp_secret'], session['email_address'])
+        }), 200
 
 
 @api.route('/totp/setup', methods=['GET'])
@@ -165,7 +167,7 @@ def get_cities(state_id):
 
 
 @api.route('/user/friends', methods=['GET'])
-@extensions.cache.cached(timeout=60*5, query_string=True, make_cache_key=make_cache_key)
+@extensions.cache.cached(timeout=60*2, query_string=True, make_cache_key=make_cache_key)
 @login_required
 def get_friends():
     page = request.args.get('page', 1, type=int)

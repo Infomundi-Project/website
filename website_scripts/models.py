@@ -5,12 +5,97 @@ from .extensions import db
 from .hashing_util import argon2_hash_text, argon2_verify_hash
 
 
+class Publisher(db.Model):
+    __tablename__ = 'publishers'
+    publisher_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    publisher_hash = db.Column(db.LargeBinary(16), nullable=False)
+    
+    name = db.Column(db.String(100), nullable=False)
+    link = db.Column(db.String(120), nullable=False)
+    favicon = db.Column(db.String(100), nullable=True)
+    stories = db.relationship('Story', backref='publisher', lazy=True)
+
+
+class Category(db.Model):
+    __tablename__ = 'categories'
+    category_id = db.Column(db.Integer, primary_key=True)
+    
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    tags = db.relationship('Tag', secondary='category_tags', back_populates='categories')
+
+
+class Tag(db.Model):
+    __tablename__ = 'tags'
+    tag_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    
+    tag = db.Column(db.String(30), nullable=False, unique=True)
+
+
+class Story(db.Model):
+    __tablename__ = 'stories'
+    story_id = db.Column(db.Integer, primary_key=True)
+    story_hash = db.Column(db.LargeBinary(16), primary_key=True)
+    
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.String(500))
+    gpt_summary = db.Column(db.JSON)
+    
+    clicks = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+    dislikes = db.Column(db.Integer, default=0)
+
+    link = db.Column(db.String(512), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id'), nullable=False)
+    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.publisher_id'), nullable=False)
+    
+    media_content_url = db.Column(db.String(100))
+    has_media_content = db.Column(db.Boolean, default=False)
+
+    # Relationships
+    reactions = db.relationship('StoryReaction', backref='story', lazy=True)
+
+
+class StoryReaction(db.Model):
+    __tablename__ = 'story_reactions'
+    reaction_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    story_id = db.Column(db.LargeBinary(16), db.ForeignKey('stories.story_id'))
+    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'))
+    action = db.Column(db.String(10))  # 'like' or 'dislike'
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    __table_args__ = (db.UniqueConstraint('story_id', 'user_id', 'action', name='unique_reaction'),)
+
+
+class StoryStats(db.Model):
+    __tablename__ = 'story_stats'
+    story_id = db.Column(db.LargeBinary(16), db.ForeignKey('stories.story_id', ondelete='CASCADE'), primary_key=True)
+    dislikes = db.Column(db.Integer, default=0)
+    clicks = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+
+
+class Feeds(db.Model):
+    __tablename__ = 'feeds'
+    
+    feed_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    category_id = db.Column(db.Integer, nullable=False)
+    
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    site = db.Column(db.String(120), nullable=False)
+    url = db.Column(db.String(150), nullable=False)
+    favicon = db.Column(db.String(150))
+    feed_hash = db.Column(db.LargeBinary(16))
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id'), nullable=False)
+
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
+    user_id = db.Column(db.String(20), primary_key=True)
+    
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
     email = db.Column(db.String(128), nullable=False, unique=True) # SHA-512 + salt hashed email
-    user_id = db.Column(db.String(20), primary_key=True)
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
     session_version = db.Column(db.Integer, default=0)
@@ -145,66 +230,6 @@ class RegisterToken(db.Model):
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
-class Publisher(db.Model):
-    __tablename__ = 'publishers'
-    publisher_id = db.Column(db.String(40), primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    link = db.Column(db.String(120), nullable=False)
-    favicon = db.Column(db.String(100), nullable=True)
-    stories = db.relationship('Story', backref='publisher', lazy=True)
-
-
-class Category(db.Model):
-    __tablename__ = 'categories'
-    category_id = db.Column(db.String(15), primary_key=True)
-    tags = db.relationship('Tag', secondary='category_tags', back_populates='categories')
-
-
-class Tag(db.Model):
-    __tablename__ = 'tags'
-    tag_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    tag = db.Column(db.String(30), nullable=False, unique=True)
-    categories = db.relationship('Category', secondary='category_tags', back_populates='tags')
-
-
-class CategoryTag(db.Model):
-    __tablename__ = 'category_tags'
-    category_id = db.Column(db.String(15), db.ForeignKey('categories.category_id'), primary_key=True)
-    tag_id = db.Column(db.Integer, db.ForeignKey('tags.tag_id'), primary_key=True)
-
-
-class Story(db.Model):
-    __tablename__ = 'stories'
-    story_id = db.Column(db.String(40), primary_key=True) # should be 32
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    title = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.String(500))
-    gpt_summary = db.Column(db.JSON)
-    clicks = db.Column(db.Integer, default=0)
-    likes = db.Column(db.Integer, default=0)
-    dislikes = db.Column(db.Integer, default=0)
-    link = db.Column(db.String(512), nullable=False)
-    pub_date = db.Column(db.String(30), nullable=False)
-    category_id = db.Column(db.String(20), db.ForeignKey('categories.category_id'), nullable=False)
-    publisher_id = db.Column(db.String(40), db.ForeignKey('publishers.publisher_id'), nullable=False)
-    media_content_url = db.Column(db.String(100))
-    has_media_content = db.Column(db.Boolean, default=False)
-
-    # Relationships
-    reactions = db.relationship('StoryReaction', backref='story', lazy=True)
-
-
-class StoryReaction(db.Model):
-    __tablename__ = 'story_reactions'
-    reaction_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    story_id = db.Column(db.String(40), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'))
-    action = db.Column(db.String(10))  # 'like' or 'dislike'
-    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
-
-    __table_args__ = (db.UniqueConstraint('story_id', 'user_id', 'action', name='unique_reaction'),)
-
-
 class Region(db.Model):
     __tablename__ = 'regions'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -327,18 +352,6 @@ class SiteStatistics(db.Model):
     total_comments = db.Column(db.Integer, nullable=False)
     last_updated_message = db.Column(db.String(15), nullable=False)
     total_clicks = db.Column(db.BigInteger, nullable=False)
-
-
-class Feeds(db.Model):
-    __tablename__ = 'feeds'
-    
-    id = db.Column(db.String(32), primary_key=True)
-    category_id = db.Column(db.String(15), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    site = db.Column(db.String(120), nullable=False)
-    url = db.Column(db.String(150), nullable=False)
-    favicon = db.Column(db.String(150))
 
 
 class Stocks(db.Model):

@@ -18,7 +18,10 @@ def is_valid_captcha(token: str) -> bool:
     if not token:
         return False
 
-    response = post_request(url="https://challenges.cloudflare.com/turnstile/v0/siteverify", data={'secret': CAPTCHA_SECRET_KEY, 'response': token})
+    response = post_request(
+        url="https://challenges.cloudflare.com/turnstile/v0/siteverify", 
+        data={'secret': CAPTCHA_SECRET_KEY, 'response': token}
+    )
 
     # Parse JSON from response and return if was a success (True or False).
     return json_loads(response.content)['success']

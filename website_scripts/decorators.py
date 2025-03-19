@@ -8,7 +8,6 @@ from .cloudflare_util import is_valid_captcha
 from .config import CAPTCHA_CLEARANCE_HOURS
 
 
-
 def admin_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -27,18 +26,6 @@ def api_login_required(func):
             return func(*args, **kwargs)
         
         return jsonify({'status': 'Not Allowed'}), 403
-
-    return decorated_function
-
-
-def profile_owner_required(func):
-    @wraps(func)
-    def decorated_function(username, *args, **kwargs):
-        if current_user.is_authenticated and (username == current_user.username):
-            return func(username, *args, **kwargs)
-        
-        flash('Only the profile owner can edit their profile.', 'error')
-        return redirect(url_for('views.user_redirect'))
 
     return decorated_function
 

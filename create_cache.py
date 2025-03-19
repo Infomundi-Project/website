@@ -1,7 +1,6 @@
 import threading
 import logging
 import pymysql
-import os
 
 from requests import get as get_request
 from random import shuffle, choice
@@ -11,7 +10,7 @@ from datetime import datetime
 from feedparser import parse
 from sys import exit
 
-from website_scripts import json_util, config, input_sanitization, immutable, hashing_util
+from website_scripts import config, input_sanitization, immutable, hashing_util
 
 
 # Database connection parameters
@@ -35,12 +34,12 @@ def log_message(message):
     #logging.info(message)
 
 
-def insert_to_database(stories: list, category_id: str) -> int:
+def insert_to_database(stories: list, category_name: str) -> int:
     """Inserts a list of stories into the database with associated categories and publishers.
 
     Parameters:
         stories (list): A list of dictionaries containing story details.
-        category_id (str): The ID of the category to which these stories belong.
+        category_name (str): The name of the category to which these stories belong.
 
     Returns:
         int: Exceptions count, if any.
@@ -54,21 +53,21 @@ def insert_to_database(stories: list, category_id: str) -> int:
             try:
                 # Insert or update the category
                 cursor.execute(
-                    "INSERT INTO categories (category_id) VALUES (%s) "
-                    "ON DUPLICATE KEY UPDATE category_id = category_id", 
-                    (category_id,)
+                    "INSERT INTO categories (name) VALUES (%s) "
+                    "ON DUPLICATE KEY UPDATE name = name", 
+                    (category_name,)
                 )
 
                 # Insert or update the publisher
                 cursor.execute("""
-                    INSERT INTO publishers (publisher_id, name, link) 
+                    INSERT INTO publishers (md5_hash, name, link) 
                     VALUES (%s, %s, %s)
                     ON DUPLICATE KEY UPDATE name = VALUES(name), link = VALUES(link)
-                """, (item['publisher_id'], item['publisher'], item['publisher_link']))
+                """, (item['md5_hash'], item['publisher'], item['publisher_link']))
 
                 # Insert the story
                 cursor.execute("""
-                    INSERT INTO stories (story_id, title, description, link, pub_date, category_id, publisher_id, media_content_url)
+                    INSERT INTO stories (story_id, title, description, link, pub_date, category_name, publisher_id, media_content_url)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     item['id'], 
@@ -76,7 +75,7 @@ def insert_to_database(stories: list, category_id: str) -> int:
                     item['description'], 
                     item['link'], 
                     item['pub_date'], 
-                    category_id, 
+                    category_name, 
                     item['publisher_id'], 
                     item['media_content']['url']
                 ))
@@ -102,22 +101,27 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
 
     Appends the fetched and processed news items to the result_list.
     """
-    headers = {
-        'User-Agent': choice(immutable.USER_AGENTS),
-        'Referer': 'www.google.com'
-    }
-
     if not input_sanitization.is_valid_url(rss_url):
         log_message(f'Invalid url: {rss_url}')
         return {}
+
+    # Removes the ending slash if it ends with one
+    if rss_url.endswith('/'):
+        rss_url = rss_url[:-1]
     
-    for possibility in ('', 'feed', 'rss'):
+    # Tries to find the RSS feed endpoint
+    for possibility in immutable.RSS_ENDPOINTS:
+        headers = {
+            'User-Agent': choice(immutable.USER_AGENTS),
+            'Referer': 'www.google.com'
+        }
+
         try:
-            response = get_request(f'{rss_url}/{possibility}' if not rss_url.endswith('/') else f'{rss_url}{possibility}', timeout=5, headers=headers)
+            response = get_request(rss_url + possibility, timeout=5, headers=headers)
 
             feed = parse(response.content)
             break
-        except Exception as e:
+        except Exception:
             continue
 
     try:
@@ -127,57 +131,53 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             'items': []
         }
 
-        for item in feed.entries:
+        for story in feed.entries:
             # Decodes and removes html entities from text
-            feed_publisher = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(data['title']))
-            item_title = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('title', f'No title was provided').strip()))
-            item_description = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(item.get('description', 'No description was provided').strip()))
+            publisher_name = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(data['title']))
+            story_title = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.get('title', f'No title was provided').strip()))
+            story_description = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.get('description', 'No description was provided').strip()))
             
             # Gentle cut (without cutting off words)
-            feed_publisher = input_sanitization.gentle_cut_text(80, feed_publisher)
-            item_title = input_sanitization.gentle_cut_text(120, item_title)
-            item_description = input_sanitization.gentle_cut_text(500, item_description)
+            publisher_name = input_sanitization.gentle_cut_text(80, publisher_name)
+            story_title = input_sanitization.gentle_cut_text(120, story_title)
+            story_description = input_sanitization.gentle_cut_text(500, story_description)
             
-            feed_link = feed.feed.link.strip()
-            item_link = item.link.strip()
+            publisher_link = feed.feed.link.strip()
+            story_link = item.link.strip()
 
-            # Checks to see if the url is valid
-            if not input_sanitization.is_valid_url(feed_link) or not input_sanitization.is_valid_url(item_link):
-                log_message(f'Either the feed link ({feed_link}) or the item link ({item_link}) is not valid. Skipping.')
+            # Checks to see if the urls are valid
+            if not input_sanitization.is_valid_url(publisher_link) or not input_sanitization.is_valid_url(story_link):
+                log_message(f'Either the feed link ({publisher_link}) or the item link ({story_link}) is not valid. Skipping.')
                 continue
 
-            if item.has_key('published_parsed'):
-                pubdate = item.published_parsed
-            elif item.has_key('published'):
-                pubdate = item.published
+            if story.has_key('published_parsed'):
+                pubdate = story.published_parsed
+            elif story.has_key('published'):
+                pubdate = story.published
             else:
-                pubdate = item.updated
+                pubdate = story.updated
             
-            # Creates the item ID based on a MD5 summary of item title + item link.
-            item_id = hashing_util.string_to_md5_hex(unidecode(
-                item_title.lower() + item_link.lower())
+            # Creates the item hash ready to be insterted to the database
+            story_hash = hashing_util.string_to_md5_binary(unidecode(
+                story_title.lower() + story_link.lower())
             )
 
-            # Creates the publisher id based on a MD5 summary of the feed link.
-            publisher_id = hashing_util.string_to_md5_hex(unidecode(
-                feed_link)
-            )
+            # Creates the publisher hash ready to be insterted to the database
+            publisher_hash = hashing_util.string_to_md5_binary(publisher_link)
             
             # Tries to format pubdate
-            pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            story_pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             new_story = {
-                'title': item_title,
-                'description': item_description,
-                'id': item_id,
-                'publisher': feed_publisher,
-                'publisher_link': feed_link,
-                'publisher_id': publisher_id,
-                'link': item_link,
-                'pub_date': pubdate,
-                'media_content': {
-                    'url': ''
-                    }
+                'story_title': story_title,
+                'story_description': story_description,
+                'story_hash': story_hash,
+                'story_link': story_link,
+                'story_pubdate': story_pubdate,
+
+                'publisher_name': publisher_name,
+                'publisher_link': publisher_link,
+                'publisher_hash': publisher_hash,
                 }
 
             data['items'].append(new_story)
@@ -189,11 +189,6 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
     result_list.append(data)
 
 
-def iso_to_tuple(date_str: str) -> tuple:
-    """Convert ISO format date string to a 9-tuple date."""
-    return datetime.fromisoformat(date_str).timetuple()
-
-
 def format_date(date) -> dict:
     """
     Converts a date object or ISO formatted date string into a readable MySQL DATETIME format.
@@ -202,7 +197,7 @@ def format_date(date) -> dict:
     # Convert date to a 9-tuple if it's a string in ISO format
     if isinstance(date, str):
         try:
-            date = iso_to_tuple(date)
+            date = datetime.fromisoformat(date_str).timetuple()
         except ValueError:
             return {'error': 'Invalid date format'}
 
@@ -222,11 +217,11 @@ def fetch_categories():
     try:
         with db_connection.cursor() as cursor:
             # Construct the SQL query to fetch category IDs
-            sql_query = "SELECT category_id FROM categories"
+            sql_query = "SELECT name FROM categories"
             cursor.execute(sql_query)
             categories = cursor.fetchall()
 
-            category_database = [row['category_id'] for row in categories]
+            category_database = [row['name'] for row in categories]
             shuffle(category_database)
     except pymysql.MySQLError as e:
         log_message(f"Error fetching categories: {e}")

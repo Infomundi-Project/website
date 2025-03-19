@@ -304,7 +304,7 @@ def upload_image():
         
         # Checks file extension, mime type, image content and dimensions
         if not image_util.perform_all_checks(file.stream, file.filename):
-            flash("We apologize, but the file you provided is invalid.", "error")
+            flash("We apologize, but the file you provided is invalid. Make sure the image isn't inappropriate and meets the minimum dimension requirements.", "error")
             return redirect(url_for('views.user_redirect'))
     
         # Changes some variables depending on the image category
