@@ -394,7 +394,7 @@ def get_stories():
             'pub_date': story.pub_date,
             #'category_id': story.category_id,
             'publisher': {
-                'name': input_sanitization.clean_publisher_name(input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.publisher.name.strip()))),
+                'name': input_sanitization.clean_publisher_name(story.publisher.name),
                 'link': story.publisher.link,
                 'favicon': story.publisher.favicon
             },

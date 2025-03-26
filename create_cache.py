@@ -46,47 +46,67 @@ def insert_to_database(stories: list, category_name: str) -> int:
     """
     exceptions_count = 0
 
-    # Open a database cursor
     with db_connection.cursor() as cursor:
-        # Iterate over each story in the provided list
-        for item in stories:
-            try:
-                # Insert or update the category
-                cursor.execute(
-                    "INSERT INTO categories (name) VALUES (%s) "
-                    "ON DUPLICATE KEY UPDATE name = name", 
-                    (category_name,)
-                )
+        try:
+            # Get the category ID
+            cursor.execute("SELECT id FROM categories WHERE name = %s", (category_name,))
+            category_row = cursor.fetchone()
+            if not category_row:
+                log_message(f"[-] Category '{category_name}' not found. Skipping...")
+                return len(stories)  # Count as exceptions
+            
+            category_id = category_row['id']
 
-                # Insert or update the publisher
-                cursor.execute("""
-                    INSERT INTO publishers (md5_hash, name, link) 
-                    VALUES (%s, %s, %s)
-                    ON DUPLICATE KEY UPDATE name = VALUES(name), link = VALUES(link)
-                """, (item['md5_hash'], item['publisher'], item['publisher_link']))
+            for item in stories:
+                try:
+                    # Insert or update publisher
+                    cursor.execute("""
+                        INSERT INTO publishers (url, url_hash, name, favicon_url) 
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE name = VALUES(name), favicon_url = VALUES(favicon_url)
+                    """, (item['publisher_link'], item['publisher_hash'], item['publisher_name'], None))
 
-                # Insert the story
-                cursor.execute("""
-                    INSERT INTO stories (story_id, title, description, link, pub_date, category_name, publisher_id, media_content_url)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    item['id'], 
-                    item['title'], 
-                    item['description'], 
-                    item['link'], 
-                    item['pub_date'], 
-                    category_name, 
-                    item['publisher_id'], 
-                    item['media_content']['url']
-                ))
-            except Exception as err:
-                # Handle any exceptions that occur during insertion
-                exceptions_count += 1
-                log_message(f"[-] {err}")
+                    # Get publisher ID
+                    cursor.execute("SELECT id FROM publishers WHERE url_hash = %s", (item['publisher_hash'],))
+                    publisher_id = cursor.fetchone()['id']
 
-    # Commit all changes to the database
+                    # Insert story
+                    cursor.execute("""
+                        INSERT INTO stories (title, description, url, url_hash, pub_date, image_url, has_image, category_id, publisher_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)
+                    """, (
+                        item['story_title'],
+                        item['story_description'],
+                        item['story_link'],
+                        item['url_hash'],
+                        item['story_pubdate'],
+                        None,  # Placeholder for image_url
+                        0,  # Placeholder for has_image
+                        category_id,
+                        publisher_id
+                    ))
+
+                    # Get the story ID
+                    cursor.execute("SELECT id FROM stories WHERE url_hash = %s", (item['url_hash'],))
+                    story_id = cursor.fetchone()['id']
+
+                    # Insert into story_stats
+                    cursor.execute("""
+                        INSERT INTO story_stats (story_id, clicks, likes, dislikes)
+                        VALUES (%s, 0, 0, 0)
+                        ON DUPLICATE KEY UPDATE story_id = story_id
+                    """, (story_id,))
+
+                except Exception as err:
+                    exceptions_count += 1
+                    log_message(f"[-] Error inserting story: {err}")
+
+        except Exception as err:
+            log_message(f"[-] Database Error: {err}")
+            exceptions_count = len(stories)  # If a major issue happens, count all as exceptions
+
     db_connection.commit()
-    
     return exceptions_count
 
 
@@ -158,9 +178,7 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
                 pubdate = story.updated
             
             # Creates the item hash ready to be insterted to the database
-            story_hash = hashing_util.string_to_md5_binary(unidecode(
-                story_title.lower() + story_link.lower())
-            )
+            url_hash = hashing_util.string_to_md5_binary(story_link)
 
             # Creates the publisher hash ready to be insterted to the database
             publisher_hash = hashing_util.string_to_md5_binary(publisher_link)
@@ -171,7 +189,7 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             new_story = {
                 'story_title': story_title,
                 'story_description': story_description,
-                'story_hash': story_hash,
+                'url_hash': url_hash,
                 'story_link': story_link,
                 'story_pubdate': story_pubdate,
 
@@ -216,93 +234,81 @@ def fetch_categories():
     log_message('Fetching categories from the database')
     try:
         with db_connection.cursor() as cursor:
-            # Construct the SQL query to fetch category IDs
-            sql_query = "SELECT name FROM categories"
-            cursor.execute(sql_query)
+            cursor.execute("SELECT * FROM categories")
             categories = cursor.fetchall()
-
-            category_database = [row['name'] for row in categories]
-            shuffle(category_database)
-    except pymysql.MySQLError as e:
+    except Exception as e:
         log_message(f"Error fetching categories: {e}")
         return []
     
-    log_message(f'Got a total of {len(category_database)} categories from the database')
-    return category_database
+    category_list = [(row['id'], row['name']) for row in categories]
+    shuffle(category_list)
+    
+    log_message(f'Got {len(category_list)} categories from the database')
+    return category_list
 
 
-def fetch_feeds_from_database(category_id: str):
-    log_message(f'Fetching feeds from {category_id}')
+def fetch_feeds_from_database(category_id: int):
+    log_message(f'Fetching feeds for category ID: {category_id}')
     try:
         with db_connection.cursor() as cursor:
-            # Construct the SQL query to fetch category IDs
-            sql_query = """
-                SELECT site, url FROM feeds 
-                WHERE category_id = %s
-            """
-            cursor.execute(sql_query, (category_id))
-            categories = cursor.fetchall()
-    except pymysql.MySQLError as e:
-        log_message(f"Error fetching categories: {e}")
+            cursor.execute("SELECT site_name, url FROM feeds WHERE category_id = %s", (category_id,))
+            feeds = cursor.fetchall()
+    except Exception as e:
+        log_message(f"Error fetching feeds: {e}")
         return []
     
-    log_message(f'Got categories from the database')
-    return categories
+    log_message(f'Got {len(feeds)} feeds from the database')
+    return feeds
 
 
 def main():
     total_done = 0
-    
     categories = fetch_categories()
-    for selected_filter in categories:
+    print(categories)
+    exit()
+
+    for category_id, category_name in categories:
         percentage = (total_done // len(categories)) * 100
-        log_message(f"\n[{round(percentage, 2)}%] Handling {selected_filter}...")
-        
-        # Read the feeds for current category
-        rss_feeds = fetch_feeds_from_database(selected_filter)
+        log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
+
+        rss_feeds = fetch_feeds_from_database(category_id)
         all_rss_data = []
 
-        # Use threads to fetch concurrently
         threads = []
         result_list = []
 
         for feed_info in rss_feeds:
-            thread = threading.Thread(target=fetch_feed, args=(feed_info["url"], selected_filter, result_list))
+            thread = threading.Thread(target=fetch_feed, args=(feed_info["url"], category_name, result_list))
             threads.append(thread)
             thread.start()
 
-        # Wait for all threads to complete
         for thread in threads:
             thread.join()
 
-        # Process and collect data from each RSS feed
         for rss_data in result_list:
-            if len(rss_data) == 0:
+            if not rss_data:
                 continue
             
-            rss_data["site"] = feed_info["site"]
+            rss_data["site"] = feed_info["site_name"]
             all_rss_data.append(rss_data)
-        
-        # Merge articles from different feeds into a single list
+
         merged_articles = []
         for rss_data in all_rss_data:
             merged_articles.extend(rss_data["items"])
 
-        # Skip if no articles were found
         if not merged_articles:
-            log_message(f"[-] Empty cache: {selected_filter}")
+            log_message(f"[-] Empty cache: {category_name}")
             continue
 
-        # Shuffle merged articles to mix them up
         shuffle(merged_articles)
 
-        # Insert articles into the database and count any exceptions
-        exceptions_count = insert_to_database(merged_articles, selected_filter)
+        exceptions_count = insert_to_database(merged_articles, category_name)
         total_done += 1
-        
-        log_message(f"[{len(merged_articles) - exceptions_count} articles] Saved for {selected_filter}.")
+
+        log_message(f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}.")
     
     log_message('Finished!')
+
 
 
 if __name__ == "__main__":

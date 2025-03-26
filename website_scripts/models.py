@@ -7,60 +7,61 @@ from .hashing_util import argon2_hash_text, argon2_verify_hash
 
 class Publisher(db.Model):
     __tablename__ = 'publishers'
-    publisher_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    publisher_hash = db.Column(db.LargeBinary(16), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     
-    name = db.Column(db.String(100), nullable=False)
-    link = db.Column(db.String(120), nullable=False)
-    favicon = db.Column(db.String(100), nullable=True)
+    url = db.Column(db.String(200), nullable=False)
+    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
+    
+    name = db.Column(db.String(120), nullable=False)
+    favicon_url = db.Column(db.String(100), nullable=True)
+    
     stories = db.relationship('Story', backref='publisher', lazy=True)
 
 
 class Category(db.Model):
     __tablename__ = 'categories'
-    category_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(15), nullable=False, unique=True)
     
-    name = db.Column(db.String(20), unique=True, nullable=False)
-    tags = db.relationship('Tag', secondary='category_tags', back_populates='categories')
-
 
 class Tag(db.Model):
     __tablename__ = 'tags'
-    tag_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     tag = db.Column(db.String(30), nullable=False, unique=True)
 
 
 class Story(db.Model):
     __tablename__ = 'stories'
-    story_id = db.Column(db.Integer, primary_key=True)
-    story_hash = db.Column(db.LargeBinary(16), primary_key=True)
-    
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.String(500))
     gpt_summary = db.Column(db.JSON)
-    
-    clicks = db.Column(db.Integer, default=0)
-    likes = db.Column(db.Integer, default=0)
-    dislikes = db.Column(db.Integer, default=0)
 
-    link = db.Column(db.String(512), nullable=False)
+    url = db.Column(db.String(512), nullable=False)
+    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
+
+    pub_date = db.Column(db.DateTime, nullable=False)
+    image_url = db.Column(db.String(100))
+    has_image = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id'), nullable=False)
-    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.publisher_id'), nullable=False)
-    
-    media_content_url = db.Column(db.String(100))
-    has_media_content = db.Column(db.Boolean, default=False)
+
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.id'), nullable=False)
 
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)
+    stats = db.relationship('StoryStats', backref='story', lazy=True)
 
 
 class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
-    reaction_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    story_id = db.Column(db.LargeBinary(16), db.ForeignKey('stories.story_id'))
-    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'))
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id'))
+    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'))
+
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
@@ -69,51 +70,33 @@ class StoryReaction(db.Model):
 
 class StoryStats(db.Model):
     __tablename__ = 'story_stats'
-    story_id = db.Column(db.LargeBinary(16), db.ForeignKey('stories.story_id', ondelete='CASCADE'), primary_key=True)
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'), primary_key=True)
+
     dislikes = db.Column(db.Integer, default=0)
     clicks = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)
 
 
-class Feeds(db.Model):
-    __tablename__ = 'feeds'
-    
-    feed_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    category_id = db.Column(db.Integer, nullable=False)
-    
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    site = db.Column(db.String(120), nullable=False)
-    url = db.Column(db.String(150), nullable=False)
-    favicon = db.Column(db.String(150))
-    feed_hash = db.Column(db.LargeBinary(16))
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id'), nullable=False)
-
-
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
-    user_id = db.Column(db.String(20), primary_key=True)
+    id = db.Column(db.LargeBinary(16), primary_key=True)
     
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.String(128), nullable=False, unique=True) # SHA-512 + salt hashed email
+    email = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 hash
+
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
     session_version = db.Column(db.Integer, default=0)
-
-    # Timestamps
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     last_login = db.Column(db.DateTime)
 
-    # Profile Customization
+    # Profile
     display_name = db.Column(db.String(40))
     profile_description = db.Column(db.String(1500))
-
-    
-    
     avatar_url = db.Column(db.String(80))
     profile_banner_url = db.Column(db.String(80))
     profile_wallpaper_url = db.Column(db.String(80))
-    
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
 
@@ -126,26 +109,18 @@ class User(db.Model, UserMixin):
     delete_token = db.Column(db.String(40))
     delete_token_timestamp = db.Column(db.DateTime)
 
-    # Is Online?
+    # Activity
     is_online = db.Column(db.Boolean, default=False)
     last_activity = db.Column(db.DateTime)
 
     # Totp
     totp_secret = db.Column(db.String(120))
     totp_recovery = db.Column(db.String(120))
-
-    # Email 2fa token
     mail_twofactor = db.Column(db.String(6))
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
-    # Derived key
+    # Encryption
     derived_key_salt = db.Column(db.String(120))
-
-    # IP History
-    ip_history = db.relationship('UserIPHistory', back_populates='user', cascade='all, delete-orphan')
-
-    # This is only used if the user prefers to receive feed emails
-    cleartext_email = db.Column(db.String(80))
 
 
     def set_password(self, password):
@@ -190,13 +165,6 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
         return self.is_online
-
-
-    def add_ip_history(self, ip_address, user_agent):
-        """Add an entry to the IP history for this user."""
-        new_ip_history = UserIPHistory(user_id=self.user_id, ip_address=ip_address, user_agent=user_agent)
-        db.session.add(new_ip_history)
-        db.session.commit()
     
 
 
@@ -207,27 +175,16 @@ class CommonPasswords(db.Model):
     password = db.Column(db.String(30), nullable=False)
 
 
-class UserIPHistory(db.Model):
-    __tablename__ = 'user_ip_history'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
-    ip_address = db.Column(db.String(45), nullable=False)
-    access_time = db.Column(db.DateTime, default=db.func.current_timestamp())
-    user_agent = db.Column(db.String(255))
-
-    user = db.relationship('User', back_populates='ip_history')
-
-
 class RegisterToken(db.Model):
     __tablename__ = 'register_tokens'
-    user_id = db.Column(db.String(20), primary_key=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
+    user_id = db.Column(db.LargeBinary(16), primary_key=True)
+    
+    email = db.Column(db.LargeBinary(32), nullable=False, unique=True)
     username = db.Column(db.String(25), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
 
     token = db.Column(db.String(40), nullable=False)
-    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
 class Region(db.Model):
@@ -328,11 +285,14 @@ class City(db.Model):
 class Friendship(db.Model):
     __tablename__ = 'friendships'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
-    friend_id = db.Column(db.String(20), db.ForeignKey('users.user_id'), nullable=False)
+    
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    status = db.Column(db.String(10), nullable=False, default='pending')  # Status: 'pending', 'accepted', 'rejected'
+    # Statuses are 'pending', 'accepted', 'rejected'.
+    status = db.Column(db.String(10), nullable=False, default='pending')
     accepted_at = db.Column(db.DateTime)
+
+    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
+    friend_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
 
@@ -342,16 +302,17 @@ class Friendship(db.Model):
 
 class SiteStatistics(db.Model):
     __tablename__ = 'site_statistics'
-    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    total_countries_supported = db.Column(db.Integer, nullable=False)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    total_news = db.Column(db.String(15), nullable=False)
+    
+    last_updated_message = db.Column(db.String(15), nullable=False)
+    total_countries_supported = db.Column(db.Integer, nullable=False)
+    total_news = db.Column(db.Integer, nullable=False)
     total_feeds = db.Column(db.Integer, nullable=False)
     total_users = db.Column(db.Integer, nullable=False)
     total_comments = db.Column(db.Integer, nullable=False)
-    last_updated_message = db.Column(db.String(15), nullable=False)
-    total_clicks = db.Column(db.BigInteger, nullable=False)
+    total_clicks = db.Column(db.Integer, nullable=False)
 
 
 class Stocks(db.Model):

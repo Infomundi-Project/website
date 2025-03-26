@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS feeds;
 DROP TABLE IF EXISTS friendships;
 DROP TABLE IF EXISTS stories;
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS publishers;
+DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS common_passwords;
 DROP TABLE IF EXISTS register_tokens;
@@ -18,16 +18,28 @@ DROP TABLE IF EXISTS global_salts;
 
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id VARCHAR(20) NOT NULL PRIMARY KEY,
-    username VARCHAR(25) NOT NULL UNIQUE,
-    email VARCHAR(128) NOT NULL UNIQUE,
+    /* The ID here is  */
+    id BINARY(16) PRIMARY KEY,
+    
+    username VARCHAR(25) UNIQUE NOT NULL,
+    
+    /* The email is salted and stored as SHA-256 in the database. Realistically, we only require the email address during registration so we have SOME kind of protection against spam accounts, as the user needs to verify their email to be able to activate the account. 
+
+    In order to prevent user login via username, the user can only log in via email. An attacker, to target an individual user in the platform, would have to know the user's email address first, not just their public username. 
+
+    For those two reasons, the email has to be stored in the database. 
+
+    1. Allows user login
+    2. Prevents, kind of, spam account creation */
+    email BINARY(32) UNIQUE NOT NULL,
+    
     role VARCHAR(15) DEFAULT 'user',
-    password VARCHAR(150) NOT NULL,
+    password VARCHAR(150) NOT NULL, -- Stored in encrypted format (Argon2id)
     session_version INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME,
     
-    -- Customization
+    -- Profile
     display_name VARCHAR(40),
     profile_description VARCHAR(1500),
     avatar_url VARCHAR(80),
@@ -36,134 +48,137 @@ CREATE TABLE IF NOT EXISTS users (
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
 
-    -- Recovery
-    in_recovery BOOLEAN DEFAULT FALSE,
+    -- Account Recovery
+    in_recovery TINYINT(1) DEFAULT 0,
     recovery_token VARCHAR(40),
     recovery_token_timestamp DATETIME,
 
-    -- Account deletion
+    -- Account Deletion
     delete_token VARCHAR(40),
     delete_token_timestamp DATETIME,
 
     -- Activity
-    is_online BOOLEAN DEFAULT FALSE,
+    is_online TINYINT(1) DEFAULT 0,
     last_activity DATETIME,
 
-    -- Totp
+    -- Totp (secret and recovery are stored in encrypted format)
     totp_secret VARCHAR(120),
     totp_recovery VARCHAR(120),
     mail_twofactor VARCHAR(6),
     mail_twofactor_timestamp DATETIME,
 
     -- Encryption
-    derived_key_salt VARCHAR(120),
-    INDEX idx_username (username),
-    INDEX idx_email (email)
-);
-
-
-CREATE TABLE publishers (
-    publisher_id INT AUTO_INCREMENT PRIMARY KEY,
-    
-    name VARCHAR(100) NOT NULL,
-    publisher_hash BINARY(16) NOT NULL,
-    link VARCHAR(120) NOT NULL,
-    favicon VARCHAR(100) NOT NULL
+    derived_key_salt VARCHAR(120)
 );
 
 
 CREATE TABLE categories (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(20) UNIQUE NOT NULL
+    /* The ID here is the name of the category, like "br_general" or "us_general" or "pt_sports" and so on.*/
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(15) UNIQUE NOT NULL
 );
 
 
 CREATE TABLE tags (
-    tag_id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     tag VARCHAR(30) UNIQUE NOT NULL
 );
 
 
+CREATE TABLE publishers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    name VARCHAR(200) NOT NULL,
+    url VARCHAR(200) NOT NULL,
+
+    /* The url_hash here is a MD5 hash of the URL. This prevents duplicate stories being inserted into the database, while
+    maintaining performance and optimal disk usage. */
+    url_hash BINARY(16) UNIQUE NOT NULL,
+    
+    favicon_url VARCHAR(100),
+
+    category_id INT NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+
 CREATE TABLE stories (
-    story_id INT AUTO_INCREMENT PRIMARY KEY,
-    story_hash BINARY(16) NOT NULL UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     
     title VARCHAR(150) NOT NULL,
     description VARCHAR(500),
     gpt_summary JSON,
     
-    link VARCHAR(512) NOT NULL,
+    url VARCHAR(512) NOT NULL,
+    
+    /* The url_hash here is a MD5 hash of the URL. This prevents duplicate stories being inserted into the database, while
+    maintaining performance and optimal disk usage. */
+    url_hash BINARY(16) UNIQUE NOT NULL,
+    
     pub_date DATETIME NOT NULL,
-    media_content_url VARCHAR(100),
-    has_media_content TINYINT(1) DEFAULT 0,
+    image_url VARCHAR(100),
+    has_image TINYINT(1) DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     category_id INT NOT NULL,
     publisher_id INT NOT NULL,
 
-    FOREIGN KEY (category_id) REFERENCES categories(category_id),
-    FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id)
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (publisher_id) REFERENCES publishers(id)
 );
 
 
 CREATE TABLE story_reactions (
-    reaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    story_hash BINARY(16) NOT NULL,
-    user_id VARCHAR(20),
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    story_id INT NOT NULL,
+    user_id BINARY(16) NOT NULL,
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     action VARCHAR(10),  -- 'like' or 'dislike'
     
-    FOREIGN KEY (story_hash) REFERENCES stories(story_hash),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    UNIQUE KEY unique_reaction (story_hash, user_id, action)
+    FOREIGN KEY (story_id) REFERENCES stories(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE KEY unique_reaction (story_id, user_id, action)
 );
 
 
 CREATE TABLE story_stats (
-    story_hash BINARY(16) PRIMARY KEY,
+    story_id INT PRIMARY KEY,
     
     dislikes INT DEFAULT 0,
     clicks INT DEFAULT 0,
     likes INT DEFAULT 0,
 
-    FOREIGN KEY (story_hash) REFERENCES stories(story_hash) ON DELETE CASCADE
-);
-
-CREATE TABLE feeds (
-    feed_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT NOT NULL,
-    feed_hash BINARY(16),
-
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    site VARCHAR(120) NOT NULL,
-    url VARCHAR(150) NOT NULL,
-    favicon VARCHAR(150),
-
-    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE
 );
 
 
 CREATE TABLE register_tokens (
-    user_id VARCHAR(10) PRIMARY KEY,
-    email VARCHAR(70) UNIQUE NOT NULL,
-    username VARCHAR(30) UNIQUE NOT NULL,
-    password VARCHAR(100) NOT NULL,
+    user_id BINARY(16) PRIMARY KEY,
+
+    email BINARY(32) UNIQUE NOT NULL,
+    username VARCHAR(25) UNIQUE NOT NULL,
+    password VARCHAR(150) NOT NULL,
+    
     token VARCHAR(40) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
 CREATE TABLE friendships (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id VARCHAR(10) NOT NULL,
-    friend_id VARCHAR(10) NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(10) NOT NULL DEFAULT 'pending',
     accepted_at TIMESTAMP,
+    
+    user_id BINARY(16) NOT NULL,
+    friend_id BINARY(16) NOT NULL,
     CONSTRAINT unique_friendship UNIQUE (user_id, friend_id),
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
@@ -175,14 +190,16 @@ CREATE TABLE common_passwords (
 
 CREATE TABLE site_statistics (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    total_countries_supported INT NOT NULL,
+    
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    total_news VARCHAR(15) NOT NULL,
+
+    last_updated_message VARCHAR(15) NOT NULL,
+    total_countries_supported INT NOT NULL,
+    total_news INT NOT NULL,
     total_feeds INT NOT NULL,
     total_users INT NOT NULL,
     total_comments INT NOT NULL,
-    last_updated_message VARCHAR(15) NOT NULL,
-    total_clicks BIGINT NOT NULL
+    total_clicks INT NOT NULL
 );
 
 
@@ -210,8 +227,3 @@ CREATE TABLE global_salts (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     salt VARCHAR(64) NOT NULL
 );
-
-
-CREATE INDEX idx_story_hash ON stories (story_hash);
-CREATE INDEX idx_publisher_hash ON publishers (publisher_hash);
-CREATE INDEX idx_feed_hash ON feeds (feed_hash);

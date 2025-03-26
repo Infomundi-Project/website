@@ -148,6 +148,7 @@ def string_to_md5_hex(input_string: str) -> str:
     return hashlib.md5(input_string.encode()).hexdigest()
 
 
+
 def generate_hmac_signature(key: str, message: str, algorithm: str = 'sha256') -> str:
     """
     Generate an HMAC signature for a given message and key.

@@ -1,4 +1,5 @@
 import secrets
+import uuid
 import base64
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -16,6 +17,22 @@ def generate_2fa_token() -> str:
         code += str(secrets.randbelow(10))
     
     return code
+
+
+def generate_uuid_string() -> str:
+    return str(uuid.UUID(int=secrets.randbits(128)))
+
+
+def generate_uuid_bytes() -> bytes:
+    return uuid.UUID(int=secrets.randbits(128)).bytes
+
+
+def convert_uuid_bytes_to_string(uuid_bytes: bytes) -> str:
+    return str(uuid.UUID(bytes=uuid_bytes))
+
+
+def convert_uuid_string_to_bytes(uuid_string: str) -> bytes:
+    return uuid.UUID(uuid_string).bytes
 
 
 def generate_nonce(length: int=32, limit: int=0) -> str:

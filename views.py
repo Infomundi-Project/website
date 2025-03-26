@@ -4,7 +4,7 @@ from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
 cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util
-from website_scripts.decorators import verify_captcha, admin_required, profile_owner_required, captcha_required, sensitive_area, in_maintenance
+from website_scripts.decorators import verify_captcha, admin_required, captcha_required, sensitive_area, in_maintenance
 
 views = Blueprint('views', __name__)
 
