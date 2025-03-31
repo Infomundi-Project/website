@@ -65,16 +65,17 @@ with db_connection.cursor() as cursor:
                 categories.append(f'{country_cca2}_general')
         else:
             categories.append(f'{countries_cca2}_general')
-        url_hash = hashing_util.string_to_md5_binary(feed['url'])
-        category_id = [x['id'] for x in categories_from_database if x['name'] in categories][0]
+        categories_id = [x['id'] for x in categories_from_database if x['name'] in categories]
 
-        try:
-            cursor.execute("""
-                INSERT INTO feeds (site_name, url, url_hash,  category_id) 
-                VALUES (%s, %s, %s, %s)
-            """, (feed['name'].strip(), feed['url'], url_hash, category_id))
-        except Exception:
-            continue
+        for category_id in categories_id:
+            try:
+                cursor.execute("""
+                    INSERT INTO publishers (name, url, category_id) 
+                    VALUES (%s, %s, %s)
+                """, (input_sanitization.sanitize_html(feed['name']), feed['url'].strip(), category_id))
+            except Exception as e:
+                print(f'Error {e}')
+                continue
 
     db_connection.commit()
 
@@ -85,12 +86,11 @@ with db_connection.cursor() as cursor:
         category_id = [x['id'] for x in categories_from_database if x['name'] == category][0]
 
         for feed in old_feeds[feed]:
-            url_hash = hashing_util.string_to_md5_binary(feed['url'])
             try:
                 cursor.execute("""
-                    INSERT INTO publishers (name, url, url_hash, category_id) 
-                    VALUES (%s, %s, %s, %s)
-                """, (unidecode(feed['site'].strip()), feed['url'], url_hash, category_id))
+                    INSERT INTO publishers (name, url, category_id) 
+                    VALUES (%s, %s, %s)
+                """, (input_sanitization.sanitize_html(feed['site']), feed['url'].strip(), category_id))
             except Exception as e:
                 print(e)
                 continue

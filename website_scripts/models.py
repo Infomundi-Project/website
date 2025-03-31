@@ -11,8 +11,7 @@ class Publisher(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     
     url = db.Column(db.String(200), nullable=False)
-    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
-    
+
     name = db.Column(db.String(120), nullable=False)
     favicon_url = db.Column(db.String(100), nullable=True)
     

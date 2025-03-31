@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 CREATE TABLE categories (
-    /* The ID here is the name of the category, like "br_general" or "us_general" or "pt_sports" and so on.*/
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(15) UNIQUE NOT NULL
 );
@@ -91,10 +90,6 @@ CREATE TABLE publishers (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(200) NOT NULL,
     url VARCHAR(200) NOT NULL,
-
-    /* The url_hash here is a MD5 hash of the URL. This prevents duplicate publishers being inserted into the database, while
-    maintaining performance and optimal disk usage. */
-    url_hash BINARY(16) UNIQUE NOT NULL,
     
     favicon_url VARCHAR(100),
 
