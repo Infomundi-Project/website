@@ -1,6 +1,7 @@
 import requests
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formatdate
 from smtplib import SMTP
 
 from . import config
@@ -51,7 +52,11 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str='nor
     message['From'] = from_email
     message['To'] = recipient_email
     message['Subject'] = subject
-    message['Reply-To'] = reply_to
+    message['Date'] = formatdate(localtime=True)
+    
+    if reply_to != from_email:
+        message['Reply-To'] = reply_to
+    
     message.attach(MIMEText(body, 'plain'))
 
     try:

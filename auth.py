@@ -14,7 +14,6 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 @unauthenticated_only
 @verify_captcha
-@in_maintenance
 def login():
     # If user is in totp process, redirect them to the correct page
     if session.get('user_id', ''):
@@ -105,7 +104,6 @@ def disable_totp():
 @auth.route('/register', methods=['GET', 'POST'])
 @unauthenticated_only
 @verify_captcha
-@in_maintenance
 def register():
     if request.method == 'GET':
         return render_template('register.html')
@@ -150,6 +148,36 @@ def register():
     return redirect(url_for('auth.register'))
 
 
+@auth.route('/verify', methods=['GET'])
+@unauthenticated_only
+def verify():
+    token = request.args.get('token', '')
+
+    user = models.User.query.filter_by(register_token=token).first()
+    if not user:
+        flash('We apologize, but the token seems to be invalid.', 'error')
+        return redirect(url_for('views.home'))
+
+    # Checks if the token is expired
+    created_at = datetime.fromisoformat(user.register_token_timestamp.isoformat())
+    if not qol_util.is_date_within_threshold_minutes(created_at, 30):
+        extensions.db.session.delete(token_lookup)
+        extensions.db.session.commit()
+        
+        flash('We apologize, but the token has expired. Please, try registering your account again.', 'error')
+        return redirect(url_for('auth.register'))
+    
+    # Creates the new user and commits changes to the database
+    new_user = models.User(user_id=token_lookup.user_id, username=token_lookup.username, password=token_lookup.password, email=token_lookup.email, avatar_url='https://infomundi.net/static/img/avatar.webp')
+    extensions.db.session.add(new_user)
+    
+    extensions.db.session.delete(token_lookup)
+    extensions.db.session.commit()
+
+    flash(f'Your account has been verified, {token_lookup.username}! You may log in now!')
+    return redirect(url_for('auth.login'))
+
+
 @auth.route('/invalidate_sessions', methods=['POST'])
 @login_required
 def invalidate_sessions():
@@ -162,37 +190,6 @@ def invalidate_sessions():
     
     flash('All sessions have been invalidated.')
     return redirect(url_for('views.user_redirect'))
-
-
-@auth.route('/verify', methods=['GET'])
-@unauthenticated_only
-def verify():
-    token = request.args.get('token', '')
-
-    # Tries to find the token in the database
-    token_lookup = models.RegisterToken.query.filter_by(token=token).first()
-    if not token_lookup:
-        flash('We apologize, but the token seems to be invalid.', 'error')
-        return redirect(url_for('views.home'))
-
-    # Checks if the token is expired or the user already exist
-    created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
-    if not qol_util.is_date_within_threshold_minutes(created_at, 30) or models.User.query.filter_by(email=token_lookup.email).first():
-        extensions.db.session.delete(token_lookup)
-        extensions.db.session.commit()
-        
-        flash('Either the token has expired or the user associated with this token already exists in our system. Try logging in or creating your account.', 'error')
-        return redirect(url_for('views.home'))
-    
-    # Creates the new user and commits changes to the database
-    new_user = models.User(user_id=token_lookup.user_id, username=token_lookup.username, password=token_lookup.password, email=token_lookup.email, avatar_url='https://infomundi.net/static/img/avatar.webp')
-    extensions.db.session.add(new_user)
-    
-    extensions.db.session.delete(token_lookup)
-    extensions.db.session.commit()
-
-    flash(f'Your account has been verified, {token_lookup.username}! You may log in now!')
-    return redirect(url_for('auth.login'))
 
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])

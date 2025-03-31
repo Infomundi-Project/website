@@ -31,7 +31,7 @@ CREATE TABLE users (
 
     1. Allows user login
     2. Prevents, kind of, spam account creation */
-    email BINARY(32) UNIQUE NOT NULL,
+    hashed_email BINARY(32) UNIQUE NOT NULL,
     
     role VARCHAR(15) DEFAULT 'user',
     password VARCHAR(150) NOT NULL, -- Stored in encrypted format (Argon2id)
@@ -48,13 +48,18 @@ CREATE TABLE users (
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
 
+    -- Account Registration
+    is_active TINYINT(1) DEFAULT 0,
+    register_token BINARY(16),
+    register_token_timestamp DATETIME,
+
     -- Account Recovery
     in_recovery TINYINT(1) DEFAULT 0,
-    recovery_token VARCHAR(40),
+    recovery_token BINARY(16),
     recovery_token_timestamp DATETIME,
 
     -- Account Deletion
-    delete_token VARCHAR(40),
+    delete_token BINARY(16),
     delete_token_timestamp DATETIME,
 
     -- Activity
@@ -64,7 +69,7 @@ CREATE TABLE users (
     -- Totp (secret and recovery are stored in encrypted format)
     totp_secret VARCHAR(120),
     totp_recovery VARCHAR(120),
-    mail_twofactor VARCHAR(6),
+    mail_twofactor INT,
     mail_twofactor_timestamp DATETIME,
 
     -- Encryption
@@ -128,7 +133,7 @@ CREATE TABLE story_reactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     story_id INT NOT NULL,
-    user_id BINARY(16) NOT NULL,
+    user_id INT NOT NULL,
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     action VARCHAR(10),  -- 'like' or 'dislike'
@@ -150,18 +155,6 @@ CREATE TABLE story_stats (
 );
 
 
-CREATE TABLE register_tokens (
-    user_id BINARY(16) PRIMARY KEY,
-
-    email BINARY(32) UNIQUE NOT NULL,
-    username VARCHAR(25) UNIQUE NOT NULL,
-    password VARCHAR(150) NOT NULL,
-    
-    token VARCHAR(40) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
 CREATE TABLE friendships (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -169,8 +162,8 @@ CREATE TABLE friendships (
     status VARCHAR(10) NOT NULL DEFAULT 'pending',
     accepted_at TIMESTAMP,
     
-    user_id BINARY(16) NOT NULL,
-    friend_id BINARY(16) NOT NULL,
+    user_id INT NOT NULL,
+    friend_id INT NOT NULL,
     CONSTRAINT unique_friendship UNIQUE (user_id, friend_id),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE

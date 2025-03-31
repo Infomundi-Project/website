@@ -15,7 +15,7 @@ def search_user_email_in_database(email: str):
         salted_email = salt.salt + email
         hashed_email = hashing_util.string_to_sha256_binary(salted_email)
         
-        user = models.User.query.filter_by(email=hashed_email).first()
+        user = models.User.query.filter_by(hashed_email=hashed_email).first()
         # If the user is found, there's no need to continue in the loop
         if user:
             break
@@ -162,7 +162,7 @@ def handle_register_token(email: str, hashed_email: bytes, username: str, hashed
     uses notifications.send_email to send the verification token to the user.
 
     Arguments:
-        email (str): User's email address.
+        email (str): User's cleartext email address.
         hashed_email (bytes): User's sha256 hashed email.
         username (str): User's username.
         hashed_password (str): User's argon2 hashed password.
@@ -170,29 +170,27 @@ def handle_register_token(email: str, hashed_email: bytes, username: str, hashed
     Returns:
         bool: False if there's a token associated with the email or if we couldn't get to send the email. Otherwise True.
     """
-    token_lookup = models.RegisterToken.query.filter(or_(
-        models.RegisterToken.email == hashed_email,
-        models.RegisterToken.username == username
+    user_lookup = models.User.query.filter(or_(
+        models.User.hashed_email == hashed_email,
+        models.User.username == username
     )).first()
     
-    # This means there's an already issued token for the specified email address.
-    if token_lookup:
-        created_at = datetime.fromisoformat(token_lookup.timestamp.isoformat())
-        # If it's within the threshold, return False. Otherwise, delete the token.
+    # There's a token already issued or an already existing user.
+    if user_lookup:
+        created_at = datetime.fromisoformat(user_lookup.register_token_timestamp.isoformat())
         if qol_util.is_date_within_threshold_minutes(created_at, 30):
             return False
         
         extensions.db.session.delete(token_lookup)
         extensions.db.session.commit()
 
-    # Generate a REEEEALLY random verification token.
-    verification_token = security_util.generate_nonce(24)
+    uuid_token = security_util.generate_uuid_string()
 
     message = f"""Hello, {username}.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
-https://infomundi.net/auth/verify?token={verification_token}
+https://infomundi.net/auth/verify?token={uuid_token}
 
 We're looking forward to seeing you explore our platform!
 
@@ -204,8 +202,8 @@ The Infomundi Team"""
     # If we can send the email, save token to the database
     result = notifications.send_email(email, subject, message)
     if result:
-        new_token = models.RegisterToken(email=hashed_email, username=username, 
-            token=verification_token, id=security_util.generate_uuid_bytes(), password=hashed_password)
+        new_token = models.User(hashed_email=hashed_email, username=username, 
+            register_token=security_util.convert_uuid_string_to_bytes(uuid_token), password=hashed_password)
         extensions.db.session.add(new_token)
         extensions.db.session.commit()
 

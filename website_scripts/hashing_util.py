@@ -3,7 +3,7 @@ import argon2
 import hmac
 
 
-def argon2_hash_text(cleartext: str) -> str:
+def string_to_argon2_hash(cleartext: str) -> str:
     return argon2.PasswordHasher().hash(cleartext)
 
 
@@ -81,7 +81,7 @@ def string_to_sha256_hex(input_string: str) -> str:
     return hashlib.sha256(input_string.encode()).hexdigest()
 
 
-def sha512_hash_text(text: str) -> str:
+def string_to_sha512_hex(text: str) -> str:
     """
     Hashes the given text using SHA-512 and returns the hash in hexadecimal format.
 

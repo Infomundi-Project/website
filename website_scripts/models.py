@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 
@@ -78,11 +79,12 @@ class StoryStats(db.Model):
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
-    id = db.Column(db.LargeBinary(16), primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    public_id = db.Column(db.LargeBinary(16), unique=True, default=lambda: uuid.uuid4().bytes)
     
     # Really important stuff
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 hash
+    hashed_email = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 hash
 
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
@@ -99,13 +101,18 @@ class User(db.Model, UserMixin):
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
 
+    # Account registration
+    is_active = db.Column(db.Boolean, default=False)
+    register_token = db.Column(db.LargeBinary(16))
+    register_token_timestamp = db.Column(db.DateTime)
+
     # Account Recovery
     in_recovery = db.Column(db.Boolean, default=False)
-    recovery_token = db.Column(db.String(40))
+    recovery_token = db.Column(db.LargeBinary(16))
     recovery_token_timestamp = db.Column(db.DateTime)
 
     # Account Deletion
-    delete_token = db.Column(db.String(40))
+    delete_token = db.Column(db.LargeBinary(16))
     delete_token_timestamp = db.Column(db.DateTime)
 
     # Activity
@@ -115,7 +122,7 @@ class User(db.Model, UserMixin):
     # Totp
     totp_secret = db.Column(db.String(120))
     totp_recovery = db.Column(db.String(120))
-    mail_twofactor = db.Column(db.String(6))
+    mail_twofactor = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
     # Encryption
@@ -166,7 +173,6 @@ class User(db.Model, UserMixin):
         return self.is_online
     
 
-
 class CommonPasswords(db.Model):
     __tablename__ = 'common_passwords'
     
@@ -174,16 +180,67 @@ class CommonPasswords(db.Model):
     password = db.Column(db.String(30), nullable=False)
 
 
-class RegisterToken(db.Model):
-    __tablename__ = 'register_tokens'
-    user_id = db.Column(db.LargeBinary(16), primary_key=True)
+class Friendship(db.Model):
+    __tablename__ = 'friendships'
+    id = db.Column(db.Integer, primary_key=True)
     
-    email = db.Column(db.LargeBinary(32), nullable=False, unique=True)
-    username = db.Column(db.String(25), nullable=False, unique=True)
-    password = db.Column(db.String(150), nullable=False)
-
-    token = db.Column(db.String(40), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    # Statuses are 'pending', 'accepted', 'rejected'.
+    status = db.Column(db.String(10), nullable=False, default='pending')
+    accepted_at = db.Column(db.DateTime)
+
+    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
+    friend_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
+
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('user_friendships', lazy='dynamic'))
+    friend = db.relationship('User', foreign_keys=[friend_id], backref=db.backref('friend_friendships', lazy='dynamic'))
+
+
+class SiteStatistics(db.Model):
+    __tablename__ = 'site_statistics'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    last_updated_message = db.Column(db.String(15), nullable=False)
+    total_countries_supported = db.Column(db.Integer, nullable=False)
+    total_news = db.Column(db.Integer, nullable=False)
+    total_feeds = db.Column(db.Integer, nullable=False)
+    total_users = db.Column(db.Integer, nullable=False)
+    total_comments = db.Column(db.Integer, nullable=False)
+    total_clicks = db.Column(db.Integer, nullable=False)
+
+
+class Stocks(db.Model):
+    __tablename__ = 'stocks'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    country_name = db.Column(db.String(40), nullable=False)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class Currencies(db.Model):
+    __tablename__ = 'currencies'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class Crypto(db.Model):
+    __tablename__ = 'crypto'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    data = db.Column(db.JSON, nullable=False)
+
+
+class GlobalSalts(db.Model):
+    __tablename__ = 'global_salts'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    salt = db.Column(db.String(64), nullable=False)
 
 
 class Region(db.Model):
@@ -279,66 +336,3 @@ class City(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     flag = db.Column(db.Boolean, default=True)
     wikiDataId = db.Column(db.String(255), comment='Rapid API GeoDB Cities')
-
-
-class Friendship(db.Model):
-    __tablename__ = 'friendships'
-    id = db.Column(db.Integer, primary_key=True)
-    
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    # Statuses are 'pending', 'accepted', 'rejected'.
-    status = db.Column(db.String(10), nullable=False, default='pending')
-    accepted_at = db.Column(db.DateTime)
-
-    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
-    friend_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
-
-    __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
-
-    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('user_friendships', lazy='dynamic'))
-    friend = db.relationship('User', foreign_keys=[friend_id], backref=db.backref('friend_friendships', lazy='dynamic'))
-
-
-class SiteStatistics(db.Model):
-    __tablename__ = 'site_statistics'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    last_updated_message = db.Column(db.String(15), nullable=False)
-    total_countries_supported = db.Column(db.Integer, nullable=False)
-    total_news = db.Column(db.Integer, nullable=False)
-    total_feeds = db.Column(db.Integer, nullable=False)
-    total_users = db.Column(db.Integer, nullable=False)
-    total_comments = db.Column(db.Integer, nullable=False)
-    total_clicks = db.Column(db.Integer, nullable=False)
-
-
-class Stocks(db.Model):
-    __tablename__ = 'stocks'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    country_name = db.Column(db.String(40), nullable=False)
-    data = db.Column(db.JSON, nullable=False)
-
-
-class Currencies(db.Model):
-    __tablename__ = 'currencies'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    data = db.Column(db.JSON, nullable=False)
-
-
-class Crypto(db.Model):
-    __tablename__ = 'crypto'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    data = db.Column(db.JSON, nullable=False)
-
-
-class GlobalSalts(db.Model):
-    __tablename__ = 'global_salts'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    salt = db.Column(db.String(64), nullable=False)
