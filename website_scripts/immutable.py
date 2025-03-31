@@ -7,6 +7,7 @@ USER_AGENTS = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH
 IMAGE_EXTENSIONS = ('png', 'jpg', 'jpeg', 'webp', 'avif')
 
 RSS_ENDPOINTS = (
+    "",
     "/rss",
     "/feed",
     "/rss.xml",

@@ -34,7 +34,7 @@ def log_message(message):
     #logging.info(message)
 
 
-def insert_to_database(stories: list, category_name: str) -> int:
+def insert_stories_to_database(stories: list, category_name: str, category_id: int, categories, publishers) -> int:
     """Inserts a list of stories into the database with associated categories and publishers.
 
     Parameters:
@@ -47,64 +47,31 @@ def insert_to_database(stories: list, category_name: str) -> int:
     exceptions_count = 0
 
     with db_connection.cursor() as cursor:
-        try:
-            # Get the category ID
-            cursor.execute("SELECT id FROM categories WHERE name = %s", (category_name,))
-            category_row = cursor.fetchone()
-            if not category_row:
-                log_message(f"[-] Category '{category_name}' not found. Skipping...")
-                return len(stories)  # Count as exceptions
-            
-            category_id = category_row['id']
+        for story in stories:
+            try:
+                # Get publisher ID
+                publisher_id = [x['id'] for x in publishers if x['url_hash'] == story['publisher_url_hash']][0]
+                if publisher_id:
+                    print('a publisher is found!')
+                    exit()
 
-            for item in stories:
-                try:
-                    # Insert or update publisher
-                    cursor.execute("""
-                        INSERT INTO publishers (url, url_hash, name, favicon_url) 
-                        VALUES (%s, %s, %s, %s)
-                        ON DUPLICATE KEY UPDATE name = VALUES(name), favicon_url = VALUES(favicon_url)
-                    """, (item['publisher_link'], item['publisher_hash'], item['publisher_name'], None))
-
-                    # Get publisher ID
-                    cursor.execute("SELECT id FROM publishers WHERE url_hash = %s", (item['publisher_hash'],))
-                    publisher_id = cursor.fetchone()['id']
-
-                    # Insert story
-                    cursor.execute("""
-                        INSERT INTO stories (title, description, url, url_hash, pub_date, image_url, has_image, category_id, publisher_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)
-                    """, (
-                        item['story_title'],
-                        item['story_description'],
-                        item['story_link'],
-                        item['url_hash'],
-                        item['story_pubdate'],
-                        None,  # Placeholder for image_url
-                        0,  # Placeholder for has_image
-                        category_id,
-                        publisher_id
-                    ))
-
-                    # Get the story ID
-                    cursor.execute("SELECT id FROM stories WHERE url_hash = %s", (item['url_hash'],))
-                    story_id = cursor.fetchone()['id']
-
-                    # Insert into story_stats
-                    cursor.execute("""
-                        INSERT INTO story_stats (story_id, clicks, likes, dislikes)
-                        VALUES (%s, 0, 0, 0)
-                        ON DUPLICATE KEY UPDATE story_id = story_id
-                    """, (story_id,))
-
-                except Exception as err:
-                    exceptions_count += 1
-                    log_message(f"[-] Error inserting story: {err}")
-
-        except Exception as err:
-            log_message(f"[-] Database Error: {err}")
-            exceptions_count = len(stories)  # If a major issue happens, count all as exceptions
+                # Insert story
+                cursor.execute("""
+                    INSERT INTO stories (title, description, url, url_hash, pub_date, category_id, publisher_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    story['story_title'],
+                    story['story_description'],
+                    story['story_url'],
+                    story['story_url_hash'],
+                    story['story_pubdate'],
+                    category_id,
+                    publisher_id
+                ))
+                log_message(f'Inserting new story')
+            except Exception as err:
+                exceptions_count += 1
+                log_message(f"Error inserting story: {err}")
 
     db_connection.commit()
     return exceptions_count
@@ -131,11 +98,12 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
     
     # Tries to find the RSS feed endpoint
     for possibility in immutable.RSS_ENDPOINTS:
+        log_message(f'Trying {possibility} against {rss_url}')
+        
         headers = {
             'User-Agent': choice(immutable.USER_AGENTS),
             'Referer': 'www.google.com'
         }
-
         try:
             response = get_request(rss_url + possibility, timeout=5, headers=headers)
 
@@ -163,11 +131,11 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             story_description = input_sanitization.gentle_cut_text(500, story_description)
             
             publisher_link = feed.feed.link.strip()
-            story_link = item.link.strip()
+            story_url = story.link.strip()
 
             # Checks to see if the urls are valid
-            if not input_sanitization.is_valid_url(publisher_link) or not input_sanitization.is_valid_url(story_link):
-                log_message(f'Either the feed link ({publisher_link}) or the item link ({story_link}) is not valid. Skipping.')
+            if not input_sanitization.is_valid_url(publisher_link) or not input_sanitization.is_valid_url(story_url):
+                log_message(f'Either the feed link ({publisher_link}) or the story link ({story_url}) is not valid. Skipping.')
                 continue
 
             if story.has_key('published_parsed'):
@@ -177,11 +145,9 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             else:
                 pubdate = story.updated
             
-            # Creates the item hash ready to be insterted to the database
-            url_hash = hashing_util.string_to_md5_binary(story_link)
-
-            # Creates the publisher hash ready to be insterted to the database
-            publisher_hash = hashing_util.string_to_md5_binary(publisher_link)
+            # Creates the url hashes
+            url_hash = hashing_util.string_to_md5_binary(story_url)
+            publisher_url_hash = hashing_util.string_to_md5_binary(publisher_link)
             
             # Tries to format pubdate
             story_pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -189,13 +155,13 @@ def fetch_feed(rss_url: str, news_filter: str, result_list: list):
             new_story = {
                 'story_title': story_title,
                 'story_description': story_description,
-                'url_hash': url_hash,
-                'story_link': story_link,
                 'story_pubdate': story_pubdate,
+                'story_url_hash': url_hash,
+                'story_url': story_url,
 
                 'publisher_name': publisher_name,
                 'publisher_link': publisher_link,
-                'publisher_hash': publisher_hash,
+                'publisher_url_hash': publisher_url_hash,
                 }
 
             data['items'].append(new_story)
@@ -230,7 +196,7 @@ def format_date(date) -> dict:
     return {'datetime': date.strftime('%Y-%m-%d %H:%M:%S')}
 
 
-def fetch_categories():
+def fetch_categories_from_database():
     log_message('Fetching categories from the database')
     try:
         with db_connection.cursor() as cursor:
@@ -247,31 +213,30 @@ def fetch_categories():
     return category_list
 
 
-def fetch_feeds_from_database(category_id: int):
-    log_message(f'Fetching feeds for category ID: {category_id}')
+def fetch_publishers_from_database(category_id: int):
+    log_message(f'Fetching publishers for category ID: {category_id}')
     try:
         with db_connection.cursor() as cursor:
-            cursor.execute("SELECT site_name, url FROM feeds WHERE category_id = %s", (category_id,))
-            feeds = cursor.fetchall()
+            cursor.execute("SELECT id, name, url, url_hash FROM publishers WHERE category_id = %s", (category_id,))
+            publishers = cursor.fetchall()
     except Exception as e:
-        log_message(f"Error fetching feeds: {e}")
+        log_message(f"Error fetching publishers: {e}")
         return []
     
-    log_message(f'Got {len(feeds)} feeds from the database')
-    return feeds
+    log_message(f'Got {len(publishers)} publishers from the database')
+    print(publishers)
+    return publishers
 
 
 def main():
     total_done = 0
-    categories = fetch_categories()
-    print(categories)
-    exit()
+    categories = fetch_categories_from_database()
 
     for category_id, category_name in categories:
         percentage = (total_done // len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
 
-        rss_feeds = fetch_feeds_from_database(category_id)
+        rss_feeds = fetch_publishers_from_database(category_id)
         all_rss_data = []
 
         threads = []
@@ -289,7 +254,7 @@ def main():
             if not rss_data:
                 continue
             
-            rss_data["site"] = feed_info["site_name"]
+            rss_data["site"] = feed_info["name"]
             all_rss_data.append(rss_data)
 
         merged_articles = []
@@ -302,7 +267,7 @@ def main():
 
         shuffle(merged_articles)
 
-        exceptions_count = insert_to_database(merged_articles, category_name)
+        exceptions_count = insert_stories_to_database(merged_articles, category_name, category_id, categories, rss_feeds)
         total_done += 1
 
         log_message(f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}.")

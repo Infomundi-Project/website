@@ -92,7 +92,7 @@ CREATE TABLE publishers (
     name VARCHAR(200) NOT NULL,
     url VARCHAR(200) NOT NULL,
 
-    /* The url_hash here is a MD5 hash of the URL. This prevents duplicate stories being inserted into the database, while
+    /* The url_hash here is a MD5 hash of the URL. This prevents duplicate publishers being inserted into the database, while
     maintaining performance and optimal disk usage. */
     url_hash BINARY(16) UNIQUE NOT NULL,
     
