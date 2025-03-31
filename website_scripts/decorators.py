@@ -25,7 +25,7 @@ def api_login_required(func):
         if current_user.is_authenticated:
             return func(*args, **kwargs)
         
-        return jsonify({'status': 'Not Allowed'}), 403
+        return jsonify({'message': 'You must be logged in.'}), 403
 
     return decorated_function
 

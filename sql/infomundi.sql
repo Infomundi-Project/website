@@ -17,9 +17,9 @@ DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS global_salts;
 
 
-CREATE TABLE IF NOT EXISTS users (
-    /* The ID here is  */
-    id BINARY(16) PRIMARY KEY,
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    public_id BINARY(16) NOT NULL UNIQUE,
     
     username VARCHAR(25) UNIQUE NOT NULL,
     

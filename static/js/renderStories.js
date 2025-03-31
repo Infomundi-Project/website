@@ -638,7 +638,6 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           // Update time ago for newly added content
           updateTimeAgo();
-          linkSafety();
           currentPage += 1;
         } else {
           hasMoreStories = false;
@@ -812,108 +811,66 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 
-  // Function to handle like and dislike actions
   function handleLikeDislike(action, storyId, likeIcon, dislikeIcon, likeCount, dislikeCount) {
     // Fetch the saved likes/dislikes data from localStorage
     let savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+    let previousState = { ...savedInteractions }; // Store previous state for rollback
 
-    // Determine the new state for localStorage
+    // Determine the new state
     let newAction = null;
     if (action === 'like') {
-      if (savedInteractions[storyId]?.action === 'like') {
-        // Toggle off like
-        delete savedInteractions[storyId];
-      } else {
-        // Set to like
-        savedInteractions[storyId] = {
-          action: 'like'
-        };
-        newAction = 'like';
-      }
+        if (savedInteractions[storyId]?.action === 'like') {
+            delete savedInteractions[storyId];
+        } else {
+            savedInteractions[storyId] = { action: 'like' };
+            newAction = 'like';
+        }
     } else if (action === 'dislike') {
-      if (savedInteractions[storyId]?.action === 'dislike') {
-        // Toggle off dislike
-        delete savedInteractions[storyId];
-      } else {
-        // Set to dislike
-        savedInteractions[storyId] = {
-          action: 'dislike'
-        };
-        newAction = 'dislike';
-      }
+        if (savedInteractions[storyId]?.action === 'dislike') {
+            delete savedInteractions[storyId];
+        } else {
+            savedInteractions[storyId] = { action: 'dislike' };
+            newAction = 'dislike';
+        }
     }
 
-    // Save the updated interactions to localStorage
-    localStorage.setItem('storyInteractions', JSON.stringify(savedInteractions));
-
-    // Update the UI optimistically
-    const isLiked = savedInteractions[storyId]?.action === 'like';
-    const isDisliked = savedInteractions[storyId]?.action === 'dislike';
-
-    likeIcon.classList.toggle('fa-solid', isLiked);
-    likeIcon.classList.toggle('fa-regular', !isLiked);
-    dislikeIcon.classList.toggle('fa-solid', isDisliked);
-    dislikeIcon.classList.toggle('fa-regular', !isDisliked);
-
-    // Update counts optimistically
-    let likes = parseInt(likeCount.textContent.trim()) || 0;
-    let dislikes = parseInt(dislikeCount.textContent.trim()) || 0;
-
-    if (newAction === 'like') {
-      likes++;
-      if (isDisliked) dislikes--; // Remove previous dislike
-    } else if (newAction === 'dislike') {
-      dislikes++;
-      if (isLiked) likes--; // Remove previous like
-    }
-
-    likeCount.textContent = ` ${Math.max(likes, 0)}`;
-    dislikeCount.textContent = ` ${Math.max(dislikes, 0)}`;
-
-    // Inform the server about the action
-    const url = `/api/story/${action}`;
-
-    fetch(url, {
+    // Send the request first before updating the UI
+    fetch(`/api/story/${action}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: storyId
-        })
-      })
-      .then(response => {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: storyId })
+    })
+    .then(response => {
         if (!response.ok) {
-          return response.json().then(errorData => {
-            throw new Error(errorData.message || 'Error performing action');
-          });
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || 'Error performing action');
+            });
         }
         return response.json();
-      })
-      .then(data => {
-        // Update counts based on server response
+    })
+    .then(data => {
+        // Only update localStorage & UI if request succeeds
+        localStorage.setItem('storyInteractions', JSON.stringify(savedInteractions));
+
+        // Update UI
+        const isLiked = savedInteractions[storyId]?.action === 'like';
+        const isDisliked = savedInteractions[storyId]?.action === 'dislike';
+
+        likeIcon.classList.toggle('fa-solid', isLiked);
+        likeIcon.classList.toggle('fa-regular', !isLiked);
+        dislikeIcon.classList.toggle('fa-solid', isDisliked);
+        dislikeIcon.classList.toggle('fa-regular', !isDisliked);
+
+        // Update counts
         likeCount.textContent = ` ${data.likes}`;
         dislikeCount.textContent = ` ${data.dislikes}`;
-      })
-      .catch(error => {
-        // Rollback the optimistic UI update if the server request fails
+    })
+    .catch(error => {
         alert(error.message);
+        savedInteractions = previousState; // Revert state
+    });
+}
 
-        // Revert to the previous state from localStorage
-        const previousState = JSON.parse(localStorage.getItem('storyInteractions')) || {};
-        const wasLiked = previousState[storyId]?.action === 'like';
-        const wasDisliked = previousState[storyId]?.action === 'dislike';
-
-        likeIcon.classList.toggle('fa-solid', wasLiked);
-        likeIcon.classList.toggle('fa-regular', !wasLiked);
-        dislikeIcon.classList.toggle('fa-solid', wasDisliked);
-        dislikeIcon.classList.toggle('fa-regular', !wasDisliked);
-
-        // Revert counts
-        likeCount.textContent = ` ${likes}`;
-        dislikeCount.textContent = ` ${dislikes}`;
-      });
-  }
 
   // Function to calculate relative time
   function timeAgo(dateString) {

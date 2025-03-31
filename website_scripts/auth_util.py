@@ -13,7 +13,7 @@ def search_user_email_in_database(email: str):
     # We try every salt to see if there's a match in the database
     for salt in salts:
         salted_email = salt.salt + email
-        hashed_email = hashing_util.sha512_hash_text(salted_email)
+        hashed_email = hashing_util.string_to_sha256_binary(salted_email)
         
         user = models.User.query.filter_by(email=hashed_email).first()
         # If the user is found, there's no need to continue in the loop
@@ -25,21 +25,18 @@ def search_user_email_in_database(email: str):
     return user
 
 
-def search_username_in_database(username: str):
-    return models.User.query.filter_by(username=username).first()
-
-
-def hash_user_email_using_salt(email: str) -> str:
-    """Grabs a random salt from the database and hashes the salted email address with SHA-512.
-    
-        
-    """
+def hash_user_email_using_salt(email: str) -> bytes:
+    """Grabs a random salt from the database and hashes the salted email address with SHA-256."""
     salts = [salt.salt for salt in models.GlobalSalts.query.all()]
 
     shuffle(salts)
     salted_email = salts[0] + email
 
-    return hashing_util.sha512_hash_text(salted_email)
+    return hashing_util.string_to_sha256_binary(salted_email)
+
+
+def search_username_in_database(username: str):
+    return models.User.query.filter_by(username=username).first()
 
 
 def perform_login_actions(user, cleartext_email: str):
@@ -160,13 +157,13 @@ def configure_key(user, cleartext_password, cleartext_email: str = ''):
     return key_value
 
 
-def handle_register_token(email: str, hashed_email: str, username: str, hashed_password: str) -> bool:
+def handle_register_token(email: str, hashed_email: bytes, username: str, hashed_password: str) -> bool:
     """Generates a verification token, stores in the database and 
     uses notifications.send_email to send the verification token to the user.
 
     Arguments:
         email (str): User's email address.
-        hashed_email (str): User's sha256 hashed email.
+        hashed_email (bytes): User's sha256 hashed email.
         username (str): User's username.
         hashed_password (str): User's argon2 hashed password.
 
@@ -208,7 +205,7 @@ The Infomundi Team"""
     result = notifications.send_email(email, subject, message)
     if result:
         new_token = models.RegisterToken(email=hashed_email, username=username, 
-            token=verification_token, user_id=security_util.generate_nonce(10), password=hashed_password)
+            token=verification_token, id=security_util.generate_uuid_bytes(), password=hashed_password)
         extensions.db.session.add(new_token)
         extensions.db.session.commit()
 

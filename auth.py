@@ -14,6 +14,7 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 @unauthenticated_only
 @verify_captcha
+@in_maintenance
 def login():
     # If user is in totp process, redirect them to the correct page
     if session.get('user_id', ''):
@@ -104,6 +105,7 @@ def disable_totp():
 @auth.route('/register', methods=['GET', 'POST'])
 @unauthenticated_only
 @verify_captcha
+@in_maintenance
 def register():
     if request.method == 'GET':
         return render_template('register.html')
@@ -125,16 +127,17 @@ def register():
     
     # Checks if the passwords match
     if password != confirm_password:
-        flash('The passwords don\'t match.', 'error')
+        flash('Password and confirm password must match!', 'error')
         return redirect(url_for('auth.register'))
 
     # Checks if password is strong enough
     if not input_sanitization.is_strong_password(password):
-        flash('Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
+        flash('Password must be 8-100 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
         return redirect(url_for('auth.register'))
 
     email_lookup = auth_util.search_user_email_in_database(email)
     username_lookup = auth_util.search_username_in_database(username)
+
     if not (email_lookup and username_lookup):
         send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_salt(email), username, hashing_util.argon2_hash_text(password))
         if not send_token:

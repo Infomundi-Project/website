@@ -60,7 +60,7 @@ def news_page_processing(country_name: str) -> dict:
 
     # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
-    stock_data = json_util.read_json(f'{config.APP_ROOT}/data/json/stock_data/{country_name}_stock')
+    stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/{country_name}_stock')
     if not stock_data or stock_data[0]['market_cap'] == None:
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
         is_global = True
@@ -351,10 +351,10 @@ def string_similarity(s1: str, s2: str) -> float:
     return matcher.ratio() * 100
 
 
-@extensions.cache.memoize(timeout=60*60*12) # 12 hours
+#@extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def is_valid_category(category: str) -> bool:
     """Takes a category and checks if it is a valid category based on existing JSON files."""
-    categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
+    categories = [x.name for x in extensions.db.session.query(models.Category).all()]
     
     if category not in categories:
         return False
@@ -378,7 +378,7 @@ def country_code_to_name(cca2: str) -> str:
 @extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def get_supported_categories(country_code: str) -> list:
     """Returns a list of supported categories"""
-    categories = [x.category_id for x in extensions.db.session.query(models.Category).all()]
+    categories = [x.name for x in extensions.db.session.query(models.Category).all()]
     
     return [category.split('_')[1] for category in categories if category.startswith(country_code)]
 

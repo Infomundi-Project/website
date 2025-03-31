@@ -414,7 +414,7 @@ def donate():
 
 
 @views.route('/news', methods=['GET'])
-@in_maintenance
+#@in_maintenance
 def news():
     """Serving the /news endpoint. 
 

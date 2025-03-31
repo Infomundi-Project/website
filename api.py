@@ -8,7 +8,7 @@ from random import shuffle
 
 from website_scripts import config, json_util, scripts, notifications,\
     models, extensions, immutable, input_sanitization, friends_util, \
-    country_util, totp_util, security_util, hashing_util, llm_util
+    country_util, totp_util, security_util, hashing_util, llm_util, decorators
 
 api = Blueprint('api', __name__)
 
@@ -21,7 +21,7 @@ def make_cache_key(*args, **kwargs):
 
 
 @api.route('/story/<action>', methods=['POST'])
-@login_required
+@decorators.api_login_required
 def story_reaction(action):
     # Validate the action
     if action not in ('like', 'dislike'):
@@ -298,7 +298,7 @@ def summarize_story(story_id):
     if story.gpt_summary:
         return jsonify({'response': story.gpt_summary}), 200
 
-    response = llm_util.gpt_summarize(story.link)
+    response = llm_util.gpt_summarize(story.url)
     if response:
         # We convert the json response to a dict in order to store it in the database
         story.gpt_summary = response
@@ -324,8 +324,8 @@ def get_stories():
     query = request.args.get('query', '', type=str)
 
     # br_general, us_general and so on
-    selected_filter = f'{country}_{category}'
-    if not scripts.is_valid_category(selected_filter):
+    category_name = f'{country}_{category}'
+    if not scripts.is_valid_category(category_name):
         return jsonify({'error': 'This category is not yet supported!'}), 501
 
     valid_order_columns = ('created_at', 'clicks', 'title', 'pub_date')
@@ -341,10 +341,12 @@ def get_stories():
     if not (1 <= page <= 9999):
         page = 1
 
+    category_id = models.Category.query.filter_by(name=category_name).first()
+
     # Basic filtering. Category id should match and story should have image.
     query_filters = [
-        models.Story.category_id == selected_filter,
-        models.Story.has_media_content == True
+        models.Story.category_id == category_id.id,
+        models.Story.has_image == True
     ]
 
     # Filter by search query
@@ -373,7 +375,7 @@ def get_stories():
         joinedload(models.Story.publisher)
     ).order_by(
         order_criterion,
-        models.Story.story_id
+        models.Story.id
     ).offset(
         start_index
     ).limit(
@@ -382,23 +384,22 @@ def get_stories():
 
     stories_list = [
         {
-            'story_id': story.story_id,
-            #'created_at': story.created_at,
-            'title': input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.title.strip())),
-            'description': input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.description.strip())),
-            #'gpt_summary': story.gpt_summary,
-            'clicks': story.clicks,
-            'likes': story.likes,
-            'dislikes': story.dislikes,
-            'link': story.link,
+            'story_id': story.id,
+            'title': story.title,
+            'description': story.description,
+            # DEBUG 
+            'clicks': 0,
+            'likes': 0,
+            'dislikes': 0,
+
+            'link': story.url,
             'pub_date': story.pub_date,
-            #'category_id': story.category_id,
             'publisher': {
                 'name': input_sanitization.clean_publisher_name(story.publisher.name),
-                'link': story.publisher.link,
-                'favicon': story.publisher.favicon
+                'link': story.publisher.url,
+                'favicon': story.publisher.favicon_url
             },
-            'media_content_url': story.media_content_url,
+            'media_content_url': story.image_url,
         }
         for story in stories
     ]

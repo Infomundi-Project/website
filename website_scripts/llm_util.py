@@ -1,12 +1,13 @@
 import json
 import base64
+from random import choice as random_choice
 from requests import get as get_request
 from bs4 import BeautifulSoup
 from openai import OpenAI
 
 from .custom_exceptions import InfomundiCustomException
 from .config import OPENAI_API_KEY
-
+from .immutable import USER_AGENTS
 
 def gpt_summarize(url: str) -> dict:
     """Summarize a news article from the provided URL and structure the response for integration with the JavaScript.
@@ -24,7 +25,7 @@ def gpt_summarize(url: str) -> dict:
 
     try:
         # Fetch the article content
-        r = get_request(url, headers={'User-Agent': choice(immutable.USER_AGENTS)})
+        r = get_request(url, headers={'User-Agent': random_choice(USER_AGENTS)})
         if r.status_code not in (200, 301, 302):
             return {"error": "Failed to fetch the article. Invalid status code."}
 
@@ -85,7 +86,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
                     "content": (
                         "You are a helpful and comprehensive assistant designed to output in JSON format. "
                         "Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
-                        f"into the respective topics. Ensure that the output is in the same language as the one in the news article and adheres "
+                        f"into the respective topics. Ensure that the output, including json keys, is in the same language as the one in the news article and adheres "
                         "to a valid JSON structure, with clear separation between keys and their corresponding textual content."
                     )
                 },

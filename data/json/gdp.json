@@ -204,14 +204,14 @@
     }
   },
   {
-    "Bangladesh": {
-      "gdp": "$437,415,000,000 (World Bank)",
+    "Iran": {
+      "gdp": "$401,505,000,000 (World Bank)",
       "date": "2023"
     }
   },
   {
-    "Iran": {
-      "gdp": "$401,505,000,000 (World Bank)",
+    "Bangladesh": {
+      "gdp": "$437,415,000,000 (World Bank)",
       "date": "2023"
     }
   },
@@ -726,6 +726,12 @@
     }
   },
   {
+    "Lebanon": {
+      "gdp": "$17,937,000,000 (World Bank)",
+      "date": "2023"
+    }
+  },
+  {
     "Mali": {
       "gdp": "$20,905,000,000 (World Bank)",
       "date": "2023"
@@ -795,12 +801,6 @@
     "Moldova": {
       "gdp": "$16,539,000,000 (World Bank)",
       "date": "[n 13]2023"
-    }
-  },
-  {
-    "Lebanon": {
-      "gdp": "$17,937,000,000 (World Bank)",
-      "date": "2023"
     }
   },
   {

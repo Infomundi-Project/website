@@ -56,6 +56,31 @@ def sha256_verify_hash(text: str, hash_value: str) -> bool:
     return sha256_hash_text(text) == hash_value
 
 
+def binary_to_sha256_hex(binary_data: bytes) -> str:
+    """Convert a binary SHA-256 hash to a 64-character hex string"""
+    return binary_data.hex()
+
+
+def sha256_binary_to_string(binary_data: bytes) -> str:
+    """Convert SHA-256 hash (binary) to a 64-character hex string"""
+    return hashlib.sha256(binary_data).hexdigest()
+
+
+def sha256_hex_to_binary(sha256_hex: str) -> bytes:
+    """Convert SHA-256 hex to binary (32-byte BLOB equivalent)"""
+    return bytes.fromhex(sha256_hex)
+
+
+def string_to_sha256_binary(input_string: str) -> bytes:
+    """Convert a string to a SHA-256 binary hash"""
+    return hashlib.sha256(input_string.encode()).digest()
+
+
+def string_to_sha256_hex(input_string: str) -> str:
+    """Convert a string to a SHA-256 hex hash"""
+    return hashlib.sha256(input_string.encode()).hexdigest()
+
+
 def sha512_hash_text(text: str) -> str:
     """
     Hashes the given text using SHA-512 and returns the hash in hexadecimal format.

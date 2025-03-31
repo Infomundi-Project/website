@@ -90,7 +90,7 @@ def fetch_publishers_from_database(category_id: int):
     return publishers
 
 
-def fetch_stories_from_database(category_id: int, limit: int=10):
+def fetch_stories_from_database(category_id: int, limit: int=500):
     log_message(f'Fetching stories...')
     try:
         with db_connection.cursor() as cursor:
