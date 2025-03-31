@@ -41,7 +41,7 @@ def login():
     # If user has totp enabled, we redirect them to the totp page without effectively performing log in actions
     if user.totp_secret:
         session['email_address'] = email
-        session['user_id'] = user.user_id
+        session['user_id'] = user.id
         session['in_totp_process'] = True
         return redirect(url_for('auth.totp'))
 
@@ -137,7 +137,7 @@ def register():
     username_lookup = auth_util.search_username_in_database(username)
 
     if not (email_lookup and username_lookup):
-        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_salt(email), username, hashing_util.argon2_hash_text(password))
+        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_salt(email), username, hashing_util.string_to_argon2_hash(password))
         if not send_token:
             flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
             scripts.log(f'[!] Not able to send verification token to {email}.')
@@ -152,8 +152,11 @@ def register():
 @unauthenticated_only
 def verify():
     token = request.args.get('token', '')
+    if not token:
+        flash('Invalid token', 'error')
+        return redirect(url_for('auth.register'))
 
-    user = models.User.query.filter_by(register_token=token).first()
+    user = models.User.query.filter_by(register_token=security_util.convert_uuid_string_to_bytes(token)).first()
     if not user:
         flash('We apologize, but the token seems to be invalid.', 'error')
         return redirect(url_for('views.home'))
@@ -161,20 +164,19 @@ def verify():
     # Checks if the token is expired
     created_at = datetime.fromisoformat(user.register_token_timestamp.isoformat())
     if not qol_util.is_date_within_threshold_minutes(created_at, 30):
-        extensions.db.session.delete(token_lookup)
+        extensions.db.session.delete(user)
         extensions.db.session.commit()
         
         flash('We apologize, but the token has expired. Please, try registering your account again.', 'error')
         return redirect(url_for('auth.register'))
     
-    # Creates the new user and commits changes to the database
-    new_user = models.User(user_id=token_lookup.user_id, username=token_lookup.username, password=token_lookup.password, email=token_lookup.email, avatar_url='https://infomundi.net/static/img/avatar.webp')
-    extensions.db.session.add(new_user)
-    
-    extensions.db.session.delete(token_lookup)
+    user.avatar_url = 'https://infomundi.net/static/img/avatar.webp'
+    user.is_active = True
+    user.register_token = None
+    user.register_token_timestamp = None
     extensions.db.session.commit()
 
-    flash(f'Your account has been verified, {token_lookup.username}! You may log in now!')
+    flash(f'Your account has been verified, {user.username}! You may log in now!')
     return redirect(url_for('auth.login'))
 
 
@@ -208,7 +210,7 @@ def forgot_password():
             return render_template('forgot_password.html')    
         
         # We don't need to log the user in yet. Save the user id to the session cookie to use in the password_change endpoint.
-        session['user_id'] = user.user_id
+        session['user_id'] = user.id
 
         # Set user in recovery mode
         user.in_recovery = True
@@ -351,9 +353,13 @@ def google_callback():
     if not user:
         # Generate a super random password and argon2 hash it. 
         # The user can only log in using google integration or if they want to recover their account for some reason.
-        random_hashed_password = hashing_util.argon2_hash_text(security_util.generate_nonce())
-        user = models.User(user_id=security_util.generate_nonce(10), display_name=display_name,\
-            username=username, password=random_hashed_password, email=hashed_email, avatar_url='https://infomundi.net/static/img/avatar.webp')
+        random_hashed_password = hashing_util.string_to_argon2_hash(security_util.generate_nonce())
+        user = models.User(
+            display_name=display_name, 
+            username=username,
+            password=random_hashed_password, 
+            hashed_email=hashed_email
+            )
         extensions.db.session.add(user)
         extensions.db.session.commit()
     

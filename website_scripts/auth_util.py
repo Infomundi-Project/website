@@ -181,7 +181,7 @@ def handle_register_token(email: str, hashed_email: bytes, username: str, hashed
         if qol_util.is_date_within_threshold_minutes(created_at, 30):
             return False
         
-        extensions.db.session.delete(token_lookup)
+        extensions.db.session.delete(user_lookup)
         extensions.db.session.commit()
 
     uuid_token = security_util.generate_uuid_string()
@@ -199,12 +199,12 @@ The Infomundi Team"""
 
     subject = 'Infomundi - Activate Your Account'
     
-    # If we can send the email, save token to the database
+    # If we can send the email, save user to the database
     result = notifications.send_email(email, subject, message)
     if result:
-        new_token = models.User(hashed_email=hashed_email, username=username, 
+        new_user = models.User(hashed_email=hashed_email, username=username, 
             register_token=security_util.convert_uuid_string_to_bytes(uuid_token), password=hashed_password)
-        extensions.db.session.add(new_token)
+        extensions.db.session.add(new_user)
         extensions.db.session.commit()
 
     return result
@@ -297,7 +297,7 @@ def delete_account(email, token) -> bool:
 
     # Logout and delete user from database
     logout_user()
-    friends_util.delete_all_friends(user.user_id)
+    friends_util.delete_all_friends(user.id)
     extensions.db.session.delete(user)
     extensions.db.session.commit()
     

@@ -33,7 +33,7 @@ def admin():
 @login_required
 def handle_friends(friend_id, action):
     if action == 'add':
-        if friends_util.send_friend_request(current_user.user_id, friend_id):
+        if friends_util.send_friend_request(current_user.id, friend_id):
             flash('Friend request sent')
         else:
             flash('Something went wrong', 'error')
@@ -41,7 +41,7 @@ def handle_friends(friend_id, action):
         return redirect(url_for('views.user_redirect'))
     
     elif action == 'accept':
-        if friends_util.accept_friend_request(current_user.user_id, friend_id):
+        if friends_util.accept_friend_request(current_user.id, friend_id):
             flash('Friend request accepted')
         else:
             flash('Failed to accept friend request', 'error')
@@ -49,7 +49,7 @@ def handle_friends(friend_id, action):
         return redirect(url_for('views.user_redirect'))
     
     elif action == 'reject':
-        if friends_util.reject_friend_request(current_user.user_id, friend_id):
+        if friends_util.reject_friend_request(current_user.id, friend_id):
             flash("Friend request rejected")
         else:
             flash('Failed to reject friend request', 'error')
@@ -57,7 +57,7 @@ def handle_friends(friend_id, action):
         return redirect(url_for('views.user_redirect'))
             
     elif action == 'delete':
-        if friends_util.delete_friend(current_user.user_id, friend_id):
+        if friends_util.delete_friend(current_user.id, friend_id):
             flash('Friend request deleted')
         else:
             flash('Failed to delete friend request', 'error')
@@ -91,7 +91,7 @@ def user_profile(username):
     short_description = input_sanitization.gentle_cut_text(150, user.profile_description or '')
 
     if current_user.is_authenticated:
-        friend_status, pending_friend_request_sent_by_current_user = friends_util.get_friendship_status(current_user.user_id, user.user_id)
+        friend_status, pending_friend_request_sent_by_current_user = friends_util.get_friendship_status(current_user.id, user.id)
     else:
         friend_status = 'not_friends'
         pending_friend_request_sent_by_current_user = False
@@ -100,15 +100,15 @@ def user_profile(username):
     seo_description = f"{user.profile_description if user.profile_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
-    is_profile_owner = current_user.is_authenticated and (current_user.user_id == user.user_id)
+    is_profile_owner = current_user.is_authenticated and (current_user.id == user.id)
     return render_template('user_profile.html', user=user, 
         seo_data=(seo_title, seo_description, seo_image),
         short_description=input_sanitization.close_open_html_tags(short_description), 
         has_too_many_newlines=input_sanitization.has_x_linebreaks(user.profile_description),
         friend_status=friend_status, 
-        friends_list=friends_util.get_friends_list(user.user_id),
+        friends_list=friends_util.get_friends_list(user.id),
         pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user, 
-        pending_requests=friends_util.get_pending_friend_requests(current_user.user_id) if is_profile_owner else None
+        pending_requests=friends_util.get_pending_friend_requests(current_user.id) if is_profile_owner else None
         )
 
 
@@ -309,13 +309,13 @@ def upload_image():
     
         # Changes some variables depending on the image category
         if image_category == 'profile_picture':
-            bucket_path = f'users/{current_user.user_id}.jpg'
+            bucket_path = f'users/{current_user.id}.jpg'
             current_user.avatar_url = f'https://bucket.infomundi.net/{bucket_path}'
         elif image_category == 'profile_banner':
-            bucket_path = f'banners/{current_user.user_id}.jpg'
+            bucket_path = f'banners/{current_user.id}.jpg'
             current_user.profile_banner_url = f'https://bucket.infomundi.net/{bucket_path}'
         else:
-            bucket_path = f'backgrounds/{current_user.user_id}.jpg'
+            bucket_path = f'backgrounds/{current_user.id}.jpg'
             current_user.profile_wallpaper_url = f'https://bucket.infomundi.net/{bucket_path}'
 
         convert = image_util.convert_and_save(file.stream, image_category, bucket_path)

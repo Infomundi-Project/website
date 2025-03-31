@@ -1,9 +1,10 @@
 import uuid
+from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 
 from .extensions import db
-from .hashing_util import argon2_hash_text, argon2_verify_hash
+from .hashing_util import string_to_argon2_hash, argon2_verify_hash
 
 
 class Publisher(db.Model):
@@ -95,7 +96,7 @@ class User(db.Model, UserMixin):
     # Profile
     display_name = db.Column(db.String(40))
     profile_description = db.Column(db.String(1500))
-    avatar_url = db.Column(db.String(80))
+    avatar_url = db.Column(db.String(80), default='https://infomundi.net/static/img/avatar.webp')
     profile_banner_url = db.Column(db.String(80))
     profile_wallpaper_url = db.Column(db.String(80))
     level = db.Column(db.Integer, default=0)
@@ -104,7 +105,7 @@ class User(db.Model, UserMixin):
     # Account registration
     is_active = db.Column(db.Boolean, default=False)
     register_token = db.Column(db.LargeBinary(16))
-    register_token_timestamp = db.Column(db.DateTime)
+    register_token_timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Account Recovery
     in_recovery = db.Column(db.Boolean, default=False)
@@ -128,9 +129,12 @@ class User(db.Model, UserMixin):
     # Encryption
     derived_key_salt = db.Column(db.String(120))
 
+    @hybrid_property
+    def public_id(self):
+        return str(uuid.UUID(bytes=self.public_id))
 
-    def set_password(self, password):
-        self.password = argon2_hash_text(password)
+    def set_password(self, password: str):
+        self.password = string_to_argon2_hash(password)
 
 
     def check_password(self, password: str) -> bool:
@@ -146,12 +150,8 @@ class User(db.Model, UserMixin):
         return argon2_verify_hash(self.password, password)
 
 
-    def set_email(self, email):
-        self.email = argon2_hash_text(email)
-
-
     def get_id(self):
-        return str(self.user_id)
+        return str(self.id)
 
 
     def purge_totp(self):
@@ -189,8 +189,8 @@ class Friendship(db.Model):
     status = db.Column(db.String(10), nullable=False, default='pending')
     accepted_at = db.Column(db.DateTime)
 
-    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
-    friend_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'friend_id', name='unique_friendship'),)
 

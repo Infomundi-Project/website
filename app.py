@@ -100,11 +100,11 @@ def set_nonce():
 
 
 @app.before_request
-@cache.cached(timeout=300, key_prefix=current_user.user_id if (current_user and current_user.is_authenticated) else 'guest')
+@cache.cached(timeout=300, key_prefix=current_user.id if (current_user and current_user.is_authenticated) else 'guest')
 def check_session_version():
     # We check the session version every 5 minutes, to see if session is valid.
     if current_user.is_authenticated:
-        user = User.query.get(current_user.user_id)
+        user = User.query.get(current_user.id)
         
         session_version = session.get('session_version')
         if session_version and session_version != user.session_version:

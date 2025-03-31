@@ -14,7 +14,7 @@ api = Blueprint('api', __name__)
 
 
 def make_cache_key(*args, **kwargs):
-    user_id = current_user.user_id if current_user.is_authenticated else 'guest'
+    user_id = current_user.id if current_user.is_authenticated else 'guest'
     args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
     key = hashing_util.md5_hash_text(str(args_list))
     return key
@@ -40,7 +40,7 @@ def story_reaction(action):
 
     # Check if a reaction already exists for this story and user
     existing_reaction = models.StoryReaction.query.filter_by(
-        story_id=story_id, user_id=current_user.user_id).first()
+        story_id=story_id, user_id=current_user.id).first()
 
     # Initialize response flags
     is_liked = is_disliked = False
@@ -77,7 +77,7 @@ def story_reaction(action):
         # Create a new reaction
         new_reaction = models.StoryReaction(
             story_id=story_id,
-            user_id=current_user.user_id,
+            user_id=current_user.id,
             action=action
         )
         extensions.db.session.add(new_reaction)
@@ -139,7 +139,7 @@ def setup_totp():
 
     # Saves the TOTP information encrypted in the database
     current_user.totp_secret = security_util.encrypt(totp_secret, salt=key_salt, key=key_value)
-    current_user.totp_recovery = hashing_util.argon2_hash_text(totp_recovery_token)
+    current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
     extensions.db.session.commit()
 
     # There's no need to keep this info in the user's session
@@ -173,7 +173,7 @@ def get_friends():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
-    friends_list = friends_util.get_friends_list(current_user.user_id)
+    friends_list = friends_util.get_friends_list(current_user.id)
     total_friends = len(friends_list)
     online_friends = sum(1 for friend in friends_list if friend.is_online)
     paginated_friends = friends_list[(page - 1) * per_page: page * per_page]
@@ -181,7 +181,7 @@ def get_friends():
     friends_data = [{
         'username': friend.username,
         'display_name': friend.display_name,
-        'user_id': friend.user_id,
+        'user_id': friend.id,
         'avatar_url': friend.avatar_url,
         'level': friend.level,
         'is_online': friend.is_online,

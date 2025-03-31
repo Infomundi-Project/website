@@ -42,7 +42,7 @@ CREATE TABLE users (
     -- Profile
     display_name VARCHAR(40),
     profile_description VARCHAR(1500),
-    avatar_url VARCHAR(80),
+    avatar_url VARCHAR(80) DEFAULT 'https://infomundi.net/static/img/avatar.webp',
     profile_banner_url VARCHAR(80),
     profile_wallpaper_url VARCHAR(80),
     level INT DEFAULT 0,
@@ -51,7 +51,7 @@ CREATE TABLE users (
     -- Account Registration
     is_active TINYINT(1) DEFAULT 0,
     register_token BINARY(16),
-    register_token_timestamp DATETIME,
+    register_token_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     -- Account Recovery
     in_recovery TINYINT(1) DEFAULT 0,
