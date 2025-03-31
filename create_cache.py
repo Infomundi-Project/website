@@ -146,9 +146,6 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             else:
                 pubdate = story.updated
             
-            # Creates the url hashes
-            url_hash = hashing_util.string_to_md5_binary(story_url)
-
             # Tries to format pubdate
             story_pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
@@ -156,7 +153,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 'story_title': story_title,
                 'story_description': story_description,
                 'story_pubdate': story_pubdate,
-                'story_url_hash': url_hash,
+                'story_url_hash': hashing_util.string_to_md5_binary(story_url),
                 'story_url': story_url,
 
                 'publisher_id': publisher['id']
