@@ -264,7 +264,7 @@ def password_change():
     
     auth_util.change_password(user, new_password)
     
-    # ????????
+    # ???????
     if session.get('user_id', ''):
         del session['user_id']
 
