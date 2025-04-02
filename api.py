@@ -16,7 +16,7 @@ api = Blueprint('api', __name__)
 def make_cache_key(*args, **kwargs):
     user_id = current_user.id if current_user.is_authenticated else 'guest'
     args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
-    key = hashing_util.md5_hash_text(str(args_list))
+    key = hashing_util.string_to_md5_hex(str(args_list))
     return key
 
 

@@ -92,7 +92,7 @@ def string_to_sha512_hex(text: str) -> str:
         str: The resulting SHA-512 hash in hexadecimal format.
 
     Example:
-        >>> sha512_hash_text('hello world')
+        >>> string_to_sha512_hex('hello world')
         '570ea4d47019c5f953442981d994c7c936341de56cdda26dde54055b96e811c03464038a4178d514107244b632fa73c941075006c60dadc8d0cbb6ab15b599aa'
     """
     sha512 = hashlib.sha512()

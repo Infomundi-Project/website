@@ -305,7 +305,7 @@ def upload_image():
         # Checks file extension, mime type, image content and dimensions
         if not image_util.perform_all_checks(file.stream, file.filename):
             flash("We apologize, but the file you provided is invalid. Make sure the image isn't inappropriate and meets the minimum dimension requirements.", "error")
-            return redirect(url_for('views.user_redirect'))
+            return redirect(url_for('views.edit_user_avatar'))
     
         # Changes some variables depending on the image category
         if image_category == 'profile_picture':
@@ -321,11 +321,11 @@ def upload_image():
         convert = image_util.convert_and_save(file.stream, image_category, bucket_path)
         if not convert:
             flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
-            return redirect(url_for('views.user_redirect'))
-        
+            return redirect(url_for('views.edit_user_avatar'))
+
     extensions.db.session.commit()
     flash('Profile updated successfully! Please wait a few minutes for the changes to be applied.')
-    return redirect(url_for('views.user_redirect'))
+    return redirect(url_for('views.edit_user_avatar'))
 
 
 @views.route('/contact', methods=['GET', 'POST'])

@@ -9,6 +9,7 @@ from .custom_exceptions import InfomundiCustomException
 from .config import OPENAI_API_KEY
 from .immutable import USER_AGENTS
 
+
 def gpt_summarize(url: str) -> dict:
     """Summarize a news article from the provided URL and structure the response for integration with the JavaScript.
 
@@ -109,9 +110,9 @@ The output must strictly conform to this structure and contain valid JSON. All g
         return {"error": "An error occurred during summarization.", "details": str(e)}
 
 
-def is_inappropriate(text: str='', image_url: str='', image_stream: bytes=b'') -> bool:
+def is_inappropriate(text: str='', image_url: str='', image_stream=None) -> bool:
     if not text and not image_url and not image_stream:
-        raise InfomundiCustomException('You should supply text or image_url/image_stream or both.')
+        raise InfomundiCustomException('You should supply "text" or "image_url"/"image_stream" or both.')
 
     model_input = []
 
@@ -122,7 +123,10 @@ def is_inappropriate(text: str='', image_url: str='', image_stream: bytes=b'') -
         model_input.append({"type": "image_url", "image_url": {"url": image_url}})
 
     if image_stream:
-        image_b64 = base64.b64encode(image_stream).decode("utf-8")
+        image_stream.seek(0)  # Ensure we are at the start of the file
+        image_bytes = image_stream.read()  # Read file contents
+
+        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
         model_input.append({"type": "image_url", "image_url": {"url": f'data:image/jpeg;base64,{image_b64}'}})
 
     client = OpenAI(api_key=OPENAI_API_KEY)

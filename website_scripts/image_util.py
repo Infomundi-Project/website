@@ -29,7 +29,7 @@ def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: st
         dimensions: tuple
             A tuple containing dimensions to save the image with. Example 500 width x 333 height would be: (500, 333)
         
-        s3_object_key: str 
+        s3_object_key: str
             Where to save the file in the bucket. Example: 'users/5045a910.jpg'
 
     Return:
@@ -40,7 +40,7 @@ def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: st
 
     image = Image.open(image_stream)
 
-    # If the image is a profile picture, the image should be squared
+    # If the image is for the profile picture, it should be squared.
     if image_category == 'profile_picture':
         shortest_side = min(image.width, image.height)
         left = (image.width - shortest_side) / 2
@@ -59,13 +59,11 @@ def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: st
 
     output_buffer.seek(0)
 
-    # Tries to upload the buffer content to R2
     try:
         s3_client.upload_fileobj(output_buffer, config.BUCKET_NAME, s3_object_key)
     except Exception as e:
         return False
-        
-    # Close the buffer for God's sake
+    
     output_buffer.close()
     return True
 
@@ -100,8 +98,7 @@ def has_valid_mime_type(file_stream: bytes) -> bool:
 
 
 def has_allowed_dimensions(image_stream: bytes, min_width: int=200, min_height: int=200) -> bool:
-    """Checks if image dimension is in range. The image should not be bigger than 3000x3000 to
-    avoid pixel bomb DoS attack.
+    """Checks if image dimension is in range.
     
     Arguments
         image_stream (bytes): The image itself.
@@ -123,4 +120,4 @@ def has_allowed_dimensions(image_stream: bytes, min_width: int=200, min_height: 
 def perform_all_checks(image_stream: bytes, filename: str) -> bool:
     """Performs all checks to make sure the user-supplied image is safe"""
     return (is_extension_allowed(filename) and has_valid_mime_type(image_stream) \
-        and is_really_an_image(image_stream) and has_allowed_dimensions(image_stream) and not llm_util.is_inappropriate(image_stream))
+        and is_really_an_image(image_stream) and has_allowed_dimensions(image_stream) and not llm_util.is_inappropriate(image_stream=image_stream))
