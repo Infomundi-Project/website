@@ -254,7 +254,7 @@ def password_change():
     elif not input_sanitization.is_strong_password(new_password):
         message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
     elif models.CommonPasswords.query.get(new_password):
-        message = 'Your password is too common, please, make sure to create a unique one.'
+        message = 'Your password is too common, please, make sure to create a unique one'
     else:
         message = ''
 
