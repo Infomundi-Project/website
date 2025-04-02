@@ -148,7 +148,7 @@ CREATE TABLE story_stats (
     story_id INT PRIMARY KEY,
     
     dislikes INT DEFAULT 0,
-    clicks INT DEFAULT 0,
+    views INT DEFAULT 0,
     likes INT DEFAULT 0,
 
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE
@@ -167,12 +167,6 @@ CREATE TABLE friendships (
     CONSTRAINT unique_friendship UNIQUE (user_id, friend_id),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_friend FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-
-CREATE TABLE common_passwords (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    password VARCHAR(30) NOT NULL
 );
 
 

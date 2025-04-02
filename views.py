@@ -71,7 +71,7 @@ def handle_friends(friend_id, action):
 
 @views.route('/id/<user_id>', methods=['GET'])
 def user_profile_by_id(user_id):
-    user = models.User.query.get(user_id)
+    user = extensions.db.session.get(models.User, user_id)
     if not user:
         flash('User not found!', 'error')
         return redirect(url_for('views.user_redirect'))
@@ -309,15 +309,15 @@ def upload_image():
     
         # Changes some variables depending on the image category
         if image_category == 'profile_picture':
-            bucket_path = f'users/{current_user.id}.jpg'
+            bucket_path = f'users/{current_user.public_id}.jpg'
             current_user.avatar_url = f'https://bucket.infomundi.net/{bucket_path}'
         elif image_category == 'profile_banner':
-            bucket_path = f'banners/{current_user.id}.jpg'
+            bucket_path = f'banners/{current_user.public_id}.jpg'
             current_user.profile_banner_url = f'https://bucket.infomundi.net/{bucket_path}'
         else:
-            bucket_path = f'backgrounds/{current_user.id}.jpg'
+            bucket_path = f'backgrounds/{current_user.public_id}.jpg'
             current_user.profile_wallpaper_url = f'https://bucket.infomundi.net/{bucket_path}'
-
+    
         convert = image_util.convert_and_save(file.stream, image_category, bucket_path)
         if not convert:
             flash('We apologize, but something went wrong when saving your image. Please try again later.', 'error')
@@ -468,8 +468,7 @@ def comments():
         flash('We apologize, but the story ID you provided is not valid. Please try again.', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    # Check if story exists.
-    story = models.Story.query.get(news_id)
+    story = extensions.db.session.get(models.Story, news_id)
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(url_for('views.user_redirect'))

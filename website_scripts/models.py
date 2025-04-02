@@ -53,7 +53,7 @@ class Story(db.Model):
 
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)
-    stats = db.relationship('StoryStats', backref='story', lazy=True)
+    stats = db.relationship('StoryStats', backref='story', uselist=False, lazy='joined')
 
 
 class StoryReaction(db.Model):
@@ -61,7 +61,7 @@ class StoryReaction(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     
     story_id = db.Column(db.Integer, db.ForeignKey('stories.id'))
-    user_id = db.Column(db.LargeBinary(16), db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
@@ -74,7 +74,7 @@ class StoryStats(db.Model):
     story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'), primary_key=True)
 
     dislikes = db.Column(db.Integer, default=0)
-    clicks = db.Column(db.Integer, default=0)
+    views = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)
 
 
@@ -172,13 +172,6 @@ class User(db.Model, UserMixin):
 
         return self.is_online
     
-
-class CommonPasswords(db.Model):
-    __tablename__ = 'common_passwords'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(30), nullable=False)
-
 
 class Friendship(db.Model):
     __tablename__ = 'friendships'

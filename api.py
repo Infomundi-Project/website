@@ -15,35 +15,39 @@ api = Blueprint('api', __name__)
 
 def make_cache_key(*args, **kwargs):
     user_id = current_user.id if current_user.is_authenticated else 'guest'
-    args_list = [request.path, user_id] + sorted((key.lower(), value.lower()) for key, value in request.args.items())
-    key = hashing_util.string_to_md5_hex(str(args_list))
-    return key
+    args_list = [request.path, user_id] + sorted((key.lower(), value.lower())\
+        for key, value in request.args.items())
+
+    return hashing_util.string_to_md5_hex(str(args_list))
 
 
 @api.route('/story/<action>', methods=['POST'])
 @decorators.api_login_required
 def story_reaction(action):
-    # Validate the action
     if action not in ('like', 'dislike'):
-        return jsonify({"error": "Invalid action. Use 'like' or 'dislike'."}), 400
+        return jsonify({"error": "Invalid action."}), 400
 
-    # Get the story_id from the JSON body
-    data = request.get_json()
-    story_id = data.get('id')
-    if not story_id:
+    # We get the ID out of the request but it isn't the ID really, the url hash instead
+    url_hash = request.get_json().get('id')
+    if not url_hash:
         return jsonify({"error": "Story ID is required."}), 400
 
-    # Find the story
-    story = models.Story.query.get(story_id)
+    story = extensions.db.session.get(models.Story, url_hash)
     if not story:
         return jsonify({"error": "Story not found."}), 404
 
     # Check if a reaction already exists for this story and user
     existing_reaction = models.StoryReaction.query.filter_by(
-        story_id=story_id, user_id=current_user.id).first()
+        story_id=story.id, user_id=current_user.id).first()
 
     # Initialize response flags
     is_liked = is_disliked = False
+
+    story_stats = extensions.db.session.get(models.StoryStats, story.id)
+    if not story_stats:
+        story_stats = models.StoryStats(story_id=story.id, clicks=0, likes=0, dislikes=0)
+        extensions.db.session.add(story_stats)
+        extensions.db.session.commit()
 
     # If a reaction exists, update it; otherwise, create a new one
     if existing_reaction:
@@ -52,9 +56,9 @@ def story_reaction(action):
             extensions.db.session.delete(existing_reaction)
             
             if action == 'like':
-                story.likes -= 1
+                story.stats.likes -= 1
             elif action == 'dislike':
-                story.dislikes -= 1
+                story.stats.dislikes -= 1
             
             message = f"{action.capitalize()} removed"
         else:
@@ -62,12 +66,12 @@ def story_reaction(action):
             existing_reaction.action = action
             
             if action == 'like':
-                story.likes += 1
-                story.dislikes -= 1
+                story.stats.likes += 1
+                story.stats.dislikes -= 1
                 is_liked = True
             elif action == 'dislike':
-                story.dislikes += 1
-                story.likes -= 1
+                story.stats.dislikes += 1
+                story.stats.likes -= 1
                 is_disliked = True
 
             message = f"Reaction updated to {action}"
@@ -76,17 +80,17 @@ def story_reaction(action):
     else:
         # Create a new reaction
         new_reaction = models.StoryReaction(
-            story_id=story_id,
+            story_id=story.id,
             user_id=current_user.id,
             action=action
         )
         extensions.db.session.add(new_reaction)
 
         if action == 'like':
-            story.likes += 1
+            story.stats.likes += 1
             is_liked = True
         elif action == 'dislike':
-            story.dislikes += 1
+            story.stats.dislikes += 1
             is_disliked = True
 
         message = f"Story {action}d"
@@ -97,8 +101,8 @@ def story_reaction(action):
     return jsonify({
         "message": message,
         "is_liked": is_liked,
-        "likes": story.likes,
-        "dislikes": story.dislikes,
+        "likes": story.stats.likes,
+        "dislikes": story.stats.dislikes,
         "is_disliked": is_disliked
     }), 201 if not existing_reaction else 200
 
@@ -181,7 +185,7 @@ def get_friends():
     friends_data = [{
         'username': friend.username,
         'display_name': friend.display_name,
-        'user_id': friend.id,
+        'user_id': friend.public_id,
         'avatar_url': friend.avatar_url,
         'level': friend.level,
         'is_online': friend.is_online,
@@ -200,7 +204,7 @@ def get_friends():
 
 @api.route('/user/<user_id>/status', methods=['GET'])
 def get_user_status(user_id):
-    user = models.User.query.get(user_id)
+    user = extensions.db.session.get(models.User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
@@ -221,7 +225,7 @@ def update_user_status():
     current_user.last_activity = datetime.utcnow()
     
     extensions.db.session.commit()
-    return jsonify({'message': 'Status updated successfully'})
+    return jsonify({'message': 'Success!'})
 
 
 @api.route('/get_country_code', methods=['GET'])
@@ -294,7 +298,7 @@ def search():
 @api.route('/story/summarize/<story_id>', methods=['GET'])
 @extensions.limiter.limit("120/day;60/hour;10/minute", override_defaults=True)
 def summarize_story(story_id):
-    story = models.Story.query.get(story_id)
+    story = extensions.db.session.get(models.Story, story_id)
     if story.gpt_summary:
         return jsonify({'response': story.gpt_summary}), 200
 
@@ -328,7 +332,7 @@ def get_stories():
     if not scripts.is_valid_category(category_name):
         return jsonify({'error': 'This category is not yet supported!'}), 501
 
-    valid_order_columns = ('created_at', 'clicks', 'title', 'pub_date')
+    valid_order_columns = ('created_at', 'views', 'title', 'pub_date')
     if order_by not in valid_order_columns:
         order_by = 'created_at'
 
@@ -341,11 +345,11 @@ def get_stories():
     if not (1 <= page <= 9999):
         page = 1
 
-    category_id = models.Category.query.filter_by(name=category_name).first()
+    category = models.Category.query.filter_by(name=category_name).first()
 
     # Basic filtering. Category id should match and story should have image.
     query_filters = [
-        models.Story.category_id == category_id.id,
+        models.Story.category_id == category.id,
         models.Story.has_image == True
     ]
 
@@ -384,22 +388,22 @@ def get_stories():
 
     stories_list = [
         {
-            'story_id': story.id,
+            'story_id': hashing_util.binary_to_md5_hex(story.url_hash),
             'title': story.title,
             'description': story.description,
-            # DEBUG 
-            'clicks': 0,
-            'likes': 0,
-            'dislikes': 0,
+            
+            'views': story.stats.views if story.stats else 0,
+            'likes': story.stats.likes if story.stats else 0,
+            'dislikes': story.stats.dislikes if story.stats else 0,
 
-            'link': story.url,
+            'url': story.url,
             'pub_date': story.pub_date,
             'publisher': {
                 'name': input_sanitization.clean_publisher_name(story.publisher.name),
-                'link': story.publisher.url,
-                'favicon': story.publisher.favicon_url
+                'url': story.publisher.url,
+                'favicon_url': story.publisher.favicon_url
             },
-            'media_content_url': story.image_url,
+            'image_url': story.image_url,
         }
         for story in stories
     ]

@@ -90,7 +90,7 @@ login_manager.login_view = 'auth.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return db.session.get(User, user_id)
 
 
 @app.before_request
@@ -104,7 +104,7 @@ def set_nonce():
 def check_session_version():
     # We check the session version every 5 minutes, to see if session is valid.
     if current_user.is_authenticated:
-        user = User.query.get(current_user.id)
+        user = db.session.get(User, current_user.id)
         
         session_version = session.get('session_version')
         if session_version and session_version != user.session_version:

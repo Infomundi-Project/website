@@ -56,7 +56,7 @@ def totp():
     if not session.get('in_totp_process', ''):
         abort(404)
 
-    user = models.User.query.get(session['user_id'])
+    user = extensions.db.session.get(models.User, session['user_id'])
     if request.method == 'GET':
         return render_template('twofactor.html', user=user)
     
@@ -238,7 +238,7 @@ def password_change():
     if not session.get('user_id', ''):
         return abort(404)
 
-    user = models.User.query.get(session['user_id'])
+    user = extensions.db.session.get(models.User, session['user_id'])
     if not user.in_recovery:
         return abort(404)
 
@@ -253,8 +253,6 @@ def password_change():
         message = 'Passwords must match!'
     elif not input_sanitization.is_strong_password(new_password):
         message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
-    elif models.CommonPasswords.query.get(new_password):
-        message = 'Your password is too common, please, make sure to create a unique one'
     else:
         message = ''
 

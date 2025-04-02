@@ -302,14 +302,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Update modal content
           modalTitle.textContent = storyData.title;
-          modalImage.src = storyData.media_content_url;
+          modalImage.src = storyData.image_url;
           // Set the story description and link dynamically
           modalDescription.textContent = storyData.description || "No description available.";
 
           // Update the link to the original story
           const originalStoryLink = modalElement.querySelector("#originalStoryLink");
-          if (storyData.link) {
-            originalStoryLink.href = storyData.link;
+          if (storyData.url) {
+            originalStoryLink.href = storyData.url;
             originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>Access the original story`;
             originalStoryLink.style.display = "inline";
           } else {
@@ -371,7 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Update published date and view count
           modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar me-2"></i>${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
-          modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.clicks}&nbsp;views`;
+          modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
 
           // Initialize comments section for the selected story
           initializeComments(storyData.story_id, storyData.language);
@@ -670,10 +670,10 @@ document.addEventListener("DOMContentLoaded", function () {
     imgTag.alt = item.title;
     imgTag.style = 'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
     if (index < 3) {
-      imgTag.src = item.media_content_url;
+      imgTag.src = item.image_url;
       imgTag.setAttribute('fetchpriority', 'high');
     } else {
-      imgTag.setAttribute('data-src', item.media_content_url);
+      imgTag.setAttribute('data-src', item.image_url);
       imgTag.classList.add('lazyload');
     }
     imageLink.appendChild(imgTag);
@@ -684,9 +684,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const tipLogoImg = document.createElement('div');
     tipLogoImg.innerHTML = `
-        <a href="${item.publisher.link}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
-          ${item.publisher.favicon ? 
-            `<img src="${item.publisher.favicon}" class="rounded" alt="${item.publisher.name} favicon image" width="30">` : 
+        <a href="${item.publisher.url}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
+          ${item.publisher.favicon_url ? 
+            `<img src="${item.publisher.favicon_url}" class="rounded" alt="${item.publisher.name} favicon image" width="30">` : 
             `<i class="fa-solid fa-rss"></i>`
           }
         </a>
@@ -719,7 +719,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const dateSpan = document.createElement('span');
     dateSpan.classList.add('text-muted', 'fw-bold', 'small');
-    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.clicks}&nbsp;views`;
+    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.views}&nbsp;views`;
 
     colLeft.appendChild(dateSpan);
 
