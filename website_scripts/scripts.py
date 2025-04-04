@@ -351,17 +351,6 @@ def string_similarity(s1: str, s2: str) -> float:
     return matcher.ratio() * 100
 
 
-#@extensions.cache.memoize(timeout=60*60*12) # 12 hours
-def is_valid_category(category: str) -> bool:
-    """Takes a category and checks if it is a valid category based on existing JSON files."""
-    categories = [x.name for x in extensions.db.session.query(models.Category).all()]
-    
-    if category not in categories:
-        return False
-    
-    return True
-
-
 @extensions.cache.memoize(timeout=60*60*12) # 12 hours
 def country_code_to_name(cca2: str) -> str:
     countries = config.COUNTRY_LIST

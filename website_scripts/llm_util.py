@@ -26,7 +26,7 @@ def gpt_summarize(url: str) -> dict:
 
     try:
         # Fetch the article content
-        r = get_request(url, headers={'User-Agent': random_choice(USER_AGENTS)})
+        r = get_request(url, timeout=5, headers={'User-Agent': random_choice(USER_AGENTS)})
         if r.status_code not in (200, 301, 302):
             return {"error": "Failed to fetch the article. Invalid status code."}
 
@@ -87,7 +87,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
                     "content": (
                         "You are a helpful and comprehensive assistant designed to output in JSON format. "
                         "Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
-                        f"into the respective topics. Ensure that the output, including json keys, is in the same language as the one in the news article and adheres "
+                        "into the respective topics. Ensure that the output, including json keys, is in the same language as the one in the news article and adheres "
                         "to a valid JSON structure, with clear separation between keys and their corresponding textual content."
                     )
                 },

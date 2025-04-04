@@ -228,12 +228,10 @@ The Infomundi Team
 def user_redirect():
     target_url = request.headers.get('Referer', '')
 
-    if target_url == 'https://infomundi.net/redirect':
-        return redirect('https://infomundi.net/')
-    elif not input_sanitization.is_safe_url(target_url):
+    if target_url == 'https://infomundi.net/redirect' or not input_sanitization.is_safe_url(target_url):
         return redirect(url_for('views.home'))
-    else:
-        return redirect(target_url)
+
+    return redirect(target_url)
 
 
 @views.route('/be-right-back', methods=['GET'])
@@ -304,7 +302,7 @@ def upload_image():
         
         # Checks file extension, mime type, image content and dimensions
         if not image_util.perform_all_checks(file.stream, file.filename):
-            flash("We apologize, but the file you provided is invalid. Make sure the image isn't inappropriate and meets the minimum dimension requirements.", "error")
+            flash("We apologize, but the file you provided is invalid.", "error")
             return redirect(url_for('views.edit_user_avatar'))
     
         # Changes some variables depending on the image category
@@ -461,14 +459,14 @@ def news():
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    news_id = request.args.get('id', '').lower()
+    story_id = request.args.get('id', '').lower()
     
     # Check if has the length of a md5 hash
-    if not input_sanitization.is_md5_hash(news_id):
+    if not input_sanitization.is_md5_hash(story_id):
         flash('We apologize, but the story ID you provided is not valid. Please try again.', 'error')
         return redirect(url_for('views.user_redirect'))
 
-    story = extensions.db.session.get(models.Story, news_id)
+    story = extensions.db.session.get(models.Story, story_id)
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(url_for('views.user_redirect'))
@@ -482,8 +480,7 @@ def comments():
             header = key.replace('_', ' ').title()
             formatted_gpt_summary.append({'header': header, 'paragraph': value})
 
-    # Add a click to the story.
-    if story.clicks == None:
+    if not story.clicks:
         story.clicks = 1
     else:
         story.clicks += 1
@@ -492,10 +489,10 @@ def comments():
     extensions.db.session.commit()
     
     # Set session information, used in templates.
-    session['last_visited_news'] = f'comments?id={news_id}'
+    session['last_visited_news'] = f'comments?id={story_id}'
     
     # Used in the api.
-    session['visited_news'] = news_id
+    session['visited_news'] = story_id
     
     # Create the SEO data. Title should be 60 characters, description should be 150 characters
     seo_title = input_sanitization.gentle_cut_text(45, story.title)

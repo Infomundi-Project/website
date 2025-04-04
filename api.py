@@ -1,12 +1,12 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
-from sqlalchemy import or_, and_, cast, func
-from datetime import datetime, timedelta
+from sqlalchemy import and_, cast, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
+from datetime import datetime
 from random import shuffle
 
-from website_scripts import config, json_util, scripts, notifications,\
+from website_scripts import config, json_util, scripts,\
     models, extensions, immutable, input_sanitization, friends_util, \
     country_util, totp_util, security_util, hashing_util, llm_util, decorators
 
@@ -328,8 +328,8 @@ def get_stories():
     query = request.args.get('query', '', type=str)
 
     # br_general, us_general and so on
-    category_name = f'{country}_{category}'
-    if not scripts.is_valid_category(category_name):
+    category = models.Category.query.filter_by(name=f'{country}_{category}').first()
+    if not category:
         return jsonify({'error': 'This category is not yet supported!'}), 501
 
     valid_order_columns = ('created_at', 'views', 'title', 'pub_date')
@@ -345,21 +345,17 @@ def get_stories():
     if not (1 <= page <= 9999):
         page = 1
 
-    category = models.Category.query.filter_by(name=category_name).first()
-
     # Basic filtering. Category id should match and story should have image.
     query_filters = [
         models.Story.category_id == category.id,
-        models.Story.has_image == True
+        models.Story.has_image
     ]
 
-    # Filter by search query
-    if query:
-        query_filters.append(
-            func.match(models.Story.title, models.Story.description, query)
-        )
+    #if query:
+    #    query_filters.append(
+    #        func.match(models.Story.title, models.Story.description, query)
+    #    )
 
-    # Filter by date range
     if start_date and end_date:
         start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -407,7 +403,6 @@ def get_stories():
         }
         for story in stories
     ]
-    shuffle(stories_list)
     return jsonify(stories_list)
 
 

@@ -1,17 +1,16 @@
-from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, redirect, url_for, Blueprint, Response, jsonify
-from flask_login import LoginManager, current_user, logout_user
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, url_for, Blueprint, Response, jsonify
+from flask_login import current_user, logout_user
 from flask_assets import Environment, Bundle
 from htmlmin import minify as html_minify
-from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from os import path as os_path
 
-from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING, SECRET_KEY, MYSQL_HOST, MYSQL_DATABASE, REDIS_HOST, REDIS_PORT, REDIS_DATABASE
+from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING,\
+ SECRET_KEY, MYSQL_HOST, MYSQL_DATABASE, REDIS_HOST, REDIS_PORT, REDIS_DATABASE
 from website_scripts.extensions import db, login_manager, cache, oauth, limiter
 from website_scripts.input_sanitization import is_safe_url
 from website_scripts.security_util import generate_nonce
-from website_scripts.decorators import admin_required
 from website_scripts.qol_util import is_mobile
 from website_scripts.models import User
 
@@ -120,8 +119,7 @@ def check_session_version():
 @app.after_request
 def add_headers(response):
     nonce = g.get('nonce', '')
-
-    # https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://commento.infomundi.net https://static.cloudflareinsights.com https://translate-pa.googleapis.com https://translate.googleapis.com https://challenges.cloudflare.com https://ajax.cloudflare.com https://kit.fontawesome.com https://translate.google.com; 
+ 
     # Sets the CSP header to include the nonce
     response.headers['Content-Security-Policy'] = (
         "default-src 'self' https://*.infomundi.net; "
@@ -161,7 +159,11 @@ css_base = Bundle(
     output='gen/base_packed.css')
 # base.html
 js_base = Bundle(
-    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js', 'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js', 'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js', 'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js', 'js/captchaWaitSubmit.js', 'js/renderFriendsModal.js',
+    'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js',
+    'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js',
+    'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js',
+    'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js',
+    'js/captchaWaitSubmit.js', 'js/renderFriendsModal.js',
     filters='jsmin', 
     output='gen/base_packed.js')
 # homepage.html

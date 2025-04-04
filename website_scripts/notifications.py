@@ -1,5 +1,5 @@
-import requests
 from email.mime.multipart import MIMEMultipart
+from requests import post as post_request
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from smtplib import SMTP
@@ -22,15 +22,15 @@ def post_webhook(data: dict) -> bool:
     """
 
     try:
-        response = requests.post(config.WEBHOOK_URL, json=data)
+        response = post_request(config.WEBHOOK_URL, timeout=3, json=data)
         response.raise_for_status()
-    except Exception as err:
+    except Exception:
         return False
 
     return True
 
 
-def send_email(recipient_email: str, subject: str, body: str, reply_to: str='noreply@infomundi.net', from_email: str='Infomundi <noreply@infomundi.net>') -> bool:
+def send_email(recipient_email: str, subject: str, body: str, reply_to: str = 'noreply@infomundi.net', from_email: str = 'Infomundi <noreply@infomundi.net>') -> bool:
     """Takes the recipient email, the subject and the body of the email and sends it.
     
     Arguments:
@@ -66,7 +66,7 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str='nor
 
             # Send the email
             server.sendmail(config.SMTP_USERNAME, recipient_email, message.as_string())
-    except Exception as e:
+    except Exception:
         return False
 
     return True

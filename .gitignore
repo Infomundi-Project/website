@@ -10,7 +10,6 @@ local/
 cache/
 users/
 logs/
-gen/
 gdp_per_capita.json
 currencies.json
 infomundi.wsgi

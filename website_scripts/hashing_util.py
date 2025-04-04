@@ -112,13 +112,13 @@ def sha512_verify_hash(text: str, hash_value: str) -> bool:
         bool: True if the text matches the hash, False otherwise.
 
     Example:
-        >>> hash_value = sha512_hash_text('hello world')
+        >>> hash_value = string_to_sha512_hex('hello world')
         >>> verify_sha512_hash('hello world', hash_value)
         True
         >>> verify_sha512_hash('hello', hash_value)
         False
     """
-    return sha512_hash_text(text) == hash_value
+    return string_to_sha512_hex(text) == hash_value
 
 
 def binary_to_md5_hex(binary_data: bytes) -> str:
@@ -140,7 +140,7 @@ def md5_binary_to_string(binary_data: bytes) -> str:
         >>> print(md5_binary_to_string(binary_md5))
         52df1db4ad8b6c8a1c98e92b3ea1aada
     """
-    return hashlib.md5(binary_data).hexdigest()
+    return hashlib.md5(binary_data, usedforsecurity=False).hexdigest()
 
 
 def md5_hex_to_binary(md5_hex: str) -> bytes:
@@ -160,7 +160,7 @@ def string_to_md5_binary(input_string: str) -> bytes:
         >>> print(string_to_md5_binary("hello"))
         b']A@\\x02\\xab\\xc4\\xb2\\xa7k\\x97\\x19\\xd9\\x11\\x01|Y'
     """
-    return hashlib.md5(input_string.encode()).digest()
+    return hashlib.md5(input_string.encode(), usedforsecurity=False).digest()
 
 
 def string_to_md5_hex(input_string: str) -> str:
@@ -170,7 +170,7 @@ def string_to_md5_hex(input_string: str) -> str:
         >>> print(string_to_md5_hex("hello"))  
         5d41402abc4b2a76b9719d911017c592
     """
-    return hashlib.md5(input_string.encode()).hexdigest()
+    return hashlib.md5(input_string.encode(), usedforsecurity=False).hexdigest()
 
 
 

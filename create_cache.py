@@ -4,11 +4,8 @@ import pymysql
 
 from requests import get as get_request
 from random import shuffle, choice
-from unidecode import unidecode
-from bs4 import BeautifulSoup
 from datetime import datetime
 from feedparser import parse
-from sys import exit
 
 from website_scripts import config, input_sanitization, immutable, hashing_util
 
@@ -126,8 +123,10 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
         for story in feed.entries:
             # Sanitizes input
-            story_title = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.get('title', f'No title was provided').strip()))
-            story_description = input_sanitization.sanitize_html(input_sanitization.decode_html_entities(story.get('description', 'No description was provided').strip()))
+            story_title = input_sanitization.sanitize_html(
+                input_sanitization.decode_html_entities(story.get('title', 'No title was provided').strip()))
+            story_description = input_sanitization.sanitize_html(
+                input_sanitization.decode_html_entities(story.get('description', 'No description was provided').strip()))
             
             # Gentle cuts text
             story_title = input_sanitization.gentle_cut_text(120, story_title)

@@ -14,12 +14,12 @@ def is_valid_captcha(token: str) -> bool:
     Returns:
         bool: True if CAPTCHA is valid, otherwise False.
     """
-    
     if not token:
         return False
 
     response = post_request(
         url="https://challenges.cloudflare.com/turnstile/v0/siteverify", 
+        timeout=3,
         data={'secret': CAPTCHA_SECRET_KEY, 'response': token}
     )
 

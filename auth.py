@@ -24,7 +24,7 @@ def login():
 
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '')
-    session['remember_me'] = bool(request.form.get('remember_me', ''))
+    session['remember_me'] = request.form.get('remember_me', '') == 'yes'
 
     # To avoid making unecessary queries to the database, first check to see if the credentials match our sandards
     if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):

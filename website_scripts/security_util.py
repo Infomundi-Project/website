@@ -1,21 +1,14 @@
 import secrets
 import uuid
 import base64
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-
-from .custom_exceptions import InfomundiCustomException
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
 def generate_2fa_token() -> str:
     code = ''
     for _ in range(6):
         code += str(secrets.randbelow(10))
-    
     return code
 
 
@@ -35,7 +28,7 @@ def convert_uuid_string_to_bytes(uuid_string: str) -> bytes:
     return uuid.UUID(uuid_string).bytes
 
 
-def generate_nonce(length: int=32, limit: int=0) -> str:
+def generate_nonce(length: int = 32, limit: int=0) -> str:
     """Creates a secure random sequence of URL-safe characters provided by the 'secrets' library. Used to generate safe random values.
 
     Arguments
@@ -61,83 +54,80 @@ def generate_nonce(length: int=32, limit: int=0) -> str:
     return secrets.token_urlsafe(length)
 
 
-def derive_key(secret: str, initial_salt: str = ''):
-    # Decodes the base64-encoded salt if provided, otherwise generates a new one
-    if initial_salt:
-        salt = base64.b64decode(initial_salt.encode('utf-8'))
-    else:
-        salt = secrets.token_bytes(16)  # Generate a random salt
+def derive_key(password: str, salt: bytes, length: int = 32) -> bytes:
+    """
+    Derives a symmetric encryption key from a cleartext password using the Scrypt key derivation function.
 
-    # Derive a key using Scrypt key derivation function
+    Args:
+        password (str): The user's password or secret.
+        salt (bytes): A random salt used to ensure key uniqueness.
+        length (int): Desired length of the derived key in bytes. Default is 32 bytes (256 bits).
+
+    Returns:
+        bytes: A derived cryptographic key suitable for use with AES.
+    """
     kdf = Scrypt(
         salt=salt,
-        length=32,
+        length=length,
         n=2**14,
         r=8,
         p=1,
-        backend=default_backend()
     )
-    key = kdf.derive(secret.encode())  # Derive the key from the secret (binary)
-
-    # Return salt and key both base64-encoded (if new salt is generated)
-    if not initial_salt:
-        return base64.b64encode(salt).decode('utf-8'), base64.b64encode(key).decode('utf-8')
-    
-    # Return only the key as base64-encoded if salt was provided
-    return base64.b64encode(key).decode('utf-8')
+    return kdf.derive(password.encode())
 
 
-def encrypt(plaintext: str, secret: str = '', salt: str = '', key: str = '') -> str:
-    if not key and secret:
-        # If key is not provided, derive it along with salt
-        salt, key = derive_key(secret)
-    elif salt and key:
-        # If salt and key are provided, decode them from base64
-        salt = base64.b64decode(salt.encode('utf-8'))
-        key = base64.b64decode(key.encode('utf-8'))
-    else:
-        raise InfomundiCustomException('Either the secret or both the salt and key must be provided')
+def encrypt(plaintext: str, password: str) -> str:
+    """
+    Encrypts plaintext using AES-GCM with a key derived from the user's password.
 
-    # Generate a random IV (initialization vector)
-    iv = secrets.token_bytes(16)
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    encryptor = cipher.encryptor()
+    A new random salt and nonce are generated for each encryption operation.
+    The output is a Base64-encoded string containing salt + nonce + ciphertext.
 
-    # Padding plaintext to be a multiple of block size
-    padder = padding.PKCS7(128).padder()
-    padded_data = padder.update(plaintext.encode()) + padder.finalize()
+    Args:
+        plaintext (str): The plaintext message to encrypt.
+        password (str): The password from which the encryption key will be derived.
 
-    # Encrypt the padded data
-    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+    Returns:
+        str: Base64-encoded encrypted data including the salt, nonce, and ciphertext.
+    """
+    salt = secrets.token_bytes(16)  # Unique salt per encryption
+    key = derive_key(password, salt)
 
-    # Combine salt, IV, and ciphertext, then encode them into Base64 string
-    encrypted_data = base64.b64encode(salt + iv + ciphertext).decode('utf-8')
-    return encrypted_data
+    aesgcm = AESGCM(key)
+    nonce = secrets.token_bytes(12)  # Recommended nonce size for GCM
+    ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)
+
+    encrypted_blob = base64.b64encode(salt + nonce + ciphertext).decode()
+    return encrypted_blob
 
 
-def decrypt(encrypted_data: str, initial_key: str = '', secret: str = '') -> str:
-    encrypted_data = base64.b64decode(encrypted_data.encode('utf-8'))
+def decrypt(encrypted_blob: str, password: str) -> str:
+    """
+    Decrypts AES-GCM encrypted data using the password from which the key was derived.
 
-    # Extract salt, IV, and ciphertext from the encrypted data
-    salt = encrypted_data[:16]
-    iv = encrypted_data[16:32]
-    ciphertext = encrypted_data[32:]
+    Automatically extracts the salt and nonce from the encrypted blob to recreate the key.
 
-    # If the key is not provided, derive it from the secret and salt
-    if not initial_key:
-        if not secret:
-            raise InfomundiCustomException('If no key is provided, the original secret is required')
-        key = derive_key(secret, base64.b64encode(salt).decode('utf-8'))
-    else:
-        key = base64.b64decode(initial_key.encode('utf-8'))
+    Args:
+        encrypted_blob (str): Base64-encoded data containing salt + nonce + ciphertext.
+        password (str): The password originally used to encrypt the data.
 
-    # Decrypt the data using the derived key and IV
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    decryptor = cipher.decryptor()
+    Returns:
+        str: The decrypted plaintext message.
 
-    # Decrypt and remove padding
-    padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-    unpadder = padding.PKCS7(128).unpadder()
-    plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+    Raises:
+        ValueError: If the decryption fails due to an incorrect password or tampered data.
+    """
+    decoded = base64.b64decode(encrypted_blob)
+    salt = decoded[:16]
+    nonce = decoded[16:28]
+    ciphertext = decoded[28:]
+
+    key = derive_key(password, salt)
+    aesgcm = AESGCM(key)
+
+    try:
+        plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+    except Exception:
+        raise ValueError("Decryption failed: invalid password or corrupted data")
 
     return plaintext.decode()
