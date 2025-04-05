@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-from website_scripts.input_sanitization import decode_html_entities, clean_publisher_name, sanitize_description, sanitize_html, sanitize_text, sanitize_username, is_valid_email, is_valid_url, close_open_html_tags, is_safe_url
+from website_scripts.input_sanitization import *
 
 
 @pytest.mark.parametrize("input_text, expected", [

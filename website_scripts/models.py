@@ -1,10 +1,9 @@
-import uuid
-from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 
 from .extensions import db
 from .hashing_util import string_to_argon2_hash, argon2_verify_hash
+from .security_util import uuid_bytes_to_string
 
 
 class Publisher(db.Model):
@@ -81,11 +80,12 @@ class StoryStats(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    public_id = db.Column(db.LargeBinary(16), unique=True, default=lambda: uuid.uuid4().bytes)
+    public_id = db.Column(db.LargeBinary(16), nullable=False, unique=True)
     
-    # Really important stuff
+    # User Account Data
     username = db.Column(db.String(25), nullable=False, unique=True)
-    hashed_email = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 hash
+    email_fingerprint = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 + HMAC
+    email_encrypted = db.Column(db.LargeBinary(120), nullable=False) # AES-GCM
 
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
@@ -103,7 +103,7 @@ class User(db.Model, UserMixin):
     level_progress = db.Column(db.Integer, default=0)
 
     # Account registration
-    is_active = db.Column(db.Boolean, default=False)
+    is_enabled = db.Column(db.Boolean, default=False)
     register_token = db.Column(db.LargeBinary(16))
     register_token_timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
@@ -126,12 +126,18 @@ class User(db.Model, UserMixin):
     mail_twofactor = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
-    # Encryption
-    derived_key_salt = db.Column(db.String(120))
 
-    @hybrid_property
-    def public_id(self):
-        return str(uuid.UUID(bytes=self.public_id))
+    def enable(self):
+        self.is_enabled = True
+        self.register_token = None
+        self.register_token_timestamp = None
+        db.session.commit()
+
+
+    def disable(self):
+        self.is_enabled = False
+        db.session.commit()
+
 
     def set_password(self, password: str):
         self.password = string_to_argon2_hash(password)
@@ -154,13 +160,14 @@ class User(db.Model, UserMixin):
         return str(self.id)
 
 
+    def get_public_id(self):
+        return uuid_bytes_to_string(self.public_id)
+
+
     def purge_totp(self):
         self.totp_secret = None
         self.totp_recovery = None
-
-
-    def purge_key(self):
-        self.derived_key_salt = None
+        db.session.commit()
 
 
     def check_is_online(self):
@@ -226,14 +233,6 @@ class Crypto(db.Model):
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     data = db.Column(db.JSON, nullable=False)
-
-
-class GlobalSalts(db.Model):
-    __tablename__ = 'global_salts'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    salt = db.Column(db.String(64), nullable=False)
 
 
 class Region(db.Model):

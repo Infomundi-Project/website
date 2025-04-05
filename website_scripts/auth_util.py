@@ -8,39 +8,12 @@ from . import models, notifications, extensions, friends_util, security_util, ha
 
 
 def search_user_email_in_database(email: str):
-    # Gets all salts from the database
-    salts = models.GlobalSalts.query.all()
-    # We try every salt to see if there's a match in the database
-    for salt in salts:
-        salted_email = salt.salt + email
-        hashed_email = hashing_util.string_to_sha256_binary(salted_email)
-        
-        user = models.User.query.filter_by(hashed_email=hashed_email).first()
-        # If the user is found, there's no need to continue in the loop
-        if user:
-            break
-    else:
-        return None
-
-    return user
-
-
-def hash_user_email_using_salt(email: str) -> bytes:
-    """Grabs a random salt from the database and hashes the salted email address with SHA-256."""
-    salts = [salt.salt for salt in models.GlobalSalts.query.all()]
-
-    shuffle(salts)
-    salted_email = salts[0] + email
-
-    return hashing_util.string_to_sha256_binary(salted_email)
-
-
-def search_username_in_database(username: str):
-    return models.User.query.filter_by(username=username).first()
+    return models.User.query.filter_by(
+        email_fingerprint=hashing_util.generate_hmac_signature(email, as_bytes=True)
+        ).first()
 
 
 def perform_login_actions(user, cleartext_email: str):
-    # Save the timestamp of the last login
     user.last_login = datetime.now()
 
     login_user(user, remember=session.get('remember_me', True))
@@ -126,71 +99,45 @@ The Infomundi Team"""
     logout_user()
 
 
-def configure_key(user, cleartext_password, cleartext_email: str = ''):
-    """
-    Here's the deal, when the user creates an account through Google, we don't know their cleartext password, ever.
-    However, we still need to encrypt the TOTP secret if the user choses to enable 2FA authentication via TOTP. To make this work,
-    we can use the user's cleartext email address, it's better than nothing, as the email itself is stored in hash format in
-    the database.
-
-    We check to see if the user has a salt associated with their account, if they do, we generate their key and simply return. If they do not,
-    we call the derive_key function without specifying the salt. This way, we'll get a random salt generated and the user's derived key based on
-    the details (cleartext_password or cleartext_email) that we passed along. The salt is associated with the user and saved to the database, and we
-    return the derived key as usual.
-
-    Arguments:
-        user (UserMixin): The user, so we can change/read value for them in the database
-        cleartext_password (str): User's cleartext password
-        cleartext_email (str): Optional. User's cleartext email.
-
-    Returns:
-        str: The user's key
-    """
-    if user.derived_key_salt:
-        return security_util.derive_key(cleartext_email if cleartext_email else cleartext_password, user.derived_key_salt)
-
-    # Return key salt and key value as the salt wasn't specified!
-    key_salt, key_value = security_util.derive_key(cleartext_email if cleartext_email else cleartext_password)
-    user.derived_key_salt = key_salt
-    extensions.db.session.commit()
-    
-    return key_value
-
-
-def handle_register_token(email: str, hashed_email: bytes, username: str, hashed_password: str) -> bool:
+def handle_register_token(email: str, username: str, password: str) -> bool:
     """Generates a verification token, stores in the database and 
     uses notifications.send_email to send the verification token to the user.
 
     Arguments:
-        email (str): User's cleartext email address.
-        hashed_email (bytes): User's sha256 hashed email.
+        email (str): User's email address.
         username (str): User's username.
-        hashed_password (str): User's argon2 hashed password.
+        password (str): User's password.
 
     Returns:
-        bool: False if there's a token associated with the email or if we couldn't get to send the email. Otherwise True.
+        bool
     """
-    user_lookup = models.User.query.filter(or_(
-        models.User.hashed_email == hashed_email,
+    email_encrypted = security_util.encrypt(email)
+    email_fingerprint = hashing_util.generate_hmac_signature(email, as_bytes=True)
+    
+    user = models.User.query.filter(or_(
+        models.User.email_fingerprint == email_fingerprint,
         models.User.username == username
     )).first()
-    
-    # There's a token already issued or an already existing user.
-    if user_lookup:
-        created_at = datetime.fromisoformat(user_lookup.register_token_timestamp.isoformat())
-        if qol_util.is_date_within_threshold_minutes(created_at, 30):
-            return False
-        
-        extensions.db.session.delete(user_lookup)
-        extensions.db.session.commit()
 
-    uuid_token = security_util.generate_uuid_string()
+    if user:
+        # If the user is already enabled, we can't proceed.
+        if user.is_enabled:
+            return False
+
+        # If the user is not enabled, but the token is expired, we delete the entry.
+        created_at = datetime.fromisoformat(user.register_token_timestamp.isoformat())
+        if not qol_util.is_date_within_threshold_minutes(created_at, 30):
+            extensions.db.session.delete(user)
+            extensions.db.session.commit()
+            return False
+
+    register_token = security_util.generate_uuid_string()
 
     message = f"""Hello, {username}.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
-https://infomundi.net/auth/verify?token={uuid_token}
+https://infomundi.net/auth/verify?token={register_token}
 
 We're looking forward to seeing you explore our platform!
 
@@ -202,8 +149,14 @@ The Infomundi Team"""
     # If we can send the email, save user to the database
     result = notifications.send_email(email, subject, message)
     if result:
-        new_user = models.User(hashed_email=hashed_email, username=username, 
-            register_token=security_util.convert_uuid_string_to_bytes(uuid_token), password=hashed_password)
+        new_user = models.User(
+            email_encrypted=email_encrypted, 
+            email_fingerprint=email_fingerprint,
+            username=username, 
+            password=hashing_util.string_to_argon2_hash(password),
+            register_token=security_util.uuid_string_to_bytes(register_token),
+            public_id=security_util.generate_uuid_bytes()
+            )
         extensions.db.session.add(new_user)
         extensions.db.session.commit()
 
@@ -214,27 +167,29 @@ def check_recovery_token(token: str) -> object:
     """Checks if the account recovery token is valid.
 
     Arguments:
-        token (str): Account recovery token. MD5 hash.
+        token (str): Account recovery token.
 
     Returns:
         object: The user object. None if error.
     """
-    user_lookup = models.User.query.filter_by(recovery_token=token).first()
-    # Checks if there is any user associated with the specified token. If not, return False
-    if not user_lookup:
+    user = models.User.query.filter_by(
+        recovery_token=security_util.uuid_string_to_bytes(token)
+        ).first()
+    if not user:
         return None
 
-    created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
+    created_at = datetime.fromisoformat(user.recovery_token_timestamp.isoformat())
     if not qol_util.is_date_within_threshold_minutes(created_at, 30):
-        user_lookup.recovery_token = None
+        user.recovery_token = None
         extensions.db.session.commit()
         return None
 
-    user_lookup.in_recovery = True
-    user_lookup.recovery_token = None
+    user.in_recovery = True
+    user.recovery_token = None
+    user.recovery_token_timestamp = None
     extensions.db.session.commit()
 
-    return user_lookup
+    return user
 
 
 def send_recovery_token(email: str) -> bool:
@@ -246,24 +201,24 @@ def send_recovery_token(email: str) -> bool:
     Returns:
         bool: True if user can proceed with account recovery. Otherwise, False.
     """
-    user_lookup = search_user_email_in_database(email)
-    if not user_lookup:
+    user = search_user_email_in_database(email)
+    if not user:
         return False
 
     # If there's a token already issued to the user, check if it's expired. If expired, proceed. If not, return False.
-    if user_lookup.recovery_token:
-        created_at = datetime.fromisoformat(user_lookup.recovery_token_timestamp.isoformat())
+    if user.recovery_token:
+        created_at = datetime.fromisoformat(user.recovery_token_timestamp.isoformat())
         if not qol_util.is_date_within_threshold_minutes(created_at, 30):
             return False
 
     # Generates a super random token.
-    verification_token = security_util.generate_nonce(24)
+    recovery_token = security_util.generate_uuid_string()
 
     message = f"""Hello.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to recover your Infomundi account, feel free to click on the link below:
 
-https://infomundi.net/auth/forgot_password?token={verification_token}
+https://infomundi.net/auth/forgot_password?token={recovery_token}
 
 Please keep in mind that this token will expire in 30 minutes.
 
@@ -274,8 +229,8 @@ The Infomundi Team"""
     # If we get to send the email, save it to the tokens file.
     result = notifications.send_email(email, subject, message)
     if result:
-        user_lookup.recovery_token = verification_token
-        user_lookup.recovery_token_timestamp = datetime.now()
+        user.recovery_token = security_util.uuid_string_to_bytes(recovery_token)
+        user.recovery_token_timestamp = datetime.now()
         extensions.db.session.commit()
     
     return result

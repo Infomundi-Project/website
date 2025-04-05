@@ -1,13 +1,12 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
-from sqlalchemy import and_, cast, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
+from sqlalchemy import and_, cast
 from datetime import datetime
-from random import shuffle
 
 from website_scripts import config, json_util, scripts,\
-    models, extensions, immutable, input_sanitization, friends_util, \
+    models, extensions, input_sanitization, friends_util, \
     country_util, totp_util, security_util, hashing_util, llm_util, decorators
 
 api = Blueprint('api', __name__)
@@ -19,6 +18,51 @@ def make_cache_key(*args, **kwargs):
         for key, value in request.args.items())
 
     return hashing_util.string_to_md5_hex(str(args_list))
+
+
+@api.route('/countries', methods=['GET'])
+@extensions.cache.cached(timeout=60*60*24*30) # 30 days
+@login_required
+def get_countries():
+    return jsonify(country_util.get_countries())
+
+
+@api.route('/countries/<int:country_id>/states', methods=['GET'])
+@extensions.cache.cached(timeout=60*60*24*30) # 30 days
+@login_required
+def get_states(country_id):
+    return jsonify(country_util.get_states(country_id))
+
+
+@api.route('/states/<int:state_id>/cities', methods=['GET'])
+@extensions.cache.cached(timeout=60*60*24*30) # 30 days
+@login_required
+def get_cities(state_id):
+    return jsonify(country_util.get_cities(state_id))
+
+
+@api.route('/currencies')
+@extensions.cache.cached(timeout=60*30) # 30m cached
+def get_currencies():
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+    return jsonify(currencies)
+
+
+@api.route('/stocks')
+@extensions.cache.cached(timeout=60*30) # 30m cached
+def get_stocks():
+    stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    
+    # Removes unused US stocks
+    del stocks[1:3]
+    
+    return jsonify(stocks)
+
+
+@api.route('/crypto')
+@extensions.cache.cached(timeout=60*30) # 30m cached
+def get_crypto():
+    return jsonify(json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto'))
 
 
 @api.route('/story/<action>', methods=['POST'])
@@ -123,7 +167,6 @@ def generate_totp():
 @api.route('/totp/setup', methods=['GET'])
 @login_required
 def setup_totp():
-    # If the user already has a secret, then they don't need to finish setup again
     if current_user.totp_secret:
         return jsonify({'status': 'Not Allowed'}), 403
 
@@ -137,12 +180,8 @@ def setup_totp():
     # Generates a super random recovery token
     totp_recovery_token = security_util.generate_nonce()
 
-    # Gets the key information from user's session
-    key_salt = current_user.derived_key_salt
-    key_value = session['key_value']
-
     # Saves the TOTP information encrypted in the database
-    current_user.totp_secret = security_util.encrypt(totp_secret, salt=key_salt, key=key_value)
+    current_user.totp_secret = security_util.encrypt(totp_secret, config.ENCRYPTION_KEY)
     current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
     extensions.db.session.commit()
 
@@ -150,24 +189,6 @@ def setup_totp():
     del session['totp_secret']
 
     return jsonify({'valid': True, 'totp_recovery_token': totp_recovery_token}), 200
-
-
-@api.route('/countries', methods=['GET'])
-@login_required
-def get_countries():
-    return jsonify(country_util.get_countries())
-
-
-@api.route('/countries/<int:country_id>/states', methods=['GET'])
-@login_required
-def get_states(country_id):
-    return jsonify(country_util.get_states(country_id))
-
-
-@api.route('/states/<int:state_id>/cities', methods=['GET'])
-@login_required
-def get_cities(state_id):
-    return jsonify(country_util.get_cities(state_id))
 
 
 @api.route('/user/friends', methods=['GET'])
@@ -185,7 +206,7 @@ def get_friends():
     friends_data = [{
         'username': friend.username,
         'display_name': friend.display_name,
-        'user_id': friend.public_id,
+        'user_id': friend.get_public_id(),
         'avatar_url': friend.avatar_url,
         'level': friend.level,
         'is_online': friend.is_online,
@@ -404,27 +425,3 @@ def get_stories():
         for story in stories
     ]
     return jsonify(stories_list)
-
-
-@api.route('/currencies')
-@extensions.cache.cached(timeout=60*60) # 1h cached
-def get_currencies():
-    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
-    return jsonify(currencies)
-
-
-@api.route('/stocks')
-@extensions.cache.cached(timeout=60*60) # 1h cached
-def get_stocks():
-    stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
-    
-    # Removes unused US stocks
-    del stocks[1:3]
-    
-    return jsonify(stocks)
-
-
-@api.route('/crypto')
-@extensions.cache.cached(timeout=60*60) # 1h cached
-def get_crypto():
-    return jsonify(json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto'))

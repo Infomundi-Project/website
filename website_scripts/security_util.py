@@ -1,8 +1,9 @@
 import secrets
 import uuid
-import base64
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+from .config import ENCRYPTION_KEY
 
 
 def generate_2fa_token() -> str:
@@ -20,11 +21,11 @@ def generate_uuid_bytes() -> bytes:
     return uuid.UUID(int=secrets.randbits(128)).bytes
 
 
-def convert_uuid_bytes_to_string(uuid_bytes: bytes) -> str:
+def uuid_bytes_to_string(uuid_bytes: bytes) -> str:
     return str(uuid.UUID(bytes=uuid_bytes))
 
 
-def convert_uuid_string_to_bytes(uuid_string: str) -> bytes:
+def uuid_string_to_bytes(uuid_string: str) -> bytes:
     return uuid.UUID(uuid_string).bytes
 
 
@@ -76,39 +77,42 @@ def derive_key(password: str, salt: bytes, length: int = 32) -> bytes:
     return kdf.derive(password.encode())
 
 
-def encrypt(plaintext: str, password: str) -> str:
+def encrypt(plaintext: str, salt: bytes = b'', password: str = ENCRYPTION_KEY) -> bytes:
     """
     Encrypts plaintext using AES-GCM with a key derived from the user's password.
 
     A new random salt and nonce are generated for each encryption operation.
-    The output is a Base64-encoded string containing salt + nonce + ciphertext.
+    The output is a blob containing salt + nonce + ciphertext.
 
     Args:
         plaintext (str): The plaintext message to encrypt.
-        password (str): The password from which the encryption key will be derived.
+        salt (bytes): Optional. The salt to use.
+        password (str): Optional. The password from which the encryption key will be derived.
 
     Returns:
-        str: Base64-encoded encrypted data including the salt, nonce, and ciphertext.
+        bytes: Encrypted data including the salt, nonce, and ciphertext.
     """
-    salt = secrets.token_bytes(16)  # Unique salt per encryption
+    if not salt:
+        salt = secrets.token_bytes(16)  # Unique salt per encryption
+    
     key = derive_key(password, salt)
 
     aesgcm = AESGCM(key)
     nonce = secrets.token_bytes(12)  # Recommended nonce size for GCM
     ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)
 
-    encrypted_blob = base64.b64encode(salt + nonce + ciphertext).decode()
+    encrypted_blob = salt + nonce + ciphertext
     return encrypted_blob
 
 
-def decrypt(encrypted_blob: str, password: str) -> str:
+def decrypt(encrypted_blob: bytes, password: str = ENCRYPTION_KEY) -> str:
     """
     Decrypts AES-GCM encrypted data using the password from which the key was derived.
 
     Automatically extracts the salt and nonce from the encrypted blob to recreate the key.
 
     Args:
-        encrypted_blob (str): Base64-encoded data containing salt + nonce + ciphertext.
+        encrypted_blob (bytes): Data containing salt + nonce + ciphertext.
         password (str): The password originally used to encrypt the data.
 
     Returns:
@@ -117,10 +121,9 @@ def decrypt(encrypted_blob: str, password: str) -> str:
     Raises:
         ValueError: If the decryption fails due to an incorrect password or tampered data.
     """
-    decoded = base64.b64decode(encrypted_blob)
-    salt = decoded[:16]
-    nonce = decoded[16:28]
-    ciphertext = decoded[28:]
+    salt = encrypted_blob[:16]
+    nonce = encrypted_blob[16:28]
+    ciphertext = encrypted_blob[28:]
 
     key = derive_key(password, salt)
     aesgcm = AESGCM(key)

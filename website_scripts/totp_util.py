@@ -3,7 +3,7 @@ import base64
 import pyotp
 import io
 
-from . import security_util, hashing_util
+from . import security_util, hashing_util, config
 
 
 def generate_totp_secret():
@@ -19,7 +19,6 @@ def generate_qr_code(secret_key, account_name) -> str:
     totp = pyotp.TOTP(secret_key)
     uri = totp.provisioning_uri(name=account_name, issuer_name="Infomundi")
     
-    # Generate QR code
     qr = qrcode.make(uri)
     
     # Convert the QR image to base64
@@ -53,13 +52,13 @@ def deal_with_it(user, code: str, recovery_token: str, key_value: str) -> tuple:
     """
     if recovery_token:
         if hashing_util.argon2_verify_hash(user.totp_recovery, recovery_token):
-            remove_totp(user)
+            user.purge_totp()
             return (True, f'We removed your TOTP configuration, {user.username}. Please, re-enable it whenever possible. Welcome back to Infomundi!')
         else:
             return (False, 'Invalid TOTP recovery code!')
 
     # Decrypt user's totp secret
-    totp_secret = security_util.decrypt(user.totp_secret, initial_key=key_value)
+    totp_secret = security_util.decrypt(user.totp_secret, config.ENCRYPTION_KEY)
 
     is_valid_totp = verify_totp(totp_secret, code)
     if not is_valid_totp:

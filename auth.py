@@ -1,12 +1,12 @@
 import binascii, json, hmac, hashlib
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
 from flask_login import login_user, login_required, current_user, logout_user
 from datetime import datetime
 from sqlalchemy import or_
 
 from website_scripts import config, json_util, scripts, extensions, models, input_sanitization,\
  cloudflare_util, auth_util, hashing_util, qol_util, security_util, totp_util
-from website_scripts.decorators import admin_required, in_maintenance, unauthenticated_only, verify_captcha
+from website_scripts.decorators import in_maintenance, unauthenticated_only, verify_captcha
 
 auth = Blueprint('auth', __name__)
 
@@ -29,14 +29,12 @@ def login():
     # To avoid making unecessary queries to the database, first check to see if the credentials match our sandards
     if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
         flash('Invalid credentials!', 'error')
-        return redirect(url_for('auth.login'))
-
-    user = auth_util.search_user_email_in_database(email)
-    if not user or not user.check_password(password):
-        flash('Invalid credentials!', 'error')
         return render_template('login.html')
 
-    session['key_value'] = auth_util.configure_key(user, password)
+    user = auth_util.search_user_email_in_database(email)
+    if not user or not user.check_password(password) or not user.is_enabled:
+        flash('Invalid credentials!', 'error')
+        return render_template('login.html')
 
     # If user has totp enabled, we redirect them to the totp page without effectively performing log in actions
     if user.totp_secret:
@@ -123,26 +121,15 @@ def register():
     password = request.form.get('password', '')
     confirm_password = request.form.get('confirm_password', '')
     
-    # Checks if the passwords match
     if password != confirm_password:
         flash('Password and confirm password must match!', 'error')
         return redirect(url_for('auth.register'))
 
-    # Checks if password is strong enough
     if not input_sanitization.is_strong_password(password):
         flash('Password must be 8-100 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
         return redirect(url_for('auth.register'))
 
-    email_lookup = auth_util.search_user_email_in_database(email)
-    username_lookup = auth_util.search_username_in_database(username)
-
-    if not (email_lookup and username_lookup):
-        send_token = auth_util.handle_register_token(email, auth_util.hash_user_email_using_salt(email), username, hashing_util.string_to_argon2_hash(password))
-        if not send_token:
-            flash('We apologize, but something went wrong on our end. Please, try again later.', 'error')
-            scripts.log(f'[!] Not able to send verification token to {email}.')
-            
-            return redirect(url_for('auth.register'))
+    auth_util.handle_register_token(email, username, password)
 
     flash(f'If everything went smoothly, you should soon receive instructions in your inbox at {email}')
     return redirect(url_for('auth.register'))
@@ -156,7 +143,7 @@ def verify():
         flash('Invalid token', 'error')
         return redirect(url_for('auth.register'))
 
-    user = models.User.query.filter_by(register_token=security_util.convert_uuid_string_to_bytes(token)).first()
+    user = models.User.query.filter_by(register_token=security_util.uuid_string_to_bytes(token)).first()
     if not user:
         flash('We apologize, but the token seems to be invalid.', 'error')
         return redirect(url_for('views.home'))
@@ -170,12 +157,7 @@ def verify():
         flash('We apologize, but the token has expired. Please, try registering your account again.', 'error')
         return redirect(url_for('auth.register'))
     
-    user.avatar_url = 'https://infomundi.net/static/img/avatar.webp'
-    user.is_active = True
-    user.register_token = None
-    user.register_token_timestamp = None
-    extensions.db.session.commit()
-
+    user.enable()
     flash(f'Your account has been verified, {user.username}! You may log in now!')
     return redirect(url_for('auth.login'))
 
@@ -228,7 +210,7 @@ def forgot_password():
     auth_util.send_recovery_token(email)
 
     # Generic message to prevent user enumeration
-    flash(f"If {email} is in our database, an email will be sent with instructions.")
+    flash(f"If {email} happens to be in our database, an email will be sent with instructions.")
     return render_template('forgot_password.html')
 
 
@@ -344,7 +326,7 @@ def google_callback():
     # Get user details
     display_name = input_sanitization.sanitize_text(user_info['name'])
     username = input_sanitization.create_username_out_of_display_name(display_name)
-    hashed_email = auth_util.hash_user_email_using_salt(user_info['email'])
+    email_fingerprint = auth_util.hash_user_email_using_salt(user_info['email'])
     
     # If the user is not already in the database, we create an entry for them
     user = auth_util.search_user_email_in_database(user_info['email'])
@@ -356,7 +338,7 @@ def google_callback():
             display_name=display_name, 
             username=username,
             password=random_hashed_password, 
-            hashed_email=hashed_email
+            email_fingerprint=email_fingerprint
             )
         extensions.db.session.add(user)
         extensions.db.session.commit()

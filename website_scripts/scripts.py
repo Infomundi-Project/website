@@ -5,9 +5,8 @@ from difflib import SequenceMatcher
 from unidecode import unidecode
 from bs4 import BeautifulSoup
 from random import choice
-from os import path
 
-from . import config, json_util, immutable, notifications, models, extensions, qol_util
+from . import config, json_util, immutable, models, extensions, qol_util
 
 
 @extensions.cache.memoize(timeout=60*60*8) # 8 hours
@@ -61,7 +60,7 @@ def news_page_processing(country_name: str) -> dict:
     # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
     stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/{country_name}_stock')
-    if not stock_data or stock_data[0]['market_cap'] == None:
+    if not stock_data or stock_data[0]['market_cap'] is None:
         stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
         is_global = True
 
@@ -69,10 +68,19 @@ def news_page_processing(country_name: str) -> dict:
     stock_date = stock_data[0]['date']
 
     try:
-        country_index = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks') if x['country']['name'].lower() == country_name][0]
-        currency_info = [x for x in json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies') if x['country']['name'].lower() == country_name.replace(' ', '-')][0]
+        country_index = [
+            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/data/json/stocks")
+            if x['country']['name'].lower() == country_name
+        ][0]
+
+        currency_info = [
+            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/data/json/currencies")
+            if x['country']['name'].lower() == country_name.replace(' ', '-')
+        ][0]
+
         country_index['currency'] = currency_info
-    except IndexError as err:
+
+    except IndexError:
         country_index = ''
 
     # Get page language
@@ -111,7 +119,7 @@ def get_nation_data(cca2: str) -> dict:
         data = json_util.read_json(config_filepath)
     else:
         URL = f"https://restcountries.com/v3.1/alpha/{cca2.lower()}"
-        r = get_request(URL)
+        r = get_request(URL, timeout=4)
         data = json.loads(r.text)
         json_util.write_json(data, config_filepath)
     
@@ -200,7 +208,7 @@ def get_current_time_in_timezone(cca2: str) -> str:
                 break
         else:
             timezone = ''
-    except Exception as err:
+    except Exception:
         timezone = ''
 
     if '+' in timezone or '-' in timezone:
@@ -214,7 +222,7 @@ def get_current_time_in_timezone(cca2: str) -> str:
 
 
 @extensions.cache.memoize(timeout=60*60*16) # 16 hours
-def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
+def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
     """Takes the country name and wether is per capta or not (optional, default=False). 
     Also, updates the saved database if the current save is more than 30 days old.
 
@@ -249,7 +257,7 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
     headers = {
         'User-Agent': choice(immutable.USER_AGENTS)
     }
-    response = get_request(url, headers=headers)
+    response = get_request(url, headers=headers, timeout=4)
 
     if response.status_code != 200:
         return []
@@ -298,8 +306,8 @@ def get_gdp(country_name: str, is_per_capita: bool=False) -> dict:
     
     json_util.write_json(save_list[2:], cache_filepath)
     for index, value in enumerate(save_list):
-            if list(value.keys())[0].lower() == country_name:
-                return save_list[index]
+        if list(value.keys())[0].lower() == country_name:
+            return save_list[index]
 
 
 def get_link_preview(url: str) -> dict:

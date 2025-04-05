@@ -4,6 +4,7 @@ from sys import exit
 from xml.etree.ElementTree import Element, ElementTree, SubElement
 from defusedxml.ElementTree import parse as safe_parse
 from datetime import datetime
+from random import shuffle
 
 from website_scripts import config, models, extensions
 from app import app
@@ -25,11 +26,11 @@ def fetch_categories() -> list:
     try:
         with db_connection.cursor() as cursor:
             # Construct the SQL query to fetch category IDs
-            sql_query = "SELECT category_id FROM categories"
+            sql_query = "SELECT * FROM categories"
             cursor.execute(sql_query)
             categories = cursor.fetchall()
 
-            category_database = [row['category_id'] for row in categories]
+            category_database = [row['name'] for row in categories]
             shuffle(category_database)
     except pymysql.MySQLError as e:
         return []
@@ -44,9 +45,9 @@ def fetch_stories(selected_filter: str):
         with db_connection.cursor() as cursor:
             # Construct the SQL query with a LIMIT clause
             sql_query = """
-                SELECT story_id FROM stories 
-                WHERE category_id = %s AND NOT has_media_content 
-                ORDER BY created_at DESC
+                SELECT url_hash FROM stories 
+                WHERE category_id = %s AND has_image 
+                ORDER BY pub_date DESC
             """
             # Execute the query
             cursor.execute(sql_query, (selected_filter))
@@ -72,7 +73,7 @@ def add_url(loc, lastmod, changefreq, priority):
 
 def save_sitemap(root, sitemap_file: str):
     tree = ElementTree(root)
-    tree.write(SITEMAP_FILE, encoding='utf-8', xml_declaration=True)
+    tree.write(sitemap_file, encoding='utf-8', xml_declaration=True)
 
 
 def main():

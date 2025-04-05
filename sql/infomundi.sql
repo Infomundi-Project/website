@@ -19,19 +19,20 @@ DROP TABLE IF EXISTS global_salts;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    public_id BINARY(16) NOT NULL UNIQUE,
+    public_id BINARY(16) NOT NULL UNIQUE, -- UUIDv4 Binary, for public display
     
     username VARCHAR(25) UNIQUE NOT NULL,
     
-    /* The email is salted and stored as SHA-256 in the database. Realistically, we only require the email address during registration so we have SOME kind of protection against spam accounts, as the user needs to verify their email to be able to activate the account. 
+    /* The email is encrypted with AES/GCM. Realistically, we only require the email address during registration so we have SOME kind of protection against spam accounts, as the user needs to verify their email to be able to activate the account. 
 
     In order to prevent user login via username, the user can only log in via email. An attacker, to target an individual user in the platform, would have to know the user's email address first, not just their public username. 
 
-    For those two reasons, the email has to be stored in the database. 
+    The email has to be stored in the database because:
 
     1. Allows user login
-    2. Prevents, kind of, spam account creation */
-    hashed_email BINARY(32) UNIQUE NOT NULL,
+    2. Prevents, in some way, creation of spam accounts */
+    email_fingerprint BINARY(32) UNIQUE NOT NULL,
+    email_encrypted BINARY(120) NOT NULL,
     
     role VARCHAR(15) DEFAULT 'user',
     password VARCHAR(150) NOT NULL, -- Stored in encrypted format (Argon2id)
@@ -49,7 +50,7 @@ CREATE TABLE users (
     level_progress INT DEFAULT 0,
 
     -- Account Registration
-    is_active TINYINT(1) DEFAULT 0,
+    is_enabled TINYINT(1) DEFAULT 0,
     register_token BINARY(16),
     register_token_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -66,14 +67,11 @@ CREATE TABLE users (
     is_online TINYINT(1) DEFAULT 0,
     last_activity DATETIME,
 
-    -- Totp (secret and recovery are stored in encrypted format)
-    totp_secret VARCHAR(120),
-    totp_recovery VARCHAR(120),
+    -- Totp 
+    totp_secret VARCHAR(120), -- Stored in encrypted format (AES/GCM)
+    totp_recovery VARCHAR(150), -- Stored in encrypted format (Argon2id)
     mail_twofactor INT,
-    mail_twofactor_timestamp DATETIME,
-
-    -- Encryption
-    derived_key_salt VARCHAR(120)
+    mail_twofactor_timestamp DATETIME
 );
 
 
@@ -203,9 +201,3 @@ CREATE TABLE crypto (
     data TEXT
 );
 
-
-CREATE TABLE global_salts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    salt VARCHAR(64) NOT NULL
-);

@@ -2,6 +2,8 @@ import hashlib
 import argon2
 import hmac
 
+from .config import HMAC_KEY
+
 
 def string_to_argon2_hash(cleartext: str) -> str:
     return argon2.PasswordHasher().hash(cleartext)
@@ -14,25 +16,6 @@ def argon2_verify_hash(hashed_data: str, cleartext: str) -> bool:
         return False
 
     return True
-
-
-def sha256_hash_text(text: str) -> str:
-    """
-    Hashes the given text using SHA-256 and returns the hash in hexadecimal format.
-
-    Args:
-        text (str): The input text to be hashed.
-
-    Returns:
-        str: The resulting SHA-256 hash in hexadecimal format.
-
-    Example:
-        >>> sha256_hash_text('hello world')
-        'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e'
-    """
-    sha256 = hashlib.sha256()
-    sha256.update(text.encode('utf-8'))
-    return sha256.hexdigest()
 
 
 def sha256_verify_hash(text: str, hash_value: str) -> bool:
@@ -173,23 +156,27 @@ def string_to_md5_hex(input_string: str) -> str:
     return hashlib.md5(input_string.encode(), usedforsecurity=False).hexdigest()
 
 
-
-def generate_hmac_signature(key: str, message: str, algorithm: str = 'sha256') -> str:
+def generate_hmac_signature(message: str, key: str = HMAC_KEY, algorithm: str = 'sha256', as_bytes: bool = False):
     """
     Generate an HMAC signature for a given message and key.
     
     Parameters:
-        key (str): The secret key used for signing.
+        key (str): The secret key used for signing. Default is the HMAC key for the application.
         message (str): The message to be signed.
         algorithm (str): The hashing algorithm to use ('sha256', 'sha1', 'md5', etc.). Default is 'sha256'.
+        return_format (str): Changes the signature return format ('string', 'bytes'). Default is 'string'.
     
     Returns:
-        str: The generated HMAC signature as a hexadecimal string.
+        str or bytes: The generated HMAC signature as a hexadecimal string or bytes.
     """
     key_bytes = key.encode('utf-8')
     message_bytes = message.encode('utf-8')
     hash_function = getattr(hashlib, algorithm)
     hmac_obj = hmac.new(key_bytes, message_bytes, hash_function)
+    
+    if as_bytes:
+        return hmac_obj.digest()
+
     return hmac_obj.hexdigest()
 
 
@@ -201,13 +188,13 @@ def is_hmac_authentic(key: str, message: str, provided_signature: str, algorithm
         key (str): The secret key used for signing.
         message (str): The message to be verified.
         provided_signature (str): The HMAC signature to verify.
-        algorithm (str): The hashing algorithm to use ('sha256', 'sha1', 'md5', etc.). Default is 'sha256'.
+        algorithm (str): The hashing algorithm to use. Default is 'sha256'.
     
     Returns:
         bool: True if the signature is authentic, False otherwise.
     """
     # Generate the correct signature
-    expected_signature = generate_hmac_signature(key, message, algorithm)
+    expected_signature = generate_hmac_signature(message, key=key)
     
     # Use hmac.compare_digest for constant-time comparison to prevent timing attacks
     return hmac.compare_digest(expected_signature, provided_signature)
