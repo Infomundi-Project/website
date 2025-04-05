@@ -29,11 +29,14 @@ def uuid_string_to_bytes(uuid_string: str) -> bytes:
     return uuid.UUID(uuid_string).bytes
 
 
-def generate_nonce(length: int = 32, limit: int=0) -> str:
-    """Creates a secure random sequence of URL-safe characters provided by the 'secrets' library. Used to generate safe random values.
+def generate_nonce(length: int = 32, limit: int = 0) -> str:
+    """Creates a secure random sequence of URL-safe characters provided by the 'secrets' library. 
+    Used to generate safe random values.
 
     Arguments
-        length (int): Optional. Byte sequence length. Does not mean that the returning string is going to match the specified length, but the byte sequence will be of X (int) bytes. Higher = safer.
+        length (int): Optional. Byte sequence length. Does not mean that 
+            the returning string is going to match the specified length, but the byte sequence 
+            will be of X (int) bytes. Higher = safer.
         limit (int): Optional. Limits the token to a specific length.
 
     Returns
@@ -49,10 +52,7 @@ def generate_nonce(length: int = 32, limit: int=0) -> str:
         >>> generate_nonce(limit=10)
         'tLut2cTtSY'
     """
-    if limit:
-        return secrets.token_urlsafe(length)[:limit]
-    
-    return secrets.token_urlsafe(length)
+    return secrets.token_urlsafe(length)[:limit] if limit else secrets.token_urlsafe(length)
 
 
 def derive_key(password: str, salt: bytes, length: int = 32) -> bytes:

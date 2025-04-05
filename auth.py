@@ -1,12 +1,11 @@
 import binascii, json, hmac, hashlib
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
-from flask_login import login_user, login_required, current_user, logout_user
+from flask_login import login_required, current_user, logout_user
 from datetime import datetime
-from sqlalchemy import or_
 
-from website_scripts import config, json_util, scripts, extensions, models, input_sanitization,\
+from website_scripts import config, scripts, extensions, models, input_sanitization,\
  cloudflare_util, auth_util, hashing_util, qol_util, security_util, totp_util
-from website_scripts.decorators import in_maintenance, unauthenticated_only, verify_captcha
+from website_scripts.decorators import unauthenticated_only, verify_captcha
 
 auth = Blueprint('auth', __name__)
 
@@ -58,7 +57,6 @@ def totp():
     if request.method == 'GET':
         return render_template('twofactor.html', user=user)
     
-    # Get information from the form
     recovery_token = request.form.get('recovery_token', '').strip()
     code = request.form.get('code', '').strip()
 
@@ -126,7 +124,7 @@ def register():
         return redirect(url_for('auth.register'))
 
     if not input_sanitization.is_strong_password(password):
-        flash('Password must be 8-100 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error')
+        flash('We apologize, but the password does not meet complexity requirements.', 'error')
         return redirect(url_for('auth.register'))
 
     auth_util.handle_register_token(email, username, password)
@@ -185,7 +183,6 @@ def forgot_password():
         if not recovery_token:
             return render_template('forgot_password.html')
         
-        # Checks if the token is valid
         user = auth_util.check_recovery_token(recovery_token)
         if not user:
             flash('We apologize, but the token seems to be invalid.', 'error')
@@ -227,14 +224,13 @@ def password_change():
     if request.method == 'GET':
         return render_template('password_change.html', username=user.username)
     
-    # Get form data
     new_password = request.form.get('new_password', '')
     confirm_password = request.form.get('confirm_password', '')
     
     if new_password != confirm_password:
         message = 'Passwords must match!'
     elif not input_sanitization.is_strong_password(new_password):
-        message = "Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+        message = "We apologize, but the password does not meet complexity requirements."
     else:
         message = ''
 
@@ -331,13 +327,12 @@ def google_callback():
     # If the user is not already in the database, we create an entry for them
     user = auth_util.search_user_email_in_database(user_info['email'])
     if not user:
-        # Generate a super random password and argon2 hash it. 
         # The user can only log in using google integration or if they want to recover their account for some reason.
-        random_hashed_password = hashing_util.string_to_argon2_hash(security_util.generate_nonce())
         user = models.User(
-            display_name=display_name, 
+            public_id=security_util.generate_uuid_bytes(),
+            display_name=display_name,
             username=username,
-            password=random_hashed_password, 
+            password=hashing_util.string_to_argon2_hash(security_util.generate_nonce()),
             email_fingerprint=email_fingerprint
             )
         extensions.db.session.add(user)
