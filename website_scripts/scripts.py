@@ -14,9 +14,9 @@ def home_processing() -> dict:
     """This function processes data for the home endpoint and caches it to speed up performance"""
     statistics = get_statistics()
 
-    crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto')
-    world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
-    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+    crypto_data = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/crypto')
+    world_stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/stocks')
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/currencies')
 
     us_indexes = world_stocks[:3]
 
@@ -40,7 +40,7 @@ def news_page_processing(country_name: str) -> dict:
     country_name = country_name.lower()
 
     # Get area ranking
-    area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/area_ranking')
+    area_ranks = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/area_ranking')
     for rank in area_ranks:
         if rank['country'].lower() == country_name:
             area_rank = rank
@@ -49,7 +49,7 @@ def news_page_processing(country_name: str) -> dict:
         area_rank = ''
 
     # Get religion info
-    religions = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/religions')
+    religions = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/religions')
     for country, religion in religions.items():
         if country.lower() == country_name:
             main_religion = religion
@@ -59,9 +59,9 @@ def news_page_processing(country_name: str) -> dict:
 
     # There are countries with no national stock data available, so we use global stocks if that is the case.
     is_global = False
-    stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/{country_name}_stock')
+    stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/stock_data/{country_name}_stock')
     if not stock_data or stock_data[0]['market_cap'] is None:
-        stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stock_data/united-states_stock')
+        stock_data = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/stock_data/united-states_stock')
         is_global = True
 
     # Gets the date from the first stock
@@ -69,12 +69,12 @@ def news_page_processing(country_name: str) -> dict:
 
     try:
         country_index = [
-            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/data/json/stocks")
+            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/assets/data/json/stocks")
             if x['country']['name'].lower() == country_name
         ][0]
 
         currency_info = [
-            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/data/json/currencies")
+            x for x in json_util.read_json(f"{config.WEBSITE_ROOT}/assets/data/json/currencies")
             if x['country']['name'].lower() == country_name.replace(' ', '-')
         ][0]
 
@@ -85,7 +85,7 @@ def news_page_processing(country_name: str) -> dict:
 
     # Get page language
     page_languages = []
-    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/langcodes')
+    languages = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/langcodes')
     for lang in languages:
         if lang['country'].lower() == country_name:
             page_languages.append(lang)
@@ -200,7 +200,7 @@ def get_current_time_in_timezone(cca2: str) -> str:
 
     try:
         country_capital = unidecode(data['capital'][0].lower())
-        capitals_time = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/capitals_time')
+        capitals_time = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/capitals_time')
 
         for item in capitals_time:
             if country_capital in unidecode(item['capital']).lower():
@@ -244,7 +244,7 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
         }
     """
     country_name = country_name.lower()
-    cache_filepath = f"{config.WEBSITE_ROOT}/data/json/gdp{'_per_capita' if is_per_capita else ''}"
+    cache_filepath = f"{config.WEBSITE_ROOT}/assets/data/json/gdp{'_per_capita' if is_per_capita else ''}"
     
     if not qol_util.is_file_creation_within_threshold_minutes(f'{cache_filepath}.json', 720, is_hours=True):
         cache_data = json_util.read_json(cache_filepath)

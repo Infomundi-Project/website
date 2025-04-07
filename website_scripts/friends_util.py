@@ -1,5 +1,5 @@
 from .extensions import db
-from .models import Friendship, User
+from .models import Friendship
 
 
 def send_friend_request(user_id, friend_id):

@@ -14,7 +14,7 @@ s3_client = boto3.client(
 )
 
 
-def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: str, dimensions: tuple=(500, 500)) -> bool:
+def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: str, dimensions: tuple = (500, 500)) -> bool:
     """
     Uses PIL library to crop the image into a square (if it's a profile picture), 
     convert to jpeg and upload to the bucket.
@@ -61,7 +61,7 @@ def convert_and_save(image_stream: bytes, image_category: str, s3_object_key: st
 
     try:
         s3_client.upload_fileobj(output_buffer, config.BUCKET_NAME, s3_object_key)
-    except Exception as e:
+    except Exception:
         return False
     
     output_buffer.close()

@@ -1,7 +1,6 @@
 from flask import session, request, make_response, url_for, redirect
 from flask_login import logout_user, login_user
 from datetime import datetime
-from random import shuffle
 from sqlalchemy import or_
 
 from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
@@ -45,7 +44,8 @@ The Infomundi Team
 
 
 def perform_logout_actions():
-    """To facilitate, we perform all logout actions in a single function. Clears user's session, and delete cookies related to Comentario's (https://commento.infomundi.net/) authentication.
+    """To facilitate, we perform all logout actions in a single function. 
+    Clears user's session, and delete cookies related to Comentario's authentication.
     """
     session.permanent = False
     session.clear()
@@ -55,9 +55,6 @@ def perform_logout_actions():
     
     # List of cookie names to delete, related to Comentario
     cookies_to_delete = ('XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session')
-    
-    # Includes all subdomains as well
-    domain = '.infomundi.net'
     
     # Delete each cookie
     for cookie in cookies_to_delete:
@@ -150,9 +147,9 @@ The Infomundi Team"""
     result = notifications.send_email(email, subject, message)
     if result:
         new_user = models.User(
-            email_encrypted=email_encrypted, 
+            email_encrypted=email_encrypted,
             email_fingerprint=email_fingerprint,
-            username=username, 
+            username=username,
             password=hashing_util.string_to_argon2_hash(password),
             register_token=security_util.uuid_string_to_bytes(register_token),
             public_id=security_util.generate_uuid_bytes()

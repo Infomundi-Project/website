@@ -110,7 +110,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
         return {"error": "An error occurred during summarization.", "details": str(e)}
 
 
-def is_inappropriate(text: str='', image_url: str='', image_stream=None) -> bool:
+def is_inappropriate(text: str = '', image_url: str = '', image_stream = None) -> bool:
     if not text and not image_url and not image_stream:
         raise InfomundiCustomException('You should supply "text" or "image_url"/"image_stream" or both.')
 

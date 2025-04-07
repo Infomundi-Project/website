@@ -86,7 +86,7 @@ def is_date_within_threshold_minutes(timestamp: datetime, threshold_time: int, i
     return time_difference <= timedelta(minutes=threshold_time)
 
 
-def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: int, is_hours: bool=False) -> bool:
+def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: int, is_hours: bool = False) -> bool:
     """Checks if the creation of the given file, pointed by file_path, is within the specified threshold of minutes/hours from the current time.
 
     Args:

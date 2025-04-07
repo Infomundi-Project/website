@@ -32,36 +32,41 @@ def log_message(message):
 
 
 def insert_stories_to_database(stories: list, category_name: str, category_id: int) -> int:
-    """Inserts a list of stories into the database with associated categories and publishers.
-
-    Parameters:
-        stories (list): A list of dictionaries containing story details.
-        category_name (str): The name of the category to which these stories belong.
-
-    Returns:
-        int: Exceptions count, if any.
     """
+    Inserts a list of stories into the database with associated categories and publishers.
+    Returns the count of failed insertions.
+    """
+    if not stories:
+        return 0
+
+    insert_query = """
+        INSERT IGNORE INTO stories (title, description, url, url_hash, pub_date, category_id, publisher_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+
+    values = []
+    for story in stories:
+        try:
+            values.append((
+                story['story_title'],
+                story['story_description'],
+                story['story_url'],
+                story['story_url_hash'],
+                story['story_pubdate'],
+                category_id,
+                story['publisher_id']
+            ))
+        except Exception as err:
+            log_message(f"Error preparing story: {err}")
+
     exceptions_count = 0
 
     with db_connection.cursor() as cursor:
-        for story in stories:
-            try:
-                # Insert story
-                cursor.execute("""
-                    INSERT INTO stories (title, description, url, url_hash, pub_date, category_id, publisher_id)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    story['story_title'],
-                    story['story_description'],
-                    story['story_url'],
-                    story['story_url_hash'],
-                    story['story_pubdate'],
-                    category_id,
-                    story['publisher_id']
-                ))
-            except Exception as err:
-                exceptions_count += 1
-                log_message(f"Error inserting story: {err}")
+        try:
+            cursor.executemany(insert_query, values)
+        except Exception as err:
+            exceptions_count = len(values)
+            log_message(f"Bulk insert failed: {err}")
 
     db_connection.commit()
     return exceptions_count
@@ -134,7 +139,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             
             # Checks to see if the url is valid
             story_url = story.link.strip()
-            if not input_sanitization.is_valid_url(story_url):
+            if not input_sanitization.is_valid_url(story_url) or len(story_url) > 512:
                 log_message(f'Story link ({story_url}) is not valid. Skipping.')
                 continue
 
@@ -201,8 +206,8 @@ def fetch_categories_from_database():
         return []
     
     # DEBUG
-    #category_list = [(row['id'], row['name']) for row in categories if row['name'] == 'br_general']
-    category_list = [(row['id'], row['name']) for row in categories]
+    category_list = [(row['id'], row['name']) for row in categories if row['name'] == 'br_general']
+    #category_list = [(row['id'], row['name']) for row in categories]
     shuffle(category_list)
     
     log_message(f'Got {len(category_list)} categories from the database')

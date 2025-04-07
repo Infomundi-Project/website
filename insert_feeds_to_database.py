@@ -13,7 +13,7 @@ db_params = {
     'cursorclass': pymysql.cursors.DictCursor
 }
 
-feeds = json_util.read_json('old/feeds')
+feeds = json_util.read_json('assets/data/json/feeds/feeds')
 
 categories = []
 for feed in feeds:
@@ -29,7 +29,7 @@ categories = list(set(categories))
 
 
 
-old_feeds = json_util.read_json('old/old-feeds')
+old_feeds = json_util.read_json('assets/data/json/feeds/old-feeds')
 all_categories = list(old_feeds.keys()) + categories
 
 

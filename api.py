@@ -76,7 +76,9 @@ def story_reaction(action):
     if not url_hash:
         return jsonify({"error": "Story ID is required."}), 400
 
-    story = extensions.db.session.get(models.Story, url_hash)
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(url_hash)
+        ).first()
     if not story:
         return jsonify({"error": "Story not found."}), 404
 
@@ -89,7 +91,7 @@ def story_reaction(action):
 
     story_stats = extensions.db.session.get(models.StoryStats, story.id)
     if not story_stats:
-        story_stats = models.StoryStats(story_id=story.id, clicks=0, likes=0, dislikes=0)
+        story_stats = models.StoryStats(story_id=story.id, views=0, likes=0, dislikes=0)
         extensions.db.session.add(story_stats)
         extensions.db.session.commit()
 
@@ -316,10 +318,16 @@ def search():
     return redirect(f'https://infomundi.net/news?country={code}')
 
 
-@api.route('/story/summarize/<story_id>', methods=['GET'])
+@api.route('/story/summarize/<story_url_hash>', methods=['GET'])
 @extensions.limiter.limit("120/day;60/hour;10/minute", override_defaults=True)
-def summarize_story(story_id):
-    story = extensions.db.session.get(models.Story, story_id)
+def summarize_story(story_url_hash):
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
+        ).first()
+
+    if not story:
+        return jsonify({'response': f"Couldn't find the story"}), 500
+
     if story.gpt_summary:
         return jsonify({'response': story.gpt_summary}), 200
 

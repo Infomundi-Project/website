@@ -1,9 +1,9 @@
 import binascii, json, hmac, hashlib
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, abort
-from flask_login import login_required, current_user, logout_user
+from flask_login import login_required, current_user
 from datetime import datetime
 
-from website_scripts import config, scripts, extensions, models, input_sanitization,\
+from website_scripts import config, extensions, models, input_sanitization,\
  cloudflare_util, auth_util, hashing_util, qol_util, security_util, totp_util
 from website_scripts.decorators import unauthenticated_only, verify_captcha
 
@@ -322,7 +322,7 @@ def google_callback():
     # Get user details
     display_name = input_sanitization.sanitize_text(user_info['name'])
     username = input_sanitization.create_username_out_of_display_name(display_name)
-    email_fingerprint = auth_util.hash_user_email_using_salt(user_info['email'])
+    email_fingerprint = hashing_util.generate_hmac_signature(user_info['email'], as_bytes=True)
     
     # If the user is not already in the database, we create an entry for them
     user = auth_util.search_user_email_in_database(user_info['email'])

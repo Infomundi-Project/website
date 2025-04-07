@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-from website_scripts.input_sanitization import *
+from website_scripts import input_sanitization
 
 
 @pytest.mark.parametrize("input_text, expected", [
@@ -21,7 +21,7 @@ from website_scripts.input_sanitization import *
     ("", ""),  # Empty string
 ])
 def test_decode_html_entities(input_text, expected):
-    assert decode_html_entities(input_text) == expected
+    assert input_sanitization.decode_html_entities(input_text) == expected
 
 
 @pytest.mark.parametrize("description, expected", [
@@ -61,7 +61,7 @@ def test_decode_html_entities(input_text, expected):
     ("<b>Bold text", "<b>Bold text</b>")
 ])
 def test_sanitize_description(description, expected):
-    assert sanitize_description(description) == expected
+    assert input_sanitization.sanitize_description(description) == expected
 
 
 @pytest.mark.parametrize("input_text, expected_output", [
@@ -81,7 +81,7 @@ def test_sanitize_description(description, expected):
     ("", ""),  # Empty string
 ])
 def test_sanitize_html(input_text, expected_output):
-    assert sanitize_html(input_text) == expected_output
+    assert input_sanitization.sanitize_html(input_text) == expected_output
 
 
 @pytest.mark.parametrize("input_text, expected_output", [
@@ -116,7 +116,7 @@ def test_sanitize_html(input_text, expected_output):
     ("", ""),
 ])
 def test_sanitize_text(input_text, expected_output):
-    assert sanitize_text(input_text) == expected_output
+    assert input_sanitization.sanitize_text(input_text) == expected_output
 
 
 @pytest.mark.parametrize("input_username, expected_output", [
@@ -150,7 +150,7 @@ def test_sanitize_text(input_text, expected_output):
     ("user/name\\test", "usernametest"),
 ])
 def test_sanitize_username(input_username, expected_output):
-    assert sanitize_username(input_username) == expected_output
+    assert input_sanitization.sanitize_username(input_username) == expected_output
 
 
 @pytest.mark.parametrize("email, expected_output", [
@@ -180,7 +180,7 @@ def test_sanitize_username(input_username, expected_output):
     ("a" * 320 + "@example.com", False),  # Exceeds max length
 ])
 def test_is_valid_email(email, expected_output):
-    assert is_valid_email(email) == expected_output, f"Failed for email: {email}"
+    assert input_sanitization.is_valid_email(email) == expected_output, f"Failed for email: {email}"
 
 
 @pytest.mark.parametrize("url, expected", [
@@ -222,7 +222,7 @@ def test_is_valid_email(email, expected_output):
     ("not-a-url", False),  # Completely malformed string
 ])
 def test_is_valid_url(url, expected):
-    assert is_valid_url(url) == expected
+    assert input_sanitization.is_valid_url(url) == expected
 
 
 @pytest.mark.parametrize("html, expected", [
@@ -237,7 +237,7 @@ def test_is_valid_url(url, expected):
     ("", ""),  # Empty string should remain empty
 ])
 def test_close_open_html_tags(html, expected):
-    assert close_open_html_tags(html) == expected
+    assert input_sanitization.close_open_html_tags(html) == expected
 
 
 @pytest.mark.parametrize("target, expected", [
@@ -277,7 +277,7 @@ def test_close_open_html_tags(html, expected):
     ("https://xn--sub-infomundi.net", False),  # IDN homograph attack attempt
 ])
 def test_is_safe_url(target, expected):
-    assert is_safe_url(target) == expected
+    assert input_sanitization.is_safe_url(target) == expected
 
 
 if __name__ == "__main__":

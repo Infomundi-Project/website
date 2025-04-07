@@ -32,7 +32,7 @@ def fetch_categories() -> list:
 
             category_database = [row['name'] for row in categories]
             shuffle(category_database)
-    except pymysql.MySQLError as e:
+    except pymysql.MySQLError:
         return []
     
     print(f'Got a total of {len(category_database)} categories from the database')

@@ -30,13 +30,13 @@ def sha256_verify_hash(text: str, hash_value: str) -> bool:
         bool: True if the text matches the hash, False otherwise.
 
     Example:
-        >>> hash_value = sha256_hash_text('hello world')
+        >>> hash_value = string_to_sha256_hex('hello world')
         >>> verify_sha256_hash('hello world', hash_value)
         True
         >>> verify_sha256_hash('hello', hash_value)
         False
     """
-    return sha256_hash_text(text) == hash_value
+    return string_to_sha256_hex(text) == hash_value
 
 
 def binary_to_sha256_hex(binary_data: bytes) -> str:

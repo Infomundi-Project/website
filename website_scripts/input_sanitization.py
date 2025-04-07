@@ -2,10 +2,8 @@ import bleach
 import html
 import re
 
-from html.parser import HTMLParser
 from urllib.parse import urlparse
 from unidecode import unidecode
-from collections import deque
 from bs4 import BeautifulSoup
 
 from . import security_util, config

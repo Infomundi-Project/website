@@ -58,7 +58,7 @@ def scrape_data(url:str, endpoint: str):
     headers = {
         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     }
-    response = get_request(url, headers=headers)
+    response = get_request(url, timeout=4, headers=headers)
 
     if response.status_code != 200:
         print(f'[+] Error getting {url}. Response code: {response.status_code}')
@@ -141,7 +141,8 @@ def scrape_stock_data(country_name: str):
         return stock_data
 
     response = get_request(
-        f"https://tradingeconomics.com/{country_name}/stock-market", 
+        f"https://tradingeconomics.com/{country_name}/stock-market",
+        timeout=5,
         headers = {
             'User-Agent': choice(immutable.USER_AGENTS)
             }

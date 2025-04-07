@@ -1,9 +1,8 @@
 import pymysql
 from datetime import datetime, timedelta
 
-from website_scripts import config, models
+from website_scripts import config
 
-# Database connection parameters
 db_params = {
     'host': '127.0.0.1',
     'user': config.MYSQL_USERNAME,
@@ -63,8 +62,6 @@ def get_statistics() -> dict:
                     last_updated_message = f"{hours} hours ago"
             else:
                 last_updated_message = "N/A"
-            
-            timestamp_string = current_timestamp.isoformat()
             
             # Insert or update statistics in the database
             if statistics:

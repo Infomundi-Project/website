@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, Blueprint, Response, jsonify
+from flask import Flask, render_template, request, send_from_directory, abort, g, session, flash, Response, jsonify
 from flask_login import current_user, logout_user
 from flask_assets import Environment, Bundle
 from htmlmin import minify as html_minify

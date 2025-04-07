@@ -114,7 +114,7 @@ def fetch_stories_from_database(category_id: int, limit: int=500):
     return stories
 
 
-def get_link_preview(data, source: str='default', category_name: str='None'):
+def get_link_preview(data, source: str = 'default', category_name: str = 'None'):
     """
     Attempts to retrieve a link preview image URL for a given URL. Handles proxy rotation
     and retries upon failure. Can return either a preview image URL or, under certain conditions,
@@ -159,7 +159,7 @@ def get_link_preview(data, source: str='default', category_name: str='None'):
             try:
                 response = requests.get(url, timeout=5, headers=headers, proxies={'http': f'http://{chosen_proxy}'})
                 if response.status_code not in [200, 301, 302]:
-                    log_message(f'[Invalid HTTP Response] {response.status_code} from {url}. Returning default image.')
+                    log_message(f'[Invalid HTTP Response] {response.status_code} from {url}.')
                     return DEFAULT_IMAGE
             except requests.exceptions.ProxyError:
                 # Handle proxy errors by marking proxy as bad and retrying
@@ -331,29 +331,38 @@ def download_and_convert_image(data: dict) -> list:
     return website_paths
 
 
-def update_story_media_content_url(story_id, image_url):
-    log_message(f"Updating image for story {story_id} image url to {image_url}...")
+def update_story_image_url(stories_to_update):
+    """
+    stories_to_update should be a list of tuples: [(image_url, story_id), ...]
+    """
+    if not stories_to_update:
+        return
+    
+    log_message(f"Updating {len(stories_to_update)} story image URLs...")
     try:
         with db_connection.cursor() as cursor:
             update_query = "UPDATE stories SET image_url = %s, has_image = 1 WHERE id = %s"
-            cursor.execute(update_query, (image_url, story_id))
-            db_connection.commit()
+            cursor.executemany(update_query, stories_to_update)
+        db_connection.commit()
     except pymysql.MySQLError as e:
-        log_message(f"Error updating story media content URL: {e}")
-    log_message(f'Updated story {story_id} image url to {image_url}')
+        log_message(f"Error updating multiple story image URLs: {e}")
 
 
-def update_publisher_favicon(publisher_id, image_url):
-    log_message(f"Updating image for publisher {publisher_id} image url to {image_url}...")
+def update_publisher_favicon(favicon_updates):
+    """
+    favicon_updates should be a list of tuples: [(image_url, publisher_id), ...]
+    """
+    if not favicon_updates:
+        return
+
+    log_message(f"Updating {len(favicon_updates)} publisher favicons...")
     try:
         with db_connection.cursor() as cursor:
             update_query = "UPDATE publishers SET favicon = %s WHERE publisher_id = %s"
-            cursor.execute(update_query, (image_url, publisher_id))
-            db_connection.commit()
-            log_message(f'[Favicon] Changed favicon for publisher {publisher_id}')
+            cursor.executemany(update_query, favicon_updates)
+        db_connection.commit()
     except pymysql.MySQLError as e:
-        log_message(f"Error updating publisher favicon: {e}")
-    log_message(f'Updated favicon {publisher_id} image url to {image_url}')
+        log_message(f"Error updating multiple favicons: {e}")
 
 
 def process_category(category: dict):
@@ -375,9 +384,10 @@ def process_category(category: dict):
         downloaded and processed images.
     """
     stories = fetch_stories_from_database(category['id'])
+    stories_to_update = []
+    favicons_to_update = []
 
     log_message(f"Starting threading with {WORKERS} workers for {category['name']}")
-    # I assume the whole code is a mess at this point...
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
         futures = []
         for story in stories:
@@ -398,12 +408,15 @@ def process_category(category: dict):
                 image_url = f'{bucket_base_url}/{path}'
 
                 if 'stories' in path:
-                    update_story_media_content_url(story['id'], image_url)
+                    stories_to_update.append((image_url, story['id']))
                 else:
-                    update_publisher_favicon(story['publisher_id'], image_url)
+                    favicons_to_update.append((image_url, story['publisher_id']))
                     favicon_database.append(f"{story['publisher_id']}.ico")
 
                 total_updated += 1
+
+        update_story_image_url(stories_to_update)
+        update_publisher_favicon(favicons_to_update)
 
         if total_updated > 0:
             log_message(f'[{category['name']}] Downloaded {total_updated}/{len(stories)} images.')
@@ -417,7 +430,6 @@ def search_images():
     """
     # DEBUG
     categories = [x for x in fetch_categories_from_database() if x['name'] == 'br_general']
-    print(categories)
 
     total = 0
     for category in categories:

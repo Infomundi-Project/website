@@ -105,7 +105,7 @@ CREATE TABLE stories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     title VARCHAR(150) NOT NULL,
-    description VARCHAR(500),
+    description VARCHAR(500) NOT NULL,
     gpt_summary JSON,
     
     url VARCHAR(512) NOT NULL,
