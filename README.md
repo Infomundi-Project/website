@@ -1,18 +1,20 @@
-<img src="https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp" style="height: auto; width: 50%;">  
+<div align="center">
 
-> Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.
+![Infomundi Logo](https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp)
 
-![Infomundi](https://img.shields.io/badge/Infomundi-2.0-blue?style=social)
-![Python](https://img.shields.io/badge/Python-3.12.7-blue?style=social&logo=python)
-![MySQL](https://img.shields.io/badge/MySQL-9.0.1-blue?style=social&logo=mysql)
+![Python](https://img.shields.io/badge/Python-3.12.7-blue?style=social&logo=python&logoColor=black)
+![Flask](https://img.shields.io/badge/3.1.0-black?style=social&logo=flask&logoColor=black&label=Flask)
+![MySQL](https://img.shields.io/badge/MySQL-9.0.1-blue?style=social&logo=mysql&logoColor=black)
+![Bootstrap 5](https://img.shields.io/badge/5.3.x-blue?style=social&logo=bootstrap&logoColor=black&label=Bootstrap)
 
----
+</div>
 
-## 🌟**About the Project**
+## About the Project
 
 Infomundi was created with the mission of simplifying access to reliable, detailed information about countries worldwide. Our platform spans topics from geopolitics to economics, continuously updated to keep our community informed and engaged. We recognize the transformative value of information. Designed to be user-friendly and accessible, our platform supports meaningful discussions and fosters a deeper understanding of the world around us.
 
-### Built With:
+### Development Stack
+
 - [Python](https://www.python.org/)
 - [Flask](https://flask.palletsprojects.com/en/stable/)
 - [SQL Alchemy](https://www.sqlalchemy.org/)
@@ -21,7 +23,7 @@ Infomundi was created with the mission of simplifying access to reliable, detail
 
 ---
 
-## ✨ **Features**
+## Features
 
 ✅ = Implemented
 🚧 = Under Development
@@ -56,7 +58,7 @@ Infomundi was created with the mission of simplifying access to reliable, detail
 ---
 
 
-## 🤝 **Contributing**
+## Contributing
 
 Contributions are what make the open-source community such a fantastic place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -70,12 +72,12 @@ See the [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ---
 
-## 📜 **License**
+## License
 
 Distributed under the X License. See `LICENSE` for more information.
 
 ---
 
-## 📬 **Contact**
+## Contact
 
-https://infomundi.net/team
+<https://infomundi.net/team>
