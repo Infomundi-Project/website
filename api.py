@@ -44,14 +44,14 @@ def get_cities(state_id):
 @api.route('/currencies')
 @extensions.cache.cached(timeout=60*30) # 30m cached
 def get_currencies():
-    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/currencies')
+    currencies = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/currencies')
     return jsonify(currencies)
 
 
 @api.route('/stocks')
 @extensions.cache.cached(timeout=60*30) # 30m cached
 def get_stocks():
-    stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/stocks')
+    stocks = json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/stocks')
     
     # Removes unused US stocks
     del stocks[1:3]
@@ -62,7 +62,7 @@ def get_stocks():
 @api.route('/crypto')
 @extensions.cache.cached(timeout=60*30) # 30m cached
 def get_crypto():
-    return jsonify(json_util.read_json(f'{config.WEBSITE_ROOT}/data/json/crypto'))
+    return jsonify(json_util.read_json(f'{config.WEBSITE_ROOT}/assets/data/json/crypto'))
 
 
 @api.route('/story/<action>', methods=['POST'])
@@ -257,14 +257,14 @@ def get_country_code():
     """Get the country code based on the selected country name.
 
     Argument: str
-    	GET 'country' parameter. A simple string, for example 'Brazil'.
+        GET 'country' parameter. A simple string, for example 'Brazil'.
 
-	Return: dict
-		Returns the country code of the specified country in a json format (using jsonify). An example would be:
+    Return: dict
+        Returns the country code of the specified country in a json format (using jsonify). An example would be:
 
-		{
-			'countryCode': 'BR'
-		}
+        {
+            'countryCode': 'BR'
+        }
     """
 
     selected_country = request.args.get('country', '')
@@ -280,12 +280,12 @@ def autocomplete():
     """Autocomplete endpoint for country names.
 
     Argument: str
-    	GET 'query' parameter. A simple string, for example 'Bra'.
+        GET 'query' parameter. A simple string, for example 'Bra'.
 
     Return: list
-    	Returns a list of countries relevant to the query. An example would be:
+        Returns a list of countries relevant to the query. An example would be:
 
-    	['Brazil', 'Gibraltar']
+        ['Brazil', 'Gibraltar']
     """
 
     query = request.args.get('query', '').lower()
@@ -321,12 +321,15 @@ def search():
 @api.route('/story/summarize/<story_url_hash>', methods=['GET'])
 @extensions.limiter.limit("120/day;60/hour;10/minute", override_defaults=True)
 def summarize_story(story_url_hash):
-    story = models.Story.query.filter_by(
-        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
-        ).first()
+    try:
+        story = models.Story.query.filter_by(
+            url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
+            ).first()
+    except Exception:
+        return jsonify({'response': "Couldn't find the story"}), 404
 
     if not story:
-        return jsonify({'response': f"Couldn't find the story"}), 500
+        return jsonify({'response': "Couldn't find the story"}), 404
 
     if story.gpt_summary:
         return jsonify({'response': story.gpt_summary}), 200
@@ -354,7 +357,7 @@ def get_stories():
 
     start_date = request.args.get('start_date', '', type=str)
     end_date = request.args.get('end_date', '', type=str)
-    query = request.args.get('query', '', type=str)
+    #query = request.args.get('query', '', type=str)
 
     # br_general, us_general and so on
     category = models.Category.query.filter_by(name=f'{country}_{category}').first()
@@ -415,7 +418,7 @@ def get_stories():
         {
             'story_id': hashing_util.binary_to_md5_hex(story.url_hash),
             'title': story.title,
-            'description': story.description,
+            'description': story.description if story.description else '',
             
             'views': story.stats.views if story.stats else 0,
             'likes': story.stats.likes if story.stats else 0,

@@ -1,0 +1,55 @@
+   .story-img {
+      border-radius: 30px;
+      max-width: 70%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      height: auto;
+      position: relative; /* Ensures the logos are behind the story image */
+      z-index: 1; /* Keep story image on top of logos */
+   }
+
+   .inf-image-wrapper {
+      max-height: 50%;
+      position: relative; /* Enables absolute positioning for pseudo-elements */
+   }
+
+   /* Left and right logos behind the image */
+   .inf-image-wrapper::before,
+   .inf-image-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-image: url('https://infomundi.net/static/img/logos/logo-icon-dark.webp');
+      background-repeat: no-repeat;
+      background-size: contain;
+      opacity: 0.75; /* Set low opacity for subtle effect */
+      width: 40%; /* Adjustable */
+      height: 100%;
+      z-index: 0; /* Behind the story image */
+   }
+
+   /* Left logo */
+   .inf-image-wrapper::before {
+      left: 0;
+      background-position: left center;
+   }
+
+   /* Right logo */
+   .inf-image-wrapper::after {
+      right: 0;
+      background-position: right center;
+   }
+
+   @media (max-width: 968px) {
+      .inf-image-wrapper {
+         max-height: 100%;
+      }
+      .story-img {
+         max-width: 100%;
+      }
+      .inf-image-wrapper::before, .inf-image-wrapper::after {
+         background-size: 60%; /* Adjust for smaller screens */
+         width: 50%; /* Fit logos better on mobile */
+      }
+   }

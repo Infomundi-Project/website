@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 
 from website_scripts import config, extensions, models, input_sanitization,\
- cloudflare_util, auth_util, hashing_util, qol_util, security_util, totp_util
+ auth_util, hashing_util, qol_util, security_util, totp_util
 from website_scripts.decorators import unauthenticated_only, verify_captcha
 
 auth = Blueprint('auth', __name__)

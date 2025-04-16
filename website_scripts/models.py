@@ -36,7 +36,7 @@ class Story(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
     title = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.String(500))
+    description = db.Column(db.String(500), nullable=False, default='No description has been provided.')
     gpt_summary = db.Column(db.JSON)
 
     url = db.Column(db.String(512), nullable=False)
@@ -211,6 +211,41 @@ class SiteStatistics(db.Model):
     total_users = db.Column(db.Integer, nullable=False)
     total_comments = db.Column(db.Integer, nullable=False)
     total_clicks = db.Column(db.Integer, nullable=False)
+
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
+
+    content = db.Column(db.Text, nullable=False)  # Markdown-supported content
+    edited = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic', cascade='all, delete-orphan')
+    reactions = db.relationship('CommentReaction', backref='comment', lazy='dynamic')
+    user = db.relationship('User', backref='comments')
+    story = db.relationship('Story', backref='comments')
+
+
+class CommentReaction(db.Model):
+    __tablename__ = 'comment_reactions'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+
+    action = db.Column(db.String(10), nullable=False)  # 'like' or 'dislike'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('comment_id', 'user_id', name='unique_comment_reaction'),)
 
 
 class Stocks(db.Model):

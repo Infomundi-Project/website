@@ -105,7 +105,7 @@ CREATE TABLE stories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     title VARCHAR(150) NOT NULL,
-    description VARCHAR(500) NOT NULL,
+    description VARCHAR(500) NOT NULL DEFAULT 'No description has been provided.',
     gpt_summary JSON,
     
     url VARCHAR(512) NOT NULL,
@@ -180,6 +180,36 @@ CREATE TABLE site_statistics (
     total_users INT NOT NULL,
     total_comments INT NOT NULL,
     total_clicks INT NOT NULL
+);
+
+
+CREATE TABLE comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    story_id INT NOT NULL,
+    user_id INT,
+    parent_id INT,
+    content TEXT NOT NULL,
+    edited TINYINT(1) DEFAULT 0,
+    is_deleted TINYINT(1) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE comment_reactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comment_id INT NOT NULL,
+    user_id INT NOT NULL,
+    action VARCHAR(10) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT unique_comment_reaction UNIQUE (comment_id, user_id)
 );
 
 

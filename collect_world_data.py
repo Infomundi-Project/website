@@ -6,7 +6,7 @@ from website_scripts import json_util, immutable
 from website_scripts.config import LOCAL_ROOT
 from website_scripts.qol_util import is_file_creation_within_threshold_minutes
 
-path = f'{LOCAL_ROOT}/data/json'
+path = f'{LOCAL_ROOT}/assets/data/json'
 
 
 def format_world_data():

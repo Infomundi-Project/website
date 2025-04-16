@@ -1,63 +1,10 @@
 {% extends "base.html" %} {% block title %}{{ seo_data[0] }}{% endblock %}
-{% block styles %}
-<style>
-   .story-img {
-      border-radius: 30px;
-      max-width: 70%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      height: auto;
-      position: relative; /* Ensures the logos are behind the story image */
-      z-index: 1; /* Keep story image on top of logos */
-   }
 
-   .inf-image-wrapper {
-      max-height: 50%;
-      position: relative; /* Enables absolute positioning for pseudo-elements */
-   }
-
-   /* Left and right logos behind the image */
-   .inf-image-wrapper::before,
-   .inf-image-wrapper::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background-image: url('{{ url_for('static', filename='img/logos/logo-icon-dark.webp') }}');
-      background-repeat: no-repeat;
-      background-size: contain;
-      opacity: 0.75; /* Set low opacity for subtle effect */
-      width: 40%; /* Adjust size as needed */
-      height: 100%;
-      z-index: 0; /* Behind the story image */
-   }
-
-   /* Left logo */
-   .inf-image-wrapper::before {
-      left: 0;
-      background-position: left center;
-   }
-
-   /* Right logo */
-   .inf-image-wrapper::after {
-      right: 0;
-      background-position: right center;
-   }
-
-   @media (max-width: 968px) {
-      .inf-image-wrapper {
-         max-height: 100%;
-      }
-      .story-img {
-         max-width: 100%;
-      }
-      .inf-image-wrapper::before, .inf-image-wrapper::after {
-         background-size: 60%; /* Adjust for smaller screens */
-         width: 50%; /* Fit logos better on mobile */
-      }
-   }
-</style>
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/comments.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}">
 {% endblock %}
+
 {% block content %}
 <div class="container align-items-center mt-5">
    <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
@@ -68,73 +15,68 @@
       </ol>
    </nav>
    <h1 class="fw-bold mt-3 mb-3 text-uppercase">{{ story.title }}</h1>
-   <p class="text-body-secondary small">Published by <a href="{{ story.link }}" target="_blank">{{ story.publisher.name }}</a>, on {{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.clicks }} view{% if story.clicks > 1 or story.clicks == 0 %}s{% endif %}</span></p>
+   <p class="text-body-secondary small">Published by <a href="{{ story.link }}" target="_blank">{{ story.publisher.name }}</a>, on {{ story.pub_date }}<span class="ms-1">&#x2022;</span><span class="ms-1">{{ story.stats.views }} view{% if story.stats.views > 1 or story.stats.views == 0 %}s{% endif %}</span></p>
    
    <div class="my-5 d-flex justify-content-center inf-image-wrapper">
-      <img fetchpriority="high" src="{{ story.media_content_url }}" class="story-img" alt="The image for this story">
+      <img fetchpriority="high" src="{{ story.image_url }}" class="story-img" alt="The image for this story">
    </div>
 
    <h2 class="fs-6 fw-light">{{ story.description|safe }}</h2>
    <hr class="mt-5 mb-3">
-   {% if not story.gpt_summary %}
-   <div id="maximusInitialText">
-      <h3 class="mb-3">Maximus is reading the news, wait a few seconds...</h3>
-   </div>
-   <div id="maximusCooking">
-      <img data-src="{{ url_for('static', filename='img/maximus.webp') }}" width="500" height="500" style="height: auto; width: 5vh" class="rounded-circle me-1 lazyload" alt="Maximus"><span id="maximusText">Maximus is noting some important things...</span>
-   </div>
-   <div class="progress">
-      <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBar"></div>
-   </div>
-   <div id="apiResponse">
-   </div>
-   <div class="invisible" id="maximusFinalMessageTrue">
-      <p>We are glad to help you further understand this news. You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
-      <div class="d-flex justify-content-between mb-3">
-         {% if previous_news %}
-         <a href="https://infomundi.net/comments?id={{ previous_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-         {% endif %}
-         {% if next_news %}
-         <a href="https://infomundi.net/comments?id={{ next_news }}&category={{ request.args.get('category', '') }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-         {% endif %}
+   <div class="maximus">
+              <!-- Header Section -->
+              <div class="maximus-summary-header row align-items-start">
+                <div class="col-auto mt-2">
+                  <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Profile Picture" class="border border-3 p-2">
+                </div>
+                <div class="col-md-10">
+                  <span class="fs-3">MAXIMUS</span><span class="ms-3 small text-uppercase">Infomundi's AI</span>
+                  <div class="my-3 border rounded">
+                    <p class="p-3 m-0">Hi, my name is Maximus, and I'm Infomundi's AI. My job is to help you make sense of complex stories and ideas. Here's how I work:</p>
+                      <ul class="p-3 m-0 ms-3">
+                        <li><strong>Addressed Topics:</strong> I'll highlight the key themes and main ideas for you.</li>
+                        <li><strong>Context Around:</strong> I'll provide the background and connect the dots so you get the full picture.</li>
+                        <li><strong>Methods for Investigation:</strong> I'll suggest ways to explore further, like useful resources and actionable tools.</li>
+                        <li><strong>Questioning the Subject:</strong> I'll help you critically analyze key questions about the subject.</li>
+                      </ul>
+                      <p class="p-3 m-0">Think of me as your guide to turning bulk information into clear and actionable insights.</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Content Section -->
+              <div class="maximus-summary-content-placeholder">
+                <!-- Blurred Text -->
+                <p class="maximus-summary-blurred-text text-break" id="maximusSummaryBlurredText"></p>
+                <!-- Progress Bar -->
+                <div class="maximus-summary-progress">
+                  <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="maximusSummaryProgressBar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+              <div class="maximus-summary-api-response"></div>
+            </div>
+
+
+
+
+   <div class="container mt-5">
+    <h3 class="mb-4">Comments</h3>
+
+    <!-- Comment Form -->
+    <form id="commentForm" class="mb-4">
+      <div class="mb-3">
+        <textarea class="form-control" id="commentText" rows="3" placeholder="Write your comment..." required></textarea>
       </div>
-   </div>
-   {% else %}
-   {% if story.gpt_summary %}
-   {% for item in formatted_gpt_summary %}
-   <h3>{{ item.header }}</h3>
-   <p>{{ item.paragraph }}</p>
-   {% endfor %}
-   <div class="mt-4">
-      <p>We are glad to help you further understand this news. You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
-   </div>
-   <div class="d-flex justify-content-between mb-3">
-      {% if previous_news %}
-      <a href="https://infomundi.net/comments?id={{ previous_news }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-      {% endif %}
-      {% if next_news %}
-      <a href="https://infomundi.net/comments?id={{ next_news }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-      {% endif %}
-   </div>
-   {% else %}
-   <p>{{ story.description }}</p>
-   <div class="mt-4">
-      <p>You can <a href="{{ story.link }}" aria-label="Click here to visit the original story" target="_blank" class="text-decoration-none">visit the original story in {{ story.publisher.name }}</a>.</p>
-   </div>
-   <div class="d-flex justify-content-between mb-3">
-      {% if previous_news %}
-      <a href="https://infomundi.net/comments?id={{ previous_news }}" class="btn btn-outline-primary"><i class="fa-solid fa-backward me-1"></i>Previous News</a>
-      {% endif %}
-      {% if next_news %}
-      <a href="https://infomundi.net/comments?id={{ next_news }}" class="btn btn-outline-primary">Next News<i class="fa-solid fa-forward ms-1"></i></a>
-      {% endif %}
-   </div>
-   {% endif %}
-   {% endif %}
-      <!--<script defer src="https://commento.infomundi.net/comentario.js"></script>-->
-   <div class="mt-5">
-      <comentario-comments auto-init="false" live-update="true" lang="{% if page_language == 'pt' %}pt-BR{% else %}{{ page_language }}{% endif %}" page-id="/comments?id={{ story.story_id }}" max-level="5" theme="{{ request.cookies.get('theme', 'light') }}"></comentario-comments>
-   </div>
+      <input type="hidden" id="parentId" />
+      <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+
+    <!-- Comments List -->
+    <div id="commentsList"></div>
+  </div>
+
+
+
+
    <div class="container">
       <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
          <ol class="breadcrumb">
@@ -156,32 +98,158 @@
    {% endif %}
 </div>
 {% endblock %}
+
+
+
+
 {% block scripts %}
-{% if not story.gpt_summary %}
-<script nonce="{{ nonce }}"
-   src="{{ url_for('static', filename='js/fetchGptSummary.js') }}"
-   ></script>
-{% endif %}
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/maximusSummary.js') }}"></script>
+<script nonce="{{ nonce }}">
+const urlParams = new URLSearchParams(window.location.search);
+const story_id = urlParams.get('id');
+
+fetchAndRenderStorySummary(story_id);
+</script>
+
+  <script nonce="{{ nonce }}">
+    const form = document.getElementById('commentForm');
+    const commentText = document.getElementById('commentText');
+    const parentIdField = document.getElementById('parentId');
+    const commentsList = document.getElementById('commentsList');
+
+    async function loadComments() {
+      const res = await fetch('/api/comments');
+      const data = await res.json();
+      commentsList.innerHTML = '';
+      data.forEach(comment => renderComment(comment, commentsList));
+    }
+
+    function renderComment(comment, container, level = 0) {
+      const div = document.createElement('div');
+      div.className = 'comment mt-3' + (level ? ' comment-box' : '');
+      div.dataset.id = comment.id;
+
+      const html = `
+        <div class="mb-2" id="comment-content-${comment.id}">
+          ${marked.parse(comment.text)}
+        </div>
+        <div class="comment-time mb-2">Posted on ${new Date(comment.created_at).toLocaleString()}</div>
+        <div class="comment-actions mb-2">
+          <button class="btn btn-sm btn-outline-success" onclick="likeComment(${comment.id})">👍 ${comment.likes}</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="dislikeComment(${comment.id})">👎 ${comment.dislikes}</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="replyTo(${comment.id})">Reply</button>
+          <button class="btn btn-sm btn-outline-primary" onclick="editComment(${comment.id})">Edit</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteComment(${comment.id})">Delete</button>
+        </div>
+      `;
+      div.innerHTML = html;
+      container.appendChild(div);
+
+      if (comment.replies && comment.replies.length) {
+        comment.replies.forEach(reply => renderComment(reply, container, level + 1));
+      }
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const text = commentText.value.trim();
+      const parentId = parentIdField.value || null;
+      if (!text) return;
+
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, parentId })
+      });
+
+      if (res.ok) {
+        commentText.value = '';
+        parentIdField.value = '';
+        await loadComments();
+      }
+    });
+
+    async function likeComment(id) {
+      await fetch(`/api/comments/${id}/like`, { method: 'POST' });
+      loadComments();
+    }
+
+    async function dislikeComment(id) {
+      await fetch(`/api/comments/${id}/dislike`, { method: 'POST' });
+      loadComments();
+    }
+
+    function replyTo(id) {
+      parentIdField.value = id;
+      commentText.focus();
+    }
+
+    function editComment(id) {
+      const contentDiv = document.getElementById(`comment-content-${id}`);
+      const originalText = contentDiv.innerText.trim();
+      const textarea = document.createElement('textarea');
+      textarea.className = 'form-control mb-2';
+      textarea.value = originalText;
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn btn-sm btn-success me-2';
+      saveBtn.textContent = 'Save';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-sm btn-secondary';
+      cancelBtn.textContent = 'Cancel';
+
+      contentDiv.replaceWith(textarea);
+      textarea.after(saveBtn, cancelBtn);
+
+      saveBtn.onclick = async () => {
+        const updatedText = textarea.value.trim();
+        if (!updatedText) return;
+        await fetch(`/api/comments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: updatedText })
+        });
+        loadComments();
+      };
+
+      cancelBtn.onclick = () => loadComments();
+    }
+
+    async function deleteComment(id) {
+      if (confirm("Are you sure you want to delete this comment?")) {
+        await fetch(`/api/comments/${id}`, { method: 'DELETE' });
+        loadComments();
+      }
+    }
+
+    // Load comments on page load
+    loadComments();
+  </script>
+
+
+
+
+
 <script nonce="{{ nonce }}"
       src="{{ url_for('static', filename='js/scrollProgressBar.js') }}" 
       ></script>
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/awaitLoadComentario.js') }}"></script>
+
 <script type="application/ld+json" nonce="{{ nonce }}">
    {
      "@context": "https://schema.org",
      "@type": "Article",
      "headline": "{{ story.title }}",
      "description": "{{ story.description }}",
-     "image": "{{ story.media_content_url }}",
+     "image": "{{ story.image_url }}",
      "publisher": {
        "@type": "Organization",
        "name": "{{ story.publisher.name }}",
        "logo": {
          "@type": "ImageObject",
-         "url": "{{ story.publisher.favicon }}"
+         "url": "{{ story.publisher.favicon_url }}"
        }
      },
-     "datePublished": "{{ story.pub_date.replace('/', '-') }}",
      "mainEntityOfPage": {
        "@type": "WebPage",
        "@id": "{{ request.url }}"

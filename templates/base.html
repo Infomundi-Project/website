@@ -250,22 +250,22 @@
           </li>
         </ul>
         {% endif %}
-        {% if session.get('last_visited_country', '') or session.get('last_visited_news', '') %}
+        {% if session.get('last_visited_country_url', '') or session.get('last_visited_story_url', '') %}
         <span class="fs-4">Session</span>
         <hr>
         <ul class="nav nav-pills flex-column mb-5">
-          {% if session.get('last_visited_country', '') %}
+          {% if session.get('last_visited_country_url', '') %}
           <li class="nav-item inf-nav-item">
-            <a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country']) else '' }}">
+            <a href="{{ session['last_visited_country_url'] }}" class="nav-link {{ 'active' if request.url == session['last_visited_country_url'] else '' }}">
               <span class="icon-wrapper me-2"><i class="fa-solid fa-earth-americas"></i></span>
               <div class="vr me-2"></div>
               Last visited country
             </a>
           </li>
           {% endif %}
-          {% if session.get('last_visited_news', '') %}
+          {% if session.get('last_visited_story_url', '') %}
           <li class="nav-item inf-nav-item">
-            <a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_news']) else '' }}">
+            <a href="{{ session['last_visited_story_url'] }}" class="nav-link {{ 'active' if request.url == session['last_visited_story_url'] else '' }}">
               <span class="icon-wrapper me-2"><i class="fa-solid fa-newspaper"></i></span>
               <div class="vr me-2"></div>
               Last visited story
@@ -719,11 +719,11 @@
               <i class="fa-solid fa-gear me-1"></i>Settings
               </a>
             </li>
-            {% if session.get('last_visited_country', '') %}
-            <li class="nav-item mb-2"><a href="https://infomundi.net/{{ session['last_visited_country'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited country"><i class="fa-solid fa-earth-americas me-1"></i>Last visited country</a></li>
+            {% if session.get('last_visited_country_url', '') %}
+            <li class="nav-item mb-2"><a href="{{ session['last_visited_country_url'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited country"><i class="fa-solid fa-earth-americas me-1"></i>Last visited country</a></li>
             {% endif %}
-            {% if session.get('last_visited_news', '') %}
-            <li class="nav-item mb-2"><a href="https://infomundi.net/{{ session['last_visited_news'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited story"><i class="fa-solid fa-newspaper me-1"></i>Last visited story</a></li>
+            {% if session.get('last_visited_story_url', '') %}
+            <li class="nav-item mb-2"><a href="{{ session['last_visited_story_url'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited story"><i class="fa-solid fa-newspaper me-1"></i>Last visited story</a></li>
             {% endif %}
             <li class="nav-item mb-2"><a href="#" data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link p-0 text-body-secondary" aria-label="Click to log out from your account"><i class="fa-solid fa-right-from-bracket me-1"></i>Sign out</a></li>
             {% endif %}

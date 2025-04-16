@@ -432,7 +432,7 @@ def news():
         flash("We apologize, but we couldn't find the country you are looking for.")
         return redirect(url_for('views.user_redirect'))
     
-    session['last_visited_country'] = f'news?country={contry_cca2}'
+    session['last_visited_country_url'] = f'https://infomundi.net/news?country={contry_cca2}'
 
     supported_categories = scripts.get_supported_categories(contry_cca2)
 
@@ -461,14 +461,9 @@ def news():
 
 @views.route('/comments', methods=['GET'])
 def comments():
-    story_id = request.args.get('id', '').lower()
-    
-    # Check if has the length of a md5 hash
-    if not input_sanitization.is_md5_hash(story_id):
-        flash('We apologize, but the story ID you provided is not valid. Please try again.', 'error')
-        return redirect(url_for('views.user_redirect'))
-
-    story = extensions.db.session.get(models.Story, story_id)
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(request.args.get('id', '').lower())
+        ).first()
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(url_for('views.user_redirect'))
@@ -482,32 +477,36 @@ def comments():
             header = key.replace('_', ' ').title()
             formatted_gpt_summary.append({'header': header, 'paragraph': value})
 
-    if not story.clicks:
-        story.clicks = 1
+    # TODO: Add clicks to story
+    story_stats = extensions.db.session.get(models.StoryStats, story.id)
+    if not story_stats:
+        story_stats = models.StoryStats(story_id=story.id, views=1, likes=0, dislikes=0)
+        extensions.db.session.add(story_stats)
     else:
-        story.clicks += 1
+        story_stats.views += 1
 
-    # Commit changes to the database.
     extensions.db.session.commit()
-    
+
     # Set session information, used in templates.
-    session['last_visited_news'] = f'comments?id={story_id}'
+    session['last_visited_story_url'] = f'https://infomundi.net/comments?id={story.id}'
     
     # Used in the api.
-    session['visited_news'] = story_id
+    session['last_visited_story_id'] = story.id
     
     # Create the SEO data. Title should be 60 characters, description should be 150 characters
     seo_title = input_sanitization.gentle_cut_text(45, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
-    seo_image = story.media_content_url
+    seo_image = story.image_url
+
+    category = extensions.db.session.get(models.Category, story.category_id)
     
-    country_cca2 = story.category_id.split('_')[0]
+    country_cca2 = category.name.split('_')[0]
     return render_template('comments.html', 
-        from_country_name=scripts.country_code_to_name(story.category_id.split('_')[0]),
+        from_country_name=scripts.country_code_to_name(category.name.split('_')[0]),
         page_language=qol_util.detect_language(story.title + ' ' + story.description),
         from_country_url=f'https://infomundi.net/news?country={country_cca2}',
-        from_country_category=story.category_id.split('_')[1],
-        from_country_code=story.category_id.split('_')[0],
+        from_country_category=category.name.split('_')[1],
+        from_country_code=category.name.split('_')[0],
         formatted_gpt_summary=formatted_gpt_summary,
         seo_data=(seo_title, seo_description, seo_image),
         previous_news='',

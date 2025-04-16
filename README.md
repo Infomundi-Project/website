@@ -2,6 +2,7 @@
 
 ![Infomundi Logo](https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3549171b5ed14423b31b3138afdf80ee)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![Python](https://img.shields.io/badge/Python-3.12.7-blue?style=social&logo=python&logoColor=black)
 ![Flask](https://img.shields.io/badge/3.1.0-black?style=social&logo=flask&logoColor=black&label=Flask)
 ![MySQL](https://img.shields.io/badge/MySQL-9.0.1-blue?style=social&logo=mysql&logoColor=black)
