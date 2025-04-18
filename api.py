@@ -7,7 +7,8 @@ from datetime import datetime
 
 from website_scripts import config, json_util, scripts,\
     models, extensions, input_sanitization, friends_util, \
-    country_util, totp_util, security_util, hashing_util, llm_util, decorators
+    country_util, totp_util, security_util, hashing_util, \
+    llm_util, decorators, comments_util
 
 api = Blueprint('api', __name__)
 
@@ -368,10 +369,12 @@ def get_stories():
     if order_by not in valid_order_columns:
         order_by = 'created_at'
 
+    model = models.StoryStats if order_by == 'views' else models.Story
+
     if order_dir == 'asc':
-        order_criterion = getattr(models.Story, order_by).asc()
+        order_criterion = getattr(model, order_by).asc()
     else:
-        order_criterion = getattr(models.Story, order_by).desc()
+        order_criterion = getattr(model, order_by).desc()
 
     # Page should be between 1 and 9999
     if not (1 <= page <= 9999):
@@ -436,3 +439,91 @@ def get_stories():
         for story in stories
     ]
     return jsonify(stories_list)
+
+
+@api.route('/comments', methods=['POST'])
+@decorators.api_login_required
+def create_comment():
+    data = request.get_json()
+    story_id = data.get('story_id') # this is the story url hash (md5 hex)
+    content = data.get('content')
+    parent_id = data.get('parent_id')
+
+    if not story_id or not content:
+        return jsonify({'error': 'Missing story_id or content'}), 400
+
+    try:
+        story = models.Story.query.filter_by(
+            url_hash=hashing_util.md5_hex_to_binary(story_id)
+            ).first()
+    except Exception:
+        story = None
+
+    if not story:
+        return jsonify({'error': 'Story not found in database'}), 400
+
+    comment = models.Comment(
+        story_id=story.id,
+        user_id=current_user.id,
+        content=input_sanitization.sanitize_html(content),
+        parent_id=parent_id
+    )
+    extensions.db.session.add(comment)
+    extensions.db.session.commit()
+    
+    return jsonify({'message': 'Comment created', 'comment_id': comment.id}), 201
+
+
+@api.route('/comments/story/<story_id>', methods=['GET'])
+def get_comments(story_id):
+    # story_id is the story url hash (md5 hex)
+    try:
+        story = models.Story.query.filter_by(
+            url_hash=hashing_util.md5_hex_to_binary(story_id)
+            ).first()
+    except Exception:
+        story = None
+
+    if not story:
+        return jsonify({'error': 'Story not found in database'}), 400
+
+    comments = models.Comment.query.filter_by(
+        story_id=story.id, 
+        parent_id=None
+        ).order_by(models.Comment.created_at.desc()).all()
+    return jsonify(
+        [comments_util.serialize_comment_tree(comment) for comment in comments]
+        )
+
+
+@api.route('/comments/<int:comment_id>', methods=['PUT'])
+@decorators.api_login_required
+def edit_comment(comment_id):
+    comment = models.Comment.query.get_or_404(comment_id)
+
+    if comment.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    content = data.get('content', '').strip()
+    
+    if not content:
+        return jsonify({'error': 'Empty content'}), 400
+
+    comment.content = input_sanitization.sanitize_html(content)
+    comment.edited = True
+    extensions.db.session.commit()
+    return jsonify({'message': 'Comment updated'})
+
+
+@api.route('/comments/<int:comment_id>', methods=['DELETE'])
+@decorators.api_login_required
+def delete_comment(comment_id):
+    comment = models.Comment.query.get_or_404(comment_id)
+
+    if comment.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    comment.is_deleted = True
+    extensions.db.session.commit()
+    return jsonify({'message': 'Comment deleted'})

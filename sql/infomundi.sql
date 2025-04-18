@@ -189,7 +189,7 @@ CREATE TABLE comments (
     user_id INT,
     parent_id INT,
     content TEXT NOT NULL,
-    edited TINYINT(1) DEFAULT 0,
+    is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,

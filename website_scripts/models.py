@@ -222,7 +222,7 @@ class Comment(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
 
     content = db.Column(db.Text, nullable=False)  # Markdown-supported content
-    edited = db.Column(db.Boolean, default=False)
+    is_edited = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -52,20 +52,20 @@
   font-weight: bold;
 }
 
-.maximus-header {
+.maximus-summary-header {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.maximus-header img {
+.maximus-summary-header img {
   width: 100px;
   height: 100px;
   border-radius: 10px;
   margin-right: 10px;
 }
 
-.content-placeholder {
+.maximus-summary-content-placeholder {
   display: none;
   position: relative;
   border-radius: 10px;
@@ -78,7 +78,7 @@
   padding: 10px;
 }
 
-.blurred-text {
+.maximus-summary-blurred-text {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -94,7 +94,7 @@
   /* Ensures text wraps properly */
 }
 
-.progress {
+.maximus-summary-progress {
   width: 80%;
   position: absolute;
   bottom: 150px;
@@ -102,48 +102,6 @@
 
 .image-card {
   position: relative;
-}
-
-/* Pillar Wrapper fills the parent column's height */
-.left-pillar-wrapper,
-.right-pillar-wrapper {
-  height: 100%;
-}
-
-.pillar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  /* Vertically centers the pillars */
-  height: 100%;
-}
-
-
-.pillar-top,
-.pillar-bottom {
-  width: 70%;
-  display: block;
-}
-
-
-.pillar-bottom {
-  margin-top: -1px;
-}
-
-.pillar-middle {
-  width: 70%;
-  display: block;
-  margin-top: -1px;
-  border-radius: 35px;
-}
-
-.mirrored {
-  transform: scaleY(-1);
-}
-
-.horizontally-mirrored {
-  transform: scaleX(-1);
 }
 
 .tip-logo {
