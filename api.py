@@ -527,3 +527,31 @@ def delete_comment(comment_id):
     comment.is_deleted = True
     extensions.db.session.commit()
     return jsonify({'message': 'Comment deleted'})
+
+
+@api.route('/comments/<int:comment_id>/<action>', methods=['POST'])
+@decorators.api_login_required
+def react_to_comment(comment_id, action):
+    if action not in ('like', 'dislike'):
+        return jsonify({'error': 'Invalid action'}), 400
+
+    reaction = models.CommentReaction.query.filter_by(comment_id=comment_id, user_id=current_user.id).first()
+
+    if reaction:
+        if reaction.action == action:
+            extensions.db.session.delete(reaction)  # Toggle off
+            extensions.db.session.commit()
+            return jsonify({'message': f'{action} removed'})
+        else:
+            reaction.action = action  # Change reaction
+            extensions.db.session.commit()
+            return jsonify({'message': f'Reaction changed to {action}'})
+    else:
+        new_reaction = models.CommentReaction(comment_id=comment_id, user_id=current_user.id, action=action)
+        extensions.db.session.add(new_reaction)
+        try:
+            extensions.db.session.commit()
+        except IntegrityError:
+            extensions.db.session.rollback()
+            return jsonify({'error': 'Duplicate reaction'}), 400
+        return jsonify({'message': f'{action} added'})

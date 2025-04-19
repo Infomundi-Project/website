@@ -13,7 +13,7 @@ def serialize_comment_tree(comment):
         },
         'content': '[deleted]' if comment.is_deleted else comment.content,
         'is_edited': comment.is_edited,
-        'updated_at': comment.updated_at,
+        'updated_at': comment.updated_at.isoformat(),
         'created_at': comment.created_at.isoformat(),
         'replies': [serialize_comment_tree(reply) for reply in comment.replies.order_by(Comment.created_at.asc())],
         'likes': comment.reactions.filter_by(action='like').count(),

@@ -1,5 +1,12 @@
-const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+function initializeTooltips() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
 
-if (tooltipTriggerList.length > 0) {
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-}
+    tooltipTriggerList.forEach(el => {
+      // Only initialize if not already initialized
+      if (!bootstrap.Tooltip.getInstance(el)) {
+        new bootstrap.Tooltip(el);
+      }
+    });
+  }
+
+initializeTooltips();
