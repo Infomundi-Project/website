@@ -468,23 +468,11 @@ def comments():
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
         return redirect(url_for('views.user_redirect'))
 
-    # The current response format is not yet prepared to be displayed. We basically need to replace all underscores by spaces.
-    formatted_gpt_summary = []
-    if story.gpt_summary:
-        summary_dict = story.gpt_summary
-        
-        for key, value in summary_dict.items():
-            header = key.replace('_', ' ').title()
-            formatted_gpt_summary.append({'header': header, 'paragraph': value})
-
-    # TODO: Add clicks to story
-    story_stats = extensions.db.session.get(models.StoryStats, story.id)
-    if not story_stats:
+    if not story.stats:
         story_stats = models.StoryStats(story_id=story.id, views=1, likes=0, dislikes=0)
         extensions.db.session.add(story_stats)
     else:
-        story_stats.views += 1
-
+        story.stats.views += 1
     extensions.db.session.commit()
 
     # Set session information, used in templates.
@@ -493,23 +481,20 @@ def comments():
     # Used in the api.
     session['last_visited_story_id'] = story.id
     
-    # Create the SEO data. Title should be 60 characters, description should be 150 characters
-    seo_title = input_sanitization.gentle_cut_text(45, story.title)
+    # Create the SEO data. Title should be 50 - 60 characters, description should be around 150 characters
+    seo_title = input_sanitization.gentle_cut_text(55, story.title)
     seo_description = input_sanitization.gentle_cut_text(150, story.description)
     seo_image = story.image_url
 
-    category = extensions.db.session.get(models.Category, story.category_id)
-    
-    country_cca2 = category.name.split('_')[0]
+    country_cca2 = story.category.name.split('_')[0]
     return render_template('comments.html', 
-        from_country_name=scripts.country_code_to_name(category.name.split('_')[0]),
+        from_country_name=scripts.country_code_to_name(story.category.name.split('_')[0]),
         page_language=qol_util.detect_language(story.title + ' ' + story.description),
         from_country_url=f'https://infomundi.net/news?country={country_cca2}',
-        from_country_category=category.name.split('_')[1],
-        from_country_code=category.name.split('_')[0],
-        formatted_gpt_summary=formatted_gpt_summary,
+        from_country_category=story.category.name.split('_')[1],
+        from_country_code=story.category.name.split('_')[0],
         seo_data=(seo_title, seo_description, seo_image),
-        previous_news='',
+        previous_story='',
         story=story,
-        next_news=''
+        next_story=''
     )

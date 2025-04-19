@@ -179,61 +179,6 @@ document.addEventListener("DOMContentLoaded", function () {
     dislikeIcon.classList.toggle('fa-regular', !isDisliked);
   }
 
-  function initializeComments(storyId, language) {
-    const commentsContainer = document.querySelector("#commentsSection");
-    if (commentsContainer) {
-      const commentsElements = document.querySelectorAll("comentario-comments");
-      commentsElements.forEach((element) => element.remove());
-      console.log("Comentario-related elements removed.");
-
-      const newCommentsElement = document.createElement("comentario-comments");
-      newCommentsElement.setAttribute("lang", language || "en");
-      newCommentsElement.setAttribute("page-id", `/comments?id=${storyId}`);
-      newCommentsElement.setAttribute("auto-init", "false");
-      newCommentsElement.setAttribute("live-update", "true");
-      newCommentsElement.setAttribute("theme", document.cookie.includes("theme=dark") ? "dark" : "light");
-
-      commentsContainer.appendChild(newCommentsElement);
-
-      if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
-        Comentario.main().then(() => {
-          console.log("Comentario reinitialized.");
-        });
-      }
-    }
-  }
-
-  function unloadComentarioScript() {
-    // Remove the script tag for comentario.js
-    const existingScript = document.querySelector('script[src="https://commento.infomundi.net/comentario.js"]');
-    if (existingScript) {
-      existingScript.remove();
-      console.log("Comentario script removed.");
-    }
-
-    // Clean up global variables/functions if Comentario exposes them
-    if (typeof window.Comentario !== "undefined") {
-      delete window.Comentario;
-      console.log("Comentario global object removed.");
-    }
-
-    // Remove any associated DOM elements if necessary
-    const commentsElements = document.querySelectorAll("comentario-comments");
-    commentsElements.forEach((element) => element.remove());
-    console.log("Comentario-related elements removed.");
-  }
-
-
-  function reinitializeComentario(commentsElement) {
-    if (typeof Comentario !== "undefined" && typeof Comentario.main === "function") {
-      Comentario.main().then(() => {
-        if (window.userAuthenticated && typeof commentsElement.nonInteractiveSsoLogin === "function") {
-          commentsElement.nonInteractiveSsoLogin();
-        }
-      }).catch((error) => console.error("Failed to initialize Comentario:", error));
-    }
-  }
-
   // Define event listeners for modal icons
   modalLikeIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
@@ -309,8 +254,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Update the link to the original story
           const originalStoryLink = modalElement.querySelector("#originalStoryLink");
           if (storyData.url) {
-            originalStoryLink.href = storyData.url;
-            originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>Access the original story`;
+            originalStoryLink.href = `/comments?id=${storyData.story_id}`;
+            originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>View More`;
             originalStoryLink.style.display = "inline";
           } else {
             originalStoryLink.style.display = "none"; // Hide the link if no URL is available
@@ -374,7 +319,6 @@ document.addEventListener("DOMContentLoaded", function () {
           modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
 
           // Initialize comments section for the selected story
-          initializeComments(storyData.story_id, storyData.language);
 
           // Load Maximus content
           fetchAndRenderStorySummary(storyData.story_id);
@@ -394,25 +338,6 @@ document.addEventListener("DOMContentLoaded", function () {
     script.onload = callback;
     document.body.appendChild(script);
   }
-
-  function loadComentarioScript() {
-    const existingScript = document.querySelector('script[src="https://commento.infomundi.net/comentario.js"]');
-    if (!existingScript) {
-      loadScript('https://commento.infomundi.net/comentario.js', () => {
-        const cc = document.getElementsByTagName('comentario-comments').item(0);
-        if (cc) {
-          if (window.userAuthenticated) {
-            cc.main().then(() => cc.nonInteractiveSsoLogin());
-          } else {
-            cc.main();
-          }
-        }
-        console.log("Comentario script loaded.");
-      });
-    }
-  }
-
-  loadComentarioScript();
 
   let middleSectionCount = 1;
 

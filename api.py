@@ -2,7 +2,7 @@ from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
-from sqlalchemy import and_, cast
+from sqlalchemy import and_, cast, desc, asc
 from datetime import datetime
 
 from website_scripts import config, json_util, scripts,\
@@ -476,8 +476,8 @@ def create_comment():
 
 @api.route('/comments/story/<story_id>', methods=['GET'])
 def get_comments(story_id):
-    # story_id is the story url hash (md5 hex)
     try:
+        # story_id is the story url hash (md5 hex)
         story = models.Story.query.filter_by(
             url_hash=hashing_util.md5_hex_to_binary(story_id)
             ).first()
@@ -485,15 +485,37 @@ def get_comments(story_id):
         story = None
 
     if not story:
-        return jsonify({'error': 'Story not found in database'}), 400
+        return jsonify({'error': 'Story not found'}), 400
 
-    comments = models.Comment.query.filter_by(
-        story_id=story.id, 
-        parent_id=None
-        ).order_by(models.Comment.created_at.desc()).all()
+    page = request.args.get("page", 1, type=int)
+    sort = request.args.get("sort", "recent")  # "recent", "old", best",
+    search = request.args.get("search", "", type=str).strip()
+
+    # Base query
+    query = models.Comment.query.filter_by(story_id=story.id, parent_id=None)
+
+    # Optional search (basic version on content)
+    #if search:
+    #    query = query.filter(models.Comment.content.ilike(f"%{search}%"))
+
+    # Sorting
+    if sort == "old":
+        query = query.order_by(asc(models.Comment.created_at))
+    #elif sort == "best":
+    #    query = query.order_by(desc(models.Comment.reactions.likes - models.Comment.reactions.dislikes))
+    else:
+        query = query.order_by(desc(models.Comment.created_at))  # fallback
+
+    # Pagination
+    paginated = query.paginate(page=page, per_page=10, error_out=False)
+    comments = paginated.items
+    has_more = paginated.has_next
     return jsonify(
-        [comments_util.serialize_comment_tree(comment) for comment in comments]
-        )
+        {
+            'has_more': has_more,
+            'comments': [comments_util.serialize_comment_tree(comment) for comment in comments]
+        }
+    )
 
 
 @api.route('/comments/<int:comment_id>', methods=['PUT'])

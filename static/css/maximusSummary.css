@@ -5,8 +5,8 @@
 }
 
 .maximus-summary-header img {
-  width: 100px;
-  height: 100px;
+  max-width: 85px;
+  height: auto;
   border-radius: 10px;
   margin-right: 10px;
 }

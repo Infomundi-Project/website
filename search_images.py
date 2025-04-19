@@ -20,7 +20,7 @@ WORKERS = 2
 DEFAULT_IMAGE = None
 
 # Define proxies variable as global and load proxy list from file
-with open(f'{config.LOCAL_ROOT}/http-proxies.txt') as f:
+with open(f'{config.LOCAL_ROOT}/assets/http-proxies.txt') as f:
     proxies = [x.rstrip() for x in f.readlines()]
     shuffle(proxies)
 

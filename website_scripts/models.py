@@ -15,8 +15,6 @@ class Publisher(db.Model):
 
     name = db.Column(db.String(120), nullable=False)
     favicon_url = db.Column(db.String(100), nullable=True)
-    
-    stories = db.relationship('Story', backref='publisher', lazy=True)
 
 
 class Category(db.Model):
@@ -53,6 +51,8 @@ class Story(db.Model):
     # Relationships
     reactions = db.relationship('StoryReaction', backref='story', lazy=True)
     stats = db.relationship('StoryStats', backref='story', uselist=False, lazy='joined')
+    category = db.relationship('Category', backref='story')
+    publisher = db.relationship('Publisher', backref='story')
 
 
 class StoryReaction(db.Model):
