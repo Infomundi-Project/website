@@ -142,3 +142,4 @@ wrapt==1.17.2
 WTForms==3.2.1
 yarg==0.1.10
 zstandard==0.23.0
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
