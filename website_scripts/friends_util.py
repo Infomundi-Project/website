@@ -1,94 +1,92 @@
-from .extensions import db
-from .models import Friendship
+from . import extensions, models
 
 
-def send_friend_request(user_id, friend_id):
-    friendship = Friendship(user_id=user_id, friend_id=friend_id, status='pending')
-    db.session.add(friendship)
-    db.session.commit()
+def send_friend_request(user_id: int, friend_id: int):
+    friendship = models.Friendship(user_id=user_id, friend_id=friend_id, status='pending')
+    extensions.db.session.add(friendship)
+    extensions.db.session.commit()
     
     return True
 
 
-def accept_friend_request(user_id: str, friend_id: str) -> bool:
-    friendship = Friendship.query.filter_by(user_id=friend_id, friend_id=user_id, status='pending').first()
+def accept_friend_request(user_id: int, friend_id: int) -> bool:
+    friendship = models.Friendship.query.filter_by(user_id=friend_id, friend_id=user_id, status='pending').first()
     if not friendship:
         return False
 
     friendship.status = 'accepted'
-    db.session.commit()
+    extensions.db.session.commit()
     return True
 
 
-def accept_all_pending_requests(user_id: str) -> bool:
-    # Find all pending friend requests where the user is the receiver
-    pending_requests = Friendship.query.filter_by(friend_id=user_id, status='pending').all()
+def accept_all_pending_requests(user_id: int) -> bool:
+    pending_requests = models.Friendship.query.filter_by(friend_id=user_id, status='pending').all()
     
-    # Accept each pending request
     for request in pending_requests:
         request.status = 'accepted'
     
-    db.session.commit()
-
-
-def reject_friend_request(user_id: str, friend_id: str) -> bool:
-    friendship = Friendship.query.filter_by(user_id=friend_id, friend_id=user_id, status='pending').first()
-    if not friendship:
-        return False
-
-    db.session.delete(friendship)
-    db.session.commit()
+    extensions.db.session.commit()
     return True
 
 
-def reject_all_pending_requests(user_id: str) -> bool:
+def reject_friend_request(user_id: int, friend_id: int) -> bool:
+    friendship = models.Friendship.query.filter_by(user_id=friend_id, friend_id=user_id, status='pending').first()
+    if not friendship:
+        return False
+
+    extensions.db.session.delete(friendship)
+    extensions.db.session.commit()
+    return True
+
+
+def reject_all_pending_requests(user_id: int) -> bool:
     # Find all pending friend requests where the user is the receiver
-    pending_requests = Friendship.query.filter_by(friend_id=user_id, status='pending').all()
+    pending_requests = models.Friendship.query.filter_by(friend_id=user_id, status='pending').all()
     if not pending_requests:
         return False
     
     # Delete each pending request
     for request in pending_requests:
-        db.session.delete(request)
+        extensions.db.session.delete(request)
     
-    db.session.commit()
+    extensions.db.session.commit()
     return True
 
 
-def delete_friend(user_id: str, friend_id: str):
-    friendship = Friendship.query.filter(
-        db.or_(
-            db.and_(Friendship.user_id == user_id, Friendship.friend_id == friend_id),
-            db.and_(Friendship.user_id == friend_id, Friendship.friend_id == user_id)
+def delete_friend(user_id: int, friend_id: int):
+    friendship = models.Friendship.query.filter(
+        extensions.db.or_(
+            extensions.db.and_(models.Friendship.user_id == user_id, models.Friendship.friend_id == friend_id),
+            extensions.db.and_(models.Friendship.user_id == friend_id, models.Friendship.friend_id == user_id)
         )
     ).first()
     if friendship:
-        db.session.delete(friendship)
-        db.session.commit()
+        extensions.db.session.delete(friendship)
+        extensions.db.session.commit()
         return True
     return False
 
 
-def delete_all_friends(user_id: str) -> bool:
+def delete_all_friends(user_id: int) -> bool:
     # Delete friendships where the user is the requester
-    friendships_sent = Friendship.query.filter_by(user_id=user_id).all()
+    friendships_sent = models.Friendship.query.filter_by(user_id=user_id).all()
     for friendship in friendships_sent:
-        db.session.delete(friendship)
+        extensions.db.session.delete(friendship)
     
     # Delete friendships where the user is the receiver
-    friendships_received = Friendship.query.filter_by(friend_id=user_id).all()
+    friendships_received = models.Friendship.query.filter_by(friend_id=user_id).all()
     for friendship in friendships_received:
-        db.session.delete(friendship)
+        extensions.db.session.delete(friendship)
     
-    db.session.commit()
+    extensions.db.session.commit()
     return True
 
 
-def get_pending_friend_requests(user_id: str):
-    return Friendship.query.filter_by(friend_id=user_id, status='pending').all()
+def get_pending_friend_requests(user_id: int):
+    return models.Friendship.query.filter_by(friend_id=user_id, status='pending').all()
 
 
-def get_friends_list(user_id: str) -> list:
+def get_friends_list(user_id: int) -> list:
     """
         Returns the user's friends in a list.
 
@@ -101,26 +99,26 @@ def get_friends_list(user_id: str) -> list:
     query the friendships table by the friend_id passing the user_id, and get the friend data with [x.user for ...].
 
     Arguments
-        user_id (str): The user id.
+        user_id (int): The user id.
 
     Returns
         list: A list containing data regarding the user's friends.
     """
-    sent_friends = [x.friend for x in Friendship.query.filter_by(user_id=user_id, status='accepted').all()]
+    sent_friends = [x.friend for x in models.Friendship.query.filter_by(user_id=user_id, status='accepted').all()]
     
     # The opposite happens here.
-    received_friends = [x.user for x in Friendship.query.filter_by(friend_id=user_id, status='accepted').all()]
+    received_friends = [x.user for x in models.Friendship.query.filter_by(friend_id=user_id, status='accepted').all()]
 
     return sent_friends + received_friends
 
 
-def get_friendship_status(current_user_id: str, profile_user_id: str) -> tuple:
+def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
     """
     Determines the friendship status between the current user and the profile user.
     
     Parameters:
-        current_user_id (str): The user ID of the current user.
-        profile_user_id (str): The user ID of the profile user.
+        current_user_id (int): The user ID of the current user.
+        profile_user_id (int): The user ID of the profile user.
 
     Returns:
         tuple: A tuple containing the friendship status and a boolean indicating
@@ -130,10 +128,10 @@ def get_friendship_status(current_user_id: str, profile_user_id: str) -> tuple:
     pending_friend_request_sent_by_current_user = False
 
     # Check if there is any friendship relation (sent or received) between the current user and the profile user
-    friendship = Friendship.query.filter(
-        db.or_(
-            db.and_(Friendship.user_id == current_user_id, Friendship.friend_id == profile_user_id),
-            db.and_(Friendship.user_id == profile_user_id, Friendship.friend_id == current_user_id)
+    friendship = models.Friendship.query.filter(
+        extensions.db.or_(
+            extensions.db.and_(models.Friendship.user_id == current_user_id, models.Friendship.friend_id == profile_user_id),
+            extensions.db.and_(models.Friendship.user_id == profile_user_id, models.Friendship.friend_id == current_user_id)
         )
     ).first()
 

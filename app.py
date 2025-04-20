@@ -6,22 +6,16 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from os import path as os_path
 
-from website_scripts.config import MYSQL_USERNAME, MYSQL_PASSWORD, REDIS_CONNECTION_STRING,\
- SECRET_KEY, MYSQL_HOST, MYSQL_DATABASE, REDIS_HOST, REDIS_PORT, REDIS_DATABASE
-from website_scripts.extensions import db, login_manager, cache, oauth, limiter
-from website_scripts.input_sanitization import is_safe_url
-from website_scripts.security_util import generate_nonce
-from website_scripts.qol_util import is_mobile
-from website_scripts.models import User
-
+from website_scripts import config, extensions, input_sanitization,\
+ security_util, hashing_util, qol_util, models
 from views import views
 from auth import auth
 from api import api
 
 
 app = Flask(__name__, static_folder='static')
-app.config['WTF_CSRF_SECRET_KEY'] = SECRET_KEY
-app.config['SECRET_KEY'] = SECRET_KEY
+app.config['WTF_CSRF_SECRET_KEY'] = config.SECRET_KEY
+app.config['SECRET_KEY'] = config.SECRET_KEY
 
 app.config['PREFERRED_URL_SCHEME'] = 'https'
 
@@ -34,17 +28,17 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
 
 # SQLAlchemy Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{config.MYSQL_USERNAME}:{config.MYSQL_PASSWORD}@{config.MYSQL_HOST}/{config.MYSQL_DATABASE}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+extensions.db.init_app(app)
 
 # Cache
-app.config['CACHE_REDIS_URL'] = REDIS_CONNECTION_STRING
-app.config['CACHE_REDIS_DB'] = REDIS_DATABASE
-app.config['CACHE_REDIS_HOST'] = REDIS_HOST
-app.config['CACHE_REDIS_PORT'] = REDIS_PORT
+app.config['CACHE_REDIS_URL'] = config.REDIS_CONNECTION_STRING
+app.config['CACHE_REDIS_DB'] = config.REDIS_DATABASE
+app.config['CACHE_REDIS_HOST'] = config.REDIS_HOST
+app.config['CACHE_REDIS_PORT'] = config.REDIS_PORT
 app.config['CACHE_TYPE'] = 'RedisCache'
-cache.init_app(app)
+extensions.cache.init_app(app)
 
 # Uploads
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 Megabytes
@@ -56,10 +50,10 @@ app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(views, url_prefix='/')
 
 # Google OAuth
-oauth.init_app(app)
+extensions.oauth.init_app(app)
 
 # Rate Limiting
-limiter.init_app(app)
+extensions.limiter.init_app(app)
 
 
 @app.route('/<filename>')
@@ -80,30 +74,33 @@ def serve_file(filename):
 
 # CSRF Configuration
 csrf = CSRFProtect(app)
-csrf.exempt('api.story_reaction') # remove protection to specific endpoint
+csrf.exempt('api.story_reaction')  # Remove protection to story reaction api
 
 # Login manager
-login_manager.init_app(app)
-login_manager.login_view = 'auth.login'
+extensions.login_manager.init_app(app)
+extensions.login_manager.login_view = 'auth.login'
 
 
-@login_manager.user_loader
+@extensions.login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, user_id)
+    return extensions.db.session.get(models.User, user_id)
 
 
 @app.before_request
 def set_nonce():
     # Generates nonce to be used in the CSP
-    g.nonce = generate_nonce()
+    g.nonce = security_util.generate_nonce()
 
 
 @app.before_request
-@cache.cached(timeout=300, key_prefix=current_user.id if (current_user and current_user.is_authenticated) else 'guest')
+@extensions.cache.cached(
+    timeout=300,
+    key_prefix=current_user.id if (current_user and current_user.is_authenticated) else 'guest'
+    )
 def check_session_version():
     # We check the session version every 5 minutes, to see if session is valid.
     if current_user.is_authenticated:
-        user = db.session.get(User, current_user.id)
+        user = extensions.db.session.get(models.User, current_user.id)
         
         session_version = session.get('session_version')
         if session_version and session_version != user.session_version:
@@ -187,7 +184,10 @@ assets.register('js_news', js_news)
 @app.context_processor
 def inject_variables():
     """This function will run before each template is rendered. We'll provide some variables to every template."""
-    return dict(is_mobile=is_mobile(request), nonce=g.get('nonce', ''), referer=is_safe_url(request.headers.get('referer', '')),\
+    return dict(
+        is_mobile=qol_util.is_mobile(request),
+        nonce=g.get('nonce', ''),
+        referer=input_sanitization.is_safe_url(request.headers.get('referer', '')),
         is_light_mode=False if request.cookies.get('theme', '') == 'dark' else True
     )
 
@@ -207,7 +207,7 @@ def error_handler(error):
         buttons_enabled = True
     elif error_code == 429:
         return jsonify({
-            "response": f"We need a breather! Your lightning-fast requests have exceeded the speed limit. The limit is: {str(error.description)}",
+            "response": f"We need to breath! Your lightning-fast requests have exceeded the rate limit. The limit is: {str(error.description)}",
         }), 429
     else:
         title = "Internal Server Error"

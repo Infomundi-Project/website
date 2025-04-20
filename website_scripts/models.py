@@ -59,8 +59,8 @@ class StoryReaction(db.Model):
     __tablename__ = 'story_reactions'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     
-    story_id = db.Column(db.Integer, db.ForeignKey('stories.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
 
     action = db.Column(db.String(10))  # 'like' or 'dislike'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
@@ -217,8 +217,14 @@ class Comment(db.Model):
     __tablename__ = 'comments'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
+
+    # Unique page identifier (MD5)
+    page_hash = db.Column(db.LargeBinary(16), nullable=False)
+
+    # Commeting user
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+
+    # Means it's a reply
     parent_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
 
     content = db.Column(db.Text, nullable=False)  # Markdown-supported content
@@ -232,7 +238,6 @@ class Comment(db.Model):
     replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic', cascade='all, delete-orphan')
     reactions = db.relationship('CommentReaction', backref='comment', lazy='dynamic')
     user = db.relationship('User', backref='comments')
-    story = db.relationship('Story', backref='comments')
 
 
 class CommentReaction(db.Model):

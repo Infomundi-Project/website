@@ -74,6 +74,10 @@
 </style>
 {% endblock %}
 
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
+{% endblock %}
+
 {% block content %}
 {% if pending_requests %}
 <div class="modal fade" id="pendingFriendsModal" tabindex="-1" aria-labelledby="pendingFriendsModalLabel" aria-hidden="true">
@@ -180,7 +184,7 @@
         </div>
         <div class="my-2"></div>
         {% if current_user.is_authenticated %}
-          {% if current_user.username == user.username %}
+          {% if current_user.id == user.id %}
           <div class="row align-items-center">
             <div class="col">
               <a type="button" role="button" class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2" href="{{ url_for('views.edit_user_profile') }}">
@@ -252,9 +256,38 @@
           </div>
         {% endif %}
 
-        <div class="mt-5">
-      <comentario-comments theme="{{ request.cookies.get('theme', 'light') }}" auto-init="false" live-update="true" lang="en" page-id="/id/{{ user.user_id }}" max-level="5"></comentario-comments>
-    </div>
+        <div class="container mt-5">
+        <h3 class="mb-4">Comments<span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span></h3>
+        <form id="commentForm" class="mb-4">
+          <meta name="csrf-token" content="{{ csrf_token() }}">
+          <div class="d-flex align-items-start gap-2">
+            <img src="{% if current_user.is_authenticated %}{{ current_user.avatar_url }}{% else %}{{ url_for('static', filename='img/avatar.webp') }}{% endif %}" alt="User" class="rounded me-2" width="48" height="48">
+            <textarea id="commentText" class="form-control flex-grow-1" rows="4" placeholder="What's on your mind?"></textarea>
+          </div>
+          <div class="d-flex justify-content-end mt-2">
+            <button type="submit" class="btn btn-primary">{% if current_user.is_authenticated %}Post{% else %}Comment anonymously{% endif %}</button>
+          </div>
+          <input type="hidden" id="parentId" name="parentId">
+        </form>
+        <!-- Filter Bar -->
+        <div id="commentFilters" class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
+          <div class="d-flex gap-2 flex-wrap">
+            <select id="sortSelect" class="form-select form-select-sm w-auto">
+              <option value="best">Best</option>
+              <option value="recent">Recent</option>
+              <option value="old">Old</option>
+            </select>
+          </div>
+          <input type="text" id="searchInput" class="form-control form-control-sm w-auto mt-2 mt-sm-0" placeholder="Search..." />
+        </div>
+        <!-- Comment list -->
+        <infomundi-comments page_id="{{ user_public_id }}">
+          
+          <div id="commentsList"></div>
+
+        </infomundi-comments>
+      </div>
+
       </div>
 
       <div class="col-md-3 p-2" style="border-radius: 5px;">
@@ -267,12 +300,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script nonce="{{ nonce }}">
-  window.userAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
-</script>
-
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/awaitLoadComentario.js') }}"></script>
-
 <script nonce="{{ nonce }}">
 async function fetchUserStatus(userId) {
     const response = await fetch(`https://infomundi.net/api/user/${userId}/status`);
@@ -315,7 +342,7 @@ function startPolling(userId) {
     }, 50000);
 }
 
-startPolling('{{ user.user_id }}');
+startPolling('{{ user_public_id }}');
 </script>
 
 <script nonce="{{ nonce }}">
@@ -356,4 +383,5 @@ startPolling('{{ user.user_id }}');
       updateLastSeenElements();
   });
 </script>
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
 {% endblock %}

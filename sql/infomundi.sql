@@ -136,8 +136,8 @@ CREATE TABLE story_reactions (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     action VARCHAR(10),  -- 'like' or 'dislike'
     
-    FOREIGN KEY (story_id) REFERENCES stories(id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_reaction (story_id, user_id, action)
 );
 
@@ -185,7 +185,7 @@ CREATE TABLE site_statistics (
 
 CREATE TABLE comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    story_id INT NOT NULL,
+    page_hash BINARY(16) NOT NULL, -- Unique page identifier (MD5)
     user_id INT,
     parent_id INT,
     content TEXT NOT NULL,
@@ -194,7 +194,6 @@ CREATE TABLE comments (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );

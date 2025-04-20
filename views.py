@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util
+cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util, security_util
 from website_scripts.decorators import verify_captcha, admin_required, captcha_required, sensitive_area, in_maintenance
 
 views = Blueprint('views', __name__)
@@ -69,9 +69,9 @@ def handle_friends(friend_id, action):
         return redirect(url_for('views.user_redirect'))
 
 
-@views.route('/id/<user_id>', methods=['GET'])
-def user_profile_by_id(user_id):
-    user = extensions.db.session.get(models.User, user_id)
+@views.route('/id/<public_id>', methods=['GET'])
+def user_profile_by_id(public_id):
+    user = models.User.query.filter_by(public_id=security_util.uuid_string_to_bytes(public_id)).first()
     if not user:
         flash('User not found!', 'error')
         return redirect(url_for('views.user_redirect'))
@@ -101,14 +101,17 @@ def user_profile(username):
     seo_image = user.avatar_url
 
     is_profile_owner = current_user.is_authenticated and (current_user.id == user.id)
-    return render_template('user_profile.html', user=user, 
-        seo_data=(seo_title, seo_description, seo_image),
-        short_description=input_sanitization.close_open_html_tags(short_description), 
+    user_public_id = security_util.uuid_bytes_to_string(user.public_id)
+    return render_template('user_profile.html', 
+        pending_requests=friends_util.get_pending_friend_requests(current_user.id) if is_profile_owner else None,
+        pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user,
         has_too_many_newlines=input_sanitization.has_x_linebreaks(user.profile_description),
-        friend_status=friend_status, 
+        short_description=input_sanitization.close_open_html_tags(short_description),
         friends_list=friends_util.get_friends_list(user.id),
-        pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user, 
-        pending_requests=friends_util.get_pending_friend_requests(current_user.id) if is_profile_owner else None
+        seo_data=(seo_title, seo_description, seo_image),
+        user_public_id=user_public_id,
+        friend_status=friend_status,
+        user=user
         )
 
 

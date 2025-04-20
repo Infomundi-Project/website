@@ -270,39 +270,6 @@ def account_delete():
     return redirect(url_for('views.user_redirect'))
 
 
-@auth.route('/commento', methods=['GET'])
-@login_required
-def commento():
-    token = request.args.get("token", '', type=str)
-    received_hmac_hex = request.args.get("hmac", '', type=str)
-
-    if not token or not received_hmac_hex:
-        return "Missing token or hmac", 400
-
-    secret_key = binascii.unhexlify(config.COMMENTO_SSO_KEY)
-
-    # Validate HMAC
-    expected_hmac = hmac.new(secret_key, binascii.unhexlify(token), hashlib.sha256).digest()
-    if not hmac.compare_digest(binascii.unhexlify(received_hmac_hex), expected_hmac):
-        return "Invalid HMAC", 403
-
-    payload = {
-        "token": token,
-        "email": session['email_address'],
-        "name": current_user.username,
-        "photo": current_user.avatar_url
-    }
-
-    # Generate HMAC for the response payload
-    payload_json = json.dumps(payload, separators=(',', ':')).encode()
-    response_hmac = hmac.new(secret_key, payload_json, hashlib.sha256).hexdigest()
-    payload_hex = binascii.hexlify(payload_json).decode()
-
-    # Redirect to Commento's SSO callback
-    redirect_url = f"https://commento.infomundi.net/api/oauth/sso/callback?payload={payload_hex}&hmac={response_hmac}"
-    return redirect(redirect_url, code=302)
-
-
 @auth.route('/google_redirect', methods=['GET'])
 @unauthenticated_only
 def google_redirect():

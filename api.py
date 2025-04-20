@@ -226,9 +226,11 @@ def get_friends():
     }), 200
 
 
-@api.route('/user/<user_id>/status', methods=['GET'])
-def get_user_status(user_id):
-    user = extensions.db.session.get(models.User, user_id)
+@api.route('/user/<user_public_id>/status', methods=['GET'])
+def get_user_status(user_public_id):
+    user = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(user_public_id)
+    ).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
@@ -442,29 +444,19 @@ def get_stories():
 
 
 @api.route('/comments', methods=['POST'])
-@decorators.api_login_required
+@extensions.limiter.limit("120/day;60/hour;5/minute", override_defaults=True)
 def create_comment():
     data = request.get_json()
-    story_id = data.get('story_id') # this is the story url hash (md5 hex)
-    content = data.get('content')
     parent_id = data.get('parent_id')
+    page_id = data.get('page_id')  # A string that uniquely identifies the page
+    content = data.get('content')
 
-    if not story_id or not content:
-        return jsonify({'error': 'Missing story_id or content'}), 400
-
-    try:
-        story = models.Story.query.filter_by(
-            url_hash=hashing_util.md5_hex_to_binary(story_id)
-            ).first()
-    except Exception:
-        story = None
-
-    if not story:
-        return jsonify({'error': 'Story not found in database'}), 400
+    if not page_id or not content:
+        return jsonify({'error': 'Missing page_id or content'}), 400
 
     comment = models.Comment(
-        story_id=story.id,
-        user_id=current_user.id,
+        page_hash=hashing_util.string_to_md5_binary(page_id),
+        user_id=current_user.id if current_user.is_authenticated else comments_util.get_anonymous_user().id,
         content=input_sanitization.sanitize_html(content),
         parent_id=parent_id
     )
@@ -474,29 +466,27 @@ def create_comment():
     return jsonify({'message': 'Comment created', 'comment_id': comment.id}), 201
 
 
-@api.route('/comments/story/<story_id>', methods=['GET'])
-def get_comments(story_id):
-    try:
-        # story_id is the story url hash (md5 hex)
-        story = models.Story.query.filter_by(
-            url_hash=hashing_util.md5_hex_to_binary(story_id)
-            ).first()
-    except Exception:
-        story = None
-
-    if not story:
-        return jsonify({'error': 'Story not found'}), 400
-
+@api.route('/comments/get/<page_id>', methods=['GET'])
+def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
     sort = request.args.get("sort", "recent")  # "recent", "old", best",
     search = request.args.get("search", "", type=str).strip()
 
-    # Base query
-    query = models.Comment.query.filter_by(story_id=story.id, parent_id=None)
+    # Compute the hash once
+    page_hash = hashing_util.string_to_md5_binary(page_id)
 
-    # Optional search (basic version on content)
-    #if search:
-    #    query = query.filter(models.Comment.content.ilike(f"%{search}%"))
+    # Total comment count (including replies)
+    total = models.Comment.query.filter_by(page_hash=page_hash).count()
+
+    # Base query for top-level comments only
+    query = models.Comment.query.filter_by(
+        page_hash=page_hash,
+        parent_id=None
+    )
+
+    # Basic. Searches the content.
+    if search:
+        query = query.filter(models.Comment.content.ilike(f"%{search}%"))
 
     # Sorting
     if sort == "old":
@@ -513,6 +503,7 @@ def get_comments(story_id):
     return jsonify(
         {
             'has_more': has_more,
+            'total': total,
             'comments': [comments_util.serialize_comment_tree(comment) for comment in comments]
         }
     )
@@ -533,7 +524,7 @@ def edit_comment(comment_id):
         return jsonify({'error': 'Empty content'}), 400
 
     comment.content = input_sanitization.sanitize_html(content)
-    comment.edited = True
+    comment.is_edited = True
     extensions.db.session.commit()
     return jsonify({'message': 'Comment updated'})
 

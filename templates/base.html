@@ -770,7 +770,7 @@
     {% endif %}
 
     <script nonce="{{ nonce }}">
-     window.userAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+     window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
     </script>
     {% block scripts %} {% endblock %}
   </body>

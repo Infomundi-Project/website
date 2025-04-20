@@ -3,8 +3,6 @@ from langdetect import detect as lang_detect
 from datetime import datetime, timedelta
 from os import path as os_path
 
-from .custom_exceptions import InfomundiCustomException
-
 
 def detect_language(text: str) -> str:
     """Tries to detect the language of a text value.

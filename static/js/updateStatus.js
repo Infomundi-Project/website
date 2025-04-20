@@ -9,7 +9,7 @@ function startPolling() {
     
     setInterval(async () => {
         await updateUserStatus();
-    }, 50000);  // Poll every 50 seconds
+    }, 60000);  // Poll every 60 seconds
 }
 
 startPolling();
