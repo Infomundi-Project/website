@@ -120,8 +120,11 @@ def get_nation_data(cca2: str) -> dict:
     else:
         URL = f"https://restcountries.com/v3.1/alpha/{cca2.lower()}"
         r = get_request(URL, timeout=4)
-        data = json.loads(r.text)
-        json_util.write_json(data, config_filepath)
+        if r.status_code == 200:
+            data = json.loads(r.text)
+            json_util.write_json(data, config_filepath)
+        else:
+            data = json_util.read_json(config_filepath)
     
     for country in config.HDI_DATA:
         if country['cca2'].lower() == cca2.lower():

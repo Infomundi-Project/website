@@ -3,8 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime
 
 from website_scripts import scripts, config, json_util, immutable, notifications, image_util, extensions, models,\
-cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util, security_util
-from website_scripts.decorators import verify_captcha, admin_required, captcha_required, sensitive_area, in_maintenance
+cloudflare_util, input_sanitization, friends_util, qol_util, hashing_util, totp_util, auth_util, security_util, decorators
 
 views = Blueprint('views', __name__)
 
@@ -24,7 +23,7 @@ def home():
 
 
 @views.route('/admin', methods=['GET'])
-@admin_required
+@decorators.admin_required
 def admin():
     return render_template('admin.html')
 
@@ -169,7 +168,7 @@ def edit_user_avatar():
 
 @views.route('/profile/edit/settings', methods=['GET', 'POST'])
 @login_required
-@sensitive_area
+@decorators.sensitive_area
 def edit_user_settings():
     if request.method == 'GET':
         return render_template('edit_settings.html')
@@ -243,7 +242,7 @@ def be_right_back():
 
 
 @views.route('/captcha', methods=['GET', 'POST'])
-@verify_captcha
+@decorators.verify_captcha
 def captcha():
     if request.method == 'GET':
         # If they have clearance (means that they have recently proven they're human)
@@ -262,7 +261,7 @@ def captcha():
 
 
 @views.route('/sensitive', methods=['GET', 'POST'])
-@verify_captcha
+@decorators.verify_captcha
 @login_required
 def sensitive():
     if request.method == 'GET':
@@ -332,7 +331,7 @@ def upload_image():
 
 
 @views.route('/contact', methods=['GET', 'POST'])
-@verify_captcha
+@decorators.verify_captcha
 def contact():
     if request.method == 'GET':
         return render_template('contact.html')
@@ -394,7 +393,7 @@ The Infomundi Team"""
 
 
 @views.route('/about', methods=['GET'])
-@captcha_required
+@decorators.captcha_required
 def about():
     return render_template('about.html')
 
@@ -405,7 +404,7 @@ def policies():
 
 
 @views.route('/team', methods=['GET'])
-@captcha_required
+@decorators.captcha_required
 def team():
     return render_template('team.html')
 
@@ -417,7 +416,6 @@ def donate():
 
 
 @views.route('/news', methods=['GET'])
-#@in_maintenance
 def news():
     """Serving the /news endpoint. 
 
@@ -463,6 +461,7 @@ def news():
 
 
 @views.route('/comments', methods=['GET'])
+@decorators.in_maintenance
 def comments():
     story = models.Story.query.filter_by(
         url_hash=hashing_util.md5_hex_to_binary(request.args.get('id', '').lower())

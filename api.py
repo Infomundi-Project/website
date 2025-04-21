@@ -444,7 +444,7 @@ def get_stories():
 
 
 @api.route('/comments', methods=['POST'])
-@extensions.limiter.limit("120/day;60/hour;5/minute", override_defaults=True)
+@extensions.limiter.limit("120/day;60/hour;5/minute")
 def create_comment():
     data = request.get_json()
     parent_id = data.get('parent_id')

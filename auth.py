@@ -186,17 +186,13 @@ def forgot_password():
         user = auth_util.check_recovery_token(recovery_token)
         if not user:
             flash('We apologize, but the token seems to be invalid.', 'error')
-            return render_template('forgot_password.html')    
+            return render_template('forgot_password.html')
         
-        # We don't need to log the user in yet. Save the user id to the session cookie to use in the password_change endpoint.
-        session['user_id'] = user.id
-
-        # Set user in recovery mode
-        user.in_recovery = True
-        extensions.db.session.commit()
+        auth_util.perform_login_actions(user, security_util.decrypt(user.email_encrypted))
+        session['is_trusted_session'] = True
 
         flash('Success! You may be able to change your password now.')
-        return redirect(url_for('auth.password_change'))
+        return redirect(url_for('views.edit_user_settings'))
         
     email = request.form.get('email', '').lower().strip()
     if not input_sanitization.is_valid_email(email):
@@ -209,43 +205,6 @@ def forgot_password():
     # Generic message to prevent user enumeration
     flash(f"If {email} happens to be in our database, an email will be sent with instructions.")
     return render_template('forgot_password.html')
-
-
-@auth.route('/password_change', methods=['GET', 'POST'])
-@unauthenticated_only
-def password_change():
-    if not session.get('user_id', ''):
-        return abort(404)
-
-    user = extensions.db.session.get(models.User, session['user_id'])
-    if not user.in_recovery:
-        return abort(404)
-
-    if request.method == 'GET':
-        return render_template('password_change.html', username=user.username)
-    
-    new_password = request.form.get('new_password', '')
-    confirm_password = request.form.get('confirm_password', '')
-    
-    if new_password != confirm_password:
-        message = 'Passwords must match!'
-    elif not input_sanitization.is_strong_password(new_password):
-        message = "We apologize, but the password does not meet complexity requirements."
-    else:
-        message = ''
-
-    if message:
-        flash(message, 'error')
-        return render_template('password_change.html', username=user.username)
-    
-    auth_util.change_password(user, new_password)
-    
-    # ???????
-    if session.get('user_id', ''):
-        del session['user_id']
-
-    flash('Your password has been changed! You may log in now.')
-    return redirect(url_for('auth.login'))
 
 
 @auth.route('/delete', methods=['GET', 'POST'])
@@ -315,6 +274,4 @@ def google_callback():
 @login_required
 def logout():
     flash(f'We hope to see you again soon, {current_user.username}')
-    
-    response = auth_util.perform_logout_actions()
-    return response
+    return auth_util.perform_logout_actions()

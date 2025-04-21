@@ -32,6 +32,7 @@
     }
     return 'just now';
   }
+  const MAX_NESTING_LEVEL = 1; // Only allow root + one level of replies
   const commentForm = document.getElementById('commentForm');
   const commentText = document.getElementById('commentText');
   const parentIdField = document.getElementById('parentId');
@@ -41,6 +42,7 @@
   let page = 1;
   let loading = false;
   let hasMore = true;
+
   async function loadComments(reset = false, isScroll = false) {
     if (loading) return;
     if (isScroll && !hasMore) return; // Only block if infinite scroll says no more
@@ -59,6 +61,12 @@
 
     const res = await fetch(`/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`);
     const data = await res.json();
+    // collapse all nested replies into one level per root comment
+    data.comments.forEach(comment => {
+      if (comment.replies && comment.replies.length) {
+        comment.replies = flattenReplies(comment.replies);
+      }
+    });
 
     infomundiCommentsCount.innerHTML = data.total;
 
@@ -68,31 +76,31 @@
     loading = false;
   }
 
-
   function renderComment(comment, container, level = 0, parentUser = null) {
     const div = document.createElement('div');
     div.className = 'card mb-3 shadow-sm' + (level ? ' border-0 border-start shadow-none ps-3' : '');
     div.dataset.id = comment.id;
+    div.id = `comment-${comment.id}`;
     const repliesContainerId = `replies-${comment.id}`;
     const editedTag = comment.is_edited ? `
-                        <span class="d-inline-block text-muted ms-2 fst-italic" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.updated_at + 'Z').toLocaleString()}">(edited - ${preciseTimeAgo(comment.updated_at)})</span>` : '';
+                        <span class="d-inline-block text-muted ms-2 fst-italic small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.updated_at + 'Z').toLocaleString()}">(edited - ${preciseTimeAgo(comment.updated_at)})</span>` : '';
     div.innerHTML = `
     
                         <div class="card-body">
                           <div class="d-flex align-items-start">
-                            <img src="${comment.user.avatar_url}" class="rounded me-3" alt="User Avatar" width="48" height="48">
+                            <img src="${comment.user.avatar_url}" class="rounded me-3" alt="User Avatar" style="width: 3em; height: auto">
                               <div class="w-100">
                                 <div class="d-flex justify-content-between">
                                   <div>
-                                    ${comment.user ? `<a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset">` : ''}<strong>${comment.user.username || 'Anonymous'}</strong>${comment.user ? `</a>` : ''}
+                                    <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small">${comment.user.username}</a>
               ${comment.user.role !== 'user' ? `
                                     <span class="badge bg-primary ms-2">${comment.user.role}</span>` : ''}
                                     <br>
               ${level > 0 && parentUser ? `
-                                      <small class="text-muted">Replying to 
-                                        <strong>${parentUser ? `<a href="https://infomundi.net/id/${parentUser.id}" class="text-decoration-none text-reset">` : ''}@${parentUser.username}${parentUser ? `</a>` : ''}</strong>, 
-                                      </small>` : ''}
-                                      <small class="d-inline-block text-muted" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="${new Date(comment.created_at + 'Z').toLocaleString()}">${preciseTimeAgo(comment.created_at)}</small>
+                                      <span class="text-muted small">Replying to 
+                                        @<a href="#comment-${comment.parent_id}" class="reply-link text-decoration-none fw-bold">${parentUser.username}</a>, 
+                                      </span>` : ''}
+                                      <span class="d-inline-block text-muted small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.created_at + 'Z').toLocaleString()}">${preciseTimeAgo(comment.created_at)}</span>
               ${editedTag}
             
                                     </div>
@@ -110,24 +118,21 @@
                                       </ul>
                                     </div>
                                   </div>
-                                  <p class="my-3 text-wrap" id="comment-content-${comment.id}" style="word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; word-break: break-word;">
-            ${comment.content}
-          </p>
+
+                                  <p class="my-3 text-wrap" id="comment-content-${comment.id}" style="word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; word-break: break-word;">${comment.content}</p>
+
                                   <div class="d-flex align-items-center mt-3">
                                     <button class="btn btn-sm btn-outline-primary like-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
-                                      <i class="fa-solid fa-thumbs-up"></i>
-                                      <span class="badge bg-primary">${comment.likes}</span>
+                                      <i class="fa-solid fa-thumbs-up me-1"></i><span class="badge bg-primary">${comment.likes}</span>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger dislike-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
-                                      <i class="fa-solid fa-thumbs-down"></i>
-                                      <span class="badge bg-danger">${comment.dislikes}</span>
+                                      <i class="fa-solid fa-thumbs-down me-1"></i><span class="badge bg-danger">${comment.dislikes}</span>
                                     </button>
                                     <button class="btn btn-sm btn-outline-secondary reply-btn">
-                                      <i class="fa-solid fa-reply"></i> Reply
-            
+                                      <i class="fa-solid fa-reply"></i>
                                     </button>
                                   </div>
-                                  <div id="${repliesContainerId}" class="mt-4"></div>
+                                  <div id="${repliesContainerId}" class="mt-4" style="margin-left: -50px;"></div>
                                   <div class="reply-form-container mt-3"></div>
                                 </div>
                               </div>
@@ -141,7 +146,15 @@
     const deleteBtn = div.querySelector('.delete-btn');
     likeBtn.addEventListener('click', () => likeComment(comment.id));
     dislikeBtn.addEventListener('click', () => dislikeComment(comment.id));
-    replyBtn.addEventListener('click', () => replyTo(comment.id));
+    
+
+    replyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // 'div' is the card for this comment
+      showReplyForm(div, comment.id);
+    });
+    
+
     editBtn.addEventListener('click', (e) => {
       e.preventDefault();
       editComment(comment.id);
@@ -151,11 +164,16 @@
       deleteComment(comment.id);
     });
     container.appendChild(div);
-    // Render replies recursively
-    if (comment.replies && comment.replies.length) {
-      const repliesContainer = div.querySelector(`#${repliesContainerId}`);
-      comment.replies.forEach(reply => renderComment(reply, repliesContainer, level + 1, comment.user));
+    
+ 
+    // render only the flat replies as a single level 1
+    if (level === 0 && comment.replies && comment.replies.length) {
+      const repliesContainer = div.querySelector(`#replies-${comment.id}`);
+      comment.replies.forEach(reply => {
+        renderComment(reply, repliesContainer, 1, comment.user);
+      });
     }
+
     initializeTooltips();
   }
   async function handleCommentSubmit(e) {
@@ -203,10 +221,6 @@
     loadComments(true);
   }
 
-  function replyTo(id) {
-    parentIdField.value = id;
-    commentText.focus();
-  }
 
   function editComment(id) {
     const contentDiv = document.getElementById(`comment-content-${id}`);
@@ -305,3 +319,77 @@
   }
 
   customElements.define('infomundi-comments', InfomundiComments);
+
+  function flattenReplies(replies = []) {
+    return replies.reduce((all, reply) => {
+      all.push(reply);
+      if (reply.replies && reply.replies.length) {
+        // recurse into grandchildren
+        all.push(...flattenReplies(reply.replies));
+      }
+      return all;
+    }, []);
+  }
+
+
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('reply-link')) {
+      e.preventDefault();
+      const targetId = e.target.getAttribute('href').substring(1); // remove #
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('border-primary', 'border', 'rounded'); // visual effect
+        setTimeout(() => {
+          target.classList.remove('border-primary', 'border', 'rounded');
+        }, 2500); // remove effect after 2.5s
+      }
+    }
+  });
+
+  function showReplyForm(commentDiv, parentId) {
+    // remove any existing reply forms
+    document.querySelectorAll('.reply-form-container').forEach(c => c.innerHTML = '');
+
+    const container = commentDiv.querySelector('.reply-form-container');
+    container.innerHTML = `
+      <form class="reply-form">
+        <div class="mb-2">
+          <textarea class="form-control reply-text" rows="3"
+                    placeholder="Write a reply..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary me-2">Reply</button>
+        <button type="button" class="btn btn-sm btn-secondary cancel-reply">Cancel</button>
+      </form>
+    `;
+
+    const form = container.querySelector('form');
+    const textarea = form.querySelector('.reply-text');
+    const cancel = form.querySelector('.cancel-reply');
+
+    // focus
+    textarea.focus();
+
+    // submit -> POST & reload
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const content = textarea.value.trim();
+      if (!content) return;
+      await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          content,
+          parent_id: parentId,
+          page_id
+        })
+      });
+      await loadComments(true);
+    });
+
+    // cancel -> just clear
+    cancel.addEventListener('click', () => container.innerHTML = '');
+  }

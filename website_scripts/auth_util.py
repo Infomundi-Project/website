@@ -223,14 +223,11 @@ Best regards,
 The Infomundi Team"""
     subject = 'Infomundi - Account Recovery'
     
-    # If we get to send the email, save it to the tokens file.
-    result = notifications.send_email(email, subject, message)
-    if result:
-        user.recovery_token = security_util.uuid_string_to_bytes(recovery_token)
-        user.recovery_token_timestamp = datetime.now()
-        extensions.db.session.commit()
+    user.recovery_token = security_util.uuid_string_to_bytes(recovery_token)
+    user.recovery_token_timestamp = datetime.now()
+    extensions.db.session.commit()
     
-    return result
+    return notifications.send_email(email, subject, message)
 
 
 def delete_account(email, token) -> bool:
