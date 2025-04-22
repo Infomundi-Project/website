@@ -1,7 +1,8 @@
 {% extends "base.html" %} {% block title %}{{ seo_data[0] }}{% endblock %} {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}">
-<meta name="csrf-token" content="{{ csrf_token() }}"> {% endblock %} {% block content %} <div class="container my-5">
+<meta name="csrf-token" content="{{ csrf_token() }}"> {% endblock %} {% block content %} 
+<div class="container my-5">
   <div class="row">
     <!-- Main Content -->
     <div class="col-lg-8">
@@ -87,7 +88,7 @@
       </div>
       
       <!-- Comments --> 
-      <div class="container mt-5">
+      <div class="mt-5">
         <h3 class="mb-4">Comments<span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span></h3>
         <form id="commentForm" class="mb-4">
           <div class="d-flex align-items-start gap-2">
@@ -120,7 +121,7 @@
 
 
       <!-- Bottom Breadcrumbs -->
-      <div class="container mt-5">
+      <div class="mt-5">
         <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">

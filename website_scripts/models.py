@@ -2,8 +2,7 @@ from datetime import datetime, timedelta
 from flask_login import UserMixin
 
 from .extensions import db
-from .hashing_util import string_to_argon2_hash, argon2_verify_hash
-from .security_util import uuid_bytes_to_string
+from . import security_util, hashing_util
 
 
 class Publisher(db.Model):
@@ -84,8 +83,8 @@ class User(db.Model, UserMixin):
     
     # User Account Data
     username = db.Column(db.String(25), nullable=False, unique=True)
-    email_fingerprint = db.Column(db.LargeBinary(32), nullable=False, unique=True) # SHA-256 + HMAC
-    email_encrypted = db.Column(db.LargeBinary(120), nullable=False) # AES-GCM
+    email_fingerprint = db.Column(db.LargeBinary(32), nullable=False, unique=True)  # SHA-256 + HMAC
+    email_encrypted = db.Column(db.LargeBinary(120), nullable=False)  # AES-GCM
 
     role = db.Column(db.String(15), default='user')
     password = db.Column(db.String(150), nullable=False)
@@ -102,7 +101,7 @@ class User(db.Model, UserMixin):
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
 
-    # Account registration
+    # Account Registration
     is_enabled = db.Column(db.Boolean, default=False)
     register_token = db.Column(db.LargeBinary(16))
     register_token_timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -121,9 +120,13 @@ class User(db.Model, UserMixin):
     last_activity = db.Column(db.DateTime)
 
     # Totp
-    totp_secret = db.Column(db.String(120))
-    totp_recovery = db.Column(db.String(120))
-    mail_twofactor = db.Column(db.Integer)
+    is_totp_enabled = db.Column(db.Boolean, default=False)
+    totp_secret = db.Column(db.String(120))  # AES/GCM
+
+    totp_recovery = db.Column(db.String(150))  # Argon2id
+    
+    is_mail_twofactor_enabled = db.Column(db.Boolean, default=False)
+    mail_twofactor_code = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
 
@@ -140,20 +143,11 @@ class User(db.Model, UserMixin):
 
 
     def set_password(self, password: str):
-        self.password = string_to_argon2_hash(password)
+        self.password = hashing_util.string_to_argon2_hash(password)
 
 
     def check_password(self, password: str) -> bool:
-        """Checks to see if the cleartext password matches the user's password hash
-
-        Arguments
-            self: We'll get user's password hash out of this (as stored in the database)
-            password (str): Cleartext password we want to compare
-        
-        Returns
-            bool: True if password is valid, otherwise False.
-        """
-        return argon2_verify_hash(self.password, password)
+        return hashing_util.argon2_verify_hash(self.password, password)
 
 
     def get_id(self):
@@ -161,7 +155,7 @@ class User(db.Model, UserMixin):
 
 
     def get_public_id(self):
-        return uuid_bytes_to_string(self.public_id)
+        return security_util.uuid_bytes_to_string(self.public_id)
 
 
     def purge_totp(self):

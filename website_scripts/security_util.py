@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from .config import ENCRYPTION_KEY
 
 
-def generate_2fa_token() -> str:
+def generate_mail_totp() -> str:
     code = ''
     for _ in range(6):
         code += str(secrets.randbelow(10))
@@ -113,7 +113,7 @@ def decrypt(encrypted_blob: bytes, password: str = ENCRYPTION_KEY) -> str:
 
     Args:
         encrypted_blob (bytes): Data containing salt + nonce + ciphertext.
-        password (str): The password originally used to encrypt the data.
+        password (str): Optional. Password originally used to encrypt the data.
 
     Returns:
         str: The decrypted plaintext message.
@@ -128,9 +128,11 @@ def decrypt(encrypted_blob: bytes, password: str = ENCRYPTION_KEY) -> str:
     key = derive_key(password, salt)
     aesgcm = AESGCM(key)
 
+    ciphertext = ciphertext.strip(b'\x00')  # Removes null bytes from ciphertext
+
     try:
         plaintext = aesgcm.decrypt(nonce, ciphertext, None)
     except Exception:
         raise ValueError("Decryption failed: invalid password or corrupted data")
 
-    return plaintext.decode()
+    return str(plaintext.decode())

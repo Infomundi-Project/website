@@ -163,11 +163,8 @@ def verify():
 @auth.route('/invalidate_sessions', methods=['POST'])
 @login_required
 def invalidate_sessions():
-    # Change state in the database
     current_user.session_version += 1
-    # Change user's session version in the session cookie so they won't have to log in again
-    session['session_version'] = current_user.session_version
-    # Commit changes to the database
+    session['session_version'] = current_user.session_version  # So the user won't have to log in again
     extensions.db.session.commit()
     
     flash('All sessions have been invalidated.')

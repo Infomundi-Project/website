@@ -32,7 +32,7 @@
     }
     return 'just now';
   }
-  const MAX_NESTING_LEVEL = 1; // Only allow root + one level of replies
+
   const commentForm = document.getElementById('commentForm');
   const commentText = document.getElementById('commentText');
   const parentIdField = document.getElementById('parentId');
@@ -61,12 +61,7 @@
 
     const res = await fetch(`/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`);
     const data = await res.json();
-    // collapse all nested replies into one level per root comment
-    data.comments.forEach(comment => {
-      if (comment.replies && comment.replies.length) {
-        comment.replies = flattenReplies(comment.replies);
-      }
-    });
+    
 
     infomundiCommentsCount.innerHTML = data.total;
 
@@ -78,7 +73,7 @@
 
   function renderComment(comment, container, level = 0, parentUser = null) {
     const div = document.createElement('div');
-    div.className = 'card mb-3 shadow-sm' + (level ? ' border-0 border-start shadow-none ps-3' : '');
+    div.className = 'card bg-transparent border-0 border-start border-5 mb-3';
     div.dataset.id = comment.id;
     div.id = `comment-${comment.id}`;
     const repliesContainerId = `replies-${comment.id}`;
@@ -86,9 +81,9 @@
                         <span class="d-inline-block text-muted ms-2 fst-italic small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.updated_at + 'Z').toLocaleString()}">(edited - ${preciseTimeAgo(comment.updated_at)})</span>` : '';
     div.innerHTML = `
     
-                        <div class="card-body">
+                        <div class="card-body ps-3 pe-0">
                           <div class="d-flex align-items-start">
-                            <img src="${comment.user.avatar_url}" class="rounded me-3" alt="User Avatar" style="width: 3em; height: auto">
+                            <img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto">
                               <div class="w-100">
                                 <div class="d-flex justify-content-between">
                                   <div>
@@ -166,13 +161,41 @@
     container.appendChild(div);
     
  
-    // render only the flat replies as a single level 1
-    if (level === 0 && comment.replies && comment.replies.length) {
-      const repliesContainer = div.querySelector(`#replies-${comment.id}`);
-      comment.replies.forEach(reply => {
-        renderComment(reply, repliesContainer, 1, comment.user);
-      });
-    }
+         // === BEGIN: collapse/expand logic ===
+     if (comment.replies && comment.replies.length) {
+       // 1) Create a <div> to hold all the child replies, and give it .collapse
+       const repliesContainer = document.createElement('div');
+       repliesContainer.id = `replies-${comment.id}`;
+       repliesContainer.className = 'collapse';
+       div.querySelector('.card-body').appendChild(repliesContainer);
+
+       // 2) Create the toggle button
+       const toggleBtn = document.createElement('button');
+       toggleBtn.type = 'button';
+       toggleBtn.className = 'btn btn-sm btn-link p-0 mb-2';
+       toggleBtn.setAttribute('data-bs-toggle', 'collapse');
+       toggleBtn.setAttribute('data-bs-target', `#${repliesContainer.id}`);
+       toggleBtn.setAttribute('aria-expanded', 'false');
+       toggleBtn.setAttribute('aria-controls', repliesContainer.id);
+       toggleBtn.textContent = `Show replies (${comment.replies.length})`;
+
+       // 3) Hook into Bootstrap’s events to swap the text
+       repliesContainer.addEventListener('show.bs.collapse', () => {
+         toggleBtn.textContent = `Hide replies (${comment.replies.length})`;
+       });
+       repliesContainer.addEventListener('hide.bs.collapse', () => {
+         toggleBtn.textContent = `Show replies (${comment.replies.length})`;
+       });
+
+       // 4) Insert the toggle button *right before* the replies container
+       repliesContainer.before(toggleBtn);
+
+       // 5) Finally, render each reply *into* that container, nesting level+1:
+       comment.replies.forEach(child => {
+         renderComment(child, repliesContainer, level + 1, comment.user);
+       });
+     }
+     // === END: collapse/expand logic ===
 
     initializeTooltips();
   }
@@ -339,9 +362,9 @@
       const target = document.getElementById(targetId);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.classList.add('border-primary', 'border', 'rounded'); // visual effect
+        target.classList.add('border-primary', 'border'); // visual effect
         setTimeout(() => {
-          target.classList.remove('border-primary', 'border', 'rounded');
+          target.classList.remove('border-primary', 'border');
         }, 2500); // remove effect after 2.5s
       }
     }

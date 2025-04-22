@@ -35,7 +35,7 @@ def verify_totp(secret_key, token) -> bool:
     return totp.verify(token)
 
 
-def deal_with_it(user, code: str, recovery_token: str, key_value: str) -> tuple:
+def deal_with_it(user, code: str, recovery_token: str) -> tuple:
     """
     Deals with the entire process of verifying the TOTP code. If the recovery code is supplied instead, we make sure to remove
     the TOTP configuration for the user.
@@ -44,8 +44,6 @@ def deal_with_it(user, code: str, recovery_token: str, key_value: str) -> tuple:
         user (flask_login.UserMixin): The user performing the interaction
         code (str): 6-digit two factor authentication code
         recovery_token (str): TOTP recovery token
-        key_Value (str): A base64-encoded string that represents the key derivation out of the user's password and stored salt.
-            We get this info when the user logs in using their password.
 
     Returns
         tuple: A tuple containg the status and message regarding the performed action. Example: (False, 'Invalid TOTP recovery code!')
@@ -58,7 +56,7 @@ def deal_with_it(user, code: str, recovery_token: str, key_value: str) -> tuple:
             return (False, 'Invalid TOTP recovery code!')
 
     # Decrypt user's totp secret
-    totp_secret = security_util.decrypt(user.totp_secret, config.ENCRYPTION_KEY)
+    totp_secret = security_util.decrypt(user.totp_secret)
 
     is_valid_totp = verify_totp(totp_secret, code)
     if not is_valid_totp:

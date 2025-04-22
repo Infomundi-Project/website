@@ -68,9 +68,13 @@ CREATE TABLE users (
     last_activity DATETIME,
 
     -- Totp 
+    is_totp_enabled TINYINT(1) DEFAULT 0,
     totp_secret VARCHAR(120), -- Stored in encrypted format (AES/GCM)
+
     totp_recovery VARCHAR(150), -- Stored in encrypted format (Argon2id)
-    mail_twofactor INT,
+
+    is_mail_twofactor_enabled TINYINT(1) DEFAULT 0,
+    mail_twofactor_code INT,
     mail_twofactor_timestamp DATETIME
 );
 

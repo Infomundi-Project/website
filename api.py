@@ -8,7 +8,7 @@ from datetime import datetime
 from website_scripts import config, json_util, scripts,\
     models, extensions, input_sanitization, friends_util, \
     country_util, totp_util, security_util, hashing_util, \
-    llm_util, decorators, comments_util
+    llm_util, decorators, comments_util, notifications
 
 api = Blueprint('api', __name__)
 
@@ -184,7 +184,7 @@ def setup_totp():
     totp_recovery_token = security_util.generate_nonce()
 
     # Saves the TOTP information encrypted in the database
-    current_user.totp_secret = security_util.encrypt(totp_secret, config.ENCRYPTION_KEY)
+    current_user.totp_secret = security_util.encrypt(totp_secret)
     current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
     extensions.db.session.commit()
 
@@ -192,6 +192,47 @@ def setup_totp():
     del session['totp_secret']
 
     return jsonify({'valid': True, 'totp_recovery_token': totp_recovery_token}), 200
+
+
+@api.route("/2fa/mail/send-code", methods=["POST"])
+@decorators.api_login_required
+@extensions.limiter.limit("7/day;5/hour;3/minute")
+def send_mail_totp_code():
+    code = security_util.generate_mail_totp()
+    current_user.mail_twofactor_code = code
+    current_user.mail_twofactor_timestamp = datetime.now()
+    extensions.db.session.commit()
+
+    notifications.send_email(
+        session['email_address'],
+        f"Infomundi - {code} is Your Two-Factor Code",
+        f"Your two‑factor authentication code is: {code}"
+    )
+
+    return jsonify(success=True), 200
+
+
+@api.route("/2fa/mail/verify-code", methods=["POST"])
+@decorators.api_login_required
+def verify_mail_totp_code():
+    data = request.get_json() or {}
+    code = data.get("code")
+
+    if (current_user.mail_twofactor_code != code or not
+        qol_util.is_date_within_threshold_minutes(current_user.mail_twofactor_timestamp, 15)):
+        return jsonify(success=False, error="Invalid or expired code"), 400
+    
+    if not current_user.is_mail_twofactor_enabled:
+        current_user.is_mail_twofactor_enabled = True
+        # Changes totp recovery, and disables TOTP based 2fa
+        totp_recovery = security_util.generate_nonce()
+        current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery)
+        current_user.totp_secret = None
+        current_user.is_totp_enabled = False
+        extensions.db.session.commit()
+        return jsonify(success=True, recovery_token=totp_recovery), 200
+
+    return jsonify(success=True), 200
 
 
 @api.route('/user/friends', methods=['GET'])
@@ -248,7 +289,7 @@ def get_user_status(user_public_id):
 @login_required
 def update_user_status():
     current_user.is_online = True
-    current_user.last_activity = datetime.utcnow()
+    current_user.last_activity = datetime.now()
     
     extensions.db.session.commit()
     return jsonify({'message': 'Success!'})

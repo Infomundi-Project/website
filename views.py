@@ -463,8 +463,9 @@ def news():
 @views.route('/comments', methods=['GET'])
 @decorators.in_maintenance
 def comments():
+    story_url_hash = hashing_util.md5_hex_to_binary(request.args.get('id', ''))
     story = models.Story.query.filter_by(
-        url_hash=hashing_util.md5_hex_to_binary(request.args.get('id', '').lower())
+        url_hash=story_url_hash
         ).first()
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')
@@ -478,7 +479,7 @@ def comments():
     extensions.db.session.commit()
 
     # Set session information, used in templates.
-    session['last_visited_story_url'] = f'https://infomundi.net/comments?id={story.id}'
+    session['last_visited_story_url'] = f'https://infomundi.net/comments?id={story_url_hash}'
     
     # Used in the api.
     session['last_visited_story_id'] = story.id
