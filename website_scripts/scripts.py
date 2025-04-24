@@ -1,4 +1,4 @@
-import json
+import json, yake
 from datetime import datetime, timedelta
 from requests import get as get_request
 from difflib import SequenceMatcher
@@ -360,6 +360,11 @@ def string_similarity(s1: str, s2: str) -> float:
     """Takes two strings and returns the similarity percentage between them."""
     matcher = SequenceMatcher(None, s1, s2)
     return matcher.ratio() * 100
+
+
+def extract_yake(text: str, lang_code: str, top_n: int = 5) -> tuple:
+    kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
+    return (kw for kw, score in kw_extractor.extract_keywords(text))
 
 
 @extensions.cache.memoize(timeout=60*60*12) # 12 hours

@@ -430,7 +430,7 @@ def news():
     # Searches for the country full name
     country_name = scripts.country_code_to_name(contry_cca2)
     if not country_name:
-        flash("We apologize, but we couldn't find the country you are looking for.")
+        flash("We apologize, but we couldn't find the country you are looking for.", 'error')
         return redirect(url_for('views.user_redirect'))
     
     session['last_visited_country_url'] = f'https://infomundi.net/news?country={contry_cca2}'
@@ -463,9 +463,9 @@ def news():
 @views.route('/comments', methods=['GET'])
 @decorators.in_maintenance
 def comments():
-    story_url_hash = hashing_util.md5_hex_to_binary(request.args.get('id', ''))
+    story_url_hash = request.args.get('id', '')
     story = models.Story.query.filter_by(
-        url_hash=story_url_hash
+        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
         ).first()
     if not story:
         flash("We apologize, but we could not find the story you were looking for. Please try again later.", 'error')

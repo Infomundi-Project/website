@@ -131,7 +131,7 @@ def add_headers(response):
         "style-src 'self' 'unsafe-inline' https://*.infomundi.net https://fonts.googleapis.com https://www.gstatic.com; "
         
         "base-uri 'self' https://*.infomundi.net; "
-        "font-src 'self' https://*.infomundi.net; "
+        "font-src 'self' https://fonts.gstatic.com https://*.infomundi.net; "
         "frame-ancestors 'self' https://*.infomundi.net"
     )
 
@@ -157,7 +157,7 @@ css_base = Bundle(
 # base.html
 js_base = Bundle(
     'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js',
-    'js/initGoogleTranslate.js', 'js/triggerLiveToast.js', 'js/autocomplete.js', 'js/maximusTranslation.js',
+    'js/triggerLiveToast.js', 'js/autocomplete.js',
     'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js',
     'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js',
     'js/captchaWaitSubmit.js', 'js/renderFriendsModal.js',

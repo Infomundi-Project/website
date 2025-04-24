@@ -73,7 +73,7 @@
 
   function renderComment(comment, container, level = 0, parentUser = null) {
     const div = document.createElement('div');
-    div.className = 'card bg-transparent border-0 border-start border-5 mb-3';
+    div.className = 'card bg-transparent border-0 border-start border-primary border-5 mb-3';
     div.dataset.id = comment.id;
     div.id = `comment-${comment.id}`;
     const repliesContainerId = `replies-${comment.id}`;
@@ -81,15 +81,15 @@
                         <span class="d-inline-block text-muted ms-2 fst-italic small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.updated_at + 'Z').toLocaleString()}">(edited - ${preciseTimeAgo(comment.updated_at)})</span>` : '';
     div.innerHTML = `
     
-                        <div class="card-body ps-3 pe-0">
+                        <div class="card-body py-1 ps-3 pe-0">
                           <div class="d-flex align-items-start">
-                            <img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto">
+                            <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset"><img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto"></a>
                               <div class="w-100">
                                 <div class="d-flex justify-content-between">
                                   <div>
-                                    <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small">${comment.user.username}</a>
+                                    <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small notranslate">${comment.user.username}</a>
               ${comment.user.role !== 'user' ? `
-                                    <span class="badge bg-primary ms-2">${comment.user.role}</span>` : ''}
+                                    <span class="badge bg-primary" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}
                                     <br>
               ${level > 0 && parentUser ? `
                                       <span class="text-muted small">Replying to 
@@ -362,9 +362,13 @@
       const target = document.getElementById(targetId);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.classList.add('border-primary', 'border'); // visual effect
+
+        target.classList.remove('border-primary', 'border');
+        target.classList.add('border-info', 'border'); // visual effect
+        
         setTimeout(() => {
-          target.classList.remove('border-primary', 'border');
+          target.classList.add('border-primary', 'border');
+          target.classList.remove('border-info', 'border');
         }, 2500); // remove effect after 2.5s
       }
     }

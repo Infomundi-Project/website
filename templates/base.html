@@ -59,6 +59,12 @@
     {% assets "css_base" %}
     <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
+    <style>
+    /* Hide Google’s floating banner and watermark */
+    .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+    .goog-logo-link, .goog-te-gadget { display: none !important; }
+  </style>
     <title>Infomundi - {% block title %}Home{% endblock %}</title>
     {% block styles %} {% endblock %}
   </head>
@@ -286,10 +292,44 @@
           </li>
         </ul>
         {% endif %}
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="maximusTranslationSwitch">
-          <label class="form-check-label" for="maximusTranslationSwitch"><i class="fa-solid me-1 fa-language"></i>Enable Maximus translation</label>
-        </div>
+        <div class="dropdown ms-auto">
+        <button
+          class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="langDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="bi bi-globe2 me-1"></i>
+          <span id="current-lang">Language</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+          <!-- Disable translation option -->
+          <li>
+            <a class="dropdown-item d-flex align-items-center" href="#" data-lang="none">
+              🚫 Disable Translation
+              <i class="bi bi-check-lg ms-auto d-none"></i>
+            </a>
+          </li>
+          <!-- 15 most-spoken languages -->
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="en">🇺🇸 English <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="zh-CN">🇨🇳 中文 <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="es">🇪🇸 Español <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="hi">🇮🇳 हिन्दी <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="ar">🇸🇦 العربية <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="bn">🇧🇩 বাংলা <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="pt">🇵🇹 Português <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="ru">🇷🇺 Русский <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="ja">🇯🇵 日本語 <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="pa">🇵🇰 ਪੰਜਾਬੀ <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="mr">🇮🇳 मराठी <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="te">🇮🇳 తెలుగు <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="tr">🇹🇷 Türkçe <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="ko">🇰🇷 한국어 <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="fr">🇫🇷 Français <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="de">🇩🇪 Deutsch <i class="bi bi-check-lg ms-auto d-none"></i></a></li>
+        </ul>
+      </div>
         <div class="position-fixed bottom-0 end-0 m-3">
           <input type="checkbox" class="theme-checkbox" id="theme-checkbox" {% if not is_light_mode %}checked{% endif %}>
           <label for="theme-checkbox" class="theme-checkbox-label">
@@ -570,6 +610,97 @@
           </div>
         </div>
       </div>
+
+        <!-- TRANSLATION MODAL -->
+  <div
+    class="modal fade"
+    id="translationModal"
+    tabindex="-1"
+    aria-labelledby="translationModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="translationModalLabel">Translate Page?</h5>
+        </div>
+        <div class="modal-body">
+          <p>
+            We detected your preferred language as
+            <strong id="detectedLangDisplay"></strong>.
+          </p>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="translationOption"
+              id="opt-auto"
+              checked
+            />
+            <label class="form-check-label" for="opt-auto">
+              Translate to <span id="detectedLangInline"></span>
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="translationOption"
+              id="opt-none"
+            />
+            <label class="form-check-label" for="opt-none">
+              No translation (Original English)
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="translationOption"
+              id="opt-other"
+            />
+            <label class="form-check-label" for="opt-other">
+              Choose another language
+            </label>
+          </div>
+          <div class="mt-2" id="other-lang-group" style="display:none;">
+            <select class="form-select" id="otherLangSelect">
+              <option value="en">🇺🇸 English</option>
+              <option value="zh-CN">🇨🇳 中文</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="hi">🇮🇳 हिन्दी</option>
+              <option value="ar">🇸🇦 العربية</option>
+              <option value="bn">🇧🇩 বাংলা</option>
+              <option value="pt">🇵🇹 Português</option>
+              <option value="ru">🇷🇺 Русский</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="pa">🇵🇰 ਪੰਜਾਬੀ</option>
+              <option value="mr">🇮🇳 मराठी</option>
+              <option value="te">🇮🇳 తెలుగు</option>
+              <option value="tr">🇹🇷 Türkçe</option>
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="de">🇩🇪 Deutsch</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="saveTranslationChoice">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
       <!-- Sign out modal -->
       {% if current_user.is_authenticated %}
       <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
@@ -590,20 +721,10 @@
         </div>
       </div>
       {% endif %}
-      {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
-      <div class="toast-container position-fixed bottom-0 end-0 p-2">
-        <div id="liveToast" class="toast" role="alert" data-bs-delay="30000" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <img data-src="{{ url_for('static', filename='img/maximus.webp') }}" class="rounded me-2 lazyload" alt="Maximus" width="45" height="45">
-            <strong class="me-auto"><i class="fa-solid fa-language me-1"></i>Maximus says: Would you like to translate this page?</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">
-            <div id="google_translate_element"></div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
+
+      <!-- Hidden Google Translate container -->
+      <div id="google_translate_element" style="display:none;"></div>
+
       {% if request.endpoint in ('views.about', 'views.contact', 'views.policies', 'views.team') %}
       <div class="container">
         <div class="row">
@@ -763,11 +884,11 @@
     {% assets "js_base" %}
     <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
     {% endassets %}
-    {% if page != "Error" and request.cookies.get('maximusTranslation', '') == 'enabled' %}
+
     <script nonce="{{ nonce }}"
-      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+      src="{{ url_for('static', filename='js/automaticTranslation.js') }}" 
       ></script>
-    {% endif %}
+
 
     <script nonce="{{ nonce }}">
      window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
