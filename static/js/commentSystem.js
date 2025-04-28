@@ -43,7 +43,10 @@
   let loading = false;
   let hasMore = true;
 
+  let page_id = null;
+
   async function loadComments(reset = false, isScroll = false) {
+    if (!window.page_id) return;      // ← nothing to do until we have an ID
     if (loading) return;
     if (isScroll && !hasMore) return; // Only block if infinite scroll says no more
 
@@ -62,6 +65,8 @@
     const res = await fetch(`/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`);
     const data = await res.json();
     
+    // **refresh all “timeago” labels right away**
+    updateTimeagoLabels();
 
     infomundiCommentsCount.innerHTML = data.total;
 
@@ -76,12 +81,17 @@
     div.className = 'card bg-transparent border-0 border-start border-primary border-5 mb-3';
     div.dataset.id = comment.id;
     div.id = `comment-${comment.id}`;
+
     const repliesContainerId = `replies-${comment.id}`;
     const editedTag = comment.is_edited ? `
-                        <span class="d-inline-block text-muted ms-2 fst-italic small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.updated_at + 'Z').toLocaleString()}">(edited - ${preciseTimeAgo(comment.updated_at)})</span>` : '';
+                        <span
+                        class="d-inline-block text-muted ms-2 fst-italic small timeago"
+                        data-timestamp="${comment.updated_at}Z"
+                        title="${new Date(comment.updated_at + 'Z').toLocaleString()}">
+                        (edited – ${preciseTimeAgo(comment.updated_at)})
+                      </span>` : '';
     div.innerHTML = `
-    
-                        <div class="card-body py-1 ps-3 pe-0">
+                        <div class="card-body inf-comments-card-body py-1 ps-3 pe-0">
                           <div class="d-flex align-items-start">
                             <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset"><img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto"></a>
                               <div class="w-100">
@@ -95,7 +105,12 @@
                                       <span class="text-muted small">Replying to 
                                         @<a href="#comment-${comment.parent_id}" class="reply-link text-decoration-none fw-bold">${parentUser.username}</a>, 
                                       </span>` : ''}
-                                      <span class="d-inline-block text-muted small" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${new Date(comment.created_at + 'Z').toLocaleString()}">${preciseTimeAgo(comment.created_at)}</span>
+                                      <span
+                                        class="d-inline-block text-muted small timeago"
+                                        data-timestamp="${comment.created_at}Z"
+                                        title="${new Date(comment.created_at + 'Z').toLocaleString()}">
+                                        ${preciseTimeAgo(comment.created_at)}
+                                      </span>
               ${editedTag}
             
                                     </div>
@@ -133,6 +148,44 @@
                               </div>
                             </div>
   `;
+
+  
+    if (comment.is_flagged) {
+      // 1) mark the card
+      div.classList.add('flagged');
+
+      // 2) find the body
+      const body = div.querySelector('.inf-comments-card-body');
+
+      // 3) wrap all existing children in a blur-able container
+      const wrapper = document.createElement('div');
+      wrapper.className = 'comment-content-wrapper flagged-blur';
+      while (body.firstChild) {
+        wrapper.appendChild(body.firstChild);
+      }
+      body.appendChild(wrapper);
+
+      // 4) build the overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'flagged-overlay';
+      overlay.innerHTML = `
+        This comment was flagged by our automated systems.
+        <button class="btn btn-sm btn-light">Show</button>
+      `;
+
+      // 5) on click, unblur & remove overlay
+      overlay.addEventListener('click', () => {
+        wrapper.classList.remove('flagged-blur');
+        overlay.remove();
+      });
+
+      // 6) append overlay *after* the wrapper
+      body.appendChild(overlay);
+    }
+
+
+
+
     // Attach actions
     const likeBtn = div.querySelector('.like-btn');
     const dislikeBtn = div.querySelector('.dislike-btn');
@@ -167,7 +220,7 @@
        const repliesContainer = document.createElement('div');
        repliesContainer.id = `replies-${comment.id}`;
        repliesContainer.className = 'collapse';
-       div.querySelector('.card-body').appendChild(repliesContainer);
+       div.querySelector('.inf-comments-card-body').appendChild(repliesContainer);
 
        // 2) Create the toggle button
        const toggleBtn = document.createElement('button');
@@ -224,30 +277,56 @@
   }
   commentForm.addEventListener('submit', handleCommentSubmit);
   async function likeComment(id) {
-    await fetch(`/api/comments/${id}/like`, {
+    // 1) Hit the API
+    const res = await fetch(`/api/comments/${id}/like`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       }
     });
-    loadComments(true);
+    if (!res.ok) return;
+    const { likes } = await res.json();  // have your API return the new like count
+
+    // 2) Find the button’s badge and update it
+    const commentDiv = document.getElementById(`comment-${id}`);
+    const badge = commentDiv.querySelector('.like-btn .badge');
+    badge.textContent = likes;
+
+    // 3) (Optional) briefly highlight it so they see feedback immediately
+    commentDiv.classList.add('bg-highlight');
+    setTimeout(() => commentDiv.classList.remove('bg-highlight'), 1500);
   }
+
   async function dislikeComment(id) {
-    await fetch(`/api/comments/${id}/dislike`, {
+    // 1) Call the API
+    const res = await fetch(`/api/comments/${id}/dislike`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       }
     });
-    loadComments(true);
+    if (!res.ok) return;                             // bail if something’s wrong
+    const { dislikes } = await res.json();            // expect { dislikes: <newCount> }
+
+    // 2) Update the badge in-place
+    const commentDiv = document.getElementById(`comment-${id}`);
+    const badge = commentDiv.querySelector('.dislike-btn .badge');
+    badge.textContent = dislikes;
+
+    // 3) Give a quick highlight for feedback
+    commentDiv.classList.add('bg-highlight');
+    setTimeout(() => commentDiv.classList.remove('bg-highlight'), 1500);
   }
+
 
 
   function editComment(id) {
     const contentDiv = document.getElementById(`comment-content-${id}`);
     const originalText = contentDiv.innerText.trim();
+
+    // 1) Replace the <p> with a <textarea> + buttons
     const textarea = document.createElement('textarea');
     textarea.className = 'form-control mb-2';
     textarea.value = originalText;
@@ -257,24 +336,63 @@
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn btn-sm btn-secondary';
     cancelBtn.textContent = 'Cancel';
+
     contentDiv.replaceWith(textarea);
     textarea.after(saveBtn, cancelBtn);
+
+    // 2) Wire up “Save”
     saveBtn.onclick = async () => {
       const updatedText = textarea.value.trim();
       if (!updatedText) return;
-      await fetch(`/api/comments/${id}`, {
+
+      const res = await fetch(`/api/comments/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({
-          content: updatedText
-        })
+        body: JSON.stringify({ content: updatedText })
       });
-      loadComments(true);
+      if (!res.ok) return;                            // error handling as desired
+      const data = await res.json();                   // expect { content, updated_at }
+
+      // 3) Rebuild the paragraph with new content
+      const newP = document.createElement('p');
+      newP.id = `comment-content-${id}`;
+      newP.className = contentDiv.className;           // carry over your styling
+      newP.style = contentDiv.getAttribute('style');
+      newP.textContent = data.content;
+
+      // 4) Swap textarea out for the new <p>
+      textarea.replaceWith(newP);
+      saveBtn.remove();
+      cancelBtn.remove();
+
+      // 5) Update the “(edited … ago)” tag or insert it if missing
+      const body = document.querySelector(`#comment-${id} .inf-comments-card-body .d-flex > div`);
+      let editedTag = body.querySelector('.edited-tag');
+      if (!editedTag) {
+        editedTag = document.createElement('span');
+        editedTag.className = 'd-inline-block text-muted ms-2 fst-italic small edited-tag';
+        body.appendChild(editedTag);
+      }
+      editedTag.setAttribute('title', new Date(data.updated_at + 'Z').toLocaleString());
+      editedTag.textContent = `(edited – ${preciseTimeAgo(data.updated_at)})`;
+
+      // 6) Give a quick visual cue
+      const commentDiv = document.getElementById(`comment-${id}`);
+      commentDiv.classList.add('highlight-border');
+      setTimeout(() => commentDiv.classList.remove('highlight-border'), 2000);
+    };
+
+    // 7) Wire up “Cancel” to restore original
+    cancelBtn.onclick = () => {
+      textarea.replaceWith(contentDiv);
+      saveBtn.remove();
+      cancelBtn.remove();
     };
   }
+
   async function deleteComment(id) {
     if (confirm("Are you sure you want to delete this comment?")) {
       await fetch(`/api/comments/${id}`, {
@@ -313,35 +431,53 @@
 
 
   class InfomundiComments extends HTMLElement {
-    constructor() {
-      super();
-    }
+  static get observedAttributes() {
+    return ['page_id'];
+  }
 
-    connectedCallback() {
-      const rawId = this.getAttribute('page_id');
-      if (!rawId) {
-        console.error("No page_id specified for <infomundi-comments>");
-        return;
-      }
+  constructor() {
+    super();
+  }
 
-      // URL-safe Base64 encode
-      const base64Id = btoa(rawId)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+  connectedCallback() {
+    // Initial render on first connection
+    this.handlePageIdChange(this.getAttribute('page_id'));
+  }
 
-      this.renderCommentSection(base64Id);
-    }
-
-    renderCommentSection(page_id) {
-      // Expose globally
-      window.page_id = page_id;
-
-      loadComments(true);
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'page_id' && newValue && newValue !== oldValue) {
+      this.handlePageIdChange(newValue);
     }
   }
 
-  customElements.define('infomundi-comments', InfomundiComments);
+  handlePageIdChange(rawId) {
+    if (!rawId) {
+      console.error("No page_id specified for <infomundi-comments>");
+      return;
+    }
+
+    // URL-safe Base64 encode
+    const base64Id = btoa(rawId)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    // Expose globally for fetch logic
+    page_id = base64Id;
+    window.page_id = base64Id;
+
+    // Reset infinite-scroll state and clear UI
+    page = 1;
+    hasMore = true;
+    commentsList.innerHTML = '';
+
+    // Fetch comments for the new page_id
+    loadComments(true);
+  }
+}
+
+customElements.define('infomundi-comments', InfomundiComments);
+
 
   function flattenReplies(replies = []) {
     return replies.reduce((all, reply) => {
@@ -420,3 +556,15 @@
     // cancel -> just clear
     cancel.addEventListener('click', () => container.innerHTML = '');
   }
+
+  function updateTimeagoLabels() {
+    document.querySelectorAll('.timeago').forEach(el => {
+      const ts = el.getAttribute('data-timestamp');
+      // strip trailing Z for our utility, if needed
+      const base = ts.endsWith('Z') ? ts.slice(0, -1) : ts;
+      el.textContent = preciseTimeAgo(base);
+    });
+  }
+
+  // Update every 60 seconds
+  setInterval(updateTimeagoLabels, 60 * 1000);

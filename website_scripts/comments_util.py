@@ -28,6 +28,7 @@ def serialize_comment_tree(comment) -> dict:
             'role': comment.user.role
         },
         'content': '[deleted]' if comment.is_deleted else comment.content,
+        'is_flagged': comment.is_flagged,
         'is_edited': comment.is_edited,
         'updated_at': comment.updated_at.isoformat(),
         'created_at': comment.created_at.isoformat(),

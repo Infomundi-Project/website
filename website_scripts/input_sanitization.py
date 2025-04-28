@@ -9,6 +9,55 @@ from bs4 import BeautifulSoup
 from . import security_util, config
 
 
+def has_external_links(text: str) -> bool:
+    """
+    Analyze the given text and return any detected patterns that
+    could indicate a user is trying to direct others to an external website.
+    """
+    patterns = [
+        # Standard URLs
+        r'https?://[^\s]+',
+        # 'www.' prefix without protocol
+        r'www\.[^\s]+',
+        # Common TLDs
+        r'\b[^\s]+\.(com|org|net|io|info|biz|co|us|edu|gov)\b',
+        # Obfuscated with dots or spaces
+        r'\b[^\s]+\s*\.\s*(com|org|net|io|info|biz|co|us|edu|gov)\b',
+        # Dot spelled out
+        r'\b[^\s]+\s+dot\s+(com|org|net|io|info|biz|co|us|edu|gov)\b',
+        # Dot in brackets
+        r'\b[^\s]+\s*\[\s*dot\s*\]\s*(com|org|net|io|info|biz|co|us|edu|gov)\b',
+        # Protocol obfuscated with spaces
+        r'(?:(?:http|https)\s*[:]\s*//[^\s]+)',
+        # URL shorteners and redirect services
+        r'\b(?:bit\.ly|tinyurl\.com|goo\.gl|t\.co|ow\.ly|buff\.ly|lc\.chat)\b[^\s]*',
+        # Punycode (xn--)
+        r'\b(?:xn--[^\s]+)\b',
+        # Raw IP addresses (with optional port/path)
+        r'\b(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:/[^\s]*)?',
+        # URL-encoded separators
+        r'%3A%2F%2F',
+        # Data URIs
+        r'data:[^\s]+base64,',
+        # HTML anchor tags
+        r'<a\s+href=["\']([^"\']+)["\']',
+        # JavaScript redirects
+        r'javascript\s*:',
+        # Markdown-style links
+        r'\[.*?\]\(.*?\)',
+    ]
+
+    findings = []
+    for pat in patterns:
+        for match in re.finditer(pat, text, flags=re.IGNORECASE):
+            findings.append({
+                'pattern': pat,
+                'match': match.group().strip()
+            })
+
+    return bool(findings)
+
+
 def clean_publisher_name(name):
     # Remove common patterns
     name = re.sub(r' - Latest.*', '', name, flags=re.IGNORECASE)

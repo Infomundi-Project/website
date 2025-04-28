@@ -495,16 +495,28 @@ def create_comment():
     if not page_id or not content:
         return jsonify({'error': 'Missing page_id or content'}), 400
 
+    content_moderation = llm_util.is_inappropriate(text=content, simple_return=False).categories
+    moderation_categories = ('self_harm', 'illicit', 'sexual_minors')
+
     comment = models.Comment(
         page_hash=hashing_util.string_to_md5_binary(page_id),
         user_id=current_user.id if current_user.is_authenticated else comments_util.get_anonymous_user().id,
         content=input_sanitization.sanitize_html(content),
+        is_flagged=any(
+            getattr(content_moderation, category, False) for category in moderation_categories
+            ) or input_sanitization.has_external_links(content),
         parent_id=parent_id
     )
     extensions.db.session.add(comment)
     extensions.db.session.commit()
     
     return jsonify({'message': 'Comment created', 'comment_id': comment.id}), 201
+
+
+@api.route('/stories/most_commented', methods=['GET'])
+@extensions.cache.cached(timeout=60*60*24*1) # 1 day
+def stories_get_most_commented():
+    return jsonify(country_util.get_countries())
 
 
 @api.route('/comments/get/<page_id>', methods=['GET'])
@@ -533,7 +545,7 @@ def get_comments(page_id):
     if sort == "old":
         query = query.order_by(asc(models.Comment.created_at))
     #elif sort == "best":
-    #    query = query.order_by(desc(models.Comment.reactions.likes - models.Comment.reactions.dislikes))
+    #    query = query.order_by(desc(models.Comment.reactions.filter_by(action='like') - models.Comment.reactions.dislikes))
     else:
         query = query.order_by(desc(models.Comment.created_at))  # fallback
 
@@ -589,17 +601,19 @@ def react_to_comment(comment_id, action):
     if action not in ('like', 'dislike'):
         return jsonify({'error': 'Invalid action'}), 400
 
+    comment = extensions.db.session.get(models.Comment, comment_id)
+    if not comment:
+        return jsonify({'error': 'Invalid comment'}), 400
+
     reaction = models.CommentReaction.query.filter_by(comment_id=comment_id, user_id=current_user.id).first()
 
     if reaction:
         if reaction.action == action:
             extensions.db.session.delete(reaction)  # Toggle off
             extensions.db.session.commit()
-            return jsonify({'message': f'{action} removed'})
         else:
             reaction.action = action  # Change reaction
             extensions.db.session.commit()
-            return jsonify({'message': f'Reaction changed to {action}'})
     else:
         new_reaction = models.CommentReaction(comment_id=comment_id, user_id=current_user.id, action=action)
         extensions.db.session.add(new_reaction)
@@ -608,4 +622,8 @@ def react_to_comment(comment_id, action):
         except IntegrityError:
             extensions.db.session.rollback()
             return jsonify({'error': 'Duplicate reaction'}), 400
-        return jsonify({'message': f'{action} added'})
+
+    if action == 'like':
+        return jsonify(likes=comment.reactions.filter_by(action='like').count())
+    else:
+        return jsonify(dislikes=comment.reactions.filter_by(action='dislike').count())

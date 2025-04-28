@@ -313,56 +313,13 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
             return save_list[index]
 
 
-def get_link_preview(url: str) -> dict:
-    """Takes an URL as input and returns a dictionary with link preview information such as image, description and title."""
-    try:
-        headers = {
-            'User-Agent': choice(immutable.USER_AGENTS)
-        }
-
-        response = get_request(url, timeout=5, headers=headers)
-        
-        if response.status_code != 200:
-            raise Exception
-
-        response.encoding = 'utf-8'
-        # Parse the HTML content of the page
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        # Extract relevant information
-        title = soup.title.text.strip() if soup.title else "No title"
-        
-        description = soup.find('meta', {'name': 'description'})
-        description = description.get('content').strip() if description else "No description"
-        
-        image = soup.find('meta', {'property': 'og:image'})
-        image = image.get('content').strip() if image else "static/img/infomundi-white-darkbg-square.webp"
-
-        # Remove some potentially harmful characters
-        for character in immutable.SPECIAL_CHARACTERS:
-            title.replace(character, '')
-            description.replace(character, '')
-
-        return {
-            'image': image,
-            'description': description,
-            'title': title
-        }
-    except Exception:
-        return {
-            'image': 'static/img/infomundi-white-darkbg-square.webp',
-            'description': 'No description was provided',
-            'title': 'No title was provided'
-        }
-
-
 def string_similarity(s1: str, s2: str) -> float:
     """Takes two strings and returns the similarity percentage between them."""
     matcher = SequenceMatcher(None, s1, s2)
     return matcher.ratio() * 100
 
 
-def extract_yake(text: str, lang_code: str, top_n: int = 5) -> tuple:
+def extract_yake(text: str, lang_code: str = 'en', top_n: int = 5) -> tuple:
     kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
     return (kw for kw, score in kw_extractor.extract_keywords(text))
 

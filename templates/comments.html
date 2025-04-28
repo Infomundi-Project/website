@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block title %}{{ seo_data[0] }}{% endblock %} {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}">
-<meta name="csrf-token" content="{{ csrf_token() }}"> {% endblock %} {% block content %} 
+{% endblock %} {% block content %} 
 <div class="container my-5">
   <div class="row">
     <!-- Main Content -->
@@ -30,6 +30,8 @@
       <article class="mb-5">
         <p class="lead">{{ story.description|safe }}</p>
         <hr class="mt-5 mb-3">
+
+
         <div class="maximus">
           <!-- Header Section -->
           <div class="maximus-summary-header row align-items-start">
@@ -70,6 +72,8 @@
           </div>
           <div class="maximus-summary-api-response"></div>
         </div>
+
+
       </article>
       <!-- Share Buttons -->
       <div class="mb-4">
@@ -91,6 +95,7 @@
       <div class="mt-5">
         <h3 class="mb-4">Comments<span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span></h3>
         <form id="commentForm" class="mb-4">
+          <meta name="csrf-token" content="{{ csrf_token() }}">
           <div class="d-flex align-items-start gap-2">
             <img src="{% if current_user.is_authenticated %}{{ current_user.avatar_url }}{% else %}{{ url_for('static', filename='img/avatar.webp') }}{% endif %}" alt="User" class="rounded me-2" width="48" height="48">
             <textarea id="commentText" class="form-control flex-grow-1" rows="4" placeholder="What's on your mind?"></textarea>

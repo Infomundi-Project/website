@@ -3,9 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
     keyboard: false,
   });
 
-  // Lock to prevent multiple requests
-  let isFetchingSummary = false;
-
   // Modal element selectors
   const modalElement = document.getElementById("infomundiStoryModal");
   const modalTitle = modalElement.querySelector(".modal-header h1");
@@ -23,146 +20,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const modalSatelliteIcon = modalElement.querySelector(".fa-satellite-dish");
   const modalPublishedDate = modalElement.querySelector("#publishedDateStoryModal");
   const modalViewCount = modalElement.querySelector("#viewCountStoryModal");
-
-  const textElement = document.getElementById("blurred-text");
-  const progressBar = document.getElementById("progress-bar");
-  const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas fermentum lorem consequat diam tempor malesuada. Nunc id odio lorem. Duis quis cursus nisi. Curabitur cursus eget augue a rutrum. Maecenas vestibulum nunc id eros ultrices, id sollicitudin diam lacinia. Proin eget eros ultrices, vestibulum est et, vestibulum nisi. Vivamus erat odio, convallis nec efficitur dapibus, imperdiet sit amet libero. Donec sed molestie urna. Praesent pretium metus id augue tristique, eget elementum mi convallis. Nullam ex dui, scelerisque eget dui in, rutrum maximus diam. Donec elementum efficitur est, in imperdiet diam scelerisque eu. Mauris maximus risus mi, at pellentesque tellus congue ut. Morbi libero nulla, dapibus eget ex aliquam, rhoncus tincidunt leo. Cras tempor purus at mauris tempus posuere. Donec ultricies tellus risus, vel aliquam nulla tristique et. Morbi vehicula augue ut iaculis sodales.
-
-  Nullam auctor, enim nec luctus iaculis, urna orci posuere diam, eget aliquam sem magna et ex. Ut feugiat, mauris quis suscipit vulputate, ante quam porta dolor, ac eleifend neque risus non tellus. Vestibulum sit amet velit nibh. Etiam quis tortor id turpis condimentum tempor ut eu metus. Pellentesque in fermentum massa. Donec elit magna, dictum ut tellus ac, blandit fringilla magna. Sed pulvinar non mauris eget aliquet. Vivamus lectus nibh, porta sed leo in, lobortis sollicitudin erat. Nullam eu lorem vehicula, sodales massa vitae, tempus velit. Morbi at consequat ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vestibulum scelerisque libero in odio vulputate lacinia.`;
-
-  let currentIndex = 0;
-  let totalCharacters = loremIpsum.replace(/\s+/g, "").length; // Exclude spaces
-
-  // Function to reset and play placeholder animation
-  function resetAndPlayPlaceholder() {
-    textElement.textContent = ""; // Clear any existing text
-    currentIndex = 0;
-    progressBar.style.width = "0%";
-    progressBar.setAttribute("aria-valuenow", "0");
-
-    function typeText() {
-      if (currentIndex < loremIpsum.length) {
-        const currentChar = loremIpsum[currentIndex];
-        if (currentChar.trim()) {
-          textElement.textContent += currentChar;
-          const progress = Math.min(
-            (textElement.textContent.replace(/\s+/g, "").length /
-              totalCharacters) *
-              100,
-            100
-          );
-          progressBar.style.width = `${progress}%`;
-          progressBar.setAttribute("aria-valuenow", progress.toFixed(0));
-        }
-        currentIndex++;
-        setTimeout(typeText, 0.07); // Time in ms
-      }
-    }
-
-    typeText();
-  }
-
-
-  function fetchAndRenderStorySummary(storyId) {
-    if (isFetchingSummary) return; // Prevent duplicate requests
-    isFetchingSummary = true; // Set lock
-
-    const contentPlaceholder = document.querySelector(".content-placeholder");
-    const maximusApiResponse = document.querySelector(".maximus-api-response");
-
-    // Reset: Show the placeholder and clear the response container
-    contentPlaceholder.style.display = "flex";
-    maximusApiResponse.innerHTML = "";
-
-    resetAndPlayPlaceholder(); // Play loading animation
-
-    fetch(`/api/story/summarize/${storyId}`)
-        .then((response) => {
-            if (!response.ok) {
-                // If the response isn't OK, parse the JSON and throw the error
-                return response.json().then((errorData) => {
-                    throw new Error(errorData.response || "Failed to fetch story summary.");
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
-            const responseData = data.response;
-
-            if (!responseData) {
-                maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
-                contentPlaceholder.style.display = "none"; // Hide placeholder
-                return;
-            }
-
-            const {
-                addressed_topics,
-                context_around,
-                questioning_the_subject,
-                methods_for_inquiry
-            } = responseData;
-
-            if (!addressed_topics && !context_around && !questioning_the_subject && !methods_for_inquiry) {
-                maximusApiResponse.innerHTML = "<p>No summary available for this story.</p>";
-                contentPlaceholder.style.display = "none"; // Hide placeholder
-                return;
-            }
-
-            // Construct content dynamically
-            let contentHTML = "";
-
-            // Add "Addressed Topics"
-            if (addressed_topics?.length) {
-                contentHTML += `
-                    <h4>Addressed Topics</h4>
-                    <ul>${addressed_topics.map((topic) => `<li>${topic}</li>`).join("")}</ul>
-                    <hr class="my-3">
-                `;
-            }
-
-            // Add "Context Around"
-            if (context_around?.length) {
-                contentHTML += `
-                    <h4>Context Around</h4>
-                    <ul>${context_around.map((context) => `<li>${context}</li>`).join("")}</ul>
-                    <hr class="my-3">
-                `;
-            }
-
-            // Add "Methods for Inquiry"
-            if (methods_for_inquiry?.length) {
-                contentHTML += `
-                    <h4>Methods for Investigation</h4>
-                    <ul>${methods_for_inquiry.map((method) => `<li>${method}</li>`).join("")}</ul>
-                    <hr class="my-3">
-                `;
-            }
-
-            // Add "Questioning the Subject"
-            if (questioning_the_subject?.length) {
-                contentHTML += `
-                    <h4>Questioning the Subject</h4>
-                    <ul>${questioning_the_subject.map((question) => `<li>${question}</li>`).join("")}</ul>
-                `;
-            }
-
-            // Update Maximus API Response
-            maximusApiResponse.innerHTML = contentHTML;
-
-            // Hide the placeholder and show the API content
-            contentPlaceholder.style.display = "none";
-        })
-        .catch((error) => {
-            console.error(error);
-
-            // Display the error message from the API response
-            maximusApiResponse.innerHTML = `<p>${error.message}</p>`;
-            contentPlaceholder.style.display = "none"; // Hide placeholder
-        })
-        .finally(() => {
-            isFetchingSummary = false; // Release lock
-        });
-  }
 
 
   // Function to initialize like/dislike icons based on localStorage
@@ -319,6 +176,8 @@ document.addEventListener("DOMContentLoaded", function () {
           modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
 
           // Initialize comments section for the selected story
+          const commentsElement = document.querySelector('infomundi-comments');
+          commentsElement.setAttribute('page_id', storyData.story_id);
 
           // Load Maximus content
           fetchAndRenderStorySummary(storyData.story_id);
@@ -582,7 +441,7 @@ document.addEventListener("DOMContentLoaded", function () {
     colDiv.classList.add('col-lg-6', 'col-xl-4', 'my-5');
 
     const cardDiv = document.createElement('div');
-    cardDiv.classList.add('card', 'image-card', 'border', 'border-0');
+    cardDiv.classList.add('card', 'image-card', 'inf-story-card', 'border', 'border-0');
     cardDiv.id = `${item.story_id}-${item.category_id}`;
 
     // Image link
@@ -621,6 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Card body
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
+    cardBody.classList.add('inf-story-card-body');
     cardBody.innerHTML = `
         <a href="/comments?id=${item.story_id}" class="text-decoration-none text-reset">
           <p class="card-title fw-bold fs-6 line-clamp-3">
@@ -634,7 +494,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Card footer
     const cardFooter = document.createElement('div');
-    cardFooter.classList.add('card-footer', 'bg-transparent', 'border', 'border-0');
+    cardFooter.classList.add('card-footer', 'inf-story-card-footer', 'bg-transparent', 'border', 'border-0');
 
     const rowDiv = document.createElement('div');
     rowDiv.classList.add('row', 'd-flex', 'justify-content-between');

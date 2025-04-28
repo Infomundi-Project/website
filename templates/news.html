@@ -2,6 +2,7 @@
 {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
 {% endblock %}
 {% block content %}
 <div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
@@ -49,38 +50,81 @@
               <a class="btn btn-sm btn-primary" id="originalStoryLink" href="#" target="_blank" role="button">View More</a>
             </p>
             <hr class="mt-5 mb-3">
+
+
             <div class="maximus">
               <!-- Header Section -->
-              <div class="maximus-header row align-items-start">
-                <div class="col-auto mt-2">
+              <div class="maximus-summary-header row align-items-start">
+                <div class="col-sm-2 mt-2">
                   <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Profile Picture" class="border border-3 p-2">
                 </div>
-                <div class="col-md-10">
-                  <span class="fs-3">MAXIMUS</span><span class="ms-3 small text-uppercase">Infomundi's AI</span>
+                <div class="col-sm-10">
+                  <span class="fs-3">MAXIMUS</span>
+                  <span class="ms-3 small text-uppercase">Infomundi's AI</span>
                   <div class="my-3 border rounded">
                     <p class="p-3 m-0">Hi, my name is Maximus, and I'm Infomundi's AI. My job is to help you make sense of complex stories and ideas. Here's how I work:</p>
-                      <ul class="p-3 m-0 ms-3">
-                        <li><strong>Addressed Topics:</strong> I'll highlight the key themes and main ideas for you.</li>
-                        <li><strong>Context Around:</strong> I'll provide the background and connect the dots so you get the full picture.</li>
-                        <li><strong>Methods for Investigation:</strong> I'll suggest ways to explore further, like useful resources and actionable tools.</li>
-                        <li><strong>Questioning the Subject:</strong> I'll help you critically analyze key questions about the subject.</li>
-                      </ul>
-                      <p class="p-3 m-0">Think of me as your guide to turning bulk information into clear and actionable insights.</p>
+                    <ul class="p-3 m-0 ms-3">
+                      <li>
+                        <strong>Addressed Topics:</strong> I'll highlight the key themes and main ideas for you.
+                      </li>
+                      <li>
+                        <strong>Context Around:</strong> I'll provide the background and connect the dots so you get the full picture.
+                      </li>
+                      <li>
+                        <strong>Methods for Investigation:</strong> I'll suggest ways to explore further, like useful resources and actionable tools.
+                      </li>
+                      <li>
+                        <strong>Questioning the Subject:</strong> I'll help you critically analyze key questions about the subject.
+                      </li>
+                    </ul>
+                    <p class="p-3 m-0">Think of me as your guide to turning bulk information into clear and actionable insights.</p>
                   </div>
                 </div>
               </div>
               <!-- Content Section -->
-              <div class="content-placeholder">
+              <div class="maximus-summary-content-placeholder">
                 <!-- Blurred Text -->
-                <p class="blurred-text text-break" id="blurred-text"></p>
+                <p class="maximus-summary-blurred-text text-break" id="maximusSummaryBlurredText"></p>
                 <!-- Progress Bar -->
-                <div class="progress">
-                  <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="progress-bar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="maximus-summary-progress">
+                  <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="maximusSummaryProgressBar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
               </div>
-              <div class="maximus-api-response"></div>
+              <div class="maximus-summary-api-response"></div>
             </div>
-            <div id="commentsSection" class="mt-5">
+
+
+            <div class="mt-5">
+              <h3 class="mb-4">Comments<span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span></h3>
+              <form id="commentForm" class="mb-4">
+                <meta name="csrf-token" content="{{ csrf_token() }}">
+                <div class="d-flex align-items-start gap-2">
+                  <img src="{% if current_user.is_authenticated %}{{ current_user.avatar_url }}{% else %}{{ url_for('static', filename='img/avatar.webp') }}{% endif %}" alt="User" class="rounded me-2" width="48" height="48">
+                  <textarea id="commentText" class="form-control flex-grow-1" rows="4" placeholder="What's on your mind?"></textarea>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                  <button type="submit" class="btn btn-primary">{% if current_user.is_authenticated %}Post{% else %}Comment anonymously{% endif %}</button>
+                </div>
+                <input type="hidden" id="parentId" name="parentId">
+              </form>
+              <!-- Filter Bar -->
+              <div id="commentFilters" class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
+                <div class="d-flex gap-2 flex-wrap">
+                  <select id="sortSelect" class="form-select form-select-sm w-auto">
+                    <option value="best">Best</option>
+                    <option value="recent">Recent</option>
+                    <option value="old">Old</option>
+                  </select>
+                </div>
+                <input type="text" id="searchInput" class="form-control form-control-sm w-auto mt-2 mt-sm-0" placeholder="Search..." />
+              </div>
+              <!-- Comment list -->
+              <infomundi-comments>
+                
+                <div id="commentsList"></div>
+
+              </infomundi-comments>
+            </div>
             </div>
           </div>
         </div>
@@ -88,13 +132,7 @@
     </div>
   </div>
 </div>
-<div class="row">
-  {% if not is_mobile %}
-  <div class="col-lg-2">
-
-  </div>
-  {% endif %}
-  <div class="col-lg-{% if not is_mobile %}8{% else %}12{% endif %}">
+<div class="container">
     <div class="row my-3 align-items-center justify-content-center">
       <div class="col-md-3">
         {% if not is_mobile %}
@@ -479,29 +517,17 @@
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-  </div>
-  {% if not is_mobile %}
-  <div class="col-lg-2">
 
-    <!--
-    <div class="right-pillar-wrapper h-100">
-      <div class="pillar-container-right pillar-container">
-        <img src="{{ url_for('static', filename='img/illustrations/pillar-top2.webp') }}" alt="Top of the Top Pillar" class="pillar-top horizontally-mirrored">
-        <img src="{{ url_for('static', filename='img/illustrations/pillar-middle2.webp') }}" alt="Middle of the Right Pillar" class="pillar-middle horizontally-mirrored">
-        <img src="{{ url_for('static', filename='img/illustrations/pillar-bottom2.webp') }}" alt="Base of the Right Pillar" class="pillar-bottom horizontally-mirrored">
-      </div>
-    </div>
-    -->
-
-
-  </div>
-  {% endif %}
 </div>
 {% endblock %}
 {% block scripts %}
 
+
 {% assets "js_news" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
+
+<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
+<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ url_for('static', filename='js/maximusSummary.js') }}"></script>
 
 {% endblock %}

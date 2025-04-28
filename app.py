@@ -159,7 +159,7 @@ js_base = Bundle(
     'js/lazysizes.min.js', 'js/themeButton.js', 'js/triggerTooltip.js', 'js/tickerSpeedUp.js',
     'js/triggerLiveToast.js', 'js/autocomplete.js',
     'js/scrollTopButton.js', 'js/hiddenNavbarScroll.js', 'js/libs/cookieconsent-3.0.1.js',
-    'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js',
+    'js/cookieConsent.js', 'js/linkSafety.js', 'js/autoSubmitCaptcha.js', 
     'js/captchaWaitSubmit.js', 'js/renderFriendsModal.js',
     filters='jsmin', 
     output='gen/base_packed.js')
@@ -170,7 +170,7 @@ js_home = Bundle(
     output='gen/home_packed.js')
 # news.html
 js_news = Bundle(
-    'js/renderStories.js',
+    'js/renderStories.js', 
     filters='jsmin', 
     output='gen/news_packed.js')
 

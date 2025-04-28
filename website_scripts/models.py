@@ -218,10 +218,14 @@ class Comment(db.Model):
     # Commeting user
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
+    # Save story id if it's a story
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='SET NULL'), nullable=True)
+
     # Means it's a reply
     parent_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
 
-    content = db.Column(db.Text, nullable=False)  # Markdown-supported content
+    content = db.Column(db.String(1000), nullable=False)
+    is_flagged = db.Column(db.Boolean, default=False)
     is_edited = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)
 

@@ -191,14 +191,17 @@ CREATE TABLE comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     page_hash BINARY(16) NOT NULL, -- Unique page identifier (MD5)
     user_id INT,
+    story_id INT,
     parent_id INT,
-    content TEXT NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    is_flagged TINYINT(1) DEFAULT 0,
     is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,
     FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );
 
