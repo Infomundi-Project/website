@@ -37,8 +37,7 @@
   const commentText = document.getElementById('commentText');
   const parentIdField = document.getElementById('parentId');
   const commentsList = document.getElementById('commentsList');
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')
-    .getAttribute('content');
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
   let page = 1;
   let loading = false;
@@ -60,10 +59,19 @@
       hasMore = true;
     }
 
-    const sort = document.getElementById('sortSelect').value;
-    const search = document.getElementById('searchInput').value;
-    const infomundiCommentsCount = document.getElementById(
-      'infomundiCommentsCount');
+    // ←—— GRAB YOUR CONTROLS WITH NULL-CHECKS
+    const sortEl = document.getElementById('sortSelect');
+    const searchEl = document.getElementById('searchInput');
+    const countEl = document.getElementById('infomundiCommentsCount');
+
+    // If they’re not in the DOM yet, bail out and retry on next scroll/submit
+    if (!sortEl || !searchEl || !countEl) {
+      loading = false;
+      return;
+    }
+
+    const sort = sortEl.value;
+    const search = searchEl.value;
 
     const res = await fetch(
       `/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`
@@ -265,9 +273,17 @@
   }
   async function handleCommentSubmit(e) {
     e.preventDefault();
-    const content = commentText.value.trim();
-    const parent_id = parentIdField.value || null;
-    if (!content) return;
+  const form       = e.currentTarget;
+  const textarea   = form.querySelector('#commentText');
+  const parentInput= form.querySelector('#parentId');
+  const content    = textarea.value.trim();
+  const parent_id  = parentInput.value || null;
+  if (!content) return;
+
+    const csrfToken = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute('content');
+    
     const res = await fetch('/api/comments', {
       method: 'POST',
       headers: {
@@ -281,12 +297,11 @@
       })
     });
     if (res.ok) {
-      commentText.value = '';
-      parentIdField.value = '';
+      textarea.value = '';
+      parentInput.value = '';
       await loadComments(true);
     }
   }
-  commentForm.addEventListener('submit', handleCommentSubmit);
   async function likeComment(id) {
     // 1) Hit the API
     const res = await fetch(`/api/comments/${id}/like`, {
@@ -439,24 +454,96 @@
     };
   }
 
-  const debouncedLoadComments = infCommentSearchDebounce(() => loadComments(
-    true), 300); // 300ms delay
-  document.getElementById('searchInput').addEventListener('input',
-    debouncedLoadComments);
 
 
-  const sortSelect = document.getElementById('sortSelect');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', () => loadComments(true));
-  }
 
-  window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.body
-      .offsetHeight - 500) {
-      loadComments(false, true);
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    // 2) Inject the full comment UI around every <infomundi-comments>
+    document.querySelectorAll('infomundi-comments').forEach(el => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mt-5';
+      el.parentNode.insertBefore(wrapper, el);
+
+      wrapper.innerHTML = `
+      <h3 class="mb-4">
+        Comments
+        <span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span>
+      </h3>
+      <form id="commentForm" class="mb-4">
+        <div class="d-flex align-items-start gap-2">
+          <img src="${window.currentUserAvatarUrl}"
+               alt="User avatar"
+               class="rounded me-2"
+               width="48" height="48">
+          <textarea id="commentText"
+                    class="form-control flex-grow-1"
+                    rows="4"
+                    placeholder="What's on your mind?"
+                    maxlength="1000"></textarea>
+          <small id="commentTextCount" class="text-muted ms-2">0/1000</small>
+        </div>
+        <div class="d-flex justify-content-end mt-2">
+          <button type="submit" class="btn btn-primary">
+            ${window.isUserAuthenticated ? 'Post' : 'Comment anonymously'}
+          </button>
+        </div>
+        <input type="hidden" id="parentId" name="parentId">
+      </form>
+      <div id="commentFilters" class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
+        <div class="d-flex gap-2 flex-wrap">
+          <select id="sortSelect" class="form-select form-select-sm w-auto">
+            <option value="best">Best</option>
+            <option value="recent">Recent</option>
+            <option value="old">Old</option>
+          </select>
+        </div>
+        <input type="text"
+               id="searchInput"
+               class="form-control form-control-sm w-auto mt-2 mt-sm-0"
+               placeholder="Search..." />
+      </div>
+      <div id="commentsList"></div>
+    `;
+
+      // move the custom element into the wrapper
+      wrapper.appendChild(el);
+
+      // wire up live count on the main textarea
+      const commentText = wrapper.querySelector('#commentText');
+      const commentTextCount = wrapper.querySelector(
+        '#commentTextCount');
+      commentText.addEventListener('input', () => {
+        commentTextCount.textContent =
+          `${commentText.value.length}/1000`;
+      });
+      commentText.dispatchEvent(new Event('input'));
+    });
+
+    // 3) Now that the DOM exists, grab elements & wire up your existing logic
+    const commentForm = document.getElementById('commentForm');
+    const commentText = document.getElementById('commentText');
+    const parentIdField = document.getElementById('parentId');
+    const commentsList = document.getElementById('commentsList');
+
+    commentForm.addEventListener('submit', handleCommentSubmit);
+
+    const debouncedLoadComments = infCommentSearchDebounce(() =>
+      loadComments(true), 300);
+    document.getElementById('searchInput').addEventListener('input',
+      debouncedLoadComments);
+    document.getElementById('sortSelect').addEventListener('change', () =>
+      loadComments(true));
+
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body
+        .offsetHeight - 500) {
+        loadComments(false, true);
+      }
+    });
+
+    // kick things off (InfomundiComments.connectedCallback will also invoke loadComments)
+    loadComments(true);
   });
-
 
   class InfomundiComments extends HTMLElement {
     static get observedAttributes() {
@@ -566,6 +653,24 @@
     const form = container.querySelector('form');
     const textarea = form.querySelector('.reply-text');
     const cancel = form.querySelector('.cancel-reply');
+
+    // 1) enforce maxlength
+    textarea.setAttribute('maxlength', '1000');
+
+    // 2) inject a counter element
+    const replyCount = document.createElement('small');
+    replyCount.className = 'text-muted ms-2 reply-char-count';
+    replyCount.textContent = '0/1000';
+    textarea.after(replyCount);
+
+    // 3) wire up live updates
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      replyCount.textContent = `${len}/1000`;
+    });
+
+    // initialize it (in case there’s pre-filled text)
+    textarea.dispatchEvent(new Event('input'));
 
     // focus
     textarea.focus();

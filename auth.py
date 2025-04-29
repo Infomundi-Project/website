@@ -15,7 +15,7 @@ auth = Blueprint('auth', __name__)
 @verify_captcha
 def login():
     # If user is in totp process, redirect them to the correct page
-    if session.get('user_id', ''):
+    if session.get('in_totp_process', ''):
         return redirect(url_for('auth.totp'))
 
     if request.method == 'GET':
@@ -25,7 +25,7 @@ def login():
     password = request.form.get('password', '')
     session['remember_me'] = request.form.get('remember_me', '') == 'yes'
 
-    # To avoid making unecessary queries to the database, first check to see if the credentials match our sandards
+    # To avoid making unecessary queries to the database, first check to see if the credentials match our standards
     if not input_sanitization.is_valid_email(email) or not input_sanitization.is_strong_password(password):
         flash('Invalid credentials!', 'error')
         return render_template('login.html')
@@ -36,7 +36,7 @@ def login():
         return render_template('login.html')
 
     # If user has totp enabled, we redirect them to the totp page without effectively performing log in actions
-    if user.totp_secret:
+    if user.is_totp_enabled or user.is_mail_twofactor_enabled:
         session['email_address'] = email
         session['user_id'] = user.id
         session['in_totp_process'] = True
@@ -61,7 +61,7 @@ def totp():
     code = request.form.get('code', '').strip()
 
     # Perform all necessary checks
-    is_valid, message = totp_util.deal_with_it(user, code, recovery_token, session['key_value'])
+    is_valid, message = totp_util.deal_with_it(user, code, recovery_token,)
     if not is_valid:
         flash(message, 'error')
         return redirect(url_for('auth.totp'))

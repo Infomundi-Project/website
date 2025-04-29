@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ request.url }}">
     <script type="application/ld+json" nonce="{{ nonce }}">
       {
@@ -795,7 +796,7 @@
     <button type="button" class="btn btn-primary inf-fixed-button" id="scrollTopBtn" style="position: fixed; bottom: 20px; right: 20px; display: none;"><i class="fa-solid fa-angles-up"></i></button>
     <!-- Start Footer -->
     {% if page != "Error" %}
-    <div class="container py-5">
+    <div class="container py-5 px-0">
       <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
         <div class="col-md-4 mb-3">
           <center>
@@ -892,6 +893,7 @@
 
     <script nonce="{{ nonce }}">
      window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+     window.currentUserAvatarUrl = "{{ current_user.avatar_url if current_user.is_authenticated else 'https://infomundi.net/static/img/avatar.webp' }}";
     </script>
     {% block scripts %} {% endblock %}
   </body>

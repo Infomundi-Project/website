@@ -394,9 +394,9 @@ def summarize_story(story_url_hash):
 
 
 @api.route('/get_stories', methods=['GET'])
-@extensions.cache.cached(timeout=60*1, query_string=True) # 1 min cached
+@extensions.cache.cached(timeout=60*15, query_string=True)  # 15 min cached
 def get_stories():
-    """Returns jsonified list of stories based on certain criteria. Cached for 1h (60s * 60)."""
+    """Returns jsonified list of stories based on certain criteria. Cached for 15 min (60s * 15)."""
     country = request.args.get('country', 'br', type=str).lower()
     category = request.args.get('category', 'general', type=str).lower()
     page = request.args.get('page', 1, type=int)
@@ -499,16 +499,11 @@ def create_comment():
     if not page_id or not content:
         return jsonify({'error': 'Missing page_id or content'}), 400
 
-    content_moderation = llm_util.is_inappropriate(text=content, simple_return=False).categories
-    moderation_categories = ('self_harm', 'illicit', 'sexual_minors')
-
     comment = models.Comment(
         page_hash=hashing_util.string_to_md5_binary(page_id),
         user_id=current_user.id if current_user.is_authenticated else comments_util.get_anonymous_user().id,
         content=input_sanitization.sanitize_html(content),
-        is_flagged=any(
-            getattr(content_moderation, category, False) for category in moderation_categories
-            ) or input_sanitization.has_external_links(content),
+        is_flagged=comments_util.is_content_inappropriate(content),
         parent_id=parent_id
     )
     extensions.db.session.add(comment)
@@ -581,6 +576,7 @@ def edit_comment(comment_id):
         return jsonify({'error': 'Empty content'}), 400
 
     comment.content = input_sanitization.sanitize_html(content)
+    comment.is_flagged = comments_util.is_content_inappropriate(content)
     comment.is_edited = True
     extensions.db.session.commit()
     return jsonify({'message': 'Comment updated'})

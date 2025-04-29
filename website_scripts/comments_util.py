@@ -1,4 +1,4 @@
-from . import extensions, models, security_util, hashing_util, config
+from . import extensions, models, security_util, hashing_util, config, llm_util, input_sanitization
 
 
 def get_anonymous_user() -> object:
@@ -37,3 +37,11 @@ def serialize_comment_tree(comment) -> dict:
         'likes': comment.reactions.filter_by(action='like').count(),
         'dislikes': comment.reactions.filter_by(action='dislike').count()
     }
+
+
+def is_content_inappropriate(content: str) -> bool:
+    content_moderation = llm_util.is_inappropriate(text=content, simple_return=False).categories
+    moderation_categories = ('self_harm', 'illicit', 'sexual_minors')
+    return any(
+        getattr(content_moderation, category, False) for category in moderation_categories
+        ) or input_sanitization.has_external_links(content)

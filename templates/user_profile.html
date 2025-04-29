@@ -4,134 +4,155 @@
 
 {% block styles %}
 <style>
-    .background-container {
-        background: url('{{ user.profile_wallpaper_url  }}') no-repeat center center;
-        background-size: cover;
-        padding-top: 30px;
-        position: relative;
-    }
-    .background-container::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.8));
-        z-index: 1;
-    }
-    .profile-container {
-        border-radius: 15px;
-        padding: 20px;
-        margin-top: 50px;
-        margin-bottom: 50px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        position: relative;
-        z-index: 2;
-    }
-    .profile-header {
-        background: url('{{ user.profile_banner_url  }}') no-repeat center center;
-        background-size: cover;
-        height: 200px;
-        position: relative;
-        border-radius: 15px 15px 0 0;
-        overflow: hidden;
-    }
-    .profile-header::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
-    }
+  .background-container {
+    background: url('{{ user.profile_wallpaper_url  }}') no-repeat center center;
+    background-size: cover;
+    padding-top: 30px;
+    position: relative;
+  }
+
+  .background-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.8));
+    z-index: 1;
+  }
+
+  .profile-container {
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+  }
+
+  .profile-header {
+    background: url('{{ user.profile_banner_url  }}') no-repeat center center;
+    background-size: cover;
+    height: 200px;
+    position: relative;
+    border-radius: 15px 15px 0 0;
+    overflow: hidden;
+  }
+
+  .profile-header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+  }
+
+  .profile-avatar {
+    max-width: 10rem;
+    height: auto;
+    border-radius: 15px;
+    border: 3px solid white;
+  }
+
+  .friend-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 15px;
+    border: 3px solid white;
+  }
+
+  .user-description {
+    max-height: 150px;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  @media (max-width: 1000px) {
     .profile-avatar {
-        max-width: 10rem;
-        height: auto;
-        border-radius: 15px;
-        border: 3px solid white;
-    }
-
-    .friend-avatar {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 15px;
-        border: 3px solid white;
-    }
-
-    .user-description {
-        max-height: 150px;
-        overflow: hidden;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    }
-
-    @media (max-width: 1000px) {
-      .profile-avatar {
       max-width: 5rem;
-      }
     }
+  }
 </style>
 {% endblock %}
 
 {% block header %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
+<link rel="stylesheet"
+  href="{{ url_for('static', filename='css/commentSystem.css') }}">
 {% endblock %}
 
 {% block content %}
 {% if pending_requests %}
-<div class="modal fade" id="pendingFriendsModal" tabindex="-1" aria-labelledby="pendingFriendsModalLabel" aria-hidden="true">
+<div class="modal fade" id="pendingFriendsModal" tabindex="-1"
+  aria-labelledby="pendingFriendsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header align-items-center justify-content-center">
-        <p class="modal-title fs-5" id="pendingFriendsModalLabel"><i class="fa-solid fa-user-group fa-xs"></i><div class="vr mx-2"></div>Friend Requests<span class="badge text-bg-secondary ms-3">{{ pending_requests|length }}</span></p>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <p class="modal-title fs-5" id="pendingFriendsModalLabel"><i
+            class="fa-solid fa-user-group fa-xs"></i>
+        <div class="vr mx-2"></div>Friend Requests<span
+          class="badge text-bg-secondary ms-3">{{ pending_requests|length }}</span>
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+          aria-label="Close"></button>
       </div>
       <div class="modal-body">
-          {% for request in pending_requests %}
-          <div class="row">
-            <div class="col-md-3">
-              <img src="{{ request.user.avatar_url }}" class="lazyload rounded" style="height: 6rem; width: 6rem;">
-            </div>
-            <div class="col-md-6">
-              {% if request.user.display_name %}
-                <span class="notranslate">{{ request.user.display_name }}</span><br>
-                <span class="notranslate text-muted small">(@{{ request.user.username }})</span>
-              {% else %}
-                <span class="notranslate">{{ request.user.username }}</span>
-              {% endif %}
-            </div>
-            <div class="col-md-3">
-              <div class="d-flex justify-content-center">
-                <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='accept') }}" type="button" role="button" class="btn btn-sm btn-success me-2">
-                  <i class="fa-solid fa-check"></i>
-                </a>
-                <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='reject') }}" type="button" role="button" class="btn btn-sm btn-danger">
-                  <i class="fa-solid fa-xmark"></i>
-                </a>
-              </div>
+        {% for request in pending_requests %}
+        <div class="row">
+          <div class="col-md-3">
+            <img src="{{ request.user.avatar_url }}" class="lazyload rounded"
+              style="height: 6rem; width: 6rem;">
+          </div>
+          <div class="col-md-6">
+            {% if request.user.display_name %}
+            <span class="notranslate">{{ request.user.display_name }}</span><br>
+            <span
+              class="notranslate text-muted small">(@{{ request.user.username }})</span>
+            {% else %}
+            <span class="notranslate">{{ request.user.username }}</span>
+            {% endif %}
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex justify-content-center">
+              <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='accept') }}"
+                type="button" role="button" class="btn btn-sm btn-success me-2">
+                <i class="fa-solid fa-check"></i>
+              </a>
+              <a href="{{ url_for('views.handle_friends', friend_id=request.user_id, action='reject') }}"
+                type="button" role="button" class="btn btn-sm btn-danger">
+                <i class="fa-solid fa-xmark"></i>
+              </a>
             </div>
           </div>
-          {% endfor %}
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 </div>
 {% endif %}
 
-<div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+<div class="modal fade" id="descriptionModal" tabindex="-1"
+  aria-labelledby="descriptionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="descriptionModalLabel">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s description</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h1 class="modal-title fs-5" id="descriptionModalLabel">
+          {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s
+          description</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+          aria-label="Close"></button>
       </div>
       <div class="modal-body text-break">
         {{ user.profile_description|safe }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary"
+          data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -143,77 +164,108 @@
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %}">
   <div class="profile-container bg-dark-subtle shadow-lg" style="opacity: 90%;">
     <div class="profile-header mb-3"></div>
-    
+
     <div class="row">
       <div class="col-md-8">
         <div class="row">
           <div class="col-auto me-2">
-            <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s profile picture" class="profile-avatar">
+            <img src="{{ user.avatar_url }}"
+              alt="{{ user.username }}'s profile picture"
+              class="profile-avatar">
           </div>
           <div class="col">
             {% if user.display_name %}
-              <span class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} fw-bold">{{ user.display_name }}</span>
-              <br>
-              <span class="notranslate fs-6 text-muted me-1">@{{ user.username }}</span>
+            <span
+              class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} fw-bold">{{ user.display_name }}</span>
+            <br>
+            <span
+              class="notranslate fs-6 text-muted me-1">@{{ user.username }}</span>
             {% else %}
-              <span class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} me-1">{{ user.username }}</span>
+            <span
+              class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} me-1">{{ user.username }}</span>
             {% endif %}
             {% if user.role == 'admin' %}
-              <span class="badge rounded-pill text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Infomundi Administrator"><i class="fa-solid fa-user-tie"></i></span>
+            <span class="badge rounded-pill text-bg-danger"
+              data-bs-toggle="tooltip" data-bs-placement="right"
+              data-bs-title="Infomundi Administrator"><i
+                class="fa-solid fa-user-tie"></i></span>
             {% endif %}
             {% if user.profile_description %}
             <div class="mt-2 user-description">
-                {% if has_too_many_newlines or is_mobile %}
-                  <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>
-                {% else %}
-                  {{ short_description|safe }} 
-                  {% if user.profile_description|length > 200 %}
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>
-                  {% endif %}
-                {% endif %}
+              {% if has_too_many_newlines or is_mobile %}
+              <a href="#" data-bs-toggle="modal"
+                data-bs-target="#descriptionModal">View more</a>
+              {% else %}
+              {{ short_description|safe }}
+              {% if user.profile_description|length > 200 %}
+              <a href="#" data-bs-toggle="modal"
+                data-bs-target="#descriptionModal">View more</a>
+              {% endif %}
+              {% endif %}
             </div>
             {% endif %}
           </div>
         </div>
       </div>
-      
+
       <div class="col-md-4{% if is_mobile %} mt-5{% endif %}">
         <p class="fs-4">
-          <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">{{ user.level }}</span>
+          <span class="fw-bold me-2">Level</span><span
+            class="badge text-bg-info">{{ user.level }}</span>
         </p>
         <span>{{ user.level_progress }}/1000</span>
-        <div class="progress" role="progressbar" aria-valuenow="{{ user.level_progress }}" aria-valuemin="0" aria-valuemax="100" style="height: 3px">
-          <div class="progress-bar bg-info" style="width: {{ user.level_progress }}%"></div>
+        <div class="progress" role="progressbar"
+          aria-valuenow="{{ user.level_progress }}" aria-valuemin="0"
+          aria-valuemax="100" style="height: 3px">
+          <div class="progress-bar bg-info"
+            style="width: {{ user.level_progress }}%"></div>
         </div>
         <div class="my-2"></div>
         {% if current_user.is_authenticated %}
-          {% if current_user.id == user.id %}
-          <div class="row align-items-center">
-            <div class="col">
-              <a type="button" role="button" class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2" href="{{ url_for('views.edit_user_profile') }}">
-                <i class="fa-solid fa-pen me-1"></i>Edit Profile
-              </a>
-            </div>
-            {% if pending_requests %}
-            <div class="col-2">
-              <button type="button" class="btn btn-primary position-relative" data-bs-toggle="modal" data-bs-target="#pendingFriendsModal">
-                <i class="fa-solid fa-bell"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ pending_requests|length }}<span class="visually-hidden">friend requests</span></span>
-              </button>
-            </div>
-            {% endif %}
+        {% if current_user.id == user.id %}
+        <div class="row align-items-center">
+          <div class="col">
+            <a type="button" role="button"
+              class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2"
+              href="{{ url_for('views.edit_user_profile') }}">
+              <i class="fa-solid fa-pen me-1"></i>Edit Profile
+            </a>
           </div>
-          {% else %}
-            {% if friend_status == 'not_friends' %}
-              <a type="button" role="button" class="btn btn-lg btn-outline-success" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='add') }}" data-bs-toggle="tooltip" data-bs-title="Add Friend"><i class="fa-solid fa-user-plus"></i></a>
-            {% elif friend_status == 'pending' and pending_friend_request_sent_by_current_user %}
-              <a type="button" role="button" class="btn btn-lg btn-outline-warning" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Cancel Request"><i class="fa-solid fa-hourglass-half"></i></a>
-            {% elif friend_status == 'pending' %}
-              <a type="button" role="button" class="btn btn-lg btn-outline-success" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}" data-bs-toggle="tooltip" data-bs-title="Accept Request"><i class="fa-solid fa-user-check"></i></a>
-            {% elif friend_status == 'accepted' %}
-              <a type="button" role="button" class="btn btn-sm btn-outline-danger" href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}" data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i class="fa-solid fa-user-minus"></i></a>
-            {% endif %}
+          {% if pending_requests %}
+          <div class="col-2">
+            <button type="button" class="btn btn-primary position-relative"
+              data-bs-toggle="modal" data-bs-target="#pendingFriendsModal">
+              <i class="fa-solid fa-bell"></i>
+              <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ pending_requests|length }}<span
+                  class="visually-hidden">friend requests</span></span>
+            </button>
+          </div>
           {% endif %}
+        </div>
+        {% else %}
+        {% if friend_status == 'not_friends' %}
+        <a type="button" role="button" class="btn btn-lg btn-outline-success"
+          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='add') }}"
+          data-bs-toggle="tooltip" data-bs-title="Add Friend"><i
+            class="fa-solid fa-user-plus"></i></a>
+        {% elif friend_status == 'pending' and pending_friend_request_sent_by_current_user %}
+        <a type="button" role="button" class="btn btn-lg btn-outline-warning"
+          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"
+          data-bs-toggle="tooltip" data-bs-title="Cancel Request"><i
+            class="fa-solid fa-hourglass-half"></i></a>
+        {% elif friend_status == 'pending' %}
+        <a type="button" role="button" class="btn btn-lg btn-outline-success"
+          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}"
+          data-bs-toggle="tooltip" data-bs-title="Accept Request"><i
+            class="fa-solid fa-user-check"></i></a>
+        {% elif friend_status == 'accepted' %}
+        <a type="button" role="button" class="btn btn-sm btn-outline-danger"
+          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"
+          data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i
+            class="fa-solid fa-user-minus"></i></a>
+        {% endif %}
+        {% endif %}
         {% endif %}
       </div>
     </div>
@@ -229,75 +281,62 @@
           <a href="#" class="list-group-item list-group-item-action">Lorem Ipsum #3</a>
         </div>
       -->
-        
+
         <!-- Friends -->
         {% if friends_list %}
-          <div>
-            <h3>Friends<span class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span></h3>
-            <div class="row">
-              {% for friend in friends_list %}
-                <div class="col">
-                  <div class="row row-cols-auto">
-                    <div class="col-auto">
-                      <a href="{{ url_for('views.user_profile', username=friend.username) }}" class="text-decoration-none">
-                        <img src="{{ friend.avatar_url }}" alt="{{ friend.username }}'s avatar" data-bs-toggle="tooltip" data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}" class="friend-avatar">
-                      </a>
-                    </div>
-                    <div class="col-md-9">
-                      <p class="fw-bold notranslate {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}" style="margin-bottom: -5px;">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</p>
-                      {% if friend.is_online %}
-                        <p class="text-primary-emphasis fs-6">Currently Online</p>
-                      {% else %}
-                        <p class="text-muted fs-6">Last seen <span data-last-seen={{ friend.last_activity|tojson }}></span></p>
-                      {% endif %}
-                    </div>
-                  </div>
+        <div>
+          <h3>Friends<span
+              class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span>
+          </h3>
+          <div class="row">
+            {% for friend in friends_list %}
+            <div class="col">
+              <div class="row row-cols-auto">
+                <div class="col-auto">
+                  <a href="{{ url_for('views.user_profile', username=friend.username) }}"
+                    class="text-decoration-none">
+                    <img src="{{ friend.avatar_url }}"
+                      alt="{{ friend.username }}'s avatar"
+                      data-bs-toggle="tooltip"
+                      data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}"
+                      class="friend-avatar">
+                  </a>
                 </div>
-              {% endfor %}
+                <div class="col-md-9">
+                  <p class="fw-bold notranslate {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}"
+                    style="margin-bottom: -5px;">
+                    {% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}
+                  </p>
+                  {% if friend.is_online %}
+                  <p class="text-primary-emphasis fs-6">Currently Online</p>
+                  {% else %}
+                  <p class="text-muted fs-6">Last seen <span
+                      data-last-seen={{ friend.last_activity|tojson }}></span>
+                  </p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
 
-            </div> 
           </div>
+        </div>
         {% endif %}
 
-        <div class="container mt-5">
-        <h3 class="mb-4">Comments<span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span></h3>
-        <form id="commentForm" class="mb-4">
-          <meta name="csrf-token" content="{{ csrf_token() }}">
-          <div class="d-flex align-items-start gap-2">
-            <img src="{% if current_user.is_authenticated %}{{ current_user.avatar_url }}{% else %}{{ url_for('static', filename='img/avatar.webp') }}{% endif %}" alt="User" class="rounded me-2" width="48" height="48">
-            <textarea id="commentText" class="form-control flex-grow-1" rows="4" placeholder="What's on your mind?"></textarea>
-          </div>
-          <div class="d-flex justify-content-end mt-2">
-            <button type="submit" class="btn btn-primary">{% if current_user.is_authenticated %}Post{% else %}Comment anonymously{% endif %}</button>
-          </div>
-          <input type="hidden" id="parentId" name="parentId">
-        </form>
-        <!-- Filter Bar -->
-        <div id="commentFilters" class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
-          <div class="d-flex gap-2 flex-wrap">
-            <select id="sortSelect" class="form-select form-select-sm w-auto">
-              <option value="best">Best</option>
-              <option value="recent">Recent</option>
-              <option value="old">Old</option>
-            </select>
-          </div>
-          <input type="text" id="searchInput" class="form-control form-control-sm w-auto mt-2 mt-sm-0" placeholder="Search..." />
-        </div>
-        <!-- Comment list -->
+        <!-- Comments -->
         <infomundi-comments page_id="{{ user_public_id }}">
-          
+
           <div id="commentsList"></div>
 
         </infomundi-comments>
-      </div>
 
       </div>
 
-      <div class="col-md-3 p-2" style="border-radius: 5px;">
+      <div class="col-md-3 p-2">
         <div id="user-status" class="text-center"></div>
       </div>
 
-    
+
     </div>
   </div>
 </div>
@@ -305,87 +344,92 @@
 
 {% block scripts %}
 <script nonce="{{ nonce }}">
-async function fetchUserStatus(userId) {
-    const response = await fetch(`https://infomundi.net/api/user/${userId}/status`);
+  async function fetchUserStatus(userId) {
+    const response = await fetch(
+      `https://infomundi.net/api/user/${userId}/status`);
     const data = await response.json();
     const statusElement = document.getElementById('user-status');
 
     if (data.error) {
-        statusElement.innerText = 'User not found';
+      statusElement.innerText = 'User not found';
     } else {
-        const lastActivity = new Date(data.last_activity);
-        const now = new Date();
-        const timeDifference = Math.floor((now - lastActivity) / 1000);
+      const lastActivity = new Date(data.last_activity);
+      const now = new Date();
+      const timeDifference = Math.floor((now - lastActivity) / 1000);
 
-        let lastSeenText = '';
-        if (timeDifference < 60) {
-            lastSeenText = `${timeDifference} seconds ago`;
-        } else if (timeDifference < 3600) {
-            lastSeenText = `${Math.floor(timeDifference / 60)} minutes ago`;
-        } else if (timeDifference < 86400) {
-            lastSeenText = `${Math.floor(timeDifference / 3600)} hours ago`;
-        } else {
-            lastSeenText = `${Math.floor(timeDifference / 86400)} days ago`;
-        }
+      let lastSeenText = '';
+      if (timeDifference < 60) {
+        lastSeenText = `${timeDifference} seconds ago`;
+      } else if (timeDifference < 3600) {
+        lastSeenText = `${Math.floor(timeDifference / 60)} minutes ago`;
+      } else if (timeDifference < 86400) {
+        lastSeenText = `${Math.floor(timeDifference / 3600)} hours ago`;
+      } else {
+        lastSeenText = `${Math.floor(timeDifference / 86400)} days ago`;
+      }
 
-        if (data.is_online) {
-            statusElement.innerHTML = '<h4>Currently Online</h4>';
-            statusElement.className = 'text-primary-emphasis';
-        } else {
-            statusElement.innerHTML = `<h4>Currently Offline</h4><p>Last seen ${lastSeenText}</p>`;
-            statusElement.className = 'text-muted';
-        }
+      if (data.is_online) {
+        statusElement.innerHTML = '<h4>Currently Online</h4>';
+        statusElement.className = 'text-primary-emphasis';
+      } else {
+        statusElement.innerHTML =
+          `<h4>Currently Offline</h4><p>Last seen ${lastSeenText}</p>`;
+        statusElement.className = 'text-muted';
+      }
     }
-}
+  }
 
-function startPolling(userId) {
+  function startPolling(userId) {
     fetchUserStatus(userId);
 
     setInterval(async () => {
-        await fetchUserStatus(userId);
+      await fetchUserStatus(userId);
     }, 50000);
-}
+  }
 
-startPolling('{{ user_public_id }}');
+  startPolling('{{ user_public_id }}');
 </script>
 
 <script nonce="{{ nonce }}">
-  document.addEventListener("DOMContentLoaded", function() {
-      function timeSince(date) {
-          const seconds = Math.floor((new Date() - date) / 1000);
-          let interval = seconds / 31536000;
-  
-          if (interval > 1) {
-              return Math.floor(interval) + " years ago";
-          }
-          interval = seconds / 2592000;
-          if (interval > 1) {
-              return Math.floor(interval) + " months ago";
-          }
-          interval = seconds / 86400;
-          if (interval > 1) {
-              return Math.floor(interval) + " days ago";
-          }
-          interval = seconds / 3600;
-          if (interval > 1) {
-              return Math.floor(interval) + " hours ago";
-          }
-          interval = seconds / 60;
-          if (interval > 1) {
-              return Math.floor(interval) + " minutes ago";
-          }
-          return Math.floor(seconds) + " seconds ago";
+  document.addEventListener("DOMContentLoaded", function () {
+    function timeSince(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      let interval = seconds / 31536000;
+
+      if (interval > 1) {
+        return Math.floor(interval) + " years ago";
       }
-  
-      function updateLastSeenElements() {
-          document.querySelectorAll('[data-last-seen]').forEach(function(element) {
-              const lastSeenDate = new Date(element.getAttribute('data-last-seen'));
-              element.innerText = timeSince(lastSeenDate);
-          });
+      interval = seconds / 2592000;
+      if (interval > 1) {
+        return Math.floor(interval) + " months ago";
       }
-  
-      updateLastSeenElements();
+      interval = seconds / 86400;
+      if (interval > 1) {
+        return Math.floor(interval) + " days ago";
+      }
+      interval = seconds / 3600;
+      if (interval > 1) {
+        return Math.floor(interval) + " hours ago";
+      }
+      interval = seconds / 60;
+      if (interval > 1) {
+        return Math.floor(interval) + " minutes ago";
+      }
+      return Math.floor(seconds) + " seconds ago";
+    }
+
+    function updateLastSeenElements() {
+      document.querySelectorAll('[data-last-seen]').forEach(function (
+        element) {
+        const lastSeenDate = new Date(element.getAttribute(
+          'data-last-seen'));
+        element.innerText = timeSince(lastSeenDate);
+      });
+    }
+
+    updateLastSeenElements();
   });
 </script>
-<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
 {% endblock %}
