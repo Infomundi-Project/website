@@ -93,18 +93,6 @@
 }
 
 
-.inf-story-card-body {
-  margin-right: -15px;
-  margin-left: -15px;
-}
-
-
-.inf-story-card-footer {
-  margin-right: -15px;
-  margin-left: -15px;
-}
-
-
 @media (max-width: 1200px) {
   .inf-story-card {
     position: relative;

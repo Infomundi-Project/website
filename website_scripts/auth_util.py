@@ -21,6 +21,7 @@ def perform_login_actions(user, cleartext_email: str):
     session['obfuscated_email_address'] = input_sanitization.obfuscate_email(cleartext_email)
     session['session_version'] = user.session_version
     session['email_address'] = cleartext_email
+    session['user_id'] = user.id
 
     message = f"""Hello, {user.username}.
 

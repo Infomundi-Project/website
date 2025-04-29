@@ -69,7 +69,7 @@ CREATE TABLE users (
 
     -- Totp 
     is_totp_enabled TINYINT(1) DEFAULT 0,
-    totp_secret VARCHAR(120), -- Stored in encrypted format (AES/GCM)
+    totp_secret BINARY(100), -- Stored in encrypted format (AES/GCM)
 
     totp_recovery VARCHAR(150), -- Stored in encrypted format (Argon2id)
 

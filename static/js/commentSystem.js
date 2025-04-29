@@ -37,8 +37,9 @@
   const commentText = document.getElementById('commentText');
   const parentIdField = document.getElementById('parentId');
   const commentsList = document.getElementById('commentsList');
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')
+    .getAttribute('content');
+
   let page = 1;
   let loading = false;
   let hasMore = true;
@@ -46,9 +47,10 @@
   let page_id = null;
 
   async function loadComments(reset = false, isScroll = false) {
-    if (!window.page_id) return;      // ← nothing to do until we have an ID
+    if (!window.page_id) return; // ← nothing to do until we have an ID
     if (loading) return;
-    if (isScroll && !hasMore) return; // Only block if infinite scroll says no more
+    if (isScroll && !hasMore)
+      return; // Only block if infinite scroll says no more
 
     loading = true;
 
@@ -60,17 +62,21 @@
 
     const sort = document.getElementById('sortSelect').value;
     const search = document.getElementById('searchInput').value;
-    const infomundiCommentsCount = document.getElementById('infomundiCommentsCount');
+    const infomundiCommentsCount = document.getElementById(
+      'infomundiCommentsCount');
 
-    const res = await fetch(`/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`);
+    const res = await fetch(
+      `/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`
+    );
     const data = await res.json();
-    
+
     // **refresh all “timeago” labels right away**
     updateTimeagoLabels();
 
     infomundiCommentsCount.innerHTML = data.total;
 
-    data.comments.forEach(comment => renderComment(comment, commentsList));
+    data.comments.forEach(comment => renderComment(comment,
+      commentsList));
     hasMore = data.has_more;
     page++;
     loading = false;
@@ -78,7 +84,8 @@
 
   function renderComment(comment, container, level = 0, parentUser = null) {
     const div = document.createElement('div');
-    div.className = 'card bg-transparent border-0 border-start border-primary border-5 mb-3';
+    div.className =
+      'card bg-transparent border-0 border-start border-primary border-5 mb-3';
     div.dataset.id = comment.id;
     div.id = `comment-${comment.id}`;
 
@@ -149,7 +156,7 @@
                             </div>
   `;
 
-  
+
     if (comment.is_flagged) {
       // 1) mark the card
       div.classList.add('flagged');
@@ -194,14 +201,14 @@
     const deleteBtn = div.querySelector('.delete-btn');
     likeBtn.addEventListener('click', () => likeComment(comment.id));
     dislikeBtn.addEventListener('click', () => dislikeComment(comment.id));
-    
+
 
     replyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       // 'div' is the card for this comment
       showReplyForm(div, comment.id);
     });
-    
+
 
     editBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -212,43 +219,47 @@
       deleteComment(comment.id);
     });
     container.appendChild(div);
-    
- 
-         // === BEGIN: collapse/expand logic ===
-     if (comment.replies && comment.replies.length) {
-       // 1) Create a <div> to hold all the child replies, and give it .collapse
-       const repliesContainer = document.createElement('div');
-       repliesContainer.id = `replies-${comment.id}`;
-       repliesContainer.className = 'collapse';
-       div.querySelector('.inf-comments-card-body').appendChild(repliesContainer);
 
-       // 2) Create the toggle button
-       const toggleBtn = document.createElement('button');
-       toggleBtn.type = 'button';
-       toggleBtn.className = 'btn btn-sm btn-link p-0 mb-2';
-       toggleBtn.setAttribute('data-bs-toggle', 'collapse');
-       toggleBtn.setAttribute('data-bs-target', `#${repliesContainer.id}`);
-       toggleBtn.setAttribute('aria-expanded', 'false');
-       toggleBtn.setAttribute('aria-controls', repliesContainer.id);
-       toggleBtn.textContent = `Show replies (${comment.replies.length})`;
 
-       // 3) Hook into Bootstrap’s events to swap the text
-       repliesContainer.addEventListener('show.bs.collapse', () => {
-         toggleBtn.textContent = `Hide replies (${comment.replies.length})`;
-       });
-       repliesContainer.addEventListener('hide.bs.collapse', () => {
-         toggleBtn.textContent = `Show replies (${comment.replies.length})`;
-       });
+    // === BEGIN: collapse/expand logic ===
+    if (comment.replies && comment.replies.length) {
+      // 1) Create a <div> to hold all the child replies, and give it .collapse
+      const repliesContainer = document.createElement('div');
+      repliesContainer.id = `replies-${comment.id}`;
+      repliesContainer.className = 'collapse';
+      div.querySelector('.inf-comments-card-body').appendChild(
+        repliesContainer);
 
-       // 4) Insert the toggle button *right before* the replies container
-       repliesContainer.before(toggleBtn);
+      // 2) Create the toggle button
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'btn btn-sm btn-link p-0 mb-2';
+      toggleBtn.setAttribute('data-bs-toggle', 'collapse');
+      toggleBtn.setAttribute('data-bs-target', `#${repliesContainer.id}`);
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      toggleBtn.setAttribute('aria-controls', repliesContainer.id);
+      toggleBtn.textContent = `Show replies (${comment.replies.length})`;
 
-       // 5) Finally, render each reply *into* that container, nesting level+1:
-       comment.replies.forEach(child => {
-         renderComment(child, repliesContainer, level + 1, comment.user);
-       });
-     }
-     // === END: collapse/expand logic ===
+      // 3) Hook into Bootstrap’s events to swap the text
+      repliesContainer.addEventListener('show.bs.collapse', () => {
+        toggleBtn.textContent =
+          `Hide replies (${comment.replies.length})`;
+      });
+      repliesContainer.addEventListener('hide.bs.collapse', () => {
+        toggleBtn.textContent =
+          `Show replies (${comment.replies.length})`;
+      });
+
+      // 4) Insert the toggle button *right before* the replies container
+      repliesContainer.before(toggleBtn);
+
+      // 5) Finally, render each reply *into* that container, nesting level+1:
+      comment.replies.forEach(child => {
+        renderComment(child, repliesContainer, level + 1, comment
+          .user);
+      });
+    }
+    // === END: collapse/expand logic ===
 
     initializeTooltips();
   }
@@ -286,7 +297,9 @@
       }
     });
     if (!res.ok) return;
-    const { likes } = await res.json();  // have your API return the new like count
+    const {
+      likes
+    } = await res.json(); // have your API return the new like count
 
     // 2) Find the button’s badge and update it
     const commentDiv = document.getElementById(`comment-${id}`);
@@ -307,8 +320,10 @@
         'X-CSRFToken': csrfToken
       }
     });
-    if (!res.ok) return;                             // bail if something’s wrong
-    const { dislikes } = await res.json();            // expect { dislikes: <newCount> }
+    if (!res.ok) return; // bail if something’s wrong
+    const {
+      dislikes
+    } = await res.json(); // expect { dislikes: <newCount> }
 
     // 2) Update the badge in-place
     const commentDiv = document.getElementById(`comment-${id}`);
@@ -351,15 +366,19 @@
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({ content: updatedText })
+        body: JSON.stringify({
+          content: updatedText
+        })
       });
-      if (!res.ok) return;                            // error handling as desired
-      const data = await res.json();                   // expect { content, updated_at }
+      if (!res.ok) return; // error handling as desired
+      const data = await res
+        .json(); // expect { content, updated_at }
 
       // 3) Rebuild the paragraph with new content
       const newP = document.createElement('p');
       newP.id = `comment-content-${id}`;
-      newP.className = contentDiv.className;           // carry over your styling
+      newP.className = contentDiv
+        .className; // carry over your styling
       newP.style = contentDiv.getAttribute('style');
       newP.textContent = data.content;
 
@@ -369,20 +388,26 @@
       cancelBtn.remove();
 
       // 5) Update the “(edited … ago)” tag or insert it if missing
-      const body = document.querySelector(`#comment-${id} .inf-comments-card-body .d-flex > div`);
+      const body = document.querySelector(
+        `#comment-${id} .inf-comments-card-body .d-flex > div`
+      );
       let editedTag = body.querySelector('.edited-tag');
       if (!editedTag) {
         editedTag = document.createElement('span');
-        editedTag.className = 'd-inline-block text-muted ms-2 fst-italic small edited-tag';
+        editedTag.className =
+          'd-inline-block text-muted ms-2 fst-italic small edited-tag';
         body.appendChild(editedTag);
       }
-      editedTag.setAttribute('title', new Date(data.updated_at + 'Z').toLocaleString());
-      editedTag.textContent = `(edited – ${preciseTimeAgo(data.updated_at)})`;
+      editedTag.setAttribute('title', new Date(data.updated_at +
+        'Z').toLocaleString());
+      editedTag.textContent =
+        `(edited – ${preciseTimeAgo(data.updated_at)})`;
 
       // 6) Give a quick visual cue
       const commentDiv = document.getElementById(`comment-${id}`);
       commentDiv.classList.add('highlight-border');
-      setTimeout(() => commentDiv.classList.remove('highlight-border'), 2000);
+      setTimeout(() => commentDiv.classList.remove(
+        'highlight-border'), 2000);
     };
 
     // 7) Wire up “Cancel” to restore original
@@ -405,17 +430,19 @@
       loadComments(true);
     }
   }
-  
+
   function infCommentSearchDebounce(func, delay) {
-      let timeoutId;
-      return (...args) => {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => func.apply(this, args), delay);
-      };
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
   }
 
-  const debouncedLoadComments = infCommentSearchDebounce(() => loadComments(true), 300); // 300ms delay
-  document.getElementById('searchInput').addEventListener('input', debouncedLoadComments);
+  const debouncedLoadComments = infCommentSearchDebounce(() => loadComments(
+    true), 300); // 300ms delay
+  document.getElementById('searchInput').addEventListener('input',
+    debouncedLoadComments);
 
 
   const sortSelect = document.getElementById('sortSelect');
@@ -424,59 +451,61 @@
   }
 
   window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+    if (window.innerHeight + window.scrollY >= document.body
+      .offsetHeight - 500) {
       loadComments(false, true);
     }
   });
 
 
   class InfomundiComments extends HTMLElement {
-  static get observedAttributes() {
-    return ['page_id'];
-  }
+    static get observedAttributes() {
+      return ['page_id'];
+    }
 
-  constructor() {
-    super();
-  }
+    constructor() {
+      super();
+    }
 
-  connectedCallback() {
-    // Initial render on first connection
-    this.handlePageIdChange(this.getAttribute('page_id'));
-  }
+    connectedCallback() {
+      // Initial render on first connection
+      this.handlePageIdChange(this.getAttribute('page_id'));
+    }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'page_id' && newValue && newValue !== oldValue) {
-      this.handlePageIdChange(newValue);
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (name === 'page_id' && newValue && newValue !== oldValue) {
+        this.handlePageIdChange(newValue);
+      }
+    }
+
+    handlePageIdChange(rawId) {
+      if (!rawId) {
+        console.error(
+          "No page_id specified for <infomundi-comments>");
+        return;
+      }
+
+      // URL-safe Base64 encode
+      const base64Id = btoa(rawId)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      // Expose globally for fetch logic
+      page_id = base64Id;
+      window.page_id = base64Id;
+
+      // Reset infinite-scroll state and clear UI
+      page = 1;
+      hasMore = true;
+      commentsList.innerHTML = '';
+
+      // Fetch comments for the new page_id
+      loadComments(true);
     }
   }
 
-  handlePageIdChange(rawId) {
-    if (!rawId) {
-      console.error("No page_id specified for <infomundi-comments>");
-      return;
-    }
-
-    // URL-safe Base64 encode
-    const base64Id = btoa(rawId)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-
-    // Expose globally for fetch logic
-    page_id = base64Id;
-    window.page_id = base64Id;
-
-    // Reset infinite-scroll state and clear UI
-    page = 1;
-    hasMore = true;
-    commentsList.innerHTML = '';
-
-    // Fetch comments for the new page_id
-    loadComments(true);
-  }
-}
-
-customElements.define('infomundi-comments', InfomundiComments);
+  customElements.define('infomundi-comments', InfomundiComments);
 
 
   function flattenReplies(replies = []) {
@@ -494,17 +523,24 @@ customElements.define('infomundi-comments', InfomundiComments);
   document.addEventListener('click', (e) => {
     if (e.target.classList.contains('reply-link')) {
       e.preventDefault();
-      const targetId = e.target.getAttribute('href').substring(1); // remove #
+      const targetId = e.target.getAttribute('href').substring(
+        1); // remove #
       const target = document.getElementById(targetId);
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
 
         target.classList.remove('border-primary', 'border');
-        target.classList.add('border-info', 'border'); // visual effect
-        
+        target.classList.add('border-info',
+          'border'); // visual effect
+
         setTimeout(() => {
-          target.classList.add('border-primary', 'border');
-          target.classList.remove('border-info', 'border');
+          target.classList.add('border-primary',
+            'border');
+          target.classList.remove('border-info',
+            'border');
         }, 2500); // remove effect after 2.5s
       }
     }
@@ -512,7 +548,8 @@ customElements.define('infomundi-comments', InfomundiComments);
 
   function showReplyForm(commentDiv, parentId) {
     // remove any existing reply forms
-    document.querySelectorAll('.reply-form-container').forEach(c => c.innerHTML = '');
+    document.querySelectorAll('.reply-form-container').forEach(c => c
+      .innerHTML = '');
 
     const container = commentDiv.querySelector('.reply-form-container');
     container.innerHTML = `

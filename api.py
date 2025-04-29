@@ -186,6 +186,7 @@ def setup_totp():
     # Saves the TOTP information encrypted in the database
     current_user.totp_secret = security_util.encrypt(totp_secret)
     current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
+    current_user.is_totp_enabled = True
     extensions.db.session.commit()
 
     # There's no need to keep this info in the user's session
@@ -194,13 +195,14 @@ def setup_totp():
     return jsonify({'valid': True, 'totp_recovery_token': totp_recovery_token}), 200
 
 
-@api.route("/2fa/mail/send-code", methods=["POST"])
-@decorators.api_login_required
+@api.route("/2fa/mail/send", methods=["POST"])
 @extensions.limiter.limit("7/day;5/hour;3/minute")
 def send_mail_totp_code():
+    user = extensions.db.session.get(models.User, session['user_id'])
+
     code = security_util.generate_mail_totp()
-    current_user.mail_twofactor_code = code
-    current_user.mail_twofactor_timestamp = datetime.now()
+    user.mail_twofactor_code = code
+    user.mail_twofactor_timestamp = datetime.now()
     extensions.db.session.commit()
 
     notifications.send_email(
@@ -212,23 +214,25 @@ def send_mail_totp_code():
     return jsonify(success=True), 200
 
 
-@api.route("/2fa/mail/verify-code", methods=["POST"])
+@api.route("/2fa/mail/verify", methods=["POST"])
 @decorators.api_login_required
 def verify_mail_totp_code():
     data = request.get_json() or {}
     code = data.get("code")
 
-    if (current_user.mail_twofactor_code != code or not
-        qol_util.is_date_within_threshold_minutes(current_user.mail_twofactor_timestamp, 15)):
+    user = extensions.db.session.get(models.User, session['user_id'])
+
+    if (user.mail_twofactor_code != code or not
+        qol_util.is_date_within_threshold_minutes(user.mail_twofactor_timestamp, 15)):
         return jsonify(success=False, error="Invalid or expired code"), 400
     
-    if not current_user.is_mail_twofactor_enabled:
-        current_user.is_mail_twofactor_enabled = True
+    if not user.is_mail_twofactor_enabled:
+        user.is_mail_twofactor_enabled = True
         # Changes totp recovery, and disables TOTP based 2fa
         totp_recovery = security_util.generate_nonce()
-        current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery)
-        current_user.totp_secret = None
-        current_user.is_totp_enabled = False
+        user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery)
+        user.totp_secret = None
+        user.is_totp_enabled = False
         extensions.db.session.commit()
         return jsonify(success=True, recovery_token=totp_recovery), 200
 

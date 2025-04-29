@@ -1,30 +1,42 @@
 document.addEventListener("DOMContentLoaded", function () {
-  let infomundiStoryModal = new bootstrap.Modal(document.getElementById("infomundiStoryModal"), {
-    keyboard: false,
-  });
+  let infomundiStoryModal = new bootstrap.Modal(document
+    .getElementById("infomundiStoryModal"), {
+      keyboard: false,
+    });
 
   // Modal element selectors
   const modalElement = document.getElementById("infomundiStoryModal");
   const modalTitle = modalElement.querySelector(".modal-header h1");
   const modalImage = modalElement.querySelector(".modal-header img");
-  const modalDescription = modalElement.querySelector(".modal-body p");
-  const modalPublisherContainer = modalElement.querySelector("#publisherContainer");
-  const modalPublisherLogo = modalElement.querySelector("#publisherLogo");
-  const modalPublisherName = modalElement.querySelector("#publisherName");
+  const modalDescription = modalElement.querySelector(
+    ".modal-body p");
+  const modalPublisherContainer = modalElement.querySelector(
+    "#publisherContainer");
+  const modalPublisherLogo = modalElement.querySelector(
+    "#publisherLogo");
+  const modalPublisherName = modalElement.querySelector(
+    "#publisherName");
 
-  const modalTagsContainer = modalElement.querySelector(".modal-body .d-flex.align-items-center");
+  const modalTagsContainer = modalElement.querySelector(
+    ".modal-body .d-flex.align-items-center");
   const modalLikeIcon = modalElement.querySelector(".fa-thumbs-up");
-  const modalDislikeIcon = modalElement.querySelector(".fa-thumbs-down");
+  const modalDislikeIcon = modalElement.querySelector(
+    ".fa-thumbs-down");
   const modalLikeCount = modalLikeIcon.querySelector("span");
   const modalDislikeCount = modalDislikeIcon.querySelector("span");
-  const modalSatelliteIcon = modalElement.querySelector(".fa-satellite-dish");
-  const modalPublishedDate = modalElement.querySelector("#publishedDateStoryModal");
-  const modalViewCount = modalElement.querySelector("#viewCountStoryModal");
+  const modalSatelliteIcon = modalElement.querySelector(
+    ".fa-satellite-dish");
+  const modalPublishedDate = modalElement.querySelector(
+    "#publishedDateStoryModal");
+  const modalViewCount = modalElement.querySelector(
+    "#viewCountStoryModal");
 
 
   // Function to initialize like/dislike icons based on localStorage
-  function initializeLikeDislikeIcons(storyId, likeIcon, dislikeIcon) {
-    const savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
+  function initializeLikeDislikeIcons(storyId, likeIcon,
+    dislikeIcon) {
+    const savedInteractions = JSON.parse(localStorage.getItem(
+      'storyInteractions')) || {};
     const userAction = savedInteractions[storyId]?.action;
 
     const isLiked = userAction === 'like';
@@ -39,24 +51,30 @@ document.addEventListener("DOMContentLoaded", function () {
   // Define event listeners for modal icons
   modalLikeIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
-    handleLikeDislike('like', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
+    handleLikeDislike('like', storyId, modalLikeIcon,
+      modalDislikeIcon, modalLikeCount,
+      modalDislikeCount);
   });
 
   modalDislikeIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
-    handleLikeDislike('dislike', storyId, modalLikeIcon, modalDislikeIcon, modalLikeCount, modalDislikeCount);
+    handleLikeDislike('dislike', storyId, modalLikeIcon,
+      modalDislikeIcon, modalLikeCount,
+      modalDislikeCount);
   });
 
   // Satellite share button functionality
   modalSatelliteIcon.addEventListener('click', function () {
     const storyId = this.dataset.storyId;
     const storyTitle = this.dataset.storyTitle;
-    const storyDescription = this.dataset.storyDescription || '';
+    const storyDescription = this.dataset
+      .storyDescription || '';
     if (navigator.share) {
       navigator.share({
         title: storyTitle,
         text: storyDescription,
-        url: window.location.origin + `/comments?id=${storyId}`
+        url: window.location.origin +
+          `/comments?id=${storyId}`
       }).then(() => {
         console.log('Thanks for sharing!');
       }).catch(console.error);
@@ -69,7 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
     modalTitle.textContent = "";
     modalImage.src = "";
     modalDescription.textContent = "";
-    modalTagsContainer.innerHTML = ""; // Clear the tags container
+    modalTagsContainer.innerHTML =
+      ""; // Clear the tags container
     modalLikeCount.innerHTML = " 0";
     modalDislikeCount.innerHTML = " 0";
     modalPublishedDate.innerHTML = "";
@@ -86,47 +105,76 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Attach event listener to dynamically created story cards
   function attachModalEvents() {
-    const storyCards = document.querySelectorAll(".card.image-card");
+    const storyCards = document.querySelectorAll(
+      ".card.image-card");
 
     storyCards.forEach((card) => {
       card.addEventListener("click", function (event) {
-        const clickedElement = event.target; // Get the clicked element
+        const clickedElement = event
+          .target; // Get the clicked element
 
         // Check if the click is on the image or card body (title + description)
         if (
-          clickedElement.classList.contains("card-img-top") || // Image
-          clickedElement.closest(".card-body") // Card body (title + description)
+          clickedElement.classList.contains(
+            "card-img-top") || // Image
+          clickedElement.closest(
+            ".card-body") // Card body (title + description)
         ) {
-          event.preventDefault(); // Prevent navigation
+          event
+            .preventDefault(); // Prevent navigation
 
           // Extract story data from the clicked card
-          const storyData = JSON.parse(this.dataset.storyData);
+          const storyData = JSON.parse(this
+            .dataset.storyData);
 
           // Update modal content
-          modalTitle.textContent = storyData.title;
-          modalImage.src = storyData.image_url;
+          modalTitle.textContent = storyData
+            .title;
+          modalImage.src = storyData
+            .image_url;
           // Set the story description and link dynamically
-          modalDescription.textContent = storyData.description || "No description available.";
+          modalDescription.textContent =
+            storyData.description ||
+            "No description available.";
 
           // Update the link to the original story
-          const originalStoryLink = modalElement.querySelector("#originalStoryLink");
+          const originalStoryLink =
+            modalElement.querySelector(
+              "#originalStoryLink");
           if (storyData.url) {
-            originalStoryLink.href = `/comments?id=${storyData.story_id}`;
-            originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>View More`;
-            originalStoryLink.style.display = "inline";
+            originalStoryLink.href =
+              `/comments?id=${storyData.story_id}`;
+            originalStoryLink.innerHTML =
+              `<i class="fa-solid fa-square-arrow-up-right me-2"></i>View More`;
+            originalStoryLink.style
+              .display = "inline";
           } else {
-            originalStoryLink.style.display = "none"; // Hide the link if no URL is available
+            originalStoryLink.style
+              .display =
+              "none"; // Hide the link if no URL is available
           }
 
           // Update tags as links
-          modalTagsContainer.innerHTML = ""; // Clear previous tags
-          if (storyData.tags && Array.isArray(storyData.tags)) {
-            storyData.tags.forEach((tag) => {
-              const tagLink = document.createElement("a");
-              tagLink.href = `${window.location.origin}?search=${encodeURIComponent(tag)}`;
-              tagLink.className = "badge text-bg-primary mx-1";
-              tagLink.textContent = tag;
-              modalTagsContainer.appendChild(tagLink);
+          modalTagsContainer.innerHTML =
+            ""; // Clear previous tags
+          if (storyData.tags && Array.isArray(
+              storyData.tags)) {
+            storyData.tags.forEach((
+              tag) => {
+              const tagLink =
+                document
+                .createElement(
+                  "a");
+              tagLink.href =
+                `${window.location.origin}?search=${encodeURIComponent(tag)}`;
+              tagLink.className =
+                "badge text-bg-primary mx-1";
+              tagLink
+                .textContent =
+                tag;
+              modalTagsContainer
+                .appendChild(
+                  tagLink);
             });
           }
 
@@ -137,52 +185,90 @@ document.addEventListener("DOMContentLoaded", function () {
               favicon
             } = storyData.publisher;
 
-            modalPublisherName.textContent = name || "Unknown Publisher";
+            modalPublisherName.textContent =
+              name || "Unknown Publisher";
 
             if (favicon) {
-              modalPublisherLogo.src = favicon;
-              modalPublisherLogo.style.display = "inline"; // Show the logo if available
+              modalPublisherLogo.src =
+                favicon;
+              modalPublisherLogo.style
+                .display =
+                "inline"; // Show the logo if available
             } else {
-              modalPublisherLogo.style.display = "none"; // Hide the logo if not available
+              modalPublisherLogo.style
+                .display =
+                "none"; // Hide the logo if not available
             }
           } else {
-            modalPublisherName.textContent = "Unknown Publisher";
-            modalPublisherLogo.style.display = "none"; // Hide the logo if publisher info is not provided
+            modalPublisherName.textContent =
+              "Unknown Publisher";
+            modalPublisherLogo.style
+              .display =
+              "none"; // Hide the logo if publisher info is not provided
           }
 
           // Update data attributes for the icons
-          modalLikeIcon.dataset.storyId = storyData.story_id;
-          modalLikeIcon.dataset.liked = storyData.is_liked ? "true" : "false";
-          modalDislikeIcon.dataset.storyId = storyData.story_id;
-          modalDislikeIcon.dataset.disliked = storyData.is_disliked ? "true" : "false";
+          modalLikeIcon.dataset.storyId =
+            storyData.story_id;
+          modalLikeIcon.dataset.liked =
+            storyData.is_liked ? "true" :
+            "false";
+          modalDislikeIcon.dataset.storyId =
+            storyData.story_id;
+          modalDislikeIcon.dataset.disliked =
+            storyData.is_disliked ? "true" :
+            "false";
 
           // Update like/dislike counts
-          modalLikeCount.innerHTML = `&nbsp;${storyData.likes || 0}`;
-          modalDislikeCount.innerHTML = `&nbsp;${storyData.dislikes || 0}`;
+          modalLikeCount.innerHTML =
+            `&nbsp;${storyData.likes || 0}`;
+          modalDislikeCount.innerHTML =
+            `&nbsp;${storyData.dislikes || 0}`;
 
           // Update icons based on is_liked/is_disliked
-          modalLikeIcon.classList.toggle("fa-solid", storyData.is_liked);
-          modalLikeIcon.classList.toggle("fa-regular", !storyData.is_liked);
-          modalDislikeIcon.classList.toggle("fa-solid", storyData.is_disliked);
-          modalDislikeIcon.classList.toggle("fa-regular", !storyData.is_disliked);
+          modalLikeIcon.classList.toggle(
+            "fa-solid", storyData
+            .is_liked);
+          modalLikeIcon.classList.toggle(
+            "fa-regular", !storyData
+            .is_liked);
+          modalDislikeIcon.classList.toggle(
+            "fa-solid", storyData
+            .is_disliked);
+          modalDislikeIcon.classList.toggle(
+            "fa-regular", !storyData
+            .is_disliked);
 
           // Update satellite icon data attributes
-          modalSatelliteIcon.dataset.storyId = storyData.story_id;
-          modalSatelliteIcon.dataset.storyTitle = storyData.title;
-          modalSatelliteIcon.dataset.storyDescription = storyData.description || "";
+          modalSatelliteIcon.dataset.storyId =
+            storyData.story_id;
+          modalSatelliteIcon.dataset
+            .storyTitle = storyData.title;
+          modalSatelliteIcon.dataset
+            .storyDescription = storyData
+            .description || "";
 
           // Update published date and view count
-          modalPublishedDate.innerHTML = `<i class="fa-regular fa-calendar me-2"></i>${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
-          modalViewCount.innerHTML = `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
+          modalPublishedDate.innerHTML =
+            `<i class="fa-regular fa-calendar me-2"></i>${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
+          modalViewCount.innerHTML =
+            `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
 
           // Initialize comments section for the selected story
-          const commentsElement = document.querySelector('infomundi-comments');
-          commentsElement.setAttribute('page_id', storyData.story_id);
+          const commentsElement = document
+            .querySelector(
+              'infomundi-comments');
+          commentsElement.setAttribute(
+            'page_id', storyData
+            .story_id);
 
           // Load Maximus content
-          fetchAndRenderStorySummary(storyData.story_id);
+          fetchAndRenderStorySummary(storyData
+            .story_id);
 
-          initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
+          initializeLikeDislikeIcons(storyData
+            .story_id, modalLikeIcon,
+            modalDislikeIcon);
           // Show the modal
           infomundiStoryModal.show();
         }
@@ -202,44 +288,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function addMiddleSection() {
     // Left Pillar
-    const leftPillar = document.querySelector('.pillar-container-left');
+    const leftPillar = document.querySelector(
+      '.pillar-container-left');
     if (leftPillar) {
       const leftPillarMiddle = document.createElement('img');
-      leftPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+      leftPillarMiddle.src =
+        'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
       leftPillarMiddle.alt = 'Middle of the Pillar';
-      leftPillarMiddle.classList.add('pillar-middle', 'adjusted-up');
+      leftPillarMiddle.classList.add('pillar-middle',
+        'adjusted-up');
 
       // Apply flipped class to every other section in the left pillar for alternating effect
       if (middleSectionCount % 2 !== 0) {
         leftPillarMiddle.classList.add('mirrored');
       }
 
-      const leftPillarBottom = leftPillar.querySelector('.pillar-bottom');
+      const leftPillarBottom = leftPillar.querySelector(
+        '.pillar-bottom');
       if (leftPillarBottom) {
-        leftPillar.insertBefore(leftPillarMiddle, leftPillarBottom);
+        leftPillar.insertBefore(leftPillarMiddle,
+          leftPillarBottom);
       } else {
-        leftPillar.appendChild(leftPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+        leftPillar.appendChild(
+          leftPillarMiddle); // Fallback if .pillar-bottom doesn't exist
       }
     }
 
     // Right Pillar (Mirrored)
-    const rightPillar = document.querySelector('.pillar-container-right');
+    const rightPillar = document.querySelector(
+      '.pillar-container-right');
     if (rightPillar) {
       const rightPillarMiddle = document.createElement('img');
-      rightPillarMiddle.src = 'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
+      rightPillarMiddle.src =
+        'https://infomundi.net/static/img/illustrations/pillar-middle2.webp';
       rightPillarMiddle.alt = 'Middle of the Pillar';
-      rightPillarMiddle.classList.add('pillar-middle', 'horizontally-mirrored'); // Add mirrored class
+      rightPillarMiddle.classList.add('pillar-middle',
+        'horizontally-mirrored'); // Add mirrored class
 
       // Apply flipped class to every other section in the right pillar for alternating effect
       if (middleSectionCount % 2 !== 0) {
         rightPillarMiddle.classList.add('mirrored');
       }
 
-      const rightPillarBottom = rightPillar.querySelector('.pillar-bottom');
+      const rightPillarBottom = rightPillar.querySelector(
+        '.pillar-bottom');
       if (rightPillarBottom) {
-        rightPillar.insertBefore(rightPillarMiddle, rightPillarBottom);
+        rightPillar.insertBefore(rightPillarMiddle,
+          rightPillarBottom);
       } else {
-        rightPillar.appendChild(rightPillarMiddle); // Fallback if .pillar-bottom doesn't exist
+        rightPillar.appendChild(
+          rightPillarMiddle); // Fallback if .pillar-bottom doesn't exist
       }
     }
 
@@ -256,32 +354,45 @@ document.addEventListener("DOMContentLoaded", function () {
   //initializePillar();
 
   // Event listener for the Clear Filters button
-  document.getElementById('clearFiltersButton').addEventListener('click', function () {
-    // Reset form fields to their default values
-    document.getElementById('query').value = '';
-    document.getElementById('modalStartDate').value = '';
-    document.getElementById('modalEndDate').value = '';
+  document.getElementById('clearFiltersButton').addEventListener(
+    'click',
+    function () {
+      // Reset form fields to their default values
+      document.getElementById('query').value = '';
+      document.getElementById('modalStartDate').value = '';
+      document.getElementById('modalEndDate').value = '';
 
-    // Reset radio buttons to default
-    document.querySelector(`input[name="category"][value="general"]`).checked = true;
-    document.querySelector(`input[name="order_by"][value="pub_date"]`).checked = true;
-    document.querySelector(`input[name="order_dir"][value="desc"]`).checked = true;
+      // Reset radio buttons to default
+      document.querySelector(
+          `input[name="category"][value="general"]`)
+        .checked = true;
+      document.querySelector(
+          `input[name="order_by"][value="pub_date"]`)
+        .checked = true;
+      document.querySelector(
+          `input[name="order_dir"][value="desc"]`)
+        .checked = true;
 
-    // Reset button texts
-    document.getElementById('categoryButtonText').textContent = 'General';
-    document.getElementById('orderByButtonText').textContent = 'Publication Date';
-    document.getElementById('orderDirButtonText').textContent = 'Descending';
-    document.getElementById('periodButtonText').textContent = 'Start Date - End Date';
+      // Reset button texts
+      document.getElementById('categoryButtonText')
+        .textContent = 'General';
+      document.getElementById('orderByButtonText')
+        .textContent = 'Publication Date';
+      document.getElementById('orderDirButtonText')
+        .textContent = 'Descending';
+      document.getElementById('periodButtonText')
+        .textContent = 'Start Date - End Date';
 
-    // Clear filters from localStorage
-    localStorage.removeItem('newsFilters');
+      // Clear filters from localStorage
+      localStorage.removeItem('newsFilters');
 
-    // Reset filters in the application by applying the default state
-    applyFilters();
-  });
+      // Reset filters in the application by applying the default state
+      applyFilters();
+    });
 
   const filterForm = document.getElementById("filterForm");
-  const storiesContainer = document.getElementById("storiesContainer");
+  const storiesContainer = document.getElementById(
+    "storiesContainer");
   const endPageSpinner = document.getElementById("endPageSpinner");
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -314,34 +425,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event listeners for filter inputs
   // Category Radio Buttons
-  document.querySelectorAll('input[name="category"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      applyFilters();
+  document.querySelectorAll('input[name="category"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        applyFilters();
+      });
     });
-  });
 
   // Order By Radio Buttons
-  document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      applyFilters();
+  document.querySelectorAll('input[name="order_by"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        applyFilters();
+      });
     });
-  });
 
   // Order Direction Radio Buttons
-  document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      applyFilters();
+  document.querySelectorAll('input[name="order_dir"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        applyFilters();
+      });
     });
-  });
 
   // Date Inputs
-  document.getElementById('modalStartDate').addEventListener('change', function () {
-    applyFilters();
-  });
+  document.getElementById('modalStartDate').addEventListener('change',
+    function () {
+      applyFilters();
+    });
 
-  document.getElementById('modalEndDate').addEventListener('change', function () {
-    applyFilters();
-  });
+  document.getElementById('modalEndDate').addEventListener('change',
+    function () {
+      applyFilters();
+    });
 
   // Debounce Function
   function debounce(func, wait) {
@@ -357,12 +473,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Debounced Apply Filters for Search Input
   const debounceApplyFilters = debounce(applyFilters, 500);
-  document.getElementById('query').addEventListener('input', function () {
-    debounceApplyFilters();
-  });
+  document.getElementById('query').addEventListener('input',
+    function () {
+      debounceApplyFilters();
+    });
 
   window.addEventListener('scroll', () => {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 2000 && !isLoading && hasMoreStories) {
+    if ((window.innerHeight + window.scrollY) >= document
+      .body.offsetHeight - 2000 && !isLoading &&
+      hasMoreStories) {
       fetchStories(false);
       initializePillar();
     }
@@ -379,22 +498,29 @@ document.addEventListener("DOMContentLoaded", function () {
   function fetchStories(reset) {
     if (isLoading) return;
 
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]');
 
     if (tooltipTriggerList.length > 0) {
-      [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+      [...tooltipTriggerList].map(tooltipTriggerEl =>
+        new bootstrap.Tooltip(tooltipTriggerEl));
     }
 
     isLoading = true;
-    const category = document.querySelector('input[name="category"]:checked').value;
-    const orderBy = document.querySelector('input[name="order_by"]:checked').value;
-    const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
+    const category = document.querySelector(
+      'input[name="category"]:checked').value;
+    const orderBy = document.querySelector(
+      'input[name="order_by"]:checked').value;
+    const orderDir = document.querySelector(
+      'input[name="order_dir"]:checked').value;
     const country = document.getElementById("country").value;
-    const startDate = document.getElementById("modalStartDate").value;
+    const startDate = document.getElementById("modalStartDate")
+      .value;
     const endDate = document.getElementById("modalEndDate").value;
     const query = document.getElementById("query").value;
 
-    let url = `/api/get_stories?country=${country}&category=${category}&order_by=${orderBy}&order_dir=${orderDir}&page=${currentPage}`;
+    let url =
+      `/api/get_stories?country=${country}&category=${category}&order_by=${orderBy}&order_dir=${orderDir}&page=${currentPage}`;
 
     if (startDate && endDate) {
       url += `&start_date=${startDate}&end_date=${endDate}`;
@@ -408,14 +534,18 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(response => response.json())
       .then(data => {
         if (reset) {
-          storiesContainer.innerHTML = ''; // Clear the container for new filter
+          storiesContainer.innerHTML =
+            ''; // Clear the container for new filter
         }
         if (data.length > 0) {
           data.forEach((item, index) => {
-            const storyCard = createStoryCard(item, index);
-            storiesContainer.appendChild(storyCard);
+            const storyCard = createStoryCard(
+              item, index);
+            storiesContainer.appendChild(
+              storyCard);
           });
-          attachModalEvents(); // Attach modal events to newly created cards
+          attachModalEvents
+            (); // Attach modal events to newly created cards
           // Initialize lazy loading after new content is loaded
           if (window.lazyload) {
             lazyload();
@@ -441,7 +571,8 @@ document.addEventListener("DOMContentLoaded", function () {
     colDiv.classList.add('col-lg-6', 'col-xl-4', 'my-5');
 
     const cardDiv = document.createElement('div');
-    cardDiv.classList.add('card', 'image-card', 'inf-story-card', 'border', 'border-0');
+    cardDiv.classList.add('card', 'image-card', 'inf-story-card',
+      'border', 'border-0');
     cardDiv.id = `${item.story_id}-${item.category_id}`;
 
     // Image link
@@ -452,7 +583,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const imgTag = document.createElement('img');
     imgTag.classList.add('card-img-top', 'rounded');
     imgTag.alt = item.title;
-    imgTag.style = 'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
+    imgTag.style =
+      'width: 100%; aspect-ratio: 16 / 9; object-fit: cover;';
     if (index < 3) {
       imgTag.src = item.image_url;
       imgTag.setAttribute('fetchpriority', 'high');
@@ -479,8 +611,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Card body
     const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body');
-    cardBody.classList.add('inf-story-card-body');
+    cardBody.classList.add('card-body', 'inf-story-card-body', 'px-0');
     cardBody.innerHTML = `
         <a href="/comments?id=${item.story_id}" class="text-decoration-none text-reset">
           <p class="card-title fw-bold fs-6 line-clamp-3">
@@ -494,17 +625,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Card footer
     const cardFooter = document.createElement('div');
-    cardFooter.classList.add('card-footer', 'inf-story-card-footer', 'bg-transparent', 'border', 'border-0');
+    cardFooter.classList.add('card-footer', 'px-0', 'inf-story-card-footer',
+      'bg-transparent', 'border', 'border-0');
 
     const rowDiv = document.createElement('div');
-    rowDiv.classList.add('row', 'd-flex', 'justify-content-between');
+    rowDiv.classList.add('row', 'd-flex',
+      'justify-content-between');
 
     const colLeft = document.createElement('div');
     colLeft.classList.add('col');
 
     const dateSpan = document.createElement('span');
     dateSpan.classList.add('text-muted', 'fw-bold', 'small');
-    dateSpan.innerHTML = `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.views}&nbsp;views`;
+    dateSpan.innerHTML =
+      `<span class="date-info" id="date-info">${item.pub_date}</span><span class="mx-1">•</span>${item.views}&nbsp;views`;
 
     colLeft.appendChild(dateSpan);
 
@@ -513,33 +647,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Like Icon with Count
     const likeIcon = document.createElement('i');
-    likeIcon.classList.add(item.is_liked ? 'fa-solid' : 'fa-regular', 'fa-thumbs-up');
+    likeIcon.classList.add(item.is_liked ? 'fa-solid' :
+      'fa-regular', 'fa-thumbs-up');
     likeIcon.style.cursor = 'pointer';
     likeIcon.dataset.storyId = item.story_id;
     likeIcon.dataset.liked = item.is_liked ? 'true' : 'false';
 
     const likeCount = document.createElement('span');
-    likeCount.innerHTML = `&nbsp;${item.likes || 0}`; // Display the like count
+    likeCount.innerHTML =
+      `&nbsp;${item.likes || 0}`; // Display the like count
     likeIcon.appendChild(likeCount);
 
     // Dislike Icon with Count
     const dislikeIcon = document.createElement('i');
-    dislikeIcon.classList.add(item.is_disliked ? 'fa-solid' : 'fa-regular', 'fa-thumbs-down', 'mx-4');
+    dislikeIcon.classList.add(item.is_disliked ? 'fa-solid' :
+      'fa-regular', 'fa-thumbs-down', 'mx-4');
     dislikeIcon.style.cursor = 'pointer';
     dislikeIcon.dataset.storyId = item.story_id;
-    dislikeIcon.dataset.disliked = item.is_disliked ? 'true' : 'false';
+    dislikeIcon.dataset.disliked = item.is_disliked ? 'true' :
+      'false';
 
     const dislikeCount = document.createElement('span');
-    dislikeCount.innerHTML = `&nbsp;${item.dislikes || 0}`; // Display the dislike count
+    dislikeCount.innerHTML =
+      `&nbsp;${item.dislikes || 0}`; // Display the dislike count
     dislikeIcon.appendChild(dislikeCount);
 
     // Event listeners for like and dislike icons
     likeIcon.addEventListener('click', function () {
-      handleLikeDislike('like', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
+      handleLikeDislike('like', item.story_id, likeIcon,
+        dislikeIcon, likeCount, dislikeCount);
     });
 
     dislikeIcon.addEventListener('click', function () {
-      handleLikeDislike('dislike', item.story_id, likeIcon, dislikeIcon, likeCount, dislikeCount);
+      handleLikeDislike('dislike', item.story_id,
+        likeIcon, dislikeIcon, likeCount,
+        dislikeCount);
     });
 
     // Bookmark Icon
@@ -549,7 +691,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Satellite Share Icon
     const satelliteIcon = document.createElement('i');
-    satelliteIcon.classList.add('fa-solid', 'fa-satellite-dish', 'ms-4', 'satellite-share-button');
+    satelliteIcon.classList.add('fa-solid', 'fa-satellite-dish',
+      'ms-4', 'satellite-share-button');
     satelliteIcon.style.cursor = 'pointer';
 
     // Satellite share button functionality
@@ -558,13 +701,15 @@ document.addEventListener("DOMContentLoaded", function () {
         navigator.share({
           title: item.title,
           text: item.description || '',
-          url: window.location.origin + `/comments?id=${item.story_id}`
+          url: window.location.origin +
+            `/comments?id=${item.story_id}`
         }).then(() => {
           console.log('Thanks for sharing!');
         }).catch(console.error);
       } else {
         // Fallback for browsers that don't support the Web Share API
-        alert('Sharing is not supported on this browser.');
+        alert(
+          'Sharing is not supported on this browser.');
       }
     });
 
@@ -590,71 +735,90 @@ document.addEventListener("DOMContentLoaded", function () {
     cardDiv.dataset.storyData = JSON.stringify(item);
 
     // Initialize like/dislike states
-    initializeLikeDislikeIcons(item.story_id, likeIcon, dislikeIcon);
+    initializeLikeDislikeIcons(item.story_id, likeIcon,
+      dislikeIcon);
 
     return colDiv;
   }
 
 
-  function handleLikeDislike(action, storyId, likeIcon, dislikeIcon, likeCount, dislikeCount) {
+  function handleLikeDislike(action, storyId, likeIcon, dislikeIcon,
+    likeCount, dislikeCount) {
     // Fetch the saved likes/dislikes data from localStorage
-    let savedInteractions = JSON.parse(localStorage.getItem('storyInteractions')) || {};
-    let previousState = { ...savedInteractions }; // Store previous state for rollback
+    let savedInteractions = JSON.parse(localStorage.getItem(
+      'storyInteractions')) || {};
+    let previousState = {
+      ...savedInteractions
+    }; // Store previous state for rollback
 
     // Determine the new state
     let newAction = null;
     if (action === 'like') {
-        if (savedInteractions[storyId]?.action === 'like') {
-            delete savedInteractions[storyId];
-        } else {
-            savedInteractions[storyId] = { action: 'like' };
-            newAction = 'like';
-        }
+      if (savedInteractions[storyId]?.action === 'like') {
+        delete savedInteractions[storyId];
+      } else {
+        savedInteractions[storyId] = {
+          action: 'like'
+        };
+        newAction = 'like';
+      }
     } else if (action === 'dislike') {
-        if (savedInteractions[storyId]?.action === 'dislike') {
-            delete savedInteractions[storyId];
-        } else {
-            savedInteractions[storyId] = { action: 'dislike' };
-            newAction = 'dislike';
-        }
+      if (savedInteractions[storyId]?.action === 'dislike') {
+        delete savedInteractions[storyId];
+      } else {
+        savedInteractions[storyId] = {
+          action: 'dislike'
+        };
+        newAction = 'dislike';
+      }
     }
 
     // Send the request first before updating the UI
     fetch(`/api/story/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: storyId })
-    })
-    .then(response => {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: storyId
+        })
+      })
+      .then(response => {
         if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || 'Error performing action');
-            });
+          return response.json().then(errorData => {
+            throw new Error(errorData.message ||
+              'Error performing action');
+          });
         }
         return response.json();
-    })
-    .then(data => {
+      })
+      .then(data => {
         // Only update localStorage & UI if request succeeds
-        localStorage.setItem('storyInteractions', JSON.stringify(savedInteractions));
+        localStorage.setItem('storyInteractions', JSON
+          .stringify(savedInteractions));
 
         // Update UI
-        const isLiked = savedInteractions[storyId]?.action === 'like';
-        const isDisliked = savedInteractions[storyId]?.action === 'dislike';
+        const isLiked = savedInteractions[storyId]
+          ?.action === 'like';
+        const isDisliked = savedInteractions[storyId]
+          ?.action === 'dislike';
 
         likeIcon.classList.toggle('fa-solid', isLiked);
         likeIcon.classList.toggle('fa-regular', !isLiked);
-        dislikeIcon.classList.toggle('fa-solid', isDisliked);
-        dislikeIcon.classList.toggle('fa-regular', !isDisliked);
+        dislikeIcon.classList.toggle('fa-solid',
+          isDisliked);
+        dislikeIcon.classList.toggle('fa-regular', !
+          isDisliked);
 
         // Update counts
         likeCount.textContent = ` ${data.likes}`;
         dislikeCount.textContent = ` ${data.dislikes}`;
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         alert(error.message);
         savedInteractions = previousState; // Revert state
-    });
-}
+      });
+  }
 
 
   // Function to calculate relative time
@@ -665,8 +829,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return dateString;
     }
     const currentDate = new Date();
-    const differenceInSeconds = Math.floor((currentDate - originalDate) / 1000);
-    const differenceInHours = Math.floor(differenceInSeconds / 3600);
+    const differenceInSeconds = Math.floor((currentDate -
+      originalDate) / 1000);
+    const differenceInHours = Math.floor(differenceInSeconds /
+      3600);
     const differenceInDays = Math.floor(differenceInHours / 24);
 
     // Adjusting logic to only return "today", "yesterday", or "X days ago"
@@ -683,19 +849,27 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateTimeAgo() {
     const dateElements = document.querySelectorAll('.date-info');
     dateElements.forEach(function (element) {
-      const originalDateString = element.textContent.trim(); // Extract the date string
-      const relativeDateString = timeAgo(originalDateString); // Convert to relative format
-      element.innerHTML = relativeDateString; // Update the element content
+      const originalDateString = element.textContent
+        .trim(); // Extract the date string
+      const relativeDateString = timeAgo(
+        originalDateString
+      ); // Convert to relative format
+      element.innerHTML =
+        relativeDateString; // Update the element content
     });
   }
 
 
   // Function to save filter settings to localStorage
   function saveFiltersToLocalStorage() {
-    const category = document.querySelector('input[name="category"]:checked').value;
-    const orderBy = document.querySelector('input[name="order_by"]:checked').value;
-    const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
-    const startDate = document.getElementById("modalStartDate").value;
+    const category = document.querySelector(
+      'input[name="category"]:checked').value;
+    const orderBy = document.querySelector(
+      'input[name="order_by"]:checked').value;
+    const orderDir = document.querySelector(
+      'input[name="order_dir"]:checked').value;
+    const startDate = document.getElementById("modalStartDate")
+      .value;
     const endDate = document.getElementById("modalEndDate").value;
     const query = document.getElementById("query").value;
 
@@ -712,7 +886,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to load filter settings from localStorage
   function loadSavedFilters() {
-    const savedFilters = JSON.parse(localStorage.getItem('newsFilters'));
+    const savedFilters = JSON.parse(localStorage.getItem(
+      'newsFilters'));
     if (savedFilters) {
       const {
         category,
@@ -722,9 +897,15 @@ document.addEventListener("DOMContentLoaded", function () {
         endDate,
         query
       } = savedFilters;
-      document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
-      document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
-      document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
+      document.querySelector(
+          `input[name="category"][value="${category}"]`)
+        .checked = true;
+      document.querySelector(
+          `input[name="order_by"][value="${orderBy}"]`)
+        .checked = true;
+      document.querySelector(
+          `input[name="order_dir"][value="${orderDir}"]`)
+        .checked = true;
       document.getElementById("modalStartDate").value = startDate;
       document.getElementById("modalEndDate").value = endDate;
       document.getElementById("query").value = query;
@@ -734,14 +915,18 @@ document.addEventListener("DOMContentLoaded", function () {
       if (startDate && endDate) {
         periodText = `${startDate} to ${endDate}`;
       }
-      document.getElementById('periodButtonText').textContent = periodText;
+      document.getElementById('periodButtonText').textContent =
+        periodText;
     }
   }
 
   function updateButtonText(inputName, buttonTextId) {
-    var selectedLabel = document.querySelector(`input[name="${inputName}"]:checked`).nextElementSibling;
-    var selectedText = selectedLabel.querySelector('.label-text').textContent.trim();
-    document.getElementById(buttonTextId).textContent = selectedText;
+    var selectedLabel = document.querySelector(
+      `input[name="${inputName}"]:checked`).nextElementSibling;
+    var selectedText = selectedLabel.querySelector('.label-text')
+      .textContent.trim();
+    document.getElementById(buttonTextId).textContent =
+      selectedText;
   }
 
   // Initialize Button Texts
@@ -750,44 +935,56 @@ document.addEventListener("DOMContentLoaded", function () {
   updateButtonText('order_dir', 'orderDirButtonText');
 
   // Event Listeners for Category
-  document.querySelectorAll('input[name="category"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      updateButtonText('category', 'categoryButtonText');
+  document.querySelectorAll('input[name="category"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        updateButtonText('category',
+          'categoryButtonText');
+      });
     });
-  });
 
   // Event Listeners for Order By
-  document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      updateButtonText('order_by', 'orderByButtonText');
+  document.querySelectorAll('input[name="order_by"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        updateButtonText('order_by',
+          'orderByButtonText');
+      });
     });
-  });
 
   // Event Listeners for Order Direction
-  document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
-    el.addEventListener('change', function () {
-      updateButtonText('order_dir', 'orderDirButtonText');
+  document.querySelectorAll('input[name="order_dir"]').forEach(
+    function (el) {
+      el.addEventListener('change', function () {
+        updateButtonText('order_dir',
+          'orderDirButtonText');
+      });
     });
-  });
 
   // Event listener for the Apply button in Period Modal
-  document.getElementById('applyPeriodButton').addEventListener('click', function () {
-    // Update the periodButton text
-    let startDate = document.getElementById('modalStartDate').value;
-    let endDate = document.getElementById('modalEndDate').value;
-    let periodText = 'Start Date - End Date';
-    if (startDate && endDate) {
-      periodText = `${startDate} to ${endDate}`;
-    }
-    document.getElementById('periodButtonText').textContent = periodText;
+  document.getElementById('applyPeriodButton').addEventListener(
+    'click',
+    function () {
+      // Update the periodButton text
+      let startDate = document.getElementById(
+        'modalStartDate').value;
+      let endDate = document.getElementById('modalEndDate')
+        .value;
+      let periodText = 'Start Date - End Date';
+      if (startDate && endDate) {
+        periodText = `${startDate} to ${endDate}`;
+      }
+      document.getElementById('periodButtonText')
+        .textContent = periodText;
 
-    // Close the modal
-    document.getElementById('periodModal').classList.remove('show');
-    document.querySelector('.modal-backdrop').remove();
+      // Close the modal
+      document.getElementById('periodModal').classList.remove(
+        'show');
+      document.querySelector('.modal-backdrop').remove();
 
-    // Apply the filters
-    applyFilters();
-  });
+      // Apply the filters
+      applyFilters();
+    });
 
   // Initial fetch to populate stories on page load
   showLoading();

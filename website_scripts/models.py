@@ -121,7 +121,7 @@ class User(db.Model, UserMixin):
 
     # Totp
     is_totp_enabled = db.Column(db.Boolean, default=False)
-    totp_secret = db.Column(db.String(120))  # AES/GCM
+    totp_secret = db.Column(db.LargeBinary(120))  # AES/GCM
 
     totp_recovery = db.Column(db.String(150))  # Argon2id
     

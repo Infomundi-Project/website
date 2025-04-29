@@ -31,11 +31,11 @@
 
           <!-- 2) Recovery token display (hidden initially) -->
           <div class="mb-3 d-none" id="recoveryGroup">
-            <label for="recoveryToken" class="form-label">
+            <label for="mailRecoveryToken" class="form-label">
               Your recovery token
             </label>
             <input
-              type="text" id="recoveryToken" class="form-control"
+              type="text" id="mailRecoveryToken" class="form-control"
               readonly>
             <small class="form-text text-muted">
               Save this somewhere safe – you’ll need it if you lose access to your 2FA device.
@@ -442,7 +442,7 @@
     const doneBtn     = document.getElementById("doneBtn");
     const codeInput   = document.getElementById("twoFactorCode");
     const recGroup    = document.getElementById("recoveryGroup");
-    const recInput    = document.getElementById("recoveryToken");
+    const recInput    = document.getElementById("mailRecoveryToken");
     const msgDiv      = document.getElementById("message");
 
     function showMessage(html, type="warning") {
@@ -450,7 +450,7 @@
     }
 
     sendBtn.addEventListener("click", () => {
-      fetch("/api/2fa/mail/send-code", {
+      fetch("/api/2fa/mail/send", {
         method: "POST",
         headers: {
         'Content-Type': 'application/json',
@@ -475,7 +475,7 @@
       const code = codeInput.value.trim();
       if (!code) return showMessage("Please enter the code.","danger");
 
-      fetch("/api/2fa/mail/verify-code", {
+      fetch("/api/2fa/mail/verify", {
         method: "POST",
         headers: {
         'Content-Type': 'application/json',
