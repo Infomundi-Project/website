@@ -9,7 +9,7 @@ from . import config
 
 def post_webhook(data: dict) -> bool:
     """Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
-    
+
     Arguments:
         data: dict
             Information needed to create the embed message. Should have the following structure:
@@ -17,7 +17,7 @@ def post_webhook(data: dict) -> bool:
                 'text': 'some text'
             }
 
-    Returns: 
+    Returns:
         bool: True if we were able to POST the webhook, otherwise False.
     """
 
@@ -30,9 +30,15 @@ def post_webhook(data: dict) -> bool:
     return True
 
 
-def send_email(recipient_email: str, subject: str, body: str, reply_to: str = 'noreply@infomundi.net', from_email: str = 'Infomundi <noreply@infomundi.net>') -> bool:
+def send_email(
+    recipient_email: str,
+    subject: str,
+    body: str,
+    reply_to: str = "noreply@infomundi.net",
+    from_email: str = "Infomundi <noreply@infomundi.net>",
+) -> bool:
     """Takes the recipient email, the subject and the body of the email and sends it.
-    
+
     Arguments:
         recipient_email: str
             Email address to send message to
@@ -42,22 +48,22 @@ def send_email(recipient_email: str, subject: str, body: str, reply_to: str = 'n
             Email's message
         reply_to: str
             Reply-To address. Defaults to 'noreply@infomundi.net'
-    
+
     Returns:
         bool: True if we were able to send the message, otherwise False.
     """
-    
+
     # Create a message
     message = MIMEMultipart()
-    message['From'] = from_email
-    message['To'] = recipient_email
-    message['Subject'] = subject
-    message['Date'] = formatdate(localtime=True)
-    
+    message["From"] = from_email
+    message["To"] = recipient_email
+    message["Subject"] = subject
+    message["Date"] = formatdate(localtime=True)
+
     if reply_to != from_email:
-        message['Reply-To'] = reply_to
-    
-    message.attach(MIMEText(body, 'plain'))
+        message["Reply-To"] = reply_to
+
+    message.attach(MIMEText(body, "plain"))
 
     try:
         with SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:

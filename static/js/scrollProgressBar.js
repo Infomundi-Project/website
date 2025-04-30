@@ -5,10 +5,11 @@ document.body.appendChild(progressBar);
 
 // Function to update the progress bar width
 function updateProgressBar() {
-    const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const currentScroll = window.scrollY;
-    const scrolled = (currentScroll / windowHeight) * 100;
-    progressBar.style.width = scrolled + '%';
+  const windowHeight = document.documentElement.scrollHeight - document
+    .documentElement.clientHeight;
+  const currentScroll = window.scrollY;
+  const scrolled = (currentScroll / windowHeight) * 100;
+  progressBar.style.width = scrolled + '%';
 }
 
 // Event listener for scroll events

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const checkbox = document.getElementById("theme-checkbox");
 
   if (checkbox) { // Check if the checkbox element exists
@@ -10,7 +10,8 @@ const setCookie = (name, value, daysToExpire) => {
   const expirationDate = new Date();
   expirationDate.setDate(expirationDate.getDate() + daysToExpire);
 
-  const cookieString = `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
+  const cookieString =
+    `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
   document.cookie = cookieString;
 };
 

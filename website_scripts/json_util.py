@@ -4,7 +4,7 @@ import json
 def read_json(filepath: str) -> dict:
     """Takes only one argument, the path to the .json file on the system. Opens the requested file in a pythonic format (dictionary)"""
     try:
-        with open(f"{filepath}.json", encoding='utf-8') as f:
+        with open(f"{filepath}.json", encoding="utf-8") as f:
             data = json.load(f)
         return data
     except FileNotFoundError:
@@ -21,7 +21,7 @@ def read_json(filepath: str) -> dict:
 def write_json(data: dict, filepath: str):
     """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is saved in a 'filepath' file in json format."""
     try:
-        with open(f"{filepath}.json", "w", encoding='utf-8') as f:
+        with open(f"{filepath}.json", "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"An error occurred while writing to the file: {e}")
@@ -30,7 +30,7 @@ def write_json(data: dict, filepath: str):
 def append_json(data: dict, filepath: str):
     """It takes 'data' as the first argument, and then 'filename' as the second argument. 'data' is added to 'filepath' in json format."""
     try:
-        with open(f"{filepath}.json", "a", encoding='utf-8') as f:
+        with open(f"{filepath}.json", "a", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"An error occurred while appending to the file: {e}")

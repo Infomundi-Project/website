@@ -3,25 +3,27 @@ from os import environ
 from . import json_util
 
 
-WEBSITE_ROOT = '/app'
-LOCAL_ROOT = '/root/docker/infomundi-app'
+WEBSITE_ROOT = "/app"
+LOCAL_ROOT = "/root/docker/infomundi-app"
 
 # -----------> Secret Keys <-----------
-CAPTCHA_SECRET_KEY = environ['CAPTCHA_SECRET_KEY']
-COMMENTO_SSO_KEY = environ['COMMENTO_SSO_KEY']
-OPENAI_API_KEY = environ['OPENAI_API_KEY']
-ENCRYPTION_KEY = environ['ENCRYPTION_KEY']
-SECRET_KEY = environ['SECRET_KEY']
-HMAC_KEY = environ['HMAC_KEY']
+CAPTCHA_SECRET_KEY = environ["CAPTCHA_SECRET_KEY"]
+COMMENTO_SSO_KEY = environ["COMMENTO_SSO_KEY"]
+OPENAI_API_KEY = environ["OPENAI_API_KEY"]
+ENCRYPTION_KEY = environ["ENCRYPTION_KEY"]
+SECRET_KEY = environ["SECRET_KEY"]
+HMAC_KEY = environ["HMAC_KEY"]
 
 # -----------> Files <-----------
-COUNTRY_TO_CODE_LIST = json_util.read_json(f'{WEBSITE_ROOT}/assets/data/json/country_names_codes')
-PRESIDENTS_DATA = json_util.read_json(f'{WEBSITE_ROOT}/assets/data/json/presidents')
-COUNTRY_LIST = json_util.read_json(f'{WEBSITE_ROOT}/assets/data/json/countries')
-HDI_DATA = json_util.read_json(f'{WEBSITE_ROOT}/assets/data/json/hdi_data')
+COUNTRY_TO_CODE_LIST = json_util.read_json(
+    f"{WEBSITE_ROOT}/assets/data/json/country_names_codes"
+)
+PRESIDENTS_DATA = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/presidents")
+COUNTRY_LIST = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/countries")
+HDI_DATA = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/hdi_data")
 
 # -----------> Folders <-----------
-COUNTRIES_DATA_PATH = f'{WEBSITE_ROOT}/assets/data/json/countries_data'
+COUNTRIES_DATA_PATH = f"{WEBSITE_ROOT}/assets/data/json/countries_data"
 
 # -----------> Inputs <-----------
 MIN_MESSAGE_LEN = 5
@@ -49,37 +51,39 @@ DISPLAY_NAME_LENGTH_RANGE = (MIN_DISPLAY_NAME_LEN, MAX_DISPLAY_NAME_LEN)
 CAPTCHA_CLEARANCE_HOURS = 12
 
 # -----------> Email <-----------
-SMTP_USERNAME = 'noreply@infomundi.net'
-SMTP_PASSWORD = environ['SMTP_PASSWORD']
-SMTP_SERVER = 'mail.infomundi.net'
+SMTP_USERNAME = "noreply@infomundi.net"
+SMTP_PASSWORD = environ["SMTP_PASSWORD"]
+SMTP_SERVER = "mail.infomundi.net"
 SMTP_PORT = 587
 
 # -----------> Databases <-----------
-MYSQL_DATABASE = 'infomundi'
-MYSQL_HOST = 'infomundi-mysql'
-MYSQL_USERNAME = 'infomundi'
-MYSQL_PASSWORD = environ['MYSQL_PASSWORD']
+MYSQL_DATABASE = "infomundi"
+MYSQL_HOST = "infomundi-mysql"
+MYSQL_USERNAME = "infomundi"
+MYSQL_PASSWORD = environ["MYSQL_PASSWORD"]
 
 REDIS_DATABASE = 0
-REDIS_HOST = 'infomundi-redis'
+REDIS_HOST = "infomundi-redis"
 REDIS_PORT = 6379
-REDIS_PASSWORD = environ['REDIS_PASSWORD']
-REDIS_CONNECTION_STRING = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DATABASE}'
+REDIS_PASSWORD = environ["REDIS_PASSWORD"]
+REDIS_CONNECTION_STRING = (
+    f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DATABASE}"
+)
 
 # -----------> Cloudflare R2 <-----------
-R2_ENDPOINT = environ['R2_ENDPOINT']
-R2_SECRET = environ['R2_SECRET']
-R2_TOKEN = environ['R2_TOKEN']
-R2_ACCESS_KEY = environ['R2_ACCESS_KEY']
-BUCKET_BASE_URL = 'https://bucket.infomundi.net'
-BUCKET_NAME = 'infomundi'
+R2_ENDPOINT = environ["R2_ENDPOINT"]
+R2_SECRET = environ["R2_SECRET"]
+R2_TOKEN = environ["R2_TOKEN"]
+R2_ACCESS_KEY = environ["R2_ACCESS_KEY"]
+BUCKET_BASE_URL = "https://bucket.infomundi.net"
+BUCKET_NAME = "infomundi"
 
 
 # -----------> Google OAuth <-----------
-GOOGLE_CLIENT_ID = environ['GOOGLE_CLIENT_ID']
-GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-GOOGLE_CLIENT_SECRET = environ['GOOGLE_CLIENT_SECRET']
+GOOGLE_CLIENT_ID = environ["GOOGLE_CLIENT_ID"]
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+GOOGLE_CLIENT_SECRET = environ["GOOGLE_CLIENT_SECRET"]
 
 
 # -----------> Webhook <-----------
-WEBHOOK_URL = environ['WEBHOOK_URL']
+WEBHOOK_URL = environ["WEBHOOK_URL"]

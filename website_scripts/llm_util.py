@@ -26,14 +26,18 @@ def gpt_summarize(url: str) -> dict:
 
     try:
         # Fetch the article content
-        r = get_request(url, timeout=5, headers={'User-Agent': random_choice(USER_AGENTS)})
+        r = get_request(
+            url, timeout=5, headers={"User-Agent": random_choice(USER_AGENTS)}
+        )
         if r.status_code not in (200, 301, 302):
             return {"error": "Failed to fetch the article. Invalid status code."}
 
         # Parse the article content
-        soup = BeautifulSoup(r.content, 'lxml')
+        soup = BeautifulSoup(r.content, "lxml")
         news_title = soup.title.string.strip() if soup.title else "News Article"
-        article_text = ' '.join([p.get_text().strip() for p in soup.find_all('p')])[:1500]
+        article_text = " ".join([p.get_text().strip() for p in soup.find_all("p")])[
+            :1500
+        ]
 
         prompt = f"""Given the context of "{news_title}", perform an in-depth analysis of the following news article:
 
@@ -89,13 +93,13 @@ The output must strictly conform to this structure and contain valid JSON. All g
                         "Each section should contain well-elaborated, insightful paragraphs, offering a deep dive "
                         "into the respective topics. Ensure that the output, including json keys, is in the same language as the one in the news article and adheres "
                         "to a valid JSON structure, with clear separation between keys and their corresponding textual content."
-                    )
+                    ),
                 },
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
             n=1,
             response_format={"type": "json_object"},
-            temperature=0
+            temperature=0,
         )
 
         # Parse and validate JSON output
@@ -110,9 +114,13 @@ The output must strictly conform to this structure and contain valid JSON. All g
         return {"error": "An error occurred during summarization.", "details": str(e)}
 
 
-def is_inappropriate(text: str = '', image_url: str = '', image_stream = None, simple_return: bool = True) -> bool:
+def is_inappropriate(
+    text: str = "", image_url: str = "", image_stream=None, simple_return: bool = True
+) -> bool:
     if not text and not image_url and not image_stream:
-        raise InfomundiCustomException('You should supply "text" or "image_url"/"image_stream" or both.')
+        raise InfomundiCustomException(
+            'You should supply "text" or "image_url"/"image_stream" or both.'
+        )
 
     model_input = []
 
@@ -127,12 +135,16 @@ def is_inappropriate(text: str = '', image_url: str = '', image_stream = None, s
         image_bytes = image_stream.read()  # Read file contents
 
         image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-        model_input.append({"type": "image_url", "image_url": {"url": f'data:image/jpeg;base64,{image_b64}'}})
+        model_input.append(
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"},
+            }
+        )
 
     client = OpenAI(api_key=OPENAI_API_KEY)
     response = client.moderations.create(
-        model="omni-moderation-latest",
-        input=model_input
+        model="omni-moderation-latest", input=model_input
     )
 
     return response.results[0].flagged if simple_return else response.results[0]

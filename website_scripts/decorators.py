@@ -11,9 +11,9 @@ from .config import CAPTCHA_CLEARANCE_HOURS
 def admin_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if current_user.is_authenticated and current_user.role == 'admin':
+        if current_user.is_authenticated and current_user.role == "admin":
             return func(*args, **kwargs)
-        
+
         return abort(404)
 
     return decorated_function
@@ -24,8 +24,8 @@ def api_login_required(func):
     def decorated_function(*args, **kwargs):
         if current_user.is_authenticated:
             return func(*args, **kwargs)
-        
-        return jsonify({'message': 'You must be logged in.'}), 403
+
+        return jsonify({"message": "You must be logged in."}), 403
 
     return decorated_function
 
@@ -36,9 +36,9 @@ def unauthenticated_only(func):
         # Check if the user is an authenticated
         if not current_user.is_authenticated:
             return func(*args, **kwargs)
-        
-        flash('You are already authenticated!', 'error')
-        return redirect(url_for('views.home'))
+
+        flash("You are already authenticated!", "error")
+        return redirect(url_for("views.home"))
 
     return decorated_function
 
@@ -47,38 +47,42 @@ def in_maintenance(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         # If the user is admin, maintenance is bypassed
-        if current_user.is_authenticated and current_user.role == 'admin':
+        if current_user.is_authenticated and current_user.role == "admin":
             return func(*args, **kwargs)
-        
-        return redirect(url_for('views.be_right_back'))
+
+        return redirect(url_for("views.be_right_back"))
 
     return decorated_function
 
 
 def captcha_required(func):
     """This decorator is used to check if the user needs to resolve a proof of life first."""
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        clearance = session.get('clearance', '')
+        clearance = session.get("clearance", "")
         if clearance:
             timestamp = datetime.fromisoformat(clearance)
-            if is_date_within_threshold_minutes(timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True):
+            if is_date_within_threshold_minutes(
+                timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True
+            ):
                 return func(*args, **kwargs)
-        
-        session['clearance_from'] = request.url
-        return redirect(url_for('views.captcha'))
+
+        session["clearance_from"] = request.url
+        return redirect(url_for("views.captcha"))
 
     return decorated_function
 
 
 def verify_captcha(func):
     """This decorator is used to check if a captcha token is valid"""
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if request.method == 'POST':
-            token = request.form.get('cf-turnstile-response', '')
+        if request.method == "POST":
+            token = request.form.get("cf-turnstile-response", "")
             if not is_valid_captcha(token):
-                flash('Invalid captcha. Are you a robot?', 'error')
+                flash("Invalid captcha. Are you a robot?", "error")
                 return redirect(request.url)
 
         # If captcha is valid, return the function as usual
@@ -89,13 +93,14 @@ def verify_captcha(func):
 
 def sensitive_area(func):
     """This decorator is used to check if the user is allowed to access their account's sensitive area"""
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        is_trusted_session = session.get('is_trusted_session', '')
+        is_trusted_session = session.get("is_trusted_session", "")
         if is_trusted_session:
             return func(*args, **kwargs)
-        
-        return redirect(url_for('views.sensitive'))
+
+        return redirect(url_for("views.sensitive"))
 
     return decorated_function
 
@@ -103,14 +108,14 @@ def sensitive_area(func):
 def check_twofactor(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if request.method == 'GET':
+        if request.method == "GET":
             return func(*args, **kwargs)
 
-        user = extensions.db.session.get(models.User, session['user_id'])
+        user = extensions.db.session.get(models.User, session["user_id"])
 
-        recovery_token = request.form.get('recovery_token', '').strip()
-        password = request.form.get('password', '').strip()
-        code = request.form.get('code', '').strip()
+        recovery_token = request.form.get("recovery_token", "").strip()
+        password = request.form.get("password", "").strip()
+        code = request.form.get("code", "").strip()
 
         if user.is_totp_enabled:
             is_valid = user.check_totp(code, recovery_token)
@@ -120,12 +125,12 @@ def check_twofactor(func):
             is_valid = user.check_password(password)
 
         if not is_valid:
-            flash('Invalid credentials!', 'error')
-            return redirect(url_for('views.user_redirect'))
-        
-        if session.get('in_twofactor_process', ''):
-            del session['in_twofactor_process']
-        
+            flash("Invalid credentials!", "error")
+            return redirect(url_for("views.user_redirect"))
+
+        if session.get("in_twofactor_process", ""):
+            del session["in_twofactor_process"]
+
         return func(*args, **kwargs)
 
     return decorated_function

@@ -7,7 +7,7 @@ from .config import ENCRYPTION_KEY
 
 
 def generate_random_number_sequence(length: int = 6) -> str:
-    code = ''
+    code = ""
     for _ in range(length):
         code += str(secrets.randbelow(10))
     return code
@@ -30,12 +30,12 @@ def uuid_string_to_bytes(uuid_string: str) -> bytes:
 
 
 def generate_nonce(length: int = 32, limit: int = 0) -> str:
-    """Creates a secure random sequence of URL-safe characters provided by the 'secrets' library. 
+    """Creates a secure random sequence of URL-safe characters provided by the 'secrets' library.
     Used to generate safe random values.
 
     Arguments
-        length (int): Optional. Byte sequence length. Does not mean that 
-            the returning string is going to match the specified length, but the byte sequence 
+        length (int): Optional. Byte sequence length. Does not mean that
+            the returning string is going to match the specified length, but the byte sequence
             will be of X (int) bytes. Higher = safer.
         limit (int): Optional. Limits the token to a specific length.
 
@@ -52,7 +52,11 @@ def generate_nonce(length: int = 32, limit: int = 0) -> str:
         >>> generate_nonce(limit=10)
         'tLut2cTtSY'
     """
-    return secrets.token_urlsafe(length)[:limit] if limit else secrets.token_urlsafe(length)
+    return (
+        secrets.token_urlsafe(length)[:limit]
+        if limit
+        else secrets.token_urlsafe(length)
+    )
 
 
 def derive_key(password: str, salt: bytes, length: int = 32) -> bytes:
@@ -77,7 +81,7 @@ def derive_key(password: str, salt: bytes, length: int = 32) -> bytes:
     return kdf.derive(password.encode())
 
 
-def encrypt(plaintext: str, salt: bytes = b'', password: str = ENCRYPTION_KEY) -> bytes:
+def encrypt(plaintext: str, salt: bytes = b"", password: str = ENCRYPTION_KEY) -> bytes:
     """
     Encrypts plaintext using AES-GCM with a key derived from the user's password.
 
@@ -94,7 +98,7 @@ def encrypt(plaintext: str, salt: bytes = b'', password: str = ENCRYPTION_KEY) -
     """
     if not salt:
         salt = secrets.token_bytes(16)  # Unique salt per encryption
-    
+
     key = derive_key(password, salt)
 
     aesgcm = AESGCM(key)
@@ -128,7 +132,7 @@ def decrypt(encrypted_blob: bytes, password: str = ENCRYPTION_KEY) -> str:
     key = derive_key(password, salt)
     aesgcm = AESGCM(key)
 
-    ciphertext = ciphertext.strip(b'\x00')  # Removes null bytes from ciphertext
+    ciphertext = ciphertext.strip(b"\x00")  # Removes null bytes from ciphertext
 
     try:
         plaintext = aesgcm.decrypt(nonce, ciphertext, None)

@@ -30,15 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadGoogleTranslate(onReady) {
   if (scriptLoaded) return onReady();
   window.googleTranslateElementInit = () => {
-    new google.translate.TranslateElement(
-      { pageLanguage: 'en', autoDisplay: false },
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false
+      },
       'google_translate_element'
     );
     scriptLoaded = true;
     onReady();
   };
   const script = document.createElement('script');
-  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  script.src =
+    'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   script.defer = true;
   document.body.appendChild(script);
 }
@@ -81,28 +84,31 @@ function showModal(autoLang, modal) {
   document.getElementById('detectedLangInline').textContent = name;
   document.getElementById('otherLangSelect').value = autoLang;
 
-  document.querySelectorAll('input[name="translationOption"]').forEach(radio => {
+  document.querySelectorAll('input[name="translationOption"]').forEach(
+  radio => {
     radio.addEventListener('change', () => {
       document.getElementById('other-lang-group').style.display =
         radio.id === 'opt-other' ? 'block' : 'none';
     });
   });
 
-  document.getElementById('saveTranslationChoice').addEventListener('click', () => {
-    const opt = document.querySelector('input[name="translationOption"]:checked').id;
-    let target;
-    if (opt === 'opt-auto') target = autoLang;
-    else if (opt === 'opt-none') target = 'none';
-    else target = document.getElementById('otherLangSelect').value;
+  document.getElementById('saveTranslationChoice').addEventListener('click',
+  () => {
+      const opt = document.querySelector(
+        'input[name="translationOption"]:checked').id;
+      let target;
+      if (opt === 'opt-auto') target = autoLang;
+      else if (opt === 'opt-none') target = 'none';
+      else target = document.getElementById('otherLangSelect').value;
 
-    localStorage.setItem('preferredLanguage', target);
-    if (target === 'none') {
-      setActiveNone();
-    } else {
-      applyTranslation(target, false);
-    }
-    modal.hide();
-  });
+      localStorage.setItem('preferredLanguage', target);
+      if (target === 'none') {
+        setActiveNone();
+      } else {
+        applyTranslation(target, false);
+      }
+      modal.hide();
+    });
 
   modal.show();
 }
@@ -138,7 +144,8 @@ function setActive(lang) {
     if (it.getAttribute('data-lang') === lang) {
       it.classList.add('active');
       check && check.classList.remove('d-none');
-      document.getElementById('current-lang').textContent = it.textContent.trim();
+      document.getElementById('current-lang').textContent = it.textContent
+        .trim();
     } else {
       it.classList.remove('active');
       check && check.classList.add('d-none');

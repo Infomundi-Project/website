@@ -79,7 +79,7 @@ def string_to_sha512_hex(text: str) -> str:
         '570ea4d47019c5f953442981d994c7c936341de56cdda26dde54055b96e811c03464038a4178d514107244b632fa73c941075006c60dadc8d0cbb6ab15b599aa'
     """
     sha512 = hashlib.sha512()
-    sha512.update(text.encode('utf-8'))
+    sha512.update(text.encode("utf-8"))
     return sha512.hexdigest()
 
 
@@ -128,7 +128,7 @@ def md5_binary_to_string(binary_data: bytes) -> str:
 
 def md5_hex_to_binary(md5_hex: str) -> bytes:
     """Convert MD5 hex to binary (16-byte BLOB equivalent)
-    
+
     Example:
         >>> print(md5_hex_to_binary("5d41402abc4b2a76b9719d911017c592"))
         b']A@\\x02\\xab\\xc4\\xb2\\xa7k\\x97\\x19\\xd9\\x11\\x01|Y'
@@ -150,51 +150,55 @@ def string_to_md5_hex(input_string: str) -> str:
     """
 
     Example:
-        >>> print(string_to_md5_hex("hello"))  
+        >>> print(string_to_md5_hex("hello"))
         5d41402abc4b2a76b9719d911017c592
     """
     return hashlib.md5(input_string.encode(), usedforsecurity=False).hexdigest()
 
 
-def generate_hmac_signature(message: str, key: str = HMAC_KEY, algorithm: str = 'sha256', as_bytes: bool = False):
+def generate_hmac_signature(
+    message: str, key: str = HMAC_KEY, algorithm: str = "sha256", as_bytes: bool = False
+):
     """
     Generate an HMAC signature for a given message and key.
-    
+
     Parameters:
         key (str): The secret key used for signing. Default is the HMAC key for the application.
         message (str): The message to be signed.
         algorithm (str): The hashing algorithm to use ('sha256', 'sha1', 'md5', etc.). Default is 'sha256'.
         return_format (str): Changes the signature return format ('string', 'bytes'). Default is 'string'.
-    
+
     Returns:
         str or bytes: The generated HMAC signature as a hexadecimal string or bytes.
     """
-    key_bytes = key.encode('utf-8')
-    message_bytes = message.encode('utf-8')
+    key_bytes = key.encode("utf-8")
+    message_bytes = message.encode("utf-8")
     hash_function = getattr(hashlib, algorithm)
     hmac_obj = hmac.new(key_bytes, message_bytes, hash_function)
-    
+
     if as_bytes:
         return hmac_obj.digest()
 
     return hmac_obj.hexdigest()
 
 
-def is_hmac_authentic(key: str, message: str, provided_signature: str, algorithm: str = 'sha256') -> bool:
+def is_hmac_authentic(
+    key: str, message: str, provided_signature: str, algorithm: str = "sha256"
+) -> bool:
     """
     Verify if the provided HMAC signature matches the expected signature for the given message and key.
-    
+
     Parameters:
         key (str): The secret key used for signing.
         message (str): The message to be verified.
         provided_signature (str): The HMAC signature to verify.
         algorithm (str): The hashing algorithm to use. Default is 'sha256'.
-    
+
     Returns:
         bool: True if the signature is authentic, False otherwise.
     """
     # Generate the correct signature
     expected_signature = generate_hmac_signature(message, key=key)
-    
+
     # Use hmac.compare_digest for constant-time comparison to prevent timing attacks
     return hmac.compare_digest(expected_signature, provided_signature)

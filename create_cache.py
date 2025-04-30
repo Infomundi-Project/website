@@ -12,26 +12,32 @@ from website_scripts import config, input_sanitization, immutable, hashing_util
 
 # Database connection parameters
 db_params = {
-    'host': '127.0.0.1',
-    'user': config.MYSQL_USERNAME,
-    'password': config.MYSQL_PASSWORD,
-    'db': config.MYSQL_DATABASE,
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
+    "host": "127.0.0.1",
+    "user": config.MYSQL_USERNAME,
+    "password": config.MYSQL_PASSWORD,
+    "db": config.MYSQL_DATABASE,
+    "charset": "utf8mb4",
+    "cursorclass": pymysql.cursors.DictCursor,
 }
 
 db_connection = pymysql.connect(**db_params)
 
 # Setup logging
-logging.basicConfig(filename=f'{config.LOCAL_ROOT}/logs/create_cache.log', level=logging.INFO, format='[%(asctime)s] %(message)s')
+logging.basicConfig(
+    filename=f"{config.LOCAL_ROOT}/logs/create_cache.log",
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s",
+)
 
 
 def log_message(message):
-    print(f'[~] {message}')
-    #logging.info(message)
+    print(f"[~] {message}")
+    # logging.info(message)
 
 
-def insert_stories_to_database(stories: list, category_name: str, category_id: int) -> int:
+def insert_stories_to_database(
+    stories: list, category_name: str, category_id: int
+) -> int:
     """
     Inserts a list of stories into the database with associated categories and publishers.
     Returns the count of failed insertions.
@@ -47,15 +53,17 @@ def insert_stories_to_database(stories: list, category_name: str, category_id: i
     values = []
     for story in stories:
         try:
-            values.append((
-                story['story_title'],
-                story['story_description'],
-                story['story_url'],
-                story['story_url_hash'],
-                story['story_pubdate'],
-                category_id,
-                story['publisher_id']
-            ))
+            values.append(
+                (
+                    story["story_title"],
+                    story["story_description"],
+                    story["story_url"],
+                    story["story_url_hash"],
+                    story["story_pubdate"],
+                    category_id,
+                    story["publisher_id"],
+                )
+            )
         except Exception as err:
             log_message(f"Error preparing story: {err}")
 
@@ -83,19 +91,16 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
     Appends the fetched and processed news items to the result_list.
     """
-    rss_url = publisher['url']
+    rss_url = publisher["url"]
     if not input_sanitization.is_valid_url(rss_url):
-        log_message(f'Invalid url: {rss_url}')
+        log_message(f"Invalid url: {rss_url}")
         return {}
 
     # Removes the ending slash if it ends with one
-    if rss_url.endswith('/'):
+    if rss_url.endswith("/"):
         rss_url = rss_url[:-1]
-    
-    headers = {
-        'User-Agent': choice(immutable.USER_AGENTS),
-        'Referer': 'www.google.com'
-    }
+
+    headers = {"User-Agent": choice(immutable.USER_AGENTS), "Referer": "www.google.com"}
 
     invalid_feed = False
     try:
@@ -109,10 +114,12 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
     if invalid_feed:
         for _ in range(3):
             possibility = choice(immutable.RSS_ENDPOINTS)
-            log_message(f'Trying {possibility} against {rss_url}')
-            
+            log_message(f"Trying {possibility} against {rss_url}")
+
             try:
-                response = get_request(rss_url + possibility, timeout=5, headers=headers)
+                response = get_request(
+                    rss_url + possibility, timeout=5, headers=headers
+                )
 
                 feed = parse(response.content)
                 break
@@ -121,50 +128,59 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
     try:
         data = {
-            'title': getattr(feed.feed, 'title', 'Unknown Publisher').strip(),
-            'link': getattr(feed.feed, 'link', 'Unknown Link').strip(),
-            'items': []
+            "title": getattr(feed.feed, "title", "Unknown Publisher").strip(),
+            "link": getattr(feed.feed, "link", "Unknown Link").strip(),
+            "items": [],
         }
 
         for story in feed.entries:
             # Sanitizes input
             story_title = input_sanitization.sanitize_html(
-                input_sanitization.decode_html_entities(story.get('title', 'No title was provided').strip()))
+                input_sanitization.decode_html_entities(
+                    story.get("title", "No title was provided").strip()
+                )
+            )
             story_description = input_sanitization.sanitize_html(
-                input_sanitization.decode_html_entities(story.get('description', 'No description was provided').strip()))
-            
+                input_sanitization.decode_html_entities(
+                    story.get("description", "No description was provided").strip()
+                )
+            )
+
             # Gentle cuts text
             story_title = input_sanitization.gentle_cut_text(120, story_title)
-            story_description = input_sanitization.gentle_cut_text(500, story_description)
-            
+            story_description = input_sanitization.gentle_cut_text(
+                500, story_description
+            )
+
             # Checks to see if the url is valid
             story_url = story.link.strip()
             if not input_sanitization.is_valid_url(story_url) or len(story_url) > 512:
-                log_message(f'Story link ({story_url}) is not valid. Skipping.')
+                log_message(f"Story link ({story_url}) is not valid. Skipping.")
                 continue
 
-            if story.has_key('published_parsed'):
+            if story.has_key("published_parsed"):
                 pubdate = story.published_parsed
-            elif story.has_key('published'):
+            elif story.has_key("published"):
                 pubdate = story.published
             else:
                 pubdate = story.updated
-            
+
             # Tries to format pubdate
-            story_pubdate = format_date(pubdate).get('datetime', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            story_pubdate = format_date(pubdate).get(
+                "datetime", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
 
             new_story = {
-                'story_title': story_title,
-                'story_description': story_description,
-                'story_pubdate': story_pubdate,
-                'story_url_hash': hashing_util.string_to_md5_binary(story_url),
-                'story_url': story_url,
+                "story_title": story_title,
+                "story_description": story_description,
+                "story_pubdate": story_pubdate,
+                "story_url_hash": hashing_util.string_to_md5_binary(story_url),
+                "story_url": story_url,
+                "publisher_id": publisher["id"],
+            }
 
-                'publisher_id': publisher['id']
-                }
+            data["items"].append(new_story)
 
-            data['items'].append(new_story)
-    
     except Exception as err:
         log_message(f"Exception getting {rss_url} ({news_filter}) // {err}")
         data = {}
@@ -182,7 +198,7 @@ def format_date(date) -> dict:
         try:
             date = datetime.fromisoformat(date).timetuple()
         except ValueError:
-            return {'error': 'Invalid date format'}
+            return {"error": "Invalid date format"}
 
     # Convert the 9-tuple date to a datetime object
     if isinstance(date, tuple):
@@ -190,13 +206,13 @@ def format_date(date) -> dict:
 
     # Ensure it's a datetime object
     if not isinstance(date, datetime):
-        return {'error': 'Invalid date format'}
+        return {"error": "Invalid date format"}
 
-    return {'datetime': date.strftime('%Y-%m-%d %H:%M:%S')}
+    return {"datetime": date.strftime("%Y-%m-%d %H:%M:%S")}
 
 
 def fetch_categories_from_database():
-    log_message('Fetching categories from the database')
+    log_message("Fetching categories from the database")
     try:
         with db_connection.cursor() as cursor:
             cursor.execute("SELECT * FROM categories")
@@ -204,27 +220,32 @@ def fetch_categories_from_database():
     except Exception as e:
         log_message(f"Error fetching categories: {e}")
         return []
-    
+
     # DEBUG
-    category_list = [(row['id'], row['name']) for row in categories if row['name'] == 'br_general']
-    #category_list = [(row['id'], row['name']) for row in categories]
+    category_list = [
+        (row["id"], row["name"]) for row in categories if row["name"] == "br_general"
+    ]
+    # category_list = [(row['id'], row['name']) for row in categories]
     shuffle(category_list)
-    
-    log_message(f'Got {len(category_list)} categories from the database')
+
+    log_message(f"Got {len(category_list)} categories from the database")
     return category_list
 
 
 def fetch_publishers_from_database(category_id: int):
-    log_message(f'Fetching publishers for category ID: {category_id}')
+    log_message(f"Fetching publishers for category ID: {category_id}")
     try:
         with db_connection.cursor() as cursor:
-            cursor.execute("SELECT id, name, url FROM publishers WHERE category_id = %s", (category_id,))
+            cursor.execute(
+                "SELECT id, name, url FROM publishers WHERE category_id = %s",
+                (category_id,),
+            )
             publishers = cursor.fetchall()
     except Exception as e:
         log_message(f"Error fetching publishers: {e}")
         return []
-    
-    log_message(f'Got {len(publishers)} publishers from the database')
+
+    log_message(f"Got {len(publishers)} publishers from the database")
     return publishers
 
 
@@ -241,7 +262,9 @@ def main():
 
         publishers = fetch_publishers_from_database(category_id)
         for publisher in publishers:
-            thread = threading.Thread(target=fetch_feed, args=(publisher, category_name, result_list))
+            thread = threading.Thread(
+                target=fetch_feed, args=(publisher, category_name, result_list)
+            )
             threads.append(thread)
             thread.start()
 
@@ -253,7 +276,7 @@ def main():
         for rss_data in result_list:
             if not rss_data:
                 continue
-            
+
             merged_articles.extend(rss_data["items"])
 
         if not merged_articles:
@@ -262,13 +285,16 @@ def main():
 
         shuffle(merged_articles)
 
-        exceptions_count = insert_stories_to_database(merged_articles, category_name, category_id)
+        exceptions_count = insert_stories_to_database(
+            merged_articles, category_name, category_id
+        )
         total_done += 1
 
-        log_message(f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}.")
-    
-    log_message('Finished!')
+        log_message(
+            f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}."
+        )
 
+    log_message("Finished!")
 
 
 if __name__ == "__main__":

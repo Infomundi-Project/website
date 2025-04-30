@@ -6,7 +6,7 @@ from .config import CAPTCHA_SECRET_KEY
 
 
 def is_valid_captcha(token: str) -> bool:
-    """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge. 
+    """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge.
 
     Args:
         token (str): The turnstile token.
@@ -18,13 +18,13 @@ def is_valid_captcha(token: str) -> bool:
         return False
 
     response = post_request(
-        url="https://challenges.cloudflare.com/turnstile/v0/siteverify", 
+        url="https://challenges.cloudflare.com/turnstile/v0/siteverify",
         timeout=3,
-        data={'secret': CAPTCHA_SECRET_KEY, 'response': token}
+        data={"secret": CAPTCHA_SECRET_KEY, "response": token},
     )
 
     # Parse JSON from response and return if was a success (True or False).
-    return json_loads(response.content)['success']
+    return json_loads(response.content)["success"]
 
 
 def get_user_ip() -> str:
@@ -36,8 +36,8 @@ def get_user_ip() -> str:
     Returns:
         str: User's IPv4 or IPv6 address.
     """
-    ipv4 = request.headers.get('CF-Connecting-IP', '')
-    ipv6 = request.headers.get('CF-Connecting-IPv6', '')
+    ipv4 = request.headers.get("CF-Connecting-IP", "")
+    ipv6 = request.headers.get("CF-Connecting-IPv6", "")
     return ipv4 or ipv6
 
 
@@ -50,4 +50,4 @@ def get_user_country() -> str:
     Returns:
         str: The cca2 for the user IP. For instance, BR or US or CA and so on.
     """
-    return request.headers.get('CF-IPCountry', '')
+    return request.headers.get("CF-IPCountry", "")

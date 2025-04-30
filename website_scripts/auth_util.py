@@ -3,25 +3,37 @@ from flask_login import logout_user, login_user
 from datetime import datetime
 from sqlalchemy import or_
 
-from . import models, notifications, extensions, friends_util, security_util, hashing_util, qol_util, input_sanitization, cloudflare_util
+from . import (
+    models,
+    notifications,
+    extensions,
+    friends_util,
+    security_util,
+    hashing_util,
+    qol_util,
+    input_sanitization,
+    cloudflare_util,
+)
 
 
 def search_user_email_in_database(email: str):
     return models.User.query.filter_by(
         email_fingerprint=hashing_util.generate_hmac_signature(email, as_bytes=True)
-        ).first()
+    ).first()
 
 
 def perform_login_actions(user, cleartext_email: str):
     user.last_login = datetime.now()
 
-    login_user(user, remember=session.get('remember_me', True))
-    
+    login_user(user, remember=session.get("remember_me", True))
+
     session.permanent = True
-    session['obfuscated_email_address'] = input_sanitization.obfuscate_email(cleartext_email)
-    session['session_version'] = user.session_version
-    session['email_address'] = cleartext_email
-    session['user_id'] = user.id
+    session["obfuscated_email_address"] = input_sanitization.obfuscate_email(
+        cleartext_email
+    )
+    session["session_version"] = user.session_version
+    session["email_address"] = cleartext_email
+    session["user_id"] = user.id
 
     message = f"""Hello, {user.username}.
 
@@ -40,26 +52,31 @@ If you encounter any issues, please don't hesitate to contact our team for assis
 Best regards,
 The Infomundi Team
     """
-    subject = 'Infomundi - New Login'
+    subject = "Infomundi - New Login"
     notifications.send_email(cleartext_email, subject, message)
 
 
 def perform_logout_actions():
-    """To facilitate, we perform all logout actions in a single function. 
+    """To facilitate, we perform all logout actions in a single function.
     Clears user's session, and delete cookies related to Comentario's authentication.
     """
     session.permanent = False
     session.clear()
     logout_user()
 
-    response = make_response(redirect(url_for('auth.login')))
-    
+    response = make_response(redirect(url_for("auth.login")))
+
     # List of cookie names to delete, related to Comentario
-    cookies_to_delete = ('XSRF-TOKEN', '_comentario_auth_session', '_xsrf_session', 'comentario_commenter_session')
-    
+    cookies_to_delete = (
+        "XSRF-TOKEN",
+        "_comentario_auth_session",
+        "_xsrf_session",
+        "comentario_commenter_session",
+    )
+
     # Delete each cookie
     for cookie in cookies_to_delete:
-        response.set_cookie(cookie, '', expires=0)
+        response.set_cookie(cookie, "", expires=0)
 
     return response
 
@@ -90,15 +107,15 @@ https://infomundi.net/contact
 
 Best regards,
 The Infomundi Team"""
-    subject = 'Infomundi - Your Password Has Been Reset'
-    if session.get('email_address', ''):
-        notifications.send_email(session['email_address'], subject, message)
+    subject = "Infomundi - Your Password Has Been Reset"
+    if session.get("email_address", ""):
+        notifications.send_email(session["email_address"], subject, message)
     session.clear()
     logout_user()
 
 
 def handle_register_token(email: str, username: str, password: str) -> bool:
-    """Generates a verification token, stores in the database and 
+    """Generates a verification token, stores in the database and
     uses notifications.send_email to send the verification token to the user.
 
     Arguments:
@@ -111,11 +128,13 @@ def handle_register_token(email: str, username: str, password: str) -> bool:
     """
     email_encrypted = security_util.encrypt(email)
     email_fingerprint = hashing_util.generate_hmac_signature(email, as_bytes=True)
-    
-    user = models.User.query.filter(or_(
-        models.User.email_fingerprint == email_fingerprint,
-        models.User.username == username
-    )).first()
+
+    user = models.User.query.filter(
+        or_(
+            models.User.email_fingerprint == email_fingerprint,
+            models.User.username == username,
+        )
+    ).first()
 
     if user:
         # If the user is already enabled, we can't proceed.
@@ -142,8 +161,8 @@ We're looking forward to seeing you explore our platform!
 Best regards,
 The Infomundi Team"""
 
-    subject = 'Infomundi - Activate Your Account'
-    
+    subject = "Infomundi - Activate Your Account"
+
     # If we can send the email, save user to the database
     result = notifications.send_email(email, subject, message)
     if result:
@@ -153,8 +172,8 @@ The Infomundi Team"""
             username=username,
             password=hashing_util.string_to_argon2_hash(password),
             register_token=security_util.uuid_string_to_bytes(register_token),
-            public_id=security_util.generate_uuid_bytes()
-            )
+            public_id=security_util.generate_uuid_bytes(),
+        )
         extensions.db.session.add(new_user)
         extensions.db.session.commit()
 
@@ -172,7 +191,7 @@ def check_recovery_token(token: str) -> object:
     """
     user = models.User.query.filter_by(
         recovery_token=security_util.uuid_string_to_bytes(token)
-        ).first()
+    ).first()
     if not user:
         return None
 
@@ -222,12 +241,12 @@ Please keep in mind that this token will expire in 30 minutes.
 
 Best regards,
 The Infomundi Team"""
-    subject = 'Infomundi - Account Recovery'
-    
+    subject = "Infomundi - Account Recovery"
+
     user.recovery_token = security_util.uuid_string_to_bytes(recovery_token)
     user.recovery_token_timestamp = datetime.now()
     extensions.db.session.commit()
-    
+
     return notifications.send_email(email, subject, message)
 
 
@@ -250,7 +269,7 @@ def delete_account(email, token) -> bool:
     friends_util.delete_all_friends(user.id)
     extensions.db.session.delete(user)
     extensions.db.session.commit()
-    
+
     return True
 
 
@@ -258,7 +277,7 @@ def send_delete_token(email: str) -> bool:
     user = search_user_email_in_database(email)
 
     token = security_util.generate_nonce(24)
-    
+
     subject = "Infomundi - Confirm Account Deletion"
     message = f"""Hello, {user.display_name if user.display_name else user.username}.
 

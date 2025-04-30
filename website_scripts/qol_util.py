@@ -6,13 +6,13 @@ from os import path as os_path
 
 def detect_language(text: str) -> str:
     """Tries to detect the language of a text value.
-    
+
     Args:
         text (str): Any given text.
 
     Returns:
         str: The text's language code. Defaults to 'en' when fails to detect the actual language.
-    
+
     Examples:
         >>> detect_language('Esse é um texto que está escrito em português!')
         'pt'
@@ -22,8 +22,8 @@ def detect_language(text: str) -> str:
     try:
         lang = lang_detect(text)
     except Exception:
-        lang = 'en'
-    
+        lang = "en"
+
     return lang
 
 
@@ -37,10 +37,18 @@ def is_mobile(request) -> bool:
     Returns:
         bool: True if the User-Agent string indicates a mobile device, False otherwise.
     """
-    mobile_keywords = ('Mobile', 'Android', 'iPhone', 'iPod', 'iPad', 'BlackBerry', 'Phone')
+    mobile_keywords = (
+        "Mobile",
+        "Android",
+        "iPhone",
+        "iPod",
+        "iPad",
+        "BlackBerry",
+        "Phone",
+    )
 
     # If the for loop breaks, it means that a keyword was found in the user agent and we return True later on.
-    user_agent = request.headers.get('User-Agent', '')
+    user_agent = request.headers.get("User-Agent", "")
     for keyword in mobile_keywords:
         if keyword in user_agent:
             break
@@ -50,7 +58,9 @@ def is_mobile(request) -> bool:
     return True
 
 
-def is_date_within_threshold_minutes(timestamp: datetime, threshold_time: int, is_hours: bool=False) -> bool:
+def is_date_within_threshold_minutes(
+    timestamp: datetime, threshold_time: int, is_hours: bool = False
+) -> bool:
     """
     Checks if the given timestamp is within the specified threshold of minutes/hours from the current time.
 
@@ -84,7 +94,9 @@ def is_date_within_threshold_minutes(timestamp: datetime, threshold_time: int, i
     return time_difference <= timedelta(minutes=threshold_time)
 
 
-def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: int, is_hours: bool = False) -> bool:
+def is_file_creation_within_threshold_minutes(
+    file_path: str, threshold_time: int, is_hours: bool = False
+) -> bool:
     """Checks if the creation of the given file, pointed by file_path, is within the specified threshold of minutes/hours from the current time.
 
     Args:
@@ -93,7 +105,7 @@ def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: in
         is_hours (bool, optional): Time in hours to compare.
 
 
-    Returns: 
+    Returns:
         bool: False if cache is not old, meaning that there's less than 24 hours since last modification. Otherwise, True.
     """
 
@@ -102,10 +114,10 @@ def is_file_creation_within_threshold_minutes(file_path: str, threshold_time: in
         file_mtime = datetime.fromtimestamp(os_path.getmtime(file_path))
     except Exception:
         return True
-    
+
     # Calculate the time difference between now and the file modification time
     time_difference = datetime.now() - file_mtime
-    
+
     if is_hours:
         return time_difference <= timedelta(hours=threshold_time)
 
@@ -129,12 +141,20 @@ def get_device_info(user_agent_string: str):
     """
     try:
         user_agent = parse_user_agent(user_agent_string)
-    
+
         # Extract information (we can get the browser version with user_agent.browser.version_string)
         browser = user_agent.browser.family
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
-        device = "Mobile" if user_agent.is_mobile else "Tablet" if user_agent.is_tablet else "PC" if user_agent.is_pc else "Other"
+        device = (
+            "Mobile"
+            if user_agent.is_mobile
+            else (
+                "Tablet"
+                if user_agent.is_tablet
+                else "PC" if user_agent.is_pc else "Other"
+            )
+        )
     except Exception:
-        return 'No information'
+        return "No information"
 
-    return f'Browser: {browser}, OS: {os}, device type: {device}'
+    return f"Browser: {browser}, OS: {os}, device type: {device}"
