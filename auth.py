@@ -4,18 +4,17 @@ from flask_login import login_required, current_user
 from datetime import datetime
 
 from website_scripts import config, extensions, models, input_sanitization,\
- auth_util, hashing_util, qol_util, security_util, totp_util
-from website_scripts.decorators import unauthenticated_only, verify_captcha
+ auth_util, hashing_util, qol_util, security_util, totp_util, decorators
 
 auth = Blueprint('auth', __name__)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
+@decorators.unauthenticated_only
+@decorators.verify_captcha
 def login():
     # If user is in totp process, redirect them to the correct page
-    if session.get('in_totp_process', ''):
+    if session.get('in_twofactor_process', ''):
         return redirect(url_for('auth.totp'))
 
     if request.method == 'GET':
@@ -39,7 +38,7 @@ def login():
     if user.is_totp_enabled or user.is_mail_twofactor_enabled:
         session['email_address'] = email
         session['user_id'] = user.id
-        session['in_totp_process'] = True
+        session['in_twofactor_process'] = True
         return redirect(url_for('auth.totp'))
 
     auth_util.perform_login_actions(user, email)
@@ -48,41 +47,26 @@ def login():
 
 
 @auth.route('/totp', methods=['GET', 'POST'])
-@verify_captcha
+@decorators.verify_captcha
+@decorators.check_twofactor
 def totp():
-    if not session.get('in_totp_process', ''):
+    if not session.get('in_twofactor_process', ''):
         abort(404)
 
     user = extensions.db.session.get(models.User, session['user_id'])
     if request.method == 'GET':
         return render_template('twofactor.html', user=user)
-    
-    recovery_token = request.form.get('recovery_token', '').strip()
-    code = request.form.get('code', '').strip()
 
-    # Perform all necessary checks
-    is_valid, message = totp_util.deal_with_it(user, code, recovery_token,)
-    if not is_valid:
-        flash(message, 'error')
-        return redirect(url_for('auth.totp'))
-
-    # Logs the user and performs some other actions
     auth_util.perform_login_actions(user, session['email_address'])
-    
-    # Deletes variables related to the totp process
-    del session['user_id']
-    del session['in_totp_process']
-
-    flash(message)
     return redirect(url_for('views.user_profile', username=user.username))
 
 
 @auth.route('/reset_totp', methods=['GET'])
 def reset_totp():
-    if not session.get('in_totp_process', ''):
+    if not session.get('in_twofactor_process', ''):
         return abort(404)
 
-    del session['in_totp_process']
+    del session['in_twofactor_process']
     del session['user_id']
 
     return redirect(url_for('views.home'))
@@ -91,15 +75,14 @@ def reset_totp():
 @auth.route('/disable_totp', methods=['POST'])
 @login_required
 def disable_totp():
-    totp_util.remove_totp(current_user)
-
+    current_user.purge_totp()
     flash('You removed your two factor authentication!')
-    return redirect(url_for('views.edit_user_settings', username=current_user.username))
+    return redirect(url_for('views.edit_user_settings'))
 
 
 @auth.route('/register', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
+@decorators.unauthenticated_only
+@decorators.verify_captcha
 def register():
     if request.method == 'GET':
         return render_template('register.html')
@@ -134,7 +117,7 @@ def register():
 
 
 @auth.route('/verify', methods=['GET'])
-@unauthenticated_only
+@decorators.unauthenticated_only
 def verify():
     token = request.args.get('token', '')
     if not token:
@@ -172,8 +155,8 @@ def invalidate_sessions():
 
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
-@unauthenticated_only
-@verify_captcha
+@decorators.unauthenticated_only
+@decorators.verify_captcha
 def forgot_password():
     if request.method == 'GET':
         recovery_token = request.args.get('token', '')
@@ -227,7 +210,7 @@ def account_delete():
 
 
 @auth.route('/google_redirect', methods=['GET'])
-@unauthenticated_only
+@decorators.unauthenticated_only
 def google_redirect():
     nonce = g.nonce
     session['nonce'] = nonce
@@ -237,7 +220,7 @@ def google_redirect():
 
 
 @auth.route('/google', methods=['GET'])
-@unauthenticated_only
+@decorators.unauthenticated_only
 def google_callback():
     token = extensions.google.authorize_access_token()
     user_info = extensions.google.parse_id_token(token, nonce=session['nonce'])

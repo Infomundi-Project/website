@@ -98,3 +98,34 @@ def sensitive_area(func):
         return redirect(url_for('views.sensitive'))
 
     return decorated_function
+
+
+def check_twofactor(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if request.method == 'GET':
+            return func(*args, **kwargs)
+
+        user = extensions.db.session.get(models.User, session['user_id'])
+
+        recovery_token = request.form.get('recovery_token', '').strip()
+        password = request.form.get('password', '').strip()
+        code = request.form.get('code', '').strip()
+
+        if user.is_totp_enabled:
+            is_valid = user.check_totp(code, recovery_token)
+        elif user.is_mail_twofactor_enabled:
+            is_valid = user.check_mail_twofactor(code, recovery_token)
+        else:
+            is_valid = user.check_password(password)
+
+        if not is_valid:
+            flash('Invalid credentials!', 'error')
+            return redirect(url_for('views.user_redirect'))
+        
+        if session.get('in_twofactor_process', ''):
+            del session['in_twofactor_process']
+        
+        return func(*args, **kwargs)
+
+    return decorated_function

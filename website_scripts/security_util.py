@@ -6,9 +6,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from .config import ENCRYPTION_KEY
 
 
-def generate_mail_totp() -> str:
+def generate_random_number_sequence(length: int = 6) -> str:
     code = ''
-    for _ in range(6):
+    for _ in range(length):
         code += str(secrets.randbelow(10))
     return code
 

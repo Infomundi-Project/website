@@ -262,34 +262,16 @@ def captcha():
 
 @views.route('/sensitive', methods=['GET', 'POST'])
 @decorators.verify_captcha
+@decorators.check_twofactor
 @login_required
 def sensitive():
     if request.method == 'GET':
-        is_trusted_session = session.get('is_trusted_session', '')
-        if is_trusted_session:
-            flash("We know you are who you say you are, don't worry!")
-            return redirect(url_for('views.user_redirect'))
-
-        return render_template('sensitive.html')
-    
-    recovery_token = request.form.get('recovery_token', '').strip()
-    code = request.form.get('code', '').strip()
-
-    # If user provided the code or recovery token, then we check it. If not, check the password instead
-    if code or recovery_token:
-        is_valid, message = totp_util.deal_with_it(current_user, code, recovery_token, session['key_value'])
-    else:
-        is_valid = current_user.check_password(request.form.get('current_password', ''))
-        message = 'Invalid password!'
-    
-    if not is_valid:
-        flash(message, 'error')
-        return redirect(url_for('views.sensitive'))
+        return abort(404) if session.get('is_trusted_session', '') else render_template('sensitive.html')
 
     session['is_trusted_session'] = request.form.get('trust_session', '') == 'yes'
 
     flash('Thanks for verifying! You are who you say you are after all.')
-    return redirect(url_for('views.edit_user_settings', username=current_user.username))
+    return redirect(url_for('views.edit_user_settings'))
 
 
 @views.route('/upload_image', methods=['POST'])

@@ -1,6 +1,5 @@
-import json, yake
+import json, yake, requests
 from datetime import datetime, timedelta
-from requests import get as get_request
 from difflib import SequenceMatcher
 from unidecode import unidecode
 from bs4 import BeautifulSoup
@@ -114,18 +113,8 @@ def get_nation_data(cca2: str) -> dict:
     """Takes cca2 (country code) and returns a bunch of data about the specified country"""
     config_filepath = f'{config.COUNTRIES_DATA_PATH}/{cca2}'
     
-    # 720 hours = 30 days
-    if not qol_util.is_file_creation_within_threshold_minutes(f'{config_filepath}.json', 720, is_hours=True):
-        data = json_util.read_json(config_filepath)
-    else:
-        URL = f"https://restcountries.com/v3.1/alpha/{cca2.lower()}"
-        r = get_request(URL, timeout=4)
-        if r.status_code == 200:
-            data = json.loads(r.text)
-            json_util.write_json(data, config_filepath)
-        else:
-            data = json_util.read_json(config_filepath)
-    
+    data = json_util.read_json(config_filepath)
+
     for country in config.HDI_DATA:
         if country['cca2'].lower() == cca2.lower():
             country_name = country['country']
@@ -260,7 +249,7 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
     headers = {
         'User-Agent': choice(immutable.USER_AGENTS)
     }
-    response = get_request(url, headers=headers, timeout=4)
+    response = requests.get(url, headers=headers, timeout=4)
 
     if response.status_code != 200:
         return []

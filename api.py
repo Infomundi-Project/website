@@ -157,7 +157,7 @@ def story_reaction(action):
 @api.route('/totp/generate', methods=['GET'])
 @login_required
 def generate_totp():
-    if current_user.totp_secret:
+    if current_user.is_totp_enabled:
         return jsonify({'status': 'Not Allowed'}), 403
 
     session['totp_secret'] = totp_util.generate_totp_secret()
@@ -170,7 +170,7 @@ def generate_totp():
 @api.route('/totp/setup', methods=['GET'])
 @login_required
 def setup_totp():
-    if current_user.totp_secret:
+    if current_user.is_totp_enabled:
         return jsonify({'status': 'Not Allowed'}), 403
 
     code = request.args.get('code', '')
@@ -180,16 +180,9 @@ def setup_totp():
     if not is_valid:
         return jsonify({'valid': False}), 200
 
-    # Generates a super random recovery token
-    totp_recovery_token = security_util.generate_nonce()
-
-    # Saves the TOTP information encrypted in the database
-    current_user.totp_secret = security_util.encrypt(totp_secret)
-    current_user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
-    current_user.is_totp_enabled = True
-    extensions.db.session.commit()
-
-    # There's no need to keep this info in the user's session
+    totp_recovery_token = current_user.setup_totp()
+    
+    # There's no need to keep this info in the user's session anymore
     del session['totp_secret']
 
     return jsonify({'valid': True, 'totp_recovery_token': totp_recovery_token}), 200
@@ -200,7 +193,7 @@ def setup_totp():
 def send_mail_totp_code():
     user = extensions.db.session.get(models.User, session['user_id'])
 
-    code = security_util.generate_mail_totp()
+    code = security_util.generate_random_number_sequence()
     user.mail_twofactor_code = code
     user.mail_twofactor_timestamp = datetime.now()
     extensions.db.session.commit()
@@ -226,6 +219,7 @@ def verify_mail_totp_code():
         qol_util.is_date_within_threshold_minutes(user.mail_twofactor_timestamp, 15)):
         return jsonify(success=False, error="Invalid or expired code"), 400
     
+    # This means the user has just configured mail twofactor via settings
     if not user.is_mail_twofactor_enabled:
         user.is_mail_twofactor_enabled = True
         # Changes totp recovery, and disables TOTP based 2fa

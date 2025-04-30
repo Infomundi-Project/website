@@ -305,7 +305,7 @@
 <div class="input-group mb-3">
     <span class="input-group-text" style="width: 40px;"><i class="fa-solid fa-mobile-screen-button"></i></span>
     <div class="form-floating">
-        <input type="text" class="form-control" id="floatingInputTotp" placeholder="Email" value="You'll receive authentication codes through a 2FA application on your phone" disabled>
+        <input type="text" class="form-control" id="floatingInputTotp" placeholder="Email" value="Receive authentication codes through a 2FA application" disabled>
         <label for="floatingInputTotp">TOTP
         {% if current_user.totp_secret %}
         <span class="ms-2 badge rounded-pill text-bg-success">Active</span>
@@ -327,11 +327,11 @@
 <div class="input-group">
     <span class="input-group-text" style="width: 40px;"><i class="fa-solid fa-envelope-circle-check"></i></span>
     <div class="form-floating">
-        <input type="text" class="form-control" id="floatingInputEmail2fa" placeholder="Email" value="You'll receive authentication codes in your email inbox" disabled>
+        <input type="text" class="form-control" id="floatingInputEmail2fa" placeholder="Email" value="Receive authentication codes in your email inbox" disabled>
         <label for="floatingInputEmail2fa">Email</label>
     </div>
     <span class="input-group-text">
-        {% if current_user.totp_secret %}
+        {% if current_user.is_mail_twofactor_enabled %}
             <button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Disable TOTP-based two factor if you want to setup this" disabled>Setup</button>
         {% else %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#twoFactorModal">Setup</button>

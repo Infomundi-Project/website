@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from flask_login import UserMixin
 
 from .extensions import db
-from . import security_util, hashing_util
+from . import security_util, hashing_util, totp_util, qol_util
 
 
 class Publisher(db.Model):
@@ -159,9 +159,62 @@ class User(db.Model, UserMixin):
 
 
     def purge_totp(self):
+        self.is_totp_enabled = False
         self.totp_secret = None
         self.totp_recovery = None
         db.session.commit()
+
+
+    def setup_totp(self) -> str:
+        totp_recovery_token = security_util.generate_nonce()
+
+        self.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
+        self.totp_secret = security_util.encrypt(totp_secret)
+        self.is_mail_twofactor_enabled = False
+        self.is_totp_enabled = True
+        db.session.commit()
+
+        return totp_recovery_token
+
+
+    def check_totp(self, code: str, recovery_token: str = '') -> bool:
+        if recovery_token:
+            if not hashing_util.argon2_verify_hash(self.totp_recovery, recovery_token):
+                return False
+        
+            self.purge_totp()
+            return True
+
+        return totp_util.verify_totp(security_util.decrypt(self.totp_secret), code)
+
+
+    def setup_mail_twofactor(self):
+        self.purge_totp()  # Removes totp-based two factor
+        self.is_mail_twofactor_enabled = True
+        
+        # Changes totp recovery
+        totp_recovery = security_util.generate_nonce()
+        self.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery)
+        
+        db.session.commit()
+        return totp_recovery
+
+
+    def check_mail_twofactor(self, code: str, recovery_token: str = '') -> bool:
+        if recovery_token:
+            if not hashing_util.argon2_verify_hash(self.totp_recovery, recovery_token):
+                return False
+
+        if (self.mail_twofactor_code != code 
+            or not qol_util.is_date_within_threshold_minutes(self.mail_twofactor_timestamp, 15)
+            ):
+            return False
+
+        self.mail_twofactor_code = None
+        self.mail_twofactor_timestamp = None
+        db.session.commit()
+        return True
+
 
 
     def check_is_online(self):

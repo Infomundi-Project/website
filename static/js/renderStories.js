@@ -611,7 +611,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Card body
     const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body', 'inf-story-card-body', 'px-0');
+    cardBody.classList.add('card-body', 'inf-story-card-body', 'px-1');
     cardBody.innerHTML = `
         <a href="/comments?id=${item.story_id}" class="text-decoration-none text-reset">
           <p class="card-title fw-bold fs-6 line-clamp-3">
@@ -625,7 +625,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Card footer
     const cardFooter = document.createElement('div');
-    cardFooter.classList.add('card-footer', 'px-0', 'inf-story-card-footer',
+    cardFooter.classList.add('card-footer', 'px-1', 'inf-story-card-footer',
       'bg-transparent', 'border', 'border-0');
 
     const rowDiv = document.createElement('div');
