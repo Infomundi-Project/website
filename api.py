@@ -21,6 +21,7 @@ from website_scripts import (
     decorators,
     comments_util,
     notifications,
+    qol_util
 )
 
 api = Blueprint("api", __name__)
@@ -216,7 +217,7 @@ def setup_totp():
 
 @api.route("/2fa/mail/send", methods=["POST"])
 @extensions.limiter.limit("7/day;5/hour;3/minute")
-def send_mail_totp_code():
+def send_mail_twofactor_code():
     user = extensions.db.session.get(models.User, session["user_id"])
 
     code = security_util.generate_random_number_sequence()
@@ -235,30 +236,23 @@ def send_mail_totp_code():
 
 @api.route("/2fa/mail/verify", methods=["POST"])
 @decorators.api_login_required
-def verify_mail_totp_code():
+def verify_mail_twofactor_code():
     data = request.get_json() or {}
-    code = data.get("code")
+    code = data.get('code', '')
+
+    if not code:
+        return jsonify(success=False, error="Missing 'code' attribute"), 400
 
     user = extensions.db.session.get(models.User, session["user_id"])
-
-    if (
-        user.mail_twofactor_code != code
-        or not qol_util.is_date_within_threshold_minutes(
-            user.mail_twofactor_timestamp, 15
-        )
-    ):
+    
+    # We first check if the code is valid
+    if not user.check_mail_twofactor(code):
         return jsonify(success=False, error="Invalid or expired code"), 400
 
     # This means the user has just configured mail twofactor via settings
     if not user.is_mail_twofactor_enabled:
-        user.is_mail_twofactor_enabled = True
-        # Changes totp recovery, and disables TOTP based 2fa
-        totp_recovery = security_util.generate_nonce()
-        user.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery)
-        user.totp_secret = None
-        user.is_totp_enabled = False
-        extensions.db.session.commit()
-        return jsonify(success=True, recovery_token=totp_recovery), 200
+        recovery_token = user.setup_mail_twofactor()
+        return jsonify(success=True, recovery_token=recovery_token), 200
 
     return jsonify(success=True), 200
 

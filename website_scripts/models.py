@@ -190,7 +190,7 @@ class User(db.Model, UserMixin):
 
         return totp_util.verify_totp(security_util.decrypt(self.totp_secret), code)
 
-    def setup_mail_twofactor(self):
+    def setup_mail_twofactor(self) -> str:
         self.purge_totp()  # Removes totp-based two factor
         self.is_mail_twofactor_enabled = True
 
@@ -207,7 +207,7 @@ class User(db.Model, UserMixin):
                 return False
 
         if (
-            self.mail_twofactor_code != code
+            str(self.mail_twofactor_code) != code
             or not qol_util.is_date_within_threshold_minutes(
                 self.mail_twofactor_timestamp, 15
             )
