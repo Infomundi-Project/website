@@ -3,9 +3,7 @@ from flask_login import current_user
 from datetime import datetime
 from functools import wraps
 
-from .qol_util import is_date_within_threshold_minutes
-from .cloudflare_util import is_valid_captcha
-from .config import CAPTCHA_CLEARANCE_HOURS
+from . import extensions, qol_util, cloudflare_util, config, models
 
 
 def admin_required(func):
@@ -63,8 +61,8 @@ def captcha_required(func):
         clearance = session.get("clearance", "")
         if clearance:
             timestamp = datetime.fromisoformat(clearance)
-            if is_date_within_threshold_minutes(
-                timestamp, CAPTCHA_CLEARANCE_HOURS, is_hours=True
+            if qol_util.is_date_within_threshold_minutes(
+                timestamp, config.CAPTCHA_CLEARANCE_HOURS, is_hours=True
             ):
                 return func(*args, **kwargs)
 
@@ -81,7 +79,7 @@ def verify_captcha(func):
     def decorated_function(*args, **kwargs):
         if request.method == "POST":
             token = request.form.get("cf-turnstile-response", "")
-            if not is_valid_captcha(token):
+            if not cloudflare_util.is_valid_captcha(token):
                 flash("Invalid captcha. Are you a robot?", "error")
                 return redirect(request.url)
 
@@ -108,28 +106,28 @@ def sensitive_area(func):
 def check_twofactor(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if request.method == "GET":
-            return func(*args, **kwargs)
+        if request.method == "POST":
+            user = extensions.db.session.get(models.User, session["user_id"])
 
-        user = extensions.db.session.get(models.User, session["user_id"])
+            recovery_token = request.form.get("recovery_token", "").strip()
+            password = request.form.get("password", "").strip()
+            code = request.form.get("code", "").strip()
 
-        recovery_token = request.form.get("recovery_token", "").strip()
-        password = request.form.get("password", "").strip()
-        code = request.form.get("code", "").strip()
+            if user.is_totp_enabled:
+                is_valid = user.check_totp(code, recovery_token)
+            elif user.is_mail_twofactor_enabled:
+                is_valid = user.check_mail_twofactor(code, recovery_token)
+            else:
+                is_valid = user.check_password(password)
 
-        if user.is_totp_enabled:
-            is_valid = user.check_totp(code, recovery_token)
-        elif user.is_mail_twofactor_enabled:
-            is_valid = user.check_mail_twofactor(code, recovery_token)
-        else:
-            is_valid = user.check_password(password)
+            if not is_valid:
+                flash("Invalid credentials!", "error")
+                return redirect(request.url)
 
-        if not is_valid:
-            flash("Invalid credentials!", "error")
-            return redirect(url_for("views.user_redirect"))
+            if session.get("in_twofactor_process", ""):
+                del session["in_twofactor_process"]
 
-        if session.get("in_twofactor_process", ""):
-            del session["in_twofactor_process"]
+            session['is_valid_twofactor'] = True
 
         return func(*args, **kwargs)
 

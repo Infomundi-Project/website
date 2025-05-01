@@ -59,6 +59,7 @@ def login():
     # If user has totp enabled, we redirect them to the totp page without effectively performing log in actions
     if user.is_totp_enabled or user.is_mail_twofactor_enabled:
         session["email_address"] = email
+        session['username'] = user.username
         session["user_id"] = user.id
         session["in_twofactor_process"] = True
         return redirect(url_for("auth.totp"))
@@ -72,15 +73,15 @@ def login():
 @decorators.verify_captcha
 @decorators.check_twofactor
 def totp():
-    if not session.get("in_twofactor_process", ""):
-        abort(404)
-
     user = extensions.db.session.get(models.User, session["user_id"])
-    if request.method == "GET":
-        return render_template("twofactor.html", user=user)
+    
+    if session.get("is_valid_twofactor", ""):
+        auth_util.perform_login_actions(user, session["email_address"])
+        del session['is_valid_twofactor']
+        return redirect(url_for("views.user_profile", username=user.username))
 
-    auth_util.perform_login_actions(user, session["email_address"])
-    return redirect(url_for("views.user_profile", username=user.username))
+    if request.method == 'GET':
+        return render_template('twofactor.html', user=user)
 
 
 @auth.route("/reset_totp", methods=["GET"])

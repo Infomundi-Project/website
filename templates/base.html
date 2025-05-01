@@ -1116,13 +1116,7 @@
 
 
   <script nonce="{{ nonce }}">
-    window.isUserAuthenticated = {
-      {
-        'true'
-        if current_user.is_authenticated
-        else 'false'
-      }
-    };
+    window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
     window.currentUserAvatarUrl =
       "{{ current_user.avatar_url if current_user.is_authenticated else 'https://infomundi.net/static/img/avatar.webp' }}";
   </script>
