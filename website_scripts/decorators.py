@@ -127,7 +127,7 @@ def check_twofactor(func):
             if session.get("in_twofactor_process", ""):
                 del session["in_twofactor_process"]
 
-            session['is_valid_twofactor'] = True
+            session["is_valid_twofactor"] = True
 
         return func(*args, **kwargs)
 

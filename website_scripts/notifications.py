@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from smtplib import SMTP
 
-from . import config
+from . import config, extensions, models
 
 
 def post_webhook(data: dict) -> bool:
@@ -28,6 +28,16 @@ def post_webhook(data: dict) -> bool:
         return False
 
     return True
+
+
+def notify(user, notif_type: str, message: str, url: str = None, **fk_kwargs):
+    """Create and commit a Notification for a user."""
+    n = models.Notification(
+        user_id=user.id, type=notif_type, message=message, url=url, **fk_kwargs
+    )
+    extensions.db.session.add(n)
+    extensions.db.session.commit()
+    return n
 
 
 def send_email(

@@ -60,11 +60,14 @@ def admin():
 @login_required
 def handle_friends(friend_id, action):
     if action == "add":
-        if friends_util.send_friend_request(current_user.id, friend_id):
-            flash("Friend request sent")
-        else:
-            flash("Something went wrong", "error")
-
+        new_friendship = friends_util.send_friend_request(current_user.id, friend_id)
+        notifications.notify(
+            user=friend_id,
+            notif_type="friend_request",
+            message=f"{current_user.username} sent you a friend request",
+            friendship_id=new_friendship.id,
+        )
+        flash("Friend request sent")
         return redirect(url_for("views.user_redirect"))
 
     elif action == "accept":
@@ -132,11 +135,11 @@ def user_profile(username):
         pending_friend_request_sent_by_current_user = False
 
     seo_title = f"Infomundi - {user.display_name if user.display_name else user.username}'s profile"
-    seo_description = f"{user.profile_description if user.profile_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
+    seo_description = f"{short_description if short_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
     is_profile_owner = current_user.is_authenticated and (current_user.id == user.id)
-    user_public_id = security_util.uuid_bytes_to_string(user.public_id)
+    user_public_id = user.get_public_id()
     return render_template(
         "user_profile.html",
         pending_requests=(

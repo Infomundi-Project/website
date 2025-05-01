@@ -21,7 +21,7 @@ from website_scripts import (
     decorators,
     comments_util,
     notifications,
-    qol_util
+    qol_util,
 )
 
 api = Blueprint("api", __name__)
@@ -238,13 +238,13 @@ def send_mail_twofactor_code():
 @decorators.api_login_required
 def verify_mail_twofactor_code():
     data = request.get_json() or {}
-    code = data.get('code', '')
+    code = data.get("code", "")
 
     if not code:
         return jsonify(success=False, error="Missing 'code' attribute"), 400
 
     user = extensions.db.session.get(models.User, session["user_id"])
-    
+
     # We first check if the code is valid
     if not user.check_mail_twofactor(code):
         return jsonify(success=False, error="Invalid or expired code"), 400

@@ -219,6 +219,39 @@ CREATE TABLE comment_reactions (
 );
 
 
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- which user will receive this notification
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    
+    -- type of notification (e.g. comment_reply, friend_request, etc.)
+    type VARCHAR(30) NOT NULL,
+    
+    comment_id INT,
+    FOREIGN KEY (comment_id)
+        REFERENCES comments(id),
+    
+    friendship_id INT,
+    FOREIGN KEY (friendship_id)
+        REFERENCES friendships(id),
+    
+    message VARCHAR(100) NOT NULL,
+    url VARCHAR(512),
+
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index to speed up querying unread notifications per user
+CREATE INDEX idx_notifications_user_unread
+    ON notifications(user_id, is_read);
+
+
 CREATE TABLE stocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     country_name VARCHAR(40) NOT NULL,

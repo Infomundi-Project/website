@@ -1,14 +1,52 @@
+from sqlalchemy.exc import IntegrityError
+
 from . import extensions, models
 
 
-def send_friend_request(user_id: int, friend_id: int):
+def send_friend_request(user_id: int, friend_id: int) -> int:
+    """Sends a friendship request and returns the friendship id from the database."""
+    # 1. Prevent friending yourself
+    if user_id == friend_id:
+        raise ValueError("You can’t send a friend request to yourself.")
+
+    # 2. Check for an existing friendship record (pending or accepted), in either direction
+    existing = models.Friendship.query.filter(
+        or_(
+            and_(
+                models.Friendship.user_id == user_id,
+                models.Friendship.friend_id == friend_id,
+            ),
+            and_(
+                models.Friendship.user_id == friend_id,
+                models.Friendship.friend_id == user_id,
+            ),
+        )
+    ).first()
+
+    if existing:
+        if existing.status == "pending":
+            # You’ve already got a pending request
+            return existing.id
+        if existing.status == "accepted":
+            # You’re already friends!
+            return existing.id
+
+    # 3. Otherwise, create a new pending request
     friendship = models.Friendship(
         user_id=user_id, friend_id=friend_id, status="pending"
     )
     extensions.db.session.add(friendship)
-    extensions.db.session.commit()
+    try:
+        extensions.db.session.commit()
+    except IntegrityError:
+        extensions.db.session.rollback()
+        # This could happen under concurrency as we have a unique constraint.
+        existing = models.Friendship.query.filter_by(
+            user_id=user_id, friend_id=friend_id
+        ).first()
+        return existing.id
 
-    return True
+    return friendship.id
 
 
 def accept_friend_request(user_id: int, friend_id: int) -> bool:
@@ -52,10 +90,7 @@ def reject_all_pending_requests(user_id: int) -> bool:
     pending_requests = models.Friendship.query.filter_by(
         friend_id=user_id, status="pending"
     ).all()
-    if not pending_requests:
-        return False
 
-    # Delete each pending request
     for request in pending_requests:
         extensions.db.session.delete(request)
 

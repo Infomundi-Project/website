@@ -206,11 +206,10 @@ class User(db.Model, UserMixin):
             if not hashing_util.argon2_verify_hash(self.totp_recovery, recovery_token):
                 return False
 
-        if (
-            str(self.mail_twofactor_code) != code
-            or not qol_util.is_date_within_threshold_minutes(
-                self.mail_twofactor_timestamp, 15
-            )
+        if str(
+            self.mail_twofactor_code
+        ) != code or not qol_util.is_date_within_threshold_minutes(
+            self.mail_twofactor_timestamp, 15
         ):
             return False
 
@@ -231,10 +230,10 @@ class User(db.Model, UserMixin):
 
 class Friendship(db.Model):
     __tablename__ = "friendships"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    # Statuses are 'pending', 'accepted', 'rejected'.
+    # 'pending', 'accepted', 'rejected'
     status = db.Column(db.String(10), nullable=False, default="pending")
     accepted_at = db.Column(db.DateTime)
 
@@ -274,7 +273,6 @@ class SiteStatistics(db.Model):
 
 class Comment(db.Model):
     __tablename__ = "comments"
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Unique page identifier (MD5)
@@ -355,6 +353,34 @@ class Crypto(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     data = db.Column(db.JSON, nullable=False)
+
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Which user will receive this notification
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    user = db.relationship("User", backref=db.backref("notifications", lazy="dynamic"))
+
+    # A simple enum or string to categorize
+    type = db.Column(db.String(30), nullable=False)
+    # e.g. "comment_reply", "friend_request", "friend_accepted", etc.
+
+    # Optional foreign keys to domain objects
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id"), nullable=True)
+    friendship_id = db.Column(
+        db.Integer, db.ForeignKey("friendships.id"), nullable=True
+    )
+
+    # Friendly message or metadata
+    message = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(512), nullable=True)  # link to view the item
+
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 class Region(db.Model):
