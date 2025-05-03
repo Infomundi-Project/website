@@ -100,7 +100,7 @@
     const repliesContainerId = `replies-${comment.id}`;
     const editedTag = comment.is_edited ? `
                         <span
-                        class="d-inline-block text-muted ms-2 fst-italic small timeago"
+                        class="d-inline-block edited-tag text-muted ms-2 fst-italic small timeago"
                         data-timestamp="${comment.updated_at}Z"
                         title="${new Date(comment.updated_at + 'Z').toLocaleString()}">
                         (edited – ${preciseTimeAgo(comment.updated_at)})
@@ -273,26 +273,19 @@
   }
   async function handleCommentSubmit(e) {
   e.preventDefault();
-  const form         = e.currentTarget;
-  const textarea     = form.querySelector('#commentText');
-  const parentInput  = form.querySelector('#parentId');
-  const submitBtn    = form.querySelector('button[type="submit"]');
+  const form     = e.currentTarget;
+  const textarea = form.querySelector('#commentText');
+  const parentId = form.querySelector('#parentId').value || null;
+  const submitBtn = form.querySelector('button[type="submit"]');
   const originalHTML = submitBtn.innerHTML;
-
-  const content   = textarea.value.trim();
-  const parent_id = parentInput.value || null;
+  const content = textarea.value.trim();
   if (!content) return;
 
-  // 1️⃣ Show spinner & disable
   submitBtn.disabled = true;
   submitBtn.innerHTML = `
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Posting...
   `;
-
-  const csrfToken = document
-    .querySelector('meta[name="csrf-token"]')
-    .getAttribute('content');
 
   try {
     const res = await fetch('/api/comments', {
@@ -301,25 +294,33 @@
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       },
-      body: JSON.stringify({ content, parent_id, page_id })
+      body: JSON.stringify({ content, parent_id: parentId, page_id })
     });
 
     if (res.ok) {
       textarea.value = '';
-      parentInput.value = '';
+      form.querySelector('#parentId').value = '';
       await loadComments(true);
+      showSuccessToast('Comment posted! 🎉');
     } else {
-      // you could show an error toast here
       console.error('Failed to post comment', await res.text());
+      showErrorToast(
+        'Failed to post comment — tap to retry.',
+        () => handleCommentSubmit(e)
+      );
     }
   } catch (err) {
     console.error('Network error:', err);
+    showErrorToast(
+      'Network error — tap to retry.',
+      () => handleCommentSubmit(e)
+    );
   } finally {
-    // 4️⃣ Restore button
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalHTML;
   }
 }
+
 
   async function likeComment(id) {
     // 1) Hit the API
@@ -484,6 +485,11 @@
       el.parentNode.insertBefore(wrapper, el);
 
       wrapper.innerHTML = `
+      <div id="infCommentsToastContainer"
+           class="position-fixed bottom-0 end-0 p-3"
+           style="z-index: 1050;">
+      </div>
+
       <h3 class="mb-4">
         Comments
         <span class="ms-1 badge text-bg-secondary" id="infomundiCommentsCount">0</span>
@@ -744,3 +750,61 @@
 
   // Update every 60 seconds
   setInterval(updateTimeagoLabels, 60 * 1000);
+
+
+
+  /**
+ * Generic Bootstrap toast generator.
+ * @param {'success'|'danger'} type
+ * @param {string} message
+ * @param {Function=} retryCallback  optional, called if user taps the “Retry” button
+ */
+function showToast(type, message, retryCallback) {
+  const container = document.getElementById('infCommentsToastContainer');
+  const toastEl = document.createElement('div');
+  toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
+  toastEl.setAttribute('role', 'alert');
+  toastEl.setAttribute('aria-live', 'assertive');
+  toastEl.setAttribute('aria-atomic', 'true');
+
+  // build inner HTML
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body" style="cursor: ${retryCallback ? 'pointer' : 'auto'};">
+        ${message}
+      </div>
+      ${retryCallback
+        ? `<button type="button" class="btn btn-sm me-2 retry-btn">Retry</button>`
+        : ''}
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  `;
+
+  // append & show
+  container.appendChild(toastEl);
+  const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+  
+  // wire retry
+  if (retryCallback) {
+    toastEl.querySelector('.retry-btn')
+      .addEventListener('click', () => {
+        retryCallback();
+        toast.hide();
+      });
+  }
+
+  toast.show();
+  toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+}
+
+function showSuccessToast(msg) {
+  showToast('success', msg);
+}
+
+function showErrorToast(msg, retryCallback) {
+  showToast('danger', msg, retryCallback);
+}

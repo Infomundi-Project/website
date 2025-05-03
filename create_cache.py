@@ -1,11 +1,14 @@
+import feedparser
 import threading
 import logging
 import pymysql
+import requests
 
-from requests import get as get_request
+from collections import defaultdict
 from random import shuffle, choice
+from urllib.parse import urljoin
 from datetime import datetime
-from feedparser import parse
+from bs4 import BeautifulSoup
 
 from website_scripts import config, input_sanitization, immutable, hashing_util
 
@@ -91,40 +94,38 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
     Appends the fetched and processed news items to the result_list.
     """
-    rss_url = publisher["url"]
-    if not input_sanitization.is_valid_url(rss_url):
-        log_message(f"Invalid url: {rss_url}")
+    publisher_url = publisher.get("feed_url") or publisher.get("site_url")
+    if not input_sanitization.is_valid_url(publisher_url):
+        log_message(f"Invalid url: {publisher_url}")
         return {}
 
     # Removes the ending slash if it ends with one
-    if rss_url.endswith("/"):
-        rss_url = rss_url[:-1]
-
-    headers = {"User-Agent": choice(immutable.USER_AGENTS), "Referer": "www.google.com"}
+    if publisher_url.endswith("/"):
+        publisher_url = publisher_url[:-1]
 
     invalid_feed = False
     try:
-        response = get_request(rss_url, timeout=5, headers=headers)
+        response = requests.get(
+            publisher_url,
+            timeout=5,
+            headers={
+                "User-Agent": choice(immutable.USER_AGENTS),
+                "Referer": "www.google.com",
+            },
+        )
 
-        feed = parse(response.content)
-    except Exception:
+        feed = feedparser.parse(response.content)
+    except Exception as e:
+        log_message(f"Exception: {e}")
         invalid_feed = True
 
     # Tries to find the RSS feed endpoint
     if invalid_feed:
-        for _ in range(3):
-            possibility = choice(immutable.RSS_ENDPOINTS)
-            log_message(f"Trying {possibility} against {rss_url}")
+        feed = find_rss_feed(publisher_url)
 
-            try:
-                response = get_request(
-                    rss_url + possibility, timeout=5, headers=headers
-                )
-
-                feed = parse(response.content)
-                break
-            except Exception:
-                continue
+    if not feed:
+        log_message(f"Could not find feed for {publisher_url}, skipping...")
+        return {}
 
     try:
         data = {
@@ -136,15 +137,21 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
         for story in feed.entries:
             # Sanitizes input
             story_title = input_sanitization.sanitize_html(
-                input_sanitization.decode_html_entities(
-                    story.get("title", "No title was provided").strip()
-                )
+                input_sanitization.decode_html_entities(story.get("title"))
             )
             story_description = input_sanitization.sanitize_html(
                 input_sanitization.decode_html_entities(
-                    story.get("description", "No description was provided").strip()
+                    story.get("description") or story.get("summary")
                 )
             )
+
+            story_author = input_sanitization.sanitize_html(
+                input_sanitization.decode_html_entities(story.get("author"))
+            )
+
+            if not story_title:
+                log_message(f"No story title was identified, skipping")
+                continue
 
             # Gentle cuts text
             story_title = input_sanitization.gentle_cut_text(250, story_title)
@@ -152,18 +159,19 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 500, story_description
             )
 
+            story_categories = [tag.term for tag in story.get("tags", [])]
+
             # Checks to see if the url is valid
-            story_url = story.link.strip()
+            story_url = story.get("link")
             if not input_sanitization.is_valid_url(story_url) or len(story_url) > 512:
                 log_message(f"Story link ({story_url}) is not valid. Skipping.")
                 continue
 
-            if story.has_key("published_parsed"):
-                pubdate = story.published_parsed
-            elif story.has_key("published"):
-                pubdate = story.published
-            else:
-                pubdate = story.updated
+            pubdate = (
+                story.get("published_parsed")
+                or story.get("published")
+                or story.get("updated")
+            )
 
             # Tries to format pubdate
             story_pubdate = format_date(pubdate).get(
@@ -172,6 +180,8 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
             new_story = {
                 "story_title": story_title,
+                "story_categories": story_categories,
+                "story_author": story_author,
                 "story_description": story_description,
                 "story_pubdate": story_pubdate,
                 "story_url_hash": hashing_util.string_to_md5_binary(story_url),
@@ -182,9 +192,10 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             data["items"].append(new_story)
 
     except Exception as err:
-        log_message(f"Exception getting {rss_url} ({news_filter}) // {err}")
+        log_message(f"Exception getting {publisher_url} ({news_filter}) // {err}")
         data = {}
 
+    log_message(f"Successfully processed feed for {publisher.name}!")
     result_list.append(data)
 
 
@@ -209,6 +220,73 @@ def format_date(date) -> dict:
         return {"error": "Invalid date format"}
 
     return {"datetime": date.strftime("%Y-%m-%d %H:%M:%S")}
+
+
+def find_rss_feed(base_url, candidates=None, timeout=5):
+    """
+    Attempts to discover a valid RSS/Atom feed for the given base URL by
+    1) Crawling <link> tags in the HTML head for feeds.
+    2) Testing a list of common feed endpoint paths.
+
+    Args:
+        base_url (str): The news website's base URL (e.g., https://example.com).
+        candidates (list): Optional list of feed endpoint paths to try.
+        timeout (int): Request timeout in seconds.
+
+    Returns:
+        str or None: The full URL to a discovered feed, or None if none found.
+    """
+    discovered = []
+    # 1) Crawl HTML for <link rel="alternate"> tags
+    try:
+        resp = requests.get(base_url, timeout=timeout)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for link in soup.find_all(
+                "link", rel=lambda x: x and "alternate" in x.lower()
+            ):
+                t = link.get("type", "").lower()
+                if "rss" in t or "atom" in t or "xml" in t:
+                    href = link.get("href")
+                    if href:
+                        full = urljoin(base_url, href)
+                        discovered.append(full)
+    except requests.RequestException:
+        pass
+
+    # 2) Fallback: common endpoints
+    if candidates is None:
+        candidates = [
+            "/rss",
+            "/rss.xml",
+            "/feed",
+            "/feed.xml",
+            "/atom.xml",
+            "/index.rdf",
+        ]
+
+    # Prepend discovered feeds so they get tested first
+    endpoints = discovered + candidates
+
+    # Test each endpoint
+    for endpoint in endpoints:
+        # If endpoint looks like full URL, use it; else join with base
+        feed_url = (
+            endpoint
+            if (endpoint.startswith("http") or endpoint.startswith("https"))
+            else urljoin(base_url, endpoint)
+        )
+        try:
+            resp = requests.get(feed_url, timeout=timeout)
+            ct = resp.headers.get("Content-Type", "")
+            if resp.status_code == 200 and "xml" in ct:
+                parsed = feedparser.parse(resp.content)
+                if parsed.bozo == 0 and parsed.entries:
+                    return feed_url
+        except requests.RequestException:
+            continue
+
+    return None
 
 
 def fetch_categories_from_database():
@@ -237,7 +315,7 @@ def fetch_publishers_from_database(category_id: int):
     try:
         with db_connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, name, url FROM publishers WHERE category_id = %s",
+                "SELECT * FROM publishers WHERE category_id = %s",
                 (category_id,),
             )
             publishers = cursor.fetchall()

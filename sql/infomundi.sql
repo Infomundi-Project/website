@@ -103,7 +103,8 @@ CREATE TABLE publishers (
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(200) NOT NULL,
-    url VARCHAR(200) NOT NULL,
+    feed_url VARCHAR(200),
+    site_url VARCHAR(200),
     
     favicon_url VARCHAR(100),
 
@@ -119,6 +120,7 @@ CREATE TABLE stories (
     description VARCHAR(500) NOT NULL DEFAULT 'No description was provided.',
     gpt_summary JSON,
     lang VARCHAR(2) NOT NULL DEFAULT 'en',
+    author VARCHAR(150),
     
     url VARCHAR(512) NOT NULL,
     

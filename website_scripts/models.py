@@ -10,9 +10,10 @@ class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
 
-    url = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(150), nullable=False)
+    feed_url = db.Column(db.String(200))
+    site_url = db.Column(db.String(200))
 
-    name = db.Column(db.String(120), nullable=False)
     favicon_url = db.Column(db.String(100), nullable=True)
 
 
@@ -25,7 +26,9 @@ class Category(db.Model):
 class Tag(db.Model):
     __tablename__ = "tags"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
     tag = db.Column(db.String(30), nullable=False)
 
     __table_args__ = (
@@ -45,7 +48,8 @@ class Story(db.Model):
     description = db.Column(
         db.String(500), nullable=False, default="No description was provided."
     )
-    lang = db.Column(db.String(2), nullable=False, default='en')
+    lang = db.Column(db.String(2), nullable=False, default="en")
+    author = db.Column(db.String(150))
     gpt_summary = db.Column(db.JSON)
 
     url = db.Column(db.String(512), nullable=False)

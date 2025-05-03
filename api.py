@@ -609,7 +609,7 @@ def edit_comment(comment_id):
     comment.is_flagged = comments_util.is_content_inappropriate(content)
     comment.is_edited = True
     extensions.db.session.commit()
-    return jsonify({"message": "Comment updated"})
+    return jsonify(content=comment.content, updated_at=comment.updated_at.isoformat())
 
 
 @api.route("/comments/<int:comment_id>", methods=["DELETE"])
