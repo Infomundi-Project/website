@@ -86,8 +86,15 @@ CREATE TABLE categories (
 
 
 CREATE TABLE tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tag VARCHAR(30) UNIQUE NOT NULL
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  story_id INT NOT NULL,
+  tag VARCHAR(30) NOT NULL,
+  UNIQUE KEY uq_story_tag (story_id,tag),
+  KEY idx_tags_story (story_id),
+  CONSTRAINT fk_tags_story
+    FOREIGN KEY (story_id)
+    REFERENCES stories (id)
+    ON DELETE CASCADE
 );
 
 
@@ -108,9 +115,10 @@ CREATE TABLE publishers (
 CREATE TABLE stories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
-    title VARCHAR(150) NOT NULL,
-    description VARCHAR(500) NOT NULL DEFAULT 'No description has been provided.',
+    title VARCHAR(250) NOT NULL,
+    description VARCHAR(500) NOT NULL DEFAULT 'No description was provided.',
     gpt_summary JSON,
+    lang VARCHAR(2) NOT NULL DEFAULT 'en',
     
     url VARCHAR(512) NOT NULL,
     

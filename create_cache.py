@@ -147,7 +147,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             )
 
             # Gentle cuts text
-            story_title = input_sanitization.gentle_cut_text(120, story_title)
+            story_title = input_sanitization.gentle_cut_text(250, story_title)
             story_description = input_sanitization.gentle_cut_text(
                 500, story_description
             )

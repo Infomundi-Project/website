@@ -8,7 +8,7 @@ from random import choice
 from . import config, json_util, immutable, models, extensions, qol_util
 
 
-@extensions.cache.memoize(timeout=60 * 60 * 8)  # 8 hours
+@extensions.cache.memoize(timeout=60 * 60 * 1)  # 1 hour
 def home_processing() -> dict:
     """This function processes data for the home endpoint and caches it to speed up performance"""
     statistics = get_statistics()

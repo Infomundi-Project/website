@@ -24,18 +24,28 @@ class Category(db.Model):
 
 class Tag(db.Model):
     __tablename__ = "tags"
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    tag = db.Column(db.String(30), nullable=False, unique=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    tag = db.Column(db.String(30), nullable=False)
+
+    __table_args__ = (
+        # ensure we don’t get duplicate tags on the same story
+        db.UniqueConstraint("story_id", "tag", name="uq_story_tag"),
+    )
+
+    # back-ref for convenience
+    story = db.relationship("Story", back_populates="tags")
 
 
 class Story(db.Model):
     __tablename__ = "stories"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    title = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(250), nullable=False)
     description = db.Column(
-        db.String(500), nullable=False, default="No description has been provided."
+        db.String(500), nullable=False, default="No description was provided."
     )
+    lang = db.Column(db.String(2), nullable=False, default='en')
     gpt_summary = db.Column(db.JSON)
 
     url = db.Column(db.String(512), nullable=False)
@@ -48,6 +58,14 @@ class Story(db.Model):
 
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
     publisher_id = db.Column(db.Integer, db.ForeignKey("publishers.id"), nullable=False)
+
+    # pull in all tags that reference this story
+    tags = db.relationship(
+        "Tag",
+        back_populates="story",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
 
     # Relationships
     reactions = db.relationship("StoryReaction", backref="story", lazy=True)

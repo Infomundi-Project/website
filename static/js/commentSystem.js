@@ -272,36 +272,55 @@
     initializeTooltips();
   }
   async function handleCommentSubmit(e) {
-    e.preventDefault();
-  const form       = e.currentTarget;
-  const textarea   = form.querySelector('#commentText');
-  const parentInput= form.querySelector('#parentId');
-  const content    = textarea.value.trim();
-  const parent_id  = parentInput.value || null;
+  e.preventDefault();
+  const form         = e.currentTarget;
+  const textarea     = form.querySelector('#commentText');
+  const parentInput  = form.querySelector('#parentId');
+  const submitBtn    = form.querySelector('button[type="submit"]');
+  const originalHTML = submitBtn.innerHTML;
+
+  const content   = textarea.value.trim();
+  const parent_id = parentInput.value || null;
   if (!content) return;
 
-    const csrfToken = document
+  // 1️⃣ Show spinner & disable
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Posting...
+  `;
+
+  const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute('content');
-    
+
+  try {
     const res = await fetch('/api/comments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       },
-      body: JSON.stringify({
-        content,
-        parent_id,
-        page_id
-      })
+      body: JSON.stringify({ content, parent_id, page_id })
     });
+
     if (res.ok) {
       textarea.value = '';
       parentInput.value = '';
       await loadComments(true);
+    } else {
+      // you could show an error toast here
+      console.error('Failed to post comment', await res.text());
     }
+  } catch (err) {
+    console.error('Network error:', err);
+  } finally {
+    // 4️⃣ Restore button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalHTML;
   }
+}
+
   async function likeComment(id) {
     // 1) Hit the API
     const res = await fetch(`/api/comments/${id}/like`, {
@@ -677,23 +696,38 @@
 
     // submit -> POST & reload
     form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const content = textarea.value.trim();
-      if (!content) return;
-      await fetch('/api/comments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-          content,
-          parent_id: parentId,
-          page_id
-        })
-      });
-      await loadComments(true);
+  e.preventDefault();
+  const replyBtn    = form.querySelector('button[type="submit"]');
+  const original   = replyBtn.innerHTML;
+  const content    = textarea.value.trim();
+  if (!content) return;
+
+  // Show spinner
+  replyBtn.disabled = true;
+  replyBtn.innerHTML = `
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Replying...
+  `;
+
+  try {
+    await fetch('/api/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({ content, parent_id: parentId, page_id })
     });
+    await loadComments(true);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    // Restore
+    replyBtn.disabled = false;
+    replyBtn.innerHTML = original;
+  }
+});
+
 
     // cancel -> just clear
     cancel.addEventListener('click', () => container.innerHTML = '');

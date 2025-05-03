@@ -35,19 +35,20 @@ def get_statistics() -> dict:
             cursor.execute("SELECT COUNT(*) FROM categories")
             total_countries_supported = cursor.fetchone()["COUNT(*)"]
 
-            cursor.execute("SELECT COUNT(*) FROM feeds")
+            cursor.execute("SELECT COUNT(*) FROM publishers")
             total_feeds = cursor.fetchone()["COUNT(*)"]
 
             cursor.execute("SELECT COUNT(*) FROM stories")
             total_news = cursor.fetchone()["COUNT(*)"]
 
-            cursor.execute("SELECT SUM(clicks) FROM stories")
-            total_clicks = cursor.fetchone()["SUM(clicks)"] or 0
+            cursor.execute("SELECT SUM(views) FROM story_stats")
+            total_clicks = cursor.fetchone()["SUM(views)"] or 0
 
             cursor.execute("SELECT COUNT(*) FROM users")
             total_users = cursor.fetchone()["COUNT(*)"]
 
-            total_comments = 32  # DEBUG placeholder
+            cursor.execute("SELECT COUNT(*) FROM comments")
+            total_comments = cursor.fetchone()["COUNT(*)"]
 
             # Calculate last updated message
             if saved_timestamp:
@@ -61,7 +62,7 @@ def get_statistics() -> dict:
                 else:
                     last_updated_message = f"{hours} hours ago"
             else:
-                last_updated_message = "N/A"
+                last_updated_message = "Now"
 
             # Insert or update statistics in the database
             if statistics:
@@ -73,7 +74,7 @@ def get_statistics() -> dict:
                     """,
                     (
                         total_countries_supported,
-                        f"{total_news:,}",
+                        total_news,
                         total_feeds,
                         total_users,
                         total_comments,
@@ -91,7 +92,7 @@ def get_statistics() -> dict:
                     """,
                     (
                         total_countries_supported,
-                        f"{total_news:,}",
+                        total_news,
                         total_feeds,
                         total_users,
                         total_comments,

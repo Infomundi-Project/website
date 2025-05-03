@@ -26,9 +26,6 @@
   transition: border-color 0.3s;
 }
 
-
-
-
 /* wrap comment content in this, then blur it */
 .comment-content-wrapper.flagged-blur {
   filter: blur(6px);
