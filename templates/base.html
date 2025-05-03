@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html
-  lang="{% if request.endpoint == 'views.comments' %}{{ page_language }}{% else %}en{% endif %}"
+  lang="{% if request.endpoint == 'views.comments' %}{{ story.lang }}{% else %}en{% endif %}"
   data-bs-theme="{% if not is_light_mode %}dark{% else %}light{% endif %}">
 
 <head>

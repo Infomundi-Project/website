@@ -505,7 +505,7 @@ def get_stories():
             "pub_date": story.pub_date,
             "publisher": {
                 "name": input_sanitization.clean_publisher_name(story.publisher.name),
-                "url": story.publisher.url,
+                "url": story.publisher.site_url,
                 "favicon_url": story.publisher.favicon_url,
             },
             "image_url": story.image_url,
@@ -521,7 +521,9 @@ def create_comment():
     data = request.get_json()
     parent_id = data.get("parent_id")
     page_id = data.get("page_id")  # A string that uniquely identifies the page
-    content = data.get("content")
+    content = content = input_sanitization.gentle_cut_text(
+        1000, input_sanitization.sanitize_html(data.get("content"))
+    )
 
     if not page_id or not content:
         return jsonify({"error": "Missing page_id or content"}), 400
@@ -533,7 +535,7 @@ def create_comment():
             if current_user.is_authenticated
             else comments_util.get_anonymous_user().id
         ),
-        content=input_sanitization.sanitize_html(content),
+        content=content,
         is_flagged=comments_util.is_content_inappropriate(content),
         parent_id=parent_id,
     )
@@ -600,12 +602,14 @@ def edit_comment(comment_id):
         return jsonify({"error": "Unauthorized"}), 403
 
     data = request.get_json()
-    content = data.get("content", "").strip()
+    content = input_sanitization.gentle_cut_text(
+        1000, input_sanitization.sanitize_html(data.get("content"))
+    )
 
     if not content:
         return jsonify({"error": "Empty content"}), 400
 
-    comment.content = input_sanitization.sanitize_html(content)
+    comment.content = content
     comment.is_flagged = comments_util.is_content_inappropriate(content)
     comment.is_edited = True
     extensions.db.session.commit()

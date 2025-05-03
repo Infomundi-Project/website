@@ -49,8 +49,8 @@ def insert_stories_to_database(
         return 0
 
     insert_query = """
-        INSERT IGNORE INTO stories (title, description, url, url_hash, pub_date, category_id, publisher_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT IGNORE INTO stories (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
     values = []
@@ -59,6 +59,8 @@ def insert_stories_to_database(
             values.append(
                 (
                     story["story_title"],
+                    story["story_lang"],
+                    story["story_author"],
                     story["story_description"],
                     story["story_url"],
                     story["story_url_hash"],
@@ -178,9 +180,14 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 "datetime", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
 
+            story_lang = qol_util.detect_language(
+                f"{story_title} {story_description}"
+            )  # Returns language code (en, pt, es...)
+
             new_story = {
                 "story_title": story_title,
                 "story_categories": story_categories,
+                "story_lang": story_lang,
                 "story_author": story_author,
                 "story_description": story_description,
                 "story_pubdate": story_pubdate,

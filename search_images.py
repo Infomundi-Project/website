@@ -96,27 +96,48 @@ def fetch_publishers_from_database(category_id: int):
     return publishers
 
 
-def fetch_stories_from_database(category_id: int, limit: int = 250):
-    log_message(f"Fetching stories...")
+def fetch_stories_with_publishers(category_id: int, limit: int = 20):
+    log_message("Fetching stories with nested publisher dict...")
     try:
         with db_connection.cursor() as cursor:
-            # Construct the SQL query with a LIMIT clause
-            sql_query = """
-                SELECT * FROM stories 
-                WHERE category_id = %s AND NOT has_image 
-                ORDER BY created_at DESC
-                LIMIT %s
+            sql = """
+            SELECT
+                s.*,
+                p.favicon_url AS publisher_favicon_url,
+                p.id          AS publisher_id,
+                p.name        AS publisher_name,
+                p.feed_url    AS publisher_feed_url,
+                p.site_url    AS publisher_site_url
+            FROM stories AS s
+            JOIN publishers AS p
+              ON s.publisher_id = p.id
+            WHERE s.category_id = %s
+              AND NOT s.has_image
+            ORDER BY s.created_at DESC
+            LIMIT %s
             """
-            # Execute the query
-            cursor.execute(sql_query, (category_id, limit))
-
-            # Fetch all the results
-            stories = cursor.fetchall()
+            cursor.execute(sql, (category_id, limit))
+            rows = cursor.fetchall()
     except pymysql.MySQLError as e:
         log_message(f"Error fetching stories: {e}")
-        stories = []
+        return []
 
-    log_message(f"Got a total of {len(stories)} for category id {category_id}")
+    stories = []
+    for row in rows:
+        # split out publisher fields
+        publisher = {
+            key.replace("publisher_", ""): row[key]
+            for key in row
+            if key.startswith("publisher_")
+        }
+        # everything else is story data
+        story_data = {key: row[key] for key in row if not key.startswith("publisher_")}
+        story_data["publisher"] = publisher
+        stories.append(story_data)
+
+    log_message(
+        f"Got {len(stories)} stories (with nested publisher) for category {category_id}"
+    )
     return stories
 
 
@@ -190,7 +211,7 @@ def get_link_preview(data, source: str = "default", category_name: str = "None")
                 # General error handling
                 log_message(f"[Unexpected Error] {err}")
                 if isinstance(data, object):
-                    log_message(f"Story: {data['id']} from: {data['publisher_id']}")
+                    log_message(f"Story: {data['id']}")
 
                 return DEFAULT_IMAGE
 
@@ -250,21 +271,9 @@ def extract_image_from_response(
     log_message(
         f"Checking to see if the favicon for story {story['id']} is in the database"
     )
-    favicon_file = f"{story['publisher_id']}.ico"
-    # Checks to see if the favicon is already in the database so we don't send duplicate requests to the bucket (spend less cash$)
-
-    # TODO: check favicon
-    # if favicon_file in favicon_database:
-    if True:
-        log_message(
-            f"Favicon for publisher {story['publisher_id']} is already in the database"
-        )
-        is_favicon_in_database = True
-    else:
-        is_favicon_in_database = False
-
+    publisher_id = story["publisher"]["id"]
     # If the favicon is already stored, there's no need for us to store it again. So, we specify only the story image information.
-    if is_favicon_in_database:
+    if story["publisher"]["favicon_url"] or f"{publisher_id}.ico" in favicon_database:
         images = {
             "story": {
                 "url": image_url,
@@ -275,13 +284,14 @@ def extract_image_from_response(
         images = {
             "story": {
                 "url": image_url,
-                "output_path": f"stories/{category_name}/{story['story_id']}",
+                "output_path": f"stories/{category_name}/{hashing_util.binary_to_md5_hex(story['url_hash'])}",
             },
             "favicon": {
                 "url": favicon_url,
-                "output_path": f"favicons/{category_name}/{story['publisher_id']}",
+                "output_path": f"favicons/{category_name}/{publisher_id}",
             },
         }
+        favicon_database.append(f"{publisher_id}.ico")
 
     return download_and_convert_image(images)
 
@@ -306,10 +316,7 @@ def download_and_convert_image(data: dict) -> list:
     for item in data:
         url = data[item]["url"]
 
-        if (
-            url == "https://infomundi.net/static/img/infomundi-white-darkbg-square.webp"
-            or not url
-        ):
+        if not url:
             continue
 
         response = get_link_preview(url, "download")
@@ -386,7 +393,7 @@ def update_publisher_favicon(favicon_updates):
     log_message(f"Updating {len(favicon_updates)} publisher favicons...")
     try:
         with db_connection.cursor() as cursor:
-            update_query = "UPDATE publishers SET favicon = %s WHERE publisher_id = %s"
+            update_query = "UPDATE publishers SET favicon_url = %s WHERE id = %s"
             cursor.executemany(update_query, favicon_updates)
         db_connection.commit()
     except pymysql.MySQLError as e:
@@ -411,9 +418,11 @@ def process_category(category: dict):
         media content URL for each story, either with a direct image URL or paths to
         downloaded and processed images.
     """
-    stories = fetch_stories_from_database(category["id"])
+    global favicon_database
+    stories = fetch_stories_with_publishers(category["id"])
     stories_to_update = []
     favicons_to_update = []
+    favicon_database = []
 
     log_message(f"Starting threading with {WORKERS} workers for {category['name']}")
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
@@ -440,8 +449,8 @@ def process_category(category: dict):
                 if "stories" in path:
                     stories_to_update.append((image_url, story["id"]))
                 else:
-                    favicons_to_update.append((image_url, story["publisher_id"]))
-                    favicon_database.append(f"{story['publisher_id']}.ico")
+                    favicons_to_update.append((image_url, story["publisher"]["id"]))
+                    favicon_database.append(f"{story['publisher']['id']}.ico")
 
                 total_updated += 1
 

@@ -6,7 +6,6 @@ from flask import (
     url_for,
     flash,
     session,
-    g,
     abort,
 )
 from flask_login import current_user, login_required
@@ -600,7 +599,7 @@ def comments():
         from_country_name=scripts.country_code_to_name(
             story.category.name.split("_")[0]
         ),
-        page_language=qol_util.detect_language(story.title + " " + story.description),
+        story_url_hash=story_url_hash,
         from_country_url=f"https://infomundi.net/news?country={country_cca2}",
         from_country_category=story.category.name.split("_")[1],
         from_country_code=story.category.name.split("_")[0],
