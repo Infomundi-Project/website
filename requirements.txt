@@ -190,3 +190,4 @@ yake==0.4.8
 yarg==0.1.10
 zope.interface==7.2
 zstandard==0.23.0
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
