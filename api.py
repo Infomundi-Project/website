@@ -678,7 +678,7 @@ def react_to_comment(comment_id, action):
             extensions.db.session.rollback()
             return jsonify({"error": "Duplicate reaction"}), 400
 
-    if action == "like":
-        return jsonify(likes=comment.reactions.filter_by(action="like").count())
-    else:
-        return jsonify(dislikes=comment.reactions.filter_by(action="dislike").count())
+    return jsonify(
+        likes=comment.reactions.filter_by(action="like").count(),
+        dislikes=comment.reactions.filter_by(action="dislike").count(),
+    )

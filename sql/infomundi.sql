@@ -262,6 +262,24 @@ CREATE INDEX idx_notifications_user_unread
     ON notifications(user_id, is_read);
 
 
+CREATE TABLE bookmarks (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  story_id INT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_user_story_bookmark (user_id, story_id),
+  CONSTRAINT fk_bookmarks_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_bookmarks_story
+    FOREIGN KEY (story_id)
+    REFERENCES stories(id)
+    ON DELETE CASCADE
+);
+
+
 CREATE TABLE stocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     country_name VARCHAR(40) NOT NULL,

@@ -405,6 +405,30 @@ class Notification(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
+class Bookmark(db.Model):
+    __tablename__ = "bookmarks"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    story_id = db.Column(
+        db.Integer,
+        db.ForeignKey("stories.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    created_at = db.Column(
+        db.DateTime, default=db.func.current_timestamp(), nullable=False
+    )
+
+    __table_args__ = (
+        # one bookmark per (user, story)
+        db.UniqueConstraint("user_id", "story_id", name="uq_user_story_bookmark"),
+    )
+
+
+
 class Region(db.Model):
     __tablename__ = "regions"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)

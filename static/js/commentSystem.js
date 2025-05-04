@@ -45,11 +45,21 @@
 
   let page_id = null;
 
+  function hasUnsavedText() {
+    // grab the main textarea on the fly
+    const mainEl = document.getElementById('commentText');
+    const mainText = mainEl && mainEl.value.trim().length > 0;
+
+    const anyReplyText = Array.from(document.querySelectorAll('.reply-text'))
+      .some(t => t.value.trim().length > 0);
+
+    return mainText || anyReplyText;
+  }
+
   async function loadComments(reset = false, isScroll = false) {
-    if (!window.page_id) return; // ← nothing to do until we have an ID
+    if (!window.page_id) return;
     if (loading) return;
-    if (isScroll && !hasMore)
-      return; // Only block if infinite scroll says no more
+    if (isScroll && !hasMore) return;
 
     loading = true;
 
@@ -59,36 +69,45 @@
       hasMore = true;
     }
 
-    // ←—— GRAB YOUR CONTROLS WITH NULL-CHECKS
     const sortEl = document.getElementById('sortSelect');
     const searchEl = document.getElementById('searchInput');
-    const countEl = document.getElementById('infomundiCommentsCount');
-
-    // If they’re not in the DOM yet, bail out and retry on next scroll/submit
-    if (!sortEl || !searchEl || !countEl) {
+    if (!sortEl || !searchEl) {
       loading = false;
       return;
     }
 
     const sort = sortEl.value;
-    const search = searchEl.value;
+    const search = searchEl.value.trim();
 
     const res = await fetch(
-      `/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${search}`
+      `/api/comments/get/${page_id}?page=${page}&sort=${sort}&search=${encodeURIComponent(search)}`
     );
     const data = await res.json();
 
-    // **refresh all “timeago” labels right away**
+    // If resetting and no comments came back, show a “no results” message
+    if (reset && data.comments.length === 0) {
+      commentsList.innerHTML = `
+        <div class="text-center text-muted my-5">
+          <i class="fa-solid fa-comment-slash fa-xl mb-3"></i>
+          <p>No comments found for ${search ? `"<strong>${search}</strong>"` : 'this story'}.</p>
+        </div>
+      `;
+      // no more pages, disable further scrolling
+      hasMore = false;
+      infomundiCommentsCount.innerHTML = data.total;
+      loading = false;
+      return;
+    }
+
+    // otherwise, render like usual
     updateTimeagoLabels();
-
     infomundiCommentsCount.innerHTML = data.total;
-
-    data.comments.forEach(comment => renderComment(comment,
-      commentsList));
+    data.comments.forEach(comment => renderComment(comment, commentsList));
     hasMore = data.has_more;
     page++;
     loading = false;
   }
+
 
   function renderComment(comment, container, level = 0, parentUser = null) {
     const div = document.createElement('div');
@@ -272,103 +291,95 @@
     initializeTooltips();
   }
   async function handleCommentSubmit(e) {
-  e.preventDefault();
-  const form     = e.currentTarget;
-  const textarea = form.querySelector('#commentText');
-  const parentId = form.querySelector('#parentId').value || null;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalHTML = submitBtn.innerHTML;
-  const content = textarea.value.trim();
-  if (!content) return;
+    e.preventDefault();
+    const form = e.currentTarget;
+    const textarea = form.querySelector('#commentText');
+    const parentId = form.querySelector('#parentId').value || null;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalHTML = submitBtn.innerHTML;
+    const content = textarea.value.trim();
+    if (!content) return;
 
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Posting...
   `;
 
-  try {
-    const res = await fetch('/api/comments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({ content, parent_id: parentId, page_id })
-    });
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          content,
+          parent_id: parentId,
+          page_id
+        })
+      });
 
-    if (res.ok) {
-      textarea.value = '';
-      form.querySelector('#parentId').value = '';
-      await loadComments(true);
-      showSuccessToast('Comment posted! 🎉');
-    } else {
-      console.error('Failed to post comment', await res.text());
+      if (res.ok) {
+        textarea.value = '';
+        form.querySelector('#parentId').value = '';
+        await loadComments(true);
+        showSuccessToast('Comment posted! 🎉');
+      } else {
+        console.error('Failed to post comment', await res.text());
+        showErrorToast(
+          'Failed to post comment — tap to retry.',
+          () => handleCommentSubmit(e)
+        );
+      }
+    } catch (err) {
+      console.error('Network error:', err);
       showErrorToast(
-        'Failed to post comment — tap to retry.',
+        'Network error — tap to retry.',
         () => handleCommentSubmit(e)
       );
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
     }
-  } catch (err) {
-    console.error('Network error:', err);
-    showErrorToast(
-      'Network error — tap to retry.',
-      () => handleCommentSubmit(e)
-    );
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalHTML;
   }
-}
 
 
-  async function likeComment(id) {
-    // 1) Hit the API
-    const res = await fetch(`/api/comments/${id}/like`, {
+  async function updateReaction(id, action) {
+    // 1) POST to /like or /dislike
+    const res = await fetch(`/api/comments/${id}/${action}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       }
     });
-    if (!res.ok) return;
+    if (!res.ok) return; // bail on failure
+
+    // 2) Expect both counts back
     const {
-      likes
-    } = await res.json(); // have your API return the new like count
-
-    // 2) Find the button’s badge and update it
-    const commentDiv = document.getElementById(`comment-${id}`);
-    const badge = commentDiv.querySelector('.like-btn .badge');
-    badge.textContent = likes;
-
-    // 3) (Optional) briefly highlight it so they see feedback immediately
-    commentDiv.classList.add('bg-highlight');
-    setTimeout(() => commentDiv.classList.remove('bg-highlight'), 1500);
-  }
-
-  async function dislikeComment(id) {
-    // 1) Call the API
-    const res = await fetch(`/api/comments/${id}/dislike`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      }
-    });
-    if (!res.ok) return; // bail if something’s wrong
-    const {
+      likes,
       dislikes
-    } = await res.json(); // expect { dislikes: <newCount> }
+    } = await res.json();
 
-    // 2) Update the badge in-place
+    // 3) Update the DOM in one place
     const commentDiv = document.getElementById(`comment-${id}`);
-    const badge = commentDiv.querySelector('.dislike-btn .badge');
-    badge.textContent = dislikes;
+    commentDiv.querySelector('.like-btn .badge').textContent = likes;
+    commentDiv.querySelector('.dislike-btn .badge').textContent = dislikes;
 
-    // 3) Give a quick highlight for feedback
+    // 4) Give the user a quick flash of feedback
     commentDiv.classList.add('bg-highlight');
     setTimeout(() => commentDiv.classList.remove('bg-highlight'), 1500);
   }
+
+  function likeComment(id) {
+    return updateReaction(id, 'like');
+  }
+
+  function dislikeComment(id) {
+    return updateReaction(id, 'dislike');
+  }
+
 
 
 
@@ -497,17 +508,17 @@
       <form id="commentForm" class="mb-4">
         <div class="d-flex align-items-start gap-2">
           <img src="${window.currentUserAvatarUrl}"
-               alt="User avatar"
-               class="rounded me-2"
-               width="48" height="48">
+               alt="Commenting user's avatar"
+               class="rounded me-2 d-none d-md-block d-lg-block"
+               style="width: 3em; height: auto">
           <textarea id="commentText"
                     class="form-control flex-grow-1"
                     rows="4"
                     placeholder="What's on your mind?"
                     maxlength="1000"></textarea>
-          <small id="commentTextCount" class="text-muted ms-2">0/1000</small>
         </div>
         <div class="d-flex justify-content-end mt-2">
+          <small id="commentTextCount" class="text-muted me-2">0/1000</small>
           <button type="submit" class="btn btn-primary">
             ${window.isUserAuthenticated ? 'Post' : 'Comment anonymously'}
           </button>
@@ -702,37 +713,41 @@
 
     // submit -> POST & reload
     form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const replyBtn    = form.querySelector('button[type="submit"]');
-  const original   = replyBtn.innerHTML;
-  const content    = textarea.value.trim();
-  if (!content) return;
+      e.preventDefault();
+      const replyBtn = form.querySelector('button[type="submit"]');
+      const original = replyBtn.innerHTML;
+      const content = textarea.value.trim();
+      if (!content) return;
 
-  // Show spinner
-  replyBtn.disabled = true;
-  replyBtn.innerHTML = `
+      // Show spinner
+      replyBtn.disabled = true;
+      replyBtn.innerHTML = `
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Replying...
   `;
 
-  try {
-    await fetch('/api/comments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({ content, parent_id: parentId, page_id })
+      try {
+        await fetch('/api/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            content,
+            parent_id: parentId,
+            page_id
+          })
+        });
+        await loadComments(true);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        // Restore
+        replyBtn.disabled = false;
+        replyBtn.innerHTML = original;
+      }
     });
-    await loadComments(true);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    // Restore
-    replyBtn.disabled = false;
-    replyBtn.innerHTML = original;
-  }
-});
 
 
     // cancel -> just clear
@@ -754,21 +769,21 @@
 
 
   /**
- * Generic Bootstrap toast generator.
- * @param {'success'|'danger'} type
- * @param {string} message
- * @param {Function=} retryCallback  optional, called if user taps the “Retry” button
- */
-function showToast(type, message, retryCallback) {
-  const container = document.getElementById('infCommentsToastContainer');
-  const toastEl = document.createElement('div');
-  toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
-  toastEl.setAttribute('role', 'alert');
-  toastEl.setAttribute('aria-live', 'assertive');
-  toastEl.setAttribute('aria-atomic', 'true');
+   * Generic Bootstrap toast generator.
+   * @param {'success'|'danger'} type
+   * @param {string} message
+   * @param {Function=} retryCallback  optional, called if user taps the “Retry” button
+   */
+  function showToast(type, message, retryCallback) {
+    const container = document.getElementById('infCommentsToastContainer');
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
 
-  // build inner HTML
-  toastEl.innerHTML = `
+    // build inner HTML
+    toastEl.innerHTML = `
     <div class="d-flex">
       <div class="toast-body" style="cursor: ${retryCallback ? 'pointer' : 'auto'};">
         ${message}
@@ -784,27 +799,40 @@ function showToast(type, message, retryCallback) {
     </div>
   `;
 
-  // append & show
-  container.appendChild(toastEl);
-  const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-  
-  // wire retry
-  if (retryCallback) {
-    toastEl.querySelector('.retry-btn')
-      .addEventListener('click', () => {
-        retryCallback();
-        toast.hide();
-      });
+    // append & show
+    container.appendChild(toastEl);
+    const toast = new bootstrap.Toast(toastEl, {
+      delay: 5000
+    });
+
+    // wire retry
+    if (retryCallback) {
+      toastEl.querySelector('.retry-btn')
+        .addEventListener('click', () => {
+          retryCallback();
+          toast.hide();
+        });
+    }
+
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
   }
 
-  toast.show();
-  toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-}
+  function showSuccessToast(msg) {
+    showToast('success', msg);
+  }
 
-function showSuccessToast(msg) {
-  showToast('success', msg);
-}
+  function showErrorToast(msg, retryCallback) {
+    showToast('danger', msg, retryCallback);
+  }
 
-function showErrorToast(msg, retryCallback) {
-  showToast('danger', msg, retryCallback);
-}
+  // When the user tries to leave/reload
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedText()) {
+      // Standard way to trigger a confirmation dialog
+      e.preventDefault();
+      e.returnValue = '';
+      // Some browsers require returnValue set; some look at the returned string
+      return '';
+    }
+  });
