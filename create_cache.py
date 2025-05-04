@@ -55,16 +55,16 @@ def insert_story_and_tags(cursor, story, category_id):
     cursor.execute(
         story_sql,
         (
-          story["story_title"],
-          story["story_lang"],
-          story["story_author"],
-          story["story_description"],
-          story["story_url"],
-          story["story_url_hash"],
-          story["story_pubdate"],
-          category_id,
-          story["publisher_id"],
-        )
+            story["story_title"],
+            story["story_lang"],
+            story["story_author"],
+            story["story_description"],
+            story["story_url"],
+            story["story_url_hash"],
+            story["story_pubdate"],
+            category_id,
+            story["publisher_id"],
+        ),
     )
     # 2) If the story was new, grab its ID
     if cursor.lastrowid:
@@ -72,16 +72,13 @@ def insert_story_and_tags(cursor, story, category_id):
     else:
         # it was ignored (duplicate); fetch existing ID
         cursor.execute(
-            "SELECT id FROM stories WHERE url_hash = %s",
-            (story["story_url_hash"],)
+            "SELECT id FROM stories WHERE url_hash = %s", (story["story_url_hash"],)
         )
         new_story_id = cursor.fetchone()["id"]
 
     # 3) Insert tags in bulk for this story
     tag_values = [
-        (new_story_id, tag.strip()) 
-        for tag in story["story_tags"]
-        if tag.strip()
+        (new_story_id, tag.strip()) for tag in story["story_tags"] if tag.strip()
     ]
     if tag_values:
         tags_sql = """
@@ -168,7 +165,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             story_author = input_sanitization.sanitize_html(
                 input_sanitization.decode_html_entities(story.get("author"))
             )
-            if story_author == 'None':  # this actually happens
+            if story_author == "None":  # this actually happens
                 story_author = None
 
             if not story_title:
@@ -332,7 +329,9 @@ def fetch_categories_from_database():
         return []
 
     # DEBUG if row["name"] == "br_general"
-    category_list = [(row["id"], row["name"]) for row in categories if row["name"] == "br_general"]
+    category_list = [
+        (row["id"], row["name"]) for row in categories if row["name"] == "br_general"
+    ]
     shuffle(category_list)
 
     log_message(f"Got {len(category_list)} categories from the database")

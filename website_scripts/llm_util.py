@@ -86,7 +86,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
         summary_data = json.loads(output)  # json input should be validated
     except json.JSONDecodeError:
         summary_data = {}
-    
+
     return summary_data
 
 

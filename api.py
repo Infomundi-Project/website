@@ -423,11 +423,9 @@ def summarize_story(story_url_hash):
         article = NewsPlease.from_url(story.url)
         title = article.title
         main_text = article.maintext
-        tags = scripts.extract_yake(f'{title}, {main_text}', lang_code=story.lang)
+        tags = scripts.extract_yake(f"{title}, {main_text}", lang_code=story.lang)
         tag_dicts = [
-            {"story_id": story.id, "tag": t.strip()}
-            for t in tags
-            if t.strip()
+            {"story_id": story.id, "tag": t.strip()} for t in tags if t.strip()
         ]
         if tag_dicts:
             extensions.db.session.execute(insert(models.Tag), tag_dicts)
@@ -436,11 +434,13 @@ def summarize_story(story_url_hash):
         title = story.title
         main_text = story.description
 
-
-    response = llm_util.gpt_summarize(input_sanitization.gentle_cut_text(300, article.title), input_sanitization.gentle_cut_text(1700, article.maintext))
+    response = llm_util.gpt_summarize(
+        input_sanitization.gentle_cut_text(300, article.title),
+        input_sanitization.gentle_cut_text(1700, article.maintext),
+    )
     if not response:
-        return jsonify({"response": 'Summarization has failed.'}), 500
-    
+        return jsonify({"response": "Summarization has failed."}), 500
+
     story.gpt_summary = response
     extensions.db.session.commit()
     return jsonify({"response": response}), 200

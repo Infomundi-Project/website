@@ -21,14 +21,25 @@
         </ol>
       </nav>
       <!-- Hero Section -->
-      <img src="{{ story.image_url }}" class="hero-image mb-4 rounded" alt="Story Image">
+
+      <figure class="figure w-100">
+        <img 
+          src="{{ story.image_url }}" 
+          class="figure-img hero-image mb-4 rounded" 
+          alt="Story Image" 
+        >
+        <figcaption class="figure-caption text-muted text-end">
+          <span class="badge text-bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="This image is NOT affiliated with Infomundi. Used here for informational purposes only. It may also be in the public domain; please refer to the original source for any reuse. Source: {{ story.publisher.name }}, {{ story.pub_date }}"><i class="fa-solid fa-triangle-exclamation me-1"></i>Disclaimer</span>
+        </figcaption>
+      </figure>
+
       <h1 class="display-5 fw-bold text-uppercase">{{ story.title }}</h1>
       <div class="mb-3 text-muted">
         <span class="badge bg-primary me-2">{{ from_country_category.title() }}</span>{% if story.author %}·<span class="mx-2">{{ story.author }}</span>{% endif %}·<a class="mx-2" href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a>·<time class="mx-2">{{ story.pub_date }}</time>·<span class="ms-2">{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
       </div>
       <!-- Article Content -->
       <article class="mb-5">
-        <p class="lead">{{ story.description|safe }}</p>
+        <p class="lead">{{ story.description }}</p>
         <hr class="mt-5 mb-3">
 
 
@@ -132,9 +143,11 @@
         <!-- Tags -->
         <div class="mb-4">
           <h5>Tags</h5>
-          <span class="badge bg-secondary me-2">Bootstrap</span>
-          <span class="badge bg-secondary me-2">WebDev</span>
-          <span class="badge bg-secondary">UI</span>
+          {% if story.tags %}
+            {% for tag in story.tags %}
+              <span class="badge bg-secondary me-2">{{ tag.tag }}</span>
+            {% endfor %}
+          {% endif %}
         </div>
         <!-- Trending -->
         <div class="mb-4">
