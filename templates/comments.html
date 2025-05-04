@@ -24,7 +24,7 @@
       <img src="{{ story.image_url }}" class="hero-image mb-4 rounded" alt="Story Image">
       <h1 class="display-5 fw-bold text-uppercase">{{ story.title }}</h1>
       <div class="mb-3 text-muted">
-        <span class="badge bg-primary">{{ from_country_category.title() }}</span> · By <a href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a> · <time>{{ story.pub_date }}</time> · <span>{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
+        <span class="badge bg-primary me-2">{{ from_country_category.title() }}</span>{% if story.author %}·<span class="mx-2">{{ story.author }}</span>{% endif %}·<a class="mx-2" href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a>·<time class="mx-2">{{ story.pub_date }}</time>·<span class="ms-2">{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
       </div>
       <!-- Article Content -->
       <article class="mb-5">
@@ -40,7 +40,7 @@
             </div>
             <div class="col-sm-10">
               <span class="fs-3">MAXIMUS</span>
-              <span class="ms-3 small text-uppercase">Infomundi's AI</span>
+              <span class="ms-3 small badge text-bg-primary text-uppercase">Infomundi's AI</span>
               <div class="my-3 border rounded">
                 <p class="p-3 m-0">Hi, my name is Maximus, and I'm Infomundi's AI. My job is to help you make sense of complex stories and ideas. Here's how I work:</p>
                 <ul class="p-3 m-0 ms-3">
@@ -84,10 +84,14 @@
       </div>
       <!-- Author Bio -->
       <div class="d-flex align-items-center bg-light-subtle p-3 rounded mb-4">
-        <img src="https://source.unsplash.com/50x50/?face" class="author-avatar me-3" alt="Author">
-        <div>
-          <h6 class="mb-0">{{ story.publisher.name }}</h6>
-          <small class="text-muted">One of the thousands of publishers available on Infomundi</small>
+        <a href="{{ story.url }}" class="text-reset" target="_blank">
+          {% if story.publisher.favicon_url %}
+          <img src="{{ story.publisher.favicon_url }}" class="rounded me-3" alt="{{ story.publisher.name }} icon">
+          {% endif %}
+          <div>
+            <h6 class="mb-0">{{ story.publisher.name }}</h6>
+        </a>
+          <small class="text-muted">One of the thousands of publishers collected and available on <a href="{{ url_for('views.about') }}" class="text-reset">Infomundi</a></small>
         </div>
       </div>
       

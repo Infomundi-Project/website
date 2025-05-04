@@ -16,7 +16,7 @@ from sys import exit
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
-WORKERS = 2
+WORKERS = 1
 DEFAULT_IMAGE = None
 
 # Define proxies variable as global and load proxy list from file
@@ -169,6 +169,7 @@ def get_link_preview(data, source: str = "default", category_name: str = "None")
         log_message(f"Invalid url: {url}")
         return DEFAULT_IMAGE
 
+    bad_proxies_count = 0
     try:
         while True:
             # Randomly select a user agent to simulate browser requests
@@ -197,6 +198,13 @@ def get_link_preview(data, source: str = "default", category_name: str = "None")
                     return DEFAULT_IMAGE
             except requests.exceptions.ProxyError:
                 # Handle proxy errors by marking proxy as bad and retrying
+                bad_proxies_count += 1
+                if bad_proxies_count > 10:
+                    log_message(
+                        f"[Proxy Error] Too many bad proxies in sequence, finishing: {url}"
+                    )
+                    bad_proxies_count = 0
+                    return DEFAULT_IMAGE
                 bad_proxies.append(chosen_proxy)
                 log_message(f"[Proxy Error] Added to badlist: {chosen_proxy}")
                 continue
@@ -469,10 +477,8 @@ def search_images():
     """
     Searches images for each category in the feeds path.
     """
-    # DEBUG
-    categories = [
-        x for x in fetch_categories_from_database() if x["name"] == "br_general"
-    ]
+    # DEBUG if x["name"] == "br_general"
+    categories = [x for x in fetch_categories_from_database()]
 
     total = 0
     for category in categories:

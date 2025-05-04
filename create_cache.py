@@ -10,7 +10,14 @@ from urllib.parse import urljoin
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-from website_scripts import config, input_sanitization, immutable, hashing_util
+from website_scripts import (
+    config,
+    input_sanitization,
+    immutable,
+    hashing_util,
+    qol_util,
+)
+from website_scripts.scripts import extract_yake
 
 
 # Database connection parameters
@@ -38,51 +45,63 @@ def log_message(message):
     # logging.info(message)
 
 
-def insert_stories_to_database(
-    stories: list, category_name: str, category_id: int
-) -> int:
+def insert_story_and_tags(cursor, story, category_id):
+    # 1) Insert the story
+    story_sql = """
+      INSERT IGNORE INTO stories
+        (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
+      VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """
-    Inserts a list of stories into the database with associated categories and publishers.
-    Returns the count of failed insertions.
-    """
-    if not stories:
-        return 0
+    cursor.execute(
+        story_sql,
+        (
+          story["story_title"],
+          story["story_lang"],
+          story["story_author"],
+          story["story_description"],
+          story["story_url"],
+          story["story_url_hash"],
+          story["story_pubdate"],
+          category_id,
+          story["publisher_id"],
+        )
+    )
+    # 2) If the story was new, grab its ID
+    if cursor.lastrowid:
+        new_story_id = cursor.lastrowid
+    else:
+        # it was ignored (duplicate); fetch existing ID
+        cursor.execute(
+            "SELECT id FROM stories WHERE url_hash = %s",
+            (story["story_url_hash"],)
+        )
+        new_story_id = cursor.fetchone()["id"]
 
-    insert_query = """
-        INSERT IGNORE INTO stories (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
+    # 3) Insert tags in bulk for this story
+    tag_values = [
+        (new_story_id, tag.strip()) 
+        for tag in story["story_tags"]
+        if tag.strip()
+    ]
+    if tag_values:
+        tags_sql = """
+          INSERT IGNORE INTO tags (story_id, tag)
+          VALUES (%s, %s)
+        """
+        cursor.executemany(tags_sql, tag_values)
 
-    values = []
-    for story in stories:
-        try:
-            values.append(
-                (
-                    story["story_title"],
-                    story["story_lang"],
-                    story["story_author"],
-                    story["story_description"],
-                    story["story_url"],
-                    story["story_url_hash"],
-                    story["story_pubdate"],
-                    category_id,
-                    story["publisher_id"],
-                )
-            )
-        except Exception as err:
-            log_message(f"Error preparing story: {err}")
 
-    exceptions_count = 0
-
+def insert_stories_to_database(stories, category_name, category_id):
+    exceptions = 0
     with db_connection.cursor() as cursor:
-        try:
-            cursor.executemany(insert_query, values)
-        except Exception as err:
-            exceptions_count = len(values)
-            log_message(f"Bulk insert failed: {err}")
-
-    db_connection.commit()
-    return exceptions_count
+        for story in stories:
+            try:
+                insert_story_and_tags(cursor, story, category_id)
+            except Exception as e:
+                log_message(f"Error inserting story or tags: {e}")
+                exceptions += 1
+        db_connection.commit()
+    return exceptions
 
 
 def fetch_feed(publisher: dict, news_filter: str, result_list: list):
@@ -137,7 +156,6 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
         }
 
         for story in feed.entries:
-            # Sanitizes input
             story_title = input_sanitization.sanitize_html(
                 input_sanitization.decode_html_entities(story.get("title"))
             )
@@ -150,12 +168,14 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             story_author = input_sanitization.sanitize_html(
                 input_sanitization.decode_html_entities(story.get("author"))
             )
+            if story_author == 'None':  # this actually happens
+                story_author = None
 
             if not story_title:
                 log_message(f"No story title was identified, skipping")
                 continue
 
-            # Gentle cuts text
+            # Gentle cuts text (without breaking off words)
             story_title = input_sanitization.gentle_cut_text(250, story_title)
             story_description = input_sanitization.gentle_cut_text(
                 500, story_description
@@ -184,9 +204,14 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 f"{story_title} {story_description}"
             )  # Returns language code (en, pt, es...)
 
+            story_tags = extract_yake(
+                f"{story_title} {story_description}", lang_code=story_lang
+            )
+
             new_story = {
                 "story_title": story_title,
                 "story_categories": story_categories,
+                "story_tags": story_tags,
                 "story_lang": story_lang,
                 "story_author": story_author,
                 "story_description": story_description,
@@ -202,7 +227,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
         log_message(f"Exception getting {publisher_url} ({news_filter}) // {err}")
         data = {}
 
-    log_message(f"Successfully processed feed for {publisher.name}!")
+    log_message(f"Successfully processed feed for {publisher['name']}!")
     result_list.append(data)
 
 
@@ -306,11 +331,8 @@ def fetch_categories_from_database():
         log_message(f"Error fetching categories: {e}")
         return []
 
-    # DEBUG
-    category_list = [
-        (row["id"], row["name"]) for row in categories if row["name"] == "br_general"
-    ]
-    # category_list = [(row['id'], row['name']) for row in categories]
+    # DEBUG if row["name"] == "br_general"
+    category_list = [(row["id"], row["name"]) for row in categories if row["name"] == "br_general"]
     shuffle(category_list)
 
     log_message(f"Got {len(category_list)} categories from the database")

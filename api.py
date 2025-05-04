@@ -1,8 +1,9 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session
 from flask_login import current_user, login_required
+from sqlalchemy import and_, cast, desc, asc, insert
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Date
-from sqlalchemy import and_, cast, desc, asc
+from newsplease import NewsPlease
 from datetime import datetime
 
 from website_scripts import (
@@ -403,7 +404,7 @@ def search():
 
 
 @api.route("/story/summarize/<story_url_hash>", methods=["GET"])
-@extensions.limiter.limit("120/day;60/hour;10/minute", override_defaults=True)
+@extensions.limiter.limit("120/day;60/hour;6/minute", override_defaults=True)
 def summarize_story(story_url_hash):
     try:
         story = models.Story.query.filter_by(
@@ -418,14 +419,30 @@ def summarize_story(story_url_hash):
     if story.gpt_summary:
         return jsonify({"response": story.gpt_summary}), 200
 
-    response = llm_util.gpt_summarize(story.url)
-    if response:
-        # We convert the json response to a dict in order to store it in the database
-        story.gpt_summary = response
-        extensions.db.session.commit()
-    else:
-        return jsonify({"response": response}), 500
+    try:
+        article = NewsPlease.from_url(story.url)
+        title = article.title
+        main_text = article.maintext
+        tags = scripts.extract_yake(f'{title}, {main_text}', lang_code=story.lang)
+        tag_dicts = [
+            {"story_id": story.id, "tag": t.strip()}
+            for t in tags
+            if t.strip()
+        ]
+        if tag_dicts:
+            extensions.db.session.execute(insert(models.Tag), tag_dicts)
+            extensions.db.session.commit()
+    except Exception:
+        title = story.title
+        main_text = story.description
 
+
+    response = llm_util.gpt_summarize(input_sanitization.gentle_cut_text(300, article.title), input_sanitization.gentle_cut_text(1700, article.maintext))
+    if not response:
+        return jsonify({"response": 'Summarization has failed.'}), 500
+    
+    story.gpt_summary = response
+    extensions.db.session.commit()
     return jsonify({"response": response}), 200
 
 
