@@ -428,7 +428,6 @@ class Bookmark(db.Model):
     )
 
 
-
 class Region(db.Model):
     __tablename__ = "regions"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)

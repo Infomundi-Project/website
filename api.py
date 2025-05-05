@@ -1,7 +1,7 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session
-from flask_login import current_user, login_required
 from sqlalchemy import and_, cast, desc, asc, insert
 from sqlalchemy.orm import joinedload
+from flask_login import current_user
 from sqlalchemy.types import Date
 from newsplease import NewsPlease
 from datetime import datetime
@@ -39,21 +39,21 @@ def make_cache_key(*args, **kwargs):
 
 @api.route("/countries", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 60 * 24 * 30)  # 30 days
-@login_required
+@decorators.api_login_required
 def get_countries():
     return jsonify(country_util.get_countries())
 
 
 @api.route("/countries/<int:country_id>/states", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 60 * 24 * 30)  # 30 days
-@login_required
+@decorators.api_login_required
 def get_states(country_id):
     return jsonify(country_util.get_states(country_id))
 
 
 @api.route("/states/<int:state_id>/cities", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 60 * 24 * 30)  # 30 days
-@login_required
+@decorators.api_login_required
 def get_cities(state_id):
     return jsonify(country_util.get_cities(state_id))
 
@@ -176,7 +176,7 @@ def story_reaction(action):
 
 
 @api.route("/totp/generate", methods=["GET"])
-@login_required
+@decorators.api_login_required
 def generate_totp():
     if current_user.is_totp_enabled:
         return jsonify({"status": "Not Allowed"}), 403
@@ -196,7 +196,7 @@ def generate_totp():
 
 
 @api.route("/totp/setup", methods=["GET"])
-@login_required
+@decorators.api_login_required
 def setup_totp():
     if current_user.is_totp_enabled:
         return jsonify({"status": "Not Allowed"}), 403
@@ -262,7 +262,7 @@ def verify_mail_twofactor_code():
 @extensions.cache.cached(
     timeout=60 * 2, query_string=True, make_cache_key=make_cache_key
 )
-@login_required
+@decorators.api_login_required
 def get_friends():
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
@@ -319,7 +319,7 @@ def get_user_status(user_public_id):
 
 
 @api.route("/user/status/update", methods=["GET"])
-@login_required
+@decorators.api_login_required
 def update_user_status():
     current_user.is_online = True
     current_user.last_activity = datetime.now()
@@ -513,6 +513,7 @@ def get_stories():
     stories_list = [
         {
             "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
+            "id": story.id,
             "title": story.title,
             "description": story.description if story.description else "",
             "views": story.stats.views if story.stats else 0,
@@ -652,9 +653,7 @@ def react_to_comment(comment_id, action):
     if action not in ("like", "dislike"):
         return jsonify({"error": "Invalid action"}), 400
 
-    comment = extensions.db.session.get(models.Comment, comment_id)
-    if not comment:
-        return jsonify({"error": "Invalid comment"}), 400
+    comment = models.Comment.query.get_or_404(comment_id)
 
     reaction = models.CommentReaction.query.filter_by(
         comment_id=comment_id, user_id=current_user.id
@@ -682,3 +681,44 @@ def react_to_comment(comment_id, action):
         likes=comment.reactions.filter_by(action="like").count(),
         dislikes=comment.reactions.filter_by(action="dislike").count(),
     )
+
+
+@api.route("/bookmark", methods=["GET"])
+@decorators.api_login_required
+def list_bookmarks():
+    stories = current_user.bookmarked_stories.all()
+    return jsonify([s.to_dict() for s in stories]), 200
+
+
+@api.route("/bookmark", methods=["POST"])
+@decorators.api_login_required
+def add_bookmark():
+    data = request.get_json()
+    story_id = data.get("story_id")
+
+    story = models.Story.query.get_or_404(story_id)
+
+    # check if already bookmarked
+    existing = models.Bookmark.query.filter_by(
+        user_id=current_user.id, story_id=story.id
+    ).first()
+    if existing:
+        return jsonify(message="Already bookmarked"), 200
+
+    bm = models.Bookmark(user_id=current_user.id, story_id=story.id)
+    extensions.db.session.add(bm)
+    extensions.db.session.commit()
+    return jsonify(message="Bookmarked!"), 201
+
+
+@api.route("/bookmark/<int:story_id>", methods=["DELETE"])
+@decorators.api_login_required
+def remove_bookmark(story_id):
+    bm = models.Bookmark.query.filter_by(
+        user_id=current_user.id, story_id=story_id
+    ).first()
+    if not bm:
+        return jsonify(message="Not found"), 404
+    extensions.db.session.delete(bm)
+    extensions.db.session.commit()
+    return jsonify(message="Removed bookmark"), 200

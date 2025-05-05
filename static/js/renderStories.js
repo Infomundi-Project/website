@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('card', 'image-card', 'inf-story-card',
       'border', 'border-0');
-    cardDiv.id = `${item.story_id}-${item.category_id}`;
+    cardDiv.id = `${item.story_id}`;
 
     // Image link
     const imageLink = document.createElement('a');
@@ -686,8 +686,62 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Bookmark Icon
     const thumbtackIcon = document.createElement('i');
-    thumbtackIcon.classList.add('fa-regular', 'fa-bookmark');
+    // initialize based on whether it's already bookmarked
+    thumbtackIcon.classList.add(
+      item.is_bookmarked ? 'fa-solid' : 'fa-regular',
+      'fa-bookmark'
+    );
     thumbtackIcon.style.cursor = 'pointer';
+
+      // handle click without opening the modal
+  thumbtackIcon.addEventListener('click', function (e) {
+    e.stopPropagation(); // so we don't trigger the modal
+    const storyId = item.id;
+    const currentlyBookmarked = thumbtackIcon.classList.contains('fa-solid');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    if (!currentlyBookmarked) {
+      // add bookmark
+      fetch('/api/bookmark', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ story_id: storyId })
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Could not bookmark');
+          return res.json();
+        })
+        .then(() => {
+          // update UI
+          thumbtackIcon.classList.replace('fa-regular', 'fa-solid');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Oops, couldn’t bookmark right now.');
+        });
+    } else {
+      // 3) remove bookmark
+      fetch(`/api/bookmark/${storyId}`, { method: 'DELETE', headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        } })
+        .then(res => {
+          if (!res.ok) throw new Error('Could not remove bookmark');
+          return res.json();
+        })
+        .then(() => {
+          // 4) update UI
+          thumbtackIcon.classList.replace('fa-solid', 'fa-regular');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Oops, couldn’t remove bookmark right now.');
+        });
+    }
+  });
 
     // Satellite Share Icon
     const satelliteIcon = document.createElement('i');
