@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   let infomundiStoryModal = new bootstrap.Modal(document
     .getElementById("infomundiStoryModal"), {
       keyboard: false,
@@ -31,6 +31,79 @@ document.addEventListener("DOMContentLoaded", function () {
   const modalViewCount = modalElement.querySelector(
     "#viewCountStoryModal");
 
+  // ──────────────────────────────────────────────────────────
+  // Bookmark helpers: sync local + server
+  // ──────────────────────────────────────────────────────────
+
+  // Initialize the icon based on localStorage
+  function initializeBookmarkIcon(storyId, iconEl) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarkedStories')) || {};
+    const isBookmarked = !!bookmarks[storyId];
+    iconEl.classList.toggle('fa-solid', isBookmarked);
+    iconEl.classList.toggle('fa-regular', !isBookmarked);
+    iconEl.dataset.storyId = storyId;
+  }
+
+  // Handle a click: call the API, then update localStorage + UI
+  function handleBookmarkToggle(storyId, iconEl) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarkedStories')) || {};
+    const currently = !!bookmarks[storyId];
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+
+    if (!currently) {
+      // Add bookmark on server
+      fetch('/api/bookmark', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            story_id: storyId
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Could not bookmark');
+          return res.json();
+        })
+        .then(() => {
+          // On success, mirror state locally & flip icon
+          bookmarks[storyId] = true;
+          localStorage.setItem('bookmarkedStories', JSON.stringify(bookmarks));
+          iconEl.classList.replace('fa-regular', 'fa-solid');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Huh, couldn’t bookmark right now.');
+        });
+    } else {
+      // Remove bookmark on server
+      fetch(`/api/bookmark/${storyId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Could not remove bookmark');
+          return res.json();
+        })
+        .then(() => {
+          // On success, mirror state locally & flip icon back
+          delete bookmarks[storyId];
+          localStorage.setItem('bookmarkedStories', JSON.stringify(bookmarks));
+          iconEl.classList.replace('fa-solid', 'fa-regular');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Huh, couldn’t remove bookmark right now.');
+        });
+    }
+  }
+
+
 
   // Function to initialize like/dislike icons based on localStorage
   function initializeLikeDislikeIcons(storyId, likeIcon,
@@ -49,14 +122,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Define event listeners for modal icons
-  modalLikeIcon.addEventListener('click', function () {
+  modalLikeIcon.addEventListener('click', function() {
     const storyId = this.dataset.storyId;
     handleLikeDislike('like', storyId, modalLikeIcon,
       modalDislikeIcon, modalLikeCount,
       modalDislikeCount);
   });
 
-  modalDislikeIcon.addEventListener('click', function () {
+  modalDislikeIcon.addEventListener('click', function() {
     const storyId = this.dataset.storyId;
     handleLikeDislike('dislike', storyId, modalLikeIcon,
       modalDislikeIcon, modalLikeCount,
@@ -64,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Satellite share button functionality
-  modalSatelliteIcon.addEventListener('click', function () {
+  modalSatelliteIcon.addEventListener('click', function() {
     const storyId = this.dataset.storyId;
     const storyTitle = this.dataset.storyTitle;
     const storyDescription = this.dataset
@@ -83,7 +156,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  modalElement.addEventListener("hidden.bs.modal", function () {
+    // Grab it once
+  const modalBookmarkIcon = document
+    .getElementById("infomundiStoryModal")
+    .querySelector('.fa-bookmark');
+
+  // Single event listener
+  modalBookmarkIcon.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const storyId = this.dataset.storyId;      // set elsewhere
+    handleBookmarkToggle(storyId, this);
+  });
+
+  modalElement.addEventListener("hidden.bs.modal", function() {
     modalTitle.textContent = "";
     modalImage.src = "";
     modalDescription.textContent = "";
@@ -109,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ".card.image-card");
 
     storyCards.forEach((card) => {
-      card.addEventListener("click", function (event) {
+      card.addEventListener("click", function(event) {
         const clickedElement = event
           .target; // Get the clicked element
 
@@ -146,8 +231,6 @@ document.addEventListener("DOMContentLoaded", function () {
               `/comments?id=${storyData.story_id}`;
             originalStoryLink.innerHTML =
               `<i class="fa-solid fa-square-arrow-up-right me-2"></i>View More`;
-            originalStoryLink.style
-              .display = "inline";
           } else {
             originalStoryLink.style
               .display =
@@ -164,11 +247,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const tagLink =
                 document
                 .createElement(
-                  "a");
-              tagLink.href =
-                `${window.location.origin}?search=${encodeURIComponent(tag)}`;
+                  "span");
               tagLink.className =
-                "badge text-bg-primary mx-1";
+                "badge text-bg-primary me-1";
               tagLink
                 .textContent =
                 tag;
@@ -182,15 +263,17 @@ document.addEventListener("DOMContentLoaded", function () {
           if (storyData.publisher) {
             const {
               name,
-              favicon
+              favicon_url
             } = storyData.publisher;
 
             modalPublisherName.textContent =
               name || "Unknown Publisher";
 
-            if (favicon) {
+            modalPublisherName.setAttribute('href', storyData.url);
+
+            if (favicon_url) {
               modalPublisherLogo.src =
-                favicon;
+                favicon_url;
               modalPublisherLogo.style
                 .display =
                 "inline"; // Show the logo if available
@@ -250,7 +333,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Update published date and view count
           modalPublishedDate.innerHTML =
-            `<i class="fa-regular fa-calendar me-2"></i>${storyData.pub_date}&nbsp;(${timeAgo(storyData.pub_date)})`;
+            `<i class="fa-regular fa-calendar me-2"></i>${timeAgo(storyData.pub_date)}`;
+          modalPublishedDate.setAttribute('tabindex', '0');
+          modalPublishedDate.dataset.bsToggle = "tooltip";
+          modalPublishedDate.dataset.bsPlacement = "top";
+          modalPublishedDate.setAttribute('title', storyData.pub_date);
+
           modalViewCount.innerHTML =
             `<i class="fa-regular fa-eye me-2"></i>${storyData.views}&nbsp;views`;
 
@@ -261,6 +349,12 @@ document.addEventListener("DOMContentLoaded", function () {
           commentsElement.setAttribute(
             'page_id', storyData
             .story_id);
+
+          // Grab the modal’s thumbtack
+          const modalBookmarkIcon = modalElement.querySelector('.fa-bookmark');
+
+          modalBookmarkIcon.dataset.storyId = storyData.id;
+          initializeBookmarkIcon(storyData.id, modalBookmarkIcon);
 
           // Load Maximus content
           fetchAndRenderStorySummary(storyData
@@ -356,7 +450,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Event listener for the Clear Filters button
   document.getElementById('clearFiltersButton').addEventListener(
     'click',
-    function () {
+    function() {
       // Reset form fields to their default values
       document.getElementById('query').value = '';
       document.getElementById('modalStartDate').value = '';
@@ -419,53 +513,53 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Prevent form submission
-  filterForm.addEventListener('submit', function (event) {
+  filterForm.addEventListener('submit', function(event) {
     event.preventDefault();
   });
 
   // Event listeners for filter inputs
   // Category Radio Buttons
   document.querySelectorAll('input[name="category"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         applyFilters();
       });
     });
 
   // Order By Radio Buttons
   document.querySelectorAll('input[name="order_by"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         applyFilters();
       });
     });
 
   // Order Direction Radio Buttons
   document.querySelectorAll('input[name="order_dir"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         applyFilters();
       });
     });
 
   // Date Inputs
   document.getElementById('modalStartDate').addEventListener('change',
-    function () {
+    function() {
       applyFilters();
     });
 
   document.getElementById('modalEndDate').addEventListener('change',
-    function () {
+    function() {
       applyFilters();
     });
 
   // Debounce Function
   function debounce(func, wait) {
     let timeout;
-    return function (...args) {
+    return function(...args) {
       const context = this;
       clearTimeout(timeout);
-      timeout = setTimeout(function () {
+      timeout = setTimeout(function() {
         func.apply(context, args);
       }, wait);
     };
@@ -474,7 +568,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Debounced Apply Filters for Search Input
   const debounceApplyFilters = debounce(applyFilters, 500);
   document.getElementById('query').addEventListener('input',
-    function () {
+    function() {
       debounceApplyFilters();
     });
 
@@ -600,10 +694,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const tipLogoImg = document.createElement('div');
     tipLogoImg.innerHTML = `
-        <a href="${item.publisher.url}" class="text-decoration-none" target="_blank" data-bs-toggle="tooltip" data-bs-title="${item.publisher.name}">
+        <span data-bs-toggle="tooltip" data-bs-title="Source: ${item.publisher.name}">
           ${item.publisher.favicon_url ? 
             `<img src="${item.publisher.favicon_url}" class="rounded" alt="${item.publisher.name} favicon image" width="30">` : 
-            `<i class="fa-solid fa-rss"></i>`
+            `<i class="fa-solid fa-tower-cell"></i>`
           }
         </a>
     `;
@@ -673,12 +767,12 @@ document.addEventListener("DOMContentLoaded", function () {
     dislikeIcon.appendChild(dislikeCount);
 
     // Event listeners for like and dislike icons
-    likeIcon.addEventListener('click', function () {
+    likeIcon.addEventListener('click', function() {
       handleLikeDislike('like', item.story_id, likeIcon,
         dislikeIcon, likeCount, dislikeCount);
     });
 
-    dislikeIcon.addEventListener('click', function () {
+    dislikeIcon.addEventListener('click', function() {
       handleLikeDislike('dislike', item.story_id,
         likeIcon, dislikeIcon, likeCount,
         dislikeCount);
@@ -686,62 +780,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Bookmark Icon
     const thumbtackIcon = document.createElement('i');
-    // initialize based on whether it's already bookmarked
-    thumbtackIcon.classList.add(
-      item.is_bookmarked ? 'fa-solid' : 'fa-regular',
-      'fa-bookmark'
-    );
+    thumbtackIcon.classList.add('fa-bookmark');
     thumbtackIcon.style.cursor = 'pointer';
 
-      // handle click without opening the modal
-  thumbtackIcon.addEventListener('click', function (e) {
-    e.stopPropagation(); // so we don't trigger the modal
-    const storyId = item.id;
-    const currentlyBookmarked = thumbtackIcon.classList.contains('fa-solid');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // 1️⃣ Initialize from localStorage
+    initializeBookmarkIcon(item.id, thumbtackIcon);
 
-    if (!currentlyBookmarked) {
-      // add bookmark
-      fetch('/api/bookmark', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({ story_id: storyId })
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Could not bookmark');
-          return res.json();
-        })
-        .then(() => {
-          // update UI
-          thumbtackIcon.classList.replace('fa-regular', 'fa-solid');
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Oops, couldn’t bookmark right now.');
-        });
-    } else {
-      // 3) remove bookmark
-      fetch(`/api/bookmark/${storyId}`, { method: 'DELETE', headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        } })
-        .then(res => {
-          if (!res.ok) throw new Error('Could not remove bookmark');
-          return res.json();
-        })
-        .then(() => {
-          // 4) update UI
-          thumbtackIcon.classList.replace('fa-solid', 'fa-regular');
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Oops, couldn’t remove bookmark right now.');
-        });
-    }
-  });
+    // 2️⃣ On click, sync with server then local
+    thumbtackIcon.addEventListener('click', e => {
+      e.stopPropagation(); // don’t open the modal!
+      handleBookmarkToggle(item.id, thumbtackIcon);
+    });
 
     // Satellite Share Icon
     const satelliteIcon = document.createElement('i');
@@ -902,7 +951,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to update time ago for all date-info elements
   function updateTimeAgo() {
     const dateElements = document.querySelectorAll('.date-info');
-    dateElements.forEach(function (element) {
+    dateElements.forEach(function(element) {
       const originalDateString = element.textContent
         .trim(); // Extract the date string
       const relativeDateString = timeAgo(
@@ -990,8 +1039,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event Listeners for Category
   document.querySelectorAll('input[name="category"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         updateButtonText('category',
           'categoryButtonText');
       });
@@ -999,8 +1048,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event Listeners for Order By
   document.querySelectorAll('input[name="order_by"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         updateButtonText('order_by',
           'orderByButtonText');
       });
@@ -1008,8 +1057,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event Listeners for Order Direction
   document.querySelectorAll('input[name="order_dir"]').forEach(
-    function (el) {
-      el.addEventListener('change', function () {
+    function(el) {
+      el.addEventListener('change', function() {
         updateButtonText('order_dir',
           'orderDirButtonText');
       });
@@ -1018,7 +1067,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Event listener for the Apply button in Period Modal
   document.getElementById('applyPeriodButton').addEventListener(
     'click',
-    function () {
+    function() {
       // Update the periodButton text
       let startDate = document.getElementById(
         'modalStartDate').value;

@@ -33,7 +33,7 @@
 
       <h1 class="display-5 fw-bold text-uppercase">{{ story.title }}</h1>
       <div class="mb-3 text-muted">
-        <span class="badge bg-primary me-2">{{ from_country_category.title() }}</span>{% if story.author %}·<span class="mx-2">{{ story.author }}</span>{% endif %}·<a class="mx-2" href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a>·<time class="mx-2">{{ story.pub_date }}</time>·<span class="ms-2">{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
+        <span class="badge bg-primary me-2">{{ from_country_category.title() }}</span>{% if story.author and story.author != 'None' %}·<span class="mx-2">{{ story.author }}</span>{% endif %}·<a class="mx-2" href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a>·<span class="mx-2" id="storyPubDate">{{ story.pub_date }}</span>·<span class="ms-2">{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
       </div>
       <!-- Article Content -->
       <article class="mb-5">
@@ -230,7 +230,7 @@
 </script>
 <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
 
-<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/scrollProgressBar.js') }}"></script>
+<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/scrollProgressBar.js') }}"></script>
 <script type="application/ld+json" nonce="{{ nonce }}">
   {
     "@context": "https://schema.org",
@@ -251,4 +251,14 @@
       "@id": "{{ request.url }}"
     }
   }
-</script> {% endblock %}
+</script> 
+
+<script defer type="text/javascript" nonce="{{ nonce }}">
+  const storyPubDate = document.getElementById('storyPubDate');
+  const newDate = preciseTimeAgo(storyPubDate.textContent);
+  storyPubDate.textContent = newDate;
+</script>
+
+
+
+{% endblock %}

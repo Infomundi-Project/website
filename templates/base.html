@@ -374,7 +374,49 @@
         </li>
       </ul>
       {% endif %}
-      <div class="dropdown ms-auto">
+      <div class="position-fixed bottom-0 end-0 m-3">
+        <input type="checkbox" class="theme-checkbox" id="theme-checkbox"
+          {% if not is_light_mode %}checked{% endif %}>
+        <label for="theme-checkbox" class="theme-checkbox-label">
+          <i class="fa-solid fa-sun"></i>
+          <i class="fa-solid fa-moon"></i>
+          <span class="ball"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+
+
+
+    <nav class="navbar bg-body-tertiary navbar-expand shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar" id="mainNavbar">
+      <div class="container-fluid">
+        <a href="#" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavigation"
+              aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3"
+              style="height: 1.7rem; width: 1.7rem;"
+              aria-label="Click to expand the site navigation"></a>
+        <a href="/"
+            class="navbar-brand py-0 logo-text notranslate fs-5">
+            <img fetchpriority="high"
+              src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg"
+              class="me-2" style="height: auto; width: 3.5rem"
+              alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">{% if not is_mobile %}infomundi{% endif %}</a>
+
+        <div class="collapse navbar-collapse" id="navbarsExample02">
+          <ul class="navbar-nav me-auto text-uppercase">
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link" href="{{ url_for('views.about') }}">About</a>
+            </li>
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link disabled" href="#" aria-disabled="true">Community</a>
+            </li>
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link disabled" href="#" aria-disabled="true">World Trackers</a>
+            </li>
+          </ul>
+
+            <div class="dropdown me-lg-5 me-3">
         <button
           class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
           type="button" id="langDropdown" data-bs-toggle="dropdown"
@@ -443,85 +485,8 @@
                 class="bi bi-check-lg ms-auto d-none"></i></a></li>
         </ul>
       </div>
-      <div class="position-fixed bottom-0 end-0 m-3">
-        <input type="checkbox" class="theme-checkbox" id="theme-checkbox"
-          {% if not is_light_mode %}checked{% endif %}>
-        <label for="theme-checkbox" class="theme-checkbox-label">
-          <i class="fa-solid fa-sun"></i>
-          <i class="fa-solid fa-moon"></i>
-          <span class="ball"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-  <nav class="navbar bg-body-tertiary shadow-lg sticky-top border-bottom"
-    aria-label="Infomundi Navbar" id="mainNavbar">
-    <div class="container-fluid {% if not is_mobile %}px-3{% endif %}">
-      <div class="row w-100">
-        <div class="col-md-6 col-9">
-          <a href="#" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasNavigation"
-            aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3"
-            style="height: 1.7rem; width: 1.7rem;"
-            aria-label="Click to expand the site navigation"></a>
-          {% if not is_mobile %}
-          <a href="/" class="text-decoration-none">
-            <img fetchpriority="high"
-              src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg"
-              style="height: 3.5rem; width: 3.5rem"
-              alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">
-          </a>
-          <a class="ms-4 text-uppercase text-reset text-decoration-none"
-            href="{{ url_for('views.about') }}">About</a><a
-            class="ms-4 text-uppercase text-reset text-decoration-none"
-            aria-disabled="true">Community</a><a
-            class="ms-4 text-uppercase text-reset text-decoration-none"
-            aria-disabled="true">World Trackers</a>
-          {% else %}
-          <a href="/"
-            class="logo-text notranslate text-decoration-none text-reset fs-5">
-            <img fetchpriority="high"
-              src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg"
-              class="me-2" style="height: 3rem; width: 3rem"
-              alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">infomundi
-          </a>
-          {% endif %}
-        </div>
-        <div
-          class="col-md-6 col-3 {% if not current_user.is_authenticated or is_mobile %}d-inline-flex text-end align-items-center justify-content-end{% endif %} d-block p-0">
-          {% if current_user.is_authenticated %}
-          {% if not is_mobile %}
-          <div class="d-flex flex-row-reverse align-items-center"
-            style="margin-right: -10px;">
-            <div class="col-auto">
-              <a href="#" class="text-decoration-none text-reset"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasUserNavigation"
-                aria-controls="offcanvasUserNavigation"
-                aria-label="Click here to expand the user navigation">
-
-                <img src="{{ current_user.avatar_url }}" fetchpriority="high"
-                  alt="{{ current_user.username }}'s profile picture"
-                  style="height: 3.5rem; width: 3.5rem;" class="rounded">
-              </a>
-            </div>
-
-            <div class="col-auto me-4 mt-2 position-relative">
-              <!-- Notification Bubble 
-                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    99+
-                    <span class="visually-hidden">unread messages</span>
-                  </span>-->
-
-              <!-- Icon and Text -->
-              <span class="d-block text-center">
-                <i class="fa-solid fa-inbox"></i>
-              </span>
-              <span class="text-muted small text-capitalize">inbox</span>
-            </div>
-
-
-            <div class="col-auto me-4 mt-2" data-bs-toggle="modal"
+            {% if current_user.is_authenticated %}
+            <div class="me-3 mt-2 d-none d-md-block d-lg-block" data-bs-toggle="modal"
               data-bs-target="#friendsModal">
               <span id="totalFriends" class="d-block text-center"></span>
               <span id="onlineFriends" class="text-muted small text-capitalize">
@@ -529,33 +494,49 @@
                   style="height: 8px; width: 8px; background-color: gray; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>
               </span>
             </div>
-            {% else %}
+
+
+            <div class="me-4 mt-2 position-relative d-none d-md-block d-lg-block">
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1<span class="visually-hidden">unread messages</span></span>
+
+              <!-- Icon and Text -->
+              <span class="d-block text-center"><i class="fa-solid fa-inbox"></i></span>
+              <span class="text-muted small text-capitalize">inbox</span>
+            </div>
+
+
             <a href="#" class="text-decoration-none text-reset"
               data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasUserNavigation"
               aria-controls="offcanvasUserNavigation"
               aria-label="Click here to expand the user navigation">
-              <img src="{{ current_user.avatar_url }}"
+
+              <img src="{{ current_user.avatar_url }}" fetchpriority="high"
                 alt="{{ current_user.username }}'s profile picture"
-                style="height: 3rem; width: 3rem;"
-                class="rounded border border-1 border-{% if is_light_mode %}dark{% else %}light{% endif %}">
+                style="height: 3.5rem; width: 3.5rem;" class="rounded">
+            </a>
+            {% else %}
+            <a href="#"
+              class="d-block link-body-emphasis text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation"
+              aria-controls="offcanvasUserNavigation"
+              aria-label="Click here to expand the user navigation">
+              <span class="dropdown-toggle"><i
+                  class="fa-solid fa-user me-2"></i>{% if not is_mobile %}Account{% endif %}</span>
             </a>
             {% endif %}
-          </div>
-          {% else %}
-          <a href="#"
-            class="d-block link-body-emphasis text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}"
-            data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation"
-            aria-controls="offcanvasUserNavigation"
-            aria-label="Click here to expand the user navigation">
-            <span class="dropdown-toggle"><i
-                class="fa-solid fa-user me-2"></i>{% if not is_mobile %}Account{% endif %}</span>
-          </a>
-          {% endif %}
+
+
+
         </div>
       </div>
-    </div>
   </nav>
+
+
+
+
+
+
   {% endif %}
   {% if world_stocks and is_mobile %}
   <div class="hwrap-home mb-3" style="border-radius: 0px;" id="ticker">

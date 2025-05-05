@@ -515,6 +515,8 @@ def get_stories():
             "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
             "id": story.id,
             "title": story.title,
+            "tags": [tag.tag for tag in story.tags],
+            "author": story.author,
             "description": story.description if story.description else "",
             "views": story.stats.views if story.stats else 0,
             "likes": story.stats.likes if story.stats else 0,

@@ -33,7 +33,7 @@ function resetAndPlayPlaceholder() {
         maximusProgressBar.setAttribute("aria-valuenow", progress.toFixed(0));
       }
       maximusCurrentIndex++;
-      setTimeout(typeText, 0.07); // Time in ms
+      setTimeout(typeText, 0.3); // Time in ms
     }
   }
 

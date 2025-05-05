@@ -23,9 +23,9 @@
             <div class="col-lg-8 d-block">
               <div id="publisherContainer" class="d-flex align-items-center mb-2">
                 <img id="publisherLogo" src="" alt="Publisher Logo" class="rounded me-2" style="width: 30px; display: none;">
-                <span id="publisherName" class="fw-bold"></span>
+                <a href="#" id="publisherName" class="fw-bold text-reset"></a>
               </div>
-              <span id="publishedDateStoryModal">24/11/2024</span><span class="mx-2">&#x2022;</span><span id="viewCountStoryModal">X views</span>
+              <span id="publishedDateStoryModal" >24/11/2024</span><span class="mx-2">&#x2022;</span><span id="viewCountStoryModal">X views</span>
             </div>
             <div class="col-lg-4 {% if is_mobile %}mt-2{% else %}d-flex justify-content-end d-block{% endif %}">
               <span class="fs-4">
@@ -46,10 +46,10 @@
               <span class="badge text-bg-primary">Tag 1</span><span class="badge text-bg-primary mx-2">Tag 2</span><span class="badge text-bg-primary">Tag 3</span>
             </div>
             <p>Story Description</p>
-            <p>
+            <span>
               <a class="btn btn-sm btn-primary" id="originalStoryLink" href="#" target="_blank" role="button">View More</a>
-            </p>
-            <hr class="mt-5 mb-3">
+            </span>
+            <hr class="my-4">
 
 
             <div class="maximus">
@@ -100,17 +100,13 @@
                 <div id="commentsList"></div>
 
               </infomundi-comments>
-
-
-
-
-            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <div class="container">
     <div class="row my-3 align-items-center justify-content-center">
       <div class="col-md-3">
