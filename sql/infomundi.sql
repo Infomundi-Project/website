@@ -48,6 +48,8 @@ CREATE TABLE users (
     profile_wallpaper_url VARCHAR(80),
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
+    profile_visibility VARCHAR(7) DEFAULT 'public',  -- public, friends, private
+    notification_type VARCHAR(9) DEFAULT 'all',  -- all, important, none
 
     -- Account Registration
     is_enabled TINYINT(1) DEFAULT 0,
@@ -148,7 +150,7 @@ CREATE TABLE story_reactions (
     user_id INT NOT NULL,
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    action VARCHAR(10),  -- 'like' or 'dislike'
+    action VARCHAR(7) NOT NULL,  -- 'like', 'dislike', 'report'
     
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -220,7 +222,7 @@ CREATE TABLE comment_reactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     comment_id INT NOT NULL,
     user_id INT NOT NULL,
-    action VARCHAR(10) NOT NULL,
+    action VARCHAR(7) NOT NULL,  -- 'like', 'dislike', 'report'
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,

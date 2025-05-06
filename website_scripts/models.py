@@ -85,7 +85,7 @@ class StoryReaction(db.Model):
     story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
 
-    action = db.Column(db.String(10))  # 'like' or 'dislike'
+    action = db.Column(db.String(7), nullable=False)  # 'like', 'dislike', 'report'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
     __table_args__ = (
@@ -132,6 +132,13 @@ class User(db.Model, UserMixin):
     profile_wallpaper_url = db.Column(db.String(80))
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
+    # Privacy settings
+    profile_visibility = db.Column(
+        db.String(7), default="public"
+    )  # "public", "friends", "private"
+    notification_type = db.Column(
+        db.String(9), default="all"
+    )  # "all", "important", "none"
 
     # Account Registration
     is_enabled = db.Column(db.Boolean, default=False)
@@ -347,7 +354,7 @@ class CommentReaction(db.Model):
         db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    action = db.Column(db.String(10), nullable=False)  # 'like' or 'dislike'
+    action = db.Column(db.String(7), nullable=False)  # 'like', 'dislike', 'report'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (

@@ -543,7 +543,7 @@ def create_comment():
     page_id = data.get("page_id")  # A string that uniquely identifies the page
     content = content = input_sanitization.gentle_cut_text(
         1000, input_sanitization.sanitize_html(data.get("content"))
-    )
+    )  # Sanitizes and then gently cuts content
 
     if not page_id or not content:
         return jsonify({"error": "Missing page_id or content"}), 400
@@ -562,7 +562,12 @@ def create_comment():
     extensions.db.session.add(comment)
     extensions.db.session.commit()
 
-    return jsonify({"message": "Comment created", "comment_id": comment.id}), 201
+    return (
+        jsonify(
+            message="Comment created", comment_id=comment.id, comment=comment.content
+        ),
+        201,
+    )
 
 
 @api.route("/stories/most_commented", methods=["GET"])
@@ -724,3 +729,111 @@ def remove_bookmark(story_id):
     extensions.db.session.delete(bm)
     extensions.db.session.commit()
     return jsonify(message="Removed bookmark"), 200
+
+
+@api.route("/notifications", methods=["GET"])
+@decorators.api_login_required
+def list_notifications():
+    """
+    List the current user's notifications, newest first, paginated.
+    Query params:
+      - page: page number (default 1)
+      - per_page: items per page (default 20)
+      - show_read: "true" or "false" (default true)
+    """
+    page = request.args.get("page", type=int) or 1
+    per_page = request.args.get("per_page", type=int) or 20
+    show_read = request.args.get("show_read", "true").lower() == "true"
+
+    q = models.Notification.query.filter_by(user_id=current_user.id)
+    if not show_read:
+        q = q.filter_by(is_read=False)
+
+    pagination = q.order_by(models.Notification.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    items = []
+    for n in pagination.items:
+        items.append(
+            {
+                "id": n.id,
+                "type": n.type,
+                "message": n.message,
+                "url": n.url,
+                "is_read": n.is_read,
+                "created_at": n.created_at.isoformat(),
+                # include related IDs if set
+                "comment_id": n.comment_id,
+                "friendship_id": n.friendship_id,
+            }
+        )
+
+    return (
+        jsonify(
+            {
+                "notifications": items,
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages,
+            }
+        ),
+        200,
+    )
+
+
+@api.route("/notifications/unread_count", methods=["GET"])
+@decorators.api_login_required
+def unread_notification_count():
+    """
+    Return count of unread notifications for current user.
+    """
+    count = models.Notification.query.filter_by(
+        user_id=current_user.id, is_read=False
+    ).count()
+    return jsonify({"unread_count": count}), 200
+
+
+@api.route("/notifications/<int:notification_id>/read", methods=["POST"])
+@decorators.api_login_required
+def mark_notification_read(notification_id):
+    """
+    Mark a single notification as read.
+    """
+    notif = models.Notification.query.filter_by(
+        id=notification_id, user_id=current_user.id
+    ).first()
+    if not notif:
+        return jsonify({"error": "Notification not found."}), 404
+
+    if not notif.is_read:
+        notif.is_read = True
+        notif.read_at = (
+            datetime.utcnow() if hasattr(models.Notification, "read_at") else None
+        )
+        extensions.db.session.commit()
+
+    return jsonify({"message": "Notification marked as read.", "id": notif.id}), 200
+
+
+@api.route("/notifications/read_all", methods=["POST"])
+@decorators.api_login_required
+def mark_all_notifications_read():
+    """
+    Mark all of the current user's notifications as read.
+    """
+    updated = models.Notification.query.filter_by(
+        user_id=current_user.id, is_read=False
+    ).update({"is_read": True}, synchronize_session="fetch")
+    extensions.db.session.commit()
+
+    return (
+        jsonify(
+            {
+                "message": "All notifications marked as read.",
+                "notifications_updated": updated,
+            }
+        ),
+        200,
+    )

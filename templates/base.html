@@ -496,13 +496,14 @@
             </div>
 
 
-            <div class="me-4 mt-2 position-relative d-none d-md-block d-lg-block">
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1<span class="visually-hidden">unread messages</span></span>
-
-              <!-- Icon and Text -->
-              <span class="d-block text-center"><i class="fa-solid fa-inbox"></i></span>
+            <button id="inboxBtn" class="me-4 mt-2 position-relative d-none d-md-block d-lg-block btn btn-link px-0">
+              <span id="unreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0
+                <span class="visually-hidden">unread messages</span>
+              </span>
+              <span class="d-block text-center"><i class="fa-solid fa-inbox fa-lg"></i></span>
               <span class="text-muted small text-capitalize">inbox</span>
-            </div>
+            </button>
+
 
 
             <a href="#" class="text-decoration-none text-reset"
@@ -724,6 +725,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Notifications Modal -->
+<div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notificationsLabel">Your Notifications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <ul class="list-group" id="notificationsList">
+          <!-- JS will inject <li> items here -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="markAllReadBtn" type="button" class="btn btn-link">Mark All as Read</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     <!-- Link Warning Modal -->
     <div class="modal fade" id="externalLinkModal" tabindex="-1"
       aria-labelledby="externalLinkModalLabel" aria-hidden="true">
@@ -1086,6 +1110,8 @@
   {% if current_user.is_authenticated %}
   <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/updateStatus.js') }}"></script>
+    <script nonce="{{ nonce }}"
+    src="{{ url_for('static', filename='js/notificationSystem.js') }}"></script>
   {% endif %}
   {% assets "js_base" %}
   <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
