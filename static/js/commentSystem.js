@@ -89,7 +89,7 @@
       commentsList.innerHTML = `
         <div class="text-center text-muted my-5">
           <i class="fa-solid fa-comment-slash fa-xl mb-3"></i>
-          <p>No comments found for ${search ? `"<strong>${search}</strong>"` : 'this story'}.</p>
+          <p>No comments found${search ? ` for "<strong>${search}</strong>"` : '.'}</p>
         </div>
       `;
       // no more pages, disable further scrolling
@@ -608,15 +608,12 @@
         return;
       }
 
-      // URL-safe Base64 encode
-      const base64Id = btoa(rawId)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+      // URL-safe id
+      const urlSafeId = encodeURIComponent(rawId);
 
       // Expose globally for fetch logic
-      page_id = base64Id;
-      window.page_id = base64Id;
+      page_id = urlSafeId;
+      window.page_id = urlSafeId;
 
       // Reset infinite-scroll state and clear UI
       page = 1;

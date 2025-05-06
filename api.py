@@ -406,13 +406,9 @@ def search():
 @api.route("/story/summarize/<story_url_hash>", methods=["GET"])
 @extensions.limiter.limit("120/day;60/hour;6/minute", override_defaults=True)
 def summarize_story(story_url_hash):
-    try:
-        story = models.Story.query.filter_by(
-            url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
-        ).first()
-    except Exception:
-        return jsonify({"response": "Couldn't find the story"}), 404
-
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
+    ).first()
     if not story:
         return jsonify({"response": "Couldn't find the story"}), 404
 
@@ -435,8 +431,8 @@ def summarize_story(story_url_hash):
         main_text = story.description
 
     response = llm_util.gpt_summarize(
-        input_sanitization.gentle_cut_text(300, article.title),
-        input_sanitization.gentle_cut_text(1700, article.maintext),
+        input_sanitization.gentle_cut_text(300, title),
+        input_sanitization.gentle_cut_text(1700, main_text),
     )
     if not response:
         return jsonify({"response": "Summarization has failed."}), 500
@@ -559,6 +555,26 @@ def create_comment():
         is_flagged=comments_util.is_content_inappropriate(content),
         parent_id=parent_id,
     )
+
+    # Sees if the page_id refers to a valid story in the database
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(page_id)
+    ).first()
+    if story:
+        comment.story_id = story.id
+        # We'll send notifications to the users who bookmarked this specific story.
+        bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
+        notif_dicts = [
+            {
+                "user_id": b.user_id,
+                "type": "new_comment",
+                "message": "Someone commented on a bookmarked story",
+                "url": f"https://infomundi.net/comments?id={story.get_public_id()}",
+            }
+            for b in bookmarks
+        ]
+        notifications.notify(notif_dicts)
+
     extensions.db.session.add(comment)
     extensions.db.session.commit()
 
@@ -577,6 +593,7 @@ def stories_get_most_commented():
 
 
 @api.route("/comments/get/<page_id>", methods=["GET"])
+@extensions.limiter.limit("120/day;60/hour;10/minute")
 def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
     sort = request.args.get("sort", "recent")  # "recent", "old", best",

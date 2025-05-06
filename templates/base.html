@@ -496,7 +496,7 @@
             </div>
 
 
-            <button id="inboxBtn" class="me-4 mt-2 position-relative d-none d-md-block d-lg-block btn btn-link px-0">
+            <button id="inboxBtn" class="me-4 mt-2 position-relative d-none d-md-block d-lg-block btn px-0">
               <span id="unreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0
                 <span class="visually-hidden">unread messages</span>
               </span>
@@ -1107,12 +1107,14 @@
     src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer>
   </script>
   {% endif %}
+
   {% if current_user.is_authenticated %}
   <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/updateStatus.js') }}"></script>
     <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/notificationSystem.js') }}"></script>
   {% endif %}
+
   {% assets "js_base" %}
   <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
   {% endassets %}

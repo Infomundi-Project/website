@@ -133,7 +133,10 @@ def md5_hex_to_binary(md5_hex: str) -> bytes:
         >>> print(md5_hex_to_binary("5d41402abc4b2a76b9719d911017c592"))
         b']A@\\x02\\xab\\xc4\\xb2\\xa7k\\x97\\x19\\xd9\\x11\\x01|Y'
     """
-    return bytes.fromhex(md5_hex)
+    try:
+        return bytes.fromhex(md5_hex)
+    except Exception:
+        return b""
 
 
 def string_to_md5_binary(input_string: str) -> bytes:

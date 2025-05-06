@@ -77,6 +77,9 @@ class Story(db.Model):
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
 
+    def get_public_id(self) -> str:
+        return hashing_util.md5_binary_to_string(self.url_hash)
+
 
 class StoryReaction(db.Model):
     __tablename__ = "story_reactions"
