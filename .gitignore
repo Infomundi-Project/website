@@ -1,4 +1,8 @@
+static/fontawesome/
 .webassets-cache/
+static/css/libs/
+static/js/libs/
+static/fonts/
 __pycache__/
 static/gen/
 backups/

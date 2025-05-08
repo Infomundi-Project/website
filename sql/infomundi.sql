@@ -240,8 +240,7 @@ CREATE TABLE notifications (
         REFERENCES users(id)
         ON DELETE CASCADE,
     
-    -- type of notification (e.g. comment_reply, friend_request, etc.)
-    type VARCHAR(30) NOT NULL,
+    type VARCHAR(20) NOT NULL, -- "default", "new_comment", "comment_reply", "comment_reaction", "friend_request", "friend_accepted", "friend_status", "mentions", "security", "profile_edit"
     
     comment_id INT,
     FOREIGN KEY (comment_id)

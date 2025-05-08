@@ -561,20 +561,34 @@ def create_comment():
         url_hash=hashing_util.md5_hex_to_binary(page_id)
     ).first()
     if story:
-        comment.story_id = story.id
-        # We'll send notifications to the users who bookmarked this specific story.
+        comment.story_id = story.id  # Sets the optional story_id column
+        # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
         notif_dicts = [
             {
                 "user_id": b.user_id,
                 "type": "new_comment",
-                "message": "Someone commented on a bookmarked story",
-                "url": f"https://infomundi.net/comments?id={story.get_public_id()}",
+                "message": "A new comment was posted on a bookmarked story",
+                "url": comment.url,
             }
             for b in bookmarks
         ]
         notifications.notify(notif_dicts)
 
+    # If this is a reply, ping the parent comment's author
+    if parent_id:
+        #parent_comment = models.Comment.query.get(parent_id)
+        parent_comment = extensions.db.session.get(models.Comment, parent_id)
+        if parent_comment and parent_comment.user_id != comment.user_id:
+            notifications.notify([
+                {
+                    "user_id": parent_comment.user_id,
+                    "type": "comment_reply",
+                    "message": f"{current_user.username} replied to your comment",
+                    "url": parent_comment.url
+                }
+            ])
+    comment.url = "https://infomundi.net" + page_id + f"#comment-{comment.id}"
     extensions.db.session.add(comment)
     extensions.db.session.commit()
 
@@ -586,17 +600,11 @@ def create_comment():
     )
 
 
-@api.route("/stories/most_commented", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 60 * 24 * 1)  # 1 day
-def stories_get_most_commented():
-    return jsonify(country_util.get_countries())
-
-
 @api.route("/comments/get/<page_id>", methods=["GET"])
 @extensions.limiter.limit("120/day;60/hour;10/minute")
 def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
-    sort = request.args.get("sort", "recent")  # "recent", "old", best",
+    sort = request.args.get("sort", "recent")  # "recent", "old", best"
     search = request.args.get("search", "", type=str).strip()
 
     # Compute the hash once

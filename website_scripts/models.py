@@ -78,7 +78,7 @@ class Story(db.Model):
     publisher = db.relationship("Publisher", backref="story")
 
     def get_public_id(self) -> str:
-        return hashing_util.md5_binary_to_string(self.url_hash)
+        return hashing_util.binary_to_md5_hex(self.url_hash)
 
 
 class StoryReaction(db.Model):
@@ -326,6 +326,7 @@ class Comment(db.Model):
     )
 
     content = db.Column(db.String(1000), nullable=False)
+    url = db.Column(db.String(100), nullable=False)  # URL where to find the comment
     is_flagged = db.Column(db.Boolean, default=False)
     is_edited = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)
@@ -398,8 +399,8 @@ class Notification(db.Model):
     user = db.relationship("User", backref=db.backref("notifications", lazy="dynamic"))
 
     # A simple enum or string to categorize
-    type = db.Column(db.String(30), nullable=False)
-    # e.g. "comment_reply", "friend_request", "friend_accepted", etc.
+    type = db.Column(db.String(20), nullable=False)
+    # "default", "new_comment", "comment_reply", "comment_reaction", "friend_request", "friend_accepted", "friend_status", "mentions", "security", "profile_edit"
 
     # Optional foreign keys to domain objects
     comment_id = db.Column(db.Integer, db.ForeignKey("comments.id"), nullable=True)
