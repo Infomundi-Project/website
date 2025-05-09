@@ -326,7 +326,7 @@ class Comment(db.Model):
     )
 
     content = db.Column(db.String(1000), nullable=False)
-    url = db.Column(db.String(100), nullable=False)  # URL where to find the comment
+    url = db.Column(db.String(100))  # URL where to find the comment
     is_flagged = db.Column(db.Boolean, default=False)
     is_edited = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)

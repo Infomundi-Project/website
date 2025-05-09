@@ -212,6 +212,8 @@
       </ul>
     </div>
   </div>
+
+
   <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg"
     data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
     <div
@@ -267,11 +269,13 @@
       </a>
       {% endif %}
     </div>
+
+
     <div class="offcanvas-body">
-      {% if current_user.is_authenticated %}
       <span class="fs-4">Account</span>
       <hr>
       <ul class="nav nav-pills flex-column mb-5">
+        {% if current_user.is_authenticated %}
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('views.user_profile', username=current_user.username) }}"
             class="nav-link {% if request.url.endswith(current_user.username) and 'profile' in request.url %}active{% endif %}">
@@ -298,11 +302,16 @@
             Settings
           </a>
         </li>
-      </ul>
-      {% else %}
-      <span class="fs-4">Access</span>
-      <hr>
-      <ul class="nav nav-pills flex-column mb-5">
+        <li class="nav-item inf-nav-item">
+          <a data-bs-toggle="modal" data-bs-target="#signOutModal"
+            class="nav-link">
+            <span class="icon-wrapper me-2"><i
+                class="fa-solid fa-right-from-bracket"></i></span>
+            <div class="vr me-2"></div>
+            Sign out
+          </a>
+        </li>
+        {% else %}
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('auth.login') }}"
             class="nav-link {{ 'active' if request.endpoint == 'auth.login' }}">
@@ -330,13 +339,27 @@
             Account Recovery
           </a>
         </li>
-      </ul>
       {% endif %}
-      {% if session.get('last_visited_country_url', '') or session.get('last_visited_story_url', '') %}
+      </ul>
+
+      <span class="fs-4">Preferences</span>
+      <hr>
+      <ul class="nav nav-pills flex-column mb-5">
+        <li class="nav-item inf-nav-item" id="infThemeToggleClicker">
+          <a href="#" class="d-flex nav-link {{ 'active' if not is_light_mode else '' }}">
+            <span class="icon-wrapper me-2">
+              <i class="fa-solid fa-circle-half-stroke {{ 'fa-flip-horizontal' if is_light_mode else ''}}"></i>
+            </span>
+            <div class="vr me-2"></div>
+            {{ 'Light Mode' if is_light_mode else 'Dark Mode' }}
+          </a>
+        </li>
+      </ul>
+
       <span class="fs-4">Session</span>
       <hr>
       <ul class="nav nav-pills flex-column mb-5">
-        {% if session.get('last_visited_country_url', '') %}
+        {% if session.get('last_visited_country_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_country_url'] }}"
             class="nav-link {{ 'active' if request.url == session['last_visited_country_url'] else '' }}">
@@ -347,7 +370,7 @@
           </a>
         </li>
         {% endif %}
-        {% if session.get('last_visited_story_url', '') %}
+        {% if session.get('last_visited_story_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_story_url'] }}"
             class="nav-link {{ 'active' if request.url == session['last_visited_story_url'] else '' }}">
@@ -359,30 +382,8 @@
         </li>
         {% endif %}
       </ul>
-      {% endif %}
-      {% if current_user.is_authenticated %}
-      <hr class="mt-5">
-      <ul class="nav nav-pills flex-column mb-5">
-        <li class="nav-item inf-nav-item">
-          <a data-bs-toggle="modal" data-bs-target="#signOutModal"
-            class="nav-link">
-            <span class="icon-wrapper me-2"><i
-                class="fa-solid fa-right-from-bracket"></i></span>
-            <div class="vr me-2"></div>
-            Sign out
-          </a>
-        </li>
-      </ul>
-      {% endif %}
-      <div class="position-fixed bottom-0 end-0 m-3">
-        <input type="checkbox" class="theme-checkbox" id="theme-checkbox"
-          {% if not is_light_mode %}checked{% endif %}>
-        <label for="theme-checkbox" class="theme-checkbox-label">
-          <i class="fa-solid fa-sun"></i>
-          <i class="fa-solid fa-moon"></i>
-          <span class="ball"></span>
-        </label>
-      </div>
+
+
     </div>
   </div>
 
