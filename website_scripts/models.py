@@ -343,6 +343,13 @@ class Comment(db.Model):
         lazy="dynamic",
         cascade="all, delete-orphan",
     )
+    # one-to-one link to stats
+    stats = db.relationship(
+        "CommentStats",
+        back_populates="comment",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
     reactions = db.relationship("CommentReaction", backref="comment", lazy="dynamic")
     user = db.relationship("User", backref="comments")
 
@@ -364,6 +371,20 @@ class CommentReaction(db.Model):
     __table_args__ = (
         db.UniqueConstraint("comment_id", "user_id", name="unique_comment_reaction"),
     )
+
+
+class CommentStats(db.Model):
+    __tablename__ = "comment_stats"
+
+    # one row per comment
+    comment_id = db.Column(
+        db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"), primary_key=True
+    )
+    likes = db.Column(db.Integer, default=0, nullable=False)
+    dislikes = db.Column(db.Integer, default=0, nullable=False)
+
+    # backref to access from Comment
+    comment = db.relationship("Comment", back_populates="stats", uselist=False)
 
 
 class Stocks(db.Model):
@@ -403,9 +424,11 @@ class Notification(db.Model):
     # "default", "new_comment", "comment_reply", "comment_reaction", "friend_request", "friend_accepted", "friend_status", "mentions", "security", "profile_edit"
 
     # Optional foreign keys to domain objects
-    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id"), nullable=True)
+    comment_id = db.Column(
+        db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"), nullable=True
+    )
     friendship_id = db.Column(
-        db.Integer, db.ForeignKey("friendships.id"), nullable=True
+        db.Integer, db.ForeignKey("friendships.id", ondelete="CASCADE"), nullable=True
     )
 
     # Friendly message or metadata

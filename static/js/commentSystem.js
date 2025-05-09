@@ -44,6 +44,7 @@
   let hasMore = true;
 
   let page_id = null;
+  let commentType = null;
 
   function hasUnsavedText() {
     // grab the main textarea on the fly
@@ -316,7 +317,8 @@
         body: JSON.stringify({
           content,
           parent_id: parentId,
-          page_id
+          page_id,
+          type: commentType
         })
       });
 
@@ -583,7 +585,7 @@
 
   class InfomundiComments extends HTMLElement {
     static get observedAttributes() {
-      return ['page_id'];
+      return ['page_id', 'type'];
     }
 
     constructor() {
@@ -593,11 +595,18 @@
     connectedCallback() {
       // Initial render on first connection
       this.handlePageIdChange(this.getAttribute('page_id'));
+      // also pick up the initial type
+      commentType = this.getAttribute('type');
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (name === 'page_id' && newValue && newValue !== oldValue) {
         this.handlePageIdChange(newValue);
+      }
+      if (name === 'type' && newValue !== oldValue) {
+        commentType = newValue;
+        // if you want to reload comments when type changes:
+        loadComments(true);
       }
     }
 

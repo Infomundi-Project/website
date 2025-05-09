@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS global_salts;
-
+DROP TABLE IF EXISTS comment_stats;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -206,6 +206,7 @@ CREATE TABLE comments (
     story_id INT,
     parent_id INT,
     content VARCHAR(1000) NOT NULL,
+    url VARCHAR(100) NOT NULL,
     is_flagged TINYINT(1) DEFAULT 0,
     is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,
@@ -231,6 +232,13 @@ CREATE TABLE comment_reactions (
 );
 
 
+CREATE TABLE comment_stats (
+    comment_id INTEGER PRIMARY KEY REFERENCES comments(id) ON DELETE CASCADE,
+    likes    INTEGER NOT NULL DEFAULT 0,
+    dislikes INTEGER NOT NULL DEFAULT 0
+);
+
+
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
@@ -244,11 +252,11 @@ CREATE TABLE notifications (
     
     comment_id INT,
     FOREIGN KEY (comment_id)
-        REFERENCES comments(id),
+        REFERENCES comments(id) ON DELETE CASCADE,
     
     friendship_id INT,
     FOREIGN KEY (friendship_id)
-        REFERENCES friendships(id),
+        REFERENCES friendships(id) ON DELETE CASCADE,
     
     message VARCHAR(100) NOT NULL,
     url VARCHAR(512),

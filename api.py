@@ -537,12 +537,16 @@ def create_comment():
     data = request.get_json()
     parent_id = data.get("parent_id")
     page_id = data.get("page_id")  # A string that uniquely identifies the page
+    type = data.get("type")  # Type of page which comment was posted on
     content = content = input_sanitization.gentle_cut_text(
         1000, input_sanitization.sanitize_html(data.get("content"))
     )  # Sanitizes and then gently cuts content
 
     if not page_id or not content:
-        return jsonify({"error": "Missing page_id or content"}), 400
+        return jsonify(error="Missing page_id or content"), 400
+
+    if type not in ("user", "story", "page"):
+        return jsonify(error="Invalid type"), 400
 
     comment = models.Comment(
         page_hash=hashing_util.string_to_md5_binary(page_id),
@@ -555,12 +559,18 @@ def create_comment():
         is_flagged=comments_util.is_content_inappropriate(content),
         parent_id=parent_id,
     )
+    extensions.db.session.add(comment)  # stage the INSERT
+    extensions.db.session.flush()  # actually send it to the DB, get back the PK
 
-    # Sees if the page_id refers to a valid story in the database
-    story = models.Story.query.filter_by(
-        url_hash=hashing_util.md5_hex_to_binary(page_id)
-    ).first()
-    if story:
+    if type == "story":
+        # Sees if the page_id refers to a valid story in the database
+        story = models.Story.query.filter_by(
+            url_hash=hashing_util.md5_hex_to_binary(page_id)
+        ).first()
+        if not story:
+            return jsonify(error="Could not find story in database."), 400
+
+        comment.url = f"https://infomundi.net/comments?id={story.get_public_id()}#comment-{comment.id}"
         comment.story_id = story.id  # Sets the optional story_id column
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
@@ -574,22 +584,43 @@ def create_comment():
             for b in bookmarks
         ]
         notifications.notify(notif_dicts)
+    elif type == "user":
+        profile_owner = models.User.query.filter_by(
+            public_id=security_util.uuid_string_to_bytes(page_id)
+        ).first()
+        if not profile_owner:
+            return jsonify(error="Could not find user in database."), 400
+
+        comment.url = f"https://infomundi.net/id/{page_id}#comment-{comment.id}"
+        notifications.notify(
+            [
+                {
+                    "user_id": profile_owner.id,
+                    "type": "new_comment",
+                    "message": "Someone commented on your profile",
+                    "url": comment.url,
+                }
+            ]
+        )
+    else:
+        comment.url = f"https://infomundi.net/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
 
     # If this is a reply, ping the parent comment's author
     if parent_id:
-        #parent_comment = models.Comment.query.get(parent_id)
+        # parent_comment = models.Comment.query.get(parent_id)
         parent_comment = extensions.db.session.get(models.Comment, parent_id)
         if parent_comment and parent_comment.user_id != comment.user_id:
-            notifications.notify([
-                {
-                    "user_id": parent_comment.user_id,
-                    "type": "comment_reply",
-                    "message": f"{current_user.username} replied to your comment",
-                    "url": parent_comment.url
-                }
-            ])
-    comment.url = "https://infomundi.net" + page_id + f"#comment-{comment.id}"
-    extensions.db.session.add(comment)
+            notifications.notify(
+                [
+                    {
+                        "user_id": parent_comment.user_id,
+                        "type": "comment_reply",
+                        "message": f"Someone replied to your comment",
+                        "url": parent_comment.url,
+                    }
+                ]
+            )
+
     extensions.db.session.commit()
 
     return (
@@ -623,8 +654,11 @@ def get_comments(page_id):
     # Sorting
     if sort == "old":
         query = query.order_by(asc(models.Comment.created_at))
-    # elif sort == "best":
-    #    query = query.order_by(desc(models.Comment.reactions.filter_by(action='like') - models.Comment.reactions.dislikes))
+    if sort == "best":
+        query = query.outerjoin(models.CommentStats).order_by(
+            desc(models.CommentStats.likes - models.CommentStats.dislikes),
+            desc(models.Comment.created_at),  # tiebreak by recency
+        )
     else:
         query = query.order_by(desc(models.Comment.created_at))  # fallback
 
@@ -685,33 +719,57 @@ def react_to_comment(comment_id, action):
     if action not in ("like", "dislike"):
         return jsonify({"error": "Invalid action"}), 400
 
+    # Fetch the comment and its stats row (create stats if missing)
     comment = models.Comment.query.get_or_404(comment_id)
+    if comment.stats is None:
+        comment.stats = models.CommentStats(comment_id=comment.id)
+        extensions.db.session.add(comment.stats)
+        extensions.db.session.commit()
 
+    # See if the user already reacted
     reaction = models.CommentReaction.query.filter_by(
         comment_id=comment_id, user_id=current_user.id
     ).first()
 
-    if reaction:
-        if reaction.action == action:
-            extensions.db.session.delete(reaction)  # Toggle off
-            extensions.db.session.commit()
+    try:
+        if reaction:
+            if reaction.action == action:
+                # Toggle off: remove the reaction and decrement the counter
+                extensions.db.session.delete(reaction)
+                if action == "like":
+                    comment.stats.likes = models.CommentStats.likes - 1
+                else:
+                    comment.stats.dislikes = models.CommentStats.dislikes - 1
+            else:
+                # Change reaction: decrement old, increment new
+                if reaction.action == "like":
+                    comment.stats.likes -= 1
+                    comment.stats.dislikes += 1
+                else:
+                    comment.stats.dislikes -= 1
+                    comment.stats.likes += 1
+                reaction.action = action
         else:
-            reaction.action = action  # Change reaction
-            extensions.db.session.commit()
-    else:
-        new_reaction = models.CommentReaction(
-            comment_id=comment_id, user_id=current_user.id, action=action
-        )
-        extensions.db.session.add(new_reaction)
-        try:
-            extensions.db.session.commit()
-        except IntegrityError:
-            extensions.db.session.rollback()
-            return jsonify({"error": "Duplicate reaction"}), 400
+            # New reaction: add + increment the right counter
+            new_reaction = models.CommentReaction(
+                comment_id=comment_id, user_id=current_user.id, action=action
+            )
+            extensions.db.session.add(new_reaction)
+            if action == "like":
+                comment.stats.likes += 1
+            else:
+                comment.stats.dislikes += 1
 
+        extensions.db.session.commit()
+
+    except IntegrityError:
+        extensions.db.session.rollback()
+        return jsonify({"error": "Duplicate reaction"}), 400
+
+    # Return the fresh counters from CommentStats
     return jsonify(
-        likes=comment.reactions.filter_by(action="like").count(),
-        dislikes=comment.reactions.filter_by(action="dislike").count(),
+        likes=comment.stats.likes,
+        dislikes=comment.stats.dislikes,
     )
 
 

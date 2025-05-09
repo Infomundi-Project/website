@@ -44,10 +44,23 @@ def notify(notif_dicts: list):
                 {"user_id": user_id, "type": type, "message": message, "url": url}, { ... }
             ]
     """
-    types_allowed = ("default", "new_comment", "comment_reply", "comment_reaction", "friend_request", "friend_accepted", "friend_status", "mentions", "security", "profile_edit")
+    types_allowed = (
+        "default",
+        "new_comment",
+        "comment_reply",
+        "comment_reaction",
+        "friend_request",
+        "friend_accepted",
+        "friend_status",
+        "mentions",
+        "security",
+        "profile_edit",
+    )
     for n in notif_dicts:
-        if n.get('type') not in types_allowed:
-            raise custom_exceptions.InfomundiCustomException(f"'type' value is invalid. Types allowed: {types_allowed}")
+        if n.get("type") not in types_allowed:
+            raise custom_exceptions.InfomundiCustomException(
+                f"'type' value is invalid. Types allowed: {types_allowed}"
+            )
 
     extensions.db.session.execute(insert(models.Notification), notif_dicts)
     extensions.db.session.commit()
