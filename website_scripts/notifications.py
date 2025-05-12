@@ -57,13 +57,16 @@ def notify(notif_dicts: list):
         "profile_edit",
     )
     for n in notif_dicts:
+        if n.get("user_id") is None:
+            break
+
         if n.get("type") not in types_allowed:
             raise custom_exceptions.InfomundiCustomException(
                 f"'type' value is invalid. Types allowed: {types_allowed}"
             )
-
-    extensions.db.session.execute(insert(models.Notification), notif_dicts)
-    extensions.db.session.commit()
+    else:
+        extensions.db.session.execute(insert(models.Notification), notif_dicts)
+        extensions.db.session.commit()
 
 
 def send_email(

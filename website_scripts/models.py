@@ -130,10 +130,10 @@ class User(db.Model, UserMixin):
     display_name = db.Column(db.String(40))
     profile_description = db.Column(db.String(1500))
     avatar_url = db.Column(
-        db.String(80), default="https://infomundi.net/static/img/avatar.webp"
+        db.String(85), default="https://infomundi.net/static/img/avatar.webp"
     )
-    profile_banner_url = db.Column(db.String(80))
-    profile_wallpaper_url = db.Column(db.String(80))
+    profile_banner_url = db.Column(db.String(85))
+    profile_wallpaper_url = db.Column(db.String(85))
     # Contact info
     website_url = db.Column(db.String(120))
     public_email = db.Column(db.String(120))

@@ -43,9 +43,9 @@ CREATE TABLE users (
     -- Profile
     display_name VARCHAR(40),
     profile_description VARCHAR(1500),
-    avatar_url VARCHAR(80) DEFAULT 'https://infomundi.net/static/img/avatar.webp',
-    profile_banner_url VARCHAR(80),
-    profile_wallpaper_url VARCHAR(80),
+    avatar_url VARCHAR(85) DEFAULT 'https://infomundi.net/static/img/avatar.webp',
+    profile_banner_url VARCHAR(85),
+    profile_wallpaper_url VARCHAR(85),
     -- contact info
     website_url VARCHAR(120),
     public_email VARCHAR(120),

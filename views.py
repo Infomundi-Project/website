@@ -214,18 +214,26 @@ def edit_user_profile():
     state_id = request.form.get("state", 0, type=int)
     city_id = request.form.get("city", 0, type=int)
 
-    if country_id or state_id or city_id:
-        if country_id != current_user.country_id:
+    if country_id != current_user.country_id:
+        if country_id == 0:
+            current_user.country_id = None
+        else:
             country = extensions.db.session.get(models.Country, country_id)
             if country:
                 current_user.country_id = country_id
 
-        if state_id != current_user.state_id:
+    if state_id != current_user.state_id:
+        if state_id == 0:
+            current_user.state_id = None
+        else:
             state = extensions.db.session.get(models.State, state_id)
             if state:
                 current_user.state_id = state_id
 
-        if city_id != current_user.city_id:
+    if city_id != current_user.city_id:
+        if city_id == 0:
+            current_user.city_id = None
+        else:
             city = extensions.db.session.get(models.City, city_id)
             if city:
                 current_user.city_id = city_id

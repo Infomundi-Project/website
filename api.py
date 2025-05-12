@@ -574,16 +574,17 @@ def create_comment():
         comment.story_id = story.id  # Sets the optional story_id column
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
-        notif_dicts = [
-            {
-                "user_id": b.user_id,
-                "type": "new_comment",
-                "message": "A new comment was posted on a bookmarked story",
-                "url": comment.url,
-            }
-            for b in bookmarks
-        ]
-        notifications.notify(notif_dicts)
+        if bookmarks:
+            notif_dicts = [
+                {
+                    "user_id": b.user_id,
+                    "type": "new_comment",
+                    "message": "A new comment was posted on a bookmarked story",
+                    "url": comment.url,
+                }
+                for b in bookmarks
+            ]
+            notifications.notify(notif_dicts)
     elif type == "user":
         profile_owner = models.User.query.filter_by(
             public_id=security_util.uuid_string_to_bytes(page_id)

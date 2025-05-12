@@ -177,7 +177,7 @@
               <li class="list-inline-item"><i class="fa-solid fa-location-dot me-1"></i>{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}</li>
               {% endif %}
               {% if user.website_url %}
-              <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="#">{{ user.website_url }}</a></li>
+              <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="{{ user.website_url }}">{{ user.website_url }}</a></li>
               {% endif %}
               <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined {{ user.created_at }}</li>
             </ul>

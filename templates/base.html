@@ -72,10 +72,6 @@
     href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
   {% block header %}
   {% endblock %}
-  {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
-  <link rel="stylesheet"
-    href="{{ url_for('static', filename='css/edit_profile.css') }}">
-  {% endif %}
   <!-- Stylesheets/Website -->
   {% assets "css_base" %}
   <link rel="stylesheet" href="{{ ASSET_URL }}">
@@ -918,13 +914,13 @@
     {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %}
     <div class="container mt-5">
       <div class="row align-items-start">
-        <div class="col-md-3 main-container bg-secondary-subtle mb-3">
+        <div class="col-md-3 p-3 rounded bg-secondary-subtle mb-3">
           <img src="{{ current_user.avatar_url }}" class="img-thumbnail"
             style="border-radius: 15px;"
             alt="{{ current_user.username }}'s profile picture">
           <h4 class="mt-2">{{ current_user.username }}</h4>
           <a href="https://infomundi.net/profile/{{ current_user.username }}"
-            class="btn btn-sm btn-primary mt-2">Return to your profile</a>
+            class="btn btn-sm btn-primary mt-2">Return to profile</a>
           <ul class="nav nav-pills flex-column mt-4">
             <li class="nav-item inf-nav-item">
               <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}"
@@ -944,7 +940,7 @@
           </ul>
         </div>
         <div class="col-md-9">
-          <div class="profile-container bg-secondary-subtle">
+          <div class="p-3 rounded bg-secondary-subtle">
             {% block edit_profile_content %}
             {% endblock %}
           </div>
