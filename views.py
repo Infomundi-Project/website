@@ -210,7 +210,59 @@ def edit_user_profile():
             )
             return render_template("edit_profile.html")
 
+    country_id = request.form.get("country", 0, type=int)
+    state_id = request.form.get("state", 0, type=int)
+    city_id = request.form.get("city", 0, type=int)
+
+    if country_id or state_id or city_id:
+        if country_id != current_user.country_id:
+            country = extensions.db.session.get(models.Country, country_id)
+            if country:
+                current_user.country_id = country_id
+
+        if state_id != current_user.state_id:
+            state = extensions.db.session.get(models.State, state_id)
+            if state:
+                current_user.state_id = state_id
+
+        if city_id != current_user.city_id:
+            city = extensions.db.session.get(models.City, city_id)
+            if city:
+                current_user.city_id = city_id
+
+    linkedin_url = request.form.get("linkedin_url")
+    twitter_url = request.form.get("twitter_url")
+    instagram_url = request.form.get("instagram_url")
+
+    if linkedin_url or twitter_url or instagram_url:
+        if (
+            input_sanitization.detect_profile_type(linkedin_url) != "linkedin"
+            or input_sanitization.detect_profile_type(twitter_url) != "twitter"
+            or input_sanitization.detect_profile_type(instagram_url) != "instagram"
+        ):
+            flash("Invalid url for linkedin or twitter or instagram profile.", "error")
+            return render_template("edit_profile.html")
+
+    website_url = request.form.get("website_url")
+    if website_url:
+        if not input_sanitization.is_valid_url(website_url):
+            flash("Invalid website url.", "error")
+            return render_template("edit_profile.html")
+
+    public_email = request.form.get("public_email")
+    if public_email:
+        if not input_sanitization.is_valid_email(public_email):
+            flash("Invalid public email.", "error")
+            return render_template("edit_profile.html")
+
     # At this point user input should be safe :thumbsup: so we apply changes
+    current_user.website_url = website_url
+    current_user.public_email = public_email
+
+    current_user.linkedin_url = linkedin_url
+    current_user.twitter_url = twitter_url
+    current_user.instagram_url = instagram_url
+
     current_user.username = username
     current_user.display_name = display_name
     current_user.profile_description = description

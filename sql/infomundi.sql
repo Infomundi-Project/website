@@ -46,6 +46,14 @@ CREATE TABLE users (
     avatar_url VARCHAR(80) DEFAULT 'https://infomundi.net/static/img/avatar.webp',
     profile_banner_url VARCHAR(80),
     profile_wallpaper_url VARCHAR(80),
+    -- contact info
+    website_url VARCHAR(120),
+    public_email VARCHAR(120),
+    -- external links
+    twitter_url VARCHAR(80),
+    instagram_url VARCHAR(80),
+    linkedin_url VARCHAR(80),
+    -- level and visibility
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
     profile_visibility VARCHAR(7) DEFAULT 'public',  -- public, friends, private
@@ -77,7 +85,15 @@ CREATE TABLE users (
 
     is_mail_twofactor_enabled TINYINT(1) DEFAULT 0,
     mail_twofactor_code INT,
-    mail_twofactor_timestamp DATETIME
+    mail_twofactor_timestamp DATETIME,
+
+    country_id MEDIUMINT UNSIGNED,
+    state_id MEDIUMINT UNSIGNED,
+    city_id MEDIUMINT UNSIGNED,
+
+    FOREIGN KEY (country_id) REFERENCES countries(id),
+    FOREIGN KEY (state_id) REFERENCES states(id),
+    FOREIGN KEY (city_id) REFERENCES cities(id)
 );
 
 

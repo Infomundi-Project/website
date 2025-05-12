@@ -168,24 +168,21 @@
               id="profile-avatar">
           </div>
           <div class="col">
-            {% if user.display_name %}
-            <span
-              class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} fw-bold">{{ user.display_name }}</span>
-            <br>
-            <span
-              class="notranslate fs-6 text-muted me-1">@{{ user.username }}</span>
-            {% else %}
-            <span
-              class="notranslate {% if not is_mobile %}fs-2{% else %}fs-5{% endif %} me-1">{{ user.username }}</span>
-            {% endif %}
-            {% if user.role == 'admin' %}
-            <span class="badge rounded-pill text-bg-danger"
-              data-bs-toggle="tooltip" data-bs-placement="right"
-              data-bs-title="Infomundi Administrator"><i
-                class="fa-solid fa-user-tie"></i></span>
-            {% endif %}
+
+            <span class="notranslate {% if is_mobile %}fs-4{% else %}fs-2{% endif %} fw-bold">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif%}<span class="ms-2 text-muted fs-5">@{{ user.username }}</span></span>
+
+
+            <ul class="list-inline text-muted">
+              {% if user.country %}
+              <li class="list-inline-item"><i class="fa-solid fa-location-dot me-1"></i>{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}</li>
+              {% endif %}
+              {% if user.website_url %}
+              <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="#">{{ user.website_url }}</a></li>
+              {% endif %}
+              <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined {{ user.created_at }}</li>
+            </ul>
             {% if user.profile_description %}
-            <div class="mt-2 user-description">
+            <div class="mt-3 user-description">
               {% if has_too_many_newlines or is_mobile %}
               <a href="#" data-bs-toggle="modal"
                 data-bs-target="#descriptionModal">View more</a>

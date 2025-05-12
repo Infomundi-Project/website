@@ -47,7 +47,7 @@
     <div class="input-group">
       <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
       <div class="form-floating">
-        <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="Email" value="">
+        <input type="email" name="public_email" class="form-control" id="floatingEmail" placeholder="Email" value="{% if current_user.public_email %}{{ current_user.public_email }}{% endif %}">
         <label for="floatingEmail">Public email</label>
       </div>
     </div>
@@ -57,7 +57,7 @@
     <div class="input-group">
       <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
       <div class="form-floating">
-        <input type="url" name="website" class="form-control" id="floatingWebsite" placeholder="Website" value="">
+        <input type="url" name="website_url" class="form-control" id="floatingWebsite" placeholder="Website" value="{% if current_user.website_url %}{{ current_user.website_url }}{% endif %}">
         <label for="floatingWebsite">Website</label>
       </div>
     </div>
@@ -88,23 +88,35 @@
   <hr>
   <div class="mb-3">
     <div class="input-group">
-      <span class="input-group-text"><i class="fa-brands fa-twitter"></i></span>
-      <div class="form-floating">
-        <input type="url" name="twitter" class="form-control" id="floatingTwitter" placeholder="Twitter Profile" value="{{ current_user.twitter }}">
-        <label for="floatingTwitter">Twitter Profile</label>
-      </div>
-    </div>
-  </div>
-  
-  <div class="mb-3">
-    <div class="input-group">
       <span class="input-group-text"><i class="fa-brands fa-linkedin"></i></span>
       <div class="form-floating">
-        <input type="url" name="linkedin" class="form-control" id="floatingLinkedIn" placeholder="LinkedIn Profile" value="{{ current_user.linkedin }}">
+        <input type="url" name="linkedin_url" class="form-control" id="floatingLinkedIn" placeholder="LinkedIn Profile" value="{% if current_user.linkedin_url %}{{ current_user.linkedin_url }}{% endif %}">
         <label for="floatingLinkedIn">LinkedIn Profile</label>
       </div>
     </div>
   </div>
+
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-brands fa-twitter"></i></span>
+      <div class="form-floating">
+        <input type="url" name="twitter_url" class="form-control" id="floatingTwitter" placeholder="Twitter Profile" value="{% if current_user.twitter_url %}{{ current_user.twitter_url }}{% endif %}">
+        <label for="floatingTwitter">Twitter Profile</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-brands fa-instagram"></i></span>
+      <div class="form-floating">
+        <input type="url" name="instagram_url" class="form-control" id="floatingInstagram" placeholder="Instagram Profile" value="{% if current_user.instagram_url %}{{ current_user.instagram_url }}{% endif %}">
+        <label for="floatingInstagram">Instagram Profile</label>
+      </div>
+    </div>
+  </div>
+  
+
   
   <button class="btn btn-primary mt-3" type="submit">Submit</button>
 </form>
@@ -115,67 +127,81 @@
   ></script>
 <script nonce="{{ nonce }}">
   $(document).ready(function() {
-      // Fetch countries on page load
+    // **1. Capture the user’s current picks as JS vars**  
+    var initialCountryId = "{{ current_user.country_id or '' }}";
+    var initialStateId   = "{{ current_user.state_id   or '' }}";
+    var initialCityId    = "{{ current_user.city_id    or '' }}";
+
+    // **2. Load countries & re-select if needed**
+    $.ajax({
+      url: 'https://infomundi.net/api/countries',
+      method: 'GET',
+      success: function(countries) {
+        let $country = $('#country');
+        // append each country
+        countries.forEach(function(c) {
+          $country.append(new Option(c.name, c.id));
+        });
+        if (initialCountryId) {
+          // set the select, then fire change to load states
+          $country.val(initialCountryId).trigger('change');
+        }
+      },
+      error: function(err) {
+        console.error('Error fetching countries:', err);
+      }
+    });
+
+    // **3. When country changes, load & pre-select state**
+    $('#country').change(function() {
+      let cid = $(this).val();
+      if (!cid) return;
       $.ajax({
-          url: 'https://infomundi.net/api/countries',
-          method: 'GET',
-          success: function(data) {
-              let countries = data;
-              let countrySelect = $('#country');
-              countries.forEach(function(country) {
-                  countrySelect.append(new Option(country.name, country.id));
-              });
-          },
-          error: function(error) {
-              console.error('Error fetching countries:', error);
+        url: `https://infomundi.net/api/countries/${cid}/states`,
+        method: 'GET',
+        success: function(states) {
+          let $state = $('#state')
+            .empty()
+            .append(new Option('Select your state', '', true, false));
+          states.forEach(s => $state.append(new Option(s.name, s.id)));
+          $('#state-div').removeClass('d-none');
+
+          if (initialStateId) {
+            $state.val(initialStateId).trigger('change');
+            // clear so we don’t re-trigger on future country switches
+            initialStateId = null;
           }
+        },
+        error: function(err) {
+          console.error('Error fetching states:', err);
+        }
       });
-  
-      // Fetch states when a country is selected
-      $('#country').change(function() {
-          let countryId = $(this).val();
-          if (countryId) {
-              $.ajax({
-                  url: `https://infomundi.net/api/countries/${countryId}/states`,
-                  method: 'GET',
-                  success: function(data) {
-                      let states = data;
-                      let stateSelect = $('#state');
-                      stateSelect.empty().append(new Option('Select your state', ''));
-                      states.forEach(function(state) {
-                          stateSelect.append(new Option(state.name, state.id));
-                      });
-                      $('#state-div').removeClass('d-none');
-                  },
-                  error: function(error) {
-                      console.error('Error fetching states:', error);
-                  }
-              });
+    });
+
+    // **4. When state changes, load & pre-select city**
+    $('#state').change(function() {
+      let sid = $(this).val();
+      if (!sid) return;
+      $.ajax({
+        url: `https://infomundi.net/api/states/${sid}/cities`,
+        method: 'GET',
+        success: function(cities) {
+          let $city = $('#city')
+            .empty()
+            .append(new Option('Select your city', '', true, false));
+          cities.forEach(c => $city.append(new Option(c.name, c.id)));
+          $('#city-div').removeClass('d-none');
+
+          if (initialCityId) {
+            $city.val(initialCityId);
+            initialCityId = null;
           }
+        },
+        error: function(err) {
+          console.error('Error fetching cities:', err);
+        }
       });
-  
-      // Fetch cities when a state is selected
-      $('#state').change(function() {
-          let stateId = $(this).val();
-          if (stateId) {
-              $.ajax({
-                  url: `https://infomundi.net/api/states/${stateId}/cities`,
-                  method: 'GET',
-                  success: function(data) {
-                      let cities = data;
-                      let citySelect = $('#city');
-                      citySelect.empty().append(new Option('Select your city', ''));
-                      cities.forEach(function(city) {
-                          citySelect.append(new Option(city.name, city.id));
-                      });
-                      $('#city-div').removeClass('d-none');
-                  },
-                  error: function(error) {
-                      console.error('Error fetching cities:', error);
-                  }
-              });
-          }
-      });
+    });
   
       // Initialize Quill editor
       var quill = new Quill('#editor', {

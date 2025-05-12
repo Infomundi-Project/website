@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from flask_login import UserMixin
+from sqlalchemy.dialects.mysql import MEDIUMINT
 
 from .extensions import db
 from . import security_util, hashing_util, totp_util, qol_util
@@ -133,6 +134,14 @@ class User(db.Model, UserMixin):
     )
     profile_banner_url = db.Column(db.String(80))
     profile_wallpaper_url = db.Column(db.String(80))
+    # Contact info
+    website_url = db.Column(db.String(120))
+    public_email = db.Column(db.String(120))
+    # external links
+    twitter_url = db.Column(db.String(80))
+    instagram_url = db.Column(db.String(80))
+    linkedin_url = db.Column(db.String(80))
+    # level and privacy
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
     # Privacy settings
@@ -172,6 +181,14 @@ class User(db.Model, UserMixin):
     is_mail_twofactor_enabled = db.Column(db.Boolean, default=False)
     mail_twofactor_code = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
+
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    state_id = db.Column(db.Integer, db.ForeignKey("states.id"), nullable=True)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+
+    country = db.relationship("Country", backref="users", lazy="joined")
+    state = db.relationship("State", backref="users", lazy="joined")
+    city = db.relationship("City", backref="users", lazy="joined")
 
     def enable(self):
         self.is_enabled = True
@@ -500,7 +517,7 @@ class Subregion(db.Model):
 
 class Country(db.Model):
     __tablename__ = "countries"
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     iso3 = db.Column(db.String(3))
     numeric_code = db.Column(db.String(3))
@@ -536,7 +553,7 @@ class Country(db.Model):
 
 class State(db.Model):
     __tablename__ = "states"
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=False)
     country_code = db.Column(db.String(2), nullable=False)
@@ -559,7 +576,7 @@ class State(db.Model):
 
 class City(db.Model):
     __tablename__ = "cities"
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     state_id = db.Column(db.Integer, db.ForeignKey("states.id"), nullable=False)
     state_code = db.Column(db.String(255), nullable=False)

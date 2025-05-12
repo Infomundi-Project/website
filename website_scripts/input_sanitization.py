@@ -55,6 +55,30 @@ def has_external_links(text: str) -> bool:
     return bool(findings)
 
 
+def detect_profile_type(s: str) -> str:
+    """
+    Detects if the string is an Instagram, Twitter, or LinkedIn profile URL or handle.
+    Returns 'instagram', 'twitter', 'linkedin', or 'unknown'.
+    """
+    s = s.strip()
+    instagram_pattern = r"^(?:https?://)?(?:www\.)?instagram\.com/[A-Za-z0-9._]+/?$"
+    twitter_pattern = (
+        r"^(?:https?://)?(?:www\.)?twitter\.com/[A-Za-z0-9_]+/?$|^@[A-Za-z0-9_]+$"
+    )
+    linkedin_pattern = (
+        r"^(?:https?://)?(?:[a-z]{2,3}\.)?linkedin\.com/(?:in|company)/[A-Za-z0-9-]+/?$"
+    )
+
+    if re.match(instagram_pattern, s, re.IGNORECASE):
+        return "instagram"
+    elif re.match(twitter_pattern, s, re.IGNORECASE):
+        return "twitter"
+    elif re.match(linkedin_pattern, s, re.IGNORECASE):
+        return "linkedin"
+    else:
+        return "unknown"
+
+
 def clean_publisher_name(name):
     # Remove common patterns
     name = re.sub(r" - Latest.*", "", name, flags=re.IGNORECASE)
