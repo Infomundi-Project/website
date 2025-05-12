@@ -683,7 +683,7 @@
   </div>
   {% endif %}
   <div
-    class="container-fluid {% if request.endpoint == 'views.user_profile' %}background-container{% endif %}">
+    class="container-fluid {% if request.endpoint == 'views.user_profile' %}background-container py-3{% endif %}">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}

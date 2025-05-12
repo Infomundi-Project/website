@@ -23,10 +23,6 @@
   }
 
   .profile-container {
-    border-radius: 15px;
-    padding: 20px;
-    margin-top: 50px;
-    margin-bottom: 50px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: relative;
     z-index: 2;
@@ -37,7 +33,6 @@
     background-size: cover;
     height: 200px;
     position: relative;
-    border-radius: 15px 15px 0 0;
     overflow: hidden;
   }
 
@@ -54,8 +49,6 @@
   .profile-avatar {
     max-width: 10rem;
     height: auto;
-    border-radius: 15px;
-    border: 3px solid white;
   }
 
   .friend-avatar {
@@ -162,8 +155,8 @@
 
 
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %}">
-  <div class="profile-container bg-dark-subtle shadow-lg" style="opacity: 90%;">
-    <div class="profile-header mb-3"></div>
+  <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 90%;">
+    <div class="profile-header rounded-3 mb-3"></div>
 
     <div class="row">
       <div class="col-md-8">
@@ -171,7 +164,8 @@
           <div class="col-auto me-2">
             <img src="{{ user.avatar_url }}"
               alt="{{ user.username }}'s profile picture"
-              class="profile-avatar">
+              class="profile-avatar rounded-3 border border-3 border-light-subtle"
+              id="profile-avatar">
           </div>
           <div class="col">
             {% if user.display_name %}

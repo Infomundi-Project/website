@@ -188,13 +188,13 @@ css_base = Bundle(
     "css/ticker.css",
     "fontawesome/css/all.min.css",
     "fontawesome/css/fontawesome.min.css",
-    "css/cookieconsent.css",
+    "css/libs/cookieconsent.css",
     filters="cssmin",
     output="gen/base_packed.css",
 )
 # base.html
 js_base = Bundle(
-    "js/lazysizes.min.js",
+    "js/libs/lazysizes.min.js",
     "js/themeButton.js",
     "js/triggerTooltip.js",
     "js/tickerSpeedUp.js",
