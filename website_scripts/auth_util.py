@@ -13,6 +13,7 @@ from . import (
     qol_util,
     input_sanitization,
     cloudflare_util,
+    config,
 )
 
 
@@ -54,31 +55,6 @@ The Infomundi Team
     """
     subject = "Infomundi - New Login"
     notifications.send_email(cleartext_email, subject, message)
-
-
-def perform_logout_actions():
-    """To facilitate, we perform all logout actions in a single function.
-    Clears user's session, and delete cookies related to Comentario's authentication.
-    """
-    session.permanent = False
-    session.clear()
-    logout_user()
-
-    response = make_response(redirect(url_for("auth.login")))
-
-    # List of cookie names to delete, related to Comentario
-    cookies_to_delete = (
-        "XSRF-TOKEN",
-        "_comentario_auth_session",
-        "_xsrf_session",
-        "comentario_commenter_session",
-    )
-
-    # Delete each cookie
-    for cookie in cookies_to_delete:
-        response.set_cookie(cookie, "", expires=0)
-
-    return response
 
 
 def change_password(user, new_password: str):
@@ -250,9 +226,10 @@ The Infomundi Team"""
     return notifications.send_email(email, subject, message)
 
 
-def delete_account(email, token) -> bool:
+def delete_account(email: str, token: str) -> bool:
     user = search_user_email_in_database(email)
-
+    token = security_util.uuid_string_to_bytes(token)
+    
     # If the supplied token doesn't match the database record, return False.
     if user.delete_token != token:
         return False
@@ -276,7 +253,7 @@ def delete_account(email, token) -> bool:
 def send_delete_token(email: str) -> bool:
     user = search_user_email_in_database(email)
 
-    token = security_util.generate_nonce(24)
+    token = security_util.generate_uuid_string()
 
     subject = "Infomundi - Confirm Account Deletion"
     message = f"""Hello, {user.display_name if user.display_name else user.username}.
@@ -297,7 +274,7 @@ The Infomundi Team"""
         return False
 
     # Saves delete token information
-    user.delete_token = token
+    user.delete_token = security_util.uuid_string_to_bytes(token)
     user.delete_token_timestamp = datetime.now()
     extensions.db.session.commit()
 

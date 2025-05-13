@@ -461,6 +461,7 @@ def upload_image():
 
 
 @views.route("/contact", methods=["GET", "POST"])
+@extensions.limiter.limit("120/day;60/hour;6/minute", override_defaults=True)
 @decorators.verify_captcha
 def contact():
     if request.method == "GET":

@@ -10,7 +10,7 @@ from flask import (
     g,
     abort,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from datetime import datetime
 
 from website_scripts import (
@@ -302,5 +302,8 @@ def google_callback():
 @auth.route("/logout", methods=["GET"])
 @login_required
 def logout():
+    session.permanent = False
+    session.clear()
+    logout_user()
     flash(f"We hope to see you again soon, {current_user.username}")
-    return auth_util.perform_logout_actions()
+    return redirect(url_for("auth.login"))
