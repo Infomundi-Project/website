@@ -3,12 +3,11 @@ from os import environ
 from . import json_util
 
 
-WEBSITE_ROOT = "/app"
-LOCAL_ROOT = "/root/docker/infomundi-app"
+WEBSITE_ROOT = environ["WEBSITE_ROOT"]
+LOCAL_ROOT = environ["LOCAL_ROOT"]
 
 # -----------> Secret Keys <-----------
 CAPTCHA_SECRET_KEY = environ["CAPTCHA_SECRET_KEY"]
-COMMENTO_SSO_KEY = environ["COMMENTO_SSO_KEY"]
 OPENAI_API_KEY = environ["OPENAI_API_KEY"]
 ENCRYPTION_KEY = environ["ENCRYPTION_KEY"]
 SECRET_KEY = environ["SECRET_KEY"]
@@ -53,17 +52,17 @@ CAPTCHA_CLEARANCE_HOURS = 12
 # -----------> Email <-----------
 SMTP_USERNAME = "noreply@infomundi.net"
 SMTP_PASSWORD = environ["SMTP_PASSWORD"]
-SMTP_SERVER = "mail.infomundi.net"
+SMTP_SERVER = environ["SMTP_SERVER"]
 SMTP_PORT = 587
 
 # -----------> Databases <-----------
-MYSQL_DATABASE = "infomundi"
-MYSQL_HOST = "infomundi-mysql"
-MYSQL_USERNAME = "infomundi"
+MYSQL_DATABASE = environ["MYSQL_DATABASE"]
+MYSQL_HOST = environ["MYSQL_HOST"]
+MYSQL_USERNAME = environ["MYSQL_USERNAME"]
 MYSQL_PASSWORD = environ["MYSQL_PASSWORD"]
 
 REDIS_DATABASE = 0
-REDIS_HOST = "infomundi-redis"
+REDIS_HOST = environ["REDIS_HOST"]
 REDIS_PORT = 6379
 REDIS_PASSWORD = environ["REDIS_PASSWORD"]
 REDIS_CONNECTION_STRING = (
