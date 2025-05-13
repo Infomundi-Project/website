@@ -589,7 +589,7 @@ def create_comment():
         if not profile_owner:
             return jsonify(error="Could not find user in database."), 400
 
-        comment.url = url_for("views.id") + f"/{page_id}#comment-{comment.id}"
+        comment.url = url_for("views.user_profile_by_id", public_id=page_id) + f"#comment-{comment.id}"
         notifications.notify(
             [
                 {

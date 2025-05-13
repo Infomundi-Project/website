@@ -500,7 +500,6 @@ document.addEventListener("DOMContentLoaded", function() {
       .body.offsetHeight - 2000 && !isLoading &&
       hasMoreStories) {
       fetchStories(false);
-      initializePillar();
     }
   });
 

@@ -742,7 +742,8 @@
           body: JSON.stringify({
             content,
             parent_id: parentId,
-            page_id
+            page_id,
+            type: commentType
           })
         });
         await loadComments(true);
