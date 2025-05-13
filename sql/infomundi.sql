@@ -1,3 +1,9 @@
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS bookmarks;
+DROP TABLE IF EXISTS comment_stats;
+DROP TABLE IF EXISTS comment_reactions;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS story_stats;
 DROP TABLE IF EXISTS story_reactions;
 DROP TABLE IF EXISTS user_ip_history;
@@ -7,7 +13,6 @@ DROP TABLE IF EXISTS stories;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS publishers;
 DROP TABLE IF EXISTS categories;
-DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS common_passwords;
 DROP TABLE IF EXISTS register_tokens;
 DROP TABLE IF EXISTS site_statistics;
@@ -15,7 +20,6 @@ DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS global_salts;
-DROP TABLE IF EXISTS comment_stats;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -103,19 +107,6 @@ CREATE TABLE categories (
 );
 
 
-CREATE TABLE tags (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  story_id INT NOT NULL,
-  tag VARCHAR(30) NOT NULL,
-  UNIQUE KEY uq_story_tag (story_id,tag),
-  KEY idx_tags_story (story_id),
-  CONSTRAINT fk_tags_story
-    FOREIGN KEY (story_id)
-    REFERENCES stories (id)
-    ON DELETE CASCADE
-);
-
-
 CREATE TABLE publishers (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -156,6 +147,19 @@ CREATE TABLE stories (
 
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(id)
+);
+
+
+CREATE TABLE tags (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  story_id INT NOT NULL,
+  tag VARCHAR(30) NOT NULL,
+  UNIQUE KEY uq_story_tag (story_id,tag),
+  KEY idx_tags_story (story_id),
+  CONSTRAINT fk_tags_story
+    FOREIGN KEY (story_id)
+    REFERENCES stories (id)
+    ON DELETE CASCADE
 );
 
 

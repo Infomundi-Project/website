@@ -8,7 +8,6 @@ LOCAL_ROOT = "/root/docker/infomundi-app"
 
 # -----------> Secret Keys <-----------
 CAPTCHA_SECRET_KEY = environ["CAPTCHA_SECRET_KEY"]
-COMMENTO_SSO_KEY = environ["COMMENTO_SSO_KEY"]
 OPENAI_API_KEY = environ["OPENAI_API_KEY"]
 ENCRYPTION_KEY = environ["ENCRYPTION_KEY"]
 SECRET_KEY = environ["SECRET_KEY"]
