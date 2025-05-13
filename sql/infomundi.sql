@@ -226,7 +226,7 @@ CREATE TABLE comments (
     story_id INT,
     parent_id INT,
     content VARCHAR(1000) NOT NULL,
-    url VARCHAR(100) NOT NULL,
+    url VARCHAR(100),
     is_flagged TINYINT(1) DEFAULT 0,
     is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,

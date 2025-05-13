@@ -29,6 +29,7 @@ from website_scripts import (
     auth_util,
     security_util,
     decorators,
+    country_util,
 )
 
 views = Blueprint("views", __name__)
@@ -362,10 +363,7 @@ The Infomundi Team
 def user_redirect():
     target_url = request.headers.get("Referer", "")
 
-    if (
-        "/redirect" in target_url
-        or not input_sanitization.is_safe_url(target_url)
-    ):
+    if "/redirect" in target_url or not input_sanitization.is_safe_url(target_url):
         return redirect(url_for("views.home"))
 
     return redirect(target_url)
@@ -574,24 +572,19 @@ def news():
 
     Arguments:
         country_cca2 (str): GET 'country' parameter. Specifies the country code (2 digits). Example: 'br' (cca2 for Brazil).
-
-    Behavior:
-        Renders the news page, containing 100 news per page.
     """
     contry_cca2 = request.args.get("country", "").lower()
 
-    # Searches for the country full name
-    country_name = scripts.country_code_to_name(contry_cca2)
-    if not country_name:
+    country = country_util.get_country(iso2=contry_cca2)
+    if not country:
         flash(
             "We apologize, but we couldn't find the country you are looking for.",
             "error",
         )
         return redirect(url_for("views.user_redirect"))
 
-    session["last_visited_country_url"] = (
-        f"/news?country={contry_cca2}"
-    )
+    country_name = country.name
+    session["last_visited_country_url"] = f"/news?country={contry_cca2}"
 
     supported_categories = scripts.get_supported_categories(contry_cca2)
 
@@ -641,9 +634,7 @@ def comments():
     extensions.db.session.commit()
 
     # Set session information, used in templates.
-    session["last_visited_story_url"] = (
-        f"/comments?id={story_url_hash}"
-    )
+    session["last_visited_story_url"] = f"/comments?id={story_url_hash}"
 
     # Used in the api.
     session["last_visited_story_id"] = story.id
@@ -656,9 +647,9 @@ def comments():
     country_cca2 = story.category.name.split("_")[0]
     return render_template(
         "comments.html",
-        from_country_name=scripts.country_code_to_name(
-            story.category.name.split("_")[0]
-        ),
+        from_country_name=country_util.get_country(
+            iso2=story.category.name.split("_")[0]
+        ).name,
         story_url_hash=story_url_hash,
         from_country_url=f"/news?country={country_cca2}",
         from_country_category=story.category.name.split("_")[1],
