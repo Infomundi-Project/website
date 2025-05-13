@@ -134,7 +134,7 @@
 
     // **2. Load countries & re-select if needed**
     $.ajax({
-      url: 'https://infomundi.net/api/countries',
+      url: '/api/countries',
       method: 'GET',
       success: function(countries) {
         let $country = $('#country');
@@ -157,7 +157,7 @@
       let cid = $(this).val();
       if (!cid) return;
       $.ajax({
-        url: `https://infomundi.net/api/countries/${cid}/states`,
+        url: `/api/countries/${cid}/states`,
         method: 'GET',
         success: function(states) {
           let $state = $('#state')
@@ -183,7 +183,7 @@
       let sid = $(this).val();
       if (!sid) return;
       $.ajax({
-        url: `https://infomundi.net/api/states/${sid}/cities`,
+        url: `/api/states/${sid}/cities`,
         method: 'GET',
         success: function(cities) {
           let $city = $('#city')

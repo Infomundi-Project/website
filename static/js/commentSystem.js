@@ -128,11 +128,11 @@
     div.innerHTML = `
                         <div class="card-body inf-comments-card-body py-1 ps-3 pe-0">
                           <div class="d-flex align-items-start">
-                            <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset"><img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto"></a>
+                            <a href="/id/${comment.user.id}" class="text-decoration-none text-reset"><img src="${comment.user.avatar_url}" class="rounded me-3 d-none d-md-block d-lg-block" alt="User Avatar" style="width: 3em; height: auto"></a>
                               <div class="w-100">
                                 <div class="d-flex justify-content-between">
                                   <div>
-                                    <a href="https://infomundi.net/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small notranslate">${comment.user.username}</a>
+                                    <a href="/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small notranslate">${comment.user.username}</a>
               ${comment.user.role !== 'user' ? `
                                     <span class="badge bg-primary" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}
                                     <br>
@@ -742,7 +742,8 @@
           body: JSON.stringify({
             content,
             parent_id: parentId,
-            page_id
+            page_id,
+            type: commentType
           })
         });
         await loadComments(true);

@@ -40,7 +40,7 @@ app.config["PREFERRED_URL_SCHEME"] = "https"
 # Session Cookie Configuration
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=15)
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=15)
-app.config["SESSION_COOKIE_NAME"] = "infomundi_session"
+app.config["SESSION_COOKIE_NAME"] = config.SESSION_COOKIE_NAME
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
@@ -251,7 +251,7 @@ def error_handler(error):
     if error_code == 404:
         title = "Page Not Found"
         description = "It seems you've stumbled upon a page that even the ancient Greek philosophers couldn't find! Our esteemed statue is deep in thought, pondering over an ancient scroll, but the wisdom to locate this page eludes even him."
-        image_path = "https://infomundi.net/static/img/illustrations/scroll.webp"
+        image_path = "/static/img/illustrations/scroll.webp"
 
         buttons_enabled = True
     elif error_code == 429:
@@ -266,7 +266,7 @@ def error_handler(error):
     else:
         title = "Internal Server Error"
         description = "While we pick up the pieces, why not explore other parts of the site? We'll have this page standing tall again soon!"
-        image_path = "https://infomundi.net/static/img/illustrations/ruins.webp"
+        image_path = "/static/img/illustrations/ruins.webp"
 
         buttons_enabled = True
 

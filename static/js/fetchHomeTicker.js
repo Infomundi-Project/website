@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
           'currencies-ticker') && entry.country && entry.country.code) {
         itemHtml += `
                   <img alt="${entry.country.code} flag"
-                       data-src="https://infomundi.net/static/img/flags/4x3/${entry.country.code}.svg"
+                       data-src="/static/img/flags/4x3/${entry.country.code}.svg"
                        class="lazyload flag">
               `;
       }

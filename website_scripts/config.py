@@ -3,7 +3,9 @@ from os import environ
 from . import json_util
 
 
+SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]
 WEBSITE_ROOT = environ["WEBSITE_ROOT"]
+BASE_DOMAIN = environ["BASE_DOMAIN"]
 LOCAL_ROOT = environ["LOCAL_ROOT"]
 
 # -----------> Secret Keys <-----------
@@ -14,11 +16,7 @@ SECRET_KEY = environ["SECRET_KEY"]
 HMAC_KEY = environ["HMAC_KEY"]
 
 # -----------> Files <-----------
-COUNTRY_TO_CODE_LIST = json_util.read_json(
-    f"{WEBSITE_ROOT}/assets/data/json/country_names_codes"
-)
 PRESIDENTS_DATA = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/presidents")
-COUNTRY_LIST = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/countries")
 HDI_DATA = json_util.read_json(f"{WEBSITE_ROOT}/assets/data/json/hdi_data")
 
 # -----------> Folders <-----------

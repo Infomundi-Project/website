@@ -33,7 +33,7 @@ $(function () {
           // Redirect to the news page with the retrieved country code
           var countryCode = data.countryCode;
           window.location.href =
-            "https://infomundi.net/news?country=" +
+            "/news?country=" +
             encodeURIComponent(countryCode);
         },
         error: function (err) {

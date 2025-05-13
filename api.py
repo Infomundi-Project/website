@@ -329,7 +329,7 @@ def update_user_status():
 
 
 @api.route("/get_country_code", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 60 * 24 * 30, query_string=True)  # 30 days
+# @extensions.cache.cached(timeout=60 * 60 * 24 * 30, query_string=True)  # 30 days
 def get_country_code():
     """Get the country code based on the selected country name.
 
@@ -343,17 +343,8 @@ def get_country_code():
             'countryCode': 'BR'
         }
     """
-
-    selected_country = request.args.get("country", "")
-    if not selected_country:
-        return redirect(url_for("views.home"))
-
-    code = [
-        x["code"]
-        for x in config.COUNTRY_LIST
-        if x["name"].lower() == selected_country.lower()
-    ]
-    return jsonify({"countryCode": code[0]})
+    country = country_util.get_country(name=request.args.get("country", ""))
+    return jsonify({"countryCode": country.iso2 if country else ""})
 
 
 @api.route("/autocomplete", methods=["GET"])
@@ -363,44 +354,47 @@ def autocomplete():
     Argument: str
         GET 'query' parameter. A simple string, for example 'Bra'.
 
-    Return: list
+    Return: jsonify(list)
         Returns a list of countries relevant to the query. An example would be:
 
         ['Brazil', 'Gibraltar']
     """
-
-    query = request.args.get("query", "").lower()
+    query = request.args.get("query", "")
     if len(query) < 2:
         return redirect(url_for("views.home"))
 
-    results = [x["name"] for x in config.COUNTRY_LIST if query in x["name"].lower()]
+    results = [x.name for x in country_util.get_country(name=query, ilike=True)]
     return jsonify(results)
 
 
 @api.route("/search", methods=["POST"])
 def search():
-    """Search for valid countries in our database.
+    """Search for valid countries in our database, based on an incomplete query.
 
     Argument: str
-        GET 'query' parameter. A simple string, like 'brazil'.
+        GET 'query' parameter. A simple, perhaps incomplete string that makes up for a country name. E.g. 'bra' for Brazil or Gibraltar.
+
+    Return:
+        Redirects the user to the news endpoint, passing the country CCA2 as argument. E.g. '/news?country=br' for Brazil.
     """
-    query = request.form.get("query", "").lower()
+    query = request.form.get("query", "")
     if len(query) < 2:
         return redirect(url_for("views.home"))
 
-    countries = [x["name"].lower() for x in config.COUNTRY_LIST]
+    # Grabs all countries from the database based on the incomplete string
+    countries = country_util.get_country(name=query, ilike=True)
 
-    results = [x.lower() for x in countries if scripts.string_similarity(query, x) > 80]
-    if results:
-        code = [
-            x["code"].lower()
-            for x in config.COUNTRY_LIST
-            if x["name"].lower() == results[0]
-        ][0]
-    else:
-        code = "ERROR"
+    # Adds all countries and calculates the similarity percentage for each name
+    similarity_data = []
+    for country in countries:
+        similarity_data.append(
+            (country, scripts.string_similarity(query, country.name))
+        )
 
-    return redirect(f"https://infomundi.net/news?country={code}")
+    # Grabs the best match
+    best_match_country, value = max(similarity_data, key=lambda item: item[1])
+
+    return redirect(url_for("views.news", country=best_match_country.iso2))
 
 
 @api.route("/story/summarize/<story_url_hash>", methods=["GET"])
@@ -570,7 +564,10 @@ def create_comment():
         if not story:
             return jsonify(error="Could not find story in database."), 400
 
-        comment.url = f"https://infomundi.net/comments?id={story.get_public_id()}#comment-{comment.id}"
+        comment.url = (
+            url_for("views.comments", id=story.get_public_id())
+            + f"#comment-{comment.id}"
+        )
         comment.story_id = story.id  # Sets the optional story_id column
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
@@ -592,7 +589,7 @@ def create_comment():
         if not profile_owner:
             return jsonify(error="Could not find user in database."), 400
 
-        comment.url = f"https://infomundi.net/id/{page_id}#comment-{comment.id}"
+        comment.url = url_for("views.user_profile_by_id", public_id=page_id) + f"#comment-{comment.id}"
         notifications.notify(
             [
                 {
@@ -604,7 +601,7 @@ def create_comment():
             ]
         )
     else:
-        comment.url = f"https://infomundi.net/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
+        comment.url = f"https://{config.BASE_DOMAIN}/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
 
     # If this is a reply, ping the parent comment's author
     if parent_id:

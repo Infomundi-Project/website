@@ -47,7 +47,7 @@ CREATE TABLE users (
     -- Profile
     display_name VARCHAR(40),
     profile_description VARCHAR(1500),
-    avatar_url VARCHAR(85) DEFAULT 'https://infomundi.net/static/img/avatar.webp',
+    avatar_url VARCHAR(85) DEFAULT '/static/img/avatar.webp',
     profile_banner_url VARCHAR(85),
     profile_wallpaper_url VARCHAR(85),
     -- contact info
@@ -226,14 +226,14 @@ CREATE TABLE comments (
     story_id INT,
     parent_id INT,
     content VARCHAR(1000) NOT NULL,
-    url VARCHAR(100) NOT NULL,
+    url VARCHAR(100),
     is_flagged TINYINT(1) DEFAULT 0,
     is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,
     FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );

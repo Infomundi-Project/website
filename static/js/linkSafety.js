@@ -1,38 +1,37 @@
 function linkSafety() {
-  var trustedDomain = "infomundi.net";
-  var externalLinkModal = new bootstrap.Modal(document.getElementById(
-    'externalLinkModal'));
-  var proceedLink = document.getElementById('proceedLink');
+  const trustedDomain = "infomundi.net";
+  const externalLinkModal = new bootstrap.Modal(
+    document.getElementById('externalLinkModal')
+  );
+  const proceedLink = document.getElementById('proceedLink');
 
-  // Use event delegation instead of adding multiple event listeners
   document.body.addEventListener('click', function (event) {
-    var link = event.target.closest('a');
-    if (!link) return; // Ignore clicks that are not on links
+    const link = event.target.closest('a');
+    if (!link) return;
 
-    var href = link.href;
-    var url = new URL(href);
+    const url = new URL(link.href);
+    // is it exactly the master, or *any* subdomain?
+    const isTrusted =
+      url.hostname === trustedDomain ||
+      url.hostname.endsWith(`.${trustedDomain}`);
 
-    if (url.hostname !== trustedDomain) {
+    if (!isTrusted) {
       event.preventDefault();
-      proceedLink.href = href;
+      proceedLink.href = link.href;
 
-      // Hide any currently open modals
-      var openModal = document.querySelector('.modal.show');
+      // hide any open modal
+      const openModal = document.querySelector('.modal.show');
       if (openModal) {
-        var openModalInstance = bootstrap.Modal.getInstance(openModal);
-        openModalInstance.hide();
+        bootstrap.Modal.getInstance(openModal).hide();
       }
 
-      // Show external link modal
       externalLinkModal.show();
     }
   });
 
-  // Ensure the proceed button only has one event listener
   proceedLink.addEventListener('click', function () {
     window.location.href = this.href;
   });
 }
 
-// Run linkSafety once on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", linkSafety);

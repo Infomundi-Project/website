@@ -102,7 +102,7 @@
     <div class="offcanvas-header">
       <a href="/" class="text-decoration-none text-reset">
         <img
-          data-src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
+          data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
           width="380" height="380" style="height: auto; width: 8vh;"
           alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth."
           class="lazyload infomundi-icon me-2">
@@ -257,7 +257,7 @@
       {% else %}
       <a href="/" class="text-decoration-none text-reset">
         <img
-          data-src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
+          data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
           width="380" height="380" style="height: auto; width: 8vh;"
           alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth."
           class="lazyload infomundi-icon me-2">
@@ -396,7 +396,7 @@
         <a href="/"
             class="navbar-brand py-0 logo-text notranslate fs-5">
             <img fetchpriority="high"
-              src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg"
+              src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg"
               class="me-2" style="height: auto; width: 3.5rem"
               alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">{% if not is_mobile %}infomundi{% endif %}</a>
 
@@ -919,22 +919,22 @@
             style="border-radius: 15px;"
             alt="{{ current_user.username }}'s profile picture">
           <h4 class="mt-2">{{ current_user.username }}</h4>
-          <a href="https://infomundi.net/profile/{{ current_user.username }}"
+          <a href="/profile/{{ current_user.username }}"
             class="btn btn-sm btn-primary mt-2">Return to profile</a>
           <ul class="nav nav-pills flex-column mt-4">
             <li class="nav-item inf-nav-item">
               <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}"
-                href="https://infomundi.net/profile/edit"><i
+                href="/profile/edit"><i
                   class="fa-solid fa-user me-1"></i>Info</a>
             </li>
             <li class="nav-item inf-nav-item">
               <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}"
-                href="https://infomundi.net/profile/edit/avatar"><i
+                href="/profile/edit/avatar"><i
                   class="fa-solid fa-image me-1"></i>Media</a>
             </li>
             <li class="nav-item inf-nav-item">
               <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}"
-                href="https://infomundi.net/profile/edit/settings"><i
+                href="/profile/edit/settings"><i
                   class="fa-solid fa-address-card me-1"></i>Details</a>
             </li>
           </ul>
@@ -966,7 +966,7 @@
           <a href="/" class="text-decoration-none"
             aria-label="Click to return to the home page.">
             <img
-              data-src="https://infomundi.net/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
+              data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp"
               width="380" height="380" style="height: auto; width: 35%;"
               alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth."
               class="lazyload infomundi-icon">
@@ -1124,7 +1124,7 @@
   <script nonce="{{ nonce }}">
     window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
     window.currentUserAvatarUrl =
-      "{{ current_user.avatar_url if current_user.is_authenticated else 'https://infomundi.net/static/img/avatar.webp' }}";
+      "{{ current_user.avatar_url if current_user.is_authenticated else '/static/img/avatar.webp' }}";
   </script>
   {% block scripts %} {% endblock %}
 </body>

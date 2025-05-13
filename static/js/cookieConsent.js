@@ -28,12 +28,12 @@ CookieConsent.run({
       en: {
         consentModal: {
           title: "About cookies",
-          description: "When you visit our website (https://infomundi.net/), and use our services, you trust us with your personal information.",
+          description: "When you visit our website (infomundi.net), and use our services, you trust us with your personal information.",
           closeIconLabel: "",
           acceptAllBtn: "Accept",
           acceptNecessaryBtn: "",
           showPreferencesBtn: "Manage preferences",
-          footer: "<a href=\"https://infomundi.net/policies#privacy-policy\">Privacy Policy</a>"
+          footer: "<a href=\"/policies#privacy-policy\">Privacy Policy</a>"
         },
         preferencesModal: {
           title: "Consent Preferences Center",
@@ -49,7 +49,7 @@ CookieConsent.run({
             },
             {
               title: "More information",
-              description: "For any query in relation to our <a class=\"cc__link\" href=\"https://infomundi.net/policies#privacy-policy\">privacy policy</a> and your choices, please <a class=\"cc__link\" href=\"https://infomundi.net/contact\">contact us</a>. "
+              description: "For any query in relation to our <a class=\"cc__link\" href=\"/policies#privacy-policy\">privacy policy</a> and your choices, please <a class=\"cc__link\" href=\"/contact\">contact us</a>. "
             }
           ]
         }

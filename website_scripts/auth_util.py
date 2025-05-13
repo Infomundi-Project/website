@@ -13,6 +13,7 @@ from . import (
     qol_util,
     input_sanitization,
     cloudflare_util,
+    config,
 )
 
 
@@ -45,40 +46,15 @@ Country: {cloudflare_util.get_user_country()}
 
 It's always wise to make sure that you recognize this login. If this was unexpected, it might be time to change your password.
 
-Should you need to take any action, you can recover your account at: https://infomundi.net/auth/forgot_password
+Should you need to take any action, you can recover your account at: https://{config.BASE_DOMAIN}/auth/forgot_password
 
-If you encounter any issues, please don't hesitate to contact our team for assistance at: https://infomundi.net/contact
+If you encounter any issues, please don't hesitate to contact our team for assistance at: https://{config.BASE_DOMAIN}/contact
 
 Best regards,
 The Infomundi Team
     """
     subject = "Infomundi - New Login"
     notifications.send_email(cleartext_email, subject, message)
-
-
-def perform_logout_actions():
-    """To facilitate, we perform all logout actions in a single function.
-    Clears user's session, and delete cookies related to Comentario's authentication.
-    """
-    session.permanent = False
-    session.clear()
-    logout_user()
-
-    response = make_response(redirect(url_for("auth.login")))
-
-    # List of cookie names to delete, related to Comentario
-    cookies_to_delete = (
-        "XSRF-TOKEN",
-        "_comentario_auth_session",
-        "_xsrf_session",
-        "comentario_commenter_session",
-    )
-
-    # Delete each cookie
-    for cookie in cookies_to_delete:
-        response.set_cookie(cookie, "", expires=0)
-
-    return response
 
 
 def change_password(user, new_password: str):
@@ -99,11 +75,11 @@ The change was made from the following location:
 
 However, if you did not authorize this change, please take immediate action to secure your account. You can recover your account by clicking the link below:
 
-https://infomundi.net/auth/forgot_password
+https://{config.BASE_DOMAIN}/auth/forgot_password
 
 If you encounter any issues or need further assistance, feel free to contact us using the form at:
 
-https://infomundi.net/contact
+https://{config.BASE_DOMAIN}/contact
 
 Best regards,
 The Infomundi Team"""
@@ -154,7 +130,7 @@ def handle_register_token(email: str, username: str, password: str) -> bool:
 
 If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
-https://infomundi.net/auth/verify?token={register_token}
+https://{config.BASE_DOMAIN}/auth/verify?token={register_token}
 
 We're looking forward to seeing you explore our platform!
 
@@ -235,7 +211,7 @@ def send_recovery_token(email: str) -> bool:
 
 If you've received this message in error, feel free to disregard it. However, if you're here to recover your Infomundi account, feel free to click on the link below:
 
-https://infomundi.net/auth/forgot_password?token={recovery_token}
+https://{config.BASE_DOMAIN}/auth/forgot_password?token={recovery_token}
 
 Please keep in mind that this token will expire in 30 minutes.
 
@@ -250,9 +226,10 @@ The Infomundi Team"""
     return notifications.send_email(email, subject, message)
 
 
-def delete_account(email, token) -> bool:
+def delete_account(email: str, token: str) -> bool:
     user = search_user_email_in_database(email)
-
+    token = security_util.uuid_string_to_bytes(token)
+    
     # If the supplied token doesn't match the database record, return False.
     if user.delete_token != token:
         return False
@@ -276,14 +253,14 @@ def delete_account(email, token) -> bool:
 def send_delete_token(email: str) -> bool:
     user = search_user_email_in_database(email)
 
-    token = security_util.generate_nonce(24)
+    token = security_util.generate_uuid_string()
 
     subject = "Infomundi - Confirm Account Deletion"
     message = f"""Hello, {user.display_name if user.display_name else user.username}.
 
 If you've received this message in error, feel free to disregard it. However, if you're here to delete your Infomundi account, feel free to click on the link below:
 
-https://infomundi.net/auth/delete?token={token}
+https://{config.BASE_DOMAIN}/auth/delete?token={token}
 
 This link will expire in 30 minutes. Please, keep in mind that this action is permanent and your account data can't be recovered afterwards.
 
@@ -297,7 +274,7 @@ The Infomundi Team"""
         return False
 
     # Saves delete token information
-    user.delete_token = token
+    user.delete_token = security_util.uuid_string_to_bytes(token)
     user.delete_token_timestamp = datetime.now()
     extensions.db.session.commit()
 

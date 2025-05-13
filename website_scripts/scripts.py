@@ -157,9 +157,9 @@ def get_nation_data(cca2: str) -> dict:
 
     formatted_borders = []
     for cca3 in borders:
-        for item in config.COUNTRY_TO_CODE_LIST:
-            if item["cca3"] == cca3:
-                formatted_borders.append(item["name"])
+        countries = country_util.get_country(iso3=cca3)
+        for country in countries:
+            formatted_borders.append(country.name)
 
     try:
         return {
@@ -324,19 +324,6 @@ def string_similarity(s1: str, s2: str) -> float:
 def extract_yake(text: str, lang_code: str = "en", top_n: int = 3) -> tuple:
     kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
     return (kw for kw, score in kw_extractor.extract_keywords(text))
-
-
-@extensions.cache.memoize(timeout=60 * 60 * 12)  # 12 hours
-def country_code_to_name(cca2: str) -> str:
-    countries = config.COUNTRY_LIST
-    for item in countries:
-        if item["code"].lower() == cca2:
-            country_name = item["name"]
-            break
-    else:
-        country_name = ""
-
-    return country_name
 
 
 @extensions.cache.memoize(timeout=60 * 60 * 12)  # 12 hours

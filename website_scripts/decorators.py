@@ -107,7 +107,10 @@ def check_twofactor(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if request.method == "POST":
-            user = extensions.db.session.get(models.User, session["user_id"])
+            if not current_user.is_authenticated:
+                user = extensions.db.session.get(models.User, session["user_id"])
+            else:
+                user = current_user
 
             recovery_token = request.form.get("recovery_token", "").strip()
             password = request.form.get("password", "").strip()

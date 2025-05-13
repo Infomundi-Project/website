@@ -153,13 +153,13 @@
       </div>
       <div class="col-md-6 text-center my-4">
         <a class="fs-1 fw-bold text-decoration-none text-reset" href="/news?country={{ country_code }}">
-        <img src="https://infomundi.net/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
+        <img src="/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
         </a>
         <br>
         {% if not nation_data %}
         <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
         {% endif %}
-        <div class="input-group justify-content-center mt-3">
+        <div class="input-group justify-content-center mt-3 invisible">
           <button aria-label="Submit search button" type="submit" class="input-group-text {% if is_light_mode %}border-black border-opacity-50{% endif %}" id="search-icon">
           <i class="fa-solid fa-magnifying-glass"></i>
           </button>

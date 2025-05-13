@@ -1,5 +1,5 @@
 async function updateUserStatus() {
-    await fetch(`https://infomundi.net/api/user/status/update`, {
+    await fetch(`/api/user/status/update`, {
         method: 'GET',
     });
 }
