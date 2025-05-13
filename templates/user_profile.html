@@ -337,7 +337,7 @@
 <script nonce="{{ nonce }}">
   async function fetchUserStatus(userId) {
     const response = await fetch(
-      `https://infomundi.net/api/user/${userId}/status`);
+      `/api/user/${userId}/status`);
     const data = await response.json();
     const statusElement = document.getElementById('user-status');
 

@@ -400,7 +400,7 @@ def search():
     else:
         code = "ERROR"
 
-    return redirect(f"https://infomundi.net/news?country={code}")
+    return redirect(url_for('views.news', country=code))
 
 
 @api.route("/story/summarize/<story_url_hash>", methods=["GET"])
@@ -570,7 +570,7 @@ def create_comment():
         if not story:
             return jsonify(error="Could not find story in database."), 400
 
-        comment.url = f"https://infomundi.net/comments?id={story.get_public_id()}#comment-{comment.id}"
+        comment.url = url_for('views.comments', id=story.get_public_id()) + f"#comment-{comment.id}"
         comment.story_id = story.id  # Sets the optional story_id column
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
@@ -592,7 +592,7 @@ def create_comment():
         if not profile_owner:
             return jsonify(error="Could not find user in database."), 400
 
-        comment.url = f"https://infomundi.net/id/{page_id}#comment-{comment.id}"
+        comment.url = url_for('views.id') + f'/{page_id}#comment-{comment.id}'
         notifications.notify(
             [
                 {
@@ -604,7 +604,7 @@ def create_comment():
             ]
         )
     else:
-        comment.url = f"https://infomundi.net/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
+        comment.url = f"https://{config.BASE_DOMAIN}/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
 
     # If this is a reply, ping the parent comment's author
     if parent_id:

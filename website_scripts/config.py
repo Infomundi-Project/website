@@ -3,7 +3,9 @@ from os import environ
 from . import json_util
 
 
+SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]
 WEBSITE_ROOT = environ["WEBSITE_ROOT"]
+BASE_DOMAIN = environ["BASE_DOMAIN"]
 LOCAL_ROOT = environ["LOCAL_ROOT"]
 
 # -----------> Secret Keys <-----------

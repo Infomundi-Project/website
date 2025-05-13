@@ -363,7 +363,7 @@ def user_redirect():
     target_url = request.headers.get("Referer", "")
 
     if (
-        target_url == "https://infomundi.net/redirect"
+        "/redirect" in target_url
         or not input_sanitization.is_safe_url(target_url)
     ):
         return redirect(url_for("views.home"))
@@ -590,7 +590,7 @@ def news():
         return redirect(url_for("views.user_redirect"))
 
     session["last_visited_country_url"] = (
-        f"https://infomundi.net/news?country={contry_cca2}"
+        f"/news?country={contry_cca2}"
     )
 
     supported_categories = scripts.get_supported_categories(contry_cca2)
@@ -642,7 +642,7 @@ def comments():
 
     # Set session information, used in templates.
     session["last_visited_story_url"] = (
-        f"https://infomundi.net/comments?id={story_url_hash}"
+        f"/comments?id={story_url_hash}"
     )
 
     # Used in the api.
@@ -660,7 +660,7 @@ def comments():
             story.category.name.split("_")[0]
         ),
         story_url_hash=story_url_hash,
-        from_country_url=f"https://infomundi.net/news?country={country_cca2}",
+        from_country_url=f"/news?country={country_cca2}",
         from_country_category=story.category.name.split("_")[1],
         from_country_code=story.category.name.split("_")[0],
         seo_data=(seo_title, seo_description, seo_image),
