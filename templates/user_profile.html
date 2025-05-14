@@ -164,23 +164,40 @@
           <div class="col-auto me-2">
             <img src="{{ user.avatar_url }}"
               alt="{{ user.username }}'s profile picture"
-              class="profile-avatar rounded-3 border border-3 border-light-subtle"
+              class="profile-avatar rounded-3 border border-2"
               id="profile-avatar">
           </div>
           <div class="col">
 
-            <span class="notranslate {% if is_mobile %}fs-4{% else %}fs-2{% endif %} fw-bold">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif%}<span class="ms-2 text-muted fs-5">@{{ user.username }}</span></span>
+            <span class="d-inline-flex align-items-center notranslate fw-bold">
+              <span class="fs-2">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</span>
+              <span class="ms-2 text-muted fs-5" title="Username">@{{ user.username }}</span>
+              <!-- badge will go here -->
+              {% if user.role == 'admin' %}
+                <span class="badge bg-danger ms-4 align-middle" title="Admin"><i class="fa-solid fa-chess-king me-2"></i>ADMIN</span>
+              {% elif user.role == 'moderator' %}
+                <span class="badge bg-warning text-dark ms-4 align-middle" title="Moderator"><i class="fa-solid fa-chess-knight me-2"></i>MOD</span>
+              {% elif user.role == 'official' %}
+                <span class="badge bg-info ms-4 align-middle" title="Official"><i class="fa-solid fa-chess-pawn me-2"></i>OFFICIAL</span>
+              {% endif %}
+            </span>
 
 
             <ul class="list-inline text-muted">
+              
+              <!-- User Location -->
               {% if user.country %}
               <li class="list-inline-item"><i class="fa-solid fa-location-dot me-1"></i>{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}</li>
               {% endif %}
+
+              <!-- User website -->
               {% if user.website_url %}
               <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="{{ user.website_url }}">Website</a></li>
               {% endif %}
-              <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined {{ user.created_at }}</li>
+              
+              <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ user.created_at }}">{{ user.created_at.strftime("%B %Y") }}</span></li>
             </ul>
+
             {% if user.profile_description %}
             <div class="mt-3 user-description">
               {% if has_too_many_newlines or is_mobile %}
@@ -195,6 +212,7 @@
               {% endif %}
             </div>
             {% endif %}
+
           </div>
         </div>
       </div>
@@ -202,62 +220,45 @@
       <div class="col-md-4{% if is_mobile %} mt-5{% endif %}">
         <p class="fs-4">
           <span class="fw-bold me-2">Level</span><span
-            class="badge text-bg-info">{{ user.level }}</span>
+            class="badge text-bg-secondary">{{ user.level }}</span>
         </p>
         <span>{{ user.level_progress }}/1000</span>
-        <div class="progress" role="progressbar"
+        <div class="progress mb-3" role="progressbar"
           aria-valuenow="{{ user.level_progress }}" aria-valuemin="0"
           aria-valuemax="100" style="height: 3px">
           <div class="progress-bar bg-info"
             style="width: {{ user.level_progress }}%"></div>
         </div>
-        <div class="my-2"></div>
-        {% if current_user.is_authenticated %}
-        {% if current_user.id == user.id %}
-        <div class="row align-items-center">
-          <div class="col">
-            <a type="button" role="button"
-              class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2"
-              href="{{ url_for('views.edit_user_profile') }}">
-              <i class="fa-solid fa-pen me-1"></i>Edit Profile
-            </a>
-          </div>
-          {% if pending_requests %}
-          <div class="col-2">
-            <button type="button" class="btn btn-primary position-relative"
-              data-bs-toggle="modal" data-bs-target="#pendingFriendsModal">
-              <i class="fa-solid fa-bell"></i>
-              <span
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ pending_requests|length }}<span
-                  class="visually-hidden">friend requests</span></span>
-            </button>
-          </div>
+
+        <div class="row align-items-center justify-content-between">
+          {% if current_user.is_authenticated and current_user.id == user.id %}
+            <div class="col">
+              <a type="button" role="button"
+                class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2"
+                href="{{ url_for('views.edit_user_profile') }}">
+                <i class="fa-solid fa-pen me-2"></i>Edit Profile
+              </a>
+            </div>
+          {% elif current_user.is_authenticated %}
+            <div class="col-auto">
+              <button type="button" class="btn btn-primary btn-sm" id="userFollowBtn">Follow</button>
+              <button type="button" class="ms-2 btn btn-primary btn-sm d-inline-flex align-items-center" id="userFollowBtn">Add Friend<i class="ms-2 fa-solid fa-plus"></i></button>
+            </div>
+            <div class="col-auto mt-lg-0 mt-md-2">
+              <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  More
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Send Message</a></li>
+                  <li><a class="dropdown-item" href="#">Block</a></li>
+                  <li><a class="dropdown-item" href="#">Report</a></li>
+                </ul>
+              </div>
+            </div>
           {% endif %}
         </div>
-        {% else %}
-        {% if friend_status == 'not_friends' %}
-        <a type="button" role="button" class="btn btn-lg btn-outline-success"
-          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='add') }}"
-          data-bs-toggle="tooltip" data-bs-title="Add Friend"><i
-            class="fa-solid fa-user-plus"></i></a>
-        {% elif friend_status == 'pending' and pending_friend_request_sent_by_current_user %}
-        <a type="button" role="button" class="btn btn-lg btn-outline-warning"
-          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"
-          data-bs-toggle="tooltip" data-bs-title="Cancel Request"><i
-            class="fa-solid fa-hourglass-half"></i></a>
-        {% elif friend_status == 'pending' %}
-        <a type="button" role="button" class="btn btn-lg btn-outline-success"
-          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='accept') }}"
-          data-bs-toggle="tooltip" data-bs-title="Accept Request"><i
-            class="fa-solid fa-user-check"></i></a>
-        {% elif friend_status == 'accepted' %}
-        <a type="button" role="button" class="btn btn-sm btn-outline-danger"
-          href="{{ url_for('views.handle_friends', friend_id=user.user_id, action='delete') }}"
-          data-bs-toggle="tooltip" data-bs-title="Remove Friend"><i
-            class="fa-solid fa-user-minus"></i></a>
-        {% endif %}
-        {% endif %}
-        {% endif %}
+
       </div>
     </div>
 
@@ -340,6 +341,7 @@
       `/api/user/${userId}/status`);
     const data = await response.json();
     const statusElement = document.getElementById('user-status');
+    const profileAvatar = document.getElementById('profile-avatar');
 
     if (data.error) {
       statusElement.innerText = 'User not found';
@@ -362,10 +364,14 @@
       if (data.is_online) {
         statusElement.innerHTML = '<h4>Currently Online</h4>';
         statusElement.className = 'text-primary-emphasis';
+        profileAvatar.classList.remove('border-secondary');
+        profileAvatar.classList.add('border-primary');
       } else {
         statusElement.innerHTML =
           `<h4>Currently Offline</h4><p>Last seen ${lastSeenText}</p>`;
         statusElement.className = 'text-muted';
+        profileAvatar.classList.remove('border-primary');
+        profileAvatar.classList.add('border-secondary');
       }
     }
   }

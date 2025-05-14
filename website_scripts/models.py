@@ -152,6 +152,7 @@ class User(db.Model, UserMixin):
 
     # Account Registration
     is_enabled = db.Column(db.Boolean, default=False)
+    is_thirdparty_auth = db.Column(db.Boolean, default=False)
     register_token = db.Column(db.LargeBinary(16))
     register_token_timestamp = db.Column(
         db.DateTime, default=db.func.current_timestamp()

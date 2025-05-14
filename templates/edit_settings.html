@@ -66,11 +66,11 @@
                 <h1 class="modal-title fs-5" id="totpSetupModalLabel">TOTP Setup</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Scan the QR code below with your TOTP app or use the secret key directly.</p>
+            <div class="modal-body text-center">
+                <span>Scan the QR code below with your TOTP app or use the secret key directly.</span>
                 <!-- TOTP QR Code and Secret -->
                 <div id="totp-info">
-                    <img id="totp-qr-code" src="" alt="TOTP QR Code" class="img-fluid my-2" style="height: auto; width: 50%">
+                    <img id="totp-qr-code" src="" alt="TOTP QR Code" class="img-fluid my-3 border border-2 rounded" style="height: auto; width: 50%">
                     <div class="input-group">
                         <div class="form-floating flex-grow-1">
                             <input type="password" class="form-control" id="floatInputSecretKey" placeholder="Secret Key" disabled>
