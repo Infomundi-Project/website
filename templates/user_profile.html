@@ -155,32 +155,38 @@
 
 
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %}">
-  <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 95%;">
+  <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 97%;">
     <div class="profile-header rounded-3 mb-3"></div>
 
     <div class="row">
       <div class="col-md-8">
         <div class="row">
-          <div class="col-auto me-2">
-            <img src="{{ user.avatar_url }}"
-              alt="{{ user.username }}'s profile picture"
-              class="profile-avatar rounded-3 border border-2"
-              id="profile-avatar">
-          </div>
-          <div class="col">
+          <div class="col-3">
+            <figure class="figure w-100 position-relative">
+              <img src="{{ user.avatar_url }}"
+                alt="{{ user.username }}'s profile picture"
+                class="img-fluid figure-img rounded-3 border border-2"
+                id="profile-avatar">
 
-            <span class="d-inline-flex align-items-center notranslate fw-bold">
-              <span class="fs-2">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</span>
-              <span class="ms-2 text-muted fs-5" title="Username">@{{ user.username }}</span>
-              <!-- badge will go here -->
               {% if user.role == 'admin' %}
-                <span class="badge bg-danger ms-4 align-middle" title="Admin"><i class="fa-solid fa-chess-king me-2"></i>ADMIN</span>
+                <span class="badge bg-danger position-absolute end-0 bottom-0 me-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the administration team at Infomundi"><i class="fa-solid fa-chess-king me-1"></i>ADMIN</span>
               {% elif user.role == 'moderator' %}
-                <span class="badge bg-warning text-dark ms-4 align-middle" title="Moderator"><i class="fa-solid fa-chess-knight me-2"></i>MOD</span>
+                <span class="badge bg-info position-absolute end-0 bottom-0 me-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the moderation team at Infomundi"><i class="fa-solid fa-chess-rook me-1"></i>MOD</span>
               {% elif user.role == 'official' %}
-                <span class="badge bg-info ms-4 align-middle" title="Official"><i class="fa-solid fa-chess-pawn me-2"></i>OFFICIAL</span>
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This is an official account in the Infomundi platform"><i class="fa-solid fa-chess-bishop me-1"></i>OFFICIAL</span>
+              {% elif user.role == 'verified' %}
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is a verified account in the Infomundi platform"><i class="fa-solid fa-chess-pawn me-1"></i>VERIFIED</span>
               {% endif %}
-            </span>
+            </figure>
+          </div>
+          <div class="col-9 px-1">
+
+            <ul class="list-inline d-inline-flex align-items-center notranslate fw-bold mb-1">
+              
+              <li class="list-inline-item fs-2">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</li>
+              <li class="list-inline-item text-muted fs-5" title="Username">@{{ user.username }}</li>
+
+            </ul>
 
 
             <ul class="list-inline text-muted">
@@ -217,7 +223,7 @@
         </div>
       </div>
 
-      <div class="col-md-4{% if is_mobile %} mt-5{% endif %}">
+      <div class="col-md-4">
         <p class="fs-4">
           <span class="fw-bold me-2">Level</span><span
             class="badge text-bg-secondary">{{ user.level }}</span>
