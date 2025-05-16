@@ -326,7 +326,7 @@
           <div class="vstack gap-3">
             {% for friend in friends_list %}
               <div class="row">
-                <div class="col-md-3 px-2">
+                <div class="col-3 px-2">
                   <a href="{{ url_for('views.user_profile', username=friend.username) }}"
                     class="text-decoration-none">
                     <img src="{{ friend.avatar_url }}"
@@ -336,7 +336,7 @@
                       class="img-fluid rounded-3 border border-2 ">
                   </a>
                 </div>
-                <div class="col-md-9 px-1">
+                <div class="col-9 px-1">
                   <p class="fw-bold notranslate {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}"
                     style="margin-bottom: -5px;">
                     {% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}

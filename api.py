@@ -572,7 +572,7 @@ def get_stories():
 
 
 @api.route("/comments", methods=["POST"])
-@extensions.limiter.limit("120/day;60/hour;5/minute")
+@extensions.limiter.limit("120/day;60/hour;12/minute")
 def create_comment():
     data = request.get_json()
     parent_id = data.get("parent_id")
@@ -679,7 +679,7 @@ def create_comment():
 
 
 @api.route("/comments/get/<page_id>", methods=["GET"])
-@extensions.limiter.limit("120/day;60/hour;10/minute")
+@extensions.limiter.limit("20/minute")
 def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
     sort = request.args.get("sort", "recent")  # "recent", "old", best"

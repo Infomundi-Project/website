@@ -568,7 +568,6 @@ def news():
 
 
 @views.route("/comments", methods=["GET"])
-@decorators.in_maintenance
 def comments():
     story_url_hash = request.args.get("id", "")
     story = models.Story.query.filter_by(

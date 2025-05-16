@@ -18,9 +18,9 @@ def get_country(name: str = "", iso2: str = "", iso3: str = "", ilike: bool = Fa
         Depends. If 'ilike' is True, returns all instances where the incomplete 'name' matches. If 'ilike' is False (default) returns the country that matches to the query. Can return None if no country was found.
     """
 
-    if not name and not iso2:
+    if not name and not iso2 and not iso3:
         raise custom_exceptions.InfomundiCustomException(
-            "Either 'name' or 'iso2' should be specified"
+            "Either 'name' or 'iso2' or 'iso3' should be specified"
         )
 
     if name:

@@ -5,7 +5,7 @@ from unidecode import unidecode
 from bs4 import BeautifulSoup
 from random import choice
 
-from . import config, json_util, immutable, models, extensions, qol_util
+from . import config, json_util, immutable, models, extensions, qol_util, country_util
 
 
 @extensions.cache.memoize(timeout=60 * 60 * 1)  # 1 hour
@@ -157,9 +157,8 @@ def get_nation_data(cca2: str) -> dict:
 
     formatted_borders = []
     for cca3 in borders:
-        countries = country_util.get_country(iso3=cca3)
-        for country in countries:
-            formatted_borders.append(country.name)
+        country = country_util.get_country(iso3=cca3)
+        formatted_borders.append(country.name)
 
     try:
         return {
