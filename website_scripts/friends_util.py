@@ -1,4 +1,5 @@
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_, or_
 
 from . import extensions, models
 
@@ -183,19 +184,19 @@ def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
 
     Returns:
         tuple: A tuple containing the friendship status and a boolean indicating
-               whether the current user has sent a pending friend request.
+               whether the current user has sent a pending friend request. E.g. ("pending", True)
     """
     # Initialize the pending friend request flag
     pending_friend_request_sent_by_current_user = False
 
     # Check if there is any friendship relation (sent or received) between the current user and the profile user
     friendship = models.Friendship.query.filter(
-        extensions.db.or_(
-            extensions.db.and_(
+        or_(
+            and_(
                 models.Friendship.user_id == current_user_id,
                 models.Friendship.friend_id == profile_user_id,
             ),
-            extensions.db.and_(
+            and_(
                 models.Friendship.user_id == profile_user_id,
                 models.Friendship.friend_id == current_user_id,
             ),

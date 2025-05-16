@@ -169,7 +169,7 @@ class User(db.Model, UserMixin):
 
     # Activity
     is_online = db.Column(db.Boolean, default=False)
-    last_activity = db.Column(db.DateTime)
+    last_activity = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Totp
     is_totp_enabled = db.Column(db.Boolean, default=False)

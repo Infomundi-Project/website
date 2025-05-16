@@ -80,7 +80,7 @@ CREATE TABLE users (
 
     -- Activity
     is_online TINYINT(1) DEFAULT 0,
-    last_activity DATETIME,
+    last_activity DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     -- Totp 
     is_totp_enabled TINYINT(1) DEFAULT 0,

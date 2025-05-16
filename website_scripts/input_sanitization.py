@@ -2,9 +2,11 @@ import bleach
 import html
 import re
 
+from typing import Optional, Tuple
 from urllib.parse import urlparse
 from unidecode import unidecode
 from bs4 import BeautifulSoup
+
 
 from . import security_util, config
 
@@ -55,28 +57,31 @@ def has_external_links(text: str) -> bool:
     return bool(findings)
 
 
-def detect_profile_type(s: str) -> str:
+def extract_username_from_thirdparty_platform(url: str) -> Tuple[Optional[str], Optional[str]]:
     """
-    Detects if the string is an Instagram, Twitter, or LinkedIn profile URL or handle.
-    Returns 'instagram', 'twitter', 'linkedin', or 'unknown'.
+    Extracts the platform and username from a given social profile URL.
+    Supports Instagram, Twitter, and LinkedIn (/in/).
+    
+    Returns:
+        (platform, username) if matched, else (None, None).
     """
-    s = s.strip()
-    instagram_pattern = r"^(?:https?://)?(?:www\.)?instagram\.com/[A-Za-z0-9._]+/?$"
-    twitter_pattern = (
-        r"^(?:https?://)?(?:www\.)?twitter\.com/[A-Za-z0-9_]+/?$|^@[A-Za-z0-9_]+$"
-    )
-    linkedin_pattern = (
-        r"^(?:https?://)?(?:[a-z]{2,3}\.)?linkedin\.com/(?:in|company)/[A-Za-z0-9-]+/?$"
-    )
-
-    if re.match(instagram_pattern, s, re.IGNORECASE):
-        return "instagram"
-    elif re.match(twitter_pattern, s, re.IGNORECASE):
-        return "twitter"
-    elif re.match(linkedin_pattern, s, re.IGNORECASE):
-        return "linkedin"
-    else:
-        return "unknown"
+    patterns = {
+        'instagram': r'^https?://(?:www\.)?instagram\.com/([^/?#&]+)(?:[/?#].*)?$',
+        'twitter':   r'^https?://(?:www\.)?twitter\.com/([^/?#&]+)(?:[/?#].*)?$',
+        'linkedin':  r'^https?://(?:[a-z]{2,3}\.)?linkedin\.com/in/([^/?#&]+)(?:[/?#].*)?$',
+    }
+    
+    for platform, pattern in patterns.items():
+        match = re.match(pattern, url, re.IGNORECASE)
+        if match:
+            username = match.group(1)
+            # quick sanity check:
+            if username.startswith('http'):
+                # skeptical filter—sometimes regex can whack URLs into the group.
+                continue
+            return platform, username
+    
+    return None, None
 
 
 def clean_publisher_name(name):
