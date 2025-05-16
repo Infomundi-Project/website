@@ -65,6 +65,7 @@ CREATE TABLE users (
 
     -- Account Registration
     is_enabled TINYINT(1) DEFAULT 0,
+    is_thirdparty_auth TINYINT(1) DEFAULT 0,
     register_token BINARY(16),
     register_token_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -79,7 +80,7 @@ CREATE TABLE users (
 
     -- Activity
     is_online TINYINT(1) DEFAULT 0,
-    last_activity DATETIME,
+    last_activity DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     -- Totp 
     is_totp_enabled TINYINT(1) DEFAULT 0,

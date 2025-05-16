@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.mysql import MEDIUMINT
 
 from .extensions import db
-from . import security_util, hashing_util, totp_util, qol_util
+from . import security_util, hashing_util, totp_util, qol_util, input_sanitization
 
 
 class Publisher(db.Model):
@@ -152,6 +152,7 @@ class User(db.Model, UserMixin):
 
     # Account Registration
     is_enabled = db.Column(db.Boolean, default=False)
+    is_thirdparty_auth = db.Column(db.Boolean, default=False)
     register_token = db.Column(db.LargeBinary(16))
     register_token_timestamp = db.Column(
         db.DateTime, default=db.func.current_timestamp()
@@ -168,7 +169,7 @@ class User(db.Model, UserMixin):
 
     # Activity
     is_online = db.Column(db.Boolean, default=False)
-    last_activity = db.Column(db.DateTime)
+    last_activity = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Totp
     is_totp_enabled = db.Column(db.Boolean, default=False)
@@ -273,6 +274,18 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
         return self.is_online
+
+    def get_platform_username(self, platform: str):
+        if platform == "linkedin":
+            url = self.linkedin_url
+        elif platform == "instagram":
+            url = self.instagram_url
+        else:
+            url = self.twitter_url
+
+        return input_sanitization.extract_username_from_thirdparty_platform_url(url)[
+            1
+        ]  # [1] here is the username
 
 
 class Friendship(db.Model):

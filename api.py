@@ -86,16 +86,62 @@ def get_crypto():
     )
 
 
+@api.route("/user/friend", methods=["POST"])
+@decorators.api_login_required
+def handle_friends():
+    data = request.get_json()
+    friend_id = data.get("friend_id")
+    action = data.get("action")
+
+    if action not in ("add", "accept", "reject", "delete") or not friend_id:
+        return jsonify(
+            success=False,
+            message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
+        )
+
+    if action == "add":
+        new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
+        return jsonify(success=True, message="Friend request sent")
+
+    elif action == "accept":
+        if friends_util.accept_friend_request(current_user.id, friend_id):
+            return jsonify(success=True, message="Friend request accepted")
+
+        return jsonify(success=False, message="Failed to accept friend request")
+
+    elif action == "reject":
+        if friends_util.reject_friend_request(current_user.id, friend_id):
+            return jsonify(success=True, message="Friend request rejected")
+
+        return jsonify(success=True, message="Failed to reject friend request")
+
+    else:
+        if friends_util.delete_friend(current_user.id, friend_id):
+            return jsonify(success=True, message="Friend request deleted")
+
+        return jsonify(success=True, message="Failed to delete friend request")
+
+
+@api.route("/user/<int:user_id>/friend/status", methods=["GET"])
+@decorators.api_login_required
+def friendship_status(user_id):
+    status, is_sent_by_current_user = friends_util.get_friendship_status(
+        current_user.id, user_id
+    )
+    return jsonify(status=status, is_sent_by_current_user=is_sent_by_current_user)
+
+
 @api.route("/story/<action>", methods=["POST"])
 @decorators.api_login_required
 def story_reaction(action):
     if action not in ("like", "dislike"):
-        return jsonify({"error": "Invalid action."}), 400
+        return jsonify(error="Invalid action"), 400
 
-    # We get the ID out of the request but it isn't the ID really, the url hash instead
+    # We get an 'id' attribute, but it isn't the ID really, it's url hash (md5 hex).
+    # We pretend it's the ID to lure bad actors.
     url_hash = request.get_json().get("id")
     if not url_hash:
-        return jsonify({"error": "Story ID is required."}), 400
+        return jsonify(error="Story ID is required"), 400
 
     story = models.Story.query.filter_by(
         url_hash=hashing_util.md5_hex_to_binary(url_hash)
@@ -239,7 +285,7 @@ def send_mail_twofactor_code():
 @decorators.api_login_required
 def verify_mail_twofactor_code():
     data = request.get_json() or {}
-    code = data.get("code", "")
+    code = data.get("code")
 
     if not code:
         return jsonify(success=False, error="Missing 'code' attribute"), 400
@@ -526,7 +572,7 @@ def get_stories():
 
 
 @api.route("/comments", methods=["POST"])
-@extensions.limiter.limit("120/day;60/hour;5/minute")
+@extensions.limiter.limit("120/day;60/hour;12/minute")
 def create_comment():
     data = request.get_json()
     parent_id = data.get("parent_id")
@@ -589,7 +635,10 @@ def create_comment():
         if not profile_owner:
             return jsonify(error="Could not find user in database."), 400
 
-        comment.url = url_for("views.user_profile_by_id", public_id=page_id) + f"#comment-{comment.id}"
+        comment.url = (
+            url_for("views.user_profile_by_id", public_id=page_id)
+            + f"#comment-{comment.id}"
+        )
         notifications.notify(
             [
                 {
@@ -630,7 +679,7 @@ def create_comment():
 
 
 @api.route("/comments/get/<page_id>", methods=["GET"])
-@extensions.limiter.limit("120/day;60/hour;10/minute")
+@extensions.limiter.limit("20/minute")
 def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
     sort = request.args.get("sort", "recent")  # "recent", "old", best"

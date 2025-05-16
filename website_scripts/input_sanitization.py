@@ -2,9 +2,11 @@ import bleach
 import html
 import re
 
+from typing import Optional, Tuple
 from urllib.parse import urlparse
 from unidecode import unidecode
 from bs4 import BeautifulSoup
+
 
 from . import security_util, config
 
@@ -55,28 +57,33 @@ def has_external_links(text: str) -> bool:
     return bool(findings)
 
 
-def detect_profile_type(s: str) -> str:
+def extract_username_from_thirdparty_platform_url(
+    url: str,
+) -> Tuple[Optional[str], Optional[str]]:
     """
-    Detects if the string is an Instagram, Twitter, or LinkedIn profile URL or handle.
-    Returns 'instagram', 'twitter', 'linkedin', or 'unknown'.
-    """
-    s = s.strip()
-    instagram_pattern = r"^(?:https?://)?(?:www\.)?instagram\.com/[A-Za-z0-9._]+/?$"
-    twitter_pattern = (
-        r"^(?:https?://)?(?:www\.)?twitter\.com/[A-Za-z0-9_]+/?$|^@[A-Za-z0-9_]+$"
-    )
-    linkedin_pattern = (
-        r"^(?:https?://)?(?:[a-z]{2,3}\.)?linkedin\.com/(?:in|company)/[A-Za-z0-9-]+/?$"
-    )
+    Extracts the platform and username from a given social profile URL.
+    Supports Instagram, Twitter, and LinkedIn (/in/).
 
-    if re.match(instagram_pattern, s, re.IGNORECASE):
-        return "instagram"
-    elif re.match(twitter_pattern, s, re.IGNORECASE):
-        return "twitter"
-    elif re.match(linkedin_pattern, s, re.IGNORECASE):
-        return "linkedin"
-    else:
-        return "unknown"
+    Returns:
+        (platform, username) if matched, else (None, None).
+    """
+    patterns = {
+        "instagram": r"^https?://(?:www\.)?instagram\.com/([^/?#&]+)(?:[/?#].*)?$",
+        "twitter": r"^https?://(?:www\.)?twitter\.com/([^/?#&]+)(?:[/?#].*)?$",
+        "linkedin": r"^https?://(?:[a-z]{2,3}\.)?linkedin\.com/in/([^/?#&]+)(?:[/?#].*)?$",
+    }
+
+    for platform, pattern in patterns.items():
+        match = re.match(pattern, url, re.IGNORECASE)
+        if match:
+            username = match.group(1)
+            # quick sanity check:
+            if username.startswith("http"):
+                # skeptical filter—sometimes regex can whack URLs into the group.
+                continue
+            return platform, username
+
+    return None, None
 
 
 def clean_publisher_name(name):
@@ -366,6 +373,20 @@ def is_safe_url(target: str) -> bool:
     return True
 
 
+def get_domain(url: str) -> str:
+    """
+    Extracts and returns the domain (netloc) from the given URL.
+
+    Example:
+        >>> get_domain("https://chatgpt.com/example?get=Test")
+        'chatgpt.com'
+    """
+    parsed = urlparse(url)
+    # parsed.netloc might include port, so we split it off if present
+    domain = parsed.netloc.split("@")[-1].split(":")[0]
+    return domain
+
+
 def is_md5_hash(text: str) -> bool:
     """
     Check if the text is a MD5 hash.
@@ -464,10 +485,7 @@ def has_x_linebreaks(text: str, newlines: int = 2) -> bool:
     """
     Check if the given text contains more than specified number of newlines (defaults to 2)
     """
-    if not text:
-        return False
-
-    newline_count = text.count("\n") + text.count("<br>")
+    newline_count = (text.count("\n") + text.count("<br>")) if text else 0
     return newline_count >= newlines
 
 

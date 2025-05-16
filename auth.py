@@ -278,17 +278,21 @@ def google_callback():
     email_fingerprint = hashing_util.generate_hmac_signature(
         user_info["email"], as_bytes=True
     )
+    email_encrypted = security_util.encrypt(user_info["email"])
 
     # If the user is not already in the database, we create an entry for them
     user = auth_util.search_user_email_in_database(user_info["email"])
     if not user:
-        # The user can only log in using google integration or if they want to recover their account for some reason.
+        # The user can only log in using google integration
         user = models.User(
             public_id=security_util.generate_uuid_bytes(),
             display_name=display_name,
             username=username,
             password=hashing_util.string_to_argon2_hash(security_util.generate_nonce()),
             email_fingerprint=email_fingerprint,
+            email_encrypted=email_encrypted,
+            is_thirdparty_auth=True,
+            is_enabled=True,
         )
         extensions.db.session.add(user)
         extensions.db.session.commit()
@@ -302,8 +306,8 @@ def google_callback():
 @auth.route("/logout", methods=["GET"])
 @login_required
 def logout():
+    flash(f"We hope to see you again soon, {current_user.username}")
     session.permanent = False
     session.clear()
     logout_user()
-    flash(f"We hope to see you again soon, {current_user.username}")
     return redirect(url_for("auth.login"))

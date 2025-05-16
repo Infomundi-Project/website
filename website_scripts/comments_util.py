@@ -21,6 +21,7 @@ def get_anonymous_user() -> object:
             email_encrypted=security_util.encrypt("anonymous@anonymous.com"),
             password=hashing_util.string_to_argon2_hash(config.SECRET_KEY),
             is_enabled=True,
+            role="official",
         )
         extensions.db.session.commit()
         extensions.db.session.add(anonymous_user)

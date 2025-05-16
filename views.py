@@ -56,49 +56,6 @@ def admin():
     return render_template("admin.html")
 
 
-@views.route("/user/<friend_id>/friend/<action>", methods=["GET"])
-@login_required
-def handle_friends(friend_id, action):
-    if action == "add":
-        new_friendship = friends_util.send_friend_request(current_user.id, friend_id)
-        notifications.notify(
-            user=friend_id,
-            notif_type="friend_request",
-            message=f"{current_user.username} sent you a friend request",
-            friendship_id=new_friendship.id,
-        )
-        flash("Friend request sent")
-        return redirect(url_for("views.user_redirect"))
-
-    elif action == "accept":
-        if friends_util.accept_friend_request(current_user.id, friend_id):
-            flash("Friend request accepted")
-        else:
-            flash("Failed to accept friend request", "error")
-
-        return redirect(url_for("views.user_redirect"))
-
-    elif action == "reject":
-        if friends_util.reject_friend_request(current_user.id, friend_id):
-            flash("Friend request rejected")
-        else:
-            flash("Failed to reject friend request", "error")
-
-        return redirect(url_for("views.user_redirect"))
-
-    elif action == "delete":
-        if friends_util.delete_friend(current_user.id, friend_id):
-            flash("Friend request deleted")
-        else:
-            flash("Failed to delete friend request", "error")
-
-        return redirect(url_for("views.user_redirect"))
-
-    else:
-        flash("What?", "error")
-        return redirect(url_for("views.user_redirect"))
-
-
 @views.route("/id/<public_id>", methods=["GET"])
 def user_profile_by_id(public_id):
     user = models.User.query.filter_by(
@@ -126,36 +83,27 @@ def user_profile(username):
         150, user.profile_description or ""
     )
 
-    if current_user.is_authenticated:
-        friend_status, pending_friend_request_sent_by_current_user = (
-            friends_util.get_friendship_status(current_user.id, user.id)
-        )
-    else:
-        friend_status = "not_friends"
-        pending_friend_request_sent_by_current_user = False
-
     seo_title = f"Infomundi - {user.display_name if user.display_name else user.username}'s profile"
     seo_description = f"{short_description if short_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
-    is_profile_owner = current_user.is_authenticated and (current_user.id == user.id)
-    user_public_id = user.get_public_id()
+    user.has_contact_info = (
+        user.public_email or user.linkedin_url or user.instagram_url or user.twitter_url
+    )
+
+    user.website_domain = (
+        input_sanitization.get_domain(user.website_url) if user.website_url else ""
+    )
+
     return render_template(
         "user_profile.html",
-        pending_requests=(
-            friends_util.get_pending_friend_requests(current_user.id)
-            if is_profile_owner
-            else None
-        ),
-        pending_friend_request_sent_by_current_user=pending_friend_request_sent_by_current_user,
         has_too_many_newlines=input_sanitization.has_x_linebreaks(
             user.profile_description
         ),
         short_description=input_sanitization.close_open_html_tags(short_description),
         friends_list=friends_util.get_friends_list(user.id),
         seo_data=(seo_title, seo_description, seo_image),
-        user_public_id=user_public_id,
-        friend_status=friend_status,
+        user_public_id=user.get_public_id(),
         user=user,
     )
 
@@ -239,18 +187,28 @@ def edit_user_profile():
             if city:
                 current_user.city_id = city_id
 
-    linkedin_url = request.form.get("linkedin_url")
-    twitter_url = request.form.get("twitter_url")
-    instagram_url = request.form.get("instagram_url")
+    for platform_option in ("linkedin", "twitter", "instagram"):
+        platform_profile_url = request.form.get(
+            f"{platform_option}_url"
+        )  # e.g. linkedin_url or instagram_url
+        if not platform_profile_url:
+            continue
 
-    if linkedin_url or twitter_url or instagram_url:
-        if (
-            input_sanitization.detect_profile_type(linkedin_url) != "linkedin"
-            or input_sanitization.detect_profile_type(twitter_url) != "twitter"
-            or input_sanitization.detect_profile_type(instagram_url) != "instagram"
-        ):
-            flash("Invalid url for linkedin or twitter or instagram profile.", "error")
+        platform_result, username_result = (
+            input_sanitization.extract_username_from_thirdparty_platform_url(
+                platform_profile_url
+            )
+        )
+        if platform_option != platform_result:
+            flash(f"Invalid url for {platform_option} profile.", "error")
             return render_template("edit_profile.html")
+
+        if platform_option == "linkedin":
+            current_user.linkedin_url = platform_profile_url
+        elif platform_option == "twitter":
+            current_user.twitter_url = platform_profile_url
+        else:
+            current_user.instagram_url = platform_profile_url
 
     website_url = request.form.get("website_url")
     if website_url:
@@ -267,10 +225,6 @@ def edit_user_profile():
     # At this point user input should be safe :thumbsup: so we apply changes
     current_user.website_url = website_url
     current_user.public_email = public_email
-
-    current_user.linkedin_url = linkedin_url
-    current_user.twitter_url = twitter_url
-    current_user.instagram_url = instagram_url
 
     current_user.username = username
     current_user.display_name = display_name
@@ -614,7 +568,6 @@ def news():
 
 
 @views.route("/comments", methods=["GET"])
-@decorators.in_maintenance
 def comments():
     story_url_hash = request.args.get("id", "")
     story = models.Story.query.filter_by(
