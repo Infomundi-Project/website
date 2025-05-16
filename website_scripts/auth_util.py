@@ -229,7 +229,7 @@ The Infomundi Team"""
 def delete_account(email: str, token: str) -> bool:
     user = search_user_email_in_database(email)
     token = security_util.uuid_string_to_bytes(token)
-    
+
     # If the supplied token doesn't match the database record, return False.
     if user.delete_token != token:
         return False

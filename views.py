@@ -87,7 +87,9 @@ def user_profile(username):
     seo_description = f"{short_description if short_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
-    user.has_contact_info = (user.public_email or user.linkedin_url or user.instagram_url or user.twitter_url)
+    user.has_contact_info = (
+        user.public_email or user.linkedin_url or user.instagram_url or user.twitter_url
+    )
 
     return render_template(
         "user_profile.html",

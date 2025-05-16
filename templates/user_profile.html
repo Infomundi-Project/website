@@ -266,7 +266,7 @@
             style="width: {{ user.level_progress }}%"></div>
         </div>
 
-        <div class="row align-items-center justify-content-between">
+        <div class="row justify-content-between">
           {% if current_user.is_authenticated and current_user.id == user.id %}
             <div class="col">
               <a type="button" role="button"
@@ -277,10 +277,18 @@
             </div>
           {% elif current_user.is_authenticated %}
             <div class="col-auto">
-              <button type="button" class="btn btn-primary btn-sm" id="userFollowBtn">Follow</button>
-              <div id="friendActionContainer"></div>
+              <ul class="list-inline">
+                <li class="list-inline-item">
+                  <button type="button" class="btn btn-primary btn-sm" id="userFollowBtn">Follow</button>
+                </li>
+                <li class="list-inline-item">
+                  <div id="friendActionContainer"></div>
+                </li>
+              
+              </ul>
             </div>
-            <div class="col-auto mt-lg-0 mt-md-2">
+
+            <div class="col-auto">
               <div class="dropdown">
                 <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   More
@@ -293,6 +301,7 @@
                 </ul>
               </div>
             </div>
+
           {% endif %}
         </div>
 
@@ -499,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Builds & inserts the right buttons
   async function initFriendUI() {
-    container.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading…`;
+    container.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading...`;
 
     try {
       const res = await fetch(`/api/user/${profileId}/friend/status`, {
@@ -517,10 +526,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       else if (status === "pending") {
         if (is_sent_by_current_user) {
-          html = `<button disabled class="btn btn-secondary btn-sm">Sent <i class="ms-1 fa-solid fa-hourglass"></i></button>`;
+          // cancel button 
+          html = `<button id="cancelBtn" class="btn btn-warning btn-sm">
+                    Cancel Request <i class="ms-1 fa-solid fa-ban"></i>
+                  </button>`;
         } else {
           html = `
-            <button id="acceptBtn" class="btn btn-success btn-sm me-1">
+            <button id="acceptBtn" class="btn btn-success btn-sm">
               Accept <i class="ms-1 fa-solid fa-check"></i>
             </button>
             <button id="rejectBtn" class="btn btn-danger btn-sm">
@@ -558,6 +570,14 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
       }
+      if (btn = document.getElementById("cancelBtn")) {
+        btn.addEventListener("click", () => {
+          if (confirm("Sure you want to cancel this friend request?")) {
+            doFriendAction("delete");
+          }
+        });
+      }
+
     } catch (err) {
       console.error("Could not load friendship status:", err);
       container.innerHTML = `<button disabled class="btn btn-outline-secondary btn-sm">Error</button>`;

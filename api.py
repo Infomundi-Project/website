@@ -94,7 +94,10 @@ def handle_friends():
     action = data.get("action")
 
     if action not in ("add", "accept", "reject", "delete") or not friend_id:
-        return jsonify(success=False, message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.")
+        return jsonify(
+            success=False,
+            message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
+        )
 
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
@@ -109,19 +112,22 @@ def handle_friends():
     elif action == "reject":
         if friends_util.reject_friend_request(current_user.id, friend_id):
             return jsonify(success=True, message="Friend request rejected")
-        
+
         return jsonify(success=True, message="Failed to reject friend request")
 
     else:
         if friends_util.delete_friend(current_user.id, friend_id):
             return jsonify(success=True, message="Friend request deleted")
-        
+
         return jsonify(success=True, message="Failed to delete friend request")
+
 
 @api.route("/user/<int:user_id>/friend/status", methods=["GET"])
 @decorators.api_login_required
 def friendship_status(user_id):
-    status, is_sent_by_current_user = friends_util.get_friendship_status(current_user.id, user_id)
+    status, is_sent_by_current_user = friends_util.get_friendship_status(
+        current_user.id, user_id
+    )
     return jsonify(status=status, is_sent_by_current_user=is_sent_by_current_user)
 
 
@@ -629,7 +635,10 @@ def create_comment():
         if not profile_owner:
             return jsonify(error="Could not find user in database."), 400
 
-        comment.url = url_for("views.user_profile_by_id", public_id=page_id) + f"#comment-{comment.id}"
+        comment.url = (
+            url_for("views.user_profile_by_id", public_id=page_id)
+            + f"#comment-{comment.id}"
+        )
         notifications.notify(
             [
                 {

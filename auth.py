@@ -292,7 +292,7 @@ def google_callback():
             email_fingerprint=email_fingerprint,
             email_encrypted=email_encrypted,
             is_thirdparty_auth=True,
-            is_enabled=True
+            is_enabled=True,
         )
         extensions.db.session.add(user)
         extensions.db.session.commit()
