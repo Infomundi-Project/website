@@ -91,6 +91,10 @@ def user_profile(username):
         user.public_email or user.linkedin_url or user.instagram_url or user.twitter_url
     )
 
+    user.website_domain = (
+        input_sanitization.get_domain(user.website_url) if user.website_url else ""
+    )
+
     return render_template(
         "user_profile.html",
         has_too_many_newlines=input_sanitization.has_x_linebreaks(
@@ -183,18 +187,28 @@ def edit_user_profile():
             if city:
                 current_user.city_id = city_id
 
-    linkedin_url = request.form.get("linkedin_url")
-    twitter_url = request.form.get("twitter_url")
-    instagram_url = request.form.get("instagram_url")
+    for platform_option in ("linkedin", "twitter", "instagram"):
+        platform_profile_url = request.form.get(
+            f"{platform_option}_url"
+        )  # e.g. linkedin_url or instagram_url
+        if not platform_profile_url:
+            continue
 
-    if linkedin_url or twitter_url or instagram_url:
-        if (
-            input_sanitization.detect_profile_type(linkedin_url) != "linkedin"
-            or input_sanitization.detect_profile_type(twitter_url) != "twitter"
-            or input_sanitization.detect_profile_type(instagram_url) != "instagram"
-        ):
-            flash("Invalid url for linkedin or twitter or instagram profile.", "error")
+        platform_result, username_result = (
+            input_sanitization.extract_username_from_thirdparty_platform_url(
+                platform_profile_url
+            )
+        )
+        if platform_option != platform_result:
+            flash(f"Invalid url for {platform_option} profile.", "error")
             return render_template("edit_profile.html")
+
+        if platform_option == "linkedin":
+            current_user.linkedin_url = platform_profile_url
+        elif platform_option == "twitter":
+            current_user.twitter_url = platform_profile_url
+        else:
+            current_user.instagram_url = platform_profile_url
 
     website_url = request.form.get("website_url")
     if website_url:
@@ -211,10 +225,6 @@ def edit_user_profile():
     # At this point user input should be safe :thumbsup: so we apply changes
     current_user.website_url = website_url
     current_user.public_email = public_email
-
-    current_user.linkedin_url = linkedin_url
-    current_user.twitter_url = twitter_url
-    current_user.instagram_url = instagram_url
 
     current_user.username = username
     current_user.display_name = display_name

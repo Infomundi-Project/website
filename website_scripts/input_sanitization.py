@@ -57,7 +57,7 @@ def has_external_links(text: str) -> bool:
     return bool(findings)
 
 
-def extract_username_from_thirdparty_platform(
+def extract_username_from_thirdparty_platform_url(
     url: str,
 ) -> Tuple[Optional[str], Optional[str]]:
     """
@@ -373,6 +373,20 @@ def is_safe_url(target: str) -> bool:
     return True
 
 
+def get_domain(url: str) -> str:
+    """
+    Extracts and returns the domain (netloc) from the given URL.
+
+    Example:
+        >>> get_domain("https://chatgpt.com/example?get=Test")
+        'chatgpt.com'
+    """
+    parsed = urlparse(url)
+    # parsed.netloc might include port, so we split it off if present
+    domain = parsed.netloc.split("@")[-1].split(":")[0]
+    return domain
+
+
 def is_md5_hash(text: str) -> bool:
     """
     Check if the text is a MD5 hash.
@@ -471,10 +485,7 @@ def has_x_linebreaks(text: str, newlines: int = 2) -> bool:
     """
     Check if the given text contains more than specified number of newlines (defaults to 2)
     """
-    if not text:
-        return False
-
-    newline_count = text.count("\n") + text.count("<br>")
+    newline_count = (text.count("\n") + text.count("<br>")) if text else 0
     return newline_count >= newlines
 
 

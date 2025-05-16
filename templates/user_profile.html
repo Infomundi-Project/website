@@ -51,29 +51,12 @@
     height: auto;
   }
 
-  .friend-avatar {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 15px;
-    border: 3px solid white;
-  }
-
   .user-description {
     max-height: 150px;
     overflow: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
   }
-
-  .modal-sheet .modal-dialog {
-  width: 380px;
-  transition: bottom .75s ease-in-out;
-  }
-  .modal-sheet .modal-footer {
-    padding-bottom: 2rem;
-  }
-
-
 
   @media (max-width: 1000px) {
     .profile-avatar {
@@ -113,7 +96,7 @@
 </div>
 
 
-<div class="modal fade modal-sheet p-4 py-md-5" aria-hidden="true" tabindex="-1" id="userContactInfoModal">
+<div class="modal fade p-4 py-md-5" aria-hidden="true" tabindex="-1" id="userContactInfoModal">
   <div class="modal-dialog">
     <div class="modal-content rounded-4 shadow">
       <div class="modal-body p-5">
@@ -137,7 +120,7 @@
             <i class="fa-brands fa-square-instagram fa-2xl"></i>
             <div>
               <h5 class="mb-0">Instagram</h5>
-              @{{ input_sanitization.extract_username_from_thirdpaty_platform(user.instagram_url)[1] }}
+              <a href="{{ user.instagram_url }}" target="_blank">@{{ user.get_platform_username('instagram') }}</a>
             </div>
           </li>
           {% endif %}
@@ -147,7 +130,7 @@
             <i class="fa-brands fa-square-x-twitter fa-2xl"></i>
             <div>
               <h5 class="mb-0">X (Twitter)</h5>
-              {{ user.twitter_url }}
+              <a href="{{ user.twitter_url }}" target="_blank">@{{ user.get_platform_username('twitter') }}</a>
             </div>
           </li>
           {% endif %}
@@ -157,17 +140,17 @@
             <i class="fa-brands fa-linkedin fa-2xl"></i>
             <div>
               <h5 class="mb-0">LinkedIn</h5>
-              {{ user.linkedin_url }}
+              <a href="{{ user.linkedin_url }}" target="_blank">@{{ user.get_platform_username('linkedin') }}</a>
             </div>
           </li>
           {% endif %}
 
           {% if user.public_email %}
           <li class="d-flex align-items-center gap-4">
-            <i class="fa-solid fa-envelope fa-2xl"></i>
+            <i class="fa-solid fa-square-envelope fa-2xl"></i>
             <div>
               <h5 class="mb-0">Email</h5>
-              <a href="mailto:{{ user.public_email }}">{{ user.public_email }}</a>
+              <a href="mailto:{{ user.public_email }}" target="_blank">{{ user.public_email }}</a>
             </div>
           </li>
           {% endif %}
@@ -228,7 +211,7 @@
 
               <!-- User website -->
               {% if user.website_url %}
-              <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="{{ user.website_url }}">Website</a></li>
+              <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="{{ user.website_url }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ user.website_domain }}</a></li>
               {% endif %}
               
               <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ user.created_at }}">{{ user.created_at.strftime("%B %Y") }}</span></li>
@@ -320,27 +303,40 @@
         </div>
       -->
 
+        <!-- Comments -->
+        <infomundi-comments page_id="{{ user.get_public_id() }}" type="user">
+
+          <div id="commentsList"></div>
+
+        </infomundi-comments>
+
+      </div>
+
+      <div class="col-md-3 p-2">
+        <div id="user-status" class="text-center"></div>
+        
+
         <!-- Friends -->
         {% if friends_list %}
-        <div>
-          <h3>Friends<span
+        <div class="mt-5">
+          <p class="fs-4">Friends<span
               class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span>
-          </h3>
-          <div class="row">
+          </p>
+
+          <div class="vstack gap-3">
             {% for friend in friends_list %}
-            <div class="col">
-              <div class="row row-cols-auto">
-                <div class="col-auto">
+              <div class="row">
+                <div class="col-md-3 px-2">
                   <a href="{{ url_for('views.user_profile', username=friend.username) }}"
                     class="text-decoration-none">
                     <img src="{{ friend.avatar_url }}"
                       alt="{{ friend.username }}'s avatar"
                       data-bs-toggle="tooltip"
                       data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}"
-                      class="friend-avatar">
+                      class="img-fluid rounded-3 border border-2 ">
                   </a>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-9 px-1">
                   <p class="fw-bold notranslate {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}"
                     style="margin-bottom: -5px;">
                     {% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}
@@ -354,24 +350,13 @@
                   {% endif %}
                 </div>
               </div>
-            </div>
             {% endfor %}
-
           </div>
+
         </div>
         {% endif %}
 
-        <!-- Comments -->
-        <infomundi-comments page_id="{{ user.get_public_id() }}" type="user">
 
-          <div id="commentsList"></div>
-
-        </infomundi-comments>
-
-      </div>
-
-      <div class="col-md-3 p-2">
-        <div id="user-status" class="text-center"></div>
       </div>
 
 

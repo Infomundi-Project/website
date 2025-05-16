@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.mysql import MEDIUMINT
 
 from .extensions import db
-from . import security_util, hashing_util, totp_util, qol_util
+from . import security_util, hashing_util, totp_util, qol_util, input_sanitization
 
 
 class Publisher(db.Model):
@@ -274,6 +274,18 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
         return self.is_online
+
+    def get_platform_username(self, platform: str):
+        if platform == "linkedin":
+            url = self.linkedin_url
+        elif platform == "instagram":
+            url = self.instagram_url
+        else:
+            url = self.twitter_url
+
+        return input_sanitization.extract_username_from_thirdparty_platform_url(url)[
+            1
+        ]  # [1] here is the username
 
 
 class Friendship(db.Model):
