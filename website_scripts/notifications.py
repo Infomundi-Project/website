@@ -1,9 +1,11 @@
 import gnupg
 from email.mime.multipart import MIMEMultipart
+from sqlalchemy.exc import IntegrityError
 from requests import post as post_request
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from sqlalchemy import insert
+
 from smtplib import SMTP
 
 from . import config, extensions, models, custom_exceptions
@@ -70,10 +72,24 @@ def notify(notif_dicts: list):
 
 
 def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
-    """Create and commit a Notification for a user."""
-    n = models.Notification(
-        user_id=user_id, type=type, message=message, **fk_kwargs
-    )
+    """
+    Create-and-commit a Notification for a user,
+    but first check if an unread one already exists.
+    """
+    filters = {
+        "user_id": user_id,
+        "type": type,
+        "is_read": False,
+        **fk_kwargs,
+    }
+
+    existing = extensions.db.session.query(models.Notification).filter_by(**filters).first()
+    if existing:
+        # We already have a pending one—just return it.
+        return existing
+
+    # Otherwise, create & commit a fresh notification
+    n = models.Notification(user_id=user_id, type=type, message=message, **fk_kwargs)
     extensions.db.session.add(n)
     extensions.db.session.commit()
     return n

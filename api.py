@@ -87,7 +87,7 @@ def get_crypto():
 
 
 @api.route("/user/friend", methods=["POST"])
-@extensions.limiter.limit("12/hour;6/minute")
+@extensions.limiter.limit("54/hour;18/minute")
 @decorators.api_login_required
 def handle_friends():
     data = request.get_json()
@@ -107,7 +107,15 @@ def handle_friends():
 
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
-        notifications.notify_single(friend.id, 'friend_request', f'{current_user.username} has sent you a friend request', url=url_for('views.user_profile_by_id', public_id=current_user.get_public_id()))
+        notifications.notify_single(
+            friend.id,
+            "friend_request",
+            f"{current_user.username} has sent you a friend request",
+            friendship_id=new_friendship_id,
+            url=url_for(
+                "views.user_profile_by_id", public_id=current_user.get_public_id()
+            ),
+        )
         return jsonify(success=True, message="Friend request sent")
 
     elif action == "accept":
@@ -945,10 +953,9 @@ def mark_notification_read(notification_id):
         return jsonify({"error": "Notification not found."}), 404
 
     if not notif.is_read:
+        notif.friendship_id = None
         notif.is_read = True
-        notif.read_at = (
-            datetime.utcnow() if hasattr(models.Notification, "read_at") else None
-        )
+        notif.read_at = datetime.utcnow()
         extensions.db.session.commit()
 
     return jsonify({"message": "Notification marked as read.", "id": notif.id}), 200
@@ -962,7 +969,7 @@ def mark_all_notifications_read():
     """
     updated = models.Notification.query.filter_by(
         user_id=current_user.id, is_read=False
-    ).update({"is_read": True}, synchronize_session="fetch")
+    ).update({"is_read": True, "friendship_id": None}, synchronize_session="fetch")
     extensions.db.session.commit()
 
     return (

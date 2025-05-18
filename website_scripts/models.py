@@ -464,6 +464,7 @@ class Notification(db.Model):
     url = db.Column(db.String(512), nullable=True)  # link to view the item
 
     is_read = db.Column(db.Boolean, default=False, nullable=False)
+    read_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 

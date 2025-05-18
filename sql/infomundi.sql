@@ -283,8 +283,16 @@ CREATE TABLE notifications (
     url VARCHAR(512),
 
     is_read TINYINT(1) NOT NULL DEFAULT 0,
+    read_at DATETIME,
 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_notifications_pending_friend (
+        user_id,
+        type,
+        friendship_id,
+        is_read
+    )
 );
 
 -- Index to speed up querying unread notifications per user
