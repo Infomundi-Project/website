@@ -69,6 +69,16 @@ def notify(notif_dicts: list):
         extensions.db.session.commit()
 
 
+def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
+    """Create and commit a Notification for a user."""
+    n = models.Notification(
+        user_id=user_id, type=type, message=message, **fk_kwargs
+    )
+    extensions.db.session.add(n)
+    extensions.db.session.commit()
+    return n
+
+
 def send_email(
     recipient_email: str,
     subject: str,

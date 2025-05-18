@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${
             n.is_read
               ? ""
-              : `<button data-id="${n.id}" class="btn btn-sm btn-outline-primary mark-read-btn"><i class="fa-solid fa-check-double"></i></button>`
+              : `<button data-id="${n.id}" class="btn btn-sm btn-outline-primary mark-read-btn">Read</button>`
           }
         `;
         notificationsList.appendChild(li);

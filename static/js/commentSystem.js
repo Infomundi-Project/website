@@ -134,7 +134,7 @@
                                   <div>
                                     <a href="/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small notranslate">${comment.user.username}</a>
               ${comment.user.role !== 'user' ? `
-                                    <span class="badge bg-primary" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}
+                                    <span class="badge bg-primary p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}
                                     <br>
               ${level > 0 && parentUser ? `
                                       <span class="text-muted small">Replying to 
@@ -202,24 +202,27 @@
 
       // 4) build the overlay
       const overlay = document.createElement('div');
-      overlay.className = 'flagged-overlay';
+      overlay.classList.add('flagged-overlay', 'rounded-end');
       overlay.innerHTML = `
-        This comment was flagged by our automated systems.
-        <button class="btn btn-sm btn-light">Show</button>
+        This comment was flagged by Infomundi's automated systems.
+        <button class="btn btn-sm btn-light show-flagged-btn">Show</button>
       `;
 
-      // 5) on click, unblur & remove overlay
-      overlay.addEventListener('click', () => {
-        wrapper.classList.remove('flagged-blur');
-        overlay.remove();
+      // 5) wire up the Show button to ask for confirmation first
+      const btn = overlay.querySelector('.show-flagged-btn');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation(); // don’t let the click bubble up if you had other listeners
+        const really = window.confirm('Are you sure you want to view this comment?');
+        if (really) {
+          wrapper.classList.remove('flagged-blur');
+          overlay.remove();
+        }
+        // if they cancel, we do nothing—still blurred
       });
 
       // 6) append overlay *after* the wrapper
       body.appendChild(overlay);
     }
-
-
-
 
     // Attach actions
     const likeBtn = div.querySelector('.like-btn');
@@ -236,8 +239,6 @@
       // 'div' is the card for this comment
       showReplyForm(div, comment.id);
     });
-
-
     editBtn.addEventListener('click', (e) => {
       e.preventDefault();
       editComment(comment.id);

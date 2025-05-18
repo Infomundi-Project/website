@@ -145,7 +145,7 @@ class User(db.Model, UserMixin):
     # Privacy settings
     profile_visibility = db.Column(
         db.String(7), default="public"
-    )  # "public", "friends", "private"
+    )  # "public", "login", "friends", "private"
     notification_type = db.Column(
         db.String(9), default="all"
     )  # "all", "important", "none"
@@ -217,7 +217,7 @@ class User(db.Model, UserMixin):
         self.totp_recovery = None
         db.session.commit()
 
-    def setup_totp(self) -> str:
+    def setup_totp(self, totp_secret) -> str:
         totp_recovery_token = security_util.generate_nonce()
 
         self.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)

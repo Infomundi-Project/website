@@ -87,9 +87,11 @@ def get_crypto():
 
 
 @api.route("/user/friend", methods=["POST"])
+@extensions.limiter.limit("12/hour;6/minute")
 @decorators.api_login_required
 def handle_friends():
     data = request.get_json()
+
     friend_id = data.get("friend_id")
     action = data.get("action")
 
@@ -99,8 +101,13 @@ def handle_friends():
             message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
         )
 
+    friend = extensions.db.session.get(models.User, friend_id)
+    if not friend:
+        return jsonify(success=False, message="Could not find user.")
+
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
+        notifications.notify_single(friend.id, 'friend_request', f'{current_user.username} has sent you a friend request', url=url_for('views.user_profile_by_id', public_id=current_user.get_public_id()))
         return jsonify(success=True, message="Friend request sent")
 
     elif action == "accept":
@@ -254,7 +261,7 @@ def setup_totp():
     if not is_valid:
         return jsonify({"valid": False}), 200
 
-    totp_recovery_token = current_user.setup_totp()
+    totp_recovery_token = current_user.setup_totp(session["totp_secret"])
 
     # There's no need to keep this info in the user's session anymore
     del session["totp_secret"]
@@ -644,7 +651,7 @@ def create_comment():
                 {
                     "user_id": profile_owner.id,
                     "type": "new_comment",
-                    "message": "Someone commented on your profile",
+                    "message": f"{comment.user.username} commented on your profile",
                     "url": comment.url,
                 }
             ]
