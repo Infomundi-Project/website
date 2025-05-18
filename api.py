@@ -120,6 +120,24 @@ def handle_friends():
 
     elif action == "accept":
         if friends_util.accept_friend_request(current_user.id, friend_id):
+            # Sends notification to the friend
+            notifications.notify_single(
+                friend.id,
+                "friend_accepted",
+                f"{current_user.username} has accepted your friend request",
+                url=url_for(
+                    "views.user_profile_by_id", public_id=current_user.get_public_id()
+                ),
+            )
+            # Sends also notification to the user
+            notifications.notify_single(
+                current_user.id,
+                "friend_status",
+                f"You accepted the friend request from {friend.username}",
+                url=url_for(
+                    "views.user_profile_by_id", public_id=friend.get_public_id()
+                ),
+            )
             return jsonify(success=True, message="Friend request accepted")
 
         return jsonify(success=False, message="Failed to accept friend request")
@@ -980,4 +998,89 @@ def mark_all_notifications_read():
             }
         ),
         200,
+    )
+
+
+@api.route("/user/<int:uid>/block/<action>", methods=["POST"])
+@decorators.api_login_required
+def block_user(uid, action):
+    if uid == current_user.id:
+        return jsonify(success=False, message="Self-blocking? Well, that's new"), 400
+
+    if action not in ("add", "remove"):
+        return jsonify(success=False, message="Unrecognized action"), 400
+
+    target = extensions.db.session.get(models.User, uid)
+    if not target:
+        return jsonify(success=False, message="Couldn't find the target user"), 400
+
+    block = models.UserBlock.query.filter_by(
+        blocker_id=current_user.id, blocked_id=uid
+    ).first()
+
+    if action == "add":
+        friends_util.delete_friend(
+            current_user.id, target.id
+        )  # users aren't friends anymore if they decide to block each other
+
+        if block:
+            return jsonify(success=True, message="Already blocked."), 200
+
+        block = models.UserBlock(blocker=current_user, blocked=target)
+        extensions.db.session.add(block)
+    else:
+        if not block:
+            return jsonify(success=True, message="User is not blocked"), 200
+        extensions.db.session.delete(block)
+
+    extensions.db.session.commit()
+
+    return (
+        jsonify(
+            success=True,
+            message=f"You blocked {target.username}. Take care of your peace!",
+        ),
+        201,
+    )
+
+
+@api.route("/user/<int:uid>/report/<action>", methods=["POST"])
+@decorators.api_login_required
+def report_user(uid):
+    if uid == current_user.id:
+        return jsonify(success=False, message="You can't report yourself"), 400
+
+    target = extensions.db.session.get(models.User, uid)
+    if not target:
+        return jsonify(success=False, message="Couldn't find the target user"), 400
+
+    data = request.get_json() or {}
+    reason = input_sanitization.gentle_cut_text(500, data.get("reason", ""))
+
+    if action not in ("add", "remove", "edit"):
+        return jsonify(success=False, message="Unrecognized action."), 400
+
+    report = models.UserReport.query.filter_by(
+        reporter_id=current_user.id, reported_id=uid, reason=reason
+    ).first()
+
+    if action == "add":
+        if existing:
+            return (
+                jsonify(success=False, message="You’ve already reported this user."),
+                200,
+            )
+
+        report = models.UserReport(
+            reporter=current_user, reported=target, reason=reason
+        )
+        extensions.db.session.add(report)
+
+    extensions.db.session.commit()
+
+    return (
+        jsonify(
+            success=True, message="Thanks for letting us know — we’ll take a look!"
+        ),
+        201,
     )

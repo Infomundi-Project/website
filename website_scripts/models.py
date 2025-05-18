@@ -117,7 +117,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(25), nullable=False, unique=True)
     email_fingerprint = db.Column(
         db.LargeBinary(32), nullable=False, unique=True
-    )  # SHA-256 + HMAC
+    )  # SHA-256 HMAC
     email_encrypted = db.Column(db.LargeBinary(120), nullable=False)  # AES-GCM
 
     role = db.Column(db.String(15), default="user")
@@ -286,6 +286,82 @@ class User(db.Model, UserMixin):
         return input_sanitization.extract_username_from_thirdparty_platform_url(url)[
             1
         ]  # [1] here is the username
+
+
+class UserReport(db.Model):
+    __tablename__ = "user_reports"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    reporter_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    reported_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    category = db.Column(
+        db.Enum(
+            "spam",
+            "harassment",
+            "hate_speech",
+            "inappropriate",
+            "other",
+            name="report_category_enum",
+        ),
+        nullable=False,
+        default="other",
+        index=True,
+    )
+
+    reason = db.Column(db.String(500), nullable=True)
+
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    # relationships for easy backrefs
+    reporter = db.relationship(
+        "User", foreign_keys=[reporter_id], backref="reports_made", lazy="joined"
+    )
+    reported = db.relationship(
+        "User", foreign_keys=[reported_id], backref="reports_received", lazy="joined"
+    )
+    __table_args__ = (
+        # no more duplicate reports in the same category!
+        db.UniqueConstraint(
+            "reporter_id", "reported_id", "category", name="uq_user_report_category"
+        ),
+    )
+
+
+class UserBlock(db.Model):
+    __tablename__ = "user_blocks"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    blocker_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    blocked_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    blocker = db.relationship(
+        "User",
+        foreign_keys=[blocker_id],
+        backref=db.backref("blocks_made"))
+    
+    blocked = db.relationship(
+        "User",
+        foreign_keys=[blocked_id],
+        backref=db.backref("blocked_by"))
+
+    __table_args__ = (
+        # one block per pair
+        db.UniqueConstraint("blocker_id", "blocked_id", name="uq_user_block"),
+    )
 
 
 class Friendship(db.Model):

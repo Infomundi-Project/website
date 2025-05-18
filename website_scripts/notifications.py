@@ -83,7 +83,9 @@ def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
         **fk_kwargs,
     }
 
-    existing = extensions.db.session.query(models.Notification).filter_by(**filters).first()
+    existing = (
+        extensions.db.session.query(models.Notification).filter_by(**filters).first()
+    )
     if existing:
         # We already have a pending one—just return it.
         return existing
