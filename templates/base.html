@@ -274,21 +274,22 @@
         {% if current_user.is_authenticated %}
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('views.user_profile', username=current_user.username) }}"
-            class="nav-link {% if request.url.endswith(current_user.username) and 'profile' in request.url %}active{% endif %}">
+            class="nav-link {% if request.url.endswith('/p/' + current_user.username) or request.url.endswith('/profile/' + current_user.username) %}active{% endif %}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-user"></i></span>
             <div class="vr me-2"></div>
             Profile
           </a>
         </li>
-        <li class="nav-item inf-nav-item">
-          <a href="#" class="nav-link disabled" aria-disabled="true">
-            <span class="icon-wrapper me-2"><i
-                class="fa-solid fa-bell"></i></span>
-            <div class="vr me-2"></div>
-            Notifications
-          </a>
-        </li>
+        <li class="nav-item inf-nav-item" id="inboxLeftNavbar">
+  <a href="#" class="nav-link d-flex align-items-center">
+    <span class="icon-wrapper me-2"><i class="fa-solid fa-inbox fa-lg"></i></span>
+    <div class="vr me-2"></div>
+    <span>Inbox</span>
+    <!-- new badge: -->
+    <span id="unreadBadgeNavLeft" class="badge bg-danger ms-auto" style="display:none">0</span>
+  </a>
+</li>
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('views.edit_user_settings') }}"
             class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
@@ -1031,12 +1032,14 @@
               <i class="fa-solid fa-user me-1"></i>Profile
             </a>
           </li>
-          <li class="nav-item mb-2">
-            <a href="#" class="nav-link p-0 text-body-secondary disabled"
-              aria-disabled="true">
-              <i class="fa-solid fa-bell me-1"></i>Notifications
-            </a>
-          </li>
+          <li class="nav-item mb-2" id="inboxFooter">
+  <a href="#" class="nav-link p-0 text-body-secondary d-flex align-items-center">
+    <i class="fa-solid fa-inbox fa-lg me-1"></i>
+    <span>Inbox</span>
+    <!-- new badge: -->
+    <span id="unreadBadgeNavFooter" class="badge bg-danger ms-auto" style="display:none">0</span>
+  </a>
+</li>
           <li class="nav-item mb-2">
             <a href="{{ url_for('views.edit_user_profile') }}"
               class="nav-link p-0 text-body-secondary">
