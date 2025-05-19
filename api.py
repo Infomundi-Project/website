@@ -1044,9 +1044,10 @@ def block_user(uid, action):
     )
 
 
-@api.route("/user/<int:uid>/report/<action>", methods=["POST"])
+@api.route("/user/<int:uid>/reports", methods=["GET", "POST"])
+@api.route("/user/<int:uid>/reports/<int:report_id>", methods=["PATCH", "DELETE"])
 @decorators.api_login_required
-def report_user(uid):
+def user_reports(uid, report_id = 0):
     if uid == current_user.id:
         return jsonify(success=False, message="You can't report yourself"), 400
 
@@ -1054,27 +1055,58 @@ def report_user(uid):
     if not target:
         return jsonify(success=False, message="Couldn't find the target user"), 400
 
-    data = request.get_json() or {}
-    reason = input_sanitization.gentle_cut_text(500, data.get("reason", ""))
+    if request.method == 'GET':
+        reports = models.UserReport.query.filter_by(
+            reporter_id=current_user.id, reported_id=uid
+        ).all()
 
-    if action not in ("add", "remove", "edit"):
-        return jsonify(success=False, message="Unrecognized action."), 400
+        return jsonify(reports=[r.to_dict() for r in reports]), 200
 
-    report = models.UserReport.query.filter_by(
-        reporter_id=current_user.id, reported_id=uid, reason=reason
-    ).first()
+    # Collecs this data only when required
+    if request.method in ('POST', 'PATCH'):
+        data = request.get_json() or {}
+        reason = input_sanitization.gentle_cut_text(
+            500, input_sanitization.sanitize_html(data.get("reason", ""))
+        )
+        category = data.get("category")
 
-    if action == "add":
-        if existing:
+        if category not in ("spam", "harassment", "hate_speech", "inappropriate", "other"):
+            return jsonify(success=False, message="Couldn't find the target category"), 400
+
+    if request.method == "POST":
+        report = models.UserReport.query.filter_by(
+            reporter_id=current_user.id, reported_id=uid, category=category
+        ).first()
+        if report:
             return (
                 jsonify(success=False, message="You’ve already reported this user."),
                 200,
             )
 
         report = models.UserReport(
-            reporter=current_user, reported=target, reason=reason
+            reporter=current_user, reported=target, reason=reason, category=category
         )
         extensions.db.session.add(report)
+
+    elif request.method == "DELETE":
+        report = extensions.db.session.get(models.UserReport, report_id)
+        if not report:
+            return (
+                jsonify(success=False, message="There is no such report"),
+                200,
+            )
+
+        extensions.db.session.delete(report)
+    elif request.method == "PATCH":
+        report = extensions.db.session.get(models.UserReport, report_id)
+        if not report:
+            return (
+                jsonify(success=False, message="There is no such report"),
+                200,
+            )
+
+        report.reason = reason
+        report.category = category
 
     extensions.db.session.commit()
 
@@ -1082,5 +1114,5 @@ def report_user(uid):
         jsonify(
             success=True, message="Thanks for letting us know — we’ll take a look!"
         ),
-        201,
+        200,
     )

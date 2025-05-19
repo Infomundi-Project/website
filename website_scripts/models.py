@@ -334,6 +334,16 @@ class UserReport(db.Model):
         ),
     )
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "category": self.category,
+            "reason": self.reason,
+            "status": self.status,
+            "createdAt": self.created_at.isoformat(),
+            "reviewedAt": self.reviewed_at.isoformat() if self.reviewed_at else None,
+        }
+
 
 class UserBlock(db.Model):
     __tablename__ = "user_blocks"
@@ -349,14 +359,12 @@ class UserBlock(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     blocker = db.relationship(
-        "User",
-        foreign_keys=[blocker_id],
-        backref=db.backref("blocks_made"))
-    
+        "User", foreign_keys=[blocker_id], backref=db.backref("blocks_made")
+    )
+
     blocked = db.relationship(
-        "User",
-        foreign_keys=[blocked_id],
-        backref=db.backref("blocked_by"))
+        "User", foreign_keys=[blocked_id], backref=db.backref("blocked_by")
+    )
 
     __table_args__ = (
         # one block per pair
