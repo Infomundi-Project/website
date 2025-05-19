@@ -433,14 +433,19 @@
                   </a>
                 </div>
                 <div class="col-9 px-1">
-                  <p class="fw-bold notranslate {% if friend.is_online %}text-primary-emphasis{% else %}text-muted{% endif %} {% if not is_mobile %}fs-5{% else %}fs-6{% endif %}"
-                    style="margin-bottom: -5px;">
-                    {% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}
-                  </p>
+
+                  <ul class="list-inline notranslate mb-1">
+              
+                    <li class="list-inline-item fw-bold"><a href="{{ url_for('views.user_profile', username=friend.username) }}"
+                    class="text-decoration-none">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</a></li>
+                    <li class="list-inline-item text-muted" title="Username">@{{ friend.username }}</li>
+
+                  </ul>
+
                   {% if friend.is_online %}
-                  <p class="text-primary-emphasis fs-6">Currently Online</p>
+                  <p class="text-primary-emphasis small">Currently Online</p>
                   {% else %}
-                  <p class="text-muted fs-6">Last seen <span
+                  <p class="text-muted small">Last seen <span
                       data-last-seen={{ friend.last_activity|tojson }}></span>
                   </p>
                   {% endif %}
@@ -800,13 +805,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         listEl.innerHTML = reports.map(r => {
           const statusBadge = `<span class="badge bg-secondary text-uppercase"><i class="fa-solid fa-info-circle me-2"></i>${r.status}</span>`;
-          const createdAt = `<small class="text-muted"><i class="fa-solid fa-clock"></i> ${new Date(r.createdAt).toLocaleString()}</small>`;
+          const createdAt = `<small class="text-muted"><i class="fa-solid fa-clock me-1"></i>${new Date(r.createdAt).toLocaleString()} UTC</small>`;
           const opts = categories.map(c => `<option value="${c.value}" ${c.value === r.category? 'selected':''}>${c.label}</option>`).join('');
           return `
           <div class="report-item mb-3" data-id="${r.id}">
             <div class="d-flex justify-content-between align-items-center mb-2">
               ${statusBadge}
-              ${createdAt} UTC
+              ${createdAt}
             </div>
             <div class="mb-2">
               <label class="form-label"><i class="fa-solid fa-list"></i> Category</label>

@@ -177,48 +177,114 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
       <div class="sticky-sidebar">
-        <!-- Newsletter -->
+        <!-- Newsletter 
         <div class="mb-4 bg-light-subtle p-3 rounded">
           <h6>Subscribe to our newsletter</h6>
           <input type="email" class="form-control mb-2" placeholder="Your email">
           <button class="btn btn-sm btn-dark w-100">Subscribe</button>
         </div>
+        -->
         <!-- Tags -->
         {% if story.tags %}
           <div class="mb-4">
-            <h5>Tags</h5>
+            <h5><i class="fa-solid fa-tags me-2"></i>Tags</h5>
               {% for tag in story.tags %}
                 <span class="badge bg-secondary me-2">{{ tag.tag }}</span>
               {% endfor %}
           </div>
         {% endif %}
-        <!-- Trending -->
-        <div class="mb-4">
-          <h5>Trending</h5>
-          <ul class="list-unstyled">
-            <li>
-              <a href="#">The Future of Web Design</a>
-            </li>
-            <li>
-              <a href="#">Top 10 CSS Frameworks</a>
-            </li>
-            <li>
-              <a href="#">JavaScript in 2025</a>
-            </li>
-          </ul>
-        </div>
-        <h5>Most Commented</h5>
-        <ul class="list-unstyled">
-          <li>
-            <a href="#">How AI is Reshaping the Internet (120 comments)</a>
-          </li>
-          <li>
-            <a href="#">Why Dark Mode Matters (89 comments)</a>
-          </li>
-        </ul>
-        <div class="mb-4">
+        <!-- Trending Filters Card -->
+
+
+<!-- Trending List -->
+<div class="mb-4">
+  <h5><i class="fa-solid fa-fire me-2"></i>Trending</h5>
+  <!-- Trending Filters Accordion -->
+<div class="accordion mb-4" id="trendingAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTrending">
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseTrending"
+        aria-expanded="false"
+        aria-controls="collapseTrending"
+      >
+        <i class="fa-solid fa-chart-line me-2"></i>
+        Trending Filters
+      </button>
+    </h2>
+    <div
+      id="collapseTrending"
+      class="accordion-collapse collapse"
+      aria-labelledby="headingTrending"
+      data-bs-parent="#trendingAccordion"
+    >
+      <div class="accordion-body">
+        <form id="trendingFiltersForm" class="row g-3">
+          <!-- Period -->
+          <div class="col-md-4">
+            <label for="periodSelect" class="form-label">
+              <i class="fa-solid fa-clock me-1"></i>Period
+            </label>
+            <select class="form-select" id="periodSelect">
+              <option value="hour">Last Hour</option>
+              <option value="day">Today</option>
+              <option value="week">This Week</option>
+              <option value="all" selected>All Time</option>
+            </select>
+          </div>
+          <!-- Metric -->
+          <div class="col-md-4">
+            <label for="metricSelect" class="form-label">
+              <i class="fa-solid fa-eye me-1"></i>Metric
+            </label>
+            <select class="form-select" id="metricSelect">
+              <option value="views" selected>
+                <i class="fa-solid fa-eye"></i> Views
+              </option>
+              <option value="likes">
+                <i class="fa-solid fa-thumbs-up"></i> Likes
+              </option>
+              <option value="dislikes">
+                <i class="fa-solid fa-thumbs-down"></i> Dislikes
+              </option>
+            </select>
+          </div>
+          <!-- Limit -->
+          <div class="col-md-4">
+            <label for="limitInput" class="form-label">
+              <i class="fa-solid fa-list-ol me-1"></i>How Many
+            </label>
+            <input
+              type="number"
+              id="limitInput"
+              class="form-control"
+              min="1"
+              max="20"
+              value="5"
+            >
+          </div>
+          <!-- Apply Button -->
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-filter me-1"></i>Apply Filters
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <ul class="list-unstyled" id="trendingList">
+    <li>Loading…</li>
+  </ul>
+</div>
+        <div class="mb-4 invisible">
           <img src="https://placehold.co/300x250?text=Ad+Space" class="img-fluid rounded" alt="Ad">
         </div>
+
       </div>
     </div>
   </div>
@@ -259,6 +325,70 @@
   const newDate = preciseTimeAgo(storyPubDate.textContent);
   storyPubDate.textContent = newDate;
 </script>
+
+
+<script nonce="{{ nonce }}">
+  (function(){
+    const params   = new URLSearchParams(window.location.search);
+    const country  = params.get('country')  || '';
+    const category = params.get('category') || '';
+
+    const list         = document.getElementById('trendingList');
+    const periodSelect = document.getElementById('periodSelect');
+    const metricSelect = document.getElementById('metricSelect');
+    const limitInput   = document.getElementById('limitInput');
+
+    function loadTrending() {
+      const period = periodSelect.value;
+      const metric = metricSelect.value;
+      const limit  = limitInput.value;
+
+      list.innerHTML = '<li>Loading…</li>';
+
+      const url = `/api/story/trending`
+        + `?period=${encodeURIComponent(period)}`
+        + `&metric=${encodeURIComponent(metric)}`
+        + `&limit=${encodeURIComponent(limit)}`
+        + `&country=${encodeURIComponent(country)}`
+        + `&category=${encodeURIComponent(category)}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error(res.statusText);
+          return res.json();
+        })
+        .then(stories => {
+          list.innerHTML = '';
+          if (!stories.length) {
+            list.innerHTML = '<li>No trending stories found.</li>';
+            return;
+          }
+          stories.forEach(item => {
+            const li = document.createElement('li');
+            const a  = document.createElement('a');
+            a.href        = `{{ url_for('views.comments') }}?id=${item.story_id}`;
+            a.textContent = item.title;
+            a.className = "link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover";
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+        })
+        .catch(err => {
+          console.error('Trending load error:', err);
+          list.innerHTML = '<li>Failed to load trending stories.</li>';
+        });
+    }
+
+    // Fire on any change
+    [periodSelect, metricSelect, limitInput].forEach(el =>
+      el.addEventListener('change', loadTrending)
+    );
+
+    // Initial load
+    loadTrending();
+  })();
+</script>
+
 
 
 
