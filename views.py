@@ -232,7 +232,9 @@ def edit_user_profile():
     # Commit changes to the database
     extensions.db.session.commit()
 
-    notifications.notify_single(current_user.id, "profile_edit", "You edited information on your profile")
+    notifications.notify_single(
+        current_user.id, "profile_edit", "You edited information on your profile"
+    )
 
     flash("Profile updated successfully!")
     return render_template("edit_profile.html")
@@ -289,7 +291,9 @@ The Infomundi Team
         # Update database information
         current_user.set_email(new_email)
 
-        notifications.notify_single(current_user.id, "security", "You updated your email address")
+        notifications.notify_single(
+            current_user.id, "security", "You updated your email address"
+        )
 
         flash("Your email has been updated.")
         return render_template("edit_settings.html")
@@ -309,7 +313,9 @@ The Infomundi Team
             return render_template("edit_settings.html")
 
         current_user.set_password(new_password)
-        notifications.notify_single(current_user.id, "security", "You updated your password")
+        notifications.notify_single(
+            current_user.id, "security", "You updated your password"
+        )
         flash("Your password has been updated.")
         return render_template("edit_settings.html")
 
@@ -318,7 +324,7 @@ The Infomundi Team
 def user_redirect():
     target_url = request.headers.get("Referer", "")
 
-    if ("/redirect" in target_url or not input_sanitization.is_safe_url(target_url)):
+    if "/redirect" in target_url or not input_sanitization.is_safe_url(target_url):
         return redirect(url_for("views.home"))
 
     return redirect(target_url)
@@ -409,7 +415,9 @@ def upload_image():
             return redirect(url_for("views.edit_user_avatar"))
 
     extensions.db.session.commit()
-    notifications.notify_single(current_user.id, "profile_edit", "You updated your avatar information")
+    notifications.notify_single(
+        current_user.id, "profile_edit", "You updated your avatar information"
+    )
     flash(
         "Profile updated successfully! Please wait a few minutes for the changes to be applied."
     )

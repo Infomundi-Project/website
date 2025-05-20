@@ -297,8 +297,12 @@ class User(db.Model, UserMixin):
 class UserStoryView(db.Model):
     __tablename__ = "user_story_views"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
     viewed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     user = db.relationship("User", backref="story_views", lazy="joined")

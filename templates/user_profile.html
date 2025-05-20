@@ -399,11 +399,23 @@
         </div>
       -->
 
-<h3>Stats</h3>
+<h3 class="mt-5">Reading Stats</h3>
 <hr>
-<div id="reading-stats" class="row gy-4">
-  <!-- cards will be injected here -->
+<div class="row gy-4">
+  <div class="col-md-6">
+    <canvas id="readsChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <canvas id="publishersChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <canvas id="tagsChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <canvas id="countriesChart"></canvas>
+  </div>
 </div>
+
 
         <!-- Comments -->
         <infomundi-comments page_id="{{ user.get_public_id() }}" type="user">
@@ -926,57 +938,121 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 </script>
 
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/libs/chart.umd.min.js') }}"></script>
+
+
 <script nonce="{{ nonce }}">
-  async function loadReadingStats() {
-    const res = await fetch("/api/user/{{ user.id }}/stats/reading", { credentials: "same-origin" });
-    const data = await res.json();
-    const container = document.getElementById("reading-stats");
-    container.innerHTML = "";
+async function loadReadingStats() {
+  const res = await fetch("/api/user/{{ user.id }}/stats/reading", {
+    credentials: "same-origin"
+  });
+  const data = await res.json();
 
-    // 1. Period counts
-    for (const [period, count] of Object.entries(data.counts)) {
-      container.innerHTML += `
-        <div class="col-sm-4">
-          <div class="card text-center p-3">
-            <h5>${period.charAt(0).toUpperCase() + period.slice(1)}</h5>
-            <p class="display-6 fw-bold">${count}</p>
-            <small>stories read</small>
-          </div>
-        </div>`;
+  // 1. Reads over time (bar chart)
+  new Chart(
+    document.getElementById("readsChart").getContext("2d"),
+    {
+      type: "bar",
+      data: {
+        labels: ["Daily", "Weekly", "Monthly"],
+        datasets: [{
+          label: "Stories Read",
+          data: [
+            data.counts.daily,
+            data.counts.weekly,
+            data.counts.monthly
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: "Reading Rhythm" }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
     }
+  );
 
-    // 2. Top publishers
-    let pubHtml = `<h5 class="mt-4">Your Top Sources</h5><ul class="list-group">`;
-    data.top_publishers.forEach(pub => {
-      pubHtml += `<li class="list-group-item d-flex justify-content-between">
-                    ${pub.name} <span class="badge bg-secondary">${pub.count}</span>
-                  </li>`;
-    });
-    pubHtml += `</ul>`;
-    container.innerHTML += `<div class="col-md-6">${pubHtml}</div>`;
+  // 2. Top publishers (horizontal bar)
+  new Chart(
+    document.getElementById("publishersChart").getContext("2d"),
+    {
+      type: "bar",
+      data: {
+        labels: data.top_publishers.map(p => p.name),
+        datasets: [{
+          label: "Reads",
+          data: data.top_publishers.map(p => p.count)
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        plugins: {
+          title: { display: true, text: "Go-To Sources" },
+          legend: { display: false }
+        },
+        scales: {
+          x: { beginAtZero: true }
+        }
+      }
+    }
+  );
 
-    // 3. Top topics
-    let tagHtml = `<h5 class="mt-4">Favorite Topics</h5><ul class="list-inline">`;
-    data.top_tags.forEach(t => {
-      tagHtml += `<li class="list-inline-item badge bg-info mx-1">${t.tag} (${t.count})</li>`;
-    });
-    tagHtml += `</ul>`;
-    container.innerHTML += `<div class="col-md-6">${tagHtml}</div>`;
+  // 3. Favorite tags (bar chart)
+  new Chart(
+    document.getElementById("tagsChart").getContext("2d"),
+    {
+      type: "bar",
+      data: {
+        labels: data.top_tags.map(t => t.tag),
+        datasets: [{
+          label: "Mentions",
+          data: data.top_tags.map(t => t.count)
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: "Favorite Topics" },
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    }
+  );
 
-    // 4. Top countries
-    let countryHtml = `<h5 class="mt-4">Where You Read</h5><ul class="list-group">`;
-    data.top_countries.forEach(cc => {
-      countryHtml += `<li class="list-group-item d-flex justify-content-between">
-                        ${cc.category.split("_")[0].toUpperCase()} <span class="badge bg-secondary">${cc.count}</span>
-                      </li>`;
-    });
-    countryHtml += `</ul>`;
-    container.innerHTML += `<div class="col-12">${countryHtml}</div>`;
-  }
+  // 4. Countries you explore (pie chart)
+  new Chart(
+    document.getElementById("countriesChart").getContext("2d"),
+    {
+      type: "pie",
+      data: {
+        labels: data.top_countries.map(c => c.country),
+        datasets: [{
+          label: "Reads by Country",
+          data: data.top_countries.map(c => c.count)
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: "Favorite Locales" }
+        }
+      }
+    }
+  );
+}
 
-  document.addEventListener("DOMContentLoaded", loadReadingStats);
+document.addEventListener("DOMContentLoaded", loadReadingStats);
 </script>
-
 
 <script nonce="{{ nonce }}"
   src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
