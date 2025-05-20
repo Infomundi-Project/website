@@ -201,6 +201,12 @@ class User(db.Model, UserMixin):
 
     def set_password(self, password: str):
         self.password = hashing_util.string_to_argon2_hash(password)
+        db.session.commit()
+
+    def set_email(self, email):
+        self.email_encrypted = security_util.encrypt(email)
+        self.email_fingerprint = hashing_util.generate_hmac_signature(email)
+        db.session.commit()
 
     def check_password(self, password: str) -> bool:
         return hashing_util.argon2_verify_hash(self.password, password)
@@ -286,6 +292,17 @@ class User(db.Model, UserMixin):
         return input_sanitization.extract_username_from_thirdparty_platform_url(url)[
             1
         ]  # [1] here is the username
+
+
+class UserStoryView(db.Model):
+    __tablename__ = "user_story_views"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", backref="story_views", lazy="joined")
+    story = db.relationship("Story", backref="user_views", lazy="joined")
 
 
 class UserReport(db.Model):

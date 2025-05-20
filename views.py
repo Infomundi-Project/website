@@ -103,7 +103,6 @@ def user_profile(username):
         short_description=input_sanitization.close_open_html_tags(short_description),
         friends_list=friends_util.get_friends_list(user.id),
         seo_data=(seo_title, seo_description, seo_image),
-        user_public_id=user.get_public_id(),
         user=user,
     )
 
@@ -233,6 +232,8 @@ def edit_user_profile():
     # Commit changes to the database
     extensions.db.session.commit()
 
+    notifications.notify_single(current_user.id, "profile_edit", "You edited information on your profile")
+
     flash("Profile updated successfully!")
     return render_template("edit_profile.html")
 
@@ -263,8 +264,6 @@ def edit_user_settings():
             flash("The email you provided is invalid.", "error")
             return render_template("edit_settings.html")
 
-        hashed_new_email = auth_util.hash_user_email_using_salt(new_email)
-
         # Send email to the user
         subject = "Infomundi - Your Email Has Been Changed"
         body = f"""Hello, {current_user.display_name if current_user.display_name else current_user.username}.
@@ -288,8 +287,9 @@ The Infomundi Team
         )
 
         # Update database information
-        current_user.email = hashed_new_email
-        extensions.db.session.commit()
+        current_user.set_email(new_email)
+
+        notifications.notify_single(current_user.id, "security", "You updated your email address")
 
         flash("Your email has been updated.")
         return render_template("edit_settings.html")
@@ -308,16 +308,17 @@ The Infomundi Team
             )
             return render_template("edit_settings.html")
 
-        auth_util.change_password(current_user, new_password)
-        flash("Your password has been updated, and you may log in again.")
-        return redirect(url_for("auth.login"))
+        current_user.set_password(new_password)
+        notifications.notify_single(current_user.id, "security", "You updated your password")
+        flash("Your password has been updated.")
+        return render_template("edit_settings.html")
 
 
 @views.route("/redirect", methods=["GET"])
 def user_redirect():
     target_url = request.headers.get("Referer", "")
 
-    if "/redirect" in target_url or not input_sanitization.is_safe_url(target_url):
+    if ("/redirect" in target_url or not input_sanitization.is_safe_url(target_url)):
         return redirect(url_for("views.home"))
 
     return redirect(target_url)
@@ -363,7 +364,7 @@ def sensitive():
 
     session["is_trusted_session"] = request.form.get("trust_session", "") == "yes"
 
-    flash("Thanks for verifying! You are who you say you are after all.")
+    flash("Thanks for verifying!")
     return redirect(url_for("views.edit_user_settings"))
 
 
@@ -408,6 +409,7 @@ def upload_image():
             return redirect(url_for("views.edit_user_avatar"))
 
     extensions.db.session.commit()
+    notifications.notify_single(current_user.id, "profile_edit", "You updated your avatar information")
     flash(
         "Profile updated successfully! Please wait a few minutes for the changes to be applied."
     )
@@ -599,6 +601,13 @@ def comments():
     seo_image = story.image_url
 
     country_cca2 = story.category.name.split("_")[0]
+
+    if current_user.is_authenticated:
+        extensions.db.session.add(
+            models.UserStoryView(user_id=current_user.id, story_id=story.id)
+        )
+        extensions.db.session.commit()
+
     return render_template(
         "comments.html",
         from_country_name=country_util.get_country(

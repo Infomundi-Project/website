@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div>
               <span>
                 <div>${n.message}</div>
-                <small class="text-muted">${relativeTime(n.created_at)} - <a href="${n.url||'#'}">View</a></small>
+                <small class="text-muted"><span title="${n.created_at}">${relativeTime(n.created_at)}</span> ${n.url ? `- <a href="${n.url}">View</a>` : ''}</small>
               </span>
             </div>
           </div>

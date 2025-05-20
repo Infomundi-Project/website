@@ -359,7 +359,7 @@
         {% if session.get('last_visited_country_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_country_url'] }}"
-            class="nav-link {{ 'active' if request.url == session['last_visited_country_url'] else '' }}">
+            class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country_url']) else '' }}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-earth-americas"></i></span>
             <div class="vr me-2"></div>
@@ -370,7 +370,7 @@
         {% if session.get('last_visited_story_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_story_url'] }}"
-            class="nav-link {{ 'active' if request.url == session['last_visited_story_url'] else '' }}">
+            class="nav-link {{ 'active' if request.url.endswith(session['last_visited_story_url']) else '' }}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-newspaper"></i></span>
             <div class="vr me-2"></div>
@@ -916,10 +916,14 @@
     <div class="container mt-5">
       <div class="row align-items-start">
         <div class="col-md-3 p-3 rounded bg-secondary-subtle mb-3">
-          <img src="{{ current_user.avatar_url }}" class="img-thumbnail"
-            style="border-radius: 15px;"
+          <img src="{{ current_user.avatar_url }}" class="img-thumbnail rounded"
             alt="{{ current_user.username }}'s profile picture">
-          <h4 class="mt-2">{{ current_user.username }}</h4>
+          <ul class="list-inline notranslate mb-1">
+              
+              <li class="list-inline-item fw-bold fs-4">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</li>
+              <li class="list-inline-item text-muted" title="Username">@{{ current_user.username }}</li>
+
+            </ul>
           <a href="/profile/{{ current_user.username }}"
             class="btn btn-sm btn-primary mt-2">Return to profile</a>
           <ul class="nav nav-pills flex-column mt-4">

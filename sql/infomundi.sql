@@ -382,3 +382,23 @@ CREATE TABLE user_blocks (
     FOREIGN KEY (blocked_id) REFERENCES users (id)
     ON DELETE CASCADE
 );
+
+
+CREATE TABLE user_story_views (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  story_id INT NOT NULL,
+  viewed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  
+  -- Foreign key constraints for referential integrity
+  CONSTRAINT fk_user_story_views_user
+    FOREIGN KEY (user_id)
+    REFERENCES users (id)
+    ON DELETE CASCADE,
+    
+  CONSTRAINT fk_user_story_views_story
+    FOREIGN KEY (story_id)
+    REFERENCES stories (id)
+    ON DELETE CASCADE
+);

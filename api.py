@@ -86,6 +86,72 @@ def get_crypto():
     )
 
 
+@api.route("/user/<int:uid>/stats/reading", methods=["GET"])
+@decorators.api_login_required
+def reading_stats(uid):
+    now = datetime.utcnow()
+    cuts = {
+      "daily": now - timedelta(days=1),
+      "weekly": now - timedelta(days=7),
+      "monthly": now - timedelta(days=30),
+    }
+
+    user = extensions.db.session.get(models.User, uid)
+    if not user:
+        return jsonify({})
+
+    # Base query
+    q = extensions.db.session.query(models.UserStoryView, models.Story, models.Publisher, models.Category) \
+        .join(models.Story, models.UserStoryView.story_id == models.Story.id) \
+        .join(models.Publisher, models.Story.publisher_id == models.Publisher.id)
+
+    stats = {}
+    for period, since in cuts.items():
+        sub = q.filter(models.UserStoryView.user_id == uid,
+                       models.UserStoryView.viewed_at >= since)
+        stats[period] = sub.count()
+
+    # Top publishers
+    top_pubs = (
+      q.filter(models.UserStoryView.user_id == uid)
+       .with_entities(models.Publisher.name, extensions.db.func.count().label("ctr"))
+       .group_by(models.Publisher.id)
+       .order_by(desc("ctr"))
+       .limit(5)
+       .all()
+    )
+
+    # Top tags
+    top_tags = (
+      extensions.db.session.query(models.Tag.tag, extensions.db.func.count().label("ctr"))
+        .join(models.Story, models.Tag.story_id == models.Story.id)
+        .join(models.UserStoryView, models.UserStoryView.story_id == models.Story.id)
+        .filter(models.UserStoryView.user_id == uid)
+        .group_by(models.Tag.tag)
+        .order_by(desc("ctr"))
+        .limit(5)
+        .all()
+    )
+
+    # Top countries (via Category.name prefix)
+    top_countries = (
+      q.filter(models.UserStoryView.user_id == uid)
+       .with_entities(models.Category.name, extensions.db.func.count().label("ctr"))
+       .join(models.Category, models.Story.category_id == models.Category.id)
+       .group_by(models.Category.name)
+       .order_by(desc("ctr"))
+       .limit(5)
+       .all()
+    )
+
+    return jsonify({
+      "counts": stats,
+      "top_publishers": [{"name": n, "count": c} for n, c in top_pubs],
+      "top_tags":     [{"tag": t, "count": c} for t, c in top_tags],
+      "top_countries":[{"category": cat, "count": c} for cat, c in top_countries],
+    })
+
+
 @api.route("/story/trending", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 30, query_string=True)  # 30m cached
 def get_trending():

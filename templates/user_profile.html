@@ -196,7 +196,7 @@
             <i class="fa-solid fa-phone-slash fa-2xl"></i>
             <div>
               <h5 class="mb-0">None!</h5>
-              Either <span class="fw-bold">{{ user.username }}</span> has no contact info or they chose to make this private. Maybe you should send them a message!
+              Either <span class="fw-bold">{{ user.username }}</span> either has no contact info or this information is private.
             </div>
           </li>
           {% endif %}
@@ -265,13 +265,13 @@
                 id="profile-avatar">
 
               {% if user.role == 'admin' %}
-                <span class="badge bg-danger position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the administration team at Infomundi"><i class="fa-solid fa-chess-king me-1"></i>ADMIN</span>
+                <span class="badge bg-danger position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the administration team at Infomundi"><i class="fa-solid fa-chess-king me-0 me-lg-1"></i>{% if not is_mobile %}ADMIN{% endif %}</span>
               {% elif user.role == 'moderator' %}
-                <span class="badge bg-info position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the moderation team at Infomundi"><i class="fa-solid fa-chess-rook me-1"></i>MOD</span>
+                <span class="badge bg-info position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the moderation team at Infomundi"><i class="fa-solid fa-chess-rook me-0 me-lg-1"></i>{% if not is_mobile %}MOD{% endif %}</span>
               {% elif user.role == 'official' %}
-                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This is an official account in the Infomundi platform"><i class="fa-solid fa-chess-bishop me-1"></i>OFFICIAL</span>
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This is an official account in the Infomundi platform"><i class="fa-solid fa-chess-bishop me-0 me-lg-1"></i>{% if not is_mobile %}OFFICIAL{% endif %}</span>
               {% elif user.role == 'verified' %}
-                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is a verified account in the Infomundi platform"><i class="fa-solid fa-chess-pawn me-1"></i>VERIFIED</span>
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is a verified account in the Infomundi platform"><i class="fa-solid fa-chess-pawn me-0 me-lg-1"></i>{% if not is_mobile %}VERIFIED{% endif %}</span>
               {% endif %}
             </figure>
           </div>
@@ -291,7 +291,7 @@
               {% if user.country %}
               <li class="list-inline-item">
                 <div class="d-inline-flex align-top">
-                  <img src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg" class="rounded img-fluid me-1" style="height: auto; width: 1.5rem" alt="Flag for {{ user.country.name }}">{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
+                  <img src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg" class="rounded img-fluid me-1" style="height: auto; width: 1.5rem" alt="{{ user.country.nationality }} Flag" title="{{ user.country.nationality }} Flag">{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
                 </div>
               </li>
               {% endif %}
@@ -399,6 +399,12 @@
         </div>
       -->
 
+<h3>Stats</h3>
+<hr>
+<div id="reading-stats" class="row gy-4">
+  <!-- cards will be injected here -->
+</div>
+
         <!-- Comments -->
         <infomundi-comments page_id="{{ user.get_public_id() }}" type="user">
 
@@ -424,7 +430,7 @@
               <div class="row">
                 <div class="col-3 px-2">
                   <a href="{{ url_for('views.user_profile', username=friend.username) }}"
-                    class="text-decoration-none">
+                    class="text-decoration-none text-reset">
                     <img src="{{ friend.avatar_url }}"
                       alt="{{ friend.username }}'s avatar"
                       data-bs-toggle="tooltip"
@@ -437,7 +443,7 @@
                   <ul class="list-inline notranslate mb-1">
               
                     <li class="list-inline-item fw-bold"><a href="{{ url_for('views.user_profile', username=friend.username) }}"
-                    class="text-decoration-none">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</a></li>
+                    class="text-decoration-none text-reset">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</a></li>
                     <li class="list-inline-item text-muted" title="Username">@{{ friend.username }}</li>
 
                   </ul>
@@ -918,6 +924,57 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+</script>
+
+<script nonce="{{ nonce }}">
+  async function loadReadingStats() {
+    const res = await fetch("/api/user/{{ user.id }}/stats/reading", { credentials: "same-origin" });
+    const data = await res.json();
+    const container = document.getElementById("reading-stats");
+    container.innerHTML = "";
+
+    // 1. Period counts
+    for (const [period, count] of Object.entries(data.counts)) {
+      container.innerHTML += `
+        <div class="col-sm-4">
+          <div class="card text-center p-3">
+            <h5>${period.charAt(0).toUpperCase() + period.slice(1)}</h5>
+            <p class="display-6 fw-bold">${count}</p>
+            <small>stories read</small>
+          </div>
+        </div>`;
+    }
+
+    // 2. Top publishers
+    let pubHtml = `<h5 class="mt-4">Your Top Sources</h5><ul class="list-group">`;
+    data.top_publishers.forEach(pub => {
+      pubHtml += `<li class="list-group-item d-flex justify-content-between">
+                    ${pub.name} <span class="badge bg-secondary">${pub.count}</span>
+                  </li>`;
+    });
+    pubHtml += `</ul>`;
+    container.innerHTML += `<div class="col-md-6">${pubHtml}</div>`;
+
+    // 3. Top topics
+    let tagHtml = `<h5 class="mt-4">Favorite Topics</h5><ul class="list-inline">`;
+    data.top_tags.forEach(t => {
+      tagHtml += `<li class="list-inline-item badge bg-info mx-1">${t.tag} (${t.count})</li>`;
+    });
+    tagHtml += `</ul>`;
+    container.innerHTML += `<div class="col-md-6">${tagHtml}</div>`;
+
+    // 4. Top countries
+    let countryHtml = `<h5 class="mt-4">Where You Read</h5><ul class="list-group">`;
+    data.top_countries.forEach(cc => {
+      countryHtml += `<li class="list-group-item d-flex justify-content-between">
+                        ${cc.category.split("_")[0].toUpperCase()} <span class="badge bg-secondary">${cc.count}</span>
+                      </li>`;
+    });
+    countryHtml += `</ul>`;
+    container.innerHTML += `<div class="col-12">${countryHtml}</div>`;
+  }
+
+  document.addEventListener("DOMContentLoaded", loadReadingStats);
 </script>
 
 
