@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS global_salts;
 DROP TABLE IF EXISTS user_story_views;
 DROP TABLE IF EXISTS user_blocks;
 DROP TABLE IF EXISTS user_reports;
+DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,6 +95,9 @@ CREATE TABLE users (
     is_mail_twofactor_enabled TINYINT(1) DEFAULT 0,
     mail_twofactor_code INT,
     mail_twofactor_timestamp DATETIME,
+
+    -- messaging pk
+    public_key_jwk JSON,
 
     country_id MEDIUMINT UNSIGNED,
     state_id MEDIUMINT UNSIGNED,
@@ -404,4 +408,15 @@ CREATE TABLE user_story_views (
     FOREIGN KEY (story_id)
     REFERENCES stories (id)
     ON DELETE CASCADE
+);
+
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    content_encrypted TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
 );

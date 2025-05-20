@@ -724,6 +724,30 @@
       </div>
     </div>
 
+
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chatModalLabel">Chat with <span id="chatFriendName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Messages list -->
+        <ul id="chatMessages" class="list-unstyled mb-0" style="max-height: 300px; overflow-y: auto;">
+          <!-- Messages will be appended here -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <input type="text" id="chatInput" class="form-control me-2" placeholder="Type a message..." autocomplete="off">
+        <button id="sendChatBtn" class="btn btn-primary">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     <!-- Notifications Modal -->
 <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable">
@@ -1126,6 +1150,12 @@
   <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/automaticTranslation.js') }}">
   </script>
+
+  {% if current_user.is_authenticated %}
+    <!-- Include the chat client script for logged-in users -->
+    <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
+    <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+  {% endif %}
 
 
   <script nonce="{{ nonce }}">

@@ -10,6 +10,7 @@ from flask import (
     Response,
     jsonify,
 )
+from flask_socketio import SocketIO, join_room, leave_room, emit
 from flask_login import current_user, logout_user
 from flask_assets import Environment, Bundle
 from htmlmin import minify as html_minify
@@ -25,6 +26,7 @@ from website_scripts import (
     hashing_util,
     qol_util,
     models,
+    notifications,
 )
 from views import views
 from auth import auth
@@ -74,6 +76,136 @@ extensions.oauth.init_app(app)
 
 # Rate Limiting
 extensions.limiter.init_app(app)
+
+socketio = SocketIO(
+    app, cors_allowed_origins="*"
+)  # Allow appropriate origins as needed
+
+
+@socketio.on("connect")
+def handle_connect():
+    """On client connect, join a personal room for private messaging."""
+    if current_user.is_authenticated:
+        room = f"user_{current_user.id}"
+        join_room(room)
+        notifications.post_webhook(
+            text=f"User {current_user.username} connected to SocketIO and joined room {room}"
+        )
+    else:
+        return False  # Reject connection if not logged in
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    """On disconnect, optionally handle any cleanup."""
+    if current_user.is_authenticated:
+        room = f"user_{current_user.id}"
+        leave_room(room)
+        notifications.post_webhook(
+            text=f"User {current_user.username} disconnected from SocketIO."
+        )
+
+
+@socketio.on("init_chat")
+def handle_init_chat(data):
+    """
+    Receive a public key from the sender to initiate key exchange.
+    `data`: {'to': <friend_public_id>, 'pub': <sender_public_key_base64>}
+    Forwards the public key to the intended friend if online.
+    """
+    if not current_user.is_authenticated:
+        return  # security check, should not happen if connect handled
+    friend_uuid = data.get("to")
+    public_key = data.get("pub")
+    # Look up the target user by public UUID
+    friend = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_uuid)
+    ).first()
+    if not friend:
+        notifications.post_webhook(text="Invalid user id")
+        return  # invalid user id
+    # Verify that current_user and friend are friends (friendship accepted)
+    friendship = models.Friendship.query.filter(
+        (
+            (models.Friendship.user_id == current_user.id)
+            & (models.Friendship.friend_id == friend.id)
+            & (models.Friendship.status == "accepted")
+        )
+        | (
+            (models.Friendship.user_id == friend.id)
+            & (models.Friendship.friend_id == current_user.id)
+            & (models.Friendship.status == "accepted")
+        )
+    ).first()
+    if not friendship:
+        emit(
+            "error", {"message": "Friendship not found"}, room=f"user_{current_user.id}"
+        )
+        return
+    notifications.post_webhook(
+        text=f"Forwarding init_chat pubkey from {current_user.id} to {friend.id}"
+    )
+    # Forward the initiator's public key to the friend if they are online
+    emit(
+        "init_chat",
+        {"from": current_user.get_public_id(), "pub": public_key},
+        room=f"user_{friend.id}",
+    )
+    # (If friend is offline, this event will queue until they connect, or could be saved to DB if implementing offline messaging.)
+
+
+@socketio.on("send_message")
+def handle_send_message(data):
+    """
+    Handle an outgoing encrypted message.
+    `data`: {'to': <friend_public_id>, 'message': <ciphertext_base64>}
+    Saves the message and forwards it to the recipient.
+    """
+    if not current_user.is_authenticated:
+        return
+    friend_uuid = data.get("to")
+    ciphertext = data.get("message")
+    friend = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_uuid)
+    ).first()
+    if not friend:
+        return
+    # Ensure users are friends
+    friendship = models.Friendship.query.filter(
+        (
+            (models.Friendship.user_id == current_user.id)
+            & (models.Friendship.friend_id == friend.id)
+            & (models.Friendship.status == "accepted")
+        )
+        | (
+            (models.Friendship.user_id == friend.id)
+            & (models.Friendship.friend_id == current_user.id)
+            & (models.Friendship.status == "accepted")
+        )
+    ).first()
+    if not friendship:
+        emit(
+            "error",
+            {"message": "Cannot send message to non-friend."},
+            room=f"user_{current_user.id}",
+        )
+        return
+    # Store the encrypted message in the database
+    new_msg = models.Message(
+        sender_id=current_user.id, receiver_id=friend.id, content_encrypted=ciphertext
+    )
+    extensions.db.session.add(new_msg)
+    extensions.db.session.commit()
+    # Emit the message to the receiver's room for real-time delivery
+    emit(
+        "receive_message",
+        {
+            "from": current_user.get_public_id(),
+            "message": ciphertext,
+            "timestamp": new_msg.timestamp.isoformat(),
+        },
+        room=f"user_{friend.id}",
+    )
 
 
 @app.route("/<filename>")

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, jsonify, url_for, session
+from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from sqlalchemy import and_, cast, desc, asc, insert
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
@@ -86,8 +86,80 @@ def get_crypto():
     )
 
 
-@api.route("/user/<int:uid>/stats/reading", methods=["GET"])
+@api.route('/user/pubkey', methods=['POST'])
+@decorators.api_login_required
+def update_pubkey():
+    jwk = request.json.get('publicKey')
+    if not jwk: return abort(400)
+    current_user.public_key_jwk = jwk
+    extensions.db.session.commit()
+    return '', 204
 
+
+@api.route('/user/<friend_uuid>/pubkey')
+@decorators.api_login_required
+def get_pubkey(friend_uuid):
+    user = User.query.filter_by(public_id=uuid_to_bytes(friend_uuid)).first_or_404()
+    fs_status = friends_util.get_friendship_status(current_user.id, user.id)[0]
+    if fs_status != "accepted":
+        abort(403)
+    return jsonify(publicKey=user.public_key_jwk)
+
+
+@api.route("/user/<friend_public_id>/messages", methods=["GET"])
+@decorators.api_login_required
+def get_messages(friend_public_id):
+    """Get recent messages (encrypted) between current user and the specified friend."""
+    friend = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_public_id)
+    ).first()
+    if not friend:
+        return jsonify({"error": "User not found"}), 404
+    # Ensure friendship exists and is accepted
+    friendship = models.Friendship.query.filter(
+        (
+            (models.Friendship.user_id == current_user.id)
+            & (models.Friendship.friend_id == friend.id)
+            & (models.Friendship.status == "accepted")
+        )
+        | (
+            (models.Friendship.user_id == friend.id)
+            & (models.Friendship.friend_id == current_user.id)
+            & (models.Friendship.status == "accepted")
+        )
+    ).first()
+    if not friendship:
+        return jsonify({"error": "No friendship with this user"}), 403
+    # Query last N messages between users (both directions)
+    msgs = (
+        models.Message.query.filter(
+            (
+                (models.Message.sender_id == current_user.id)
+                & (models.Message.receiver_id == friend.id)
+            )
+            | (
+                (models.Message.sender_id == friend.id)
+                & (models.Message.receiver_id == current_user.id)
+            )
+        )
+        .order_by(models.Message.timestamp.asc())
+        .limit(50)
+        .all()
+    )
+    # Prepare response with ciphertexts
+    messages_data = [
+        {
+            "from": msg.sender.get_public_id(),
+            "to": msg.receiver.get_public_id(),
+            "ciphertext": msg.content_encrypted,
+            "timestamp": msg.timestamp.isoformat(),
+        }
+        for msg in msgs
+    ]
+    return jsonify({"messages": messages_data})
+
+
+@api.route("/user/<int:uid>/stats/reading", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 5)  # Cached for 5 minutes
 @decorators.api_login_required
 def reading_stats(uid):
@@ -129,10 +201,11 @@ def reading_stats(uid):
 
     # Top publishers
     top_pubs = (
-        extensions.db.session
-        .query(
+        extensions.db.session.query(
             models.Publisher.name,
-            extensions.db.func.count(extensions.db.distinct(models.UserStoryView.story_id)).label("ctr"),
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
         )
         .join(models.Story, models.Publisher.id == models.Story.publisher_id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -145,10 +218,11 @@ def reading_stats(uid):
 
     # Top tags
     top_tags = (
-        extensions.db.session
-        .query(
+        extensions.db.session.query(
             models.Tag.tag,
-            extensions.db.func.count(extensions.db.distinct(models.UserStoryView.story_id)).label("ctr"),
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
         )
         .join(models.Story, models.Tag.story_id == models.Story.id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -161,10 +235,11 @@ def reading_stats(uid):
 
     # Top countries (split the Category.name slug on “_” in Python)
     country_counts = (
-        extensions.db.session
-        .query(
+        extensions.db.session.query(
             models.Category.name,
-            extensions.db.func.count(extensions.db.distinct(models.UserStoryView.story_id)).label("ctr"),
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
         )
         .join(models.Story, models.Category.id == models.Story.category_id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -179,7 +254,6 @@ def reading_stats(uid):
         {"country": cat.split("_", 1)[0].upper(), "count": cnt}
         for cat, cnt in country_counts
     ]
-
 
     return jsonify(
         {

@@ -11,25 +11,32 @@ from smtplib import SMTP
 from . import config, extensions, models, custom_exceptions
 
 
-def post_webhook(data: dict) -> bool:
+def post_webhook(text: str = "", data: dict = {}) -> bool:
     """Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
 
     Arguments:
         data: dict
             Information needed to create the embed message. Should have the following structure:
             {
-                'text': 'some text'
+                'content': 'some text'
             }
 
     Returns:
         bool: True if we were able to POST the webhook, otherwise False.
     """
+    if not text and not data:
+        raise custom_exceptions.InfomundiCustomException(
+            "Either text or data is required"
+        )
+
+    if text:
+        data = {"content": text}
 
     try:
         response = post_request(config.WEBHOOK_URL, timeout=3, json=data)
         response.raise_for_status()
-    except Exception:
-        return False
+    except Exception as e:
+        raise custom_exceptions.InfomundiCustomException(f"Something went wrong: {e}")
 
     return True
 

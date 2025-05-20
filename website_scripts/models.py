@@ -181,6 +181,9 @@ class User(db.Model, UserMixin):
     mail_twofactor_code = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
+    # messaging pk
+    public_key_jwk = db.Column(db.JSON, nullable=True)
+
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     state_id = db.Column(db.Integer, db.ForeignKey("states.id"), nullable=True)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
@@ -593,6 +596,23 @@ class Bookmark(db.Model):
     __table_args__ = (
         # one bookmark per (user, story)
         db.UniqueConstraint("user_id", "story_id", name="uq_user_story_bookmark"),
+    )
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content_encrypted = db.Column(db.Text, nullable=False)  # ciphertext (e.g. Base64)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships (for convenience, if needed)
+    sender = db.relationship(
+        "User", foreign_keys=[sender_id], backref="sent_messages", lazy=True
+    )
+    receiver = db.relationship(
+        "User", foreign_keys=[receiver_id], backref="received_messages", lazy=True
     )
 
 

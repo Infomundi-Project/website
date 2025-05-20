@@ -88,29 +88,33 @@ document.addEventListener('DOMContentLoaded', () => {
       const col = document.createElement('div');
       col.className = 'col-6 d-flex align-items-center mb-2';
 
-      // Determine if the friend is online or display last activity as relative time
+      // Determine online status text
       let statusDisplay;
       if (friend.is_online) {
-        statusDisplay = `
-          <span class="dot" style="height: 8px; width: 8px; background-color: #00FF00; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>&nbsp;Online
-        `;
+        statusDisplay = `<span class="dot" style="...background-color: #00FF00;..."></span>&nbsp;Online`;
       } else {
-        const lastActivityGMT = new Date(friend.last_activity);
-        const lastActivityRelative = friendsTimeAgo(lastActivityGMT);
-        statusDisplay = `Last&nbsp;activity:&nbsp;${lastActivityRelative}`;
+        const lastActivity = new Date(friend.last_activity);
+        statusDisplay = `Last activity: ${friendsTimeAgo(lastActivity)}`;
       }
 
+      // Build friend entry with a Message button
       col.innerHTML = `
         <div class="friend-item d-flex align-items-center">
-          <img src="${friend.avatar_url}" alt="${friend.display_name}'s avatar" class="rounded-circle me-3" width="50" height="50">
-          <div>
-            <h6>${friend.display_name}<span class="ms-2 text-muted small">@${friend.username}</span></h6>
-            <p class="mb-0">Level: ${friend.level}</p>
+          <img src="${friend.avatar_url}" alt="${friend.display_name || friend.username}'s avatar" 
+               class="rounded-circle me-3" width="50" height="50">
+          <div class="flex-grow-1">
+            <h6>${friend.display_name || friend.username}
+              <span class="ms-2 text-muted small">@${friend.username}</span>
+            </h6>
             <small>${statusDisplay}</small>
           </div>
+          <button class="btn btn-sm btn-outline-primary ms-2 message-btn" 
+                  data-user-id="${friend.user_id}"
+      data-username="${friend.username}">
+            <i class="fa-solid fa-message"></i> Message
+          </button>
         </div>
       `;
-
       row.appendChild(col);
     });
   }
@@ -159,4 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchFriends(currentPage);
     });
   }
+
+  friendsListContainer.addEventListener('click', (e) => {
+  const btn = e.target.closest('.message-btn');
+  if (!btn) return;
+  openChat(btn.dataset.userId, btn.dataset.username);
+});
+
 });
