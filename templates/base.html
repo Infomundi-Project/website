@@ -1154,7 +1154,7 @@
   {% if current_user.is_authenticated %}
     <!-- Include the chat client script for logged-in users -->
     <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
-    <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script>
   {% endif %}
 
 

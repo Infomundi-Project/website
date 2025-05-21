@@ -86,20 +86,21 @@ def get_crypto():
     )
 
 
-@api.route('/user/pubkey', methods=['POST'])
+@api.route("/user/pubkey", methods=["POST"])
 @decorators.api_login_required
 def update_pubkey():
-    jwk = request.json.get('publicKey')
-    if not jwk: return abort(400)
+    jwk = request.json.get("publicKey")
+    if not jwk:
+        return abort(400)
     current_user.public_key_jwk = jwk
     extensions.db.session.commit()
-    return '', 204
+    return "", 204
 
 
-@api.route('/user/<friend_uuid>/pubkey')
+@api.route("/user/<friend_uuid>/pubkey")
 @decorators.api_login_required
 def get_pubkey(friend_uuid):
-    user = User.query.filter_by(public_id=uuid_to_bytes(friend_uuid)).first_or_404()
+    user = models.User.query.filter_by(public_id=security_util.uuid_string_to_bytes(friend_uuid)).first_or_404()
     fs_status = friends_util.get_friendship_status(current_user.id, user.id)[0]
     if fs_status != "accepted":
         abort(403)

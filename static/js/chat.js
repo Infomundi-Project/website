@@ -1,5 +1,24 @@
 import { getMyKeyPair } from './utils/keys.js';
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+(async function publishMyPublicKey() {
+  const { publicKey } = await getMyKeyPair();
+  // export the JWK form  public key
+  const publicJwk = await crypto.subtle.exportKey('jwk', publicKey);
+
+  // send it once to backend
+  await fetch('/api/user/pubkey', {
+    method: 'POST',
+    headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+    credentials: 'include',      // make sure cookie/session is sent
+    body: JSON.stringify({ publicKey: publicJwk }),
+  });
+})();
+
 // Initialize socket.io with credentials for Flask-Login session
 const socket = io({
   transports: ['websocket'],
@@ -12,33 +31,32 @@ let currentChatFriend = null;
 let chatReady = false;
 
 // DOM elements
-const chatModalEl     = document.getElementById('chatModal');
-const chatFriendNameEl= document.getElementById('chatFriendName');
-const chatMessagesEl  = document.getElementById('chatMessages');
-const chatInputEl     = document.getElementById('chatInput');
-const sendChatBtn     = document.getElementById('sendChatBtn');
-const bsChatModal     = new bootstrap.Modal(chatModalEl, {});
+const chatModalEl      = document.getElementById('chatModal');
+const chatFriendNameEl = document.getElementById('chatFriendName');
+const chatMessagesEl   = document.getElementById('chatMessages');
+const chatInputEl      = document.getElementById('chatInput');
+const sendChatBtn      = document.getElementById('sendChatBtn');
+const bsChatModal      = new bootstrap.Modal(chatModalEl, {});
 
-// Open chat: derive once and enable immediately
+// Function to open chat: derive once, decrypt instantly
 window.openChat = async function(friendPublicId, friendName) {
   currentChatFriend = friendPublicId;
   chatReady = false;
 
-  // UI reset
+  // Reset UI
   chatFriendNameEl.textContent = friendName;
   chatMessagesEl.innerHTML    = '';
   chatInputEl.value           = '';
   sendChatBtn.disabled        = true;
   chatInputEl.disabled        = true;
 
-  // Show modal
   bsChatModal.show();
 
   try {
-    // 1) Load/generate our long‑lived keypair
+    // Load or generate our device keypair
     const { publicKey: myPub, privateKey: myPriv } = await getMyKeyPair();
 
-    // 2) Fetch friend's public JWK from server
+    // Fetch friend’s public JWK
     const res = await fetch(`/api/user/${friendPublicId}/pubkey`);
     const { publicKey: friendJwk } = await res.json();
 
@@ -48,7 +66,7 @@ window.openChat = async function(friendPublicId, friendName) {
       false, []
     );
 
-    // 3) Derive shared secret (AES‑GCM key)
+    // Derive shared AES-GCM key
     const shared = await window.crypto.subtle.deriveKey(
       { name: 'ECDH', public: friendPub },
       myPriv,
@@ -58,12 +76,12 @@ window.openChat = async function(friendPublicId, friendName) {
     );
     chatKeys[friendPublicId] = { sharedSecret: shared };
 
-    // Enable input
+    // Enable UI
     chatReady = true;
     sendChatBtn.disabled = false;
     chatInputEl.disabled = false;
 
-    // Optionally load & decrypt history
+    // Optional: load + decrypt history
     const historyRes = await fetch(`/api/user/${friendPublicId}/messages`);
     const { messages } = await historyRes.json();
     for (let msg of messages) {
@@ -76,7 +94,7 @@ window.openChat = async function(friendPublicId, friendName) {
   }
 };
 
-// Append encrypted placeholder
+// Append an encrypted message placeholder
 function appendEncryptedMessage(ciphertext, sender) {
   const li = document.createElement('li');
   li.className = sender === 'me' ? 'text-end mb-2' : 'text-start mb-2';
@@ -87,7 +105,7 @@ function appendEncryptedMessage(ciphertext, sender) {
   chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
 }
 
-// Decrypt all pending
+// Decrypt pending messages
 async function decryptPendingMessages() {
   if (!chatReady || !chatKeys[currentChatFriend]?.sharedSecret) return;
   const items = chatMessagesEl.querySelectorAll('li');
@@ -95,39 +113,38 @@ async function decryptPendingMessages() {
     if (li.textContent === '[Encrypted message]') {
       try {
         const ctB64 = li.dataset.ciphertext;
-        const cipherBytes = Uint8Array.from(atob(ctB64), c=>c.charCodeAt(0));
-        const iv   = cipherBytes.slice(0, 12);
-        const data = cipherBytes.slice(12);
-        const plainBuf = await window.crypto.subtle.decrypt(
+        const bytes = Uint8Array.from(atob(ctB64), c=>c.charCodeAt(0));
+        const iv   = bytes.slice(0, 12);
+        const data = bytes.slice(12);
+        const buf  = await window.crypto.subtle.decrypt(
           { name: 'AES-GCM', iv },
           chatKeys[currentChatFriend].sharedSecret,
           data
         );
-        const text = new TextDecoder().decode(plainBuf);
+        const text = new TextDecoder().decode(buf);
         li.textContent = (li.dataset.sender === 'me' ? 'Me: ' : '') + text;
       } catch (e) {
         li.textContent = '[Unable to decrypt]';
-        console.error('Decrypt failed:', e);
       }
     }
   }
 }
 
-// Receive new message from socket
+// Handle incoming ciphertext
 socket.on('receive_message', data => {
-  const { from, message: cipherText } = data;
+  const { from, message } = data;
   if (from !== currentChatFriend) {
     console.log('New message from', from);
     return;
   }
-  appendEncryptedMessage(cipherText, 'friend');
+  appendEncryptedMessage(message, 'friend');
   if (chatReady) decryptPendingMessages();
 });
 
-// Send handler
+// Send encrypted message
 async function sendCurrentMessage() {
   if (!chatReady || !currentChatFriend) return;
-  const plaintext = chatInputEl.value;
+  const plaintext = chatInputEl.value.trim();
   if (!plaintext) return;
   const encoder = new TextEncoder();
   const ptBytes = encoder.encode(plaintext);
@@ -151,8 +168,11 @@ async function sendCurrentMessage() {
   }
 }
 
+// Bind send handlers
 sendChatBtn.addEventListener('click', sendCurrentMessage);
-chatInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendCurrentMessage(); }});
+chatInputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendCurrentMessage(); }
+});
 
-// Join personal room
+// Join personal room on connect
 socket.on('connect', () => socket.emit('join_room'));
