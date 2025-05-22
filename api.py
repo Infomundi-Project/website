@@ -1,10 +1,10 @@
-from flask import Blueprint, request, redirect, jsonify, url_for, session
+from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from sqlalchemy import and_, cast, desc, asc, insert
+from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
 from sqlalchemy.types import Date
 from newsplease import NewsPlease
-from datetime import datetime
 
 from website_scripts import (
     config,
@@ -58,7 +58,7 @@ def get_cities(state_id):
     return jsonify(country_util.get_cities(state_id))
 
 
-@api.route("/currencies")
+@api.route("/currencies", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 30)  # 30m cached
 def get_currencies():
     currencies = json_util.read_json(
@@ -67,7 +67,7 @@ def get_currencies():
     return jsonify(currencies)
 
 
-@api.route("/stocks")
+@api.route("/stocks", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 30)  # 30m cached
 def get_stocks():
     stocks = json_util.read_json(f"{config.WEBSITE_ROOT}/assets/data/json/stocks")
@@ -78,7 +78,7 @@ def get_stocks():
     return jsonify(stocks)
 
 
-@api.route("/crypto")
+@api.route("/crypto", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 30)  # 30m cached
 def get_crypto():
     return jsonify(
@@ -86,10 +86,310 @@ def get_crypto():
     )
 
 
+@api.route("/user/pubkey", methods=["POST"])
+@decorators.api_login_required
+def update_pubkey():
+    jwk = request.json.get("publicKey")
+    if not jwk:
+        return abort(400)
+    current_user.public_key_jwk = jwk
+    extensions.db.session.commit()
+    return "", 204
+
+
+@api.route("/user/<friend_uuid>/pubkey")
+@decorators.api_login_required
+def get_pubkey(friend_uuid):
+    user = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_uuid)
+    ).first_or_404()
+    fs_status = friends_util.get_friendship_status(current_user.id, user.id)[0]
+    if fs_status != "accepted":
+        abort(403)
+    return jsonify(publicKey=user.public_key_jwk)
+
+
+@api.route("/user/<friend_public_id>/messages", methods=["GET"])
+@decorators.api_login_required
+def get_messages(friend_public_id):
+    """Get recent messages (encrypted) between current user and the specified friend."""
+    friend = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_public_id)
+    ).first()
+    if not friend:
+        return jsonify({"error": "User not found"}), 404
+    # Ensure friendship exists and is accepted
+    friendship = models.Friendship.query.filter(
+        (
+            (models.Friendship.user_id == current_user.id)
+            & (models.Friendship.friend_id == friend.id)
+            & (models.Friendship.status == "accepted")
+        )
+        | (
+            (models.Friendship.user_id == friend.id)
+            & (models.Friendship.friend_id == current_user.id)
+            & (models.Friendship.status == "accepted")
+        )
+    ).first()
+    if not friendship:
+        return jsonify({"error": "No friendship with this user"}), 403
+    # Query last N messages between users (both directions)
+    msgs = (
+        models.Message.query.filter(
+            (
+                (models.Message.sender_id == current_user.id)
+                & (models.Message.receiver_id == friend.id)
+            )
+            | (
+                (models.Message.sender_id == friend.id)
+                & (models.Message.receiver_id == current_user.id)
+            )
+        )
+        .order_by(models.Message.timestamp.asc())
+        .limit(50)
+        .all()
+    )
+    # Prepare response with ciphertexts
+    messages_data = [
+        {
+            "from": msg.sender.get_public_id(),
+            "to": msg.receiver.get_public_id(),
+            "ciphertext": msg.content_encrypted,
+            "timestamp": msg.timestamp.isoformat(),
+        }
+        for msg in msgs
+    ]
+    return jsonify({"messages": messages_data})
+
+
+@api.route("/user/<int:uid>/stats/reading", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 5, make_cache_key=make_cache_key)  # Cached for 5 minutes
+@decorators.api_login_required
+def reading_stats(uid):
+    user = extensions.db.session.get(models.User, uid)
+    if not user:
+        return jsonify({})
+
+    now = datetime.utcnow()
+    cuts = {
+        "daily": now - timedelta(days=1),
+        "weekly": now - timedelta(days=7),
+        "monthly": now - timedelta(days=30),
+    }
+
+    # Base query
+    q = (
+        extensions.db.session.query(
+            models.UserStoryView, models.Story, models.Publisher, models.Category
+        )
+        .join(models.Story, models.UserStoryView.story_id == models.Story.id)
+        .join(models.Publisher, models.Story.publisher_id == models.Publisher.id)
+    )
+
+    stats = {}
+    for period, since in cuts.items():
+        stats[period] = (
+            extensions.db.session.query(
+                extensions.db.func.count(
+                    extensions.db.distinct(models.UserStoryView.story_id)
+                )
+            )
+            .filter(
+                models.UserStoryView.user_id == uid,
+                models.UserStoryView.viewed_at >= since,
+            )
+            .scalar()
+            or 0
+        )
+
+    # Top publishers
+    top_pubs = (
+        extensions.db.session.query(
+            models.Publisher.name,
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
+        )
+        .join(models.Story, models.Publisher.id == models.Story.publisher_id)
+        .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
+        .filter(models.UserStoryView.user_id == uid)
+        .group_by(models.Publisher.name)
+        .order_by(desc("ctr"))
+        .limit(5)
+        .all()
+    )
+
+    # Top tags
+    top_tags = (
+        extensions.db.session.query(
+            models.Tag.tag,
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
+        )
+        .join(models.Story, models.Tag.story_id == models.Story.id)
+        .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
+        .filter(models.UserStoryView.user_id == uid)
+        .group_by(models.Tag.tag)
+        .order_by(desc("ctr"))
+        .limit(5)
+        .all()
+    )
+
+    # Top countries (split the Category.name slug on “_” in Python)
+    country_counts = (
+        extensions.db.session.query(
+            models.Category.name,
+            extensions.db.func.count(
+                extensions.db.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
+        )
+        .join(models.Story, models.Category.id == models.Story.category_id)
+        .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
+        .filter(models.UserStoryView.user_id == uid)
+        .group_by(models.Category.name)
+        .order_by(desc("ctr"))
+        .limit(5)
+        .all()
+    )
+
+    top_countries = [
+        {"country": cat.split("_", 1)[0].upper(), "count": cnt}
+        for cat, cnt in country_counts
+    ]
+
+    return jsonify(
+        {
+            "counts": stats,
+            "top_publishers": [{"name": n, "count": c} for n, c in top_pubs],
+            "top_tags": [{"tag": t, "count": c} for t, c in top_tags],
+            "top_countries": top_countries,
+        }
+    )
+
+
+@api.route("/story/trending", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 30, query_string=True)  # 30m cached
+def get_trending():
+    """
+    Returns trending stories based on period, metric, and optional filters.
+    Query params:
+      - period: 'hour', 'day', 'week', 'all' (default 'day')
+      - metric: 'views', 'likes', 'dislikes' (default 'views')
+      - limit: int (default 9)
+      - country: ISO2 code (e.g. 'br')
+      - category: category slug (e.g. 'general')
+      - author: substring of author name
+      - tag: single tag to filter by
+      - publisher: substring of publisher name
+    """
+    # Read basic query parameters
+    period = request.args.get("period", "day").lower()
+    metric = request.args.get("metric", "views").lower()
+    limit = request.args.get("limit", 9, type=int)
+
+    if limit > 50:
+        limit = 50
+
+    # Optional filters
+    country = request.args.get("country", type=str)
+    category_slug = request.args.get("category", type=str)
+    author = request.args.get("author", type=str)
+    tag = request.args.get("tag", type=str)
+    publisher_name = request.args.get("publisher", type=str)
+
+    # Determine time window
+    now = datetime.utcnow()
+    if period == "hour":
+        since = now - timedelta(hours=1)
+    elif period == "week":
+        since = now - timedelta(days=7)
+    elif period == "all":
+        since = None
+    else:
+        since = now - timedelta(days=1)
+
+    # Base query: join Story with StoryStats
+    query = extensions.db.session.query(models.Story, models.StoryStats).join(
+        models.StoryStats, models.Story.id == models.StoryStats.story_id
+    )
+
+    # Time filter
+    if since is not None:
+        query = query.filter(models.Story.pub_date >= since)
+
+    # Country & Category filter
+    if country or category_slug:
+        from sqlalchemy.orm import aliased
+
+        Cat = aliased(models.Category)
+        query = query.join(Cat, models.Story.category)
+        if country and category_slug:
+            full_cat = f"{country.lower()}_{category_slug.lower()}"
+            query = query.filter(Cat.name == full_cat)
+        elif category_slug:
+            query = query.filter(Cat.name.ilike(f"%_{category_slug.lower()}"))
+        elif country:
+            query = query.filter(Cat.name.ilike(f"{country.lower()}_%"))
+
+    # Author filter
+    if author:
+        query = query.filter(models.Story.author.ilike(f"%{author}%"))
+
+    # Tag filter
+    if tag:
+        query = query.join(models.Tag, models.Story.tags).filter(
+            models.Tag.tag.ilike(f"%{tag}%")
+        )
+
+    # Publisher filter
+    if publisher_name:
+        query = query.join(models.Publisher, models.Story.publisher)
+        query = query.filter(models.Publisher.name.ilike(f"%{publisher_name}%"))
+
+    # Choose ordering column
+    if metric in ("likes", "dislikes"):
+        order_col = getattr(models.StoryStats, metric)
+    else:
+        order_col = models.StoryStats.views
+
+    # Finalize query
+    results = query.order_by(desc(order_col)).limit(limit).all()
+
+    # Serialize output
+    trending = []
+    for story, stats in results:
+        trending.append(
+            {
+                "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
+                "title": story.title,
+                "url": story.url,
+                "pub_date": story.pub_date,
+                "views": stats.views,
+                "likes": stats.likes,
+                "dislikes": stats.dislikes,
+                "image_url": story.image_url,
+                "author": story.author,
+                "tags": [t.tag for t in story.tags],
+                "publisher": {
+                    "name": input_sanitization.clean_publisher_name(
+                        story.publisher.name
+                    ),
+                    "url": story.publisher.site_url,
+                    "favicon_url": story.publisher.favicon_url,
+                },
+            }
+        )
+
+    return jsonify(trending), 200
+
+
 @api.route("/user/friend", methods=["POST"])
+@extensions.limiter.limit("54/hour;18/minute")
 @decorators.api_login_required
 def handle_friends():
     data = request.get_json()
+
     friend_id = data.get("friend_id")
     action = data.get("action")
 
@@ -99,12 +399,43 @@ def handle_friends():
             message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
         )
 
+    friend = extensions.db.session.get(models.User, friend_id)
+    if not friend:
+        return jsonify(success=False, message="Could not find user.")
+
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
+        notifications.notify_single(
+            friend.id,
+            "friend_request",
+            f"{current_user.username} has sent you a friend request",
+            friendship_id=new_friendship_id,
+            url=url_for(
+                "views.user_profile_by_id", public_id=current_user.get_public_id()
+            ),
+        )
         return jsonify(success=True, message="Friend request sent")
 
     elif action == "accept":
         if friends_util.accept_friend_request(current_user.id, friend_id):
+            # Sends notification to the friend
+            notifications.notify_single(
+                friend.id,
+                "friend_accepted",
+                f"{current_user.username} has accepted your friend request",
+                url=url_for(
+                    "views.user_profile_by_id", public_id=current_user.get_public_id()
+                ),
+            )
+            # Sends also notification to the user
+            notifications.notify_single(
+                current_user.id,
+                "friend_status",
+                f"You accepted the friend request from {friend.username}",
+                url=url_for(
+                    "views.user_profile_by_id", public_id=friend.get_public_id()
+                ),
+            )
             return jsonify(success=True, message="Friend request accepted")
 
         return jsonify(success=False, message="Failed to accept friend request")
@@ -254,7 +585,7 @@ def setup_totp():
     if not is_valid:
         return jsonify({"valid": False}), 200
 
-    totp_recovery_token = current_user.setup_totp()
+    totp_recovery_token = current_user.setup_totp(session["totp_secret"])
 
     # There's no need to keep this info in the user's session anymore
     del session["totp_secret"]
@@ -644,7 +975,7 @@ def create_comment():
                 {
                     "user_id": profile_owner.id,
                     "type": "new_comment",
-                    "message": "Someone commented on your profile",
+                    "message": f"{comment.user.username} commented on your profile",
                     "url": comment.url,
                 }
             ]
@@ -938,10 +1269,9 @@ def mark_notification_read(notification_id):
         return jsonify({"error": "Notification not found."}), 404
 
     if not notif.is_read:
+        notif.friendship_id = None
         notif.is_read = True
-        notif.read_at = (
-            datetime.utcnow() if hasattr(models.Notification, "read_at") else None
-        )
+        notif.read_at = datetime.utcnow()
         extensions.db.session.commit()
 
     return jsonify({"message": "Notification marked as read.", "id": notif.id}), 200
@@ -955,7 +1285,7 @@ def mark_all_notifications_read():
     """
     updated = models.Notification.query.filter_by(
         user_id=current_user.id, is_read=False
-    ).update({"is_read": True}, synchronize_session="fetch")
+    ).update({"is_read": True, "friendship_id": None}, synchronize_session="fetch")
     extensions.db.session.commit()
 
     return (
@@ -964,6 +1294,132 @@ def mark_all_notifications_read():
                 "message": "All notifications marked as read.",
                 "notifications_updated": updated,
             }
+        ),
+        200,
+    )
+
+
+@api.route("/user/<int:uid>/block/<action>", methods=["POST"])
+@decorators.api_login_required
+def block_user(uid, action):
+    if uid == current_user.id:
+        return jsonify(success=False, message="Self-blocking? Well, that's new"), 400
+
+    if action not in ("add", "remove"):
+        return jsonify(success=False, message="Unrecognized action"), 400
+
+    target = extensions.db.session.get(models.User, uid)
+    if not target:
+        return jsonify(success=False, message="Couldn't find the target user"), 400
+
+    block = models.UserBlock.query.filter_by(
+        blocker_id=current_user.id, blocked_id=uid
+    ).first()
+
+    if action == "add":
+        friends_util.delete_friend(
+            current_user.id, target.id
+        )  # users aren't friends anymore if they decide to block each other
+
+        if block:
+            return jsonify(success=True, message="Already blocked."), 200
+
+        block = models.UserBlock(blocker=current_user, blocked=target)
+        extensions.db.session.add(block)
+    else:
+        if not block:
+            return jsonify(success=True, message="User is not blocked"), 200
+        extensions.db.session.delete(block)
+
+    extensions.db.session.commit()
+
+    return (
+        jsonify(
+            success=True,
+            message=f"You blocked {target.username}. Take care of your peace!",
+        ),
+        201,
+    )
+
+
+@api.route("/user/<int:uid>/reports", methods=["GET", "POST"])
+@api.route("/user/<int:uid>/reports/<int:report_id>", methods=["PATCH", "DELETE"])
+@decorators.api_login_required
+def user_reports(uid, report_id=0):
+    if uid == current_user.id:
+        return jsonify(success=False, message="You can't report yourself"), 400
+
+    target = extensions.db.session.get(models.User, uid)
+    if not target:
+        return jsonify(success=False, message="Couldn't find the target user"), 400
+
+    if request.method == "GET":
+        reports = models.UserReport.query.filter_by(
+            reporter_id=current_user.id, reported_id=uid
+        ).all()
+
+        return jsonify(reports=[r.to_dict() for r in reports]), 200
+
+    # Collecs this data only when required
+    if request.method in ("POST", "PATCH"):
+        data = request.get_json() or {}
+        reason = input_sanitization.gentle_cut_text(
+            500, input_sanitization.sanitize_html(data.get("reason", ""))
+        )
+        category = data.get("category")
+
+        if category not in (
+            "spam",
+            "harassment",
+            "hate_speech",
+            "inappropriate",
+            "other",
+        ):
+            return (
+                jsonify(success=False, message="Couldn't find the target category"),
+                400,
+            )
+
+    if request.method == "POST":
+        report = models.UserReport.query.filter_by(
+            reporter_id=current_user.id, reported_id=uid, category=category
+        ).first()
+        if report:
+            return (
+                jsonify(success=False, message="You’ve already reported this user."),
+                200,
+            )
+
+        report = models.UserReport(
+            reporter=current_user, reported=target, reason=reason, category=category
+        )
+        extensions.db.session.add(report)
+
+    elif request.method == "DELETE":
+        report = extensions.db.session.get(models.UserReport, report_id)
+        if not report:
+            return (
+                jsonify(success=False, message="There is no such report"),
+                200,
+            )
+
+        extensions.db.session.delete(report)
+    elif request.method == "PATCH":
+        report = extensions.db.session.get(models.UserReport, report_id)
+        if not report:
+            return (
+                jsonify(success=False, message="There is no such report"),
+                200,
+            )
+
+        report.reason = reason
+        report.category = category
+
+    extensions.db.session.commit()
+
+    return (
+        jsonify(
+            success=True, message="Thanks for letting us know — we’ll take a look!"
         ),
         200,
     )

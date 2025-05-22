@@ -20,6 +20,10 @@ DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS global_salts;
+DROP TABLE IF EXISTS user_story_views;
+DROP TABLE IF EXISTS user_blocks;
+DROP TABLE IF EXISTS user_reports;
+DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -91,6 +95,9 @@ CREATE TABLE users (
     is_mail_twofactor_enabled TINYINT(1) DEFAULT 0,
     mail_twofactor_code INT,
     mail_twofactor_timestamp DATETIME,
+
+    -- messaging pk
+    public_key_jwk JSON,
 
     country_id MEDIUMINT UNSIGNED,
     state_id MEDIUMINT UNSIGNED,
@@ -283,8 +290,16 @@ CREATE TABLE notifications (
     url VARCHAR(512),
 
     is_read TINYINT(1) NOT NULL DEFAULT 0,
+    read_at DATETIME,
 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_notifications_pending_friend (
+        user_id,
+        type,
+        friendship_id,
+        is_read
+    )
 );
 
 -- Index to speed up querying unread notifications per user
@@ -328,3 +343,80 @@ CREATE TABLE crypto (
     data TEXT
 );
 
+
+CREATE TABLE user_reports (
+  id INT NOT NULL AUTO_INCREMENT,
+  reporter_id INT NOT NULL,
+  reported_id INT NOT NULL,
+  reason VARCHAR(500) DEFAULT NULL,
+  -- add a category column with predefined set
+  category ENUM(
+    'spam',
+    'harassment',
+    'hate_speech',
+    'inappropriate',
+    'other'
+  ) NOT NULL DEFAULT 'other',
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  reviewed_at DATETIME DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_user_report (reporter_id, reported_id, category),
+  KEY idx_user_reports_reporter (reporter_id),
+  KEY idx_user_reports_reported (reported_id),
+  CONSTRAINT fk_user_reports_reporter
+    FOREIGN KEY (reporter_id) REFERENCES users (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_user_reports_reported
+    FOREIGN KEY (reported_id) REFERENCES users (id)
+    ON DELETE CASCADE
+);
+
+
+CREATE TABLE user_blocks (
+  id INT NOT NULL AUTO_INCREMENT,
+  blocker_id INT NOT NULL,
+  blocked_id INT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_user_block (blocker_id, blocked_id),
+  KEY idx_user_blocks_blocker (blocker_id),
+  KEY idx_user_blocks_blocked (blocked_id),
+  CONSTRAINT fk_user_blocks_blocker
+    FOREIGN KEY (blocker_id) REFERENCES users (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_user_blocks_blocked
+    FOREIGN KEY (blocked_id) REFERENCES users (id)
+    ON DELETE CASCADE
+);
+
+
+CREATE TABLE user_story_views (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  story_id INT NOT NULL,
+  viewed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  
+  -- Foreign key constraints for referential integrity
+  CONSTRAINT fk_user_story_views_user
+    FOREIGN KEY (user_id)
+    REFERENCES users (id)
+    ON DELETE CASCADE,
+    
+  CONSTRAINT fk_user_story_views_story
+    FOREIGN KEY (story_id)
+    REFERENCES stories (id)
+    ON DELETE CASCADE
+);
+
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    content_encrypted TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
+);

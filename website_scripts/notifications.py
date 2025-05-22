@@ -1,33 +1,42 @@
 import gnupg
 from email.mime.multipart import MIMEMultipart
+from sqlalchemy.exc import IntegrityError
 from requests import post as post_request
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from sqlalchemy import insert
+
 from smtplib import SMTP
 
 from . import config, extensions, models, custom_exceptions
 
 
-def post_webhook(data: dict) -> bool:
+def post_webhook(text: str = "", data: dict = {}) -> bool:
     """Takes 'data' dictionary as argument, and posts to the mattermost webhook. Returns bool.
 
     Arguments:
         data: dict
             Information needed to create the embed message. Should have the following structure:
             {
-                'text': 'some text'
+                'content': 'some text'
             }
 
     Returns:
         bool: True if we were able to POST the webhook, otherwise False.
     """
+    if not text and not data:
+        raise custom_exceptions.InfomundiCustomException(
+            "Either text or data is required"
+        )
+
+    if text:
+        data = {"content": text}
 
     try:
         response = post_request(config.WEBHOOK_URL, timeout=3, json=data)
         response.raise_for_status()
-    except Exception:
-        return False
+    except Exception as e:
+        raise custom_exceptions.InfomundiCustomException(f"Something went wrong: {e}")
 
     return True
 
@@ -67,6 +76,32 @@ def notify(notif_dicts: list):
     else:
         extensions.db.session.execute(insert(models.Notification), notif_dicts)
         extensions.db.session.commit()
+
+
+def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
+    """
+    Create-and-commit a Notification for a user,
+    but first check if an unread one already exists.
+    """
+    filters = {
+        "user_id": user_id,
+        "type": type,
+        "is_read": False,
+        **fk_kwargs,
+    }
+
+    existing = (
+        extensions.db.session.query(models.Notification).filter_by(**filters).first()
+    )
+    if existing:
+        # We already have a pending one—just return it.
+        return existing
+
+    # Otherwise, create & commit a fresh notification
+    n = models.Notification(user_id=user_id, type=type, message=message, **fk_kwargs)
+    extensions.db.session.add(n)
+    extensions.db.session.commit()
+    return n
 
 
 def send_email(

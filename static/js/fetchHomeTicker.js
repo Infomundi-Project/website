@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const marketDate = document.getElementById('marketDate');
     marketDate.innerHTML = data[0]?.date;
     let html = `
-          <div class="hwrap-home">
+          <div class="hwrap-home rounded">
               <div class="hmove-home" style="color: white">
       `;
 

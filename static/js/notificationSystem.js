@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   const inboxBtn          = document.getElementById("inboxBtn");
   const unreadBadge       = document.getElementById("unreadBadge");
+  const unreadBadgeNavLeft  = document.getElementById("unreadBadgeNavLeft");
+  const unreadBadgeNavFooter= document.getElementById("unreadBadgeNavFooter");
   const notificationsList = document.getElementById("notificationsList");
   const markAllReadBtn    = document.getElementById("markAllReadBtn");
   const csrfToken         = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -20,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Intl.DateTimeFormat("default", { month: "short", day: "numeric" }).format(new Date(iso));
   }
 
-  // Load unread count
+  // Load unread count into all badges
   function loadUnreadCount() {
     fetch("/api/notifications/unread_count", {
       credentials: "include",
@@ -31,10 +33,20 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .then(res => res.json())
     .then(data => {
-      unreadBadge.textContent = data.unread_count;
-      markAllReadBtn.style.display = data.unread_count > 0 ? "inline-block" : "none";
-      unreadBadge.style.display = data.unread_count > 0 ? "inline-block" : "none";
-    });
+      const cnt = data.unread_count;
+      // main button
+      unreadBadge.textContent = cnt;
+      unreadBadge.style.display = cnt > 0 ? "inline-block" : "none";
+      // nav-left
+      unreadBadgeNavLeft.textContent = cnt;
+      unreadBadgeNavLeft.style.display = cnt > 0 ? "inline-block" : "none";
+      // footer
+      unreadBadgeNavFooter.textContent = cnt;
+      unreadBadgeNavFooter.style.display = cnt > 0 ? "inline-block" : "none";
+      // mark-all button
+      markAllReadBtn.style.display = cnt > 0 ? "inline-block" : "none";
+    })
+    .catch(console.error);
   }
 
   // —————————————————————— Core: fetch & render ——————————————————————
@@ -92,14 +104,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <div>
               <span>
                 <div>${n.message}</div>
-                <small class="text-muted">${relativeTime(n.created_at)} - <a href="${n.url||'#'}">View</a></small>
+                <small class="text-muted"><span title="${n.created_at}">${relativeTime(n.created_at)}</span> ${n.url ? `- <a href="${n.url}">View</a>` : ''}</small>
               </span>
             </div>
           </div>
           ${
             n.is_read
               ? ""
-              : `<button data-id="${n.id}" class="btn btn-sm btn-outline-primary mark-read-btn"><i class="fa-solid fa-check-double"></i></button>`
+              : `<button data-id="${n.id}" class="btn btn-sm btn-outline-primary mark-read-btn">Read</button>`
           }
         `;
         notificationsList.appendChild(li);
@@ -108,13 +120,24 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(console.error);
   }
 
-  // —————————————————————— Event Wiring ——————————————————————
-
-  // Open inbox → refresh list + show modal
-  inboxBtn.addEventListener("click", () => {
+  // Common handler to open the modal
+  function openNotificationsModal(e) {
+    e.preventDefault();
     loadNotifications();
     bsModal.show();
-  });
+  }
+
+
+  // —————————————————————— Event Wiring ——————————————————————
+
+  // wire up all triggers
+  inboxBtn.addEventListener("click", openNotificationsModal);
+  document.getElementById("inboxLeftNavbar")
+          .querySelector("a")
+          .addEventListener("click", openNotificationsModal);
+  document.getElementById("inboxFooter")
+          .querySelector("a")
+          .addEventListener("click", openNotificationsModal);
 
   // Delegate single-mark-read buttons
   notificationsList.addEventListener("click", e => {

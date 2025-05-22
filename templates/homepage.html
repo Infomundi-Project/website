@@ -47,7 +47,7 @@
 <div class="row justify-content-center align-items-center">
   <div class="col-xl-3 text-center">
     <div>
-      <h1 class="fs-2"><label for="query">Search for a Country or Specific Information</label></h1>
+      <h1 class="fs-2"><label for="query">Search for a Country</label></h1>
       <form action="{{ url_for('api.search') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="input-group justify-content-center">
@@ -123,7 +123,7 @@
       <h3><i class="fa-brands fa-bitcoin me-2"></i>Crypto</h3>
       <div id="crypto-ticker"></div>
     </div>
-    <div class="mt-5 d-flex justify-content-end">
+    <div class="mt-5 d-flex justify-content-end invisible">
       <p>View More<i class="fa-solid fa-arrow-right ms-2"></i></p>
     </div>
     {% endif %}

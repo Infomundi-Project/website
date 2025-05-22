@@ -274,21 +274,22 @@
         {% if current_user.is_authenticated %}
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('views.user_profile', username=current_user.username) }}"
-            class="nav-link {% if request.url.endswith(current_user.username) and 'profile' in request.url %}active{% endif %}">
+            class="nav-link {% if request.url.endswith('/p/' + current_user.username) or request.url.endswith('/profile/' + current_user.username) %}active{% endif %}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-user"></i></span>
             <div class="vr me-2"></div>
             Profile
           </a>
         </li>
-        <li class="nav-item inf-nav-item">
-          <a href="#" class="nav-link disabled" aria-disabled="true">
-            <span class="icon-wrapper me-2"><i
-                class="fa-solid fa-bell"></i></span>
-            <div class="vr me-2"></div>
-            Notifications
-          </a>
-        </li>
+        <li class="nav-item inf-nav-item" id="inboxLeftNavbar">
+  <a href="#" class="nav-link d-flex align-items-center">
+    <span class="icon-wrapper me-2"><i class="fa-solid fa-inbox fa-lg"></i></span>
+    <div class="vr me-2"></div>
+    <span>Inbox</span>
+    <!-- new badge: -->
+    <span id="unreadBadgeNavLeft" class="badge bg-danger ms-auto" style="display:none">0</span>
+  </a>
+</li>
         <li class="nav-item inf-nav-item">
           <a href="{{ url_for('views.edit_user_settings') }}"
             class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
@@ -358,7 +359,7 @@
         {% if session.get('last_visited_country_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_country_url'] }}"
-            class="nav-link {{ 'active' if request.url == session['last_visited_country_url'] else '' }}">
+            class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country_url']) else '' }}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-earth-americas"></i></span>
             <div class="vr me-2"></div>
@@ -369,7 +370,7 @@
         {% if session.get('last_visited_story_url') %}
         <li class="nav-item inf-nav-item">
           <a href="{{ session['last_visited_story_url'] }}"
-            class="nav-link {{ 'active' if request.url == session['last_visited_story_url'] else '' }}">
+            class="nav-link {{ 'active' if request.url.endswith(session['last_visited_story_url']) else '' }}">
             <span class="icon-wrapper me-2"><i
                 class="fa-solid fa-newspaper"></i></span>
             <div class="vr me-2"></div>
@@ -723,6 +724,30 @@
       </div>
     </div>
 
+
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chatModalLabel">Chat with <span id="chatFriendName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Messages list -->
+        <ul id="chatMessages" class="list-unstyled mb-0" style="max-height: 300px; overflow-y: auto;">
+          <!-- Messages will be appended here -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <input type="text" id="chatInput" class="form-control me-2" placeholder="Type a message..." autocomplete="off">
+        <button id="sendChatBtn" class="btn btn-primary">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     <!-- Notifications Modal -->
 <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable">
@@ -915,10 +940,14 @@
     <div class="container mt-5">
       <div class="row align-items-start">
         <div class="col-md-3 p-3 rounded bg-secondary-subtle mb-3">
-          <img src="{{ current_user.avatar_url }}" class="img-thumbnail"
-            style="border-radius: 15px;"
+          <img src="{{ current_user.avatar_url }}" class="img-thumbnail rounded"
             alt="{{ current_user.username }}'s profile picture">
-          <h4 class="mt-2">{{ current_user.username }}</h4>
+          <ul class="list-inline notranslate mb-1">
+              
+              <li class="list-inline-item fw-bold fs-4">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</li>
+              <li class="list-inline-item text-muted" title="Username">@{{ current_user.username }}</li>
+
+            </ul>
           <a href="/profile/{{ current_user.username }}"
             class="btn btn-sm btn-primary mt-2">Return to profile</a>
           <ul class="nav nav-pills flex-column mt-4">
@@ -1031,12 +1060,14 @@
               <i class="fa-solid fa-user me-1"></i>Profile
             </a>
           </li>
-          <li class="nav-item mb-2">
-            <a href="#" class="nav-link p-0 text-body-secondary disabled"
-              aria-disabled="true">
-              <i class="fa-solid fa-bell me-1"></i>Notifications
-            </a>
-          </li>
+          <li class="nav-item mb-2" id="inboxFooter">
+  <a href="#" class="nav-link p-0 text-body-secondary d-flex align-items-center">
+    <i class="fa-solid fa-inbox fa-lg me-1"></i>
+    <span>Inbox</span>
+    <!-- new badge: -->
+    <span id="unreadBadgeNavFooter" class="badge bg-danger ms-auto" style="display:none">0</span>
+  </a>
+</li>
           <li class="nav-item mb-2">
             <a href="{{ url_for('views.edit_user_profile') }}"
               class="nav-link p-0 text-body-secondary">
@@ -1119,6 +1150,12 @@
   <script nonce="{{ nonce }}"
     src="{{ url_for('static', filename='js/automaticTranslation.js') }}">
   </script>
+
+  {% if current_user.is_authenticated %}
+    <!-- Include the chat client script for logged-in users -->
+    <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
+    <script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+  {% endif %}
 
 
   <script nonce="{{ nonce }}">

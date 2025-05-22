@@ -117,7 +117,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(25), nullable=False, unique=True)
     email_fingerprint = db.Column(
         db.LargeBinary(32), nullable=False, unique=True
-    )  # SHA-256 + HMAC
+    )  # SHA-256 HMAC
     email_encrypted = db.Column(db.LargeBinary(120), nullable=False)  # AES-GCM
 
     role = db.Column(db.String(15), default="user")
@@ -145,7 +145,7 @@ class User(db.Model, UserMixin):
     # Privacy settings
     profile_visibility = db.Column(
         db.String(7), default="public"
-    )  # "public", "friends", "private"
+    )  # "public", "login", "friends", "private"
     notification_type = db.Column(
         db.String(9), default="all"
     )  # "all", "important", "none"
@@ -181,6 +181,9 @@ class User(db.Model, UserMixin):
     mail_twofactor_code = db.Column(db.Integer)
     mail_twofactor_timestamp = db.Column(db.DateTime)
 
+    # messaging pk
+    public_key_jwk = db.Column(db.JSON, nullable=True)
+
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     state_id = db.Column(db.Integer, db.ForeignKey("states.id"), nullable=True)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
@@ -201,6 +204,12 @@ class User(db.Model, UserMixin):
 
     def set_password(self, password: str):
         self.password = hashing_util.string_to_argon2_hash(password)
+        db.session.commit()
+
+    def set_email(self, email):
+        self.email_encrypted = security_util.encrypt(email)
+        self.email_fingerprint = hashing_util.generate_hmac_signature(email)
+        db.session.commit()
 
     def check_password(self, password: str) -> bool:
         return hashing_util.argon2_verify_hash(self.password, password)
@@ -217,7 +226,7 @@ class User(db.Model, UserMixin):
         self.totp_recovery = None
         db.session.commit()
 
-    def setup_totp(self) -> str:
+    def setup_totp(self, totp_secret) -> str:
         totp_recovery_token = security_util.generate_nonce()
 
         self.totp_recovery = hashing_util.string_to_argon2_hash(totp_recovery_token)
@@ -286,6 +295,105 @@ class User(db.Model, UserMixin):
         return input_sanitization.extract_username_from_thirdparty_platform_url(url)[
             1
         ]  # [1] here is the username
+
+
+class UserStoryView(db.Model):
+    __tablename__ = "user_story_views"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", backref="story_views", lazy="joined")
+    story = db.relationship("Story", backref="user_views", lazy="joined")
+
+
+class UserReport(db.Model):
+    __tablename__ = "user_reports"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    reporter_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    reported_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    category = db.Column(
+        db.Enum(
+            "spam",
+            "harassment",
+            "hate_speech",
+            "inappropriate",
+            "other",
+            name="report_category_enum",
+        ),
+        nullable=False,
+        default="other",
+        index=True,
+    )
+
+    reason = db.Column(db.String(500), nullable=True)
+
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    # relationships for easy backrefs
+    reporter = db.relationship(
+        "User", foreign_keys=[reporter_id], backref="reports_made", lazy="joined"
+    )
+    reported = db.relationship(
+        "User", foreign_keys=[reported_id], backref="reports_received", lazy="joined"
+    )
+    __table_args__ = (
+        # no more duplicate reports in the same category!
+        db.UniqueConstraint(
+            "reporter_id", "reported_id", "category", name="uq_user_report_category"
+        ),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "category": self.category,
+            "reason": self.reason,
+            "status": self.status,
+            "createdAt": self.created_at.isoformat(),
+            "reviewedAt": self.reviewed_at.isoformat() if self.reviewed_at else None,
+        }
+
+
+class UserBlock(db.Model):
+    __tablename__ = "user_blocks"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    blocker_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    blocked_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    blocker = db.relationship(
+        "User", foreign_keys=[blocker_id], backref=db.backref("blocks_made")
+    )
+
+    blocked = db.relationship(
+        "User", foreign_keys=[blocked_id], backref=db.backref("blocked_by")
+    )
+
+    __table_args__ = (
+        # one block per pair
+        db.UniqueConstraint("blocker_id", "blocked_id", name="uq_user_block"),
+    )
 
 
 class Friendship(db.Model):
@@ -464,6 +572,7 @@ class Notification(db.Model):
     url = db.Column(db.String(512), nullable=True)  # link to view the item
 
     is_read = db.Column(db.Boolean, default=False, nullable=False)
+    read_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
@@ -487,6 +596,23 @@ class Bookmark(db.Model):
     __table_args__ = (
         # one bookmark per (user, story)
         db.UniqueConstraint("user_id", "story_id", name="uq_user_story_bookmark"),
+    )
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content_encrypted = db.Column(db.Text, nullable=False)  # ciphertext (e.g. Base64)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships (for convenience, if needed)
+    sender = db.relationship(
+        "User", foreign_keys=[sender_id], backref="sent_messages", lazy=True
+    )
+    receiver = db.relationship(
+        "User", foreign_keys=[receiver_id], backref="received_messages", lazy=True
     )
 
 
