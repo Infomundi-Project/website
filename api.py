@@ -100,7 +100,9 @@ def update_pubkey():
 @api.route("/user/<friend_uuid>/pubkey")
 @decorators.api_login_required
 def get_pubkey(friend_uuid):
-    user = models.User.query.filter_by(public_id=security_util.uuid_string_to_bytes(friend_uuid)).first_or_404()
+    user = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_uuid)
+    ).first_or_404()
     fs_status = friends_util.get_friendship_status(current_user.id, user.id)[0]
     if fs_status != "accepted":
         abort(403)
@@ -161,7 +163,7 @@ def get_messages(friend_public_id):
 
 
 @api.route("/user/<int:uid>/stats/reading", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 5)  # Cached for 5 minutes
+@extensions.cache.cached(timeout=60 * 5, make_cache_key=make_cache_key)  # Cached for 5 minutes
 @decorators.api_login_required
 def reading_stats(uid):
     user = extensions.db.session.get(models.User, uid)

@@ -26,7 +26,6 @@ from website_scripts import (
     hashing_util,
     qol_util,
     models,
-    notifications,
 )
 from views import views
 from auth import auth
@@ -79,7 +78,7 @@ extensions.limiter.init_app(app)
 
 socketio = SocketIO(
     app, cors_allowed_origins="*"
-)  # Allow appropriate origins as needed
+)  # Allow appropriate origins
 
 
 @socketio.on("connect")
@@ -88,9 +87,6 @@ def handle_connect():
     if current_user.is_authenticated:
         room = f"user_{current_user.id}"
         join_room(room)
-        notifications.post_webhook(
-            text=f"User {current_user.username} connected to SocketIO and joined room {room}"
-        )
     else:
         return False  # Reject connection if not logged in
 
@@ -101,9 +97,6 @@ def handle_disconnect():
     if current_user.is_authenticated:
         room = f"user_{current_user.id}"
         leave_room(room)
-        notifications.post_webhook(
-            text=f"User {current_user.username} disconnected from SocketIO."
-        )
 
 
 @socketio.on("init_chat")
@@ -122,7 +115,6 @@ def handle_init_chat(data):
         public_id=security_util.uuid_string_to_bytes(friend_uuid)
     ).first()
     if not friend:
-        notifications.post_webhook(text="Invalid user id")
         return  # invalid user id
     # Verify that current_user and friend are friends (friendship accepted)
     friendship = models.Friendship.query.filter(
@@ -142,9 +134,6 @@ def handle_init_chat(data):
             "error", {"message": "Friendship not found"}, room=f"user_{current_user.id}"
         )
         return
-    notifications.post_webhook(
-        text=f"Forwarding init_chat pubkey from {current_user.id} to {friend.id}"
-    )
     # Forward the initiator's public key to the friend if they are online
     emit(
         "init_chat",

@@ -86,12 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const col = document.createElement('div');
-      col.className = 'col-6 d-flex align-items-center mb-2';
+      col.className = 'col-6 mb-2';
 
       // Determine online status text
       let statusDisplay;
       if (friend.is_online) {
-        statusDisplay = `<span class="dot" style="...background-color: #00FF00;..."></span>&nbsp;Online`;
+        statusDisplay = `<span class="dot" style="background-color: #00FF00;"></span>&nbsp;Online`;
       } else {
         const lastActivity = new Date(friend.last_activity);
         statusDisplay = `Last activity: ${friendsTimeAgo(lastActivity)}`;
@@ -99,9 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Build friend entry with a Message button
       col.innerHTML = `
-        <div class="friend-item d-flex align-items-center">
+        <div class="friend-item">
           <img src="${friend.avatar_url}" alt="${friend.display_name || friend.username}'s avatar" 
-               class="rounded-circle me-3" width="50" height="50">
+               class="img-thumbnail rounded me-3" style="height: auto; width: 3rem">
           <div class="flex-grow-1">
             <h6>${friend.display_name || friend.username}
               <span class="ms-2 text-muted small">@${friend.username}</span>
