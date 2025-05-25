@@ -30,7 +30,16 @@ const chatKeys = {};   // chatKeys[friendId] = { sharedSecret }
 let currentChatFriend = null;
 let chatReady = false;
 
-// DOM elements
+// --- constants - typing ---------------
+const TYPING_DEBOUNCE = 250;   // how long to wait between key strokes
+const TYPING_TIMEOUT  = 2000;  // how long after silence to emit "stop"
+
+// --- state - typing -------------------
+let typingTimer      = null;   // fires 2 s after user stops typing
+let lastTypeSent     = 0;      // throttle outgoing "typing" events
+
+// --- DOM ---------------------
+const typingIndicatorEl = document.getElementById('typingIndicator');
 const chatModalEl      = document.getElementById('chatModal');
 const chatFriendNameEl = document.getElementById('chatFriendName');
 const chatMessagesEl   = document.getElementById('chatMessages');
@@ -45,10 +54,22 @@ window.openChat = async function(friendPublicId, friendName) {
 
   // Reset UI
   chatFriendNameEl.textContent = friendName;
-  chatMessagesEl.innerHTML    = '';
+  
+  // Remove old messages but keep the typing indicator
+  chatMessagesEl
+    .querySelectorAll('li:not(#typingIndicator)')
+    .forEach(li => li.remove());
+
   chatInputEl.value           = '';
   sendChatBtn.disabled        = true;
   chatInputEl.disabled        = true;
+
+  // hide any open modal
+  const openModal = document.querySelector('.modal.show');
+  if (openModal) {
+    bootstrap.Modal.getInstance(openModal).hide();
+  }
+
 
   bsChatModal.show();
 
@@ -81,6 +102,8 @@ window.openChat = async function(friendPublicId, friendName) {
     sendChatBtn.disabled = false;
     chatInputEl.disabled = false;
 
+    decryptPendingMessages();      // handles anything that arrived early
+
     // Optional: load + decrypt history
     const historyRes = await fetch(`/api/user/${friendPublicId}/messages`);
     const { messages } = await historyRes.json();
@@ -94,52 +117,65 @@ window.openChat = async function(friendPublicId, friendName) {
   }
 };
 
-// Append an encrypted message placeholder
-function appendEncryptedMessage(ciphertext, sender) {
-  const li = document.createElement('li');
-  li.className = sender === 'me' ? 'text-end mb-2' : 'text-start mb-2';
-  li.textContent = '[Encrypted message]';
+// 1. Add a bubble wrapper when appending ciphertext
+function appendEncryptedMessage (ciphertext, sender) {
+  const li     = document.createElement('li');
+  li.className = `${sender}`;   // me | friend
   li.dataset.ciphertext = ciphertext;
   li.dataset.sender     = sender;
-  chatMessagesEl.appendChild(li);
+
+  const bubble = document.createElement('span');
+  bubble.className = 'chat-bubble';
+  if (sender === 'friend') {
+   bubble.classList.add('bg-secondary', 'text-white');
+  } else {
+     bubble.classList.add('bg-primary', 'text-white');
+  }
+
+  bubble.textContent = '[Encrypted message]';       // placeholder
+  li.appendChild(bubble);
+
+  chatMessagesEl.insertBefore(li, typingIndicatorEl);
+  typingIndicatorEl.classList.add('d-none');   // hide if it was shown
   chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
 }
 
-// Decrypt pending messages
-async function decryptPendingMessages() {
+// 2. Write into the bubble after decryption
+async function decryptPendingMessages () {
   if (!chatReady || !chatKeys[currentChatFriend]?.sharedSecret) return;
+
   const items = chatMessagesEl.querySelectorAll('li');
   for (let li of items) {
-    if (li.textContent === '[Encrypted message]') {
+    const bubble = li.querySelector('.chat-bubble');
+    if (bubble && bubble.textContent === '[Encrypted message]') {
       try {
-        const ctB64 = li.dataset.ciphertext;
-        const bytes = Uint8Array.from(atob(ctB64), c=>c.charCodeAt(0));
-        const iv   = bytes.slice(0, 12);
-        const data = bytes.slice(12);
-        const buf  = await window.crypto.subtle.decrypt(
+        const bytes = Uint8Array.from(atob(li.dataset.ciphertext), c => c.charCodeAt(0));
+        const iv    = bytes.slice(0, 12);
+        const data  = bytes.slice(12);
+        const buf   = await crypto.subtle.decrypt(
           { name: 'AES-GCM', iv },
           chatKeys[currentChatFriend].sharedSecret,
           data
         );
         const text = new TextDecoder().decode(buf);
-        li.textContent = (li.dataset.sender === 'me' ? 'Me: ' : '') + text;
-      } catch (e) {
-        li.textContent = '[Unable to decrypt]';
+        bubble.textContent = text;
+      } catch {
+        bubble.textContent = '[Unable to decrypt]';
       }
     }
   }
 }
 
-// Handle incoming ciphertext
+
 socket.on('receive_message', data => {
   const { from, message } = data;
-  if (from !== currentChatFriend) {
-    console.log('New message from', from);
-    return;
-  }
+  if (from !== currentChatFriend) return;   // ok
+
   appendEncryptedMessage(message, 'friend');
-  if (chatReady) decryptPendingMessages();
+
+  decryptPendingMessages();      // cheap no-op until the secret exists
 });
+ 
 
 // Send encrypted message
 async function sendCurrentMessage() {
@@ -149,6 +185,7 @@ async function sendCurrentMessage() {
   const encoder = new TextEncoder();
   const ptBytes = encoder.encode(plaintext);
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  socket.emit('typing', { to: currentChatFriend, typing: false });
   try {
     const ctBuf = await window.crypto.subtle.encrypt(
       { name: 'AES-GCM', iv },
@@ -173,6 +210,40 @@ sendChatBtn.addEventListener('click', sendCurrentMessage);
 chatInputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); sendCurrentMessage(); }
 });
+
+// 2-a.  OUTGOING  – detect input --------------------------------
+chatInputEl.addEventListener('input', () => {
+  if (!chatReady) return;                // key still not derived
+
+  const now = Date.now();
+  if (now - lastTypeSent > TYPING_DEBOUNCE) {
+    socket.emit('typing', { to: currentChatFriend, typing: true });
+    lastTypeSent = now;
+  }
+
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    socket.emit('typing', { to: currentChatFriend, typing: false });
+  }, TYPING_TIMEOUT);
+});
+
+// 2-b.  INCOMING  – toggle the indicator -------------------------
+socket.on('typing', data => {
+  if (data.from !== currentChatFriend) return;
+
+  if (data.typing) {
+    typingIndicatorEl.classList.remove('d-none');
+    // keep it visible for at most 3 s even if the "stop" packet is lost
+    clearTimeout(typingIndicatorEl._hideTmr);
+    typingIndicatorEl._hideTmr = setTimeout(
+      () => typingIndicatorEl.classList.add('d-none'),
+      3000
+    );
+  } else {
+    typingIndicatorEl.classList.add('d-none');
+  }
+});
+
 
 // Join personal room on connect
 socket.on('connect', () => socket.emit('join_room'));

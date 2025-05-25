@@ -118,20 +118,11 @@ def get_messages(friend_public_id):
     ).first()
     if not friend:
         return jsonify({"error": "User not found"}), 404
-    # Ensure friendship exists and is accepted
-    friendship = models.Friendship.query.filter(
-        (
-            (models.Friendship.user_id == current_user.id)
-            & (models.Friendship.friend_id == friend.id)
-            & (models.Friendship.status == "accepted")
-        )
-        | (
-            (models.Friendship.user_id == friend.id)
-            & (models.Friendship.friend_id == current_user.id)
-            & (models.Friendship.status == "accepted")
-        )
-    ).first()
-    if not friendship:
+
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+        0
+    ]
+    if friendship_status != "accepted":
         return jsonify({"error": "No friendship with this user"}), 403
     # Query last N messages between users (both directions)
     msgs = (
@@ -163,8 +154,7 @@ def get_messages(friend_public_id):
 
 
 @api.route("/user/<int:uid>/stats/reading", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 5, make_cache_key=make_cache_key)  # Cached for 5 minutes
-@decorators.api_login_required
+@extensions.cache.cached(timeout=60 * 15)  # Cached for 15 minutes
 def reading_stats(uid):
     user = extensions.db.session.get(models.User, uid)
     if not user:

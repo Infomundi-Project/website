@@ -4,13 +4,6 @@
   margin-bottom: 20px;
 }
 
-.maximus-summary-header img {
-  max-width: 85px;
-  height: auto;
-  border-radius: 10px;
-  margin-right: 10px;
-}
-
 .maximus-summary-content-placeholder {
   display: none;
   position: relative;

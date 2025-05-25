@@ -70,27 +70,14 @@
     href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}">
   <link rel="stylesheet"
     href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/chat.css') }}">
   {% block header %}
   {% endblock %}
   <!-- Stylesheets/Website -->
   {% assets "css_base" %}
   <link rel="stylesheet" href="{{ ASSET_URL }}">
   {% endassets %}
-  <style>
-    /* Hide Google’s floating banner and watermark */
-    .skiptranslate {
-      display: none !important;
-    }
-
-    body {
-      top: 0 !important;
-    }
-
-    .goog-logo-link,
-    .goog-te-gadget {
-      display: none !important;
-    }
-  </style>
   <title>Infomundi - {% block title %}Home{% endblock %}</title>
   {% block styles %} {% endblock %}
 </head>
@@ -725,26 +712,61 @@
     </div>
 
 
-<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+
+
+
+
+
+<!-- Chat modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel">
   <div class="modal-dialog modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="chatModalLabel">Chat with <span id="chatFriendName"></span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content shadow-lg border-0">
+
+      <!-- header -->
+      <div class="modal-header bg-primary text-white align-items-center">
+        <h5 class="modal-title d-flex align-items-center gap-2 mb-0" id="chatModalLabel">
+          <i class="fa-solid fa-comment-dots"></i>
+          <span id="chatFriendName"></span>
+          <span class="badge bg-success d-flex align-items-center gap-1"
+                data-bs-toggle="tooltip" data-bs-placement="top" title="This chat is encrypted end-to-end. It means that only you and the other end (your friend) have access to the content of the messages. No third party, including Infomundi's staff, can audit this conversation. Enjoy your privacy!">
+            <i class="fa-solid fa-lock"></i> E2EE
+          </span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <!-- Messages list -->
-        <ul id="chatMessages" class="list-unstyled mb-0" style="max-height: 300px; overflow-y: auto;">
-          <!-- Messages will be appended here -->
-        </ul>
+
+      <!-- message list -->
+      <div class="modal-body p-0">
+        <ul id="chatMessages"
+    class="list-unstyled p-3 mb-0 overflow-auto">
+  <!-- bubbles appear here -->
+  <li id="typingIndicator" class="text-muted small d-none">
+    <em><i class="fa-solid fa-ellipsis fa-beat-fade"></i> typing…</em>
+  </li>
+</ul>
+
       </div>
-      <div class="modal-footer">
-        <input type="text" id="chatInput" class="form-control me-2" placeholder="Type a message..." autocomplete="off">
-        <button id="sendChatBtn" class="btn btn-primary">Send</button>
+
+      <!-- composer -->
+      <div class="modal-footer bg-secondary-subtle">
+        <div class="input-group">
+          <input id="chatInput" type="text" class="form-control" placeholder="Type a message…"
+                 autocomplete="off">
+          <button id="sendChatBtn" class="btn btn-primary" type="button">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
+
+
+
+
+
 
 
 
@@ -1159,6 +1181,8 @@
 
 
   <script nonce="{{ nonce }}">
+    window.currentUserId = {{ current_user.id if current_user.is_authenticated else '' }}
+    window.currentUserPublicId = "{{ current_user.get_public_id() if current_user.is_authenticated else '' }}"
     window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
     window.currentUserAvatarUrl =
       "{{ current_user.avatar_url if current_user.is_authenticated else '/static/img/avatar.webp' }}";

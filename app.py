@@ -26,6 +26,8 @@ from website_scripts import (
     hashing_util,
     qol_util,
     models,
+    friends_util,
+    notifications,
 )
 from views import views
 from auth import auth
@@ -76,9 +78,7 @@ extensions.oauth.init_app(app)
 # Rate Limiting
 extensions.limiter.init_app(app)
 
-socketio = SocketIO(
-    app, cors_allowed_origins="*"
-)  # Allow appropriate origins
+socketio = SocketIO(app, cors_allowed_origins="*")  # Allow appropriate origins
 
 
 @socketio.on("connect")
@@ -99,50 +99,6 @@ def handle_disconnect():
         leave_room(room)
 
 
-@socketio.on("init_chat")
-def handle_init_chat(data):
-    """
-    Receive a public key from the sender to initiate key exchange.
-    `data`: {'to': <friend_public_id>, 'pub': <sender_public_key_base64>}
-    Forwards the public key to the intended friend if online.
-    """
-    if not current_user.is_authenticated:
-        return  # security check, should not happen if connect handled
-    friend_uuid = data.get("to")
-    public_key = data.get("pub")
-    # Look up the target user by public UUID
-    friend = models.User.query.filter_by(
-        public_id=security_util.uuid_string_to_bytes(friend_uuid)
-    ).first()
-    if not friend:
-        return  # invalid user id
-    # Verify that current_user and friend are friends (friendship accepted)
-    friendship = models.Friendship.query.filter(
-        (
-            (models.Friendship.user_id == current_user.id)
-            & (models.Friendship.friend_id == friend.id)
-            & (models.Friendship.status == "accepted")
-        )
-        | (
-            (models.Friendship.user_id == friend.id)
-            & (models.Friendship.friend_id == current_user.id)
-            & (models.Friendship.status == "accepted")
-        )
-    ).first()
-    if not friendship:
-        emit(
-            "error", {"message": "Friendship not found"}, room=f"user_{current_user.id}"
-        )
-        return
-    # Forward the initiator's public key to the friend if they are online
-    emit(
-        "init_chat",
-        {"from": current_user.get_public_id(), "pub": public_key},
-        room=f"user_{friend.id}",
-    )
-    # (If friend is offline, this event will queue until they connect, or could be saved to DB if implementing offline messaging.)
-
-
 @socketio.on("send_message")
 def handle_send_message(data):
     """
@@ -159,32 +115,21 @@ def handle_send_message(data):
     ).first()
     if not friend:
         return
-    # Ensure users are friends
-    friendship = models.Friendship.query.filter(
-        (
-            (models.Friendship.user_id == current_user.id)
-            & (models.Friendship.friend_id == friend.id)
-            & (models.Friendship.status == "accepted")
-        )
-        | (
-            (models.Friendship.user_id == friend.id)
-            & (models.Friendship.friend_id == current_user.id)
-            & (models.Friendship.status == "accepted")
-        )
-    ).first()
-    if not friendship:
-        emit(
-            "error",
-            {"message": "Cannot send message to non-friend."},
-            room=f"user_{current_user.id}",
-        )
+
+    # Makes sure the users are friends
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+        0
+    ]
+    if friendship_status != "accepted":
         return
+
     # Store the encrypted message in the database
     new_msg = models.Message(
         sender_id=current_user.id, receiver_id=friend.id, content_encrypted=ciphertext
     )
     extensions.db.session.add(new_msg)
     extensions.db.session.commit()
+    notifications.post_webhook("sending message")
     # Emit the message to the receiver's room for real-time delivery
     emit(
         "receive_message",
@@ -193,6 +138,37 @@ def handle_send_message(data):
             "message": ciphertext,
             "timestamp": new_msg.timestamp.isoformat(),
         },
+        room=f"user_{friend.id}",
+    )
+
+
+@socketio.on("typing")
+def handle_typing(data):
+    """
+    data = {'to': <friend_public_id>, 'typing': bool}
+    Forward the typing signal to the recipient’s personal room.
+    """
+    if not current_user.is_authenticated:
+        return
+
+    friend_uuid = data.get("to")
+    is_typing = bool(data.get("typing", True))
+
+    friend = models.User.query.filter_by(
+        public_id=security_util.uuid_string_to_bytes(friend_uuid)
+    ).first()
+    if not friend:
+        return
+
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+        0
+    ]
+    if friendship_status != "accepted":
+        return
+
+    emit(
+        "typing",
+        {"from": current_user.get_public_id(), "typing": is_typing},
         room=f"user_{friend.id}",
     )
 

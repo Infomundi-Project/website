@@ -1,5 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_
+from datetime import datetime
 
 from . import extensions, models
 
@@ -58,6 +59,7 @@ def accept_friend_request(user_id: int, friend_id: int) -> bool:
         return False
 
     friendship.status = "accepted"
+    friendship.accepted_at = datetime.now()
     extensions.db.session.commit()
     return True
 
@@ -174,6 +176,7 @@ def get_friends_list(user_id: int) -> list:
     return sent_friends + received_friends
 
 
+@extensions.cache.memoize(timeout=60 * 1)  # 1 minute
 def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
     """
     Determines the friendship status between the current user and the profile user.

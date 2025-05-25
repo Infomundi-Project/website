@@ -29,6 +29,22 @@ def get_anonymous_user() -> object:
     return anonymous_user
 
 
+def create_user_in_database(username: str = "", email: str = "", password: str = ""):
+    user = models.User(
+        username=username if username else "",
+        public_id=security_util.generate_uuid_bytes(),
+        email_fingerprint=hashing_util.generate_hmac_signature(
+            "anonymous@anonymous.com", as_bytes=True
+        ),
+        email_encrypted=security_util.encrypt("anonymous@anonymous.com"),
+        password=hashing_util.string_to_argon2_hash(config.SECRET_KEY),
+        is_enabled=True,
+        role="official",
+    )
+    extensions.db.session.commit()
+    extensions.db.session.add(user)
+
+
 def serialize_comment_tree(comment) -> dict:
     return {
         "id": comment.id,

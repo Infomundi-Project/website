@@ -145,3 +145,16 @@ body {
     height: auto;
   }
 }
+
+.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-logo-link,
+.goog-te-gadget {
+  display: none !important;
+}
