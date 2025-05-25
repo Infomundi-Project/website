@@ -127,20 +127,24 @@ def get_messages(friend_public_id):
     
     # Query last N messages between users (both directions)
     msgs = (
-        models.Message.query.filter(
+        models.Message.query
+          .filter(
             (
-                (models.Message.sender_id == current_user.id)
-                & (models.Message.receiver_id == friend.id)
+              (models.Message.sender_id   == current_user.id)
+              & (models.Message.receiver_id == friend.id)
             )
             | (
-                (models.Message.sender_id == friend.id)
-                & (models.Message.receiver_id == current_user.id)
+              (models.Message.sender_id   == friend.id)
+              & (models.Message.receiver_id == current_user.id)
             )
-        )
-        .order_by(models.Message.timestamp.asc())
-        .limit(50)
-        .all()
+          )
+          .order_by(models.Message.timestamp.desc())   # ← newest first
+          .limit(50)
+          .all()
     )
+
+    msgs.reverse()
+
     # Prepare response with ciphertexts
     messages_data = [
         {

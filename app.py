@@ -140,6 +140,7 @@ def handle_send_message(data):
         },
         room=f"user_{friend.id}",
     )
+    return {'status': 'ok'}
 
 
 @socketio.on("typing")
