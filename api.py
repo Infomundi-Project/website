@@ -124,6 +124,7 @@ def get_messages(friend_public_id):
     ]
     if friendship_status != "accepted":
         return jsonify({"error": "No friendship with this user"}), 403
+    
     # Query last N messages between users (both directions)
     msgs = (
         models.Message.query.filter(

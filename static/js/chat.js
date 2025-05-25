@@ -47,6 +47,49 @@ const chatInputEl      = document.getElementById('chatInput');
 const sendChatBtn      = document.getElementById('sendChatBtn');
 const bsChatModal      = new bootstrap.Modal(chatModalEl, {});
 
+// ---------------- util ----------------
+function scrollToBottom () {
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+}
+
+// ----------------------------------------------------
+// simple cache of friend names (fill this from your
+// existing friends list, sidebar … however you prefer)
+const friendNames = {};   // e.g.  friendNames[uuid] = "Alice"
+
+// helper ------------------------------------------------
+function showChatToast (friendId) {
+  const name = friendNames[friendId] || 'Someone';
+
+  // toast markup
+  const toastEl = document.createElement('div');
+  toastEl.className = 'toast align-items-center text-bg-primary border-0';
+  toastEl.role = 'alert';
+  toastEl.ariaLive = 'assertive';
+  toastEl.ariaAtomic = 'true';
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fa-solid fa-comment-dots me-1"></i>
+        You received a new message from <strong>${name}</strong>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>`;
+
+  // clicking the toast opens the chat
+  toastEl.addEventListener('click', () => {
+    bootstrap.Toast.getOrCreateInstance(toastEl).hide();   // optional
+    window.openChat(friendId, name);
+  });
+
+  // add to container & show
+  document.getElementById('chatToastContainer').appendChild(toastEl);
+  bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 7000 }).show();
+}
+
+
+
 // Function to open chat: derive once, decrypt instantly
 window.openChat = async function(friendPublicId, friendName) {
   currentChatFriend = friendPublicId;
@@ -110,7 +153,9 @@ window.openChat = async function(friendPublicId, friendName) {
     for (let msg of messages) {
       appendEncryptedMessage(msg.ciphertext, msg.from === friendPublicId ? 'friend' : 'me');
     }
+
     decryptPendingMessages();
+    scrollToBottom();        // history + early packets visible
 
   } catch (err) {
     console.error('Error setting up E2EE', err);
@@ -137,7 +182,7 @@ function appendEncryptedMessage (ciphertext, sender) {
 
   chatMessagesEl.insertBefore(li, typingIndicatorEl);
   typingIndicatorEl.classList.add('d-none');   // hide if it was shown
-  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  scrollToBottom();        // every new bubble
 }
 
 // 2. Write into the bubble after decryption
@@ -164,12 +209,23 @@ async function decryptPendingMessages () {
       }
     }
   }
+  scrollToBottom();      // bubble may have grown in height
 }
 
 
 socket.on('receive_message', data => {
-  const { from, message } = data;
-  if (from !== currentChatFriend) return;   // ok
+  const { from, fromName, message } = data;
+  friendNames[from] = fromName;    // cache it
+  const modalOpen = chatModalEl.classList.contains('show');
+  
+  // 1) if the message is for a different conversation   → toast
+  // 2) if it’s for the current conversation but the modal is hidden → toast
+  // 3) otherwise (active chat in view)                   → no toast
+  if (from !== currentChatFriend || !modalOpen) {
+    showChatToast(from);
+  }
+  
+  if (from !== currentChatFriend) return;   // don’t put bubbles in the wrong chat
 
   appendEncryptedMessage(message, 'friend');
 

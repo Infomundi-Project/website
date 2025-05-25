@@ -129,12 +129,12 @@ def handle_send_message(data):
     )
     extensions.db.session.add(new_msg)
     extensions.db.session.commit()
-    notifications.post_webhook("sending message")
     # Emit the message to the receiver's room for real-time delivery
     emit(
         "receive_message",
         {
             "from": current_user.get_public_id(),
+            "fromName": current_user.username,
             "message": ciphertext,
             "timestamp": new_msg.timestamp.isoformat(),
         },

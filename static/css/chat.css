@@ -1,4 +1,7 @@
-/* Container alignment */
+#chatMessages {
+  max-height: 600px;
+}
+
 #chatMessages .me     { text-align: right; }
 #chatMessages .friend { text-align: left;  }
 
