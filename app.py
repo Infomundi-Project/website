@@ -125,7 +125,10 @@ def handle_send_message(data):
 
     # Store the encrypted message in the database
     new_msg = models.Message(
-        sender_id=current_user.id, receiver_id=friend.id, content_encrypted=ciphertext
+        sender_id=current_user.id,
+        receiver_id=friend.id,
+        content_encrypted=ciphertext,
+        parent_id=data.get("parent_id"),
     )
     extensions.db.session.add(new_msg)
     extensions.db.session.commit()
@@ -136,7 +139,12 @@ def handle_send_message(data):
             "from": current_user.get_public_id(),
             "fromName": current_user.username,
             "message": ciphertext,
+            "messageId": new_msg.id,
             "timestamp": new_msg.timestamp.isoformat(),
+            "reply_to": {
+                "id": new_msg.parent_id,
+                "previewText": new_msg.content_encrypted,
+            },
         },
         room=f"user_{friend.id}",
     )

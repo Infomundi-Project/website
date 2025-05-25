@@ -144,16 +144,24 @@ def get_messages(friend_public_id):
 
     msgs.reverse()
 
-    # Prepare response with ciphertexts
-    messages_data = [
-        {
-            "from": msg.sender.get_public_id(),
-            "to": msg.receiver.get_public_id(),
-            "ciphertext": msg.content_encrypted,
-            "timestamp": msg.timestamp.isoformat(),
-        }
-        for msg in msgs
-    ]
+    messages_data = []
+    for msg in msgs:
+        preview = None
+        if msg.parent_id:
+            preview = msg.replied_to.content_encrypted
+        messages_data.append(
+            {
+                "id": msg.id,
+                "from": msg.sender.get_public_id(),
+                "ciphertext": msg.content_encrypted,
+                "timestamp": msg.timestamp.isoformat(),
+                "reply_to": (
+                    {"id": msg.replied_to.id, "previewText": preview}
+                    if preview
+                    else None
+                ),
+            }
+        )
     return jsonify({"messages": messages_data})
 
 

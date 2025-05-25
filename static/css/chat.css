@@ -5,6 +5,16 @@
 #chatMessages .me     { text-align: right; }
 #chatMessages .friend { text-align: left;  }
 
+.chat-quote {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-bottom: 0.25em;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Bubble look */
 .chat-bubble {
   display: inline-block;

@@ -607,6 +607,9 @@ class Message(db.Model):
     content_encrypted = db.Column(db.Text, nullable=False)  # ciphertext (e.g. Base64)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    parent_id = db.Column(db.Integer, db.ForeignKey("messages.id"), nullable=True)
+    replied_to = db.relationship("Message", remote_side=[id], uselist=False)
+
     # Relationships (for convenience, if needed)
     sender = db.relationship(
         "User", foreign_keys=[sender_id], backref="sent_messages", lazy=True
