@@ -9,10 +9,16 @@
   font-size: 0.85em;
   opacity: 0.8;
   margin-bottom: 0.25em;
-  max-width: 80%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* fade‐in yellow highlight, then fade out */
+.reply-highlight {
+  animation: highlightFade 1.5s ease-out;
+}
+@keyframes highlightFade {
+  0%   { background-color: rgba(255, 255,   0, 0.6); }
+  50%  { background-color: rgba(255, 255,   0, 0.3); }
+  100% { background-color: transparent; }
 }
 
 /* Bubble look */

@@ -97,29 +97,21 @@ def update_pubkey():
     return "", 204
 
 
-@api.route("/user/<friend_uuid>/pubkey")
+@api.route("/user/<friend_id>/pubkey")
 @decorators.api_login_required
-def get_pubkey(friend_uuid):
-    user = models.User.query.filter_by(
-        public_id=security_util.uuid_string_to_bytes(friend_uuid)
-    ).first_or_404()
-    fs_status = friends_util.get_friendship_status(current_user.id, user.id)[0]
+def get_pubkey(friend_id):
+    fs_status = friends_util.get_friendship_status(current_user.id, friend_id)[0]
     if fs_status != "accepted":
         abort(403)
-    return jsonify(publicKey=user.public_key_jwk)
+    friend = extensions.db.session.get(models.User, friend_id)
+    return jsonify(publicKey=friend.public_key_jwk)
 
 
-@api.route("/user/<friend_public_id>/messages", methods=["GET"])
+@api.route("/user/<friend_id>/messages", methods=["GET"])
 @decorators.api_login_required
-def get_messages(friend_public_id):
+def get_messages(friend_id):
     """Get recent messages (encrypted) between current user and the specified friend."""
-    friend = models.User.query.filter_by(
-        public_id=security_util.uuid_string_to_bytes(friend_public_id)
-    ).first()
-    if not friend:
-        return jsonify({"error": "User not found"}), 404
-
-    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend_id)[
         0
     ]
     if friendship_status != "accepted":
@@ -130,10 +122,10 @@ def get_messages(friend_public_id):
         models.Message.query.filter(
             (
                 (models.Message.sender_id == current_user.id)
-                & (models.Message.receiver_id == friend.id)
+                & (models.Message.receiver_id == friend_id)
             )
             | (
-                (models.Message.sender_id == friend.id)
+                (models.Message.sender_id == friend_id)
                 & (models.Message.receiver_id == current_user.id)
             )
         )
@@ -152,7 +144,7 @@ def get_messages(friend_public_id):
         messages_data.append(
             {
                 "id": msg.id,
-                "from": msg.sender.get_public_id(),
+                "from": msg.sender.id,
                 "ciphertext": msg.content_encrypted,
                 "timestamp": msg.timestamp.isoformat(),
                 "reply_to": (
@@ -655,7 +647,7 @@ def get_friends():
         {
             "username": friend.username,
             "display_name": friend.display_name,
-            "user_id": friend.get_public_id(),
+            "user_id": friend.id,
             "avatar_url": friend.avatar_url,
             "level": friend.level,
             "is_online": friend.is_online,

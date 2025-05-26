@@ -51,6 +51,7 @@ const chatFriendNameEl = document.getElementById('chatFriendName');
 const chatMessagesEl = document.getElementById('chatMessages');
 const chatInputEl = document.getElementById('chatInput');
 const sendChatBtn = document.getElementById('sendChatBtn');
+const chatModalBody = document.getElementById('chatModalBody');
 const bsChatModal = new bootstrap.Modal(chatModalEl, {});
 
 
@@ -68,12 +69,15 @@ function startReplying({ id, previewText }) {
 document.getElementById('cancelReplyBtn')
   .addEventListener('click', () => {
     currentReply = null;
-    document.getElementById('replyPreview').classList.add('d-none');
+    let preview = document.getElementById('replyPreview')
+    if (preview) {
+      preview.classList.add('d-none');
+    }
   });
 
 // ---------------- util ----------------
 function scrollToBottom() {
-  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  chatModalBody.scrollTop = chatModalBody.scrollHeight;
 }
 
 const friendNames = {}; // e.g.  friendNames[uuid] = "Alice"
@@ -191,7 +195,7 @@ window.openChat = async function(friendPublicId, friendName) {
     for (let msg of messages) {
       appendEncryptedMessage(
         msg.ciphertext,
-        msg.from === friendPublicId ? 'friend' : 'me',
+        msg.from == friendPublicId ? 'friend' : 'me',
         msg.reply_to,
         msg.id                    // ← newly added
       );
@@ -216,7 +220,8 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
   li.className = sender;               
   li.dataset.ciphertext = ciphertext;
   if (messageId != null) {
-    li.dataset.messageId = messageId;  // now li.dataset.messageId === "123"
+    li.dataset.messageId = messageId;
+    li.id = `msg-${messageId}`;
   }
   if (replyTo && replyTo.id) {
     // Try to find the already‐displayed parent message bubble
@@ -230,11 +235,28 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
       const quote = document.createElement('div');
       quote.className = 'chat-quote text-truncate';
       quote.textContent = snippet;
+
+      // make it obvious it’s clickable
+      quote.style.cursor = 'pointer';
+
+      // on click, jump to the original
+      quote.addEventListener('click', () => {
+        const target = document.getElementById(`msg-${replyTo.id}`);
+        if (target) {
+          // scroll the modal-body so that target is centered
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // briefly flash a highlight
+          target.classList.add('reply-highlight');
+          setTimeout(() => target.classList.remove('reply-highlight'), 1500);
+        }
+      });
+
       quote.dataset.replyToId = replyTo.id;
       // we’ll render this _before_ the chat-text
       const bubble = document.createElement('div');
       bubble.classList.add('chat-bubble',
-        sender==='friend' ? 'bg-secondary' : 'bg-primary',
+        sender=='friend' ? 'bg-secondary' : 'bg-primary',
         'text-white');
       bubble.appendChild(quote);
       const textSpan = document.createElement('span');
@@ -251,7 +273,7 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
   // No reply snippet; previous flow:
   const bubble = document.createElement('div');
   bubble.classList.add('chat-bubble',
-    sender==='friend' ? 'bg-secondary' : 'bg-primary',
+    sender=='friend' ? 'bg-secondary' : 'bg-primary',
     'text-white');
   const textSpan = document.createElement('span');
   textSpan.className = 'chat-text';
@@ -260,6 +282,7 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
   li.appendChild(bubble);
   chatMessagesEl.insertBefore(li, typingIndicatorEl);
   scrollToBottom();
+  return li;
 }
 
 
@@ -267,7 +290,7 @@ async function decryptPendingMessages() {
   if (!chatReady) return;
   for (let li of chatMessagesEl.querySelectorAll('li')) {
     const textSpan = li.querySelector('.chat-text');
-    if (!textSpan || textSpan.textContent !== '[Encrypted message]') continue;
+    if (!textSpan || textSpan.textContent != '[Encrypted message]') continue;
 
     try {
       const bytes = Uint8Array.from(atob(li.dataset.ciphertext), c=>c.charCodeAt(0));
@@ -306,11 +329,11 @@ socket.on('receive_message', data => {
   // 1) if the message is for a different conversation   → toast
   // 2) if it’s for the current conversation but the modal is hidden → toast
   // 3) otherwise (active chat in view)                   → no toast
-  if (from !== currentChatFriend || !modalOpen) {
+  if (from != currentChatFriend || !modalOpen) {
     showChatToast(from);
   }
 
-  if (from !== currentChatFriend) return; // don’t put bubbles in the wrong chat
+  if (from != currentChatFriend) return; // don’t put bubbles in the wrong chat
 
   // on receive
   appendEncryptedMessage(
@@ -354,24 +377,29 @@ async function sendCurrentMessage() {
     };
 
     // on send
-appendEncryptedMessage(
-  ctB64,
-  'me',
-  currentReply
-);
+const myLi = appendEncryptedMessage(ctB64, 'me', currentReply);
 
     // reset reply state
     currentReply = null;
-    document.getElementById('replyPreview').classList.add('d-none');
+    let preview = document.getElementById('replyPreview')
+    if (preview) {
+      preview.classList.add('d-none');
+    }
 
     // wrap emit in a Promise so we retry on failure
     try {
-      await new Promise((resolve, reject) => {
-        // third arg is the ack callback from server
-        socket.emit('send_message', payload, (ack) => {
-          if (ack && ack.status === 'ok') return resolve();
-          reject(new Error('server NACK'));
-        });
+  await new Promise((resolve, reject) => {
+    socket.emit('send_message', payload, (ack) => {
+      if (!ack || ack.status != 'ok') {
+        return reject(new Error('server NACK'));
+      }
+      // tag our LI with the real ID and anchor id
+      if (myLi) {
+        myLi.dataset.messageId = ack.messageId;
+        myLi.id = `msg-${ack.messageId}`;
+      }
+      resolve();
+    });
 
         // also time-out if no response after X seconds
         setTimeout(() => reject(new Error('ack timeout')), 5000);
@@ -391,7 +419,7 @@ appendEncryptedMessage(
 // Bind send handlers
 sendChatBtn.addEventListener('click', sendCurrentMessage);
 chatInputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
+  if (e.key == 'Enter') {
     e.preventDefault();
     sendCurrentMessage();
   }
@@ -431,7 +459,7 @@ chatMessagesEl.addEventListener('contextmenu', e => {
 
 // INCOMING  – toggle the indicator -------------------------
 socket.on('typing', data => {
-  if (data.from !== currentChatFriend) return;
+  if (data.from != currentChatFriend) return;
 
   if (data.typing) {
     typingIndicatorEl.classList.remove('d-none');
@@ -474,7 +502,7 @@ socket.on('reconnect', async (attempt) => {
     for (let msg of messages) {
       appendEncryptedMessage(
   msg.ciphertext,
-  msg.from===friendId ? 'friend' : 'me',
+  msg.from==friendId ? 'friend' : 'me',
   msg.reply_to  // or null
 );
     }

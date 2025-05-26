@@ -365,7 +365,7 @@
                 </button>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#userContactInfoModal">Contact Info</a></li>
-                  <li><a class="dropdown-item" href="#">Send Message</a></li>
+                  <li><a class="dropdown-item send-message-dropdown" data-user-id="{{ user.id }}" data-username="{{ user.username }}" href="#" id="sendMessageDropdown">Send Message</a></li>
                   <li><a class="dropdown-item" href="#">Block</a></li>
                   <li>
                     <a
@@ -1053,6 +1053,12 @@ async function loadReadingStats() {
 
 document.addEventListener("DOMContentLoaded", loadReadingStats);
 </script>
+
+<script nonce="{{ nonce }}">
+
+  const sendMessageDropdown = document.getElementById('sendMessageDropdown');
+  sendMessageDropdown.addEventListener('click', (e) => {
+  openChat(sendMessageDropdown.dataset.userId, sendMessageDropdown.dataset.username);});</script>
 
 <script nonce="{{ nonce }}"
   src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>

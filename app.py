@@ -84,11 +84,11 @@ socketio = SocketIO(app, cors_allowed_origins="*")  # Allow appropriate origins
 @socketio.on("connect")
 def handle_connect():
     """On client connect, join a personal room for private messaging."""
-    if current_user.is_authenticated:
-        room = f"user_{current_user.id}"
-        join_room(room)
-    else:
+    if not current_user.is_authenticated:
         return False  # Reject connection if not logged in
+        
+    join_room(f"user_{current_user.id}")
+    return {"status": "ok"}
 
 
 @socketio.on("disconnect")
@@ -108,27 +108,25 @@ def handle_send_message(data):
     """
     if not current_user.is_authenticated:
         return
-    friend_uuid = data.get("to")
+    friend_id = data.get("to")
     ciphertext = data.get("message")
-    friend = models.User.query.filter_by(
-        public_id=security_util.uuid_string_to_bytes(friend_uuid)
-    ).first()
-    if not friend:
-        return
 
-    # Makes sure the users are friends
-    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+    if len(ciphertext) > 3000:
+        return {"error": "Message too long"}
+
+    # Because you can't send a message to someone that isn't your friend
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend_id)[
         0
     ]
     if friendship_status != "accepted":
         return
 
-    # Store the encrypted message in the database
+    # Because we need a message history
     new_msg = models.Message(
         sender_id=current_user.id,
-        receiver_id=friend.id,
-        content_encrypted=ciphertext,
-        parent_id=data.get("parent_id"),
+        receiver_id=friend_id,
+        content_encrypted=ciphertext,  # The server never receives any cleartext messages
+        parent_id=data.get("parent_id"),  # Because it can be a reply to a previous message
     )
     extensions.db.session.add(new_msg)
     extensions.db.session.commit()
@@ -136,7 +134,7 @@ def handle_send_message(data):
     emit(
         "receive_message",
         {
-            "from": current_user.get_public_id(),
+            "from": current_user.id,
             "fromName": current_user.username,
             "message": ciphertext,
             "messageId": new_msg.id,
@@ -146,9 +144,9 @@ def handle_send_message(data):
                 "previewText": new_msg.content_encrypted,
             },
         },
-        room=f"user_{friend.id}",
+        room=f"user_{friend_id}",
     )
-    return {"status": "ok"}
+    return {"status": "ok", "messageId": new_msg.id}
 
 
 @socketio.on("typing")
@@ -160,16 +158,10 @@ def handle_typing(data):
     if not current_user.is_authenticated:
         return
 
-    friend_uuid = data.get("to")
+    friend_id = data.get("to")
     is_typing = bool(data.get("typing", True))
 
-    friend = models.User.query.filter_by(
-        public_id=security_util.uuid_string_to_bytes(friend_uuid)
-    ).first()
-    if not friend:
-        return
-
-    friendship_status = friends_util.get_friendship_status(current_user.id, friend.id)[
+    friendship_status = friends_util.get_friendship_status(current_user.id, friend_id)[
         0
     ]
     if friendship_status != "accepted":
@@ -177,8 +169,8 @@ def handle_typing(data):
 
     emit(
         "typing",
-        {"from": current_user.get_public_id(), "typing": is_typing},
-        room=f"user_{friend.id}",
+        {"from": current_user.id, "typing": is_typing},
+        room=f"user_{friend_id}",
     )
 
 

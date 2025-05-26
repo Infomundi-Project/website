@@ -177,13 +177,13 @@ def get_friends_list(user_id: int) -> list:
 
 
 @extensions.cache.memoize(timeout=60 * 1)  # 1 minute
-def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
+def get_friendship_status(user_id: int, friend_id: int) -> tuple:
     """
     Determines the friendship status between the current user and the profile user.
 
     Parameters:
-        current_user_id (int): The user ID of the current user.
-        profile_user_id (int): The user ID of the profile user.
+        user_id (int): The user ID of the current user.
+        friend_id (int): The user ID of the friend.
 
     Returns:
         tuple: A tuple containing the friendship status and a boolean indicating
@@ -196,12 +196,12 @@ def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
     friendship = models.Friendship.query.filter(
         or_(
             and_(
-                models.Friendship.user_id == current_user_id,
-                models.Friendship.friend_id == profile_user_id,
+                models.Friendship.user_id == user_id,
+                models.Friendship.friend_id == friend_id,
             ),
             and_(
-                models.Friendship.user_id == profile_user_id,
-                models.Friendship.friend_id == current_user_id,
+                models.Friendship.user_id == friend_id,
+                models.Friendship.friend_id == user_id,
             ),
         )
     ).first()
@@ -209,7 +209,7 @@ def get_friendship_status(current_user_id: int, profile_user_id: int) -> tuple:
     if friendship and friendship.status == "pending":
         # Check if the pending request was sent by the current user
         pending_friend_request_sent_by_current_user = (
-            friendship.user_id == current_user_id
+            friendship.user_id == user_id
         )
 
     return (
