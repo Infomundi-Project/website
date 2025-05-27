@@ -31,6 +31,18 @@ body {
   top: 0px !important;
 }
 
+/* 1) Base state: only non-button, non-nav links lose their underline */
+a:not(.btn):not(.nav-link) {
+  text-decoration: none;
+}
+
+/* 2) Hover state: only those same links get the underline back */
+a:not(.btn):not(.nav-link):hover {
+  text-decoration: underline;
+  text-underline-offset: .375em;
+}
+
+
 .nav-link i {
   font-size: 1rem;
 }

@@ -363,7 +363,6 @@
             const a  = document.createElement('a');
             a.href        = `{{ url_for('views.comments') }}?id=${item.story_id}`;
             a.textContent = item.title;
-            a.className = "link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover";
             li.appendChild(a);
             list.appendChild(li);
           });

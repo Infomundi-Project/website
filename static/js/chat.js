@@ -57,10 +57,16 @@ const bsChatModal = new bootstrap.Modal(chatModalEl, {});
 
 let currentReply = null;
 
-function startReplying({ id, previewText }) {
+function startReplying({
+  id,
+  previewText
+}) {
   // previewText already trimmed client-side, but let's be safe:
   const snippet = previewText.slice(0, 100);
-  currentReply = { id, previewText: snippet };
+  currentReply = {
+    id,
+    previewText: snippet
+  };
   const replyBox = document.getElementById('replyPreview');
   replyBox.querySelector('.reply-text').textContent = currentReply.previewText;
   replyBox.classList.remove('d-none');
@@ -119,43 +125,56 @@ function showChatToast(friendId) {
 
 // Function to open chat: derive once, decrypt instantly
 window.openChat = async function(friendPublicId, friendName) {
+
+  // record which friend we're trying to chat with
   currentChatFriend = friendPublicId;
   chatReady = false;
 
-  // Reset UI
+  // First: try fetching their public key
+  let friendJwk;
+
+  try {
+    const res = await fetch(`/api/user/${friendPublicId}/pubkey`, {
+      credentials: 'include'
+    });
+
+    if (res.status === 403) {
+      // they’re not friends → hide any modal & show an error, then stop
+      bsChatModal.hide();
+      alert(`You can’t start a chat with ${friendName}—you’re not friends.`);
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to load public key (status ${res.status})`);
+    }
+
+    ({
+      publicKey: friendJwk
+    } = await res.json());
+  } catch (err) {
+    console.error('Error fetching friend’s public key:', err);
+    // Optionally show a user‐facing error here
+    return;
+  }
+
+  // Only now that we know they’re allowed, set up the UI + modal
   chatFriendNameEl.textContent = friendName;
-
-  // Remove old messages but keep the typing indicator
-  chatMessagesEl
-    .querySelectorAll('li:not(#typingIndicator)')
-    .forEach(li => li.remove());
-
+  chatMessagesEl.querySelectorAll('li:not(#typingIndicator)').forEach(li => li.remove());
   chatInputEl.value = '';
   sendChatBtn.disabled = true;
   chatInputEl.disabled = true;
 
-  // hide any open modal
-  const openModal = document.querySelector('.modal.show');
-  if (openModal) {
-    bootstrap.Modal.getInstance(openModal).hide();
-  }
-
-
   bsChatModal.show();
 
   try {
-    // Load or generate our device keypair
+    // Load/generate our own keypair
     const {
       publicKey: myPub,
       privateKey: myPriv
     } = await getMyKeyPair();
 
-    // Fetch friend’s public JWK
-    const res = await fetch(`/api/user/${friendPublicId}/pubkey`);
-    const {
-      publicKey: friendJwk
-    } = await res.json();
-
+    // Import their key & derive the shared secret
     const friendPub = await window.crypto.subtle.importKey(
       'jwk', friendJwk, {
         name: 'ECDH',
@@ -164,7 +183,6 @@ window.openChat = async function(friendPublicId, friendName) {
       false, []
     );
 
-    // Derive shared AES-GCM key
     const shared = await window.crypto.subtle.deriveKey({
         name: 'ECDH',
         public: friendPub
@@ -176,11 +194,12 @@ window.openChat = async function(friendPublicId, friendName) {
       false,
       ['encrypt', 'decrypt']
     );
+
     chatKeys[friendPublicId] = {
       sharedSecret: shared
     };
 
-    // Enable UI
+    // Enable the UI
     chatReady = true;
     sendChatBtn.disabled = false;
     chatInputEl.disabled = false;
@@ -197,7 +216,7 @@ window.openChat = async function(friendPublicId, friendName) {
         msg.ciphertext,
         msg.from == friendPublicId ? 'friend' : 'me',
         msg.reply_to,
-        msg.id                    // ← newly added
+        msg.id // ← newly added
       );
     }
 
@@ -217,7 +236,7 @@ window.openChat = async function(friendPublicId, friendName) {
  */
 function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = null) {
   const li = document.createElement('li');
-  li.className = sender;               
+  li.className = sender;
   li.dataset.ciphertext = ciphertext;
   if (messageId != null) {
     li.dataset.messageId = messageId;
@@ -244,7 +263,10 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
         const target = document.getElementById(`msg-${replyTo.id}`);
         if (target) {
           // scroll the modal-body so that target is centered
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
 
           // briefly flash a highlight
           target.classList.add('reply-highlight');
@@ -256,7 +278,7 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
       // we’ll render this _before_ the chat-text
       const bubble = document.createElement('div');
       bubble.classList.add('chat-bubble',
-        sender=='friend' ? 'bg-secondary' : 'bg-primary',
+        sender == 'friend' ? 'bg-secondary' : 'bg-primary',
         'text-white');
       bubble.appendChild(quote);
       const textSpan = document.createElement('span');
@@ -273,7 +295,7 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
   // No reply snippet; previous flow:
   const bubble = document.createElement('div');
   bubble.classList.add('chat-bubble',
-    sender=='friend' ? 'bg-secondary' : 'bg-primary',
+    sender == 'friend' ? 'bg-secondary' : 'bg-primary',
     'text-white');
   const textSpan = document.createElement('span');
   textSpan.className = 'chat-text';
@@ -293,22 +315,26 @@ async function decryptPendingMessages() {
     if (!textSpan || textSpan.textContent != '[Encrypted message]') continue;
 
     try {
-      const bytes = Uint8Array.from(atob(li.dataset.ciphertext), c=>c.charCodeAt(0));
-      const iv    = bytes.slice(0, 12);
-      const data  = bytes.slice(12);
-      const buf   = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
+      const bytes = Uint8Array.from(atob(li.dataset.ciphertext), c => c.charCodeAt(0));
+      const iv = bytes.slice(0, 12);
+      const data = bytes.slice(12);
+      const buf = await crypto.subtle.decrypt({
+          name: 'AES-GCM',
+          iv
+        },
         chatKeys[currentChatFriend].sharedSecret,
         data
       );
       textSpan.textContent = new TextDecoder().decode(buf);
       // now that this message is decrypted, update any reply-quotes pointing at it
       const decrypted = textSpan.textContent;
-      const msgId     = li.dataset.messageId;
+      const msgId = li.dataset.messageId;
       if (msgId) {
         chatMessagesEl
           .querySelectorAll(`.chat-quote[data-reply-to-id="${msgId}"]`)
-          .forEach(q => { q.textContent = decrypted.slice(0, 100); });
+          .forEach(q => {
+            q.textContent = decrypted.slice(0, 100);
+          });
       }
     } catch {
       textSpan.textContent = '[Unable to decrypt]';
@@ -337,12 +363,12 @@ socket.on('receive_message', data => {
 
   // on receive
   appendEncryptedMessage(
-      data.message,
-      'friend',
-      data.reply_to,
-      data.messageId           // ← newly sent by the server
-    );
-    decryptPendingMessages();
+    data.message,
+    'friend',
+    data.reply_to,
+    data.messageId // ← newly sent by the server
+  );
+  decryptPendingMessages();
 });
 
 
@@ -377,7 +403,7 @@ async function sendCurrentMessage() {
     };
 
     // on send
-const myLi = appendEncryptedMessage(ctB64, 'me', currentReply);
+    const myLi = appendEncryptedMessage(ctB64, 'me', currentReply);
 
     // reset reply state
     currentReply = null;
@@ -388,18 +414,18 @@ const myLi = appendEncryptedMessage(ctB64, 'me', currentReply);
 
     // wrap emit in a Promise so we retry on failure
     try {
-  await new Promise((resolve, reject) => {
-    socket.emit('send_message', payload, (ack) => {
-      if (!ack || ack.status != 'ok') {
-        return reject(new Error('server NACK'));
-      }
-      // tag our LI with the real ID and anchor id
-      if (myLi) {
-        myLi.dataset.messageId = ack.messageId;
-        myLi.id = `msg-${ack.messageId}`;
-      }
-      resolve();
-    });
+      await new Promise((resolve, reject) => {
+        socket.emit('send_message', payload, (ack) => {
+          if (!ack || ack.status != 'ok') {
+            return reject(new Error('server NACK'));
+          }
+          // tag our LI with the real ID and anchor id
+          if (myLi) {
+            myLi.dataset.messageId = ack.messageId;
+            myLi.id = `msg-${ack.messageId}`;
+          }
+          resolve();
+        });
 
         // also time-out if no response after X seconds
         setTimeout(() => reject(new Error('ack timeout')), 5000);
@@ -451,10 +477,13 @@ chatMessagesEl.addEventListener('contextmenu', e => {
   const li = e.target.closest('li');
   if (!li || !li.dataset.ciphertext) return;
   e.preventDefault();
-  const msgId = li.dataset.messageId;          // now actually defined
+  const msgId = li.dataset.messageId; // now actually defined
   const bubble = li.querySelector('.chat-bubble');
   const originalText = bubble.querySelector('.chat-text').textContent;
-  startReplying({ id: msgId, previewText: originalText });
+  startReplying({
+    id: msgId,
+    previewText: originalText
+  });
 });
 
 // INCOMING  – toggle the indicator -------------------------
@@ -501,10 +530,10 @@ socket.on('reconnect', async (attempt) => {
       .forEach(li => li.remove());
     for (let msg of messages) {
       appendEncryptedMessage(
-  msg.ciphertext,
-  msg.from==friendId ? 'friend' : 'me',
-  msg.reply_to  // or null
-);
+        msg.ciphertext,
+        msg.from == friendId ? 'friend' : 'me',
+        msg.reply_to // or null
+      );
     }
     decryptPendingMessages();
     scrollToBottom();

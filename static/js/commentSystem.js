@@ -132,10 +132,14 @@
                               <div class="w-100">
                                 <div class="d-flex justify-content-between">
                                   <div>
-                                    <a href="/id/${comment.user.id}" class="text-decoration-none text-reset fw-bold small notranslate">${comment.user.username}</a>
-              ${comment.user.role !== 'user' ? `
-                                    <span class="badge bg-primary p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}
-                                    <br>
+                                      <ul class="list-inline mb-1">
+                                        <li class="list-inline-item fw-bold notranslate me-1"><a href="/id/${comment.user.id}">${comment.user.display_name ? comment.user.display_name : comment.user.username}</a></li>
+                                    
+                                        <li class="list-inline-item text-muted small notranslate me-1" title="Username">@${comment.user.username}</li>
+
+                ${comment.user.role !== 'user' ? `
+                                      <li class="list-inline-item"><span class="badge bg-primary p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}</li>
+                                      </ul>
               ${level > 0 && parentUser ? `
                                       <span class="text-muted small">Replying to 
                                         @<a href="#comment-${comment.parent_id}" class="reply-link text-decoration-none fw-bold">${parentUser.username}</a>, 

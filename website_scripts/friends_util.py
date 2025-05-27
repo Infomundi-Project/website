@@ -208,9 +208,7 @@ def get_friendship_status(user_id: int, friend_id: int) -> tuple:
 
     if friendship and friendship.status == "pending":
         # Check if the pending request was sent by the current user
-        pending_friend_request_sent_by_current_user = (
-            friendship.user_id == user_id
-        )
+        pending_friend_request_sent_by_current_user = friendship.user_id == user_id
 
     return (
         friendship.status if friendship else "not_friends",

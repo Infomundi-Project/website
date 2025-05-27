@@ -86,7 +86,7 @@ def handle_connect():
     """On client connect, join a personal room for private messaging."""
     if not current_user.is_authenticated:
         return False  # Reject connection if not logged in
-        
+
     join_room(f"user_{current_user.id}")
     return {"status": "ok"}
 
@@ -126,7 +126,9 @@ def handle_send_message(data):
         sender_id=current_user.id,
         receiver_id=friend_id,
         content_encrypted=ciphertext,  # The server never receives any cleartext messages
-        parent_id=data.get("parent_id"),  # Because it can be a reply to a previous message
+        parent_id=data.get(
+            "parent_id"
+        ),  # Because it can be a reply to a previous message
     )
     extensions.db.session.add(new_msg)
     extensions.db.session.commit()
@@ -306,8 +308,15 @@ js_base = Bundle(
     "js/autoSubmitCaptcha.js",
     "js/captchaWaitSubmit.js",
     "js/renderFriendsModal.js",
+    "js/automaticTranslation.js",
     filters="jsmin",
     output="gen/base_packed.js",
+)
+js_base_authenticated = Bundle(
+    "js/notificationSystem.js",
+    "js/updateStatus.js",
+    filters="jsmin",
+    output="gen/base_packed_authenticated.js",
 )
 # homepage.html
 js_home = Bundle(
@@ -318,6 +327,15 @@ js_home = Bundle(
     filters="jsmin",
     output="gen/home_packed.js",
 )
+# user_profile.html
+js_profile = Bundle(
+    "js/profile/friendshipButtons.js",
+    "js/profile/lastSeen.js",
+    "js/profile/reportUser.js",
+    "js/profile/userStats.js",
+    filters="jsmin",
+    output="gen/profile_packed.js",
+)
 # news.html
 js_news = Bundle("js/renderStories.js", filters="jsmin", output="gen/news_packed.js")
 
@@ -326,7 +344,8 @@ assets.register("css_base", css_base)
 assets.register("js_base", js_base)
 assets.register("js_home", js_home)
 assets.register("js_news", js_news)
-
+assets.register("js_profile", js_profile)
+assets.register("js_base_authenticated", js_base_authenticated)
 
 @app.context_processor
 def inject_variables():

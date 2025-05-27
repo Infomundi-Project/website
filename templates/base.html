@@ -70,7 +70,7 @@
     href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}">
   <link rel="stylesheet"
     href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
-    <link rel="stylesheet"
+  <link rel="stylesheet"
     href="{{ url_for('static', filename='css/chat.css') }}">
   {% block header %}
   {% endblock %}
@@ -995,7 +995,7 @@
             </li>
           </ul>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 px-0 px-lg-3">
           <div class="p-3 rounded bg-secondary-subtle">
             {% block edit_profile_content %}
             {% endblock %}
@@ -1168,25 +1168,18 @@
   </script>
   {% endif %}
 
-  {% if current_user.is_authenticated %}
-  <script nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/updateStatus.js') }}"></script>
-    <script nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/notificationSystem.js') }}"></script>
-  {% endif %}
-
   {% assets "js_base" %}
   <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
   {% endassets %}
 
-  <script nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/automaticTranslation.js') }}">
-  </script>
-
   {% if current_user.is_authenticated %}
-    <!-- Include the chat client script for logged-in users -->
+  
     <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
     <script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    {% assets "js_base_authenticated" %}
+      <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+  
   {% endif %}
 
 

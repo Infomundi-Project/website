@@ -118,12 +118,10 @@
     <div>
         <h3 class="mt-5">Avatar</h3>
         <hr>
-        <div class="d-flex align-items-center mb-3">
-            <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar" class="rounded me-3" style="width: 184px; height: 184px;">
-            <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar" class="rounded me-3" style="width: 92px; height: 92px;">
-            <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar" class="rounded" style="width: 46px; height: 46px;">
-        </div>
-        <div class="mb-3">
+            <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar" class="rounded me-3" style="width: 10rem; height: auto;">
+            <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar" class="rounded me-3 my-2" style="width: 5rem; height: auto;">
+            <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar" class="rounded" style="width: 2.5rem; height: auto">
+        <div class="my-3">
             <input type="file" accept="image/*" class="form-control w-100 w-lg-50" id="profilePhoto" name="profile_picture">
         </div>
         <small class="text-muted d-block mt-2"><i class="fa-solid fa-file-circle-plus me-1"></i>Maximum size: 2 mb</small>
