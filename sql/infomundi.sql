@@ -417,6 +417,8 @@ CREATE TABLE messages (
     receiver_id INT NOT NULL,
     content_encrypted TEXT NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    read_at DATETIME,
+    delivered_at DATETIME,
     parent_id INT,
     FOREIGN KEY (parent_id) REFERENCES messages(id),
     FOREIGN KEY (sender_id) REFERENCES users(id),

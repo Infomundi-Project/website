@@ -14,8 +14,8 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 from flask_login import current_user, logout_user
 from flask_assets import Environment, Bundle
 from htmlmin import minify as html_minify
+from datetime import timedelta, datetime
 from flask_wtf.csrf import CSRFProtect
-from datetime import timedelta
 from os import path as os_path
 
 from website_scripts import (
@@ -125,6 +125,7 @@ def handle_send_message(data):
     new_msg = models.Message(
         sender_id=current_user.id,
         receiver_id=friend_id,
+        delivered_at=datetime.utcnow(),
         content_encrypted=ciphertext,  # The server never receives any cleartext messages
         parent_id=data.get(
             "parent_id"
@@ -141,6 +142,7 @@ def handle_send_message(data):
             "message": ciphertext,
             "messageId": new_msg.id,
             "timestamp": new_msg.timestamp.isoformat(),
+            "deliveredAt": new_msg.delivered_at.isoformat(),
             "reply_to": {
                 "id": new_msg.parent_id,
                 "previewText": new_msg.content_encrypted,
@@ -173,6 +175,36 @@ def handle_typing(data):
         "typing",
         {"from": current_user.id, "typing": is_typing},
         room=f"user_{friend_id}",
+    )
+
+
+@socketio.on("message_read")
+def handle_message_read(data):
+    """
+    Client tells us “I’ve decrypted & displayed message X”.
+    We look up who sent X, and forward a ‘message_read’ event to them.
+    """
+    if not current_user.is_authenticated:
+        return
+
+    message_id = data.get("messageId")
+    if message_id is None:
+        return
+
+    # Fetch the message and confirm it was indeed sent to the reader
+    msg = extensions.db.session.get(models.Message, message_id)
+    if not msg or msg.receiver_id != current_user.id:
+        return
+
+    if msg.read_at is None:
+        msg.read_at = datetime.utcnow()
+        extensions.db.session.commit()
+
+    # Tell the original sender that X was read
+    emit(
+        "message_read",
+        {"messageId": message_id, "readAt": msg.read_at.isoformat()},
+        room=f"user_{msg.sender_id}",
     )
 
 
@@ -346,6 +378,7 @@ assets.register("js_home", js_home)
 assets.register("js_news", js_news)
 assets.register("js_profile", js_profile)
 assets.register("js_base_authenticated", js_base_authenticated)
+
 
 @app.context_processor
 def inject_variables():

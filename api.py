@@ -147,6 +147,8 @@ def get_messages(friend_id):
                 "from": msg.sender.id,
                 "ciphertext": msg.content_encrypted,
                 "timestamp": msg.timestamp.isoformat(),
+                "deliveredAt": msg.delivered_at and msg.delivered_at.isoformat(),
+                "readAt": msg.read_at and msg.read_at.isoformat(),
                 "reply_to": (
                     {"id": msg.replied_to.id, "previewText": preview}
                     if preview

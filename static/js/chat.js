@@ -216,7 +216,9 @@ window.openChat = async function(friendPublicId, friendName) {
         msg.ciphertext,
         msg.from == friendPublicId ? 'friend' : 'me',
         msg.reply_to,
-        msg.id // ← newly added
+        msg.id,
+        msg.deliveredAt,   // string or null
+        msg.readAt         // string or null
       );
     }
 
@@ -228,19 +230,36 @@ window.openChat = async function(friendPublicId, friendName) {
   }
 };
 
-/**
- * ciphertext: Base64
- * sender: "me" | "friend"
- * replyTo: { id: number, previewText: string } | null
- * messageId: number
- */
-function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = null) {
+
+function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = null, deliveredAt = null, readAt = null) {
   const li = document.createElement('li');
   li.className = sender;
   li.dataset.ciphertext = ciphertext;
   if (messageId != null) {
     li.dataset.messageId = messageId;
     li.id = `msg-${messageId}`;
+  }
+  const bubble = document.createElement('div');
+  bubble.classList.add('chat-bubble',
+    sender === 'friend' ? 'bg-secondary' : 'bg-primary',
+    'text-white',
+    'position-relative',
+    'gap-1'
+  );
+
+  if (sender === 'me') {
+    const badge = document.createElement('span');
+    badge.className = 'badge text-bg-primary position-absolute bottom-0 end-0';
+    const icon = document.createElement('i');
+    icon.className = `status-icon fa-solid small ${
+      readAt
+        ? 'fa-eye'      // read
+        : deliveredAt
+        ? 'fa-check'   // delivered
+        : 'fa-clock'   // pending
+    }`;
+    badge.appendChild(icon);
+    bubble.appendChild(badge);
   }
   if (replyTo && replyTo.id) {
     // Try to find the already‐displayed parent message bubble
@@ -282,7 +301,7 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
         'text-white');
       bubble.appendChild(quote);
       const textSpan = document.createElement('span');
-      textSpan.className = 'chat-text';
+      textSpan.className = 'chat-text p-3';
       textSpan.textContent = '[Encrypted message]';
       bubble.appendChild(textSpan);
       li.appendChild(bubble);
@@ -292,15 +311,11 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
     }
   }
 
-  // No reply snippet; previous flow:
-  const bubble = document.createElement('div');
-  bubble.classList.add('chat-bubble',
-    sender == 'friend' ? 'bg-secondary' : 'bg-primary',
-    'text-white');
   const textSpan = document.createElement('span');
-  textSpan.className = 'chat-text';
+  textSpan.className = 'chat-text p-3';
   textSpan.textContent = '[Encrypted message]';
   bubble.appendChild(textSpan);
+
   li.appendChild(bubble);
   chatMessagesEl.insertBefore(li, typingIndicatorEl);
   scrollToBottom();
@@ -308,39 +323,63 @@ function appendEncryptedMessage(ciphertext, sender, replyTo = null, messageId = 
 }
 
 
+
 async function decryptPendingMessages() {
   if (!chatReady) return;
-  for (let li of chatMessagesEl.querySelectorAll('li')) {
+
+  // grab every bubble that still needs decrypting
+  const pending = chatMessagesEl.querySelectorAll('li[data-ciphertext]');
+
+  for (let li of pending) {
     const textSpan = li.querySelector('.chat-text');
-    if (!textSpan || textSpan.textContent != '[Encrypted message]') continue;
+    if (!textSpan || textSpan.textContent !== '[Encrypted message]') {
+      continue;
+    }
 
     try {
-      const bytes = Uint8Array.from(atob(li.dataset.ciphertext), c => c.charCodeAt(0));
+      // 1) Base64 → Uint8Array, split IV + ciphertext
+      const raw = atob(li.dataset.ciphertext);
+      const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
       const iv = bytes.slice(0, 12);
       const data = bytes.slice(12);
-      const buf = await crypto.subtle.decrypt({
-          name: 'AES-GCM',
-          iv
-        },
-        chatKeys[currentChatFriend].sharedSecret,
+
+      // 2) Decrypt with our shared AES-GCM key
+      const key = chatKeys[currentChatFriend]?.sharedSecret;
+      if (!key) throw new Error('Missing shared secret key');
+
+      const decryptedBuf = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        key,
         data
       );
-      textSpan.textContent = new TextDecoder().decode(buf);
-      // now that this message is decrypted, update any reply-quotes pointing at it
-      const decrypted = textSpan.textContent;
+
+      const decryptedText = new TextDecoder().decode(decryptedBuf);
+      textSpan.textContent = decryptedText;
+
+      // 3) Update any reply-snippets
       const msgId = li.dataset.messageId;
       if (msgId) {
         chatMessagesEl
           .querySelectorAll(`.chat-quote[data-reply-to-id="${msgId}"]`)
           .forEach(q => {
-            q.textContent = decrypted.slice(0, 100);
+            q.textContent = decryptedText.slice(0, 100);
           });
       }
-    } catch {
+
+      // 4) If this was *their* message (li.friend), send one read-receipt
+      if (li.classList.contains('friend') && msgId && !li.dataset.readSent) {
+        socket.emit('message_read', { messageId: Number(msgId) });
+        li.dataset.readSent = 'true';
+      }
+
+    } catch (err) {
+      console.error('Decryption error:', err);
       textSpan.textContent = '[Unable to decrypt]';
     }
   }
 }
+
+
 
 
 socket.on('receive_message', data => {
@@ -423,6 +462,8 @@ async function sendCurrentMessage() {
           if (myLi) {
             myLi.dataset.messageId = ack.messageId;
             myLi.id = `msg-${ack.messageId}`;
+            const icon = myLi.querySelector('.status-icon');
+            if (icon) icon.className = 'status-icon fa-solid fa-check small'; // delivered
           }
           resolve();
         });
@@ -538,4 +579,12 @@ socket.on('reconnect', async (attempt) => {
     decryptPendingMessages();
     scrollToBottom();
   }
+});
+
+socket.on('message_read', (data) => {
+  const { messageId } = data;
+  const li = document.getElementById(`msg-${messageId}`);
+  if (!li) return;
+  const icon = li.querySelector('.status-icon');
+  if (icon) icon.className = 'status-icon fa-solid fa-eye small'; // read
 });
