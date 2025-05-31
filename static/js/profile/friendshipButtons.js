@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btns.forEach(b => b.disabled = true);
 
     try {
-      const res = await fetch("{{ url_for('api.handle_friends') }}", {
+      const res = await fetch("/api/user/friend", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -62,8 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
           action
         })
       });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.message);
+
+      if (!res.ok) {
+        // Attempt to parse a JSON error message
+        let errMsg = res.statusText;
+        try {
+          const errJson = await res.json();
+          if (errJson.error) {
+            errMsg = errJson.message;
+          }
+        } catch (parseErr) {
+          // If parsing fails, just leave errMsg as res.statusText
+        }
+        throw new Error(errMsg);
+      }
+
       // Re-initialize UI on success
       await initFriendUI();
     } catch (err) {
@@ -81,6 +94,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Builds & inserts the right buttons
   async function initFriendUI() {
+    if (!container) { 
+      return
+    }
+    
     container.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading...`;
     try {
       const res = await fetch(`/api/user/${profileId}/friend/status`, {

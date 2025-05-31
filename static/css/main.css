@@ -37,11 +37,19 @@ a:not(.btn):not(.nav-link) {
 }
 
 /* 2) Hover state: only those same links get the underline back */
-a:not(.btn):not(.nav-link):hover {
+a:not(.btn):not(.nav-link):not(.navbar-brand):hover {
   text-decoration: underline;
   text-underline-offset: .375em;
 }
 
+.cool-link {
+  text-decoration: none;
+}
+
+.cool-link:hover {
+  text-decoration: underline;
+  text-underline-offset: .375em;
+}
 
 .nav-link i {
   font-size: 1rem;

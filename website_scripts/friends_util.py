@@ -7,11 +7,7 @@ from . import extensions, models
 
 def send_friend_request(user_id: int, friend_id: int) -> int:
     """Sends a friendship request and returns the friendship id from the database."""
-    # 1. Prevent friending yourself
-    if user_id == friend_id:
-        raise ValueError("You can’t send a friend request to yourself.")
-
-    # 2. Check for an existing friendship record (pending or accepted), in either direction
+    # Check for an existing friendship record (pending or accepted), in either direction
     existing = models.Friendship.query.filter(
         or_(
             and_(

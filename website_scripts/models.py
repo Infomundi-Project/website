@@ -471,6 +471,7 @@ class Comment(db.Model):
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    deleted_at = db.Column(db.DateTime)
 
     # Relationships
     replies = db.relationship(

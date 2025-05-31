@@ -91,23 +91,23 @@ def get_crypto():
 def update_pubkey():
     jwk = request.json.get("publicKey")
     if not jwk:
-        return abort(400)
+        abort(400, detail="jwk is required")
     current_user.public_key_jwk = jwk
     extensions.db.session.commit()
     return "", 204
 
 
-@api.route("/user/<friend_id>/pubkey")
+@api.route("/user/<int:friend_id>/pubkey")
 @decorators.api_login_required
 def get_pubkey(friend_id):
     fs_status = friends_util.get_friendship_status(current_user.id, friend_id)[0]
     if fs_status != "accepted":
-        abort(403)
+        abort(403, detail="No friendship with this user")
     friend = extensions.db.session.get(models.User, friend_id)
     return jsonify(publicKey=friend.public_key_jwk)
 
 
-@api.route("/user/<friend_id>/messages", methods=["GET"])
+@api.route("/user/<int:friend_id>/messages", methods=["GET"])
 @decorators.api_login_required
 def get_messages(friend_id):
     """Get recent messages (encrypted) between current user and the specified friend."""
@@ -115,7 +115,7 @@ def get_messages(friend_id):
         0
     ]
     if friendship_status != "accepted":
-        return jsonify({"error": "No friendship with this user"}), 403
+        abort(403, detail="No friendship with this user.")
 
     # Query last N messages between users (both directions)
     msgs = (
@@ -129,6 +129,7 @@ def get_messages(friend_id):
                 & (models.Message.receiver_id == current_user.id)
             )
         )
+        .options(joinedload(models.Message.replied_to))
         .order_by(models.Message.timestamp.desc())  # ← newest first
         .limit(50)
         .all()
@@ -390,14 +391,14 @@ def handle_friends():
     action = data.get("action")
 
     if action not in ("add", "accept", "reject", "delete") or not friend_id:
-        return jsonify(
-            success=False,
-            message="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
-        )
+        abort(400, detail="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.")
+
+    if current_user.id == friend_id:
+        abort(400, detail="You can't friend yourself")
 
     friend = extensions.db.session.get(models.User, friend_id)
     if not friend:
-        return jsonify(success=False, message="Could not find user.")
+        abort(404, detail="Could not find user.")
 
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
@@ -410,43 +411,44 @@ def handle_friends():
                 "views.user_profile_by_id", public_id=current_user.get_public_id()
             ),
         )
-        return jsonify(success=True, message="Friend request sent")
+        return jsonify(message="Friend request sent"), 201
 
     elif action == "accept":
-        if friends_util.accept_friend_request(current_user.id, friend_id):
-            # Sends notification to the friend
-            notifications.notify_single(
-                friend.id,
-                "friend_accepted",
-                f"{current_user.username} has accepted your friend request",
-                url=url_for(
-                    "views.user_profile_by_id", public_id=current_user.get_public_id()
-                ),
-            )
-            # Sends also notification to the user
-            notifications.notify_single(
-                current_user.id,
-                "friend_status",
-                f"You accepted the friend request from {friend.username}",
-                url=url_for(
-                    "views.user_profile_by_id", public_id=friend.get_public_id()
-                ),
-            )
-            return jsonify(success=True, message="Friend request accepted")
+        if not friends_util.accept_friend_request(current_user.id, friend_id):
+            abort(404, detail="Friendship not found")
 
-        return jsonify(success=False, message="Failed to accept friend request")
+        # Sends notification to the friend
+        notifications.notify_single(
+            friend.id,
+            "friend_accepted",
+            f"{current_user.username} has accepted your friend request",
+            url=url_for(
+                "views.user_profile_by_id", public_id=current_user.get_public_id()
+            ),
+        )
+        # Sends also notification to the user
+        notifications.notify_single(
+            current_user.id,
+            "friend_status",
+            f"You accepted the friend request from {friend.username}",
+            url=url_for(
+                "views.user_profile_by_id", public_id=friend.get_public_id()
+            ),
+        )
+        return jsonify(message="Friend request accepted"), 200
 
     elif action == "reject":
-        if friends_util.reject_friend_request(current_user.id, friend_id):
-            return jsonify(success=True, message="Friend request rejected")
+        if not friends_util.reject_friend_request(current_user.id, friend_id):
+            return abort(404, detail="You don't have a pending request from this user.")
+        
+        return jsonify(message="Friend request rejected."), 200
 
-        return jsonify(success=True, message="Failed to reject friend request")
 
     else:
-        if friends_util.delete_friend(current_user.id, friend_id):
-            return jsonify(success=True, message="Friend request deleted")
-
-        return jsonify(success=True, message="Failed to delete friend request")
+        if not friends_util.delete_friend(current_user.id, friend_id):
+            return abort(404, "You're not friends.")
+            
+        return jsonify(message="Friend removed."), 200
 
 
 @api.route("/user/<int:user_id>/friend/status", methods=["GET"])
@@ -462,19 +464,19 @@ def friendship_status(user_id):
 @decorators.api_login_required
 def story_reaction(action):
     if action not in ("like", "dislike"):
-        return jsonify(error="Invalid action"), 400
+        abort(400, "Invalid action.")
 
     # We get an 'id' attribute, but it isn't the ID really, it's url hash (md5 hex).
     # We pretend it's the ID to lure bad actors.
     url_hash = request.get_json().get("id")
     if not url_hash:
-        return jsonify(error="Story ID is required"), 400
+        abort(400, "Story ID is required.")
 
     story = models.Story.query.filter_by(
         url_hash=hashing_util.md5_hex_to_binary(url_hash)
     ).first()
     if not story:
-        return jsonify({"error": "Story not found."}), 404
+        abort(400, "Could not find story.")
 
     # Check if a reaction already exists for this story and user
     existing_reaction = models.StoryReaction.query.filter_by(
@@ -552,7 +554,7 @@ def story_reaction(action):
 @decorators.api_login_required
 def generate_totp():
     if current_user.is_totp_enabled:
-        return jsonify({"status": "Not Allowed"}), 403
+        abort(403, "You are already totp-enabled.")
 
     session["totp_secret"] = totp_util.generate_totp_secret()
     return (
@@ -572,7 +574,7 @@ def generate_totp():
 @decorators.api_login_required
 def setup_totp():
     if current_user.is_totp_enabled:
-        return jsonify({"status": "Not Allowed"}), 403
+        abort(400, "You are already totp-enabled.")
 
     code = request.args.get("code", "")
     totp_secret = session["totp_secret"]
@@ -586,7 +588,7 @@ def setup_totp():
     # There's no need to keep this info in the user's session anymore
     del session["totp_secret"]
 
-    return jsonify({"valid": True, "totp_recovery_token": totp_recovery_token}), 200
+    return jsonify({"valid": True, "totp_recovery_token": totp_recovery_token}), 201
 
 
 @api.route("/2fa/mail/send", methods=["POST"])
@@ -605,7 +607,7 @@ def send_mail_twofactor_code():
         f"Your two‑factor authentication code is: {code}",
     )
 
-    return jsonify(success=True), 200
+    return jsonify(message="2FA code has been sent to your email."), 200
 
 
 @api.route("/2fa/mail/verify", methods=["POST"])
@@ -615,20 +617,20 @@ def verify_mail_twofactor_code():
     code = data.get("code")
 
     if not code:
-        return jsonify(success=False, error="Missing 'code' attribute"), 400
+        abort(400, "Missing 'code' attribute.")
 
     user = extensions.db.session.get(models.User, session["user_id"])
 
     # We first check if the code is valid
     if not user.check_mail_twofactor(code):
-        return jsonify(success=False, error="Invalid or expired code"), 400
+        abort(400, "Invalid or expired code.")
 
     # This means the user has just configured mail twofactor via settings
     if not user.is_mail_twofactor_enabled:
         recovery_token = user.setup_mail_twofactor()
-        return jsonify(success=True, recovery_token=recovery_token), 200
+        return jsonify(recovery_token=recovery_token), 201
 
-    return jsonify(success=True), 200
+    return jsonify(message="2FA code is valid!"), 200
 
 
 @api.route("/user/friends", methods=["GET"])
@@ -679,16 +681,16 @@ def get_user_status(user_public_id):
         public_id=security_util.uuid_string_to_bytes(user_public_id)
     ).first()
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        abort(404, "Couldn't find user.")
 
     if not user.last_activity:
-        return jsonify({"is_online": False, "last_activity": user.last_activity})
+        return jsonify(is_online=False, last_activity=user.last_activity), 200
 
     # Save to the database
     user.is_online = user.check_is_online()
     extensions.db.session.commit()
 
-    return jsonify({"is_online": user.is_online, "last_activity": user.last_activity})
+    return jsonify(is_online=user.is_online, last_activity=user.last_activity), 200
 
 
 @api.route("/user/status/update", methods=["GET"])
@@ -698,7 +700,7 @@ def update_user_status():
     current_user.last_activity = datetime.now()
 
     extensions.db.session.commit()
-    return jsonify({"message": "Success!"})
+    return jsonify(message="Your status has been updated."), 201
 
 
 @api.route("/get_country_code", methods=["GET"])
@@ -717,7 +719,7 @@ def get_country_code():
         }
     """
     country = country_util.get_country(name=request.args.get("country", ""))
-    return jsonify({"countryCode": country.iso2 if country else ""})
+    return jsonify({"countryCode": country.iso2 if country else ""}), 200
 
 
 @api.route("/autocomplete", methods=["GET"])
@@ -737,7 +739,7 @@ def autocomplete():
         return redirect(url_for("views.home"))
 
     results = [x.name for x in country_util.get_country(name=query, ilike=True)]
-    return jsonify(results)
+    return jsonify(results), 200
 
 
 @api.route("/search", methods=["POST"])
@@ -777,7 +779,7 @@ def summarize_story(story_url_hash):
         url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
     ).first()
     if not story:
-        return jsonify({"response": "Couldn't find the story"}), 404
+        abort(404, "Couldn't find the story.")
 
     if story.gpt_summary:
         return jsonify({"response": story.gpt_summary}), 200
@@ -802,7 +804,7 @@ def summarize_story(story_url_hash):
         input_sanitization.gentle_cut_text(1700, main_text),
     )
     if not response:
-        return jsonify({"response": "Summarization has failed."}), 500
+        return jsonify("Failed to summarize."), 204
 
     story.gpt_summary = response
     extensions.db.session.commit()
@@ -811,6 +813,7 @@ def summarize_story(story_url_hash):
 
 @api.route("/get_stories", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 15, query_string=True)  # 15 min cached
+@extensions.limiter.limit("12/minute", override_defaults=True)
 def get_stories():
     """Returns jsonified list of stories based on certain criteria. Cached for 15 min (60s * 15)."""
     country = request.args.get("country", "br", type=str).lower()
@@ -826,7 +829,7 @@ def get_stories():
     # br_general, us_general and so on
     category = models.Category.query.filter_by(name=f"{country}_{category}").first()
     if not category:
-        return jsonify({"error": "This category is not yet supported!"}), 501
+        return jsonify({"error": "This category is not yet supported!"}), 404
 
     valid_order_columns = ("created_at", "views", "title", "pub_date")
     if order_by not in valid_order_columns:
@@ -852,15 +855,18 @@ def get_stories():
     #    )
 
     if start_date and end_date:
-        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-        query_filters.append(
-            and_(
-                cast(models.Story.pub_date, Date) >= start_date_obj,
-                cast(models.Story.pub_date, Date) <= end_date_obj,
+            query_filters.append(
+                and_(
+                    cast(models.Story.pub_date, Date) >= start_date_obj,
+                    cast(models.Story.pub_date, Date) <= end_date_obj,
+                )
             )
-        )
+        except ValueError:
+            return jsonify({"error": "Invalid date format: must be YYYY-MM-DD."}), 400
 
     stories_per_page = 9
     start_index = (page - 1) * stories_per_page
@@ -915,6 +921,21 @@ def create_comment():
     if type not in ("user", "story", "page"):
         return jsonify(error="Invalid type"), 400
 
+    # only flush() (later) once we've verified type and found the story (or profile_owner)
+    if type == "story":
+        # Sees if the page_id refers to a valid story in the database
+        story = models.Story.query.filter_by(
+            url_hash=hashing_util.md5_hex_to_binary(page_id)
+        ).first()
+        if not story:
+            return jsonify(error="Could not find story in database."), 400
+    elif type == "user":
+        profile_owner = models.User.query.filter_by(
+            public_id=security_util.uuid_string_to_bytes(page_id)
+        ).first()
+        if not profile_owner:
+            return jsonify(error="Could not find user in database."), 400
+
     comment = models.Comment(
         page_hash=hashing_util.string_to_md5_binary(page_id),
         user_id=(
@@ -930,18 +951,12 @@ def create_comment():
     extensions.db.session.flush()  # actually send it to the DB, get back the PK
 
     if type == "story":
-        # Sees if the page_id refers to a valid story in the database
-        story = models.Story.query.filter_by(
-            url_hash=hashing_util.md5_hex_to_binary(page_id)
-        ).first()
-        if not story:
-            return jsonify(error="Could not find story in database."), 400
-
         comment.url = (
             url_for("views.comments", id=story.get_public_id())
             + f"#comment-{comment.id}"
         )
         comment.story_id = story.id  # Sets the optional story_id column
+        
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
         if bookmarks:
@@ -956,12 +971,6 @@ def create_comment():
             ]
             notifications.notify(notif_dicts)
     elif type == "user":
-        profile_owner = models.User.query.filter_by(
-            public_id=security_util.uuid_string_to_bytes(page_id)
-        ).first()
-        if not profile_owner:
-            return jsonify(error="Could not find user in database."), 400
-
         comment.url = (
             url_for("views.user_profile_by_id", public_id=page_id)
             + f"#comment-{comment.id}"
@@ -1057,7 +1066,7 @@ def edit_comment(comment_id):
     comment = models.Comment.query.get_or_404(comment_id)
 
     if comment.user_id != current_user.id:
-        return jsonify({"error": "Unauthorized"}), 403
+        abort(403, detail="You can't edit someone else's comment.")
 
     data = request.get_json()
     content = input_sanitization.gentle_cut_text(
@@ -1065,13 +1074,13 @@ def edit_comment(comment_id):
     )
 
     if not content:
-        return jsonify({"error": "Empty content"}), 400
+        abort(400, detail="Content shoudln't be empty.")
 
     comment.content = content
     comment.is_flagged = comments_util.is_content_inappropriate(content)
     comment.is_edited = True
     extensions.db.session.commit()
-    return jsonify(content=comment.content, updated_at=comment.updated_at.isoformat())
+    return jsonify(content=comment.content, message="Comment updated.", updated_at=comment.updated_at.isoformat()), 201
 
 
 @api.route("/comments/<int:comment_id>", methods=["DELETE"])
@@ -1080,11 +1089,12 @@ def delete_comment(comment_id):
     comment = models.Comment.query.get_or_404(comment_id)
 
     if comment.user_id != current_user.id:
-        return jsonify({"error": "Unauthorized"}), 403
+        abort(403, "You can't delete a comment from other user.")
 
     comment.is_deleted = True
+    comment.deleted_at = datetime.utcnow()
     extensions.db.session.commit()
-    return jsonify({"message": "Comment deleted"})
+    return jsonify(message="Comment deleted"), 200
 
 
 @api.route("/comments/<int:comment_id>/<action>", methods=["POST"])
@@ -1150,7 +1160,12 @@ def react_to_comment(comment_id, action):
 @api.route("/bookmark", methods=["GET"])
 @decorators.api_login_required
 def list_bookmarks():
-    stories = current_user.bookmarked_stories.all()
+    stories = (
+        models.Story.query
+        .join(models.Bookmark, models.Bookmark.story_id == models.Story.id)
+        .filter(models.Bookmark.user_id == current_user.id)
+        .all()
+    )
     return jsonify([s.to_dict() for s in stories]), 200
 
 
@@ -1270,7 +1285,7 @@ def mark_notification_read(notification_id):
         notif.read_at = datetime.utcnow()
         extensions.db.session.commit()
 
-    return jsonify({"message": "Notification marked as read.", "id": notif.id}), 200
+    return jsonify(message="Notification marked as read.", id=notif.id), 200
 
 
 @api.route("/notifications/read_all", methods=["POST"])
@@ -1284,55 +1299,46 @@ def mark_all_notifications_read():
     ).update({"is_read": True, "friendship_id": None}, synchronize_session="fetch")
     extensions.db.session.commit()
 
-    return (
-        jsonify(
-            {
-                "message": "All notifications marked as read.",
-                "notifications_updated": updated,
-            }
-        ),
-        200,
-    )
+    return jsonify(message="All notifications marked as read.", notifications_updated=updated), 200
 
 
 @api.route("/user/<int:uid>/block/<action>", methods=["POST"])
 @decorators.api_login_required
 def block_user(uid, action):
     if uid == current_user.id:
-        return jsonify(success=False, message="Self-blocking? Well, that's new"), 400
+        abort(404, detail="Self-blocking? Well, that's new")
 
     if action not in ("add", "remove"):
-        return jsonify(success=False, message="Unrecognized action"), 400
+        abort(400, detail="Unrecognized action.")
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
-        return jsonify(success=False, message="Couldn't find the target user"), 400
+        abort(404, detail="Couldn't find target user.")
 
     block = models.UserBlock.query.filter_by(
         blocker_id=current_user.id, blocked_id=uid
     ).first()
 
     if action == "add":
+        if block:
+            return jsonify(message="User is already blocked."), 204
+        
         friends_util.delete_friend(
             current_user.id, target.id
         )  # users aren't friends anymore if they decide to block each other
 
-        if block:
-            return jsonify(success=True, message="Already blocked."), 200
-
-        block = models.UserBlock(blocker=current_user, blocked=target)
-        extensions.db.session.add(block)
+        new_block = models.UserBlock(blocker=current_user, blocked=target)
+        extensions.db.session.add(new_block)
     else:
         if not block:
-            return jsonify(success=True, message="User is not blocked"), 200
+            abort(400, detail="User is not blocked.")
         extensions.db.session.delete(block)
 
     extensions.db.session.commit()
 
     return (
         jsonify(
-            success=True,
-            message=f"You blocked {target.username}. Take care of your peace!",
+            message=f"You {'blocked' if action == 'add' else 'unblocked'} {target.username}. Take care of your peace!",
         ),
         201,
     )
@@ -1343,11 +1349,11 @@ def block_user(uid, action):
 @decorators.api_login_required
 def user_reports(uid, report_id=0):
     if uid == current_user.id:
-        return jsonify(success=False, message="You can't report yourself"), 400
+        return jsonify(message="You can't report yourself"), 400
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
-        return jsonify(success=False, message="Couldn't find the target user"), 400
+        return jsonify(message="Couldn't find the target user"), 400
 
     if request.method == "GET":
         reports = models.UserReport.query.filter_by(
@@ -1371,20 +1377,14 @@ def user_reports(uid, report_id=0):
             "inappropriate",
             "other",
         ):
-            return (
-                jsonify(success=False, message="Couldn't find the target category"),
-                400,
-            )
+            abort(404, detail="Couldn't find target category.")
 
     if request.method == "POST":
         report = models.UserReport.query.filter_by(
             reporter_id=current_user.id, reported_id=uid, category=category
         ).first()
         if report:
-            return (
-                jsonify(success=False, message="You’ve already reported this user."),
-                200,
-            )
+            abort(400, detail="You've already reported this user.")
 
         report = models.UserReport(
             reporter=current_user, reported=target, reason=reason, category=category
@@ -1392,21 +1392,15 @@ def user_reports(uid, report_id=0):
         extensions.db.session.add(report)
 
     elif request.method == "DELETE":
-        report = extensions.db.session.get(models.UserReport, report_id)
+        report = models.UserReport.query.filter_by(report_id=report_id, reporter_id=current_user.id).first()
         if not report:
-            return (
-                jsonify(success=False, message="There is no such report"),
-                200,
-            )
+            abort(404, detail="Couldn't find target report.")
 
         extensions.db.session.delete(report)
     elif request.method == "PATCH":
-        report = extensions.db.session.get(models.UserReport, report_id)
+        report = models.UserReport.query.filter_by(report_id=report_id, reporter_id=current_user.id).first()
         if not report:
-            return (
-                jsonify(success=False, message="There is no such report"),
-                200,
-            )
+            abort(404, detail="Couldn't find target report.")
 
         report.reason = reason
         report.category = category
@@ -1415,7 +1409,7 @@ def user_reports(uid, report_id=0):
 
     return (
         jsonify(
-            success=True, message="Thanks for letting us know — we’ll take a look!"
+            message="Thanks for letting us know — we’ll take a look!"
         ),
         200,
     )

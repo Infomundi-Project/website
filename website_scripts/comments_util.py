@@ -50,11 +50,8 @@ def serialize_comment_tree(comment) -> dict:
         "id": comment.id,
         "user": {
             "id": security_util.uuid_bytes_to_string(comment.user.public_id),
-            "username": (
-                comment.user.display_name
-                if comment.user.display_name
-                else comment.user.username
-            ),
+            "username": comment.user.username,
+            "display_name": comment.user.display_name or None,
             "avatar_url": comment.user.avatar_url,
             "role": comment.user.role,
         },

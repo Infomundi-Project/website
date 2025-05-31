@@ -19,7 +19,6 @@ DROP TABLE IF EXISTS site_statistics;
 DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS crypto;
-DROP TABLE IF EXISTS global_salts;
 DROP TABLE IF EXISTS user_story_views;
 DROP TABLE IF EXISTS user_blocks;
 DROP TABLE IF EXISTS user_reports;
@@ -240,6 +239,7 @@ CREATE TABLE comments (
     is_deleted TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,

@@ -67,6 +67,27 @@ extensions.cache.init_app(app)
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # 2 Megabytes
 app.config["UPLOAD_FOLDER"] = "static/img/users/"
 
+"""
+@api.errorhandler(400)
+@api.errorhandler(403)
+@api.errorhandler(404)
+@api.errorhandler(500)
+def api_error_handler(error):
+    # Gets the error code, defaults to 404
+    http_status = getattr(error, "code", 404)
+
+    if http_status == 400:
+        error_title = "Invalid Request"
+    elif http_status == 403:
+        error_title = "Forbidden"
+    elif http_status == 500:
+        error_title = "Server Error"
+    else:
+        error_title = "Not Found"
+
+    return jsonify(success=False, error={"status": f"{http_status}", "title": error_title, "detail": error.detail}), http_status
+"""
+
 # Blueprints
 app.register_blueprint(auth, url_prefix="/auth")
 app.register_blueprint(api, url_prefix="/api")
@@ -282,15 +303,17 @@ def add_headers(response):
 
     # Sets the CSP header to include the nonce
     response.headers["Content-Security-Policy"] = (
-        "default-src 'self' https://*.infomundi.net; "
-        "img-src https: data:; "
+        "default-src 'none'; "
+        "img-src 'self' https://*.infomundi.net data:; "
         "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com; "
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
         f"script-src 'self' 'strict-dynamic' 'nonce-{nonce}'; "
-        "style-src 'self' 'unsafe-inline' https://*.infomundi.net https://fonts.googleapis.com https://www.gstatic.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "form-action 'self'; "
+        "manifest-src 'self'; "
         "base-uri 'self' https://*.infomundi.net; "
-        "font-src 'self' https://fonts.gstatic.com https://*.infomundi.net; "
-        "frame-ancestors 'self' https://*.infomundi.net"
+        "font-src 'self' https://*.infomundi.net; "
+        "frame-ancestors 'self'"
     )
 
     if request.path.startswith("/static"):
