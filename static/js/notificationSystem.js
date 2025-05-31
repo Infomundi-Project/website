@@ -43,8 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // footer
       unreadBadgeNavFooter.textContent = cnt;
       unreadBadgeNavFooter.style.display = cnt > 0 ? "inline-block" : "none";
-      // mark-all button
-      markAllReadBtn.style.display = cnt > 0 ? "inline-block" : "none";
+      if (cnt > 0) {
+        markAllReadBtn.classList.add("btn-primary");
+        markAllReadBtn.classList.remove("border");
+      } else {
+        markAllReadBtn.classList.add("border");
+        markAllReadBtn.classList.remove("btn-primary");
+        markAllReadBtn.setAttribute('disabled', '');
+      }
     })
     .catch(console.error);
   }
@@ -76,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // if new calendar day, inject a separator
         if (thisDate !== lastDate) {
           const divider = document.createElement("li");
-          divider.className = "list-group-item disabled text-center small";
+          divider.className = "list-group-item disabled text-center small p-4";
           divider.textContent = new Intl.DateTimeFormat("default", {
             weekday: "long",
             month: "short",

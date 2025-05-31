@@ -133,16 +133,16 @@
                                 <div class="d-flex justify-content-between">
                                   <div>
                                       <ul class="list-inline mb-1">
-                                        <li class="list-inline-item fw-bold notranslate me-1"><a href="/id/${comment.user.id}">${comment.user.display_name ? comment.user.display_name : comment.user.username}</a></li>
+                                        <li class="list-inline-item fw-bold notranslate me-1"><a class="text-reset" href="/id/${comment.user.id}">${comment.user.display_name ? comment.user.display_name : comment.user.username}</a></li>
                                     
                                         <li class="list-inline-item text-muted small notranslate me-1" title="Username">@${comment.user.username}</li>
 
                 ${comment.user.role !== 'user' ? `
-                                      <li class="list-inline-item"><span class="badge bg-primary p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}</li>
+                                      <li class="list-inline-item"><span class="badge bg-dark border" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="${comment.user.role}"><i class="fa-solid fa-globe"></i></span>` : ''}</li>
                                       </ul>
               ${level > 0 && parentUser ? `
                                       <span class="text-muted small">Replying to 
-                                        @<a href="#comment-${comment.parent_id}" class="reply-link text-decoration-none fw-bold">${parentUser.username}</a>, 
+                                        @<a href="#comment-${comment.parent_id}" class="reply-link text-decoration-none notranslate fw-bold">${parentUser.username}</a>, 
                                       </span>` : ''}
                                       <span
                                         class="d-inline-block text-muted small timeago"
@@ -171,17 +171,17 @@
                                   <p class="my-3 text-wrap" id="comment-content-${comment.id}" style="word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; word-break: break-word;">${comment.content}</p>
 
                                   <div class="d-flex align-items-center mt-3">
-                                    <button class="btn btn-sm btn-outline-primary like-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
-                                      <i class="fa-solid fa-thumbs-up me-1"></i><span class="badge bg-primary">${comment.likes}</span>
+                                    <button class="btn btn-sm border like-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
+                                      <i class="fa-regular fa-thumbs-up me-1"></i><span class="like-count">${comment.likes}</span>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger dislike-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
-                                      <i class="fa-solid fa-thumbs-down me-1"></i><span class="badge bg-danger">${comment.dislikes}</span>
+                                    <button class="btn btn-sm border dislike-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
+                                      <i class="fa-regular fa-thumbs-down me-1"></i><span class="dislike-count">${comment.dislikes}</span>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-secondary reply-btn">
+                                    <button class="btn btn-sm border reply-btn">
                                       <i class="fa-solid fa-reply"></i>
                                     </button>
                                   </div>
-                                  <div id="${repliesContainerId}" class="mt-4" style="margin-left: -50px;"></div>
+                                  <div class="mt-4 reply-wrapper" style="margin-left: -50px;"></div>
                                   <div class="reply-form-container mt-3"></div>
                                 </div>
                               </div>
@@ -266,21 +266,23 @@
       // 2) Create the toggle button
       const toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';
-      toggleBtn.className = 'btn btn-sm btn-link p-0 mb-2';
+      toggleBtn.className = 'btn btn-sm border mt-3';
       toggleBtn.setAttribute('data-bs-toggle', 'collapse');
       toggleBtn.setAttribute('data-bs-target', `#${repliesContainer.id}`);
       toggleBtn.setAttribute('aria-expanded', 'false');
       toggleBtn.setAttribute('aria-controls', repliesContainer.id);
-      toggleBtn.textContent = `Show replies (${comment.replies.length})`;
+      toggleBtn.innerHTML = `<i class="fa-solid fa-share fa-flip-vertical me-1"></i>Replies<span class="badge text-bg-danger ms-3" id="infomundiCommentsCount">${comment.replies.length}</span>`;
 
       // 3) Hook into Bootstrap’s events to swap the text
       repliesContainer.addEventListener('show.bs.collapse', () => {
+        toggleBtn.classList.replace("mt-3", "mb-2");
         toggleBtn.textContent =
-          `Hide replies (${comment.replies.length})`;
+          `Hide replies`;
       });
       repliesContainer.addEventListener('hide.bs.collapse', () => {
-        toggleBtn.textContent =
-          `Show replies (${comment.replies.length})`;
+        toggleBtn.classList.replace("mb-2", "mt-3");
+        toggleBtn.innerHTML =
+          `<i class="fa-solid fa-share fa-flip-vertical me-1"></i>Replies<span class="badge text-bg-danger ms-3" id="infomundiCommentsCount">${comment.replies.length}</span>`;
       });
 
       // 4) Insert the toggle button *right before* the replies container
@@ -371,8 +373,8 @@
 
     // 3) Update the DOM in one place
     const commentDiv = document.getElementById(`comment-${id}`);
-    commentDiv.querySelector('.like-btn .badge').textContent = likes;
-    commentDiv.querySelector('.dislike-btn .badge').textContent = dislikes;
+    commentDiv.querySelector('.like-btn .like-count').textContent = likes;
+    commentDiv.querySelector('.dislike-btn .dislike-count').textContent = dislikes;
 
     // 4) Give the user a quick flash of feedback
     commentDiv.classList.add('bg-highlight');

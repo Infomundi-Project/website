@@ -3,6 +3,7 @@ from sqlalchemy import and_, cast, desc, asc, insert
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
+from collections import OrderedDict
 from sqlalchemy.types import Date
 from newsplease import NewsPlease
 
@@ -174,21 +175,13 @@ def reading_stats(uid):
         "monthly": now - timedelta(days=30),
     }
 
-    # Base query
-    q = (
-        extensions.db.session.query(
-            models.UserStoryView, models.Story, models.Publisher, models.Category
-        )
-        .join(models.Story, models.UserStoryView.story_id == models.Story.id)
-        .join(models.Publisher, models.Story.publisher_id == models.Publisher.id)
-    )
-
+    # 1) Counts per period (just as you already have):
     stats = {}
     for period, since in cuts.items():
         stats[period] = (
             extensions.db.session.query(
                 extensions.db.func.count(
-                    extensions.db.distinct(models.UserStoryView.story_id)
+                    extensions.db.func.distinct(models.UserStoryView.story_id)
                 )
             )
             .filter(
@@ -199,12 +192,12 @@ def reading_stats(uid):
             or 0
         )
 
-    # Top publishers
+    # 2) Top publishers
     top_pubs = (
         extensions.db.session.query(
             models.Publisher.name,
             extensions.db.func.count(
-                extensions.db.distinct(models.UserStoryView.story_id)
+                extensions.db.func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Publisher.id == models.Story.publisher_id)
@@ -216,12 +209,12 @@ def reading_stats(uid):
         .all()
     )
 
-    # Top tags
+    # 3) Top tags
     top_tags = (
         extensions.db.session.query(
             models.Tag.tag,
             extensions.db.func.count(
-                extensions.db.distinct(models.UserStoryView.story_id)
+                extensions.db.func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Tag.story_id == models.Story.id)
@@ -233,12 +226,12 @@ def reading_stats(uid):
         .all()
     )
 
-    # Top countries (split the Category.name slug on “_” in Python)
+    # 4) Top countries (Category.name is something like "us_politics", so we split on “_”)
     country_counts = (
         extensions.db.session.query(
             models.Category.name,
             extensions.db.func.count(
-                extensions.db.distinct(models.UserStoryView.story_id)
+                extensions.db.func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Category.id == models.Story.category_id)
@@ -249,18 +242,53 @@ def reading_stats(uid):
         .limit(5)
         .all()
     )
-
     top_countries = [
         {"country": cat.split("_", 1)[0].upper(), "count": cnt}
         for cat, cnt in country_counts
     ]
 
+    # 5) Daily counts for the last 365 days
+    one_year_ago = now - timedelta(days=365)
+
+    # -------------------------
+    # Replace date_trunc("day", ...) with DATE(viewed_at)
+    # -------------------------
+    daily_rows = (
+        extensions.db.session.query(
+            extensions.db.func.date(models.UserStoryView.viewed_at).label(
+                "d"
+            ),  # MySQL DATE()
+            extensions.db.func.count(
+                extensions.db.func.distinct(models.UserStoryView.story_id)
+            ).label("ctr"),
+        )
+        .filter(
+            models.UserStoryView.user_id == uid,
+            models.UserStoryView.viewed_at >= one_year_ago,
+        )
+        .group_by(extensions.db.func.date(models.UserStoryView.viewed_at))
+        .order_by(extensions.db.func.date(models.UserStoryView.viewed_at))
+        .all()
+    )
+    # daily_rows: list of (date (as a Python date), count) for each date where user viewed ≥1 story.
+
+    # Build a lookup dict { "YYYY-MM-DD": count }
+    date_to_count = {row.d.isoformat(): row.ctr for row in daily_rows}
+
+    # Now fill in all 366 days (from one_year_ago through today), defaulting to 0 if missing
+    daily_counts = []
+    for i in range(0, 366):
+        that_day = (one_year_ago + timedelta(days=i)).date().isoformat()
+        daily_counts.append({"date": that_day, "count": date_to_count.get(that_day, 0)})
+
+    # 6) Return the combined JSON
     return jsonify(
         {
-            "counts": stats,
+            "counts": stats,  # { "daily": X, "weekly": Y, "monthly": Z }
             "top_publishers": [{"name": n, "count": c} for n, c in top_pubs],
             "top_tags": [{"tag": t, "count": c} for t, c in top_tags],
             "top_countries": top_countries,
+            "daily_counts": daily_counts,  # New field: list of 366 { date, count } objects
         }
     )
 
@@ -391,7 +419,10 @@ def handle_friends():
     action = data.get("action")
 
     if action not in ("add", "accept", "reject", "delete") or not friend_id:
-        abort(400, detail="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.")
+        abort(
+            400,
+            detail="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
+        )
 
     if current_user.id == friend_id:
         abort(400, detail="You can't friend yourself")
@@ -431,23 +462,20 @@ def handle_friends():
             current_user.id,
             "friend_status",
             f"You accepted the friend request from {friend.username}",
-            url=url_for(
-                "views.user_profile_by_id", public_id=friend.get_public_id()
-            ),
+            url=url_for("views.user_profile_by_id", public_id=friend.get_public_id()),
         )
         return jsonify(message="Friend request accepted"), 200
 
     elif action == "reject":
         if not friends_util.reject_friend_request(current_user.id, friend_id):
             return abort(404, detail="You don't have a pending request from this user.")
-        
-        return jsonify(message="Friend request rejected."), 200
 
+        return jsonify(message="Friend request rejected."), 200
 
     else:
         if not friends_util.delete_friend(current_user.id, friend_id):
             return abort(404, "You're not friends.")
-            
+
         return jsonify(message="Friend removed."), 200
 
 
@@ -851,7 +879,7 @@ def get_stories():
 
     # if query:
     #    query_filters.append(
-    #        func.match(models.Story.title, models.Story.description, query)
+    #        extensions.db.func.match(models.Story.title, models.Story.description, query)
     #    )
 
     if start_date and end_date:
@@ -956,7 +984,7 @@ def create_comment():
             + f"#comment-{comment.id}"
         )
         comment.story_id = story.id  # Sets the optional story_id column
-        
+
         # Send notifications to the users who bookmarked this specific story.
         bookmarks = models.Bookmark.query.filter_by(story_id=story.id).all()
         if bookmarks:
@@ -1080,7 +1108,14 @@ def edit_comment(comment_id):
     comment.is_flagged = comments_util.is_content_inappropriate(content)
     comment.is_edited = True
     extensions.db.session.commit()
-    return jsonify(content=comment.content, message="Comment updated.", updated_at=comment.updated_at.isoformat()), 201
+    return (
+        jsonify(
+            content=comment.content,
+            message="Comment updated.",
+            updated_at=comment.updated_at.isoformat(),
+        ),
+        201,
+    )
 
 
 @api.route("/comments/<int:comment_id>", methods=["DELETE"])
@@ -1161,8 +1196,9 @@ def react_to_comment(comment_id, action):
 @decorators.api_login_required
 def list_bookmarks():
     stories = (
-        models.Story.query
-        .join(models.Bookmark, models.Bookmark.story_id == models.Story.id)
+        models.Story.query.join(
+            models.Bookmark, models.Bookmark.story_id == models.Story.id
+        )
         .filter(models.Bookmark.user_id == current_user.id)
         .all()
     )
@@ -1299,7 +1335,12 @@ def mark_all_notifications_read():
     ).update({"is_read": True, "friendship_id": None}, synchronize_session="fetch")
     extensions.db.session.commit()
 
-    return jsonify(message="All notifications marked as read.", notifications_updated=updated), 200
+    return (
+        jsonify(
+            message="All notifications marked as read.", notifications_updated=updated
+        ),
+        200,
+    )
 
 
 @api.route("/user/<int:uid>/block/<action>", methods=["POST"])
@@ -1322,7 +1363,7 @@ def block_user(uid, action):
     if action == "add":
         if block:
             return jsonify(message="User is already blocked."), 204
-        
+
         friends_util.delete_friend(
             current_user.id, target.id
         )  # users aren't friends anymore if they decide to block each other
@@ -1392,13 +1433,17 @@ def user_reports(uid, report_id=0):
         extensions.db.session.add(report)
 
     elif request.method == "DELETE":
-        report = models.UserReport.query.filter_by(report_id=report_id, reporter_id=current_user.id).first()
+        report = models.UserReport.query.filter_by(
+            report_id=report_id, reporter_id=current_user.id
+        ).first()
         if not report:
             abort(404, detail="Couldn't find target report.")
 
         extensions.db.session.delete(report)
     elif request.method == "PATCH":
-        report = models.UserReport.query.filter_by(report_id=report_id, reporter_id=current_user.id).first()
+        report = models.UserReport.query.filter_by(
+            report_id=report_id, reporter_id=current_user.id
+        ).first()
         if not report:
             abort(404, detail="Couldn't find target report.")
 
@@ -1408,8 +1453,6 @@ def user_reports(uid, report_id=0):
     extensions.db.session.commit()
 
     return (
-        jsonify(
-            message="Thanks for letting us know — we’ll take a look!"
-        ),
+        jsonify(message="Thanks for letting us know — we’ll take a look!"),
         200,
     )

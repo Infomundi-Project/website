@@ -2,95 +2,25 @@
 
 {% block title %}{{ user.username }}'s Profile{% endblock %}
 
+{% block header %}
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='css/userProfile.css') }}">
+<link rel="stylesheet"
+  href="{{ url_for('static', filename='css/commentSystem.css') }}">
+{% endblock %}
+
 {% block styles %}
 <style>
-  #reportModal .modal-title i {
-    margin-right: 0.5rem;
-  }
-  #reportModal .report-item .form-label {
-    font-weight: 500;
-  }
-  #reportModal .edit-report-btn i,
-  #reportModal .delete-report-btn i,
-  #reportModal #addReportBtn i {
-    margin-right: .3rem;
-  }
-  /* Toast container positioning */
-  #reportToastContainer {
-    z-index: 1100;
-  }
-
-
   .background-container {
     background: url('{{ user.profile_wallpaper_url  }}') no-repeat center center;
     background-size: cover;
     padding-top: 30px;
     position: relative;
   }
-
-  .background-container::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.8));
-    z-index: 1;
-  }
-
-  .profile-container {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 2;
-  }
-
-  .profile-header {
-    background: url('{{ user.profile_banner_url  }}') no-repeat center center;
-    background-size: cover;
-    height: 200px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .profile-header::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
-  }
-
-  .profile-avatar {
-    max-width: 10rem;
-    height: auto;
-  }
-
-  .user-description {
-    max-height: 150px;
-    overflow: hidden;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  @media (max-width: 1000px) {
-    .profile-avatar {
-      max-width: 5rem;
-    }
-  }
 </style>
 {% endblock %}
 
-{% block header %}
-<link rel="stylesheet"
-  href="{{ url_for('static', filename='css/commentSystem.css') }}">
-{% endblock %}
-
 {% block content %}
-<!-- REPORT USER MODAL -->
-<!-- Toast container for confirmations -->
 <div class="toast-container position-fixed top-0 end-0 p-3" id="reportToastContainer"></div>
 
 <div
@@ -252,7 +182,7 @@
 
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %} px-1">
   <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 97%;">
-    <div class="profile-header rounded-3 mb-3"></div>
+    <div class="profile-header rounded-3 mb-3" style="background: url('{{ user.profile_banner_url  }}') no-repeat center center;"></div>
 
     <div class="row">
       <div class="col-md-8">
@@ -399,22 +329,72 @@
         </div>
       -->
 
-<h3 class="mt-5">Reading Stats</h3>
-<hr>
-<div class="row gy-4">
-  <div class="col-md-6">
-    <canvas id="readsChart"></canvas>
-  </div>
-  <div class="col-md-6">
-    <canvas id="publishersChart"></canvas>
-  </div>
-  <div class="col-md-6">
-    <canvas id="tagsChart"></canvas>
-  </div>
-  <div class="col-md-6">
-    <canvas id="countriesChart"></canvas>
+<div class="activity-panel bg-dark-subtle rounded border border-1 m-0 p-3">
+  <div class="calendar-wrapper mb-4">
+  <!-- 
+    This outer <div> is just a container with margin-bottom.
+    Below, .overflow-auto ensures the grid can scroll horizontally on narrow viewports.
+  -->
+  <div class="overflow-auto">
+    <!-- Month labels row: will scroll horizontally together with the grid -->
+    <div class="month-labels position-relative"></div>
+
+    <!-- 
+      Calendar Container: left = weekday labels (Mon/Wed/Fri),
+      right = the actual 7×N grid (#calendar).
+      We hide the weekday labels on <576 px via d-none d-sm-grid.
+    -->
+    <div class="calendar-container d-flex align-items-start my-3">
+      <!-- WEEKDAY LABELS (Mon, -, Wed, -, Fri, -, -) -->
+      <div class="weekday-labels d-none d-sm-grid me-2">
+        <span>Mon</span>
+        <span></span>
+        <span>Wed</span>
+        <span></span>
+        <span>Fri</span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <!-- THE 7×N GRID OF DAY SQUARES -->
+      <div id="calendar"></div>
+    </div>
   </div>
 </div>
+
+  <!-- 2) Activity Overview Box -->
+  <div class="activity-overview">
+    <!-- Left column: textual summary -->
+    <div class="overview-text">
+      <p class="year-total">
+        You’ve read <span id="yearTotalReads">0</span> stories in the past year.
+      </p>
+      <p class="source-list">
+        From <span id="topPublishersList">…</span>
+      </p>
+      <div class="mini-lists">
+        <div class="mini-list">
+          <strong>Top Tags</strong>
+          <ul id="topTagsList">
+            <!-- JS inserts up to 5 <li>security (40)</li> … -->
+          </ul>
+        </div>
+        <div class="mini-list">
+          <strong>Top Countries</strong>
+          <ul id="topCountriesList">
+            <!-- JS inserts up to 5 <li>US (60)</li> … -->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: small Chart.js for daily/weekly/monthly -->
+    <div class="overview-chart">
+      <canvas id="miniDistributionChart" width="150" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
 
 
         <!-- Comments -->
@@ -533,7 +513,7 @@
 </script>
 
     {% assets "js_profile" %}
-      <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
+      <script nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
     {% endassets %}
 
 <script nonce="{{ nonce }}"
