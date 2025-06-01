@@ -127,7 +127,7 @@ def has_allowed_dimensions(
     width, height = image.size
 
     minimum_dimensions = width >= min_width and height >= min_height
-    maximum_dimensions = width <= 3000 and height <= 3000
+    maximum_dimensions = width <= 5000 and height <= 5000
 
     return minimum_dimensions and maximum_dimensions
 

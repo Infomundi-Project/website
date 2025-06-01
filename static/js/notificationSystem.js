@@ -129,7 +129,10 @@ function loadNotifications() {
 
       // Pick an icon according to type:
       let iconClass = 
-        (n.type === "comment_reply" || n.type === "new_comment") ? "fa-comment"
+        (n.type === "new_comment") ? "fa-comment"
+      : (n.type === "security") ? "fa-user-shield"
+      : (n.type === "friend_accepted") ? "fa-user-check"
+      : (n.type === "comment_reply") ? "fa-comments"
       : (n.type === "friend_request")  ? "fa-user-plus"
       : (n.type === "friend_accepted") ? "fa-user-check"
       :                                   "fa-bell";

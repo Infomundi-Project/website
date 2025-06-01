@@ -460,7 +460,7 @@ def handle_friends():
         # Sends also notification to the user
         notifications.notify_single(
             current_user.id,
-            "friend_status",
+            "friend_accepted",
             f"You accepted the friend request from {friend.username}",
             url=url_for("views.user_profile_by_id", public_id=friend.get_public_id()),
         )

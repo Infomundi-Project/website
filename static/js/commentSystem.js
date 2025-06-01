@@ -170,7 +170,7 @@
 
                                   <p class="my-3 text-wrap" id="comment-content-${comment.id}" style="word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; word-break: break-word;">${comment.content}</p>
 
-                                  <div class="d-flex align-items-center mt-3">
+                                  <div class="d-flex align-items-center">
                                     <button class="btn btn-sm border like-btn me-2"${!window.isUserAuthenticated ? ` disabled` : ''}>
                                       <i class="fa-regular fa-thumbs-up me-1"></i><span class="like-count">${comment.likes}</span>
                                     </button>
@@ -266,7 +266,7 @@
       // 2) Create the toggle button
       const toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';
-      toggleBtn.className = 'btn btn-sm border mt-3';
+      toggleBtn.className = 'btn btn-sm border';
       toggleBtn.setAttribute('data-bs-toggle', 'collapse');
       toggleBtn.setAttribute('data-bs-target', `#${repliesContainer.id}`);
       toggleBtn.setAttribute('aria-expanded', 'false');
@@ -275,12 +275,12 @@
 
       // 3) Hook into Bootstrap’s events to swap the text
       repliesContainer.addEventListener('show.bs.collapse', () => {
-        toggleBtn.classList.replace("mt-3", "mb-2");
+        toggleBtn.classList.add("mb-2");
         toggleBtn.textContent =
           `Hide replies`;
       });
       repliesContainer.addEventListener('hide.bs.collapse', () => {
-        toggleBtn.classList.replace("mb-2", "mt-3");
+        toggleBtn.classList.remove("mb-2");
         toggleBtn.innerHTML =
           `<i class="fa-solid fa-share fa-flip-vertical me-1"></i>Replies<span class="badge text-bg-danger ms-3" id="infomundiCommentsCount">${comment.replies.length}</span>`;
       });

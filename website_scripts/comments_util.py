@@ -74,7 +74,7 @@ def is_content_inappropriate(content: str) -> bool:
     content_moderation = llm_util.is_inappropriate(
         text=content, simple_return=False
     ).categories
-    moderation_categories = ("self_harm", "illicit", "sexual_minors")
+    moderation_categories = ("self_harm", "sexual_minors")
     return any(
         getattr(content_moderation, category, False)
         for category in moderation_categories

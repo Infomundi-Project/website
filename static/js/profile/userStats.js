@@ -12,114 +12,135 @@ document.addEventListener("DOMContentLoaded", function() {
     console.error("Failed to load reading stats:", err);
   });
 
-  // =========================================
-  // 3.1) renderCalendar (Mon→Sun rows, responsive)
-  // =========================================
-  function renderCalendar(dailyCounts) {
-    const calendarEl = document.getElementById("calendar");
-    const monthLabelsEl = document.querySelector(".month-labels");
+// =========================================
+// 3.1) renderCalendar (using Bootstrap bg classes)
+// =========================================
+function renderCalendar(dailyCounts) {
+  const calendarEl       = document.getElementById("calendar");
+  const monthLabelsEl    = document.querySelector(".month-labels");
 
-    // 1) Clear any old content
-    calendarEl.innerHTML = "";
-    monthLabelsEl.innerHTML = "";
+  // 1) Clear any old content
+  calendarEl.innerHTML    = "";
+  monthLabelsEl.innerHTML = "";
 
-    // 2) Build a lookup { "YYYY-MM-DD": count }
-    const dateMap = {};
-    dailyCounts.forEach(obj => {
-      dateMap[obj.date] = obj.count;
-    });
+  // 2) Build a lookup { "YYYY-MM-DD": count }
+  const dateMap = {};
+  dailyCounts.forEach(obj => {
+    dateMap[obj.date] = obj.count;
+  });
 
-    // 3) Compute “today” (end of day) and “oneYearAgo” as UTC midnight
-    const utcToday = new Date();
-    const endOfDayToday = new Date(utcToday);
-    endOfDayToday.setHours(23, 59, 59, 999);
+  // 3) Compute “today” and “oneYearAgo”
+  const utcToday       = new Date();
+  const endOfDayToday  = new Date(utcToday);
+  endOfDayToday.setHours(23, 59, 59, 999);
 
-    const oneYearAgoUTC = new Date(dailyCounts[0].date + "T00:00:00Z");
-    // Example: if dailyCounts[0].date is "2024-05-31", that is exactly 365 days before today.
+  const oneYearAgoUTC = new Date(dailyCounts[0].date + "T00:00:00Z");
+  // … same as before …
 
-    // 4) Find the Sunday on or before oneYearAgoUTC
-    const dowOrig = oneYearAgoUTC.getUTCDay(); // 0 = Sunday, 1 = Monday, …, 6 = Saturday
-    const startOfCalendar = new Date(oneYearAgoUTC);
-    startOfCalendar.setUTCDate(startOfCalendar.getUTCDate() - dowOrig);
-    // Now startOfCalendar is that Sunday at 00:00 UTC.
+  // 4) Find the Sunday on/before oneYearAgoUTC
+  const dowOrig       = oneYearAgoUTC.getUTCDay();
+  const startOfCalendar = new Date(oneYearAgoUTC);
+  startOfCalendar.setUTCDate(startOfCalendar.getUTCDate() - dowOrig);
 
-    // 5) How many days from startOfCalendar → today (inclusive)?
-    const totalDays = Math.ceil(
-      (endOfDayToday.getTime() - startOfCalendar.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+  // 5) Compute totalDays, totalWeeks
+  const totalDays  = Math.ceil(
+    (endOfDayToday.getTime() - startOfCalendar.getTime()) /
+    (1000 * 60 * 60 * 24)
+  ) + 1;
+  const totalWeeks = Math.ceil(totalDays / 7);
 
-    // 6) How many full weeks do we need? (each week = 7 days)
-    const totalWeeks = Math.ceil(totalDays / 7);
+  // 6) Set #calendar / .month-labels width
+  const neededWidthPx = totalWeeks * 15;  // 12px + 3px gap = 15px
+  calendarEl.style.minWidth    = `${neededWidthPx}px`;
+  monthLabelsEl.style.minWidth = `${neededWidthPx}px`;
 
-    // 7) Dynamically set the min-width of #calendar and .month-labels
-    //    Each “column” is 12px wide + 3px gap = 15px total.
-    const neededWidthPx = totalWeeks * 15; 
-    calendarEl.style.minWidth = `${neededWidthPx}px`;
-    monthLabelsEl.style.minWidth = `${neededWidthPx}px`;
+  // 7) Append each day “column-major” (Mon→Sun down each column)
+  for (let weekIndex = 0; weekIndex < totalWeeks; weekIndex++) {
+    for (let rowIndex = 0; rowIndex < 7; rowIndex++) {
+      const actualDow = (rowIndex + 1) % 7; // 1=Mon … 6=Sat, 0=Sun
+      const cellDate  = new Date(startOfCalendar);
+      cellDate.setUTCDate(
+        cellDate.getUTCDate() + (weekIndex * 7) + actualDow
+      );
+      const isoStr = cellDate.toISOString().slice(0, 10);
 
-    // 8) Now append each day in “column-major” order, but with rows = Mon→Sun
-    for (let weekIndex = 0; weekIndex < totalWeeks; weekIndex++) {
-      for (let rowIndex = 0; rowIndex < 7; rowIndex++) {
-        // rowIndex=0 → Monday, ..., rowIndex=5 → Saturday, rowIndex=6 → Sunday
-        // actualDow: 1=Mon,2=Tue,...6=Sat,0=Sun
-        const actualDow = (rowIndex + 1) % 7;
+      const inRange = 
+        cellDate.getTime() >= oneYearAgoUTC.getTime() &&
+        cellDate.getTime() <= endOfDayToday.getTime();
 
-        // Compute this cell’s date by offsetting from startOfCalendar
-        const cellDate = new Date(startOfCalendar);
-        cellDate.setUTCDate(cellDate.getUTCDate() + weekIndex * 7 + actualDow);
+      // Create the <div class="day">
+      const dayEl = document.createElement("div");
+      dayEl.classList.add("day");
 
-        // Format as "YYYY-MM-DD"
-        const isoStr = cellDate.toISOString().slice(0, 10);
+      if (!inRange) {
+        // OUTSIDE the 1-year window → just a placeholder
+        // We’ll keep it as a dimmed square (opacity set in CSS)
+        dayEl.classList.add("placeholder");
+        // If you want a specific background-color for placeholders,
+        // you could also add a Bootstrap class like “bg-dark bg-opacity-10”:
+        // dayEl.classList.add("bg-dark", "bg-opacity-10");
+        dayEl.setAttribute("data-count", 0);
+        dayEl.setAttribute("data-date", "");
+      } else {
+        // INSIDE the 1-year window: figure out how many “reads” on this date
+        const count = dateMap[isoStr] || 0;
+        const lvl   = getLevel(count);
 
-        // Check if this date is within the one-year-ago … today range:
-        const inRange =
-          cellDate.getTime() >= oneYearAgoUTC.getTime() &&
-          cellDate.getTime() <= endOfDayToday.getTime();
-
-        // Create the <div class="day">
-        const dayEl = document.createElement("div");
-        if (!inRange) {
-          // Placeholder—outside of the one-year window
-          dayEl.className = "day lvl-0 placeholder";
-          dayEl.setAttribute("data-count", 0);
-          dayEl.setAttribute("data-date", "");
-        } else {
-          // Look up how many “reads” on that date
-          const count = dateMap[isoStr] || 0;
-          const lvl = getLevel(count);
-          dayEl.className = `day lvl-${lvl}`;
-          dayEl.setAttribute("data-count", count);
-          dayEl.setAttribute("data-date", isoStr);
-          const readWord = count === 1 ? "read" : "reads";
-          dayEl.setAttribute("data-bs-toggle", "tooltip");
-          dayEl.setAttribute("data-bs-title", `${count} ${readWord} on ${isoStr}`);
+        // Depending on lvl (0…3), we map to Bootstrap utilities:
+        //
+        //   lvl = 0  →  no reads:     bg-secondary
+        //   lvl = 1  →  1–10 reads:    bg-success bg-opacity-50
+        //   lvl = 2  →  11–25 reads:    bg-success bg-opacity-75
+        //   lvl = 3  →  25+ reads:    bg-success
+        //
+        switch (lvl) {
+          case 0:
+            dayEl.classList.add("bg-secondary");
+            break;
+          case 1:
+            dayEl.classList.add("bg-success", "bg-opacity-50");
+            break;
+          case 2:
+            dayEl.classList.add("bg-success", "bg-opacity-75");
+            break;
+          case 3:
+            dayEl.classList.add("bg-success");
+            break;
         }
 
-        // Because #calendar has "grid-auto-flow: column",
-        // appending here places it at row=(rowIndex+1), col=(weekIndex+1).
-        calendarEl.appendChild(dayEl);
-      }
-    }
+        dayEl.setAttribute("data-count", count);
+        dayEl.setAttribute("data-date", isoStr);
 
-    // 9) Finally, render month labels above their correct columns:
-    renderMonthLabels(startOfCalendar, totalWeeks, oneYearAgoUTC, endOfDayToday);
+        const readWord = count === 1 ? "read" : "reads";
+        dayEl.setAttribute("data-bs-toggle", "tooltip");
+        dayEl.setAttribute(
+          "data-bs-title",
+          `${count} ${readWord} on ${isoStr}`
+        );
+      }
+
+      // Because #calendar has “grid-auto-flow: column”,
+      // appending here places <div> at row=(rowIndex+1), col=(weekIndex+1).
+      calendarEl.appendChild(dayEl);
+    }
   }
+
+  // 8) Finally, render month labels
+  renderMonthLabels(startOfCalendar, totalWeeks, oneYearAgoUTC, endOfDayToday);
+  initializeTooltips();
+}
+
 
   // ------------------------------------------
   // Helper: bucket a count into 0…4
   // ------------------------------------------
   function getLevel(count) {
     if (count === 0) return 0;
-    if (count < 3) return 1;
-    if (count < 6) return 2;
-    if (count < 10) return 3;
-    return 4;
+    if (count < 11) return 1;
+    if (count < 25) return 2;
+    return 3;
   }
 
-  // =========================================
-  // 3.2) renderMonthLabels
-  // =========================================
-  // Places a <span> with "Jan","Feb", etc. above the first column in which that month appears.
   function renderMonthLabels(startSunday, totalWeeks, oneYearAgoUTC, endOfDayToday) {
     const monthLabelsEl = document.querySelector(".month-labels");
     monthLabelsEl.innerHTML = "";
@@ -158,9 +179,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // =========================================
-  // 3.3) renderOverview (unchanged from before)
-  // =========================================
   function renderOverview(data) {
     const yearTotal = data.daily_counts.reduce((sum, obj) => sum + obj.count, 0);
     document.getElementById("yearTotalReads").textContent = yearTotal;

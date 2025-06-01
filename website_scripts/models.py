@@ -57,7 +57,7 @@ class Story(db.Model):
     url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
 
     pub_date = db.Column(db.DateTime, nullable=False)
-    image_url = db.Column(db.String(100))
+    image_url = db.Column(db.String(100))  # This should be removed
     has_image = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -80,6 +80,9 @@ class Story(db.Model):
 
     def get_public_id(self) -> str:
         return hashing_util.binary_to_md5_hex(self.url_hash)
+
+    def get_image_url(self) -> str:
+        return f'https://bucket.infomundi.net/{self.category.name}/{self.get_public_id()}.avif'
 
 
 class StoryReaction(db.Model):
@@ -129,9 +132,12 @@ class User(db.Model, UserMixin):
     # Profile
     display_name = db.Column(db.String(40))
     profile_description = db.Column(db.String(1500))
+
+    # This should be removed.
     avatar_url = db.Column(db.String(85), default="/static/img/avatar.webp")
     profile_banner_url = db.Column(db.String(85))
     profile_wallpaper_url = db.Column(db.String(85))
+
     # Contact info
     website_url = db.Column(db.String(120))
     public_email = db.Column(db.String(120))
@@ -142,7 +148,8 @@ class User(db.Model, UserMixin):
     # level and privacy
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
-    # Privacy settings
+    
+    # Privacy settings - this should change (integers)
     profile_visibility = db.Column(
         db.String(7), default="public"
     )  # "public", "login", "friends", "private"

@@ -83,6 +83,22 @@ def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
     Create-and-commit a Notification for a user,
     but first check if an unread one already exists.
     """
+    types_allowed = (
+        "default",
+        "new_comment",
+        "comment_reply",
+        "comment_reaction",
+        "friend_request",
+        "friend_accepted",
+        "friend_status",
+        "mentions",
+        "security",
+        "profile_edit",
+    )
+
+    if type not in types_allowed:
+        raise InfomundiCustomException(f"Type should be one of {' '.join(types_allowed)}")
+
     filters = {
         "user_id": user_id,
         "type": type,
