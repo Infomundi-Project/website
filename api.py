@@ -1,5 +1,5 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
-from sqlalchemy import and_, cast, desc, asc, insert
+from sqlalchemy import and_, cast, desc, asc, insert, func
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
@@ -92,7 +92,7 @@ def get_crypto():
 def update_pubkey():
     jwk = request.json.get("publicKey")
     if not jwk:
-        abort(400, detail="jwk is required")
+        abort(400, description="jwk is required")
     current_user.public_key_jwk = jwk
     extensions.db.session.commit()
     return "", 204
@@ -103,7 +103,7 @@ def update_pubkey():
 def get_pubkey(friend_id):
     fs_status = friends_util.get_friendship_status(current_user.id, friend_id)[0]
     if fs_status != "accepted":
-        abort(403, detail="No friendship with this user")
+        abort(403, description="No friendship with this user")
     friend = extensions.db.session.get(models.User, friend_id)
     return jsonify(publicKey=friend.public_key_jwk)
 
@@ -116,7 +116,7 @@ def get_messages(friend_id):
         0
     ]
     if friendship_status != "accepted":
-        abort(403, detail="No friendship with this user.")
+        abort(403, description="No friendship with this user.")
 
     # Query last N messages between users (both directions)
     msgs = (
@@ -180,8 +180,8 @@ def reading_stats(uid):
     for period, since in cuts.items():
         stats[period] = (
             extensions.db.session.query(
-                extensions.db.func.count(
-                    extensions.db.func.distinct(models.UserStoryView.story_id)
+                func.count(
+                    func.distinct(models.UserStoryView.story_id)
                 )
             )
             .filter(
@@ -196,8 +196,8 @@ def reading_stats(uid):
     top_pubs = (
         extensions.db.session.query(
             models.Publisher.name,
-            extensions.db.func.count(
-                extensions.db.func.distinct(models.UserStoryView.story_id)
+            func.count(
+                func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Publisher.id == models.Story.publisher_id)
@@ -213,8 +213,8 @@ def reading_stats(uid):
     top_tags = (
         extensions.db.session.query(
             models.Tag.tag,
-            extensions.db.func.count(
-                extensions.db.func.distinct(models.UserStoryView.story_id)
+            func.count(
+                func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Tag.story_id == models.Story.id)
@@ -230,8 +230,8 @@ def reading_stats(uid):
     country_counts = (
         extensions.db.session.query(
             models.Category.name,
-            extensions.db.func.count(
-                extensions.db.func.distinct(models.UserStoryView.story_id)
+            func.count(
+                func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .join(models.Story, models.Category.id == models.Story.category_id)
@@ -255,19 +255,19 @@ def reading_stats(uid):
     # -------------------------
     daily_rows = (
         extensions.db.session.query(
-            extensions.db.func.date(models.UserStoryView.viewed_at).label(
+            func.date(models.UserStoryView.viewed_at).label(
                 "d"
             ),  # MySQL DATE()
-            extensions.db.func.count(
-                extensions.db.func.distinct(models.UserStoryView.story_id)
+            func.count(
+                func.distinct(models.UserStoryView.story_id)
             ).label("ctr"),
         )
         .filter(
             models.UserStoryView.user_id == uid,
             models.UserStoryView.viewed_at >= one_year_ago,
         )
-        .group_by(extensions.db.func.date(models.UserStoryView.viewed_at))
-        .order_by(extensions.db.func.date(models.UserStoryView.viewed_at))
+        .group_by(func.date(models.UserStoryView.viewed_at))
+        .order_by(func.date(models.UserStoryView.viewed_at))
         .all()
     )
     # daily_rows: list of (date (as a Python date), count) for each date where user viewed ≥1 story.
@@ -421,15 +421,15 @@ def handle_friends():
     if action not in ("add", "accept", "reject", "delete") or not friend_id:
         abort(
             400,
-            detail="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
+            description="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
         )
 
     if current_user.id == friend_id:
-        abort(400, detail="You can't friend yourself")
+        abort(400, description="You can't friend yourself.")
 
     friend = extensions.db.session.get(models.User, friend_id)
     if not friend:
-        abort(404, detail="Could not find user.")
+        abort(404, description="Couldn't find user.")
 
     if action == "add":
         new_friendship_id = friends_util.send_friend_request(current_user.id, friend_id)
@@ -446,7 +446,7 @@ def handle_friends():
 
     elif action == "accept":
         if not friends_util.accept_friend_request(current_user.id, friend_id):
-            abort(404, detail="Friendship not found")
+            abort(404, description="You don't have a pending request from this user.")
 
         # Sends notification to the friend
         notifications.notify_single(
@@ -468,7 +468,9 @@ def handle_friends():
 
     elif action == "reject":
         if not friends_util.reject_friend_request(current_user.id, friend_id):
-            return abort(404, detail="You don't have a pending request from this user.")
+            return abort(
+                404, description="You don't have a pending request from this user."
+            )
 
         return jsonify(message="Friend request rejected."), 200
 
@@ -841,53 +843,71 @@ def summarize_story(story_url_hash):
 
 @api.route("/get_stories", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 15, query_string=True)  # 15 min cached
-@extensions.limiter.limit("12/minute", override_defaults=True)
+@extensions.limiter.limit("20/minute", override_defaults=True)
 def get_stories():
-    """Returns jsonified list of stories based on certain criteria. Cached for 15 min (60s * 15)."""
+    """Returns a JSON list of stories, ordered by views, likes, comments, or publication date."""
+    # 1) Read query parameters
     country = request.args.get("country", "br", type=str).lower()
-    category = request.args.get("category", "general", type=str).lower()
+    category_slug = request.args.get("category", "general", type=str).lower()
     page = request.args.get("page", 1, type=int)
-    order_by = request.args.get("order_by", "created_at", type=str).lower()
+    order_by = request.args.get("order_by", "pub_date", type=str).lower()
     order_dir = request.args.get("order_dir", "desc", type=str).lower()
 
     start_date = request.args.get("start_date", "", type=str)
     end_date = request.args.get("end_date", "", type=str)
-    # query = request.args.get('query', '', type=str)
 
-    # br_general, us_general and so on
-    category = models.Category.query.filter_by(name=f"{country}_{category}").first()
+    # 2) Resolve the Category row (e.g. "br_general")
+    category = models.Category.query.filter_by(name=f"{country}_{category_slug}").first()
     if not category:
         return jsonify({"error": "This category is not yet supported!"}), 404
 
-    valid_order_columns = ("created_at", "views", "title", "pub_date")
+    # 3) Allow only these four order fields; default to "pub_date"
+    valid_order_columns = ("views", "likes", "comments", "pub_date")
     if order_by not in valid_order_columns:
-        order_by = "created_at"
+        order_by = "pub_date"
 
-    model = models.StoryStats if order_by == "views" else models.Story
+    # 4) Build the base filters on Story (category + has_image)
+    base_filters = [
+        models.Story.category_id == category.id,
+        models.Story.has_image == True,
+    ]
 
-    if order_dir == "asc":
-        order_criterion = getattr(model, order_by).asc()
-    else:
-        order_criterion = getattr(model, order_by).desc()
+    # 5) If ordering by "comments", prepare a subquery that counts non-deleted comments per story
+    if order_by == "comments":
+        comment_counts = (
+            extensions.db.session
+            .query(
+                models.Comment.story_id.label("story_id"),
+                func.count(models.Comment.id).label("comment_count")
+            )
+            .filter(models.Comment.is_deleted == False)
+            .group_by(models.Comment.story_id)
+            .subquery()
+        )
 
-    # Page should be between 1 and 9999
-    if not (1 <= page <= 9999):
-        page = 1
+    # 6) Start building the main query
+    query = models.Story.query.filter(and_(*base_filters))
 
-    # Basic filtering. Category id should match and story should have image.
-    query_filters = [models.Story.category_id == category.id, models.Story.has_image]
+    # 7) If ordering by "views" or "likes", we need to join StoryStats
+    if order_by in ("views", "likes"):
+        query = query.outerjoin(
+            models.StoryStats,
+            models.Story.id == models.StoryStats.story_id
+        )
 
-    # if query:
-    #    query_filters.append(
-    #        extensions.db.func.match(models.Story.title, models.Story.description, query)
-    #    )
+    # 8) If ordering by "comments", join the comment_counts subquery
+    if order_by == "comments":
+        query = query.outerjoin(
+            comment_counts,
+            models.Story.id == comment_counts.c.story_id
+        )
 
+    # 9) Apply date filtering if both start_date and end_date are provided
     if start_date and end_date:
         try:
             start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
             end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
-
-            query_filters.append(
+            query = query.filter(
                 and_(
                     cast(models.Story.pub_date, Date) >= start_date_obj,
                     cast(models.Story.pub_date, Date) <= end_date_obj,
@@ -896,10 +916,29 @@ def get_stories():
         except ValueError:
             return jsonify({"error": "Invalid date format: must be YYYY-MM-DD."}), 400
 
+    # 10) Determine the ORDER BY column
+    if order_by == "views":
+        order_column = models.StoryStats.views
+    elif order_by == "likes":
+        order_column = models.StoryStats.likes
+    elif order_by == "comments":
+        # Use COALESCE so that stories with no comments sort as zero
+        order_column = func.coalesce(comment_counts.c.comment_count, 0)
+    else:  # "pub_date"
+        order_column = models.Story.pub_date
+
+    if order_dir == "asc":
+        order_criterion = order_column.asc()
+    else:
+        order_criterion = order_column.desc()
+
+    # 11) Pagination setup
     stories_per_page = 9
     start_index = (page - 1) * stories_per_page
+
+    # 12) Execute query, eager-loading publisher
     stories = (
-        models.Story.query.filter(and_(*query_filters))
+        query
         .options(joinedload(models.Story.publisher))
         .order_by(order_criterion, models.Story.id)
         .offset(start_index)
@@ -907,17 +946,32 @@ def get_stories():
         .all()
     )
 
-    stories_list = [
-        {
+    # 13) Serialize results (including num_comments for clarity)
+    stories_list = []
+    for story in stories:
+        # Count non-deleted comments for each story (if the user requested ordering by comments,
+        # we already joined the subquery, but here we recompute to include in the response)
+        num_comments = (
+            extensions.db.session.query(func.count(models.Comment.id))
+            .filter(
+                models.Comment.story_id == story.id,
+                models.Comment.is_deleted == False
+            )
+            .scalar()
+            or 0
+        )
+
+        stories_list.append({
             "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
             "id": story.id,
             "title": story.title,
             "tags": [tag.tag for tag in story.tags],
             "author": story.author,
-            "description": story.description if story.description else "",
+            "description": story.description or "",
             "views": story.stats.views if story.stats else 0,
             "likes": story.stats.likes if story.stats else 0,
             "dislikes": story.stats.dislikes if story.stats else 0,
+            "num_comments": num_comments,
             "url": story.url,
             "pub_date": story.pub_date,
             "publisher": {
@@ -926,9 +980,8 @@ def get_stories():
                 "favicon_url": story.publisher.favicon_url,
             },
             "image_url": story.image_url,
-        }
-        for story in stories
-    ]
+        })
+
     return jsonify(stories_list)
 
 
@@ -1094,7 +1147,7 @@ def edit_comment(comment_id):
     comment = models.Comment.query.get_or_404(comment_id)
 
     if comment.user_id != current_user.id:
-        abort(403, detail="You can't edit someone else's comment.")
+        abort(403, description="You can't edit someone else's comment.")
 
     data = request.get_json()
     content = input_sanitization.gentle_cut_text(
@@ -1102,7 +1155,7 @@ def edit_comment(comment_id):
     )
 
     if not content:
-        abort(400, detail="Content shoudln't be empty.")
+        abort(400, description="Content shoudln't be empty.")
 
     comment.content = content
     comment.is_flagged = comments_util.is_content_inappropriate(content)
@@ -1347,14 +1400,14 @@ def mark_all_notifications_read():
 @decorators.api_login_required
 def block_user(uid, action):
     if uid == current_user.id:
-        abort(404, detail="Self-blocking? Well, that's new")
+        abort(404, description="Self-blocking? Well, that's new")
 
     if action not in ("add", "remove"):
-        abort(400, detail="Unrecognized action.")
+        abort(400, description="Unrecognized action.")
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
-        abort(404, detail="Couldn't find target user.")
+        abort(404, description="Couldn't find target user.")
 
     block = models.UserBlock.query.filter_by(
         blocker_id=current_user.id, blocked_id=uid
@@ -1372,7 +1425,7 @@ def block_user(uid, action):
         extensions.db.session.add(new_block)
     else:
         if not block:
-            abort(400, detail="User is not blocked.")
+            abort(400, description="User is not blocked.")
         extensions.db.session.delete(block)
 
     extensions.db.session.commit()
@@ -1418,14 +1471,14 @@ def user_reports(uid, report_id=0):
             "inappropriate",
             "other",
         ):
-            abort(404, detail="Couldn't find target category.")
+            abort(404, description="Couldn't find target category.")
 
     if request.method == "POST":
         report = models.UserReport.query.filter_by(
             reporter_id=current_user.id, reported_id=uid, category=category
         ).first()
         if report:
-            abort(400, detail="You've already reported this user.")
+            abort(400, description="You've already reported this user.")
 
         report = models.UserReport(
             reporter=current_user, reported=target, reason=reason, category=category
@@ -1437,7 +1490,7 @@ def user_reports(uid, report_id=0):
             report_id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
-            abort(404, detail="Couldn't find target report.")
+            abort(404, description="Couldn't find target report.")
 
         extensions.db.session.delete(report)
     elif request.method == "PATCH":
@@ -1445,7 +1498,7 @@ def user_reports(uid, report_id=0):
             report_id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
-            abort(404, detail="Couldn't find target report.")
+            abort(404, description="Couldn't find target report.")
 
         report.reason = reason
         report.category = category

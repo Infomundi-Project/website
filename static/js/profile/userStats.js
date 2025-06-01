@@ -144,6 +144,7 @@ function renderCalendar(dailyCounts) {
   function renderMonthLabels(startSunday, totalWeeks, oneYearAgoUTC, endOfDayToday) {
     const monthLabelsEl = document.querySelector(".month-labels");
     monthLabelsEl.innerHTML = "";
+    //monthLabelsEl.classList = "text-secondary";
 
     function shortMonthName(idx) {
       return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][idx];
@@ -173,7 +174,7 @@ function renderCalendar(dailyCounts) {
         const span = document.createElement("span");
         span.textContent = shortMonthName(monthIdx);
         // Each column is 12px + 3px gap = 15px wide
-        span.style.left = `${weekIndex * 15}px`;
+        span.style.left = `${weekIndex * 15.5}px`;
         monthLabelsEl.appendChild(span);
       }
     }
@@ -191,7 +192,7 @@ function renderCalendar(dailyCounts) {
       pubString = pubs.join(" and ");
     } else {
       const firstTwo = pubs.slice(0, 2).join(", ");
-      pubString = `${firstTwo} and ${pubs.length - 2} other†s`;
+      pubString = `${firstTwo} and ${pubs.length - 2} others`;
     }
     document.getElementById("topPublishersList").textContent = pubString;
 
@@ -200,6 +201,7 @@ function renderCalendar(dailyCounts) {
     data.top_tags.forEach(t => {
       const li = document.createElement("li");
       li.textContent = `${t.tag} (${t.count})`;
+      li.classList = "text-secondary mb-1";
       topTagsUl.appendChild(li);
     });
     if (data.top_tags.length === 0) {
@@ -213,6 +215,7 @@ function renderCalendar(dailyCounts) {
     data.top_countries.forEach(c => {
       const li = document.createElement("li");
       li.textContent = `${c.country} (${c.count})`;
+      li.classList = 'text-secondary mb-1';
       topCountriesUl.appendChild(li);
     });
     if (data.top_countries.length === 0) {
@@ -245,7 +248,6 @@ function renderCalendar(dailyCounts) {
           title: {
             display: true,
             text: "Reading Rhythm",
-            color: "#8b949e",
             font: { size: 12 }
           }
         },

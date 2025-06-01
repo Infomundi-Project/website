@@ -67,7 +67,7 @@ extensions.cache.init_app(app)
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # 2 Megabytes
 app.config["UPLOAD_FOLDER"] = "static/img/users/"
 
-"""
+
 @api.errorhandler(400)
 @api.errorhandler(403)
 @api.errorhandler(404)
@@ -85,8 +85,18 @@ def api_error_handler(error):
     else:
         error_title = "Not Found"
 
-    return jsonify(success=False, error={"status": f"{http_status}", "title": error_title, "detail": error.detail}), http_status
-"""
+    return (
+        jsonify(
+            success=False,
+            error={
+                "status": f"{http_status}",
+                "title": error_title,
+                "detail": error.description,
+            },
+        ),
+        http_status,
+    )
+
 
 # Blueprints
 app.register_blueprint(auth, url_prefix="/auth")

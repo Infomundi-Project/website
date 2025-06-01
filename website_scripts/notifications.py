@@ -97,7 +97,9 @@ def notify_single(user_id: int, type: str, message: str, **fk_kwargs):
     )
 
     if type not in types_allowed:
-        raise InfomundiCustomException(f"Type should be one of {' '.join(types_allowed)}")
+        raise InfomundiCustomException(
+            f"Type should be one of {' '.join(types_allowed)}"
+        )
 
     filters = {
         "user_id": user_id,

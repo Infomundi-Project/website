@@ -82,7 +82,7 @@ class Story(db.Model):
         return hashing_util.binary_to_md5_hex(self.url_hash)
 
     def get_image_url(self) -> str:
-        return f'https://bucket.infomundi.net/{self.category.name}/{self.get_public_id()}.avif'
+        return f"https://bucket.infomundi.net/{self.category.name}/{self.get_public_id()}.avif"
 
 
 class StoryReaction(db.Model):
@@ -148,7 +148,7 @@ class User(db.Model, UserMixin):
     # level and privacy
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
-    
+
     # Privacy settings - this should change (integers)
     profile_visibility = db.Column(
         db.String(7), default="public"
