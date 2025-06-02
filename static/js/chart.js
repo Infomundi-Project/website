@@ -1,85 +1,101 @@
 am5.ready(function() {
 
-var root = am5.Root.new("chartdiv");
+  // 1) Create root element
+  var root = am5.Root.new("chartdiv");
+
+  // 2) Set themes
+  root.setThemes([
+    am5themes_Animated.new(root)
+  ]);
+
+  // 3) Create the map chart
+  var chart = root.container.children.push(am5map.MapChart.new(root, {
+    panX: "rotateX",
+    projection: am5map.geoNaturalEarth1()
+  }));
+
+  // 4) Create polygon series for continents
+  var continentSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+    geoJSON: am5geodata_continentsLow,
+    exclude: ["antarctica"]
+  }));
+
+  continentSeries.mapPolygons.template.setAll({
+    tooltipText: "{name}",
+    interactive: true
+  });
+
+  continentSeries.mapPolygons.template.states.create("hover", {
+    fill: root.interfaceColors.get("primaryButtonActive")
+  });
+
+  // Zoom into a continent on click
+  continentSeries.mapPolygons.template.events.on("click", function(ev) {
+    continentSeries.zoomToDataItem(ev.target.dataItem);
+    continentSeries.hide();
+    countrySeries.show();
+    homeButton.show();
+  });
 
 
-root.setThemes([
-  am5themes_Animated.new(root)
-]);
+  // 5) Create polygon series for countries (initially hidden)
+  var countrySeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+    geoJSON: am5geodata_worldLow,
+    exclude: ["AQ"],      // Exclude Antarctica
+    visible: false       // Start hidden
+  }));
 
+  countrySeries.mapPolygons.template.setAll({
+    tooltipText: "{name}",
+    interactive: true
+  });
 
-var chart = root.container.children.push(am5map.MapChart.new(root, {
-  panX: "rotateX",
-  panY: "rotateY",
-  projection: am5map.geoOrthographic(),
-  paddingBottom: 20,
-  paddingTop: 20,
-  paddingLeft: 20,
-  paddingRight: 20
-}));
+  countrySeries.mapPolygons.template.states.create("hover", {
+    fill: root.interfaceColors.get("primaryButtonActive")
+  });
 
-
-var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
-  geoJSON: am5geodata_worldLow 
-}));
-
-polygonSeries.mapPolygons.template.setAll({
-  tooltipText: "{name}",
-  toggleKey: "active",
-  interactive: true
-});
-
-polygonSeries.mapPolygons.template.states.create("hover", {
-  fill: root.interfaceColors.get("primaryButtonHover")
-});
-
-polygonSeries.mapPolygons.template.states.create("active", {
-  fill: root.interfaceColors.get("primaryButtonHover")
-});
-
-
-var backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
-backgroundSeries.mapPolygons.template.setAll({
-  fill: root.interfaceColors.get("alternativeBackground"),
-  fillOpacity: 0.105,
-  strokeOpacity: 0
-});
-backgroundSeries.data.push({
-  geometry: am5map.getGeoRectangle(90, 180, -90, -180)
-});
-
-
-var previousPolygon;
-
-polygonSeries.mapPolygons.template.on("active", function(active, target) {
-  if (previousPolygon && previousPolygon != target) {
-    previousPolygon.set("active", false);
+  // HELPER: if you prefer a “Promise‐based” sleep
+  function sleep(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
   }
-  if (target.get("active")) {
-    selectCountry(target.dataItem.get("id"));
-  }
-  previousPolygon = target;
-});
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+  // 6) When a country is clicked, grab its ISO code (id) and redirect after 1.5 seconds
+  countrySeries.mapPolygons.template.events.on("click", function(ev) {
+    // ev.target.dataItem.get("id") is the ISO code (e.g., "US", "BR", etc.)
+    var dataItem = ev.target.dataItem;
+    var selectedCountry = dataItem.get("id");
 
-function selectCountry(id) {
-  var dataItem = polygonSeries.getDataItemById(id);
-  var target = dataItem.get("mapPolygon");
-  if (target) {
-    var centroid = target.geoCentroid();
-    if (centroid) {
-      chart.animate({ key: "rotationX", to: -centroid.longitude, duration: 1500, easing: am5.ease.inOut(am5.ease.cubic) });
-      chart.animate({ key: "rotationY", to: -centroid.latitude, duration: 1500, easing: am5.ease.inOut(am5.ease.cubic) });
+    // Optional: you might want to hide the map or show a loading state here.
+    // e.g. countrySeries.hide(); continentSeries.hide();
 
-      var selectedCountry = dataItem.get("id");
-      sleep(1500).then(() => { window.location.href = '/news?country=' + encodeURIComponent(selectedCountry); });
-    }
-  }
-}
+    // Wait 100ms, then redirect:
+    sleep(100).then(function() {
+      window.location.href = "/news?country=" + encodeURIComponent(selectedCountry);
+    });
+  });
 
-chart.appear(1000, 100);
 
-});
+  // 7) Add a “home” button to go back to the continents view
+  var homeButton = chart.children.push(am5.Button.new(root, {
+    paddingTop: 10,
+    paddingBottom: 10,
+    x: am5.percent(100),
+    centerX: am5.percent(100),
+    opacity: 0,
+    interactiveChildren: false,
+    icon: am5.Graphics.new(root, {
+      svgPath: "M16,8 L14,8 L14,16 L10,16 L10,10 L6,10 L6,16 L2,16 L2,8 L0,8 L8,0 L16,8 Z M16,8",
+      fill: am5.color(0xffffff)
+    })
+  }));
+
+  homeButton.events.on("click", function() {
+    chart.goHome();
+    continentSeries.show();
+    countrySeries.hide();
+    homeButton.hide();
+  });
+
+}); // end am5.ready()

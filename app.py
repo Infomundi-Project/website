@@ -388,6 +388,7 @@ js_home = Bundle(
     "js/amcharts/map.js",
     "js/amcharts/worldLow.js",
     "js/amcharts/animated.js",
+    "js/amcharts/continentsLow.js",
     "js/chart.js",
     filters="jsmin",
     output="gen/home_packed.js",
