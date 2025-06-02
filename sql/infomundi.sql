@@ -26,7 +26,7 @@ DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    public_id BINARY(16) NOT NULL UNIQUE, -- UUIDv4 Binary, for public display
+    public_id BINARY(16) NOT NULL UNIQUE, -- UUIDv4 Binary, for public display in certain occasions
     
     username VARCHAR(25) UNIQUE NOT NULL,
     
@@ -50,21 +50,28 @@ CREATE TABLE users (
     -- Profile
     display_name VARCHAR(40),
     profile_description VARCHAR(1500),
-    avatar_url VARCHAR(85) DEFAULT '/static/img/avatar.webp',
-    profile_banner_url VARCHAR(85),
-    profile_wallpaper_url VARCHAR(85),
-    -- contact info
+    
+    -- Below fields can all be calculated later in the application because paths to user-uploaded images are made of the user's public ID
+    has_avatar TINYINT(1) DEFAULT 0,
+    has_banner TINYINT(1) DEFAULT 0,
+    has_wallpaper TINYINT(1) DEFAULT 0,
+    
+    -- Contact info
     website_url VARCHAR(120),
     public_email VARCHAR(120),
-    -- external links
+    
+    -- External links
     twitter_url VARCHAR(80),
     instagram_url VARCHAR(80),
     linkedin_url VARCHAR(80),
-    -- level and visibility
+    
+    -- Level
     level INT DEFAULT 0,
     level_progress INT DEFAULT 0,
-    profile_visibility VARCHAR(7) DEFAULT 'public',  -- public, friends, private
-    notification_type VARCHAR(9) DEFAULT 'all',  -- all, important, none
+    
+    -- Preferences
+    profile_visibility TINYINT(1) DEFAULT 0,  -- 0 = public // 1 = login-only // 2 = friends-only // 3 = private
+    notification_type TINYINT(1) DEFAULT 0,  -- 0 = all // 1 = important-only // 2 = none
 
     -- Account Registration
     is_enabled TINYINT(1) DEFAULT 0,
@@ -95,9 +102,10 @@ CREATE TABLE users (
     mail_twofactor_code INT,
     mail_twofactor_timestamp DATETIME,
 
-    -- messaging pk
+    -- Messaging public key
     public_key_jwk JSON,
 
+    -- Country info
     country_id MEDIUMINT UNSIGNED,
     state_id MEDIUMINT UNSIGNED,
     city_id MEDIUMINT UNSIGNED,
@@ -145,7 +153,6 @@ CREATE TABLE stories (
     url_hash BINARY(16) UNIQUE NOT NULL,
     
     pub_date DATETIME NOT NULL,
-    image_url VARCHAR(100),
     has_image TINYINT(1) DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     

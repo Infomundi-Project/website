@@ -65,7 +65,7 @@ def convert_and_save(
     # Creates and saves the output image buffer so we can upload them later to the bucket.
     output_buffer = BytesIO()
     image.save(
-        output_buffer, format="JPEG", optimize=True, quality=50, progressive=True
+        output_buffer, format="webp", optimize=True, quality=70, progressive=True
     )
 
     output_buffer.seek(0)

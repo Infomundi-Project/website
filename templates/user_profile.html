@@ -207,9 +207,9 @@
           </div>
           <div class="col-9 px-1">
 
-            <ul class="list-inline notranslate fw-bold mb-1">
+            <ul class="list-inline notranslate mb-1">
               
-              <li class="list-inline-item fs-2">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</li>
+              <li class="list-inline-item fw-bold fs-3">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</li>
               <li class="list-inline-item text-muted fs-5" title="Username">@{{ user.username }}</li>
 
             </ul>
@@ -221,7 +221,7 @@
               {% if user.country %}
               <li class="list-inline-item">
                 <div class="d-inline-flex align-top">
-                  <img src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg" class="rounded img-fluid me-1" style="height: auto; width: 1.5rem" alt="{{ user.country.nationality }} Flag" title="{{ user.country.nationality }} Flag">{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
+                  <img src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg" class="rounded img-fluid me-1" style="height: auto; width: 1.25rem" alt="{{ user.country.nationality }} Flag" title="{{ user.country.nationality }} Flag">{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
                 </div>
               </li>
               {% endif %}
@@ -499,9 +499,6 @@
   window.profileUserId = {{ user.id }};
   window.profileUserName = '{{ user.display_name or user.username }}';
 </script>
-
-<script nonce="{{ nonce }}"
-  src="{{ url_for('static', filename='js/libs/chart.umd.min.js') }}"></script>
 
 <script nonce="{{ nonce }}">
   const sendMessageDropdown = document.getElementById('sendMessageDropdown');

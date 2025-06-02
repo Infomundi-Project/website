@@ -1,146 +1,394 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %}
+{% extends "base.html" %}
+{% block title %}Dashboard Home{% endblock %}
+
 {% block styles %}
 <style>
+  /* Only minimal inline styles—everything else uses Bootstrap utilities */
   #chartdiv {
-  width: 100%;
-  height: 800px;
-  max-width: 100%;
+    width: 100%;
+    height: 400px;
   }
-  .fa-solid me-1 {
-  color: #ffffff;
+  @media (max-width: 768px) {
+    #chartdiv {
+      height: 300px;
+    }
   }
-  {% if not is_light_mode %}
-  .accordion {
-  --bs-accordion-btn-bg: #202429;
-  --bs-accordion-btn-color: #ffffff;
-  --bs-accordion-active-bg: #202429;
-  --bs-accordion-active-color: #ffffff;
-  --bs-accordion-bg: #131619;
-  --bs-accordion-color: #ffffff;
-  --bs-accordion-btn-focus-box-shadow: none;
-  }
-  .accordion-flush .accordion-button {
-  border-top: 1px solid #000000;
-  }
-  .accordion-flush .accordion-item:last-child .accordion-button.collapsed,
-  .accordion-flush .accordion-item:last-child .accordion-body {
-  border-bottom: 1px solid #000000;
-  }
-  {% else %}
-  .accordion {
-  --bs-accordion-btn-bg: #ffffff;
-  --bs-accordion-active-bg: #ffffff;
-  --bs-accordion-btn-color: #000000;
-  --bs-accordion-active-color: #000000;
-  }
-  {% endif %}
-  @media (max-width: 580px) {
-  #chartdiv {
-  width: 100%;
-  height: 50vh;
-  margin-top: -3.5vh;
-  }
+  /* Make our summary “cards” uniform height */
+  .metric-card {
+    min-height: 8rem;
   }
 </style>
 {% endblock %}
+
 {% block content %}
-<div class="row justify-content-center align-items-center">
-  <div class="col-xl-3 text-center">
-    <div>
-      <h1 class="fs-2"><label for="query">Search for a Country</label></h1>
+<div class="container-fluid py-4 bg-light">
+  <!-- 1) TOP BAR / SEARCH -->
+  <div class="row mb-4 justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
       <form action="{{ url_for('api.search') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="input-group justify-content-center">
-          <button aria-label="Submit search button" type="submit" class="input-group-text {% if is_light_mode %}border-black border-opacity-50{% endif %}" id="search-icon">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-          <input 
-            class="form-control autocomplete {% if is_light_mode %}border-black border-opacity-50{% endif %}" 
-            aria-describedby="search-icon"
-            style="max-width: 360px;"
-            type="search" 
-            aria-label="Search Field" 
-            minlength="3" 
-            id="query" 
+        <div class="input-group input-group-lg">
+          <span class="input-group-text {% if is_light_mode %}bg-white border- {% else %}bg-dark text-white{% endif %}" id="search-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input
+            type="search"
+            class="form-control {% if is_light_mode %}border- {% endif %}"
+            id="query"
             name="query"
-            />
+            placeholder="Search for a country..."
+            aria-label="Search for a country"
+            aria-describedby="search-icon"
+            minlength="3"
+          >
         </div>
       </form>
-      <p class="fs-3 mt-2 mb-2">or</p>
-      <div class="d-inline-flex">
-        <h2 class="fs-1">Use the Globe</h2>
-      </div>
-      {% if not is_mobile %}
-      <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-              aria-expanded="true" aria-controls="collapseOne">
-            <i class="fa-solid me-1 fa-chart-simple"></i><span class="ms-2">Statistics</span>
-            </button>
-          </h2>
-          <div id="collapseOne" class="accordion-collapse collapse {{ 'show' if not is_mobile}}" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              <div class="d-flex flex-row text-start justify-content-evenly">
-                <div class="p-2">
-                  <p class="fs-4"><i class="fa-solid me-1 fa-database"></i>Database</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-globe"></i>Countries: {{ statistics['total_countries_supported'] }}</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-newspaper"></i>News: {{ statistics['total_news'] }}</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-rss"></i>Sources: {{ statistics['total_feeds'] }}</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-arrows-rotate"></i>Updated: {{ statistics['last_updated_message'] }}</p>
-                </div>
-                <div class="p-2">
-                  <p class="fs-4"><i class="fa-solid me-1 fa-users-rectangle"></i>Community</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-comments"></i>Comments: {{ statistics['total_comments'] }}</p>
-                  <p class="fs-6"><i class="fa-solid me-1 fa-eye"></i>Views: {{ statistics['total_clicks'] }}</p>
-                  <p class="fs-6"><i class="fa-solid fa-users me-1"></i>Users: {{ statistics['total_users'] }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    </div>
+  </div>
+
+  <!-- 2) METRICS ROW -->
+  <div class="row g-3 mb-5">
+    <!-- Total Countries -->
+    <div class="col-6 col-md-3">
+      <div class="card metric-card shadow-sm text-center">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <i class="fa-solid fa-globe fa-2x mb-2 text-primary"></i>
+          <h5 class="card-title">Countries</h5>
+          <p class="card-text display-6 mb-0">{{ statistics['total_countries_supported'] }}</p>
         </div>
       </div>
     </div>
-    {% endif %}
+    <!-- Total Stories -->
+    <div class="col-6 col-md-3">
+      <div class="card metric-card shadow-sm text-center">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <i class="fa-solid fa-newspaper fa-2x mb-2 text-success"></i>
+          <h5 class="card-title">Stories</h5>
+          <p class="card-text display-6 mb-0">{{ statistics['total_news'] }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Total Users -->
+    <div class="col-6 col-md-3">
+      <div class="card metric-card shadow-sm text-center">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <i class="fa-solid fa-users fa-2x mb-2 text-warning"></i>
+          <h5 class="card-title">Users</h5>
+          <p class="card-text display-6 mb-0">{{ statistics['total_users'] }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Total Comments -->
+    <div class="col-6 col-md-3">
+      <div class="card metric-card shadow-sm text-center">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <i class="fa-solid fa-comments fa-2x mb-2 text-danger"></i>
+          <h5 class="card-title">Comments</h5>
+          <p class="card-text display-6 mb-0">{{ statistics['total_comments'] }}</p>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-xl-5 my-3">
-    <div id="chartdiv"></div>
+
+  <!-- 3) DASHBOARD ROW -->
+  <div class="row gy-4">
+    <!-- 3a) LEFT HALF: LINE CHART (Stories per Day) -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>Stories Published (Last 7 Days)</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="storiesLineChart" width="100%" height="60"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3b) RIGHT: BAR + DONUT CHART -->
+    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+      <!-- Top Categories Bar Chart -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h6 class="mb-0"><i class="fa-solid fa-bars-staggered me-2"></i>Top Categories (This Week)</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="categoriesBarChart" width="100%" height="50"></canvas>
+        </div>
+      </div>
+      <!-- Engagement Donut Chart -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h6 class="mb-0"><i class="fa-solid fa-chart-pie me-2"></i>User Engagement</h6>
+        </div>
+        <div class="card-body d-flex justify-content-center">
+          <canvas id="engagementDoughnut" width="100%" height="100"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-xl-3">
-    {% if not is_mobile %}
-    <div>
-      <h2 class="mb-5"><i class="fa-solid fa-earth-americas me-2"></i>World Trackers - <span id="marketDate"></span></h2>
+
+  <!-- 3c) FULL WIDTH: GLOBE / MAP SELECTOR -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="fa-solid fa-earth-americas me-2"></i>Select a Country</h5>
+        </div>
+        <div class="card-body p-0">
+          <!-- Keep your existing #chartdiv where the globe lives -->
+          <div id="chartdiv"></div>
+        </div>
+      </div>
     </div>
-    <div>
-      <h3><i class="fa-solid fa-arrow-trend-up me-2"></i>Country Indexes</h3>
-      <div id="stocks-ticker"></div>
+  </div>
+
+  <!-- 4) TRENDING STORIES (same two-row horizontal grid) -->
+  {% if not is_mobile %}
+  <div class="row mt-5">
+    <div class="col-12">
+      <h4 class="fw-semibold mb-3"><i class="fa-solid fa-fire text-danger me-2"></i>Trending Now</h4>
+      <div
+        id="trending-grid"
+        style="
+          display: grid;
+          grid-auto-flow: column;
+          grid-template-rows: repeat(2, 1fr);
+          gap: 1rem;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 0.5rem;
+        "
+      >
+        <!-- JavaScript will inject story cards here -->
+      </div>
     </div>
-    <div class="my-5">
-      <h3><i class="fa-solid fa-money-bill-trend-up me-2"></i>Currencies</h3>
-      <div id="currencies-ticker"></div>
+  </div>
+  {% endif %}
+
+  <!-- Optional: footer or additional rows -->
+  <div class="row mt-5">
+    <div class="col-12 text-center text-muted small">
+      &copy; {{ config.CURRENT_YEAR }} YourSiteName. All rights reserved.
     </div>
-    <div>
-      <h3><i class="fa-brands fa-bitcoin me-2"></i>Crypto</h3>
-      <div id="crypto-ticker"></div>
-    </div>
-    <div class="mt-5 d-flex justify-content-end invisible">
-      <p>View More<i class="fa-solid fa-arrow-right ms-2"></i></p>
-    </div>
-    {% endif %}
   </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
-<script defer nonce="{{ nonce }}"
-  src="{{ url_for('static', filename='js/amcharts/index.js') }}"
+  <!-- Your existing scripts (e.g. amCharts, fetchHomeTicker) -->
+  <script defer nonce="{{ nonce }}"
+    src="{{ url_for('static', filename='js/amcharts/index.js') }}"
   ></script>
+  {% if not is_mobile %}
+  <script defer nonce="{{ nonce }}"
+          src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
+  {% endif %}
+  {% assets "js_home" %}
+  <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-{% if not is_mobile %}
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
-{% endif %}
+  <!-- ─────────────── Dashboard Chart Initializations ─────────────── -->
+  <script nonce="{{ nonce }}">
+  document.addEventListener("DOMContentLoaded", function() {
+  const today = new Date();
+  const labelsLast7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    // E.g. "Mon", "Tue", "Wed"...
+    labelsLast7.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+  }
 
-{% assets "js_home" %}
-<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
-{% endassets %}
+  // Now labelsLast7 is something like ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"]
+  const dataLast7 = {
+    labels: labelsLast7,
+    datasets: [{
+      label: 'Stories Published',
+      data: [12, 19, 8, 14, 22, 17, 25], // Replace with real data
+      borderColor: 'rgba(54, 162, 235, 1)',
+      backgroundColor: 'rgba(54, 162, 235, 0.2)',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 3,
+      pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+    }]
+  };
 
+  new Chart(
+    document.getElementById("storiesLineChart").getContext("2d"),
+    {
+      type: 'line',
+      data: dataLast7,
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    }
+  );
+
+    // ── 3b1) Top Categories Bar Chart ──
+    const ctxBar = document.getElementById("categoriesBarChart").getContext("2d");
+    // Placeholder categories & values. Replace with real API data.
+    const categories = ['Politics', 'Sports', 'Tech', 'Health', 'Business'];
+    const catCounts = [15, 22, 9, 12, 7];
+    new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: categories,
+        datasets: [{
+          label: '# of Stories',
+          data: catCounts,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        scales: {
+          x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }},
+          y: { grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // ── 3b2) User Engagement Doughnut Chart ──
+    const ctxDoughnut = document.getElementById("engagementDoughnut").getContext("2d");
+    // Placeholder engagement data. Replace with actual counts of likes/dislikes/comments or similar.
+    new Chart(ctxDoughnut, {
+      type: 'doughnut',
+      data: {
+        labels: ['Likes', 'Dislikes', 'Comments', 'Shares'],
+        datasets: [{
+          data: [340, 45, 128, 87],
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(54, 162, 235, 0.7)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        cutout: '60%',
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 12, padding: 16 }
+          }
+        }
+      }
+    });
+
+    // ── 3c) Your existing globe: any JS you already have to make #chartdiv interactive remains here ──
+
+    // ── 4) Trending Stories Script (same as before) ──
+    const trendingGrid = document.getElementById("trending-grid");
+    if (trendingGrid) {
+      fetch("/api/home/trending")
+        .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch"))
+        .then(stories => {
+          stories.forEach(story => {
+            const {
+              story_id, title, pub_date, image_url,
+              publisher, views, likes, dislikes, num_comments
+            } = story;
+
+            // Compute “time ago”
+            const then = new Date(pub_date), now = new Date();
+            const diffMs = now - then;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+            const timeAgo = diffHours < 24
+              ? `${diffHours}h ago`
+              : `${diffDays}d ago`;
+
+            // Sanitize description if you have one; else skip or fetch separately
+            const desc = (story.description || "")
+              .replace(/&/g, "&amp;")
+              .replace(/"/g, "&quot;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex-shrink-0 my-3";
+            wrapper.setAttribute("style", "width: 16rem;");
+
+            wrapper.innerHTML = `
+              <div class="card h-100 shadow-sm position-relative"
+                   id="${story_id}"
+                   data-story-data='${JSON.stringify({
+                     title, pub_date, image_url,
+                     publisher, views, likes, dislikes, num_comments
+                   }).replace(/'/g,"&#39;")}'>
+                <a href="/comments?id=${story_id}">
+                  <img src="${image_url}"
+                       class="card-img-top rounded-top"
+                       alt="${title.replace(/"/g,"&quot;")}"
+                       style="aspect-ratio:16/9; object-fit:cover;">
+                </a>
+                <div class="position-absolute top-0 end-0 mt-2 me-2">
+                  <span data-bs-toggle="tooltip" data-bs-title="Source: ${publisher.name}">
+                    <img src="${publisher.favicon_url}"
+                         class="rounded-circle"
+                         alt="${publisher.name} favicon"
+                         width="30" height="30">
+                  </span>
+                </div>
+                <div class="card-body">
+                  <a href="/comments?id=${story_id}" class="text-decoration-none text-dark">
+                    <h6 class="card-title fw-semibold line-clamp-2">${title}</h6>
+                  </a>
+                  <p class="card-text text-muted small line-clamp-3">${desc}</p>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                  <div class="d-flex justify-content-between small text-muted">
+                    <span>${timeAgo} • ${views} views</span>
+                    <div>
+                      <i class="fa-regular fa-thumbs-up me-2" data-story-id="${story_id}" data-liked="false" style="cursor: pointer;">
+                        <small>${likes}</small>
+                      </i>
+                      <i class="fa-regular fa-thumbs-down me-2" data-story-id="${story_id}" data-disliked="false" style="cursor: pointer;">
+                        <small>${dislikes}</small>
+                      </i>
+                      <i class="fa-bookmark fa-solid me-2" data-story-id="${story.id}" style="cursor: pointer;"></i>
+                      <i class="fa-solid fa-satellite-dish satellite-share-button" style="cursor: pointer;"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+            trendingGrid.appendChild(wrapper);
+          });
+
+          // Initialize Bootstrap tooltips:
+          const tipEl = Array.from(document.querySelectorAll("[data-bs-toggle='tooltip']"));
+          tipEl.forEach(el => new bootstrap.Tooltip(el));
+        })
+        .catch(err => console.error("Error loading trending:", err));
+    }
+  });
+  </script>
 {% endblock %}

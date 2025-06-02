@@ -320,7 +320,7 @@ def string_similarity(s1: str, s2: str) -> float:
     return matcher.ratio() * 100
 
 
-def extract_yake(text: str, lang_code: str = "en", top_n: int = 3) -> tuple:
+def extract_yake(text: str, lang_code: str = "en", top_n: int = 5) -> tuple:
     kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
     return (kw for kw, score in kw_extractor.extract_keywords(text))
 

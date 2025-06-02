@@ -42,7 +42,7 @@ db_params = {
     "host": "127.0.0.1",
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
-    "db": "infomundi",
+    "db": config.MYSQL_DATABASE,
     "charset": "utf8mb4",
     "cursorclass": pymysql.cursors.DictCursor,
 }
@@ -374,26 +374,27 @@ def download_and_convert_image(data: dict) -> list:
 
 def update_story_image_url(stories_to_update):
     """
-    stories_to_update should be a list of tuples: [(image_url, story_id), ...]
+    stories_to_update should be a list of tuples: [(story_id), ...]
     """
     if not stories_to_update:
+        log_message(f"Skipping as there's no stories to update")
         return
 
     log_message(f"Updating {len(stories_to_update)} story image URLs...")
     try:
         with db_connection.cursor() as cursor:
             update_query = (
-                "UPDATE stories SET image_url = %s, has_image = 1 WHERE id = %s"
+                "UPDATE stories SET has_image = 1 WHERE id = %s"
             )
             cursor.executemany(update_query, stories_to_update)
         db_connection.commit()
-    except pymysql.MySQLError as e:
+    except Exception as e:
         log_message(f"Error updating multiple story image URLs: {e}")
 
 
 def update_publisher_favicon(favicon_updates):
     """
-    favicon_updates should be a list of tuples: [(image_url, publisher_id), ...]
+    favicon_updates should be a list of tuples: [(publisher_id), ...]
     """
     if not favicon_updates:
         return
@@ -455,7 +456,7 @@ def process_category(category: dict):
                 image_url = f"{bucket_base_url}/{path}"
 
                 if "stories" in path:
-                    stories_to_update.append((image_url, story["id"]))
+                    stories_to_update.append((story["id"]))
                 else:
                     favicons_to_update.append((image_url, story["publisher"]["id"]))
                     favicon_database.append(f"{story['publisher']['id']}.ico")
@@ -478,7 +479,7 @@ def search_images():
     Searches images for each category in the feeds path.
     """
     # DEBUG if x["name"] == "br_general"
-    categories = [x for x in fetch_categories_from_database()]
+    categories = [x for x in fetch_categories_from_database() if x["name"] == "br_general"]
 
     total = 0
     for category in categories:

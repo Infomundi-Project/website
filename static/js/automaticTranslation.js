@@ -81,7 +81,7 @@
         localStorage.setItem('preferredLanguage', lang);
         lang === 'none'
           ? activateNone()
-          : (await loadGoogleTranslate(), applyTranslation(lang));
+          : (await loadGoogleTranslate(), applyTranslation(lang), window.reload());
       })
     );
   }

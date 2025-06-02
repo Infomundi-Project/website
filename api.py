@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
 from collections import OrderedDict
+from collections import defaultdict
 from sqlalchemy.types import Date
 from newsplease import NewsPlease
 
@@ -180,9 +181,7 @@ def reading_stats(uid):
     for period, since in cuts.items():
         stats[period] = (
             extensions.db.session.query(
-                func.count(
-                    func.distinct(models.UserStoryView.story_id)
-                )
+                func.count(func.distinct(models.UserStoryView.story_id))
             )
             .filter(
                 models.UserStoryView.user_id == uid,
@@ -196,9 +195,7 @@ def reading_stats(uid):
     top_pubs = (
         extensions.db.session.query(
             models.Publisher.name,
-            func.count(
-                func.distinct(models.UserStoryView.story_id)
-            ).label("ctr"),
+            func.count(func.distinct(models.UserStoryView.story_id)).label("ctr"),
         )
         .join(models.Story, models.Publisher.id == models.Story.publisher_id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -213,9 +210,7 @@ def reading_stats(uid):
     top_tags = (
         extensions.db.session.query(
             models.Tag.tag,
-            func.count(
-                func.distinct(models.UserStoryView.story_id)
-            ).label("ctr"),
+            func.count(func.distinct(models.UserStoryView.story_id)).label("ctr"),
         )
         .join(models.Story, models.Tag.story_id == models.Story.id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -230,9 +225,7 @@ def reading_stats(uid):
     country_counts = (
         extensions.db.session.query(
             models.Category.name,
-            func.count(
-                func.distinct(models.UserStoryView.story_id)
-            ).label("ctr"),
+            func.count(func.distinct(models.UserStoryView.story_id)).label("ctr"),
         )
         .join(models.Story, models.Category.id == models.Story.category_id)
         .join(models.UserStoryView, models.Story.id == models.UserStoryView.story_id)
@@ -255,12 +248,8 @@ def reading_stats(uid):
     # -------------------------
     daily_rows = (
         extensions.db.session.query(
-            func.date(models.UserStoryView.viewed_at).label(
-                "d"
-            ),  # MySQL DATE()
-            func.count(
-                func.distinct(models.UserStoryView.story_id)
-            ).label("ctr"),
+            func.date(models.UserStoryView.viewed_at).label("d"),  # MySQL DATE()
+            func.count(func.distinct(models.UserStoryView.story_id)).label("ctr"),
         )
         .filter(
             models.UserStoryView.user_id == uid,
@@ -309,12 +298,12 @@ def get_trending():
       - publisher: substring of publisher name
     """
     # Read basic query parameters
-    period = request.args.get("period", "day").lower()
+    period = request.args.get("period", "all").lower()
     metric = request.args.get("metric", "views").lower()
-    limit = request.args.get("limit", 9, type=int)
+    limit = request.args.get("limit", 7, type=int)
 
-    if limit > 50:
-        limit = 50
+    if limit > 15:
+        limit = 15
 
     # Optional filters
     country = request.args.get("country", type=str)
@@ -409,6 +398,104 @@ def get_trending():
     return jsonify(trending), 200
 
 
+@api.route("/home/trending", methods=["GET"])
+def get_home_trending():
+    """
+    Returns up to 10 “most relevant” stories (published in the last 24 h, scored by tag_count + recency),
+    but only those with has_image=True, and no more than 3 per category.
+    """
+    now = datetime.utcnow()
+    cutoff = now - timedelta(hours=24)
+
+    # 1) Count tags per story (only for stories in the last 24 h AND has_image=True)
+    tag_counts_subq = (
+        extensions.db.session
+        .query(
+            models.Tag.story_id.label("story_id"),
+            func.count(models.Tag.id).label("tag_count")
+        )
+        .join(models.Story, models.Story.id == models.Tag.story_id)
+        .filter(
+            models.Story.pub_date >= cutoff,
+            models.Story.has_image == True
+        )
+        .group_by(models.Tag.story_id)
+        .subquery()
+    )
+
+    # 2) Join Story ⇄ tag_counts_subq, again filtering by date AND has_image
+    rows = (
+        extensions.db.session
+        .query(models.Story, tag_counts_subq.c.tag_count)
+        .outerjoin(tag_counts_subq, models.Story.id == tag_counts_subq.c.story_id)
+        .filter(
+            models.Story.pub_date >= cutoff,
+            models.Story.has_image == True,
+            # Ensure we only pick stories that appear in tag_counts_subq (i.e. have ≥1 tag)
+            tag_counts_subq.c.tag_count.isnot(None)
+        )
+        .all()
+    )
+
+    # 3) Compute each story’s combined score = tag_count + recency_score
+    scored = []
+    for story, tag_count in rows:
+        tag_count = tag_count or 0
+        hours_since = (now - story.pub_date).total_seconds() / 3600.0
+        recency_score = 1.0 / (hours_since + 1.0)
+        score = tag_count + recency_score
+        scored.append((story, score))
+
+    # 4) Sort descending by score
+    scored.sort(key=lambda x: x[1], reverse=True)
+
+    # 5) Soft‐cap of 3 stories/category, pick up to 10 total
+    MAX_PER_CATEGORY = 3
+    caps = defaultdict(int)
+    selected = []
+    for story, _ in scored:
+        cat = story.category.name
+        if caps[cat] < MAX_PER_CATEGORY:
+            caps[cat] += 1
+            selected.append(story)
+        if len(selected) >= 10:
+            break
+
+    # 6) Serialize JSON (only stories with has_image=True are here)
+    out = []
+    for story in selected:
+        story_data = {
+            "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
+            "title": story.title,
+            "url": story.url,
+            "pub_date": story.pub_date.isoformat(),
+            "image_url": story.image_url,
+            "author": story.author or "",
+            "tags": [t.tag for t in story.tags],
+            "publisher": {
+                "name": input_sanitization.clean_publisher_name(story.publisher.name),
+                "url": story.publisher.site_url,
+                "favicon_url": story.publisher.favicon_url,
+            },
+            "views": story.stats.views if story.stats else 0,
+            "likes": story.stats.likes if story.stats else 0,
+            "dislikes": story.stats.dislikes if story.stats else 0,
+            "num_comments": (
+                extensions.db.session
+                .query(func.count(models.Comment.id))
+                .filter(
+                    models.Comment.story_id == story.id,
+                    models.Comment.is_deleted == False
+                )
+                .scalar() or 0
+            ),
+            "category": story.category.name,
+        }
+        out.append(story_data)
+
+    return jsonify(out), 200
+
+
 @api.route("/user/friend", methods=["POST"])
 @extensions.limiter.limit("54/hour;18/minute")
 @decorators.api_login_required
@@ -421,7 +508,7 @@ def handle_friends():
     if action not in ("add", "accept", "reject", "delete") or not friend_id:
         abort(
             400,
-            description="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id should be supplied.",
+            description="Action must be 'add', 'accept', 'reject' or 'delete', and 'friend_id' should be supplied.",
         )
 
     if current_user.id == friend_id:
@@ -491,6 +578,7 @@ def friendship_status(user_id):
 
 
 @api.route("/story/<action>", methods=["POST"])
+@extensions.limiter.limit("10/minute")
 @decorators.api_login_required
 def story_reaction(action):
     if action not in ("like", "dislike"):
@@ -641,6 +729,7 @@ def send_mail_twofactor_code():
 
 
 @api.route("/2fa/mail/verify", methods=["POST"])
+@extensions.limiter.limit("10/minute")
 @decorators.api_login_required
 def verify_mail_twofactor_code():
     data = request.get_json() or {}
@@ -768,8 +857,7 @@ def autocomplete():
     if len(query) < 2:
         return redirect(url_for("views.home"))
 
-    results = [x.name for x in country_util.get_country(name=query, ilike=True)]
-    return jsonify(results), 200
+    return jsonify(country_util.get_country(name=query, ilike=True)), 200
 
 
 @api.route("/search", methods=["POST"])
@@ -787,19 +875,16 @@ def search():
         return redirect(url_for("views.home"))
 
     # Grabs all countries from the database based on the incomplete string
-    countries = country_util.get_country(name=query, ilike=True)
+    similarity_data = country_util.get_country(name=query, ilike=True)
 
-    # Adds all countries and calculates the similarity percentage for each name
-    similarity_data = []
-    for country in countries:
-        similarity_data.append(
-            (country, scripts.string_similarity(query, country.name))
-        )
+    # Tries to grab the best match
+    try:
+        best_match_country, match_index = similarity_data[0]
+        iso2 = best_match_country.iso2
+    except Exception:
+        iso2 = 'donotexist'
 
-    # Grabs the best match
-    best_match_country, value = max(similarity_data, key=lambda item: item[1])
-
-    return redirect(url_for("views.news", country=best_match_country.iso2))
+    return redirect(url_for("views.news", country=iso2))
 
 
 @api.route("/story/summarize/<story_url_hash>", methods=["GET"])
@@ -842,7 +927,7 @@ def summarize_story(story_url_hash):
 
 
 @api.route("/get_stories", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 15, query_string=True)  # 15 min cached
+@extensions.cache.cached(timeout=60 * 5, query_string=True)  # 5 min cached
 @extensions.limiter.limit("20/minute", override_defaults=True)
 def get_stories():
     """Returns a JSON list of stories, ordered by views, likes, comments, or publication date."""
@@ -857,7 +942,9 @@ def get_stories():
     end_date = request.args.get("end_date", "", type=str)
 
     # 2) Resolve the Category row (e.g. "br_general")
-    category = models.Category.query.filter_by(name=f"{country}_{category_slug}").first()
+    category = models.Category.query.filter_by(
+        name=f"{country}_{category_slug}"
+    ).first()
     if not category:
         return jsonify({"error": "This category is not yet supported!"}), 404
 
@@ -875,10 +962,9 @@ def get_stories():
     # 5) If ordering by "comments", prepare a subquery that counts non-deleted comments per story
     if order_by == "comments":
         comment_counts = (
-            extensions.db.session
-            .query(
+            extensions.db.session.query(
                 models.Comment.story_id.label("story_id"),
-                func.count(models.Comment.id).label("comment_count")
+                func.count(models.Comment.id).label("comment_count"),
             )
             .filter(models.Comment.is_deleted == False)
             .group_by(models.Comment.story_id)
@@ -891,15 +977,13 @@ def get_stories():
     # 7) If ordering by "views" or "likes", we need to join StoryStats
     if order_by in ("views", "likes"):
         query = query.outerjoin(
-            models.StoryStats,
-            models.Story.id == models.StoryStats.story_id
+            models.StoryStats, models.Story.id == models.StoryStats.story_id
         )
 
     # 8) If ordering by "comments", join the comment_counts subquery
     if order_by == "comments":
         query = query.outerjoin(
-            comment_counts,
-            models.Story.id == comment_counts.c.story_id
+            comment_counts, models.Story.id == comment_counts.c.story_id
         )
 
     # 9) Apply date filtering if both start_date and end_date are provided
@@ -938,8 +1022,7 @@ def get_stories():
 
     # 12) Execute query, eager-loading publisher
     stories = (
-        query
-        .options(joinedload(models.Story.publisher))
+        query.options(joinedload(models.Story.publisher))
         .order_by(order_criterion, models.Story.id)
         .offset(start_index)
         .limit(stories_per_page)
@@ -954,33 +1037,16 @@ def get_stories():
         num_comments = (
             extensions.db.session.query(func.count(models.Comment.id))
             .filter(
-                models.Comment.story_id == story.id,
-                models.Comment.is_deleted == False
+                models.Comment.story_id == story.id, models.Comment.is_deleted == False
             )
             .scalar()
             or 0
         )
 
-        stories_list.append({
-            "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
-            "id": story.id,
-            "title": story.title,
-            "tags": [tag.tag for tag in story.tags],
-            "author": story.author,
-            "description": story.description or "",
-            "views": story.stats.views if story.stats else 0,
-            "likes": story.stats.likes if story.stats else 0,
-            "dislikes": story.stats.dislikes if story.stats else 0,
-            "num_comments": num_comments,
-            "url": story.url,
-            "pub_date": story.pub_date,
-            "publisher": {
-                "name": input_sanitization.clean_publisher_name(story.publisher.name),
-                "url": story.publisher.site_url,
-                "favicon_url": story.publisher.favicon_url,
-            },
-            "image_url": story.image_url,
-        })
+        story_dict = story.to_dict()
+        story_dict["num_comments"] = num_comments
+
+        stories_list.append(story_dict)
 
     return jsonify(stories_list)
 
@@ -1100,7 +1166,7 @@ def create_comment():
 def get_comments(page_id):
     page = request.args.get("page", 1, type=int)
     sort = request.args.get("sort", "recent")  # "recent", "old", best"
-    search = request.args.get("search", "", type=str).strip()
+    search = input_sanitization.sanitize_text(request.args.get("search", "", type=str))
 
     # Compute the hash once
     page_hash = hashing_util.string_to_md5_binary(page_id)
@@ -1115,7 +1181,6 @@ def get_comments(page_id):
     if search:
         query = query.filter(models.Comment.content.ilike(f"%{search}%"))
 
-    # Sorting
     if sort == "old":
         query = query.order_by(asc(models.Comment.created_at))
     if sort == "best":
@@ -1126,7 +1191,6 @@ def get_comments(page_id):
     else:
         query = query.order_by(desc(models.Comment.created_at))  # fallback
 
-    # Pagination
     paginated = query.paginate(page=page, per_page=10, error_out=False)
     comments = paginated.items
     has_more = paginated.has_next
@@ -1167,7 +1231,7 @@ def edit_comment(comment_id):
             message="Comment updated.",
             updated_at=comment.updated_at.isoformat(),
         ),
-        201,
+        200,
     )
 
 
@@ -1187,9 +1251,10 @@ def delete_comment(comment_id):
 
 @api.route("/comments/<int:comment_id>/<action>", methods=["POST"])
 @decorators.api_login_required
+@extensions.limiter.limit("150/hour;15/minute")
 def react_to_comment(comment_id, action):
     if action not in ("like", "dislike"):
-        return jsonify({"error": "Invalid action"}), 400
+        abort(400, description="Invalid action")
 
     # Fetch the comment and its stats row (create stats if missing)
     comment = models.Comment.query.get_or_404(comment_id)
@@ -1236,7 +1301,7 @@ def react_to_comment(comment_id, action):
 
     except IntegrityError:
         extensions.db.session.rollback()
-        return jsonify({"error": "Duplicate reaction"}), 400
+        abort(400, description="Reaction already exists.")
 
     # Return the fresh counters from CommentStats
     return jsonify(
@@ -1259,6 +1324,7 @@ def list_bookmarks():
 
 
 @api.route("/bookmark", methods=["POST"])
+@extensions.limiter.limit("100/hour;20/minute")
 @decorators.api_login_required
 def add_bookmark():
     data = request.get_json()
@@ -1286,7 +1352,7 @@ def remove_bookmark(story_id):
         user_id=current_user.id, story_id=story_id
     ).first()
     if not bm:
-        return jsonify(message="Not found"), 404
+        abort(404, description="Couldn't find target bookmark.")
     extensions.db.session.delete(bm)
     extensions.db.session.commit()
     return jsonify(message="Removed bookmark"), 200
@@ -1362,11 +1428,12 @@ def mark_notification_read(notification_id):
     """
     Mark a single notification as read.
     """
-    notif = models.Notification.query.filter_by(
-        id=notification_id, user_id=current_user.id
-    ).first()
+    notif = extensions.db.session.get(models.Notification, notification_id)
     if not notif:
-        return jsonify({"error": "Notification not found."}), 404
+        abort(404, description="Couldn't find target notification.")
+
+    if current_user.id != notif.user_id:
+        abort(404, description="Couldn't find target notification.")  # to blend in
 
     if not notif.is_read:
         notif.friendship_id = None
@@ -1379,6 +1446,7 @@ def mark_notification_read(notification_id):
 
 @api.route("/notifications/read_all", methods=["POST"])
 @decorators.api_login_required
+@extensions.limiter.limit("5/minute")
 def mark_all_notifications_read():
     """
     Mark all of the current user's notifications as read.
@@ -1400,7 +1468,7 @@ def mark_all_notifications_read():
 @decorators.api_login_required
 def block_user(uid, action):
     if uid == current_user.id:
-        abort(404, description="Self-blocking? Well, that's new")
+        abort(403, description="Self-blocking? Well, that's new")
 
     if action not in ("add", "remove"):
         abort(400, description="Unrecognized action.")
@@ -1443,11 +1511,11 @@ def block_user(uid, action):
 @decorators.api_login_required
 def user_reports(uid, report_id=0):
     if uid == current_user.id:
-        return jsonify(message="You can't report yourself"), 400
+        abort(403, description="Self-reporting? Well, that's new.")
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
-        return jsonify(message="Couldn't find the target user"), 400
+        abort(404, description="Couldn't find target user.")
 
     if request.method == "GET":
         reports = models.UserReport.query.filter_by(

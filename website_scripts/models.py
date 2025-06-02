@@ -57,7 +57,6 @@ class Story(db.Model):
     url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
 
     pub_date = db.Column(db.DateTime, nullable=False)
-    image_url = db.Column(db.String(100))  # This should be removed
     has_image = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -82,7 +81,36 @@ class Story(db.Model):
         return hashing_util.binary_to_md5_hex(self.url_hash)
 
     def get_image_url(self) -> str:
-        return f"https://bucket.infomundi.net/{self.category.name}/{self.get_public_id()}.avif"
+        return (
+            f"https://bucket.infomundi.net/stories/{self.category.name}/{self.get_public_id()}.avif"
+            if self.has_image
+            else ""
+        )
+
+    @property
+    def image_url(self) -> str:
+        return self.get_image_url()
+
+    def to_dict(self) -> dict:
+        return {
+            "story_id": self.get_public_id(),
+            "id": self.id,
+            "title": self.title,
+            "tags": [tag.tag for tag in self.tags],
+            "author": self.author,
+            "description": self.description or "",
+            "views": self.stats.views if self.stats else 0,
+            "likes": self.stats.likes if self.stats else 0,
+            "dislikes": self.stats.dislikes if self.stats else 0,
+            "url": self.url,
+            "pub_date": self.pub_date,
+            "publisher": {
+                "name": input_sanitization.clean_publisher_name(self.publisher.name),
+                "url": self.publisher.site_url,
+                "favicon_url": self.publisher.favicon_url,
+            },
+            "image_url": self.get_image_url(),
+        }
 
 
 class StoryReaction(db.Model):
@@ -133,29 +161,29 @@ class User(db.Model, UserMixin):
     display_name = db.Column(db.String(40))
     profile_description = db.Column(db.String(1500))
 
-    # This should be removed.
-    avatar_url = db.Column(db.String(85), default="/static/img/avatar.webp")
-    profile_banner_url = db.Column(db.String(85))
-    profile_wallpaper_url = db.Column(db.String(85))
+    # Calculated later on
+    has_avatar = db.Column(db.Boolean, default=False)
+    has_banner = db.Column(db.Boolean, default=False)
+    has_wallpaper = db.Column(db.Boolean, default=False)
 
     # Contact info
     website_url = db.Column(db.String(120))
     public_email = db.Column(db.String(120))
-    # external links
+    # External links
     twitter_url = db.Column(db.String(80))
     instagram_url = db.Column(db.String(80))
     linkedin_url = db.Column(db.String(80))
-    # level and privacy
+    # Level and privacy
     level = db.Column(db.Integer, default=0)
     level_progress = db.Column(db.Integer, default=0)
 
-    # Privacy settings - this should change (integers)
+    # Privacy settings
     profile_visibility = db.Column(
-        db.String(7), default="public"
-    )  # "public", "login", "friends", "private"
+        db.Boolean, default=False
+    )  # 0 = public // 1 = login-only // 2 = friends-only // 3 = private
     notification_type = db.Column(
-        db.String(9), default="all"
-    )  # "all", "important", "none"
+        db.Boolean, default=False
+    )  # 0 = all // 1 = important-only // 2 = none
 
     # Account Registration
     is_enabled = db.Column(db.Boolean, default=False)
@@ -199,6 +227,40 @@ class User(db.Model, UserMixin):
     state = db.relationship("State", backref="users", lazy="joined")
     city = db.relationship("City", backref="users", lazy="joined")
 
+    def get_public_id(self):
+        return security_util.uuid_bytes_to_string(self.public_id)
+
+    def get_picture(self, category: str) -> str:
+        if category not in ("avatar", "banner," "wallpaper"):
+            return ""
+
+        if category == "avatar":
+            if not self.has_avatar:
+                return "/static/img/avatar.webp"
+            path = "users"
+        elif category == "banner":
+            if not self.has_banner:
+                return ""
+            path = "banners"
+        else:
+            if not self.has_wallpaper:
+                return ""
+            path = "backgrounds"
+
+        return f"https://bucket.infomundi.net/{path}/{self.get_public_id()}.webp"
+
+    @property
+    def avatar_url(self) -> str:
+        return self.get_picture("avatar")
+
+    @property
+    def profile_banner_url(self) -> str:
+        return self.get_picture("banner")
+
+    @property
+    def profile_wallpaper_url(self) -> str:
+        return self.get_picture("wallpaper")
+
     def enable(self):
         self.is_enabled = True
         self.register_token = None
@@ -223,9 +285,6 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return str(self.id)
-
-    def get_public_id(self):
-        return security_util.uuid_bytes_to_string(self.public_id)
 
     def purge_totp(self):
         self.is_totp_enabled = False
