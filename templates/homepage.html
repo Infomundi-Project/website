@@ -3,7 +3,10 @@
 
 {% block styles %}
 <style>
-  /* Only minimal inline styles—everything else uses Bootstrap utilities */
+  .top-stories-container { cursor: grab; }
+.top-stories-container.dragging { cursor: grabbing; }
+
+  /* Minimal overrides; everything else uses Bootstrap utilities */
   #chartdiv {
     width: 100%;
     height: 500px;
@@ -13,9 +16,25 @@
       height: 300px;
     }
   }
-  /* Make our summary “cards” uniform height */
+  /* Keep metric cards uniform height */
   .metric-card {
     min-height: 8rem;
+  }
+  /* Horizontal scroll container for Top Stories */
+  .top-stories-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  /* Hide default scrollbar on WebKit (Chrome/Safari) */
+  .top-stories-container::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide default scrollbar on Firefox */
+  .top-stories-container {
+    scrollbar-width: none;
   }
 </style>
 {% endblock %}
@@ -23,12 +42,15 @@
 {% block content %}
 <div class="container-fluid py-4">
   <!-- 1) TOP BAR / SEARCH -->
-  <div class="row mb-4 justify-content-center">
+  <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
       <form action="{{ url_for('api.search') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="input-group input-group-lg">
-          <span class="input-group-text {% if is_light_mode %}bg-white border- {% else %}bg-dark text-white{% endif %}" id="search-icon">
+          <span
+            class="input-group-text {% if is_light_mode %}bg-white border- {% else %}bg-dark text-white{% endif %}"
+            id="search-icon"
+          >
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
           <input
@@ -46,61 +68,42 @@
     </div>
   </div>
 
-  <!-- 3c) FULL WIDTH: GLOBE / MAP SELECTOR -->
-  <div class="row mb-5">
-    <div class="col-12">
-      <div class="card shadow-sm">
+    <!-- 4) GLOBE & TOP STORIES ROW -->
+  <div class="row mt-3 mb-5">
+    <!-- 4a) LEFT: Globe (country selector) -->
+    <div class="col-12 col-lg-8 mb-4">
+      <div class="card shadow-sm h-100">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fa-solid fa-earth-americas me-2"></i>Select a Country</h5>
+          <h5 class="mb-0">
+            <i class="fa-solid fa-earth-americas me-2"></i>Select a Country
+          </h5>
         </div>
         <div class="card-body p-0">
-          <!-- Keep your existing #chartdiv where the globe lives -->
           <div id="chartdiv"></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- 3) DASHBOARD ROW -->
-  <div class="row gy-4">
-    <!-- 3a) LEFT HALF: LINE CHART (Stories per Day) -->
-    <div class="col-12 col-lg-8">
-      <div class="card shadow-sm h-100">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>Stories Published (Last 7 Days)</h5>
-        </div>
-        <div class="card-body">
-          <canvas id="storiesLineChart" width="100%" height="60"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3b) RIGHT: BAR + DONUT CHART -->
-    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
-      <!-- Top Categories Bar Chart -->
+    <!-- 4b) RIGHT: Top Stories -->
+    <div class="col-12 col-lg-4">
       <div class="card shadow-sm">
         <div class="card-header">
-          <h6 class="mb-0"><i class="fa-solid fa-bars-staggered me-2"></i>Top Categories (This Week)</h6>
+          <h6 class="mb-0">
+            <i class="fa-solid fa-fire text-danger me-2"></i>Top Stories
+          </h6>
         </div>
         <div class="card-body">
-          <canvas id="categoriesBarChart" width="100%" height="50"></canvas>
-        </div>
-      </div>
-      <!-- Engagement Donut Chart -->
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h6 class="mb-0"><i class="fa-solid fa-chart-pie me-2"></i>User Engagement</h6>
-        </div>
-        <div class="card-body d-flex justify-content-center">
-          <canvas id="engagementDoughnut" width="100%" height="100"></canvas>
+          <!-- Single‐row, horizontally scrollable container -->
+          <div id="topStoriesContainer" class="top-stories-container">
+            <!-- JavaScript will inject each story card (fixed‐width) here -->
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-    <!-- 2) METRICS ROW -->
-  <div class="row g-3 mt-3">
-    <!-- Total Countries -->
+  <!-- 2) METRICS ROW -->
+  <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
       <div class="card metric-card shadow-sm text-center">
         <div class="card-body d-flex flex-column justify-content-center">
@@ -110,7 +113,6 @@
         </div>
       </div>
     </div>
-    <!-- Total Stories -->
     <div class="col-6 col-md-3">
       <div class="card metric-card shadow-sm text-center">
         <div class="card-body d-flex flex-column justify-content-center">
@@ -120,7 +122,6 @@
         </div>
       </div>
     </div>
-    <!-- Total Users -->
     <div class="col-6 col-md-3">
       <div class="card metric-card shadow-sm text-center">
         <div class="card-body d-flex flex-column justify-content-center">
@@ -130,7 +131,6 @@
         </div>
       </div>
     </div>
-    <!-- Total Comments -->
     <div class="col-6 col-md-3">
       <div class="card metric-card shadow-sm text-center">
         <div class="card-body d-flex flex-column justify-content-center">
@@ -142,90 +142,97 @@
     </div>
   </div>
 
-  <!-- 4) TRENDING STORIES (same two-row horizontal grid) -->
-  {% if not is_mobile %}
-  <div class="row mt-5">
-    <div class="col-12">
-      <h4 class="fw-semibold mb-3"><i class="fa-solid fa-fire text-danger me-2"></i>Trending Now</h4>
-      <div
-        id="trending-grid"
-        style="
-          display: grid;
-          grid-auto-flow: column;
-          gap: 1rem;
-          overflow-x: auto;
-          overflow-y: hidden;
-          padding-bottom: 0.5rem;
-        "
-      >
-        <!-- JavaScript will inject story cards here -->
+  <!-- 3) DASHBOARD ROW -->
+  <div class="row gy-4">
+    <!-- 3a) LEFT: LINE CHART -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fa-solid fa-chart-line me-2"></i>Stories Published (Last 7 Days)
+          </h5>
+        </div>
+        <div class="card-body">
+          <canvas id="storiesLineChart" width="100%" height="60"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3b) RIGHT: BAR + DONUT CHART -->
+    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-bars-staggered me-2"></i>Top Categories (This Week)
+          </h6>
+        </div>
+        <div class="card-body">
+          <canvas id="categoriesBarChart" width="100%" height="50"></canvas>
+        </div>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-chart-pie me-2"></i>User Engagement
+          </h6>
+        </div>
+        <div class="card-body d-flex justify-content-center">
+          <canvas id="engagementDoughnut" width="100%" height="100"></canvas>
+        </div>
       </div>
     </div>
   </div>
-  {% endif %}
 </div>
 {% endblock %}
-
 {% block scripts %}
-  <script defer nonce="{{ nonce }}"
-    src="{{ url_for('static', filename='js/amcharts/index.js') }}"
-  ></script>
+  <!-- Your existing JS files -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/amcharts/index.js') }}"></script>
   {% if not is_mobile %}
-  <script defer nonce="{{ nonce }}"
-          src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
+    <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
   {% endif %}
   {% assets "js_home" %}
-  <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
+    <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
   {% endassets %}
 
-  <!-- ─────────────── Dashboard Chart Initializations ─────────────── -->
   <script nonce="{{ nonce }}">
   document.addEventListener("DOMContentLoaded", function() {
-  const today = new Date();
-  const labelsLast7 = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    // E.g. "Mon", "Tue", "Wed"...
-    labelsLast7.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-  }
-
-  // Now labelsLast7 is something like ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"]
-  const dataLast7 = {
-    labels: labelsLast7,
-    datasets: [{
-      label: 'Stories Published',
-      data: [12, 19, 8, 14, 22, 17, 25], // Replace with real data
-      borderColor: 'rgba(54, 162, 235, 1)',
-      backgroundColor: 'rgba(54, 162, 235, 0.2)',
-      tension: 0.4,
-      fill: true,
-      pointRadius: 3,
-      pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-    }]
-  };
-
-  new Chart(
-    document.getElementById("storiesLineChart").getContext("2d"),
-    {
+    // ── 1) STORIES LINE CHART ──
+    const ctxLine = document.getElementById("storiesLineChart").getContext("2d");
+    const labelsLast7 = [
+      {% for lbl in day_labels %}
+        "{{ lbl }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+    const dataLast7 = {
+      labels: labelsLast7,
+      datasets: [{
+        label: 'Stories Published',
+        data: [12, 19, 8, 14, 22, 17, 25], // << Replace with API data
+        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+      }]
+    };
+    new Chart(ctxLine, {
       type: 'line',
       data: dataLast7,
       options: {
         maintainAspectRatio: false,
         scales: {
-          x: { grid: { display: false } },
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+          x: { grid: { display: false }, ticks: { color: '#333' } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#333' } }
         },
         plugins: { legend: { display: false } }
       }
-    }
-  );
+    });
 
-    // ── 3b1) Top Categories Bar Chart ──
+    // ── 2) TOP CATEGORIES BAR CHART ──
     const ctxBar = document.getElementById("categoriesBarChart").getContext("2d");
-    // Placeholder categories & values. Replace with real API data.
-    const categories = ['Politics', 'Sports', 'Tech', 'Health', 'Business'];
-    const catCounts = [15, 22, 9, 12, 7];
+    const categories = ['Politics', 'Sports', 'Tech', 'Health', 'Business']; // << Replace
+    const catCounts = [15, 22, 9, 12, 7]; // << Replace
     new Chart(ctxBar, {
       type: 'bar',
       data: {
@@ -254,24 +261,21 @@
         indexAxis: 'y',
         maintainAspectRatio: false,
         scales: {
-          x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }},
+          x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
           y: { grid: { display: false } }
         },
-        plugins: {
-          legend: { display: false }
-        }
+        plugins: { legend: { display: false } }
       }
     });
 
-    // ── 3b2) User Engagement Doughnut Chart ──
+    // ── 3) USER ENGAGEMENT DOUGHNUT ──
     const ctxDoughnut = document.getElementById("engagementDoughnut").getContext("2d");
-    // Placeholder engagement data. Replace with actual counts of likes/dislikes/comments or similar.
     new Chart(ctxDoughnut, {
       type: 'doughnut',
       data: {
-        labels: ['Likes', 'Dislikes', 'Comments', 'Shares'],
+        labels: ['Likes', 'Dislikes', 'Comments', 'Shares'], // << Replace
         datasets: [{
-          data: [340, 45, 128, 87],
+          data: [340, 45, 128, 87], // << Replace
           backgroundColor: [
             'rgba(75, 192, 192, 0.7)',
             'rgba(255, 99, 132, 0.7)',
@@ -293,13 +297,14 @@
       }
     });
 
-    // ── 3c) Your existing globe: any JS you already have to make #chartdiv interactive remains here ──
+    // ── 4) EXISTING GLOBE CHART (chartdiv) INITIALIZATION ──
+    // (Insert your amCharts or D3 or whatever code here)
 
-    // ── 4) Trending Stories Script (same as before) ──
-    const trendingGrid = document.getElementById("trending-grid");
-    if (trendingGrid) {
+    // ── 5) POPULATE TOP STORIES & ADD CLICK-AND-DRAG SCROLL ──
+    const topStoriesContainer = document.getElementById("topStoriesContainer");
+    if (topStoriesContainer) {
       fetch("/api/home/trending")
-        .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch"))
+        .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch top stories"))
         .then(stories => {
           stories.forEach(story => {
             const {
@@ -316,24 +321,26 @@
               ? `${diffHours}h ago`
               : `${diffDays}d ago`;
 
-            // Sanitize description if you have one; else skip or fetch separately
+            // Sanitize (if you have a description)
             const desc = (story.description || "")
               .replace(/&/g, "&amp;")
               .replace(/"/g, "&quot;")
               .replace(/</g, "&lt;")
               .replace(/>/g, "&gt;");
 
+            // Create wrapper with fixed width so that multiple cards line up in a row
             const wrapper = document.createElement("div");
-            wrapper.className = "flex-shrink-0 my-3";
-            wrapper.setAttribute("style", "width: 16rem;");
+            wrapper.className = "flex-shrink-0";
+            wrapper.setAttribute("style", "width: 15rem;");
 
             wrapper.innerHTML = `
-              <div class="card h-100 shadow-sm position-relative"
+              <div class="card h-100 shadow-sm position-relative mb-2"
                    id="${story_id}"
                    data-story-data='${JSON.stringify({
                      title, pub_date, image_url,
                      publisher, views, likes, dislikes, num_comments
                    }).replace(/'/g,"&#39;")}'>
+                
                 <a href="/comments?id=${story_id}">
                   <img src="${image_url}"
                        class="card-img-top rounded-top"
@@ -345,41 +352,61 @@
                     <img src="${publisher.favicon_url}"
                          class="rounded-circle"
                          alt="${publisher.name} favicon"
-                         width="30" height="30">
+                         width="28" height="28">
                   </span>
                 </div>
                 <div class="card-body">
-                  <a href="/comments?id=${story_id}" class="text-decoration-none text-dark">
-                    <h6 class="card-title fw-semibold line-clamp-2">${title}</h6>
-                  </a>
+                  <h6 class="card-title fw-semibold line-clamp-2">${title}</h6>
                   <p class="card-text text-muted small line-clamp-3">${desc}</p>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                  <div class="d-flex justify-content-between small text-muted">
-                    <span>${timeAgo} • ${views} views</span>
-                    <div>
-                      <i class="fa-regular fa-thumbs-up me-2" data-story-id="${story_id}" data-liked="false" style="cursor: pointer;">
-                        <small>${likes}</small>
-                      </i>
-                      <i class="fa-regular fa-thumbs-down me-2" data-story-id="${story_id}" data-disliked="false" style="cursor: pointer;">
-                        <small>${dislikes}</small>
-                      </i>
-                      <i class="fa-bookmark fa-solid me-2" data-story-id="${story.id}" style="cursor: pointer;"></i>
-                      <i class="fa-solid fa-satellite-dish satellite-share-button" style="cursor: pointer;"></i>
-                    </div>
-                  </div>
                 </div>
               </div>
             `;
-            trendingGrid.appendChild(wrapper);
+            topStoriesContainer.appendChild(wrapper);
           });
 
-          // Initialize Bootstrap tooltips:
-          const tipEl = Array.from(document.querySelectorAll("[data-bs-toggle='tooltip']"));
-          tipEl.forEach(el => new bootstrap.Tooltip(el));
+          // Initialize Bootstrap tooltips for publisher icons
+          const tips = Array.from(document.querySelectorAll("[data-bs-toggle='tooltip']"));
+          tips.forEach(el => new bootstrap.Tooltip(el));
         })
-        .catch(err => console.error("Error loading trending:", err));
+        .catch(err => console.error("Error loading top stories:", err));
+
+      // ─┄┄┄ Click-and-Drag to Scroll ┄┄┄─
+      let isDown = false;
+      let startX;
+      let scrollStart;
+
+      topStoriesContainer.addEventListener("mousedown", (e) => {
+        isDown = true;
+        topStoriesContainer.classList.add("dragging");
+        startX = e.pageX - topStoriesContainer.offsetLeft;
+        scrollStart = topStoriesContainer.scrollLeft;
+        e.preventDefault();
+      });
+      topStoriesContainer.addEventListener("mouseleave", () => {
+        isDown = false;
+        topStoriesContainer.classList.remove("dragging");
+      });
+      topStoriesContainer.addEventListener("mouseup", () => {
+        isDown = false;
+        topStoriesContainer.classList.remove("dragging");
+      });
+      topStoriesContainer.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - topStoriesContainer.offsetLeft;
+        const walk = (x - startX) * 1; // 1px movement => 1px scroll
+        topStoriesContainer.scrollLeft = scrollStart - walk;
+      });
+
+      // Prevent child images from being dragged by default (so the drag works smoothly)
+      topStoriesContainer.querySelectorAll("img").forEach(img => {
+        img.setAttribute("draggable", "false");
+      });
+      topStoriesContainer.addEventListener("dragstart", (e) => {
+        e.preventDefault();
+      });
     }
   });
   </script>
 {% endblock %}
+

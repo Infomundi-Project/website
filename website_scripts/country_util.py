@@ -31,7 +31,9 @@ def get_country(name: str = "", iso2: str = "", iso3: str = "", ilike: bool = Fa
                 similarity_data.append(
                     (country, scripts.string_similarity(name, country.name))
                 )
-            similarity_data.sort(key=lambda x: x[1], reverse=True)  # Sorts the list based on higher similarity
+            similarity_data.sort(
+                key=lambda x: x[1], reverse=True
+            )  # Sorts the list based on higher similarity
             return similarity_data
         else:
             country = models.Country.query.filter_by(name=name).first()

@@ -171,6 +171,7 @@
           <span class="logo-text fs-4 notranslate">infomundi</span>
         </a> {% endif %} </div>
       <div class="offcanvas-body">
+        <hr class="mt-0">
         <ul class="nav nav-pills flex-column mb-5"> {% if current_user.is_authenticated %} <li class="nav-item inf-nav-item">
             <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link {% if request.url.endswith('/p/' + current_user.username) or request.url.endswith('/profile/' + current_user.username) %}active{% endif %}">
               <span class="icon-wrapper me-2">

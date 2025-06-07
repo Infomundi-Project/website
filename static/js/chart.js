@@ -71,7 +71,7 @@ am5.ready(function() {
     // e.g. countrySeries.hide(); continentSeries.hide();
 
     // Wait 100ms, then redirect:
-    sleep(100).then(function() {
+    sleep(10).then(function() {
       window.location.href = "/news?country=" + encodeURIComponent(selectedCountry);
     });
   });

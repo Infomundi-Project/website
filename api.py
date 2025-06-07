@@ -284,6 +284,7 @@ def reading_stats(uid):
 
 @api.route("/story/trending", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 30, query_string=True)  # 30m cached
+@extensions.limiter.limit("15/minute")
 def get_trending():
     """
     Returns trending stories based on period, metric, and optional filters.
@@ -399,6 +400,8 @@ def get_trending():
 
 
 @api.route("/home/trending", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 30)  # 30m cached
+@extensions.limiter.limit("18/minute")
 def get_home_trending():
     """
     Returns up to 10 “most relevant” stories (published in the last 24 h, scored by tag_count + recency),
@@ -409,30 +412,25 @@ def get_home_trending():
 
     # 1) Count tags per story (only for stories in the last 24 h AND has_image=True)
     tag_counts_subq = (
-        extensions.db.session
-        .query(
+        extensions.db.session.query(
             models.Tag.story_id.label("story_id"),
-            func.count(models.Tag.id).label("tag_count")
+            func.count(models.Tag.id).label("tag_count"),
         )
         .join(models.Story, models.Story.id == models.Tag.story_id)
-        .filter(
-            models.Story.pub_date >= cutoff,
-            models.Story.has_image == True
-        )
+        .filter(models.Story.pub_date >= cutoff, models.Story.has_image == True)
         .group_by(models.Tag.story_id)
         .subquery()
     )
 
     # 2) Join Story ⇄ tag_counts_subq, again filtering by date AND has_image
     rows = (
-        extensions.db.session
-        .query(models.Story, tag_counts_subq.c.tag_count)
+        extensions.db.session.query(models.Story, tag_counts_subq.c.tag_count)
         .outerjoin(tag_counts_subq, models.Story.id == tag_counts_subq.c.story_id)
         .filter(
             models.Story.pub_date >= cutoff,
             models.Story.has_image == True,
             # Ensure we only pick stories that appear in tag_counts_subq (i.e. have ≥1 tag)
-            tag_counts_subq.c.tag_count.isnot(None)
+            tag_counts_subq.c.tag_count.isnot(None),
         )
         .all()
     )
@@ -481,13 +479,13 @@ def get_home_trending():
             "likes": story.stats.likes if story.stats else 0,
             "dislikes": story.stats.dislikes if story.stats else 0,
             "num_comments": (
-                extensions.db.session
-                .query(func.count(models.Comment.id))
+                extensions.db.session.query(func.count(models.Comment.id))
                 .filter(
                     models.Comment.story_id == story.id,
-                    models.Comment.is_deleted == False
+                    models.Comment.is_deleted == False,
                 )
-                .scalar() or 0
+                .scalar()
+                or 0
             ),
             "category": story.category.name,
         }
@@ -882,7 +880,7 @@ def search():
         best_match_country, match_index = similarity_data[0]
         iso2 = best_match_country.iso2
     except Exception:
-        iso2 = 'donotexist'
+        iso2 = "donotexist"
 
     return redirect(url_for("views.news", country=iso2))
 

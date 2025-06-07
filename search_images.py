@@ -383,9 +383,7 @@ def update_story_image_url(stories_to_update):
     log_message(f"Updating {len(stories_to_update)} story image URLs...")
     try:
         with db_connection.cursor() as cursor:
-            update_query = (
-                "UPDATE stories SET has_image = 1 WHERE id = %s"
-            )
+            update_query = "UPDATE stories SET has_image = 1 WHERE id = %s"
             cursor.executemany(update_query, stories_to_update)
         db_connection.commit()
     except Exception as e:
@@ -479,7 +477,9 @@ def search_images():
     Searches images for each category in the feeds path.
     """
     # DEBUG if x["name"] == "br_general"
-    categories = [x for x in fetch_categories_from_database() if x["name"] == "br_general"]
+    categories = [
+        x for x in fetch_categories_from_database() if x["name"] == "br_general"
+    ]
 
     total = 0
     for category in categories:

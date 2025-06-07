@@ -319,7 +319,6 @@ def add_headers(response):
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
         f"script-src 'self' 'strict-dynamic' 'nonce-{nonce}'; "
         "style-src 'self' 'unsafe-inline'; "
-        "form-action 'self' 'strict-dynamic'; "
         "manifest-src 'self'; "
         "base-uri 'self' https://*.infomundi.net; "
         "font-src 'self' https://*.infomundi.net; "

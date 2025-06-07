@@ -250,9 +250,10 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
     country_name = country_name.lower()
     cache_filepath = f"{config.WEBSITE_ROOT}/assets/data/json/gdp{'_per_capita' if is_per_capita else ''}"
 
-    if not qol_util.is_file_creation_within_threshold_minutes(
-        f"{cache_filepath}.json", 720, is_hours=True
-    ):
+    # if not qol_util.is_file_creation_within_threshold_minutes(
+    #    f"{cache_filepath}.json", 720, is_hours=True
+    # ):
+    if True:  # DISBABLED FOR NOW
         cache_data = json_util.read_json(cache_filepath)
         for index, value in enumerate(cache_data):
             if list(value.keys())[0].lower() == country_name:
