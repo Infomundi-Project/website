@@ -498,7 +498,7 @@ def get_trending():
 
 
 @api.route("/home/trending", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 30)  # 30m cached
+#@extensions.cache.cached(timeout=60 * 30)  # 30m cached
 @extensions.limiter.limit("18/minute")
 def get_home_trending():
     """
@@ -506,7 +506,7 @@ def get_home_trending():
     but only those with has_image=True, and no more than 3 per category.
     """
     now = datetime.utcnow()
-    cutoff = now - timedelta(days=10)
+    cutoff = now - timedelta(days=15)
 
     # 1) Count tags per story (only for stories in the last 24 h AND has_image=True)
     tag_counts_subq = (
