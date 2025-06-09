@@ -1,6 +1,6 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from sqlalchemy import and_, cast, desc, asc, insert, func
-from datetime import datetime, timedelta
+from datetime import datetime, date, time, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
 from collections import OrderedDict
@@ -85,6 +85,104 @@ def get_stocks():
 def get_crypto():
     return jsonify(
         json_util.read_json(f"{config.WEBSITE_ROOT}/assets/data/json/crypto")
+    )
+
+
+@api.route("/home/dashboard", methods=["GET"])
+# @extensions.cache.cached(timeout=60 * 5)
+def get_home_dashboard():
+    now = datetime.utcnow()
+    today = now.date()
+    start_date = today - timedelta(days=6)  # inclusive 7-day window
+    start_dt = datetime.combine(start_date, time.min)
+
+    # ── 1) STORIES PER DAY ──
+    daily = (
+        extensions.db.session.query(
+            cast(models.Story.pub_date, Date).label("day"),
+            func.count(models.Story.id).label("count"),
+        )
+        .filter(cast(models.Story.pub_date, Date) >= start_date)
+        .group_by("day")
+        .order_by("day")
+        .all()
+    )
+    day_map = {r.day: r.count for r in daily}
+    days = [start_date + timedelta(days=i) for i in range(7)]
+    stories_last_7_days = [day_map.get(d, 0) for d in days]
+
+    # ── 2) TOP 5 COUNTRIES ──
+    # get raw category counts, then aggregate on country‐prefix
+    raw = (
+        extensions.db.session.query(
+            models.Category.name, func.count(models.Story.id).label("count")
+        )
+        .join(models.Story, models.Story.category_id == models.Category.id)
+        .filter(cast(models.Story.pub_date, Date) >= start_date)
+        .group_by(models.Category.name)
+        .all()
+    )
+    # fold into per‐country totals
+    country_totals = {}
+    for cat_name, cnt in raw:
+        country = cat_name.split("_", 1)[0].upper()
+        country_totals[country] = country_totals.get(country, 0) + cnt
+
+    top_countries = [
+        {"country": c, "count": country_totals[c]}
+        for c in sorted(country_totals, key=lambda k: country_totals[k], reverse=True)[
+            :5
+        ]
+    ]
+
+    # ── 3) ENGAGEMENT METRICS ──
+    likes = (
+        extensions.db.session.query(func.count(models.StoryReaction.id))
+        .filter(
+            models.StoryReaction.action == "like",
+            models.StoryReaction.created_at >= start_dt,
+        )
+        .scalar()
+        or 0
+    )
+    dislikes = (
+        extensions.db.session.query(func.count(models.StoryReaction.id))
+        .filter(
+            models.StoryReaction.action == "dislike",
+            models.StoryReaction.created_at >= start_dt,
+        )
+        .scalar()
+        or 0
+    )
+    comments = (
+        extensions.db.session.query(func.count(models.Comment.id))
+        .filter(models.Comment.created_at >= start_dt)
+        .scalar()
+        or 0
+    )
+    shares = (
+        extensions.db.session.query(func.count(models.Bookmark.id))
+        .filter(models.Bookmark.created_at >= start_dt)
+        .scalar()
+        or 0
+    )
+    days_iso = [(start_date + timedelta(days=i)).isoformat() for i in range(7)]
+
+    return (
+        jsonify(
+            {
+                "stories_last_7_days": stories_last_7_days,
+                "days": days_iso,
+                "top_countries": top_countries,
+                "engagement": {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "comments": comments,
+                    "shares": shares,
+                },
+            }
+        ),
+        200,
     )
 
 
@@ -408,7 +506,7 @@ def get_home_trending():
     but only those with has_image=True, and no more than 3 per category.
     """
     now = datetime.utcnow()
-    cutoff = now - timedelta(hours=24)
+    cutoff = now - timedelta(days=10)
 
     # 1) Count tags per story (only for stories in the last 24 h AND has_image=True)
     tag_counts_subq = (
@@ -604,7 +702,7 @@ def story_reaction(action):
 
     story_stats = extensions.db.session.get(models.StoryStats, story.id)
     if not story_stats:
-        story_stats = models.StoryStats(story_id=story.id, views=0, likes=0, dislikes=0)
+        story_stats = models.StoryStats(story_id=story.id)
         extensions.db.session.add(story_stats)
         extensions.db.session.commit()
 
@@ -632,14 +730,17 @@ def story_reaction(action):
                 story.stats.dislikes += 1
                 story.stats.likes -= 1
                 is_disliked = True
-
+            existing_reaction.created_at = datetime.now()
             message = f"Reaction updated to {action}"
             is_liked = action == "like"
             is_disliked = action == "dislike"
     else:
         # Create a new reaction
         new_reaction = models.StoryReaction(
-            story_id=story.id, user_id=current_user.id, action=action
+            story_id=story.id,
+            user_id=current_user.id,
+            action=action,
+            created_at=datetime.now(),
         )
         extensions.db.session.add(new_reaction)
 

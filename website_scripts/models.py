@@ -133,7 +133,6 @@ class StoryStats(db.Model):
     story_id = db.Column(
         db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), primary_key=True
     )
-
     dislikes = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)

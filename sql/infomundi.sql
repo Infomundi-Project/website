@@ -194,7 +194,7 @@ CREATE TABLE story_reactions (
 
 CREATE TABLE story_stats (
     story_id INT PRIMARY KEY,
-    
+
     dislikes INT DEFAULT 0,
     views INT DEFAULT 0,
     likes INT DEFAULT 0,
