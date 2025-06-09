@@ -330,7 +330,7 @@ def fetch_categories_from_database():
 
     # DEBUG if row["name"] == "br_general"
     category_list = [
-        (row["id"], row["name"]) for row in categories if row["name"] == "br_general"
+        (row["id"], row["name"]) for row in categories
     ]
     shuffle(category_list)
 

@@ -1,4 +1,5 @@
 import pymysql
+from sys import exit
 
 from website_scripts import config, input_sanitization, hashing_util, json_util
 
@@ -26,7 +27,6 @@ for feed in feeds:
 
 
 categories = list(set(categories))
-
 
 old_feeds = json_util.read_json("assets/data/json/feeds/old-feeds")
 all_categories = list(old_feeds.keys()) + categories
@@ -73,7 +73,7 @@ with db_connection.cursor() as cursor:
             try:
                 cursor.execute(
                     """
-                    INSERT INTO publishers (name, url, category_id) 
+                    INSERT INTO publishers (name, feed_url, category_id) 
                     VALUES (%s, %s, %s)
                 """,
                     (
@@ -100,7 +100,7 @@ with db_connection.cursor() as cursor:
             try:
                 cursor.execute(
                     """
-                    INSERT INTO publishers (name, url, category_id) 
+                    INSERT INTO publishers (name, feed_url, category_id) 
                     VALUES (%s, %s, %s)
                 """,
                     (

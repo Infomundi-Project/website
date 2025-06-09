@@ -96,7 +96,7 @@ def fetch_publishers_from_database(category_id: int):
     return publishers
 
 
-def fetch_stories_with_publishers(category_id: int, limit: int = 20):
+def fetch_stories_with_publishers(category_id: int, limit: int = 30):
     log_message("Fetching stories with nested publisher dict...")
     try:
         with db_connection.cursor() as cursor:
@@ -478,7 +478,7 @@ def search_images():
     """
     # DEBUG if x["name"] == "br_general"
     categories = [
-        x for x in fetch_categories_from_database() if x["name"] == "br_general"
+        x for x in fetch_categories_from_database()
     ]
 
     total = 0

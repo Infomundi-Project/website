@@ -9,7 +9,11 @@ DROP TABLE IF EXISTS story_reactions;
 DROP TABLE IF EXISTS user_ip_history;
 DROP TABLE IF EXISTS feeds;
 DROP TABLE IF EXISTS friendships;
+DROP TABLE IF EXISTS user_story_views;
 DROP TABLE IF EXISTS stories;
+DROP TABLE IF EXISTS user_blocks;
+DROP TABLE IF EXISTS user_reports;
+DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS publishers;
 DROP TABLE IF EXISTS categories;
@@ -19,10 +23,6 @@ DROP TABLE IF EXISTS site_statistics;
 DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS crypto;
-DROP TABLE IF EXISTS user_story_views;
-DROP TABLE IF EXISTS user_blocks;
-DROP TABLE IF EXISTS user_reports;
-DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
