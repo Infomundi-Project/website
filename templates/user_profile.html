@@ -12,7 +12,7 @@
 {% block styles %}
 <style>
   .background-container {
-    background: url('{{ user.profile_wallpaper_url  }}') no-repeat center center;
+    background: url('{{ user.wallpaper_url  }}') no-repeat center center;
     background-size: cover;
     padding-top: 30px;
     position: relative;
@@ -182,7 +182,7 @@
 
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %} px-1">
   <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 97%;">
-    <div class="profile-header rounded-3 mb-3" style="background: url('{{ user.profile_banner_url  }}') no-repeat center center;"></div>
+    <div class="profile-header rounded-3 mb-3" style="background: url('{{ user.banner_url  }}') no-repeat center center;"></div>
 
     <div class="row">
       <div class="col-md-8">

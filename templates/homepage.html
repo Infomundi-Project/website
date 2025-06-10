@@ -121,7 +121,7 @@
 
   <!-- Top Stories -->
   <div class="row g-3 mb-4">
-    <div class="col-12 col-lg-4">
+    <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header">
           <h6 class="mb-0">
@@ -163,7 +163,7 @@
           </h6>
         </div>
         <div class="card-body">
-          <canvas id="categoriesBarChart" width="100%" height="50"></canvas>
+          <canvas id="countriesPieChart" width="100%" height="50"></canvas>
         </div>
       </div>
       <div class="card shadow-sm">
@@ -224,14 +224,16 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // ── 2) TOP COUNTRIES BAR CHART ──
-  const ctxBar = document.getElementById("categoriesBarChart").getContext("2d");
-  const countriesChart = new Chart(ctxBar, {
-    type: 'bar',
+  const ctxPie = document
+    .getElementById("countriesPieChart")
+    .getContext("2d");
+
+  const countriesPieChart = new Chart(ctxPie, {
+    type: 'pie',   // ← change to 'polarArea' for a Polar Area chart
     data: {
-      labels: [],
+      labels: [],     // ← will be filled from the API
       datasets: [{
-        label: '# of Stories',
-        data: [],
+        data: [],     // ← will be filled from the API
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -239,25 +241,21 @@ document.addEventListener("DOMContentLoaded", function() {
           'rgba(75, 192, 192, 0.6)',
           'rgba(153, 102, 255, 0.6)'
         ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)'
-        ],
         borderWidth: 1
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-        y: { grid: { display: false } }
-      },
-      plugins: { legend: { display: false } }
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 16,
+            boxWidth: 12
+          }
+        }
+      }
     }
   });
 
@@ -306,10 +304,14 @@ document.addEventListener("DOMContentLoaded", function() {
       storiesChart.data.datasets[0].data = json.stories_last_7_days;
       storiesChart.update();
 
+      // extract countries
+      const labels = json.top_countries.map(c => c.country);
+      const counts = json.top_countries.map(c => c.count);
+      
       // update bar chart (top countries)
-      countriesChart.data.labels = json.top_countries.map(c => c.country);
-      countriesChart.data.datasets[0].data = json.top_countries.map(c => c.count);
-      countriesChart.update();
+      countriesPieChart.data.labels = labels;
+      countriesPieChart.data.datasets[0].data = counts;
+      countriesPieChart.update();
 
       // update doughnut (engagement)
       const e = json.engagement;
@@ -359,7 +361,7 @@ document.addEventListener("DOMContentLoaded", function() {
               <div class="position-absolute top-0 end-0 mt-2 me-2">
                 <span data-bs-toggle="tooltip" data-bs-title="Source: ${publisher.name}">
                   ${publisher.favicon_url ? 
-            `<img src="${publisher.favicon_url}" class="rounded" alt="${item.publisher.name} favicon image" width="30">` : 
+            `<img src="${publisher.favicon_url}" class="rounded" alt="${publisher.name} favicon image" width="30">` : 
             `<i class="fa-solid fa-tower-cell"></i>`
           }
                 </span>

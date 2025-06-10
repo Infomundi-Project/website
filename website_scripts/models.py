@@ -230,7 +230,7 @@ class User(db.Model, UserMixin):
         return security_util.uuid_bytes_to_string(self.public_id)
 
     def get_picture(self, category: str) -> str:
-        if category not in ("avatar", "banner," "wallpaper"):
+        if category not in ("avatar", "banner", "wallpaper"):
             return ""
 
         if category == "avatar":
@@ -244,7 +244,7 @@ class User(db.Model, UserMixin):
         else:
             if not self.has_wallpaper:
                 return ""
-            path = "backgrounds"
+            path = "wallpapers"
 
         return f"https://bucket.infomundi.net/{path}/{self.get_public_id()}.webp"
 
@@ -253,11 +253,11 @@ class User(db.Model, UserMixin):
         return self.get_picture("avatar")
 
     @property
-    def profile_banner_url(self) -> str:
+    def banner_url(self) -> str:
         return self.get_picture("banner")
 
     @property
-    def profile_wallpaper_url(self) -> str:
+    def wallpaper_url(self) -> str:
         return self.get_picture("wallpaper")
 
     def enable(self):

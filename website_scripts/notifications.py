@@ -1,4 +1,3 @@
-import gnupg
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy.exc import IntegrityError
 from requests import post as post_request

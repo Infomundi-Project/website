@@ -3,6 +3,7 @@ import threading
 import logging
 import pymysql
 import requests
+import yake
 
 from collections import defaultdict
 from random import shuffle, choice
@@ -17,8 +18,6 @@ from website_scripts import (
     hashing_util,
     qol_util,
 )
-from website_scripts.scripts import extract_yake
-
 
 # Database connection parameters
 db_params = {
@@ -38,6 +37,11 @@ logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
 )
+
+
+def extract_yake(text: str, lang_code: str = "en", top_n: int = 5) -> tuple:
+    kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
+    return (kw for kw, score in kw_extractor.extract_keywords(text))
 
 
 def log_message(message):

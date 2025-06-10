@@ -6,7 +6,6 @@ from flask_login import current_user
 from collections import OrderedDict
 from collections import defaultdict
 from sqlalchemy.types import Date
-from newsplease import NewsPlease
 
 from website_scripts import (
     config,
@@ -25,6 +24,7 @@ from website_scripts import (
     comments_util,
     notifications,
     qol_util,
+    image_util,
 )
 
 api = Blueprint("api", __name__)
@@ -498,7 +498,7 @@ def get_trending():
 
 
 @api.route("/home/trending", methods=["GET"])
-#@extensions.cache.cached(timeout=60 * 30)  # 30m cached
+# @extensions.cache.cached(timeout=60 * 30)  # 30m cached
 @extensions.limiter.limit("18/minute")
 def get_home_trending():
     """
@@ -999,19 +999,16 @@ def summarize_story(story_url_hash):
         return jsonify({"response": story.gpt_summary}), 200
 
     try:
-        article = NewsPlease.from_url(story.url)
-        title = article.title
-        main_text = article.maintext
-        tags = scripts.extract_yake(f"{title}, {main_text}", lang_code=story.lang)
-        tag_dicts = [
-            {"story_id": story.id, "tag": t.strip()} for t in tags if t.strip()
-        ]
-        if tag_dicts:
-            extensions.db.session.execute(insert(models.Tag), tag_dicts)
-            extensions.db.session.commit()
+        r = requests.get(story.url, timeout=4)
+        if r.status_code == 200:
+            article = scripts.extract_article_fields(r.text)
+        else:
+            article = {}
     except Exception:
-        title = story.title
-        main_text = story.description
+        article = {}
+
+    title = article["title"] if article["title"] else story.title
+    main_text = article["text"] if article["text"] else story.description
 
     response = llm_util.gpt_summarize(
         input_sanitization.gentle_cut_text(300, title),
@@ -1676,3 +1673,40 @@ def user_reports(uid, report_id=0):
         jsonify(message="Thanks for letting us know — we’ll take a look!"),
         200,
     )
+
+
+@api.route("/user/image/<category>", methods=["POST"])
+@decorators.api_login_required
+def upload_image(category):
+    ALLOWED = {
+        "avatar": ("profile_picture", "users/{id}.webp", "has_avatar"),
+        "banner": ("profile_banner", "banners/{id}.webp", "has_banner"),
+        "wallpaper": (
+            "profile_wallpaper",
+            "wallpapers/{id}.webp",
+            "has_wallpaper",
+        ),
+    }
+    if category not in ALLOWED:
+        return jsonify(error="Unknown category"), 404
+
+    util_cat, key_tmpl, attr_flag = ALLOWED[category]
+    file = request.files.get(category)
+    if not file:
+        abort(400, description="No image provided")
+
+    if not image_util.perform_all_checks(file.stream, file.filename):
+        abort(400, description="Invalid image")
+
+    s3_key = key_tmpl.format(id=current_user.get_public_id())
+    setattr(current_user, attr_flag, True)
+
+    if not image_util.convert_and_save(file.stream, util_cat, s3_key):
+        abort(500, description="Upload failed")
+
+    extensions.db.session.commit()
+    notifications.notify_single(
+        current_user.id, "profile_edit", f"You updated your {category}"
+    )
+
+    return jsonify(success=True), 201

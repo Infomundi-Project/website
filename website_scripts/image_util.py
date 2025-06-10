@@ -29,7 +29,7 @@ def convert_and_save(
             The image iteself, in bytes.
 
         image_category: str
-            The image category, should be in ('profile_picture', 'background_image')
+            The image category, should be in ('profile_picture', 'profile_wallpaper', 'profile_banner')
 
         dimensions: tuple
             A tuple containing dimensions to save the image with. Example 500 width x 333 height would be: (500, 333)
@@ -43,7 +43,7 @@ def convert_and_save(
     if image_category not in (
         "profile_picture",
         "profile_banner",
-        "profile_background",
+        "profile_wallpaper",
     ):
         return False
 
@@ -80,10 +80,10 @@ def convert_and_save(
 
 
 def is_extension_allowed(filename: str) -> bool:
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower() in immutable.IMAGE_EXTENSIONS
-    )
+    if "." in filename:
+        return filename.rsplit(".", 1)[1].lower() in immutable.IMAGE_EXTENSIONS
+
+    return True
 
 
 def is_really_an_image(file_stream) -> bool:

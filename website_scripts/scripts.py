@@ -1,4 +1,4 @@
-import json, yake, requests
+import json, requests, re
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from unidecode import unidecode
@@ -117,6 +117,74 @@ def news_page_processing(country_name: str) -> dict:
 def get_statistics() -> dict:
     """Handles the statistics for Infomundi. Returns a dict with related information."""
     return models.SiteStatistics.query.order_by(models.SiteStatistics.id.desc()).first()
+
+
+def extract_article_fields(html: str) -> dict:
+    """
+    Given a news-article HTML string, returns a dict with:
+      - 'title':       the headline
+      - 'description': meta-description (if any)
+      - 'text':        the full article body
+    """
+    soup = BeautifulSoup(html, "html.parser")
+
+    # 1) TITLE
+    title = ""
+    og = soup.find("meta", attrs={"property": "og:title"})
+    if og and og.get("content"):
+        title = og["content"].strip()
+    elif soup.title and soup.title.string:
+        title = soup.title.string.strip()
+    else:
+        h1 = soup.find("h1")
+        if h1:
+            title = h1.get_text(strip=True)
+
+    # 2) DESCRIPTION
+    description = ""
+    desc = soup.find("meta", attrs={"name": "description"})
+    if desc and desc.get("content"):
+        description = desc["content"].strip()
+    else:
+        og_desc = soup.find("meta", attrs={"property": "og:description"})
+        if og_desc and og_desc.get("content"):
+            description = og_desc["content"].strip()
+        else:
+            tw_desc = soup.find("meta", attrs={"name": "twitter:description"})
+            if tw_desc and tw_desc.get("content"):
+                description = tw_desc["content"].strip()
+
+    # 3) ARTICLE TEXT
+    def gather_paragraphs(node):
+        return [
+            p.get_text(strip=True) for p in node.find_all("p") if p.get_text(strip=True)
+        ]
+
+    # a) Prefer <article> tags
+    text = ""
+    articles = soup.find_all("article")
+    if articles:
+        paras = []
+        for art in articles:
+            paras.extend(gather_paragraphs(art))
+        text = "\n\n".join(paras)
+    else:
+        # b) Otherwise, score each <div>/<section> by total <p>-text length
+        candidates = []
+        for tag in ("div", "section"):
+            for el in soup.find_all(tag):
+                paras = gather_paragraphs(el)
+                if paras:
+                    total_len = sum(len(p) for p in paras)
+                    candidates.append((total_len, paras))
+        if candidates:
+            best_paras = max(candidates, key=lambda x: x[0])[1]
+            text = "\n\n".join(best_paras)
+        else:
+            # c) Fallback: every <p> on the page
+            text = "\n\n".join(gather_paragraphs(soup))
+
+    return {"title": title, "description": description, "text": text}
 
 
 @extensions.cache.memoize(timeout=60 * 60 * 16)  # 16 hours
@@ -319,11 +387,6 @@ def string_similarity(s1: str, s2: str) -> float:
     """Takes two strings and returns the similarity percentage between them."""
     matcher = SequenceMatcher(None, s1, s2)
     return matcher.ratio() * 100
-
-
-def extract_yake(text: str, lang_code: str = "en", top_n: int = 5) -> tuple:
-    kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
-    return (kw for kw, score in kw_extractor.extract_keywords(text))
 
 
 @extensions.cache.memoize(timeout=60 * 60 * 12)  # 12 hours
