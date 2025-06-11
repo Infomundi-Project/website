@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
     "#publisherName");
 
   const modalTagsContainer = modalElement.querySelector(
-    ".modal-body .d-flex.align-items-center");
+    ".modal-body .tags-container");
   const modalLikeIcon = modalElement.querySelector(".fa-thumbs-up");
   const modalDislikeIcon = modalElement.querySelector(
     ".fa-thumbs-down");

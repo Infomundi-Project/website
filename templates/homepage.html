@@ -70,7 +70,7 @@
     <!-- 4) GLOBE & METRICS -->
   <div class="row my-3">
     <!-- 4a) LEFT: Globe (country selector) -->
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-8 px-1 mb-2">
       <div class="card shadow-sm h-100">
         <div class="card-header">
           <h5 class="mb-0">
@@ -85,7 +85,7 @@
 
     <div class="col-12 col-lg-4">
     <div class="row row-cols-2">
-      <div class="col mb-2">
+      <div class="col px-1 mb-2">
         <div class="card metric-card shadow-sm text-center">
           <div class="card-body d-flex flex-column justify-content-center">
             <i class="fa-solid fa-globe fa-2x mb-2 text-primary"></i>
@@ -94,7 +94,7 @@
           </div>
         </div>
       </div>
-      <div class="col mb-2">
+      <div class="col px-1 mb-2">
         <div class="card metric-card shadow-sm text-center">
           <div class="card-body d-flex flex-column justify-content-center">
             <i class="fa-solid fa-newspaper fa-2x mb-2 text-success"></i>
@@ -103,7 +103,7 @@
           </div>
         </div>
       </div>
-      <div class="col mb-2">
+      <div class="col px-1 mb-2">
         <div class="card metric-card shadow-sm text-center">
           <div class="card-body d-flex flex-column justify-content-center">
             <i class="fa-solid fa-users fa-2x mb-2 text-warning"></i>
@@ -119,13 +119,13 @@
   </div>
 
   <!-- Top Stories -->
-  <div class="row g-3 mb-4">
-    <div class="col-12">
+  <div class="row mb-3">
+    <div class="col-12 px-1">
       <div class="card shadow-sm">
         <div class="card-header">
-          <h6 class="mb-0">
+          <h5 class="mb-0">
             <i class="fa-solid fa-fire text-danger me-2"></i>Top Stories
-          </h6>
+          </h5>
         </div>
         <div class="card-body">
           <!-- Single‐row, horizontally scrollable container -->
@@ -137,41 +137,71 @@
     </div>
   </div>
 
-  <!-- 3) DASHBOARD ROW -->
-  <div class="row gy-4">
-    <!-- 3a) LEFT: LINE CHART -->
-    <div class="col-12 col-lg-8">
-      <div class="card shadow-sm h-100">
+
+  <!-- Trackers -->
+  <div class="row mb-4">
+    <div class="col-12 px-1">
+      <div class="card shadow-sm">
         <div class="card-header">
           <h5 class="mb-0">
-            <i class="fa-solid fa-chart-line me-2"></i>Stories Published (Last 7 Days)
+            <i class="fa-solid fa-chart-gantt text-danger me-2"></i>Trackers - <span id="marketDate"></span>
           </h5>
         </div>
         <div class="card-body">
-          <canvas id="storiesLineChart" width="100%" height="60"></canvas>
+
+              <div>
+                <h6><i class="fa-solid fa-arrow-trend-up me-2"></i>Country Indexes</h6>
+                <div id="stocks-ticker"></div>
+              </div>
+              <div class="my-4">
+                <h6><i class="fa-solid fa-money-bill-trend-up me-2"></i>Currencies</h6>
+                <div id="currencies-ticker"></div>
+              </div>
+              <div>
+                <h6><i class="fa-brands fa-bitcoin me-2"></i>Crypto</h6>
+                <div id="crypto-ticker"></div>
+              </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3) DASHBOARD ROW -->
+  <div class="row gy-4">
+    <!-- 3a) LEFT: LINE CHART -->
+    <div class="col-12 col-lg-8 px-1">
+      <div class="card shadow-sm h-100">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fa-solid fa-chart-line text-primary me-2"></i>Stories Published
+          </h5>
+        </div>
+        <div class="card-body">
+          <canvas id="storiesLineChart" width="100%" height="120"></canvas>
         </div>
       </div>
     </div>
 
     <!-- 3b) RIGHT: BAR + DONUT CHART -->
-    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+    <div class="col-12 col-lg-4 d-flex flex-column gap-4 px-1">
       <div class="card shadow-sm">
         <div class="card-header">
           <h6 class="mb-0">
-            <i class="fa-solid fa-bars-staggered me-2"></i>Top Countries (This Week)
+            <i class="fa-solid fa-bars-staggered text-primary me-2"></i>Top Countries
           </h6>
         </div>
-        <div class="card-body">
-          <canvas id="countriesPieChart" width="100%" height="50"></canvas>
+        <div class="card-body p-1">
+          <canvas id="countriesPieChart" width="100%" height="100"></canvas>
         </div>
       </div>
       <div class="card shadow-sm">
         <div class="card-header">
           <h6 class="mb-0">
-            <i class="fa-solid fa-chart-pie me-2"></i>User Engagement
+            <i class="fa-solid fa-chart-pie text-primary me-2"></i>User Engagement
           </h6>
         </div>
-        <div class="card-body d-flex justify-content-center">
+        <div class="card-body d-flex justify-content-center p-1">
           <canvas id="engagementDoughnut" width="100%" height="100"></canvas>
         </div>
       </div>
@@ -181,9 +211,7 @@
 {% endblock %}
 {% block scripts %}
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/amcharts/index.js') }}"></script>
-  {% if not is_mobile %}
-    <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
-  {% endif %}
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
   {% assets "js_home" %}
     <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
   {% endassets %}

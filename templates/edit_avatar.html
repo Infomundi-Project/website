@@ -29,7 +29,6 @@
   .profile-mockup .profile-avatar {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     margin-bottom: 10px;
   }
   .profile-header {
@@ -50,7 +49,6 @@
   }
   .profile-preview-avatar {
     border-radius: 50%;
-    border: 5px solid white;
     object-fit: cover;
   }
 
@@ -95,7 +93,7 @@
             <div class="profile-header rounded mb-3" id="profileHeader"></div>
             <div class="row">
               <div class="col-8 d-flex align-items-center">
-                <img src="{{ current_user.avatar_url }}" class="profile-avatar" alt="User Avatar">
+                <img src="{{ current_user.avatar_url }}" class="profile-avatar rounded" alt="User Avatar">
                 <div class="ms-3">
                   {% if current_user.display_name %}
                   <p class="fs-6 fw-bold mb-0">{{ current_user.display_name }}</p>
@@ -186,16 +184,16 @@
       </div>
       <div class="modal-body text-center">
         <div class="cropper-toolbar">
-          <button type="button" class="btn btn-outline-light btn-sm" id="zoomOut">
+          <button type="button" class="btn border btn-sm" id="zoomOut">
             <i class="fa-solid fa-search-minus"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="zoomIn">
+          <button type="button" class="btn border btn-sm" id="zoomIn">
             <i class="fa-solid fa-search-plus"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="rotateLeft">
+          <button type="button" class="btn border btn-sm" id="rotateLeft">
             <i class="fa-solid fa-rotate-left"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="rotateRight">
+          <button type="button" class="btn border btn-sm" id="rotateRight">
             <i class="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -226,7 +224,7 @@
       </div>
       <div class="modal-body" id="errorModalBody"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-light"
+        <button type="button" class="btn border"
                 data-bs-dismiss="modal">Close</button>
       </div>
     </div>
