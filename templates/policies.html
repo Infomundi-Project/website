@@ -1,21 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Policies{% endblock %}
-{% block about_content %}
+{% extends "base.html" %} {% block title %}Policies{% endblock %} {% block about_content %}
 <div class="container">
   <div class="row">
     <!-- Sidebar navigation -->
     <div class="col-md-4">
       <!-- Mobile toggler -->
-      <button class="navbar-toggler d-md-none mb-3" type="button"
-              data-bs-toggle="collapse" data-bs-target="#policyNavCollapse"
-              aria-controls="policyNavCollapse" aria-expanded="false"
-              aria-label="Toggle navigation">
+      <button class="navbar-toggler d-md-none mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#policyNavCollapse" aria-controls="policyNavCollapse" aria-expanded="false" aria-label="Toggle navigation">
         Policy Sections
       </button>
       <div class="collapse d-md-block" id="policyNavCollapse">
-        <nav id="inf-scrollspy-navbar"
-             class="h-100 flex-column align-items-stretch pe-4 border-end sticky-top"
-             aria-label="Policy Sections">
+        <nav id="inf-scrollspy-navbar" class="h-100 flex-column align-items-stretch pe-4 border-end sticky-top" aria-label="Policy Sections">
           <nav class="nav nav-pills flex-column">
             <a class="nav-link" href="#privacy-policy">Privacy Policy</a>
             <nav class="nav nav-pills flex-column">
@@ -45,19 +38,21 @@
 
     <!-- Main content -->
     <div class="col-md-8">
-      <div data-bs-spy="scroll"
-           data-bs-target="#inf-scrollspy-navbar"
-           data-bs-smooth-scroll="true"
-           tabindex="0">
-
+      <div data-bs-spy="scroll" data-bs-target="#inf-scrollspy-navbar" data-bs-smooth-scroll="true" tabindex="0">
         <!-- Privacy Policy Header -->
         <header>
           <h1>Privacy Policy</h1>
         </header>
         <div class="mb-5" id="privacy-policy">
           <p><strong>Last Updated:</strong> April 29, 2025 (v1.2)</p>
-          <p>Welcome to Infomundi. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy, or our practices with regards to your personal information, please contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or use the <a href="{{ url_for('views.contact') }}">contact form</a>.</p>
-          <p>When you visit our website (https://infomundi.net/) and use our services, you trust us with your personal information. In this privacy policy, we explain in the clearest way possible what information we collect, how we use it, and what rights you have. If there are any terms in this privacy policy that you do not agree with, please discontinue use of our site.</p>
+          <p>
+            Welcome to Infomundi. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy, or our practices with regards to your personal
+            information, please contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or use the <a href="{{ url_for('views.contact') }}">contact form</a>.
+          </p>
+          <p>
+            When you visit our website (https://infomundi.net/) and use our services, you trust us with your personal information. In this privacy policy, we explain in the clearest way possible what information we collect, how we use it,
+            and what rights you have. If there are any terms in this privacy policy that you do not agree with, please discontinue use of our site.
+          </p>
           <p>This policy applies to all information collected through our website and related services.</p>
         </div>
 
@@ -98,7 +93,8 @@
           <p class="fst-italic">We encrypt everything—in transit and at rest—to keep your account locked down.</p>
           <ul>
             <li><strong>Passwords & Recovery Tokens:</strong> hashed with <a href="https://en.wikipedia.org/wiki/Argon2" target="_blank">Argon2id</a>.</li>
-            <li><strong>Email Addresses:</strong>
+            <li>
+              <strong>Email Addresses:</strong>
               <ol type="a">
                 <li>Encrypted at rest with AES-GCM (application key).</li>
                 <li>Fingerprinted via HMAC-SHA-256 (no plaintext stored).</li>
@@ -147,7 +143,11 @@
           <p class="fst-italic">Essential cookies only—unless you opt in to more.</p>
           <p>We only use necessary cookies that are crucial for site functionality.</p>
           <p>Manage your <a href="#" data-bs-toggle="modal" data-bs-target="#cookieSettingsModal">cookie settings</a> at any time.</p>
-          <p>When you enable translation under “Account → Enable Maximus translation,” we use Google Translate. Google may place its own cookies—learn more in <a href="https://policies.google.com/privacy" target="_blank">Google’s Privacy Policy</a>. We also employ Cloudflare for security and performance—visit <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare’s Privacy Policy</a> for details.</p>
+          <p>
+            When you enable translation under “Account → Enable Maximus translation,” we use Google Translate. Google may place its own cookies—learn more in
+            <a href="https://policies.google.com/privacy" target="_blank">Google’s Privacy Policy</a>. We also employ Cloudflare for security and performance—visit
+            <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare’s Privacy Policy</a> for details.
+          </p>
           <p>Cookies used by our website:</p>
           <ol>
             <li><code>theme</code> (7 days) – set only if you change the site theme.</li>
@@ -157,48 +157,42 @@
         </div>
 
         <!-- Cookie Settings Modal -->
-        <div class="modal fade" id="cookieSettingsModal" tabindex="-1"
-             aria-labelledby="cookieSettingsLabel" aria-hidden="true">
+        <div class="modal fade" id="cookieSettingsModal" tabindex="-1" aria-labelledby="cookieSettingsLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="cookieSettingsLabel">Cookie Settings</h5>
-                <button type="button" class="btn-close"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 <p>Manage your cookie preferences:</p>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox"
-                         id="cookieNecessary" checked disabled>
+                  <input class="form-check-input" type="checkbox" id="cookieNecessary" checked disabled />
                   <label class="form-check-label" for="cookieNecessary">
                     Necessary cookies
                   </label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox"
-                         id="cookieTranslation" checked>
+                  <input class="form-check-input" type="checkbox" id="cookieTranslation" checked />
                   <label class="form-check-label" for="cookieTranslation">
                     Translation cookies
                   </label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox"
-                         id="cookieAnalytics">
+                  <input class="form-check-input" type="checkbox" id="cookieAnalytics" />
                   <label class="form-check-label" for="cookieAnalytics">
                     Analytics cookies
                   </label>
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">Save Settings</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Save Settings</button>
               </div>
             </div>
           </div>
         </div>
 
-        <hr class="my-5">
+        <hr class="my-5" />
 
         <!-- Community Policy Header -->
         <header>
@@ -206,7 +200,10 @@
         </header>
         <div class="mb-5" id="community-policy">
           <p><strong>Last Updated:</strong> February 15, 2024 (v1.1)</p>
-          <p>We're thrilled to have you as part of our community. Our goal is to create an inclusive, respectful, and engaging space where all members feel valued and safe. To ensure this, we ask all members to adhere to our Community Content Policy. If you have questions, contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or via the <a href="{{ url_for('views.contact') }}">contact form</a>.</p>
+          <p>
+            We're thrilled to have you as part of our community. Our goal is to create an inclusive, respectful, and engaging space where all members feel valued and safe. To ensure this, we ask all members to adhere to our Community
+            Content Policy. If you have questions, contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or via the <a href="{{ url_for('views.contact') }}">contact form</a>.
+          </p>
         </div>
 
         <div class="mb-5" id="community-1">
@@ -259,7 +256,6 @@
             <li>Changelog and version history are available on our <a href="https://github.com/Infomundi-Project" target="_blank">GitHub</a>.</li>
           </ul>
         </div>
-
       </div>
     </div>
   </div>

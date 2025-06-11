@@ -518,7 +518,7 @@ def get_home_trending():
             func.count(models.Tag.id).label("tag_count"),
         )
         .join(models.Story, models.Story.id == models.Tag.story_id)
-        .filter(models.Story.pub_date >= cutoff, models.Story.has_image is True)
+        .filter(models.Story.pub_date >= cutoff, models.Story.has_image == True)
         .group_by(models.Tag.story_id)
         .subquery()
     )
@@ -529,7 +529,7 @@ def get_home_trending():
         .outerjoin(tag_counts_subq, models.Story.id == tag_counts_subq.c.story_id)
         .filter(
             models.Story.pub_date >= cutoff,
-            models.Story.has_image is True,
+            models.Story.has_image == True,
             # Ensure we only pick stories that appear in tag_counts_subq (i.e. have ≥1 tag)
             tag_counts_subq.c.tag_count.isnot(None),
         )
@@ -583,7 +583,7 @@ def get_home_trending():
                 extensions.db.session.query(func.count(models.Comment.id))
                 .filter(
                     models.Comment.story_id == story.id,
-                    models.Comment.is_deleted is False,
+                    models.Comment.is_deleted == False,
                 )
                 .scalar()
                 or 0
@@ -1055,7 +1055,7 @@ def get_stories():
     # 4) Build the base filters on Story (category + has_image)
     base_filters = [
         models.Story.category_id == category.id,
-        models.Story.has_image is True,
+        models.Story.has_image == True,
     ]
 
     # 5) If ordering by "comments", prepare a subquery that counts non-deleted comments per story
@@ -1065,7 +1065,7 @@ def get_stories():
                 models.Comment.story_id.label("story_id"),
                 func.count(models.Comment.id).label("comment_count"),
             )
-            .filter(models.Comment.is_deleted is False)
+            .filter(models.Comment.is_deleted == False)
             .group_by(models.Comment.story_id)
             .subquery()
         )
@@ -1136,7 +1136,7 @@ def get_stories():
         num_comments = (
             extensions.db.session.query(func.count(models.Comment.id))
             .filter(
-                models.Comment.story_id == story.id, models.Comment.is_deleted is False
+                models.Comment.story_id == story.id, models.Comment.is_deleted == False
             )
             .scalar()
             or 0

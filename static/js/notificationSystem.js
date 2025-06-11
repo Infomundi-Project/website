@@ -74,9 +74,7 @@ function loadNotifications() {
     if (!data.notifications.length) {
       notificationsList.innerHTML = `
         <div class="card">
-          <div class="card-body text-center text-muted">
-            📭 All quiet here.
-          </div>
+          <div class="card-body text-center text-muted"><i class="fa-solid fa-envelope-open me-1"></i>All quiet here.</div>
         </div>`;
       return;
     }
