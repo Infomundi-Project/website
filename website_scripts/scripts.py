@@ -1,5 +1,5 @@
-import json, requests, re
 from datetime import datetime, timedelta
+from requests import get as requests_get
 from difflib import SequenceMatcher
 from unidecode import unidecode
 from bs4 import BeautifulSoup
@@ -330,7 +330,7 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
     url = f"https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal){'_per_capita' if is_per_capita else ''}"
 
     headers = {"User-Agent": choice(immutable.USER_AGENTS)}
-    response = requests.get(url, headers=headers, timeout=4)
+    response = requests_get(url, headers=headers, timeout=4)
 
     if response.status_code != 200:
         return []
@@ -366,7 +366,7 @@ def get_gdp(country_name: str, is_per_capita: bool = False) -> dict:
                 try:
                     gdp = int(gdp.replace(",", "")) * 1000000
                     gdp = "{:,}".format(gdp)
-                except ValueError as err:
+                except ValueError:
                     pass
 
             save[country] = {}

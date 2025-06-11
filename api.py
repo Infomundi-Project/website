@@ -1,9 +1,9 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
-from sqlalchemy import and_, cast, desc, asc, insert, func
-from datetime import datetime, date, time, timedelta
+from sqlalchemy import and_, cast, desc, asc, func
+from datetime import datetime, time, timedelta
+from requests import get as requests_get
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
-from collections import OrderedDict
 from collections import defaultdict
 from sqlalchemy.types import Date
 
@@ -23,7 +23,6 @@ from website_scripts import (
     decorators,
     comments_util,
     notifications,
-    qol_util,
     image_util,
 )
 
@@ -196,7 +195,7 @@ def update_pubkey():
     if current_user.public_key_jwk != jwk:
         current_user.public_key_jwk = jwk
         extensions.db.session.commit()
-    
+
     return "", 204
 
 
@@ -519,7 +518,7 @@ def get_home_trending():
             func.count(models.Tag.id).label("tag_count"),
         )
         .join(models.Story, models.Story.id == models.Tag.story_id)
-        .filter(models.Story.pub_date >= cutoff, models.Story.has_image == True)
+        .filter(models.Story.pub_date >= cutoff, models.Story.has_image is True)
         .group_by(models.Tag.story_id)
         .subquery()
     )
@@ -530,7 +529,7 @@ def get_home_trending():
         .outerjoin(tag_counts_subq, models.Story.id == tag_counts_subq.c.story_id)
         .filter(
             models.Story.pub_date >= cutoff,
-            models.Story.has_image == True,
+            models.Story.has_image is True,
             # Ensure we only pick stories that appear in tag_counts_subq (i.e. have ≥1 tag)
             tag_counts_subq.c.tag_count.isnot(None),
         )
@@ -584,7 +583,7 @@ def get_home_trending():
                 extensions.db.session.query(func.count(models.Comment.id))
                 .filter(
                     models.Comment.story_id == story.id,
-                    models.Comment.is_deleted == False,
+                    models.Comment.is_deleted is False,
                 )
                 .scalar()
                 or 0
@@ -1003,7 +1002,7 @@ def summarize_story(story_url_hash):
         return jsonify({"response": story.gpt_summary}), 200
 
     try:
-        r = requests.get(story.url, timeout=4)
+        r = requests_get(story.url, timeout=4)
         if r.status_code == 200:
             article = scripts.extract_article_fields(r.text)
         else:
@@ -1011,8 +1010,8 @@ def summarize_story(story_url_hash):
     except Exception:
         article = {}
 
-    title = article["title"] if article["title"] else story.title
-    main_text = article["text"] if article["text"] else story.description
+    title = article.get("title", story.title)
+    main_text = article.get("text", story.description)
 
     response = llm_util.gpt_summarize(
         input_sanitization.gentle_cut_text(300, title),
@@ -1056,7 +1055,7 @@ def get_stories():
     # 4) Build the base filters on Story (category + has_image)
     base_filters = [
         models.Story.category_id == category.id,
-        models.Story.has_image == True,
+        models.Story.has_image is True,
     ]
 
     # 5) If ordering by "comments", prepare a subquery that counts non-deleted comments per story
@@ -1066,7 +1065,7 @@ def get_stories():
                 models.Comment.story_id.label("story_id"),
                 func.count(models.Comment.id).label("comment_count"),
             )
-            .filter(models.Comment.is_deleted == False)
+            .filter(models.Comment.is_deleted is False)
             .group_by(models.Comment.story_id)
             .subquery()
         )
@@ -1137,7 +1136,7 @@ def get_stories():
         num_comments = (
             extensions.db.session.query(func.count(models.Comment.id))
             .filter(
-                models.Comment.story_id == story.id, models.Comment.is_deleted == False
+                models.Comment.story_id == story.id, models.Comment.is_deleted is False
             )
             .scalar()
             or 0
@@ -1399,7 +1398,7 @@ def react_to_comment(comment_id, action):
 
         extensions.db.session.commit()
 
-    except IntegrityError:
+    except Exception:
         extensions.db.session.rollback()
         abort(400, description="Reaction already exists.")
 

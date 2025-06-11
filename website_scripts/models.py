@@ -49,12 +49,16 @@ class Story(db.Model):
     description = db.Column(
         db.String(500), nullable=False, default="No description was provided."
     )
-    lang = db.Column(db.String(2), nullable=False, default="en")  # this could be an individual table
+    lang = db.Column(
+        db.String(2), nullable=False, default="en"
+    )  # this could be an individual table
     author = db.Column(db.String(150))  # this could be an individual table
     gpt_summary = db.Column(db.JSON)  # this could be an individual table
 
     url = db.Column(db.String(512), nullable=False)
-    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)  # this is used so we don't add repeated stories to the database (improved index because it's a LargeBinary)
+    url_hash = db.Column(
+        db.LargeBinary(16), nullable=False, unique=True
+    )  # this is used so we don't add repeated stories to the database (improved index because it's a LargeBinary)
 
     pub_date = db.Column(db.DateTime, nullable=False)
     has_image = db.Column(db.Boolean, default=False)
@@ -76,7 +80,7 @@ class Story(db.Model):
     stats = db.relationship("StoryStats", backref="story", uselist=False, lazy="joined")
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
-    
+
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     country = db.relationship("Country", backref="story", lazy="joined")
 
