@@ -53,22 +53,41 @@
     border: 5px solid white;
     object-fit: cover;
   }
+
   /* Cropper wrapper styling */
-  #cropperWrapper img {
-    max-width: 100%;
-    max-height: 400px;
+  #cropperWrapper {
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: .5rem;
+    max-height: 60vh;
+    overflow: auto;
+    background: #f8f9fa;
+  }
+  .cropper-toolbar {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+  .cropper-toolbar .btn {
+    width: 2.5rem;
+  }
+  /* Toast container */
+  .toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1200;
   }
 </style>
 {% endblock %}
 
 {% block edit_profile_content %}
-<form method="POST" enctype="multipart/form-data" id="avatarForm">
+<form id="avatarForm" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <div>
-    <h3>Background & Banner</h3>
-    <hr>
-    <!-- Display area -->
+    <h3>Background & Banner</h3><hr>
     <div class="row">
       <div class="col-md-12">
         <div id="profileBackground" class="profile-background rounded">
@@ -76,7 +95,7 @@
             <div class="profile-header rounded mb-3" id="profileHeader"></div>
             <div class="row">
               <div class="col-8 d-flex align-items-center">
-                <img src="{{ current_user.avatar_url }}" alt="User Avatar" class="profile-avatar">
+                <img src="{{ current_user.avatar_url }}" class="profile-avatar" alt="User Avatar">
                 <div class="ms-3">
                   {% if current_user.display_name %}
                   <p class="fs-6 fw-bold mb-0">{{ current_user.display_name }}</p>
@@ -96,7 +115,7 @@
                      aria-valuemin="0" aria-valuemax="1000"
                      style="height: 3px;">
                   <div class="progress-bar bg-info"
-                       style="width: {{ (current_user.level_progress / 1000) * 100 }}%">
+                       style="width: {{ (current_user.level_progress / 1000)*100 }}%">
                   </div>
                 </div>
               </div>
@@ -106,7 +125,6 @@
       </div>
     </div>
 
-    <!-- File inputs -->
     <div class="row mt-4">
       <div class="col-md-6">
         <div class="mb-3">
@@ -128,52 +146,67 @@
   </div>
 
   <div>
-    <h3 class="mt-5">Avatar</h3>
-    <hr>
+    <h3 class="mt-5">Avatar</h3><hr>
     <div class="d-flex align-items-center mb-3">
       <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar"
-           class="rounded me-3 profile-preview-avatar"
-           style="width: 10rem; height: 10rem;">
+           class="rounded me-3 profile-preview-avatar" style="width: 10rem; height: 10rem;">
       <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar"
-           class="rounded me-3 profile-preview-avatar"
-           style="width: 5rem; height: 5rem;">
+           class="rounded me-3 profile-preview-avatar" style="width: 5rem; height: 5rem;">
       <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar"
-           class="rounded profile-preview-avatar"
-           style="width: 2.5rem; height: 2.5rem;">
+           class="rounded profile-preview-avatar" style="width: 2.5rem; height: 2.5rem;">
     </div>
     <div class="mb-3">
       <label for="profilePhoto" class="form-label">Select Avatar Image</label>
-      <input type="file" accept="image/*" class="form-control" id="profilePhoto"
-             name="profile_picture" data-aspect="1/1">
+      <input type="file" class="form-control" id="profilePhoto"
+             name="profile_picture" accept="image/*"
+             data-aspect="1/1">
       <small class="text-muted d-block mt-2">
         <i class="fa-solid fa-file-circle-plus me-1"></i>Max size: 2 MB
       </small>
       <small class="text-muted d-block">
-        <i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Min dimensions: 300×300
+        <i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Min: 300×300
       </small>
     </div>
   </div>
 
-  <button class="btn btn-primary mt-3" type="submit" id="submitBtn">Submit</button>
+  <button type="submit" class="btn btn-primary mt-3" id="submitBtn">
+    Submit
+  </button>
 </form>
 
 <!-- Crop Modal -->
 <div class="modal fade" id="cropModal" tabindex="-1"
      aria-labelledby="cropModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cropModalLabel">Crop Image</h5>
-        <button type="button" class="btn-close"
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="cropModalLabel">Crop Your Image</h5>
+        <button type="button" class="btn-close btn-close-white"
                 data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body text-center" id="cropperWrapper">
-        <!-- injected crop image -->
+      <div class="modal-body text-center">
+        <div class="cropper-toolbar">
+          <button type="button" class="btn btn-outline-light btn-sm" id="zoomOut">
+            <i class="fa-solid fa-search-minus"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="zoomIn">
+            <i class="fa-solid fa-search-plus"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="rotateLeft">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="rotateRight">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+        <div id="cropperWrapper">
+          <!-- image injected here -->
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary"
                 data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="cropBtn">
+        <button type="button" class="btn btn-success" id="cropBtn">
           Crop & Continue
         </button>
       </div>
@@ -186,20 +219,30 @@
      aria-labelledby="errorModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-danger" id="errorModalLabel">
-          Error
-        </h5>
-        <button type="button" class="btn-close"
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white"
                 data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" id="errorModalBody">
-        <!-- error message injected here -->
-      </div>
+      <div class="modal-body" id="errorModalBody"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary"
+        <button type="button" class="btn btn-outline-light"
                 data-bs-dismiss="modal">Close</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container">
+  <div id="successToast" class="toast align-items-center text-bg-success border-0"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Profile updated successfully! Wait a few minutes for the changes to be applied.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   </div>
 </div>
@@ -241,6 +284,12 @@ document.querySelectorAll('input[type=file]').forEach(input => {
   });
 });
 
+// Cropper toolbar actions
+document.getElementById('zoomIn').addEventListener('click',  () => cropper.zoom(0.1));
+document.getElementById('zoomOut').addEventListener('click', () => cropper.zoom(-0.1));
+document.getElementById('rotateLeft').addEventListener('click', () => cropper.rotate(-45));
+document.getElementById('rotateRight').addEventListener('click',() => cropper.rotate(45));
+
 document.getElementById('cropBtn').addEventListener('click', () => {
   if (!cropper || !currentInput) return;
   cropper.getCroppedCanvas().toBlob(blob => {
@@ -253,13 +302,11 @@ document.getElementById('cropBtn').addEventListener('click', () => {
     currentInput.files = dt.files;
     const url = URL.createObjectURL(file);
     if (currentInput.id === 'backgroundImage') {
-      document.getElementById('profileBackground').style.backgroundImage =
-        `url(${url})`;
+      document.getElementById('profileBackground').style.backgroundImage = `url(${url})`;
     } else if (currentInput.id === 'bannerImage') {
-      document.getElementById('profileHeader').style.backgroundImage =
-        `url(${url})`;
-    } else if (currentInput.id === 'profilePhoto') {
-      ['largeAvatar', 'mediumAvatar', 'smallAvatar']
+      document.getElementById('profileHeader').style.backgroundImage = `url(${url})`;
+    } else {
+      ['largeAvatar','mediumAvatar','smallAvatar']
         .forEach(id => document.getElementById(id).src = url);
     }
     bootstrap.Modal.getInstance(
@@ -272,9 +319,8 @@ document.getElementById('cropBtn').addEventListener('click', () => {
 
 document.getElementById('avatarForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-
   const submitBtn = document.getElementById('submitBtn');
-  const originalBtnHTML = submitBtn.innerHTML;
+  const originalHTML = submitBtn.innerHTML;
   submitBtn.disabled = true;
   submitBtn.innerHTML = `
     <span class="spinner-border spinner-border-sm me-2"
@@ -283,23 +329,20 @@ document.getElementById('avatarForm').addEventListener('submit', async function(
   `;
 
   const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-  const ops = [];
-  const mapping = {
+  const ops = [], mapping = {
     backgroundImage: 'background',
     bannerImage:     'banner',
     profilePhoto:    'avatar'
   };
 
   for (let inputId in mapping) {
-    const inputEl = document.getElementById(inputId);
-    if (inputEl.files.length > 0) {
-      const category = mapping[inputId];
+    const inp = document.getElementById(inputId);
+    if (inp.files.length) {
       const fd = new FormData();
-      fd.append(category, inputEl.files[0]);
+      fd.append(mapping[inputId], inp.files[0]);
       fd.append('csrf_token', csrfToken);
-
       ops.push(
-        fetch(`/api/user/image/${category}`, {
+        fetch(`/api/user/image/${mapping[inputId]}`, {
           method: 'POST',
           credentials: 'same-origin',
           body: fd
@@ -319,34 +362,34 @@ document.getElementById('avatarForm').addEventListener('submit', async function(
     }
   }
 
-  if (ops.length === 0) {
-    // No files chosen
+  if (!ops.length) {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnHTML;
-    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    submitBtn.innerHTML = originalHTML;
+    const em = new bootstrap.Modal(document.getElementById('errorModal'));
     document.getElementById('errorModalLabel').textContent = 'No files selected';
-    document.getElementById('errorModalBody').textContent =
-      'Please choose at least one image to upload.';
-    modal.show();
+    document.getElementById('errorModalBody').textContent = 'Please choose at least one image.';
+    em.show();
     return;
   }
 
   try {
     await Promise.all(ops);
-    window.location.reload();
+    // success toast
+    const toastEl = document.getElementById('successToast');
+    const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => window.location.reload());
   } catch (err) {
     console.error(err);
-    // restore button
     submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnHTML;
-    // show error modal
-    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    submitBtn.innerHTML = originalHTML;
+    const em = new bootstrap.Modal(document.getElementById('errorModal'));
     document.getElementById('errorModalLabel').textContent = err.title;
     document.getElementById('errorModalBody').innerHTML = `
       <p><strong>Status:</strong> ${err.status}</p>
       <p>${err.detail}</p>
     `;
-    modal.show();
+    em.show();
   }
 });
 </script>

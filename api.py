@@ -89,7 +89,7 @@ def get_crypto():
 
 
 @api.route("/home/dashboard", methods=["GET"])
-# @extensions.cache.cached(timeout=60 * 5)
+@extensions.cache.cached(timeout=60 * 10)  # 10m cached
 def get_home_dashboard():
     now = datetime.utcnow()
     today = now.date()
@@ -192,12 +192,16 @@ def update_pubkey():
     jwk = request.json.get("publicKey")
     if not jwk:
         abort(400, description="jwk is required")
-    current_user.public_key_jwk = jwk
-    extensions.db.session.commit()
+
+    if current_user.public_key_jwk != jwk:
+        current_user.public_key_jwk = jwk
+        extensions.db.session.commit()
+    
     return "", 204
 
 
 @api.route("/user/<int:friend_id>/pubkey")
+@extensions.cache.cached(timeout=60 * 5)  # 5m cached
 @decorators.api_login_required
 def get_pubkey(friend_id):
     fs_status = friends_util.get_friendship_status(current_user.id, friend_id)[0]
@@ -235,7 +239,7 @@ def get_messages(friend_id):
         .all()
     )
 
-    msgs.reverse()
+    msgs.reverse()  # this puts the messages in order
 
     messages_data = []
     for msg in msgs:
@@ -561,7 +565,7 @@ def get_home_trending():
     out = []
     for story in selected:
         story_data = {
-            "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
+            "story_id": story.get_public_id(),
             "title": story.title,
             "url": story.url,
             "pub_date": story.pub_date.isoformat(),
