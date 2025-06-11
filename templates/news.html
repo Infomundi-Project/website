@@ -152,28 +152,12 @@
         {% endif %}
       </div>
       <div class="col-md-6 text-center my-4">
-        <a class="fs-1 fw-bold text-decoration-none text-reset" href="/news?country={{ country_code }}">
-        <img src="/static/img/flags/4x3/{{ country_code }}.svg" width="48" height="36" style="border-radius: 3px;" class="align-middle me-2" alt="{{ country_name }}'s flag">{{ country_name }}
-        </a>
-        <br>
+        <div class="d-inline-flex justify-content-center">
+        <img src="/static/img/flags/4x3/{{ country_code }}.svg" style="height: auto; width: 3rem" class="rounded me-2" alt="{{ country_name }}'s flag"><span class="fw-bold fs-1">{{ country_name }}</span></div>
         {% if not nation_data %}
+        <br>
         <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
         {% endif %}
-        <div class="input-group justify-content-center mt-3 invisible">
-          <button aria-label="Submit search button" type="submit" class="input-group-text {% if is_light_mode %}border-black border-opacity-50{% endif %}" id="search-icon">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-          <input 
-            class="form-control {% if is_light_mode %}border-black border-opacity-50{% endif %}" 
-            aria-describedby="search-icon"
-            style="max-width: 400px;" 
-            type="search" 
-            aria-label="Search Field" 
-            minlength="3" 
-            id="query" 
-            name="query"
-            />
-        </div>
       </div>
       <div class="col-md-3">
         {% if not is_mobile %}
@@ -389,13 +373,13 @@
 
               <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy3" value="likes">
               <label class="list-group-item rounded-3 py-3" for="orderBy3">
-              <i class="fa-solid fa-thumbs-up me-2"></i><span class="label-text">Best</span>
+              <i class="fa-solid fa-thumbs-up me-2"></i><span class="label-text">Likes</span>
               <span class="d-block small opacity-50">Sort by number of likes</span>
               </label>
 
               <input class="list-group-item-check pe-none" type="radio" name="order_by" id="orderBy4" value="comments">
               <label class="list-group-item rounded-3 py-3" for="orderBy4">
-              <i class="fa-solid fa-comment-dots me-2"></i><span class="label-text">Most Commented</span>
+              <i class="fa-solid fa-comment-dots me-2"></i><span class="label-text">Comments</span>
               <span class="d-block small opacity-50">Sort by number of comments</span>
               </label>
             </div>

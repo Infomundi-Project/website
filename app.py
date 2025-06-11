@@ -314,7 +314,7 @@ def add_headers(response):
     # Sets the CSP header to include the nonce
     response.headers["Content-Security-Policy"] = (
         "default-src 'none'; "
-        "img-src 'self' https://*.infomundi.net data:; "
+        "img-src 'self' blob: https://*.infomundi.net data:; "
         "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com; "
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
         f"script-src 'self' 'strict-dynamic' 'nonce-{nonce}'; "

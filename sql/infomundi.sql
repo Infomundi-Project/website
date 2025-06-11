@@ -158,7 +158,9 @@ CREATE TABLE stories (
     
     category_id INT NOT NULL,
     publisher_id INT NOT NULL,
+    country_id MEDIUMINT UNSIGNED,
 
+    FOREIGN KEY (country_id) REFERENCES countries(id),
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(id)
 );
@@ -194,7 +196,7 @@ CREATE TABLE story_reactions (
 
 CREATE TABLE story_stats (
     story_id INT PRIMARY KEY,
-    
+
     dislikes INT DEFAULT 0,
     views INT DEFAULT 0,
     likes INT DEFAULT 0,

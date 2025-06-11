@@ -49,12 +49,12 @@ class Story(db.Model):
     description = db.Column(
         db.String(500), nullable=False, default="No description was provided."
     )
-    lang = db.Column(db.String(2), nullable=False, default="en")
-    author = db.Column(db.String(150))
-    gpt_summary = db.Column(db.JSON)
+    lang = db.Column(db.String(2), nullable=False, default="en")  # this could be an individual table
+    author = db.Column(db.String(150))  # this could be an individual table
+    gpt_summary = db.Column(db.JSON)  # this could be an individual table
 
     url = db.Column(db.String(512), nullable=False)
-    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)
+    url_hash = db.Column(db.LargeBinary(16), nullable=False, unique=True)  # this is used so we don't add repeated stories to the database (improved index because it's a LargeBinary)
 
     pub_date = db.Column(db.DateTime, nullable=False)
     has_image = db.Column(db.Boolean, default=False)
@@ -76,6 +76,9 @@ class Story(db.Model):
     stats = db.relationship("StoryStats", backref="story", uselist=False, lazy="joined")
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
+    
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    country = db.relationship("Country", backref="story", lazy="joined")
 
     def get_public_id(self) -> str:
         return hashing_util.binary_to_md5_hex(self.url_hash)
@@ -133,7 +136,6 @@ class StoryStats(db.Model):
     story_id = db.Column(
         db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), primary_key=True
     )
-
     dislikes = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)
@@ -231,7 +233,7 @@ class User(db.Model, UserMixin):
         return security_util.uuid_bytes_to_string(self.public_id)
 
     def get_picture(self, category: str) -> str:
-        if category not in ("avatar", "banner," "wallpaper"):
+        if category not in ("avatar", "banner", "wallpaper"):
             return ""
 
         if category == "avatar":
@@ -245,7 +247,7 @@ class User(db.Model, UserMixin):
         else:
             if not self.has_wallpaper:
                 return ""
-            path = "backgrounds"
+            path = "wallpapers"
 
         return f"https://bucket.infomundi.net/{path}/{self.get_public_id()}.webp"
 
@@ -254,11 +256,11 @@ class User(db.Model, UserMixin):
         return self.get_picture("avatar")
 
     @property
-    def profile_banner_url(self) -> str:
+    def banner_url(self) -> str:
         return self.get_picture("banner")
 
     @property
-    def profile_wallpaper_url(self) -> str:
+    def wallpaper_url(self) -> str:
         return self.get_picture("wallpaper")
 
     def enable(self):

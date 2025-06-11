@@ -375,7 +375,10 @@ document.addEventListener("DOMContentLoaded", function() {
     'click',
     function() {
       // Reset form fields to their default values
-      document.getElementById('query').value = '';
+      let query = document.getElementById('query');
+      if (query) {
+        query.value = '';
+      }
       document.getElementById('modalStartDate').value = '';
       document.getElementById('modalEndDate').value = '';
 
@@ -490,11 +493,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Debounced Apply Filters for Search Input
   const debounceApplyFilters = debounce(applyFilters, 500);
-  document.getElementById('query').addEventListener('input',
+  let query = document.getElementById('query'); 
+  if (query) {
+    query.addEventListener('input',
     function() {
       debounceApplyFilters();
     });
-
+  }
   window.addEventListener('scroll', () => {
     if ((window.innerHeight + window.scrollY) >= document
       .body.offsetHeight - 2000 && !isLoading &&
@@ -533,7 +538,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const startDate = document.getElementById("modalStartDate")
       .value;
     const endDate = document.getElementById("modalEndDate").value;
-    const query = document.getElementById("query").value;
+    let query = document.getElementById("query");
+    if (query) {
+      query = query.value
+    }
 
     let url =
       `/api/get_stories?country=${country}&category=${category}&order_by=${orderBy}&order_dir=${orderDir}&page=${currentPage}`;
@@ -896,7 +904,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const startDate = document.getElementById("modalStartDate")
       .value;
     const endDate = document.getElementById("modalEndDate").value;
-    const query = document.getElementById("query").value;
+    const query = document.getElementById("query");
+    if (query){
+      query = query.value;
+    }
 
     localStorage.setItem('newsFilters', JSON.stringify({
       category,
@@ -907,7 +918,6 @@ document.addEventListener("DOMContentLoaded", function() {
       query
     }));
   }
-
 
   // Function to load filter settings from localStorage
   function loadSavedFilters() {
@@ -933,7 +943,11 @@ document.addEventListener("DOMContentLoaded", function() {
         .checked = true;
       document.getElementById("modalStartDate").value = startDate;
       document.getElementById("modalEndDate").value = endDate;
-      document.getElementById("query").value = query;
+      
+      queryElement = document.getElementById("query");
+      if (queryElement) {
+        queryElement.value = query;
+      };
 
       // Update periodButtonText
       let periodText = 'Start Date - End Date';

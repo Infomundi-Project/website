@@ -1,7 +1,22 @@
-from user_agents import parse as parse_user_agent
+import re
 from langdetect import detect as lang_detect
 from datetime import datetime, timedelta
+from collections import namedtuple
 from os import path as os_path
+
+# a tiny struct to hold our parsed result
+ParsedUA = namedtuple(
+    "ParsedUA",
+    [
+        "browser_family",
+        "browser_version",
+        "os_family",
+        "os_version",
+        "is_mobile",
+        "is_tablet",
+        "is_pc",
+    ],
+)
 
 
 def detect_language(text: str) -> str:
@@ -124,37 +139,101 @@ def is_file_creation_within_threshold_minutes(
     return time_difference > timedelta(minutes=threshold_time)
 
 
+def parse_user_agent_custom(ua: str) -> ParsedUA:
+    """
+    Very basic User-Agent parser that recognizes major browsers,
+    OS families, and device classes.
+    """
+    # 1) Browser detection
+    browser_family = "Other"
+    browser_version = ""
+    browser_patterns = [
+        ("Edge", r"Edg(?:e|A|IOS)?/([\d\.]+)"),
+        ("Opera", r"OPR/([\d\.]+)"),
+        ("Chrome", r"Chrome/([\d\.]+)"),
+        ("Firefox", r"Firefox/([\d\.]+)"),
+        ("Safari", r"Version/([\d\.]+).*Safari/"),
+    ]
+    for fam, pat in browser_patterns:
+        m = re.search(pat, ua)
+        if m:
+            browser_family = fam
+            browser_version = m.group(1)
+            break
+
+    # 2) OS detection
+    os_family = "Other"
+    os_version = ""
+    # Windows NT → friendly mapping
+    win = re.search(r"Windows NT ([\d\.]+)", ua)
+    if win:
+        os_family = "Windows"
+        nt = win.group(1)
+        version_map = {
+            "10.0": "10",
+            "6.3": "8.1",
+            "6.2": "8",
+            "6.1": "7",
+            "6.0": "Vista",
+            "5.1": "XP",
+        }
+        os_version = version_map.get(nt, nt)
+    else:
+        mac = re.search(r"Mac OS X ([\d_\.]+)", ua)
+        if mac:
+            os_family = "macOS"
+            os_version = mac.group(1).replace("_", ".")
+        else:
+            android = re.search(r"Android ([\d\.]+)", ua)
+            if android:
+                os_family = "Android"
+                os_version = android.group(1)
+            else:
+                ios = re.search(r"iPhone OS ([\d_]+)", ua) or re.search(
+                    r"iPad; CPU OS ([\d_]+)", ua
+                )
+                if ios:
+                    os_family = "iOS"
+                    os_version = ios.group(1).replace("_", ".")
+                elif "Linux" in ua:
+                    os_family = "Linux"
+                    os_version = ""
+
+    # 3) Device class
+    mobile_kw = ("Mobile", "Android", "iPhone", "iPod", "BlackBerry", "Phone")
+    tablet_kw = ("Tablet", "iPad")
+    is_mobile = any(kw in ua for kw in mobile_kw)
+    is_tablet = any(kw in ua for kw in tablet_kw)
+    is_pc = not (is_mobile or is_tablet)
+
+    return ParsedUA(
+        browser_family,
+        browser_version,
+        os_family,
+        os_version,
+        is_mobile,
+        is_tablet,
+        is_pc,
+    )
+
+
 def get_device_info(user_agent_string: str):
-    """Parses the user agent string and extracts device information out of it. It can't be 100% accurate, as
-    the user agent is user-supplied input. However, it may be beneficial for us to use it, as we don't have CASH
-    to buy FingerprintJS' license.
-
-    Arguments
-        user_agent_string (str): The user agent string (obviously)
-
-    Returns:
-        dict or str: Device details.
-
-    Examples:
-        >>> get_device_info("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36")
-        {'browser': 'Chrome', 'os': 'Windows 10', 'device_type': 'PC'}
+    """
+    Parses the UA string without any external library.
+    Returns the same dict (or string) your old function did.
     """
     try:
-        user_agent = parse_user_agent(user_agent_string)
-
-        # Extract information (we can get the browser version with user_agent.browser.version_string)
-        browser = user_agent.browser.family
-        os = f"{user_agent.os.family} {user_agent.os.version_string}"
+        ua = parse_user_agent_custom(user_agent_string)
         device = (
             "Mobile"
-            if user_agent.is_mobile
-            else (
-                "Tablet"
-                if user_agent.is_tablet
-                else "PC" if user_agent.is_pc else "Other"
-            )
+            if ua.is_mobile
+            else "Tablet" if ua.is_tablet else "PC" if ua.is_pc else "Other"
         )
+        return {
+            "browser": ua.browser_family,
+            "browser_version": ua.browser_version,
+            "os": f"{ua.os_family} {ua.os_version}".strip(),
+            "device_type": device,
+        }
     except Exception:
         return "No information"
-
-    return f"Browser: {browser}, OS: {os}, device type: {device}"

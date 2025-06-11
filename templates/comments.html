@@ -40,7 +40,7 @@
       <article class="mb-5">
         <p class="lead">{{ story.description }}</p>
         <!-- Reaction Buttons -->
-      <div class="mt-4 d-flex align-items-center">
+      <div class="mt-4 d-flex align-items-center invisible">
         <button id="likeBtn" class="btn btn-sm btn-outline-success me-2">
           <i class="fa-regular fa-thumbs-up"></i> Like
         </button>
@@ -200,8 +200,10 @@
 <!-- Trending List -->
 <div class="mb-4">
   <h5><i class="fa-solid fa-fire me-2"></i>Trending</h5>
-  <!-- Trending Filters Accordion -->
-<div class="accordion mb-4" id="trendingAccordion">
+  <ul class="list-unstyled" id="trendingList">
+    <li>Loading…</li>
+  </ul>
+  <div class="accordion mb-4" id="trendingAccordion">
   <div class="accordion-item">
     <h2 class="accordion-header" id="headingTrending">
       <button
@@ -272,9 +274,6 @@
     </div>
   </div>
 </div>
-  <ul class="list-unstyled" id="trendingList">
-    <li>Loading…</li>
-  </ul>
 </div>
         <div class="mb-4 invisible">
           <img src="https://placehold.co/300x250?text=Ad+Space" class="img-fluid rounded" alt="Ad">

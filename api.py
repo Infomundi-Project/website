@@ -1,12 +1,11 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from sqlalchemy import and_, cast, desc, asc, insert, func
-from datetime import datetime, timedelta
+from datetime import datetime, date, time, timedelta
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
 from collections import OrderedDict
 from collections import defaultdict
 from sqlalchemy.types import Date
-from newsplease import NewsPlease
 
 from website_scripts import (
     config,
@@ -25,6 +24,7 @@ from website_scripts import (
     comments_util,
     notifications,
     qol_util,
+    image_util,
 )
 
 api = Blueprint("api", __name__)
@@ -88,18 +88,120 @@ def get_crypto():
     )
 
 
+@api.route("/home/dashboard", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 10)  # 10m cached
+def get_home_dashboard():
+    now = datetime.utcnow()
+    today = now.date()
+    start_date = today - timedelta(days=6)  # inclusive 7-day window
+    start_dt = datetime.combine(start_date, time.min)
+
+    # ── 1) STORIES PER DAY ──
+    daily = (
+        extensions.db.session.query(
+            cast(models.Story.pub_date, Date).label("day"),
+            func.count(models.Story.id).label("count"),
+        )
+        .filter(cast(models.Story.pub_date, Date) >= start_date)
+        .group_by("day")
+        .order_by("day")
+        .all()
+    )
+    day_map = {r.day: r.count for r in daily}
+    days = [start_date + timedelta(days=i) for i in range(7)]
+    stories_last_7_days = [day_map.get(d, 0) for d in days]
+
+    # ── 2) TOP 5 COUNTRIES ──
+    # get raw category counts, then aggregate on country‐prefix
+    raw = (
+        extensions.db.session.query(
+            models.Category.name, func.count(models.Story.id).label("count")
+        )
+        .join(models.Story, models.Story.category_id == models.Category.id)
+        .filter(cast(models.Story.pub_date, Date) >= start_date)
+        .group_by(models.Category.name)
+        .all()
+    )
+    # fold into per‐country totals
+    country_totals = {}
+    for cat_name, cnt in raw:
+        country = cat_name.split("_", 1)[0].upper()
+        country_totals[country] = country_totals.get(country, 0) + cnt
+
+    top_countries = [
+        {"country": c, "count": country_totals[c]}
+        for c in sorted(country_totals, key=lambda k: country_totals[k], reverse=True)[
+            :5
+        ]
+    ]
+
+    # ── 3) ENGAGEMENT METRICS ──
+    likes = (
+        extensions.db.session.query(func.count(models.StoryReaction.id))
+        .filter(
+            models.StoryReaction.action == "like",
+            models.StoryReaction.created_at >= start_dt,
+        )
+        .scalar()
+        or 0
+    )
+    dislikes = (
+        extensions.db.session.query(func.count(models.StoryReaction.id))
+        .filter(
+            models.StoryReaction.action == "dislike",
+            models.StoryReaction.created_at >= start_dt,
+        )
+        .scalar()
+        or 0
+    )
+    comments = (
+        extensions.db.session.query(func.count(models.Comment.id))
+        .filter(models.Comment.created_at >= start_dt)
+        .scalar()
+        or 0
+    )
+    shares = (
+        extensions.db.session.query(func.count(models.Bookmark.id))
+        .filter(models.Bookmark.created_at >= start_dt)
+        .scalar()
+        or 0
+    )
+    days_iso = [(start_date + timedelta(days=i)).isoformat() for i in range(7)]
+
+    return (
+        jsonify(
+            {
+                "stories_last_7_days": stories_last_7_days,
+                "days": days_iso,
+                "top_countries": top_countries,
+                "engagement": {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "comments": comments,
+                    "shares": shares,
+                },
+            }
+        ),
+        200,
+    )
+
+
 @api.route("/user/pubkey", methods=["POST"])
 @decorators.api_login_required
 def update_pubkey():
     jwk = request.json.get("publicKey")
     if not jwk:
         abort(400, description="jwk is required")
-    current_user.public_key_jwk = jwk
-    extensions.db.session.commit()
+
+    if current_user.public_key_jwk != jwk:
+        current_user.public_key_jwk = jwk
+        extensions.db.session.commit()
+    
     return "", 204
 
 
 @api.route("/user/<int:friend_id>/pubkey")
+@extensions.cache.cached(timeout=60 * 5)  # 5m cached
 @decorators.api_login_required
 def get_pubkey(friend_id):
     fs_status = friends_util.get_friendship_status(current_user.id, friend_id)[0]
@@ -137,7 +239,7 @@ def get_messages(friend_id):
         .all()
     )
 
-    msgs.reverse()
+    msgs.reverse()  # this puts the messages in order
 
     messages_data = []
     for msg in msgs:
@@ -400,7 +502,7 @@ def get_trending():
 
 
 @api.route("/home/trending", methods=["GET"])
-@extensions.cache.cached(timeout=60 * 30)  # 30m cached
+# @extensions.cache.cached(timeout=60 * 30)  # 30m cached
 @extensions.limiter.limit("18/minute")
 def get_home_trending():
     """
@@ -408,7 +510,7 @@ def get_home_trending():
     but only those with has_image=True, and no more than 3 per category.
     """
     now = datetime.utcnow()
-    cutoff = now - timedelta(hours=24)
+    cutoff = now - timedelta(days=15)
 
     # 1) Count tags per story (only for stories in the last 24 h AND has_image=True)
     tag_counts_subq = (
@@ -463,7 +565,7 @@ def get_home_trending():
     out = []
     for story in selected:
         story_data = {
-            "story_id": hashing_util.binary_to_md5_hex(story.url_hash),
+            "story_id": story.get_public_id(),
             "title": story.title,
             "url": story.url,
             "pub_date": story.pub_date.isoformat(),
@@ -604,7 +706,7 @@ def story_reaction(action):
 
     story_stats = extensions.db.session.get(models.StoryStats, story.id)
     if not story_stats:
-        story_stats = models.StoryStats(story_id=story.id, views=0, likes=0, dislikes=0)
+        story_stats = models.StoryStats(story_id=story.id)
         extensions.db.session.add(story_stats)
         extensions.db.session.commit()
 
@@ -632,14 +734,17 @@ def story_reaction(action):
                 story.stats.dislikes += 1
                 story.stats.likes -= 1
                 is_disliked = True
-
+            existing_reaction.created_at = datetime.now()
             message = f"Reaction updated to {action}"
             is_liked = action == "like"
             is_disliked = action == "dislike"
     else:
         # Create a new reaction
         new_reaction = models.StoryReaction(
-            story_id=story.id, user_id=current_user.id, action=action
+            story_id=story.id,
+            user_id=current_user.id,
+            action=action,
+            created_at=datetime.now(),
         )
         extensions.db.session.add(new_reaction)
 
@@ -898,19 +1003,16 @@ def summarize_story(story_url_hash):
         return jsonify({"response": story.gpt_summary}), 200
 
     try:
-        article = NewsPlease.from_url(story.url)
-        title = article.title
-        main_text = article.maintext
-        tags = scripts.extract_yake(f"{title}, {main_text}", lang_code=story.lang)
-        tag_dicts = [
-            {"story_id": story.id, "tag": t.strip()} for t in tags if t.strip()
-        ]
-        if tag_dicts:
-            extensions.db.session.execute(insert(models.Tag), tag_dicts)
-            extensions.db.session.commit()
+        r = requests.get(story.url, timeout=4)
+        if r.status_code == 200:
+            article = scripts.extract_article_fields(r.text)
+        else:
+            article = {}
     except Exception:
-        title = story.title
-        main_text = story.description
+        article = {}
+
+    title = article["title"] if article["title"] else story.title
+    main_text = article["text"] if article["text"] else story.description
 
     response = llm_util.gpt_summarize(
         input_sanitization.gentle_cut_text(300, title),
@@ -1575,3 +1677,40 @@ def user_reports(uid, report_id=0):
         jsonify(message="Thanks for letting us know — we’ll take a look!"),
         200,
     )
+
+
+@api.route("/user/image/<category>", methods=["POST"])
+@decorators.api_login_required
+def upload_image(category):
+    ALLOWED = {
+        "avatar": ("profile_picture", "users/{id}.webp", "has_avatar"),
+        "banner": ("profile_banner", "banners/{id}.webp", "has_banner"),
+        "wallpaper": (
+            "profile_wallpaper",
+            "wallpapers/{id}.webp",
+            "has_wallpaper",
+        ),
+    }
+    if category not in ALLOWED:
+        return jsonify(error="Unknown category"), 404
+
+    util_cat, key_tmpl, attr_flag = ALLOWED[category]
+    file = request.files.get(category)
+    if not file:
+        abort(400, description="No image provided")
+
+    if not image_util.perform_all_checks(file.stream, file.filename):
+        abort(400, description="Invalid image")
+
+    s3_key = key_tmpl.format(id=current_user.get_public_id())
+    setattr(current_user, attr_flag, True)
+
+    if not image_util.convert_and_save(file.stream, util_cat, s3_key):
+        abort(500, description="Upload failed")
+
+    extensions.db.session.commit()
+    notifications.notify_single(
+        current_user.id, "profile_edit", f"You updated your {category}"
+    )
+
+    return jsonify(success=True), 201

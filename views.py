@@ -374,56 +374,6 @@ def sensitive():
     return redirect(url_for("views.edit_user_settings"))
 
 
-@views.route("/upload_image", methods=["POST"])
-@login_required
-def upload_image():
-    image_categories = ("profile_picture", "profile_banner", "profile_background")
-    for image_category in image_categories:
-        file = request.files.get(image_category, "")
-
-        if not file:
-            continue
-
-        # Checks file extension, mime type, image content and dimensions
-        if not image_util.perform_all_checks(file.stream, file.filename):
-            flash("We apologize, but the file you provided is invalid.", "error")
-            return redirect(url_for("views.edit_user_avatar"))
-
-        public_id = current_user.get_public_id()
-
-        # Changes some variables depending on the image category
-        if image_category == "profile_picture":
-            bucket_path = f"users/{public_id}.jpg"
-            current_user.avatar_url = f"https://bucket.infomundi.net/{bucket_path}"
-        elif image_category == "profile_banner":
-            bucket_path = f"banners/{public_id}.jpg"
-            current_user.profile_banner_url = (
-                f"https://bucket.infomundi.net/{bucket_path}"
-            )
-        else:
-            bucket_path = f"backgrounds/{public_id}.jpg"
-            current_user.profile_wallpaper_url = (
-                f"https://bucket.infomundi.net/{bucket_path}"
-            )
-
-        convert = image_util.convert_and_save(file.stream, image_category, bucket_path)
-        if not convert:
-            flash(
-                "We apologize, but something went wrong when saving your image. Please try again later.",
-                "error",
-            )
-            return redirect(url_for("views.edit_user_avatar"))
-
-    extensions.db.session.commit()
-    notifications.notify_single(
-        current_user.id, "profile_edit", "You updated your avatar information"
-    )
-    flash(
-        "Profile updated successfully! Please wait a few minutes for the changes to be applied."
-    )
-    return redirect(url_for("views.edit_user_avatar"))
-
-
 @views.route("/contact", methods=["GET", "POST"])
 @extensions.limiter.limit("120/day;60/hour;6/minute", override_defaults=True)
 @decorators.verify_captcha

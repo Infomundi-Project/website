@@ -3,17 +3,18 @@
 {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/cropper.min.css') }}">
 {% endblock %}
+
 {% block styles %}
 <style>
-    .profile-background {
-    background-image: url('{{ current_user.profile_wallpaper_url }}');
+  .profile-background {
+    background-image: url('{{ current_user.wallpaper_url }}');
     width: 100%;
     height: 400px;
     background-size: cover;
     background-position: center;
     position: relative;
-    }
-    .profile-mockup {
+  }
+  .profile-mockup {
     position: absolute;
     top: 10%;
     left: 50%;
@@ -24,204 +25,372 @@
     display: flex;
     flex-direction: column;
     z-index: 2;
-    }
-    .profile-mockup .avatar {
+  }
+  .profile-mockup .profile-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     margin-bottom: 10px;
-    }
-    .profile-header {
-    background: url('{{ current_user.profile_banner_url }}') no-repeat center center;
+  }
+  .profile-header {
+    background: url('{{ current_user.banner_url }}') no-repeat center center;
     background-size: cover;
     height: 200px;
     position: relative;
     overflow: hidden;
-    }
-    .profile-header::after {
+  }
+  .profile-header::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
-    }
-    .profile-avatar {
-    width: 75px;
-    height: auto;
-    border-radius: 15px;
+  }
+  .profile-preview-avatar {
+    border-radius: 50%;
     border: 5px solid white;
-    /*position: absolute;*/
-    /*top: 160px; */
-    left: 3.5vh;
-    /*z-index: 3; */
-    }
+    object-fit: cover;
+  }
+
+  /* Cropper wrapper styling */
+  #cropperWrapper {
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: .5rem;
+    max-height: 60vh;
+    overflow: auto;
+    background: #f8f9fa;
+  }
+  .cropper-toolbar {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+  .cropper-toolbar .btn {
+    width: 2.5rem;
+  }
+  /* Toast container */
+  .toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1200;
+  }
 </style>
 {% endblock %}
+
 {% block edit_profile_content %}
-<form method="POST" action="{{ url_for('views.upload_image') }}" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div>
-        <h3>Background & Banner</h3>
-        <hr>
-        <div class="row">
-            <div class="col-md-12 justify-content-start">
-                <div id="profileBackground" class="profile-background rounded">
-                    <div class="profile-mockup bg-secondary-subtle rounded">
-                        <div class="profile-header rounded mb-3" id="profileHeader"></div>
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="row">
-                                    <div class="col-2">
-                                        <img src="{{ current_user.avatar_url }}" alt="User Avatar" class="profile-avatar">
-                                    </div>
-                                    <div class="ms-2 col">
-                                        {% if current_user.display_name %}
-                                        <p class="fs-6 fw-bold">{{ current_user.display_name }}</p>
-                                        <p class="small text-muted">@{{ current_user.username }}</p>
-                                        {% else %}
-                                        <p class="fs-6 text-bold">{{ current_user.username }}</p>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <p class="fs-4">
-                                    <span class="fw-bold me-2">Level</span><span class="badge text-bg-info">{{ current_user.level }}</span>
-                                </p>
-                                <span>{{ current_user.level_progress }}/1000</span>
-                                <div class="progress" role="progressbar" aria-valuenow="{{ current_user.level_progress }}" aria-valuemin="0" aria-valuemax="100" style="height: 3px">
-                                    <div class="progress-bar bg-info" style="width: 25%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<form id="avatarForm" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div>
+    <h3>Background & Banner</h3><hr>
+    <div class="row">
+      <div class="col-md-12">
+        <div id="profileBackground" class="profile-background rounded">
+          <div class="profile-mockup bg-secondary-subtle rounded">
+            <div class="profile-header rounded mb-3" id="profileHeader"></div>
+            <div class="row">
+              <div class="col-8 d-flex align-items-center">
+                <img src="{{ current_user.avatar_url }}" class="profile-avatar" alt="User Avatar">
+                <div class="ms-3">
+                  {% if current_user.display_name %}
+                  <p class="fs-6 fw-bold mb-0">{{ current_user.display_name }}</p>
+                  <p class="small text-muted mb-0">@{{ current_user.username }}</p>
+                  {% else %}
+                  <p class="fs-6 fw-bold mb-0">{{ current_user.username }}</p>
+                  {% endif %}
                 </div>
+              </div>
+              <div class="col-4 text-end">
+                <p class="fs-6 mb-1">
+                  <span class="fw-bold me-2">Level</span>
+                  <span class="badge text-bg-info">{{ current_user.level }}</span>
+                </p>
+                <div class="progress" role="progressbar"
+                     aria-valuenow="{{ current_user.level_progress }}"
+                     aria-valuemin="0" aria-valuemax="1000"
+                     style="height: 3px;">
+                  <div class="progress-bar bg-info"
+                       style="width: {{ (current_user.level_progress / 1000)*100 }}%">
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="backgroundImage" class="form-label">Select Background Image</label>
-                    <input class="form-control" type="file" id="backgroundImage" name="profile_background" accept="image/*">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="bannerImage" class="form-label">Select Banner Image</label>
-                    <input class="form-control" type="file" id="bannerImage" name="profile_banner" accept="image/*">
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    <div>
-        <h3 class="mt-5">Avatar</h3>
-        <hr>
-            <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar" class="rounded me-3" style="width: 10rem; height: auto;">
-            <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar" class="rounded me-3 my-2" style="width: 5rem; height: auto;">
-            <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar" class="rounded" style="width: 2.5rem; height: auto">
-        <div class="my-3">
-            <input type="file" accept="image/*" class="form-control w-100 w-lg-50" id="profilePhoto" name="profile_picture">
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="mb-3">
+          <label for="backgroundImage" class="form-label">Background Image</label>
+          <input type="file" class="form-control" id="backgroundImage"
+                 name="profile_background" accept="image/*"
+                 data-aspect="16/9">
         </div>
-        <small class="text-muted d-block mt-2"><i class="fa-solid fa-file-circle-plus me-1"></i>Maximum size: 2 mb</small>
-        <small class="text-muted d-block mt-2"><i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Minimum dimension: 300x300</small>
+      </div>
+      <div class="col-md-6">
+        <div class="mb-3">
+          <label for="bannerImage" class="form-label">Banner Image</label>
+          <input type="file" class="form-control" id="bannerImage"
+                 name="profile_banner" accept="image/*"
+                 data-aspect="4/1">
+        </div>
+      </div>
     </div>
-    <button class="btn btn-primary mt-3" type="submit">Submit</button>
+  </div>
+
+  <div>
+    <h3 class="mt-5">Avatar</h3><hr>
+    <div class="d-flex align-items-center mb-3">
+      <img id="largeAvatar" src="{{ current_user.avatar_url }}" alt="Large Avatar"
+           class="rounded me-3 profile-preview-avatar" style="width: 10rem; height: 10rem;">
+      <img id="mediumAvatar" src="{{ current_user.avatar_url }}" alt="Medium Avatar"
+           class="rounded me-3 profile-preview-avatar" style="width: 5rem; height: 5rem;">
+      <img id="smallAvatar" src="{{ current_user.avatar_url }}" alt="Small Avatar"
+           class="rounded profile-preview-avatar" style="width: 2.5rem; height: 2.5rem;">
+    </div>
+    <div class="mb-3">
+      <label for="profilePhoto" class="form-label">Select Avatar Image</label>
+      <input type="file" class="form-control" id="profilePhoto"
+             name="profile_picture" accept="image/*"
+             data-aspect="1/1">
+      <small class="text-muted d-block mt-2">
+        <i class="fa-solid fa-file-circle-plus me-1"></i>Max size: 2 MB
+      </small>
+      <small class="text-muted d-block">
+        <i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Min: 300×300
+      </small>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3" id="submitBtn">
+    Submit
+  </button>
 </form>
+
+<!-- Crop Modal -->
+<div class="modal fade" id="cropModal" tabindex="-1"
+     aria-labelledby="cropModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="cropModalLabel">Crop Your Image</h5>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="cropper-toolbar">
+          <button type="button" class="btn btn-outline-light btn-sm" id="zoomOut">
+            <i class="fa-solid fa-search-minus"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="zoomIn">
+            <i class="fa-solid fa-search-plus"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="rotateLeft">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm" id="rotateRight">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+        <div id="cropperWrapper">
+          <!-- image injected here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="cropBtn">
+          Crop & Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1"
+     aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-light"
+                data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container">
+  <div id="successToast" class="toast align-items-center text-bg-success border-0"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Profile updated successfully! Wait a few minutes for the changes to be applied.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
 {% endblock %}
+
 {% block scripts %}
 <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/cropper.min.js') }}"></script>
 <script nonce="{{ nonce }}">
-let cropper;  // Global cropper instance
-let currentInputId;  // To track which input is currently being edited
+let cropper = null;
+let currentInput = null;
 
-function initializeCropper(input, previewElement, isBackground) {
-    const file = input.files[0];
+function openCropper(file, aspectRatio) {
+  const reader = new FileReader();
+  reader.onload = e => {
     const img = document.createElement('img');
-    
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        img.src = e.target.result;
-        img.style.maxWidth = "100%";
-        img.style.maxHeight = "400px";
-        
-        // Destroy any existing cropper instance
-        if (cropper) {
-            cropper.destroy();
-        }
-
-        // Display the image on the page for cropping
-        previewElement.innerHTML = '';  // Clear any existing image
-        previewElement.appendChild(img);
-        cropper = new Cropper(img, {
-            aspectRatio: isBackground ? 16 / 9 : 1,
-            viewMode: 1,
-        });
-    };
-    reader.readAsDataURL(file);
+    img.id = 'cropperImage';
+    img.src = e.target.result;
+    const wrapper = document.getElementById('cropperWrapper');
+    wrapper.innerHTML = '';
+    wrapper.appendChild(img);
+    cropper = new Cropper(img, {
+      aspectRatio,
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true
+    });
+    new bootstrap.Modal(document.getElementById('cropModal')).show();
+  };
+  reader.readAsDataURL(file);
 }
 
-function updatePreviewElements(croppedDataUrl) {
-    // Different previews depending on which image is being cropped
-    if (currentInputId === 'backgroundImage') {
-        document.getElementById('profileBackground').style.backgroundImage = 'url(' + croppedDataUrl + ')';
-    } else if (currentInputId === 'bannerImage') {
-        document.getElementById('profileHeader').style.backgroundImage = 'url(' + croppedDataUrl + ')';
-    } else if (currentInputId === 'profilePhoto') {
-        const largeAvatar = document.getElementById('largeAvatar');
-        const mediumAvatar = document.getElementById('mediumAvatar');
-        const smallAvatar = document.getElementById('smallAvatar');
-
-        if (largeAvatar) largeAvatar.src = croppedDataUrl;
-        if (mediumAvatar) mediumAvatar.src = croppedDataUrl;
-        if (smallAvatar) smallAvatar.src = croppedDataUrl;
+document.querySelectorAll('input[type=file]').forEach(input => {
+  input.addEventListener('change', () => {
+    if (input.files && input.files[0]) {
+      currentInput = input;
+      const [w, h] = input.dataset.aspect.split('/').map(Number);
+      openCropper(input.files[0], w / h);
     }
-}
-
-document.getElementById('backgroundImage').addEventListener('change', function () {
-    currentInputId = 'backgroundImage';
-    initializeCropper(this, document.getElementById('profileBackground'), true);
+  });
 });
 
-document.getElementById('bannerImage').addEventListener('change', function () {
-    currentInputId = 'bannerImage';
-    initializeCropper(this, document.getElementById('profileHeader'), true);
-});
+// Cropper toolbar actions
+document.getElementById('zoomIn').addEventListener('click',  () => cropper.zoom(0.1));
+document.getElementById('zoomOut').addEventListener('click', () => cropper.zoom(-0.1));
+document.getElementById('rotateLeft').addEventListener('click', () => cropper.rotate(-45));
+document.getElementById('rotateRight').addEventListener('click',() => cropper.rotate(45));
 
-document.getElementById('profilePhoto').addEventListener('change', function () {
-    currentInputId = 'profilePhoto';
-    initializeCropper(this, document.getElementById('largeAvatar').parentNode, false);
-});
-
-async function cropAndSubmit(form) {
-    if (cropper) {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        const croppedBlob = await new Promise((resolve) => croppedCanvas.toBlob(resolve, 'image/jpeg'));
-
-        // Create a new File from the Blob with the same name as the original file
-        const croppedFile = new File([croppedBlob], `${currentInputId}.jpg`, {
-            type: 'image/jpeg',
-            lastModified: Date.now(),
-        });
-
-        // Replace the file input with the cropped file
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-
-        const inputElement = document.getElementById(currentInputId);
-        inputElement.files = dataTransfer.files; // Update input files with cropped file
-
-        // Update the preview elements with the cropped data
-        updatePreviewElements(croppedCanvas.toDataURL('image/jpeg'));
-
-        // Cleanup
-        cropper.destroy();
-        cropper = null;
+document.getElementById('cropBtn').addEventListener('click', () => {
+  if (!cropper || !currentInput) return;
+  cropper.getCroppedCanvas().toBlob(blob => {
+    const file = new File([blob], currentInput.name, {
+      type: 'image/png',
+      lastModified: Date.now()
+    });
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    currentInput.files = dt.files;
+    const url = URL.createObjectURL(file);
+    if (currentInput.id === 'backgroundImage') {
+      document.getElementById('profileBackground').style.backgroundImage = `url(${url})`;
+    } else if (currentInput.id === 'bannerImage') {
+      document.getElementById('profileHeader').style.backgroundImage = `url(${url})`;
+    } else {
+      ['largeAvatar','mediumAvatar','smallAvatar']
+        .forEach(id => document.getElementById(id).src = url);
     }
+    bootstrap.Modal.getInstance(
+      document.getElementById('cropModal')
+    ).hide();
+    cropper.destroy();
+    cropper = null;
+  }, 'image/png');
+});
 
-    form.submit();  // Submit the form with the updated file input
-}
+document.getElementById('avatarForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const submitBtn = document.getElementById('submitBtn');
+  const originalHTML = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `
+    <span class="spinner-border spinner-border-sm me-2"
+          role="status" aria-hidden="true"></span>
+    Uploading...
+  `;
 
+  const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+  const ops = [], mapping = {
+    backgroundImage: 'background',
+    bannerImage:     'banner',
+    profilePhoto:    'avatar'
+  };
+
+  for (let inputId in mapping) {
+    const inp = document.getElementById(inputId);
+    if (inp.files.length) {
+      const fd = new FormData();
+      fd.append(mapping[inputId], inp.files[0]);
+      fd.append('csrf_token', csrfToken);
+      ops.push(
+        fetch(`/api/user/image/${mapping[inputId]}`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: fd
+        })
+        .then(async res => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            const err = data.error || {};
+            throw {
+              status: err.status || res.status,
+              title:  err.title  || 'Upload Error',
+              detail: err.detail || res.statusText
+            };
+          }
+        })
+      );
+    }
+  }
+
+  if (!ops.length) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalHTML;
+    const em = new bootstrap.Modal(document.getElementById('errorModal'));
+    document.getElementById('errorModalLabel').textContent = 'No files selected';
+    document.getElementById('errorModalBody').textContent = 'Please choose at least one image.';
+    em.show();
+    return;
+  }
+
+  try {
+    await Promise.all(ops);
+    // success toast
+    const toastEl = document.getElementById('successToast');
+    const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => window.location.reload());
+  } catch (err) {
+    console.error(err);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalHTML;
+    const em = new bootstrap.Modal(document.getElementById('errorModal'));
+    document.getElementById('errorModalLabel').textContent = err.title;
+    document.getElementById('errorModalBody').innerHTML = `
+      <p><strong>Status:</strong> ${err.status}</p>
+      <p>${err.detail}</p>
+    `;
+    em.show();
+  }
+});
 </script>
 {% endblock %}
