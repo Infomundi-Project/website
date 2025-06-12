@@ -189,17 +189,16 @@ def edit_user_profile():
         platform_profile_url = request.form.get(
             f"{platform_option}_url"
         )  # e.g. linkedin_url or instagram_url
-        if not platform_profile_url:
-            continue
 
-        platform_result, username_result = (
-            input_sanitization.extract_username_from_thirdparty_platform_url(
-                platform_profile_url
+        if platform_profile_url:  # we check to see if the user actually did set this, or want to remove from profile
+            platform_result, username_result = (
+                input_sanitization.extract_username_from_thirdparty_platform_url(
+                    platform_profile_url
+                )
             )
-        )
-        if platform_option != platform_result:
-            flash(f"Invalid url for {platform_option} profile.", "error")
-            return render_template("edit_profile.html")
+            if platform_option != platform_result:
+                flash(f"Invalid url for {platform_option} profile.", "error")
+                return render_template("edit_profile.html")
 
         if platform_option == "linkedin":
             current_user.linkedin_url = platform_profile_url

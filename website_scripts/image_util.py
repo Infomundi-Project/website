@@ -25,8 +25,8 @@ _mime_detector = magic.Magic(mime=True)
 
 # Allowed settings
 IMAGE_CATEGORIES = {
-    "profile_picture":   {"crop": True,  "size": (500, 500)},
-    "profile_banner":    {"crop": False, "size": (1600, 400)},
+    "profile_picture": {"crop": True, "size": (500, 500)},
+    "profile_banner": {"crop": False, "size": (1600, 400)},
     "profile_wallpaper": {"crop": False, "size": (1920, 1080)},
 }
 
@@ -126,12 +126,7 @@ def upload_image(buffer: BytesIO, s3_key: str) -> None:
         raise
 
 
-def convert_and_save(
-    file_stream,
-    filename: str,
-    category: str,
-    s3_key: str
-) -> tuple:
+def convert_and_save(file_stream, filename: str, category: str, s3_key: str) -> tuple:
     """
     Reads from a file-like object or bytes, validates, processes, and uploads.
     Returns (True, "Upload successful") on success, or (False, error_message) on failure.

@@ -1698,14 +1698,18 @@ def upload_image(category):
     s3_key = key_tmpl.format(id=current_user.get_public_id())
     setattr(current_user, attr_flag, True)
 
-    is_valid, message = image_util.convert_and_save(file.stream, file.filename, util_cat, s3_key)
+    is_valid, message = image_util.convert_and_save(
+        file.stream, file.filename, util_cat, s3_key
+    )
 
     if not is_valid:
         abort(400, description=message)
 
     extensions.db.session.commit()
     notifications.notify_single(
-        current_user.id, "profile_edit", f"You submitted a new {category}. Wait a few minutes for it to update."
+        current_user.id,
+        "profile_edit",
+        f"You submitted a new {category}. Wait a few minutes for it to update.",
     )
 
     return jsonify(success=True), 201

@@ -24,9 +24,7 @@ def post_webhook(text: str = "", data: dict = {}) -> bool:
         bool: True if we were able to POST the webhook, otherwise False.
     """
     if not text and not data:
-        raise InfomundiCustomException(
-            "Either text or data is required"
-        )
+        raise InfomundiCustomException("Either text or data is required")
 
     if text:
         data = {"content": text}
