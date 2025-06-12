@@ -172,7 +172,6 @@ def get_friends_list(user_id: int) -> list:
     return sent_friends + received_friends
 
 
-@extensions.cache.memoize(timeout=60 * 1)  # 1 minute
 def get_friendship_status(user_id: int, friend_id: int) -> tuple:
     """
     Determines the friendship status between the current user and the profile user.

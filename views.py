@@ -14,7 +14,6 @@ from datetime import datetime
 from website_scripts import (
     scripts,
     config,
-    json_util,
     immutable,
     notifications,
     image_util,
@@ -84,7 +83,7 @@ def user_profile(username):
     )
 
     seo_title = f"Infomundi - {user.display_name if user.display_name else user.username}'s profile"
-    seo_description = f"{short_description if short_description else 'We don\'t know much about this user, they prefer keeping an air of mystery...'}"
+    seo_description = f"{short_description if short_description else 'We know nothing about this user, they prefer keeping an air of mystery...'}"
     seo_image = user.avatar_url
 
     user.has_contact_info = (
@@ -265,22 +264,6 @@ def edit_user_settings():
         ) or auth_util.search_user_email_in_database(new_email):
             flash("The email you provided is invalid.", "error")
             return render_template("edit_settings.html")
-
-        # Send email to the user
-        subject = "Infomundi - Your Email Has Been Changed"
-        body = f"""Hello, {current_user.display_name if current_user.display_name else current_user.username}.
-
-We wanted to inform you that the email address associated with your Infomundi account has been successfully updated. Here are the details:
-
-Device: {qol_util.get_device_info(request.headers.get('User-Agent'))}
-IP Address: {cloudflare_util.get_user_ip()}
-Country: {cloudflare_util.get_user_country()}
-
-If you made this change, no further action is needed. However, if you did not request this change, please secure your account immediately by contacting our support team for assistance.
-
-Best regards,
-The Infomundi Team
-"""
 
         # Update session information
         session["email_address"] = new_email

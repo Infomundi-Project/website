@@ -1244,7 +1244,7 @@ def create_comment():
                     {
                         "user_id": parent_comment.user_id,
                         "type": "comment_reply",
-                        "message": f"Someone replied to your comment",
+                        "message": "Someone replied to your comment",
                         "url": parent_comment.url,
                     }
                 ]
@@ -1563,14 +1563,11 @@ def mark_all_notifications_read():
     )
 
 
-@api.route("/user/<int:uid>/block/<action>", methods=["POST"])
+@api.route("/user/<int:uid>/block", methods=["GET", "POST", "DELETE"])
 @decorators.api_login_required
 def block_user(uid, action):
     if uid == current_user.id:
         abort(403, description="Self-blocking? Well, that's new")
-
-    if action not in ("add", "remove"):
-        abort(400, description="Unrecognized action.")
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
@@ -1580,7 +1577,7 @@ def block_user(uid, action):
         blocker_id=current_user.id, blocked_id=uid
     ).first()
 
-    if action == "add":
+    if request.method == "POST":
         if block:
             return jsonify(message="User is already blocked."), 204
 
@@ -1590,7 +1587,7 @@ def block_user(uid, action):
 
         new_block = models.UserBlock(blocker=current_user, blocked=target)
         extensions.db.session.add(new_block)
-    else:
+    elif request.method == "DELETE":
         if not block:
             abort(400, description="User is not blocked.")
         extensions.db.session.delete(block)
@@ -1599,7 +1596,7 @@ def block_user(uid, action):
 
     return (
         jsonify(
-            message=f"You {'blocked' if action == 'add' else 'unblocked'} {target.username}. Take care of your peace!",
+            message=f"You {'blocked' if request.method == "POST" else 'unblocked'} {target.username}. Take care of your peace!",
         ),
         201,
     )
@@ -1654,7 +1651,7 @@ def user_reports(uid, report_id=0):
 
     elif request.method == "DELETE":
         report = models.UserReport.query.filter_by(
-            report_id=report_id, reporter_id=current_user.id
+            id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
             abort(404, description="Couldn't find target report.")
@@ -1662,7 +1659,7 @@ def user_reports(uid, report_id=0):
         extensions.db.session.delete(report)
     elif request.method == "PATCH":
         report = models.UserReport.query.filter_by(
-            report_id=report_id, reporter_id=current_user.id
+            id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
             abort(404, description="Couldn't find target report.")
@@ -1673,7 +1670,7 @@ def user_reports(uid, report_id=0):
     extensions.db.session.commit()
 
     return (
-        jsonify(message="Thanks for letting us know — we’ll take a look!"),
+        jsonify(message="That's done."),
         200,
     )
 
@@ -1698,18 +1695,17 @@ def upload_image(category):
     if not file:
         abort(400, description="No image provided")
 
-    if not image_util.perform_all_checks(file.stream, file.filename):
-        abort(400, description="Invalid image")
-
     s3_key = key_tmpl.format(id=current_user.get_public_id())
     setattr(current_user, attr_flag, True)
 
-    if not image_util.convert_and_save(file.stream, util_cat, s3_key):
-        abort(500, description="Upload failed")
+    is_valid, message = image_util.convert_and_save(file.stream, file.filename, util_cat, s3_key)
+
+    if not is_valid:
+        abort(400, description=message)
 
     extensions.db.session.commit()
     notifications.notify_single(
-        current_user.id, "profile_edit", f"You updated your {category}"
+        current_user.id, "profile_edit", f"You submitted a new {category}. Wait a few minutes for it to update."
     )
 
     return jsonify(success=True), 201

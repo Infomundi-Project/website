@@ -1,19 +1,35 @@
-{% extends "base.html" %} {% block title %}{{ user.username }}'s Profile{% endblock %} {% block header %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/userProfile.css') }}" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}" />
-{% endblock %} {% block styles %}
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block header %}
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='css/userProfile.css') }}">
+<link rel="stylesheet"
+  href="{{ url_for('static', filename='css/commentSystem.css') }}">
+{% endblock %}
+
+{% block styles %}
 <style>
   .background-container {
-    background: url("{{ user.wallpaper_url  }}") no-repeat center center;
+    background: url('{{ user.wallpaper_url  }}') no-repeat center center;
     background-size: cover;
     padding-top: 30px;
     position: relative;
   }
 </style>
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="toast-container position-fixed top-0 end-0 p-3" id="reportToastContainer"></div>
 
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="reportModal"
+  tabindex="-1"
+  aria-labelledby="reportModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
@@ -21,14 +37,19 @@
           <i class="fa-solid fa-flag"></i>
           Reports on @{{ user.username }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
       <div class="modal-body">
         <!-- EXISTING REPORTS LIST -->
         <div id="reportList" class="mb-4">
           <p class="text-center text-muted">Loading…</p>
         </div>
-        <hr class="mt-5" />
+        <hr class="mt-5">
         <!-- ADD NEW REPORT -->
         <h6>
           <i class="fa-solid fa-plus-circle text-primary"></i>
@@ -36,16 +57,27 @@
         </h6>
         <div class="row g-3 align-items-center">
           <div class="col-md-4">
-            <label for="newReportCategory" class="form-label"> <i class="fa-solid fa-list"></i> Category </label>
+            <label for="newReportCategory" class="form-label">
+              <i class="fa-solid fa-list"></i> Category
+            </label>
             <select id="newReportCategory" class="form-select form-select-sm"></select>
           </div>
           <div class="col-md-8">
-            <label for="newReportReason" class="form-label"> <i class="fa-solid fa-pencil-alt"></i> Reason </label>
-            <textarea id="newReportReason" class="form-control form-control-sm" rows="4" placeholder="Why are you reporting this user?"></textarea>
+            <label for="newReportReason" class="form-label">
+              <i class="fa-solid fa-pencil-alt"></i> Reason
+            </label>
+            <textarea
+              id="newReportReason"
+              class="form-control form-control-sm"
+              rows="4"
+              placeholder="Why are you reporting this user?"
+            ></textarea>
           </div>
         </div>
         <div class="mt-3 text-end">
-          <button id="addReportBtn" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+          <button id="addReportBtn" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-paper-plane"></i> Submit
+          </button>
         </div>
         <div id="reportFeedback" class="mt-2"></div>
       </div>
@@ -53,24 +85,33 @@
   </div>
 </div>
 
-<div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+
+
+
+
+
+<div class="modal fade" id="descriptionModal" tabindex="-1"
+  aria-labelledby="descriptionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="descriptionModalLabel">
-          {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s description
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}'s
+          description</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+          aria-label="Close"></button>
       </div>
       <div class="modal-body text-break">
         {{ user.profile_description|safe }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary"
+          data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
+
 
 <div class="modal fade p-4 py-md-5" aria-hidden="true" tabindex="-1" id="userContactInfoModal">
   <div class="modal-dialog">
@@ -79,6 +120,7 @@
         <h2 class="fw-bold mb-0">Contact Information: {{ user.username }}</h2>
 
         <ul class="d-grid gap-4 my-5 list-unstyled small">
+
           {% if not user.has_contact_info %}
           <li class="d-flex align-items-center gap-4">
             <i class="fa-solid fa-phone-slash fa-2xl"></i>
@@ -87,7 +129,10 @@
               Either <span class="fw-bold">{{ user.username }}</span> has no contact info or this information is private.
             </div>
           </li>
-          {% endif %} {% if user.instagram_url %}
+          {% endif %}
+          
+
+          {% if user.instagram_url %}
           <li class="d-flex align-items-center gap-4">
             <i class="fa-brands fa-square-instagram fa-2xl"></i>
             <div>
@@ -95,7 +140,9 @@
               <a href="{{ user.instagram_url }}" target="_blank">@{{ user.get_platform_username('instagram') }}</a>
             </div>
           </li>
-          {% endif %} {% if user.twitter_url %}
+          {% endif %}
+
+          {% if user.twitter_url %}
           <li class="d-flex align-items-center gap-4">
             <i class="fa-brands fa-square-x-twitter fa-2xl"></i>
             <div>
@@ -103,7 +150,9 @@
               <a href="{{ user.twitter_url }}" target="_blank">@{{ user.get_platform_username('twitter') }}</a>
             </div>
           </li>
-          {% endif %} {% if user.linkedin_url %}
+          {% endif %}
+
+          {% if user.linkedin_url %}
           <li class="d-flex align-items-center gap-4">
             <i class="fa-brands fa-linkedin fa-2xl"></i>
             <div>
@@ -111,7 +160,9 @@
               <a href="{{ user.linkedin_url }}" target="_blank">@{{ user.get_platform_username('linkedin') }}</a>
             </div>
           </li>
-          {% endif %} {% if user.public_email %}
+          {% endif %}
+
+          {% if user.public_email %}
           <li class="d-flex align-items-center gap-4">
             <i class="fa-solid fa-square-envelope fa-2xl"></i>
             <div>
@@ -120,12 +171,14 @@
             </div>
           </li>
           {% endif %}
+
         </ul>
         <button type="button" class="btn btn-lg btn-primary mt-5 w-100" data-bs-dismiss="modal">Great, thanks!</button>
       </div>
     </div>
   </div>
 </div>
+
 
 <div class="{% if is_mobile %}container-fluid{% else %}container{% endif %} px-1">
   <div class="profile-container p-3 rounded-3 bg-dark-subtle shadow-lg" style="opacity: 97%;">
@@ -136,46 +189,39 @@
         <div class="row">
           <div class="col-3">
             <figure class="figure w-100 position-relative">
-              <img src="{{ user.avatar_url }}" alt="{{ user.username }}'s profile picture" class="img-fluid figure-img rounded-3 border-0 border-top border-5" id="profile-avatar" />
+              <img src="{{ user.avatar_url }}"
+                alt="{{ user.username }}'s profile picture"
+                class="img-fluid figure-img rounded-3 border-0 border-top border-5"
+                id="profile-avatar">
 
               {% if user.role == 'admin' %}
-              <span class="badge bg-danger position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the administration team at Infomundi">
-                <i class="fa-solid fa-chess-king me-0 me-lg-1"></i>{% if not is_mobile %}ADMIN{% endif %}
-              </span>
+                <span class="badge bg-danger position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the administration team at Infomundi"><i class="fa-solid fa-chess-king me-0 me-lg-1"></i>{% if not is_mobile %}ADMIN{% endif %}</span>
               {% elif user.role == 'moderator' %}
-              <span class="badge bg-info position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the moderation team at Infomundi">
-                <i class="fa-solid fa-chess-rook me-0 me-lg-1"></i>{% if not is_mobile %}MOD{% endif %}
-              </span>
+                <span class="badge bg-info position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is part of the moderation team at Infomundi"><i class="fa-solid fa-chess-rook me-0 me-lg-1"></i>{% if not is_mobile %}MOD{% endif %}</span>
               {% elif user.role == 'official' %}
-              <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This is an official account in the Infomundi platform">
-                <i class="fa-solid fa-chess-bishop me-0 me-lg-1"></i>{% if not is_mobile %}OFFICIAL{% endif %}
-              </span>
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This is an official account in the Infomundi platform"><i class="fa-solid fa-chess-bishop me-0 me-lg-1"></i>{% if not is_mobile %}OFFICIAL{% endif %}</span>
               {% elif user.role == 'verified' %}
-              <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is a verified account in the Infomundi platform">
-                <i class="fa-solid fa-chess-pawn me-0 me-lg-1"></i>{% if not is_mobile %}VERIFIED{% endif %}
-              </span>
+                <span class="badge bg-primary position-absolute end-0 bottom-0 me-1 p-1" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="This user is a verified account in the Infomundi platform"><i class="fa-solid fa-chess-pawn me-0 me-lg-1"></i>{% if not is_mobile %}VERIFIED{% endif %}</span>
               {% endif %}
             </figure>
           </div>
           <div class="col-9 px-1">
+
             <ul class="list-inline notranslate mb-1">
+              
               <li class="list-inline-item fw-bold fs-3">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</li>
               <li class="list-inline-item text-muted fs-5" title="Username">@{{ user.username }}</li>
+
             </ul>
 
+
             <ul class="list-inline text-muted">
+              
               <!-- User Location -->
               {% if user.country %}
               <li class="list-inline-item">
                 <div class="d-inline-flex align-top">
-                  <img
-                    src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg"
-                    class="rounded img-fluid me-1"
-                    style="height: auto; width: 1.25rem;"
-                    alt="{{ user.country.nationality }} Flag"
-                    title="{{ user.country.nationality }} Flag"
-                  />
-                  {{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
+                  <img src="/static/img/flags/4x3/{{ user.country.iso2.lower() }}.svg" class="rounded img-fluid me-1" style="height: auto; width: 1.25rem" alt="{{ user.country.nationality }} Flag" title="{{ user.country.nationality }} Flag">{{ user.country.name }}{% if user.state %}, {{ user.state.name }}{% endif %}{% if user.city %}, {{ user.city.name }}{% endif %}
                 </div>
               </li>
               {% endif %}
@@ -184,71 +230,90 @@
               {% if user.website_url %}
               <li class="list-inline-item"><i class="fa-solid fa-link me-1"></i><a href="{{ user.website_url }}">{{ user.website_domain }}</a></li>
               {% endif %}
-
-              <li class="list-inline-item">
-                <i class="fa-solid fa-calendar me-1"></i>Joined <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ user.created_at }}">{{ user.created_at.strftime("%B %Y") }}</span>
-              </li>
+              
+              <li class="list-inline-item"><i class="fa-solid fa-calendar me-1"></i>Joined <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ user.created_at }}">{{ user.created_at.strftime("%B %Y") }}</span></li>
             </ul>
 
             {% if user.profile_description %}
             <div class="mt-3 user-description">
               {% if has_too_many_newlines or is_mobile %}
-              <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>
-              {% else %} {{ short_description|safe }} {% if user.profile_description|length > 200 %}
-              <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal">View more</a>
-              {% endif %} {% endif %}
+              <a href="#" data-bs-toggle="modal"
+                data-bs-target="#descriptionModal">View more</a>
+              {% else %}
+              {{ short_description|safe }}
+              {% if user.profile_description|length > 200 %}
+              <a href="#" data-bs-toggle="modal"
+                data-bs-target="#descriptionModal">View more</a>
+              {% endif %}
+              {% endif %}
             </div>
             {% endif %}
+
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <p class="fs-4"><span class="fw-bold me-2">Level</span><span class="badge text-bg-secondary">{{ user.level }}</span></p>
+        <p class="fs-4">
+          <span class="fw-bold me-2">Level</span><span
+            class="badge text-bg-secondary">{{ user.level }}</span>
+        </p>
         <span>{{ user.level_progress }}/1000</span>
-        <div class="progress mb-3" role="progressbar" aria-valuenow="{{ user.level_progress }}" aria-valuemin="0" aria-valuemax="100" style="height: 3px;">
-          <div class="progress-bar bg-info" style="width: {{ user.level_progress }}%"></div>
+        <div class="progress mb-3" role="progressbar"
+          aria-valuenow="{{ user.level_progress }}" aria-valuemin="0"
+          aria-valuemax="100" style="height: 3px">
+          <div class="progress-bar bg-info"
+            style="width: {{ user.level_progress }}%"></div>
         </div>
 
         <div class="row justify-content-between">
           {% if current_user.is_authenticated and current_user.id == user.id %}
-          <div class="col">
-            <a type="button" role="button" class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2" href="{{ url_for('views.edit_user_profile') }}">
-              <i class="fa-solid fa-pen me-2"></i>Edit Profile
-            </a>
-          </div>
+            <div class="col">
+              <a type="button" role="button"
+                class="w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mt-2"
+                href="{{ url_for('views.edit_user_profile') }}">
+                <i class="fa-solid fa-pen me-2"></i>Edit Profile
+              </a>
+            </div>
           {% elif current_user.is_authenticated %}
-          <div class="col-auto">
-            <ul class="list-inline">
-              <li class="list-inline-item">
-                <button type="button" class="btn btn-primary btn-sm" id="userFollowBtn">Follow</button>
-              </li>
-              <li class="list-inline-item">
-                <div id="friendActionContainer"></div>
-              </li>
-            </ul>
-          </div>
-
-          <div class="col-auto">
-            <div class="dropdown">
-              <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                More
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#userContactInfoModal">Contact Info</a></li>
-                <li><a class="dropdown-item send-message-dropdown" data-user-id="{{ user.id }}" data-username="{{ user.username }}" href="#" id="sendMessageDropdown">Send Message</a></li>
-                <li><a class="dropdown-item" href="#">Block</a></li>
-                <li>
-                  <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal">
-                    Report
-                  </a>
+            <div class="col-auto">
+              <ul class="list-inline">
+                <li class="list-inline-item">
+                  <button type="button" class="btn btn-primary btn-sm" id="userFollowBtn">Follow</button>
                 </li>
+                <li class="list-inline-item">
+                  <div id="friendActionContainer"></div>
+                </li>
+              
               </ul>
             </div>
-          </div>
+
+            <div class="col-auto">
+              <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  More
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#userContactInfoModal">Contact Info</a></li>
+                  <li><a class="dropdown-item send-message-dropdown" data-user-id="{{ user.id }}" data-username="{{ user.username }}" href="#" id="sendMessageDropdown">Send Message</a></li>
+                  <li><a class="dropdown-item" href="#">Block</a></li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      data-bs-toggle="modal"
+                      data-bs-target="#reportModal"
+                    >
+                      Report
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
           {% endif %}
         </div>
+
       </div>
     </div>
 
@@ -264,136 +329,160 @@
         </div>
       -->
 
-        <div class="activity-panel bg-dark-subtle rounded border border-1 m-0 p-3">
-          <div class="calendar-wrapper mb-4">
-            <!-- 
+<div class="activity-panel bg-dark-subtle rounded border border-1 m-0 p-3">
+  <div class="calendar-wrapper mb-4">
+  <!-- 
     This outer <div> is just a container with margin-bottom.
     Below, .overflow-auto ensures the grid can scroll horizontally on narrow viewports.
   -->
-            <div class="overflow-auto">
-              <!-- Month labels row: will scroll horizontally together with the grid -->
-              <div class="month-labels position-relative"></div>
+  <div class="overflow-auto">
+    <!-- Month labels row: will scroll horizontally together with the grid -->
+    <div class="month-labels position-relative"></div>
 
-              <!-- 
+    <!-- 
       Calendar Container: left = weekday labels (Mon/Wed/Fri),
       right = the actual 7×N grid (#calendar).
       We hide the weekday labels on <576 px via d-none d-sm-grid.
     -->
-              <div class="calendar-container d-flex align-items-start my-3">
-                <!-- WEEKDAY LABELS (Mon, -, Wed, -, Fri, -, -) -->
-                <div class="weekday-labels d-none d-sm-grid me-2">
-                  <span>Mon</span>
-                  <span></span>
-                  <span>Wed</span>
-                  <span></span>
-                  <span>Fri</span>
-                  <span></span>
-                  <span></span>
-                </div>
+    <div class="calendar-container d-flex align-items-start my-3">
+      <!-- WEEKDAY LABELS (Mon, -, Wed, -, Fri, -, -) -->
+      <div class="weekday-labels d-none d-sm-grid me-2">
+        <span>Mon</span>
+        <span></span>
+        <span>Wed</span>
+        <span></span>
+        <span>Fri</span>
+        <span></span>
+        <span></span>
+      </div>
 
-                <!-- THE 7×N GRID OF DAY SQUARES -->
-                <div id="calendar"></div>
-              </div>
-            </div>
-          </div>
+      <!-- THE 7×N GRID OF DAY SQUARES -->
+      <div id="calendar"></div>
+    </div>
+  </div>
+</div>
 
-          <!-- 2) Activity Overview Box -->
-          <div class="activity-overview">
-            <!-- Left column: textual summary -->
-            <div class="overview-text">
-              <p class="year-total">You’ve read <span id="yearTotalReads">0</span> stories in the past year.</p>
-              <p class="source-list">From <span id="topPublishersList">…</span></p>
-              <div class="mini-lists">
-                <div class="mini-list">
-                  <strong>Top Tags</strong>
-                  <ul id="topTagsList">
-                    <!-- JS inserts up to 5 <li>security (40)</li> … -->
-                  </ul>
-                </div>
-                <div class="mini-list">
-                  <strong>Top Countries</strong>
-                  <ul id="topCountriesList">
-                    <!-- JS inserts up to 5 <li>US (60)</li> … -->
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right column: small Chart.js for daily/weekly/monthly -->
-            <div class="overview-chart">
-              <canvas id="miniDistributionChart" width="150" height="150"></canvas>
-            </div>
-          </div>
+  <!-- 2) Activity Overview Box -->
+  <div class="activity-overview">
+    <!-- Left column: textual summary -->
+    <div class="overview-text">
+      <p class="year-total">
+        You’ve read <span id="yearTotalReads">0</span> stories in the past year.
+      </p>
+      <p class="source-list">
+        From <span id="topPublishersList">…</span>
+      </p>
+      <div class="mini-lists">
+        <div class="mini-list">
+          <strong>Top Tags</strong>
+          <ul id="topTagsList">
+            <!-- JS inserts up to 5 <li>security (40)</li> … -->
+          </ul>
         </div>
+        <div class="mini-list">
+          <strong>Top Countries</strong>
+          <ul id="topCountriesList">
+            <!-- JS inserts up to 5 <li>US (60)</li> … -->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: small Chart.js for daily/weekly/monthly -->
+    <div class="overview-chart">
+      <canvas id="miniDistributionChart" width="150" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
+
 
         <!-- Comments -->
         <infomundi-comments page_id="{{ user.get_public_id() }}" type="user">
+
           <div id="commentsList"></div>
+
         </infomundi-comments>
+
       </div>
 
       <div class="col-md-3 p-2">
         <div id="user-status" class="text-center"></div>
+        
 
         <!-- Friends -->
         {% if friends_list %}
         <div class="mt-5">
-          <p class="fs-4">Friends<span class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span></p>
+          <p class="fs-4">Friends<span
+              class="badge text-bg-secondary ms-1">{{ friends_list|length }}</span>
+          </p>
 
           <div class="vstack gap-3">
             {% for friend in friends_list %}
-            <div class="row">
-              <div class="col-3 px-2">
-                <a href="{{ url_for('views.user_profile', username=friend.username) }}" class="text-decoration-none text-reset">
-                  <img
-                    src="{{ friend.avatar_url }}"
-                    alt="{{ friend.username }}'s avatar"
-                    data-bs-toggle="tooltip"
-                    data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}"
-                    class="img-fluid rounded-3 border border-2"
-                  />
-                </a>
-              </div>
-              <div class="col-9 px-1">
-                <ul class="list-inline notranslate mb-1">
-                  <li class="list-inline-item fw-bold">
-                    <a href="{{ url_for('views.user_profile', username=friend.username) }}" class="text-decoration-none text-reset">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</a>
-                  </li>
-                  <li class="list-inline-item text-muted" title="Username">@{{ friend.username }}</li>
-                </ul>
+              <div class="row">
+                <div class="col-3 px-2">
+                  <a href="{{ url_for('views.user_profile', username=friend.username) }}"
+                    class="text-decoration-none text-reset">
+                    <img src="{{ friend.avatar_url }}"
+                      alt="{{ friend.username }}'s avatar"
+                      data-bs-toggle="tooltip"
+                      data-bs-title="{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}"
+                      class="img-fluid rounded-3 border border-2 ">
+                  </a>
+                </div>
+                <div class="col-9 px-1">
 
-                {% if friend.is_online %}
-                <p class="text-primary-emphasis small">Currently Online</p>
-                {% else %}
-                <p class="text-muted small">Last seen <span data-last-seen="{{" friend.last_activity|tojson }}></span></p>
-                {% endif %}
+                  <ul class="list-inline notranslate mb-1">
+              
+                    <li class="list-inline-item fw-bold"><a href="{{ url_for('views.user_profile', username=friend.username) }}"
+                    class="text-decoration-none text-reset">{% if friend.display_name %}{{ friend.display_name }}{% else %}{{ friend.username }}{% endif %}</a></li>
+                    <li class="list-inline-item text-muted" title="Username">@{{ friend.username }}</li>
+
+                  </ul>
+
+                  {% if friend.is_online %}
+                  <p class="text-primary-emphasis small">Currently Online</p>
+                  {% else %}
+                  <p class="text-muted small">Last seen <span
+                      data-last-seen={{ friend.last_activity|tojson }}></span>
+                  </p>
+                  {% endif %}
+                </div>
               </div>
-            </div>
             {% endfor %}
           </div>
+
         </div>
         {% endif %}
+
+
       </div>
+
+
     </div>
   </div>
 </div>
 
 <!-- Dynamic Confirm-Friend Modal -->
-<div class="modal fade" id="confirmFriendModal" tabindex="-1" aria-labelledby="confirmFriendModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmFriendModal" tabindex="-1"
+     aria-labelledby="confirmFriendModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmFriendModalLabel">
           <!-- set via JS -->
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="confirmFriendModalBody">
         <!-- set via JS -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn" id="confirmFriendModalBtn" data-action="" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn" id="confirmFriendModalBtn"
+                data-action="" data-bs-dismiss="modal">
           <!-- set via JS -->
         </button>
       </div>
@@ -401,7 +490,10 @@
   </div>
 </div>
 
-{% endblock %} {% block scripts %}
+
+{% endblock %}
+
+{% block scripts %}
 <script nonce="{{ nonce }}">
   window.profileUserPublicId = '{{ user.get_public_id() }}';
   window.profileUserId = {{ user.id }};
@@ -409,17 +501,18 @@
 </script>
 
 <script nonce="{{ nonce }}">
-  const sendMessageDropdown = document.getElementById("sendMessageDropdown");
+  const sendMessageDropdown = document.getElementById('sendMessageDropdown');
   if (sendMessageDropdown) {
-    sendMessageDropdown.addEventListener("click", (e) => {
+    sendMessageDropdown.addEventListener('click', (e) => {
       openChat(sendMessageDropdown.dataset.userId, sendMessageDropdown.dataset.username);
     });
   }
 </script>
 
-{% assets "js_profile" %}
-<script nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
-{% endassets %}
+    {% assets "js_profile" %}
+      <script nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 
-<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
 {% endblock %}

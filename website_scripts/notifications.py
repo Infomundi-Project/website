@@ -1,5 +1,4 @@
 from email.mime.multipart import MIMEMultipart
-from sqlalchemy.exc import IntegrityError
 from requests import post as post_request
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -7,7 +6,8 @@ from sqlalchemy import insert
 
 from smtplib import SMTP
 
-from . import config, extensions, models, custom_exceptions
+from . import config, extensions, models
+from .custom_exceptions import InfomundiCustomException
 
 
 def post_webhook(text: str = "", data: dict = {}) -> bool:
@@ -24,7 +24,7 @@ def post_webhook(text: str = "", data: dict = {}) -> bool:
         bool: True if we were able to POST the webhook, otherwise False.
     """
     if not text and not data:
-        raise custom_exceptions.InfomundiCustomException(
+        raise InfomundiCustomException(
             "Either text or data is required"
         )
 
@@ -35,7 +35,7 @@ def post_webhook(text: str = "", data: dict = {}) -> bool:
         response = post_request(config.WEBHOOK_URL, timeout=3, json=data)
         response.raise_for_status()
     except Exception as e:
-        raise custom_exceptions.InfomundiCustomException(f"Something went wrong: {e}")
+        raise InfomundiCustomException(f"Something went wrong: {e}")
 
     return True
 
@@ -69,7 +69,7 @@ def notify(notif_dicts: list):
             break
 
         if n.get("type") not in types_allowed:
-            raise custom_exceptions.InfomundiCustomException(
+            raise InfomundiCustomException(
                 f"'type' value is invalid. Types allowed: {types_allowed}"
             )
     else:
