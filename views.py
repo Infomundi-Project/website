@@ -190,7 +190,9 @@ def edit_user_profile():
             f"{platform_option}_url"
         )  # e.g. linkedin_url or instagram_url
 
-        if platform_profile_url:  # we check to see if the user actually did set this, or want to remove from profile
+        if (
+            platform_profile_url
+        ):  # we check to see if the user actually did set this, or want to remove from profile
             platform_result, username_result = (
                 input_sanitization.extract_username_from_thirdparty_platform_url(
                     platform_profile_url
