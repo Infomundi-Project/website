@@ -80,6 +80,9 @@ class Story(db.Model):
     stats = db.relationship("StoryStats", backref="story", uselist=False, lazy="joined")
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
+    
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    country = db.relationship("Country", backref="story", lazy="joined")
 
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     country = db.relationship("Country", backref="story", lazy="joined")
