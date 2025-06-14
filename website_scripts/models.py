@@ -85,6 +85,9 @@ class Story(db.Model):
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     country = db.relationship("Country", backref="story", lazy="joined")
 
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    country = db.relationship("Country", backref="story", lazy="joined")
+
     def get_public_id(self) -> str:
         return hashing_util.binary_to_md5_hex(self.url_hash)
 
