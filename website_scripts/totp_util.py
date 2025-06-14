@@ -3,7 +3,7 @@ import base64
 import pyotp
 import io
 
-from . import security_util, hashing_util, config
+from . import hashing_util, config
 
 
 def generate_totp_secret():

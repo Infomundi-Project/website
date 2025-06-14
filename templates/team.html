@@ -1,31 +1,25 @@
-{% extends "base.html" %} 
-
-{% block title %}Team{% endblock %} 
-
-{% block styles %}
+{% extends "base.html" %} {% block title %}Team{% endblock %} {% block styles %}
 <style type="text/css">
-.card {
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transition: 0.3s;
-}
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+  }
 
-.card:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
+  .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
 
-.card-img-top {
-  height: 40vh;
-  object-fit: cover;
-}
+  .card-img-top {
+    height: 40vh;
+    object-fit: cover;
+  }
 
-.card-body {
-  padding: 15px;
-}
+  .card-body {
+    padding: 15px;
+  }
 </style>
-{% endblock %} 
-
-{% block about_content %}
+{% endblock %} {% block about_content %}
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-4 mb-5">
@@ -39,8 +33,8 @@
             </li>
           </ul>
         </div>
-        <a href="/id/99532207-9632-4359-4f14-e4a84b2432b1" class="text-decoration-none text-reset">
-          <img src="{{ url_for('static', filename='img/dbarros.webp') }}" class="card-img-top" alt="Infomundi CEO">
+        <a href="/id/db0b96e1-fc56-2eb6-56e1-f7ca0e51e561" class="text-decoration-none text-reset">
+          <img src="{{ url_for('static', filename='img/dbarros.webp') }}" class="card-img-top" alt="Infomundi CEO" />
         </a>
         <div class="card-body">
           <h5 class="card-title">Diogo Cristovão</h5>
@@ -51,16 +45,12 @@
                 <p>Be an eagle every day... not a pigeon!</p>
               </small>
             </blockquote>
-            <figcaption class="blockquote-footer">
-              Alexandre Barros, <cite title="Source Title">my father</cite>
-            </figcaption>
+            <figcaption class="blockquote-footer">Alexandre Barros, <cite title="Source Title">my father</cite></figcaption>
           </figure>
         </div>
         <ul class="list-group list-group-flush mt-3">
           <li class="list-group-item">
-            <a href="mailto:barros@infomundi.net" target="_blank" class="text-decoration-none">
-              <i class="fa-solid fa-envelope me-2"></i>barros@infomundi.net
-            </a>
+            <a href="mailto:barros@infomundi.net" target="_blank" class="text-decoration-none"> <i class="fa-solid fa-envelope me-2"></i>barros@infomundi.net </a>
           </li>
         </ul>
         <div class="card-footer text-body-secondary">
@@ -92,8 +82,8 @@
             </li>
           </ul>
         </div>
-        <a href="/id/47561c58-8bda-ae6e-b12a-01af8a95750e" class="text-decoration-none text-reset">
-          <img src="{{ url_for('static', filename='img/galves.webp') }}" class="card-img-top" alt="Infomundi CTO">
+        <a href="/id/1d3636cf-9a96-5dad-0943-43b1b532dd93" class="text-decoration-none text-reset">
+          <img src="{{ url_for('static', filename='img/galves.webp') }}" class="card-img-top" alt="Infomundi CTO" />
         </a>
         <div class="card-body">
           <h5 class="card-title">Guilherme Alves</h5>
@@ -102,9 +92,7 @@
         </div>
         <ul class="list-group list-group-flush mt-3">
           <li class="list-group-item">
-            <a href="mailto:gui.alves@infomundi.net" target="_blank" class="text-decoration-none">
-              <i class="fa-solid fa-envelope me-2"></i>gui.alves@infomundi.net
-            </a>
+            <a href="mailto:gui.alves@infomundi.net" target="_blank" class="text-decoration-none"> <i class="fa-solid fa-envelope me-2"></i>gui.alves@infomundi.net </a>
           </li>
         </ul>
         <div class="card-footer text-body-secondary">
@@ -117,34 +105,32 @@
     </div>
   </div>
 </div>
-{% endblock %} 
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script nonce="{{ nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-  const dateElements = document.querySelectorAll('.date-info');
-  const dateElementsEu = document.querySelectorAll('.date-info-eu');
-  
-  const date = new Date();
-  const dateTimezone = new Intl.DateTimeFormat('pt-BR', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-      timeZone: 'America/Belem',
-  });
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateElements = document.querySelectorAll(".date-info");
+    const dateElementsEu = document.querySelectorAll(".date-info-eu");
 
-  const dateEu = new Date();
-  const dateTimezoneEu = new Intl.DateTimeFormat('pt-BR', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-      timeZone: 'Europe/Lisbon',
-  });
+    const date = new Date();
+    const dateTimezone = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Belem",
+    });
 
-  dateElements.forEach(function(element) {
-    element.innerHTML = dateTimezone.format(date); // Update the element content
+    const dateEu = new Date();
+    const dateTimezoneEu = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Belem",
+    });
+
+    dateElements.forEach(function (element) {
+      element.innerHTML = dateTimezone.format(date); // Update the element content
+    });
+    dateElementsEu.forEach(function (element) {
+      element.innerHTML = dateTimezoneEu.format(dateEu); // Update the element content
+    });
   });
-  dateElementsEu.forEach(function(element) {
-    element.innerHTML = dateTimezoneEu.format(dateEu); // Update the element content
-  });
-});
 </script>
 {% endblock %}

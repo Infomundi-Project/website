@@ -33,7 +33,7 @@
 
 .profile-header {
   background-size: cover !important;
-  height: 200px;
+  height: 300px;
   position: relative;
   overflow: hidden;
 }
@@ -63,6 +63,9 @@
 @media (max-width: 1000px) {
   .profile-avatar {
     max-width: 5rem;
+  }
+  .profile-header {
+    height: 120px;
   }
 }
 

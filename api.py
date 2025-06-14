@@ -1,9 +1,9 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
-from sqlalchemy import and_, cast, desc, asc, insert, func
-from datetime import datetime, date, time, timedelta
+from sqlalchemy import and_, cast, desc, asc, func
+from datetime import datetime, time, timedelta
+from requests import get as requests_get
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
-from collections import OrderedDict
 from collections import defaultdict
 from sqlalchemy.types import Date
 
@@ -23,7 +23,6 @@ from website_scripts import (
     decorators,
     comments_util,
     notifications,
-    qol_util,
     image_util,
 )
 
@@ -196,7 +195,7 @@ def update_pubkey():
     if current_user.public_key_jwk != jwk:
         current_user.public_key_jwk = jwk
         extensions.db.session.commit()
-    
+
     return "", 204
 
 
@@ -1003,7 +1002,7 @@ def summarize_story(story_url_hash):
         return jsonify({"response": story.gpt_summary}), 200
 
     try:
-        r = requests.get(story.url, timeout=4)
+        r = requests_get(story.url, timeout=4)
         if r.status_code == 200:
             article = scripts.extract_article_fields(r.text)
         else:
@@ -1011,8 +1010,8 @@ def summarize_story(story_url_hash):
     except Exception:
         article = {}
 
-    title = article["title"] if article["title"] else story.title
-    main_text = article["text"] if article["text"] else story.description
+    title = article.get("title", story.title)
+    main_text = article.get("text", story.description)
 
     response = llm_util.gpt_summarize(
         input_sanitization.gentle_cut_text(300, title),
@@ -1245,7 +1244,7 @@ def create_comment():
                     {
                         "user_id": parent_comment.user_id,
                         "type": "comment_reply",
-                        "message": f"Someone replied to your comment",
+                        "message": "Someone replied to your comment",
                         "url": parent_comment.url,
                     }
                 ]
@@ -1399,7 +1398,7 @@ def react_to_comment(comment_id, action):
 
         extensions.db.session.commit()
 
-    except IntegrityError:
+    except Exception:
         extensions.db.session.rollback()
         abort(400, description="Reaction already exists.")
 
@@ -1564,14 +1563,11 @@ def mark_all_notifications_read():
     )
 
 
-@api.route("/user/<int:uid>/block/<action>", methods=["POST"])
+@api.route("/user/<int:uid>/block", methods=["GET", "POST", "DELETE"])
 @decorators.api_login_required
 def block_user(uid, action):
     if uid == current_user.id:
         abort(403, description="Self-blocking? Well, that's new")
-
-    if action not in ("add", "remove"):
-        abort(400, description="Unrecognized action.")
 
     target = extensions.db.session.get(models.User, uid)
     if not target:
@@ -1581,7 +1577,7 @@ def block_user(uid, action):
         blocker_id=current_user.id, blocked_id=uid
     ).first()
 
-    if action == "add":
+    if request.method == "POST":
         if block:
             return jsonify(message="User is already blocked."), 204
 
@@ -1591,7 +1587,7 @@ def block_user(uid, action):
 
         new_block = models.UserBlock(blocker=current_user, blocked=target)
         extensions.db.session.add(new_block)
-    else:
+    elif request.method == "DELETE":
         if not block:
             abort(400, description="User is not blocked.")
         extensions.db.session.delete(block)
@@ -1600,7 +1596,7 @@ def block_user(uid, action):
 
     return (
         jsonify(
-            message=f"You {'blocked' if action == 'add' else 'unblocked'} {target.username}. Take care of your peace!",
+            message=f"You {'blocked' if request.method == "POST" else 'unblocked'} {target.username}. Take care of your peace!",
         ),
         201,
     )
@@ -1655,7 +1651,7 @@ def user_reports(uid, report_id=0):
 
     elif request.method == "DELETE":
         report = models.UserReport.query.filter_by(
-            report_id=report_id, reporter_id=current_user.id
+            id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
             abort(404, description="Couldn't find target report.")
@@ -1663,7 +1659,7 @@ def user_reports(uid, report_id=0):
         extensions.db.session.delete(report)
     elif request.method == "PATCH":
         report = models.UserReport.query.filter_by(
-            report_id=report_id, reporter_id=current_user.id
+            id=report_id, reporter_id=current_user.id
         ).first()
         if not report:
             abort(404, description="Couldn't find target report.")
@@ -1674,7 +1670,7 @@ def user_reports(uid, report_id=0):
     extensions.db.session.commit()
 
     return (
-        jsonify(message="Thanks for letting us know — we’ll take a look!"),
+        jsonify(message="That's done."),
         200,
     )
 
@@ -1699,18 +1695,21 @@ def upload_image(category):
     if not file:
         abort(400, description="No image provided")
 
-    if not image_util.perform_all_checks(file.stream, file.filename):
-        abort(400, description="Invalid image")
-
     s3_key = key_tmpl.format(id=current_user.get_public_id())
     setattr(current_user, attr_flag, True)
 
-    if not image_util.convert_and_save(file.stream, util_cat, s3_key):
-        abort(500, description="Upload failed")
+    is_valid, message = image_util.convert_and_save(
+        file.stream, file.filename, util_cat, s3_key
+    )
+
+    if not is_valid:
+        abort(400, description=message)
 
     extensions.db.session.commit()
     notifications.notify_single(
-        current_user.id, "profile_edit", f"You updated your {category}"
+        current_user.id,
+        "profile_edit",
+        f"You submitted a new {category}. Wait a few minutes for it to update.",
     )
 
     return jsonify(success=True), 201

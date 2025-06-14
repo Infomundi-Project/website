@@ -36,11 +36,15 @@ def perform_login_actions(user, cleartext_email: str):
     session["email_address"] = cleartext_email
     session["user_id"] = user.id
 
+    user_device = qol_util.get_device_info(request.headers.get("User-Agent"))
+
     message = f"""Hello, {user.username}.
 
 It appears that someone has logged into your Infomundi account from a new device. But fear not, we have kept a watchful eye! Here are the details:
 
-Device: {qol_util.get_device_info(request.headers.get('User-Agent'))}
+Browser: {user_device.get("browser")}
+OS: {user_device.get("os")}
+Device Type: {user_device.get("device_type")}
 IP Address: {cloudflare_util.get_user_ip()}
 Country: {cloudflare_util.get_user_country()}
 

@@ -29,13 +29,12 @@
   .profile-mockup .profile-avatar {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     margin-bottom: 10px;
   }
   .profile-header {
     background: url('{{ current_user.banner_url }}') no-repeat center center;
     background-size: cover;
-    height: 200px;
+    height: 120px;
     position: relative;
     overflow: hidden;
   }
@@ -50,7 +49,6 @@
   }
   .profile-preview-avatar {
     border-radius: 50%;
-    border: 5px solid white;
     object-fit: cover;
   }
 
@@ -95,7 +93,7 @@
             <div class="profile-header rounded mb-3" id="profileHeader"></div>
             <div class="row">
               <div class="col-8 d-flex align-items-center">
-                <img src="{{ current_user.avatar_url }}" class="profile-avatar" alt="User Avatar">
+                <img src="{{ current_user.avatar_url }}" class="profile-avatar rounded" alt="User Avatar">
                 <div class="ms-3">
                   {% if current_user.display_name %}
                   <p class="fs-6 fw-bold mb-0">{{ current_user.display_name }}</p>
@@ -160,16 +158,10 @@
       <input type="file" class="form-control" id="profilePhoto"
              name="profile_picture" accept="image/*"
              data-aspect="1/1">
-      <small class="text-muted d-block mt-2">
-        <i class="fa-solid fa-file-circle-plus me-1"></i>Max size: 2 MB
-      </small>
-      <small class="text-muted d-block">
-        <i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Min: 300×300
-      </small>
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary mt-3" id="submitBtn">
+  <button type="submit" class="btn btn-lg w-100 btn-primary mt-5" id="submitBtn">
     Submit
   </button>
 </form>
@@ -186,16 +178,16 @@
       </div>
       <div class="modal-body text-center">
         <div class="cropper-toolbar">
-          <button type="button" class="btn btn-outline-light btn-sm" id="zoomOut">
+          <button type="button" class="btn border btn-sm" id="zoomOut">
             <i class="fa-solid fa-search-minus"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="zoomIn">
+          <button type="button" class="btn border btn-sm" id="zoomIn">
             <i class="fa-solid fa-search-plus"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="rotateLeft">
+          <button type="button" class="btn border btn-sm" id="rotateLeft">
             <i class="fa-solid fa-rotate-left"></i>
           </button>
-          <button type="button" class="btn btn-outline-light btn-sm" id="rotateRight">
+          <button type="button" class="btn border btn-sm" id="rotateRight">
             <i class="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -226,7 +218,7 @@
       </div>
       <div class="modal-body" id="errorModalBody"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-light"
+        <button type="button" class="btn border"
                 data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -250,147 +242,5 @@
 
 {% block scripts %}
 <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/cropper.min.js') }}"></script>
-<script nonce="{{ nonce }}">
-let cropper = null;
-let currentInput = null;
-
-function openCropper(file, aspectRatio) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = document.createElement('img');
-    img.id = 'cropperImage';
-    img.src = e.target.result;
-    const wrapper = document.getElementById('cropperWrapper');
-    wrapper.innerHTML = '';
-    wrapper.appendChild(img);
-    cropper = new Cropper(img, {
-      aspectRatio,
-      viewMode: 1,
-      autoCropArea: 1,
-      responsive: true
-    });
-    new bootstrap.Modal(document.getElementById('cropModal')).show();
-  };
-  reader.readAsDataURL(file);
-}
-
-document.querySelectorAll('input[type=file]').forEach(input => {
-  input.addEventListener('change', () => {
-    if (input.files && input.files[0]) {
-      currentInput = input;
-      const [w, h] = input.dataset.aspect.split('/').map(Number);
-      openCropper(input.files[0], w / h);
-    }
-  });
-});
-
-// Cropper toolbar actions
-document.getElementById('zoomIn').addEventListener('click',  () => cropper.zoom(0.1));
-document.getElementById('zoomOut').addEventListener('click', () => cropper.zoom(-0.1));
-document.getElementById('rotateLeft').addEventListener('click', () => cropper.rotate(-45));
-document.getElementById('rotateRight').addEventListener('click',() => cropper.rotate(45));
-
-document.getElementById('cropBtn').addEventListener('click', () => {
-  if (!cropper || !currentInput) return;
-  cropper.getCroppedCanvas().toBlob(blob => {
-    const file = new File([blob], currentInput.name, {
-      type: 'image/png',
-      lastModified: Date.now()
-    });
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    currentInput.files = dt.files;
-    const url = URL.createObjectURL(file);
-    if (currentInput.id === 'backgroundImage') {
-      document.getElementById('profileBackground').style.backgroundImage = `url(${url})`;
-    } else if (currentInput.id === 'bannerImage') {
-      document.getElementById('profileHeader').style.backgroundImage = `url(${url})`;
-    } else {
-      ['largeAvatar','mediumAvatar','smallAvatar']
-        .forEach(id => document.getElementById(id).src = url);
-    }
-    bootstrap.Modal.getInstance(
-      document.getElementById('cropModal')
-    ).hide();
-    cropper.destroy();
-    cropper = null;
-  }, 'image/png');
-});
-
-document.getElementById('avatarForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const submitBtn = document.getElementById('submitBtn');
-  const originalHTML = submitBtn.innerHTML;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `
-    <span class="spinner-border spinner-border-sm me-2"
-          role="status" aria-hidden="true"></span>
-    Uploading...
-  `;
-
-  const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-  const ops = [], mapping = {
-    backgroundImage: 'background',
-    bannerImage:     'banner',
-    profilePhoto:    'avatar'
-  };
-
-  for (let inputId in mapping) {
-    const inp = document.getElementById(inputId);
-    if (inp.files.length) {
-      const fd = new FormData();
-      fd.append(mapping[inputId], inp.files[0]);
-      fd.append('csrf_token', csrfToken);
-      ops.push(
-        fetch(`/api/user/image/${mapping[inputId]}`, {
-          method: 'POST',
-          credentials: 'same-origin',
-          body: fd
-        })
-        .then(async res => {
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            const err = data.error || {};
-            throw {
-              status: err.status || res.status,
-              title:  err.title  || 'Upload Error',
-              detail: err.detail || res.statusText
-            };
-          }
-        })
-      );
-    }
-  }
-
-  if (!ops.length) {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalHTML;
-    const em = new bootstrap.Modal(document.getElementById('errorModal'));
-    document.getElementById('errorModalLabel').textContent = 'No files selected';
-    document.getElementById('errorModalBody').textContent = 'Please choose at least one image.';
-    em.show();
-    return;
-  }
-
-  try {
-    await Promise.all(ops);
-    // success toast
-    const toastEl = document.getElementById('successToast');
-    const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
-    toast.show();
-    toastEl.addEventListener('hidden.bs.toast', () => window.location.reload());
-  } catch (err) {
-    console.error(err);
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalHTML;
-    const em = new bootstrap.Modal(document.getElementById('errorModal'));
-    document.getElementById('errorModalLabel').textContent = err.title;
-    document.getElementById('errorModalBody').innerHTML = `
-      <p><strong>Status:</strong> ${err.status}</p>
-      <p>${err.detail}</p>
-    `;
-    em.show();
-  }
-});
-</script>
+<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/profile/edit/imageCrop.js') }}"></script>
 {% endblock %}

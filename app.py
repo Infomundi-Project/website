@@ -63,14 +63,11 @@ app.config["CACHE_REDIS_PORT"] = config.REDIS_PORT
 app.config["CACHE_TYPE"] = "RedisCache"
 extensions.cache.init_app(app)
 
-# Uploads
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # 2 Megabytes
-app.config["UPLOAD_FOLDER"] = "static/img/users/"
-
 
 @api.errorhandler(400)
 @api.errorhandler(403)
 @api.errorhandler(404)
+@api.errorhandler(429)
 @api.errorhandler(500)
 def api_error_handler(error):
     # Gets the error code, defaults to 404
@@ -80,6 +77,9 @@ def api_error_handler(error):
         error_title = "Invalid Request"
     elif http_status == 403:
         error_title = "Forbidden"
+    elif http_status == 429:
+        error_title = "Too Many Requests"
+        custom_description = f"Your lightning-fast requests have exceeded the rate limit. The limit is: {str(error.description)}"
     elif http_status == 500:
         error_title = "Server Error"
     else:
@@ -91,7 +91,9 @@ def api_error_handler(error):
             error={
                 "status": f"{http_status}",
                 "title": error_title,
-                "detail": error.description,
+                "detail": (
+                    error.description if http_status != 429 else custom_description
+                ),
             },
         ),
         http_status,
@@ -311,9 +313,9 @@ def check_session_version():
 def add_headers(response):
     nonce = g.get("nonce", "")
 
-    # Sets the CSP header to include the nonce
     response.headers["Content-Security-Policy"] = (
         "default-src 'none'; "
+        "media-src 'self' https://*.infomundi.net; "
         "img-src 'self' blob: https://*.infomundi.net data:; "
         "connect-src 'self' wss://*.infomundi.net https://*.infomundi.net https://pagead2.googlesyndication.com https://csi.gstatic.com https://translate.googleapis.com https://translate-pa.googleapis.com https://cloudflareinsights.com; "
         "frame-src 'self' https://*.infomundi.net https://challenges.cloudflare.com https://translate.googleapis.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com; "
@@ -441,7 +443,7 @@ def error_handler(error):
         return (
             jsonify(
                 {
-                    "response": f"We need to breath! Your lightning-fast requests have exceeded the rate limit. The limit is: {str(error.description)}",
+                    "response": f"Your lightning-fast requests have exceeded the rate limit. The limit is: {str(error.description)}",
                 }
             ),
             429,

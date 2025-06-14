@@ -1,10 +1,17 @@
-import magic, boto3
-from io import BytesIO
-from PIL import Image
+import logging
+import magic
+import boto3
+from io import BytesIO, BufferedReader
+from PIL import Image, UnidentifiedImageError
 
 from . import immutable, config, llm_util
+from .custom_exceptions import InfomundiCustomException
 
-# r2 configuration
+# Configure basic logging
+target_logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+# r2/S3 client configuration
 s3_client = boto3.client(
     "s3",
     endpoint_url=config.R2_ENDPOINT,
@@ -13,131 +20,139 @@ s3_client = boto3.client(
     region_name="auto",
 )
 
+# Preload magic for MIME detection
+_mime_detector = magic.Magic(mime=True)
 
-def convert_and_save(
-    image_stream: bytes,
-    image_category: str,
-    s3_object_key: str,
-    dimensions: tuple = (500, 500),
-) -> bool:
-    """
-    Uses PIL library to crop the image into a square (if it's a profile picture),
-    convert to jpeg and upload to the bucket.
+# Allowed settings
+IMAGE_CATEGORIES = {
+    "profile_picture": {"crop": True, "size": (500, 500)},
+    "profile_banner": {"crop": False, "size": (1600, 400)},
+    "profile_wallpaper": {"crop": False, "size": (1920, 1080)},
+}
 
-    Arguments:
-        image_stream: bytes
-            The image iteself, in bytes.
-
-        image_category: str
-            The image category, should be in ('profile_picture', 'profile_wallpaper', 'profile_banner')
-
-        dimensions: tuple
-            A tuple containing dimensions to save the image with. Example 500 width x 333 height would be: (500, 333)
-
-        s3_object_key: str
-            Where to save the file in the bucket. Example: 'users/5045a910.jpg'
-
-    Return:
-        bool: True if the image got uploaded to the bucket. False otherwise.
-    """
-    if image_category not in (
-        "profile_picture",
-        "profile_banner",
-        "profile_wallpaper",
-    ):
-        return False
-
-    image = Image.open(image_stream)
-
-    # If the image is for the profile picture, it should be squared.
-    if image_category == "profile_picture":
-        shortest_side = min(image.width, image.height)
-        left = (image.width - shortest_side) / 2
-        top = (image.height - shortest_side) / 2
-        right = (image.width + shortest_side) / 2
-        bottom = (image.height + shortest_side) / 2
-
-        image = image.crop((left, top, right, bottom))
-        image.thumbnail(dimensions)
-
-    image = image.convert("RGB")
-
-    # Creates and saves the output image buffer so we can upload them later to the bucket.
-    output_buffer = BytesIO()
-    image.save(
-        output_buffer, format="webp", optimize=True, quality=70, progressive=True
-    )
-
-    output_buffer.seek(0)
-
-    try:
-        s3_client.upload_fileobj(output_buffer, config.BUCKET_NAME, s3_object_key)
-    except Exception:
-        return False
-
-    output_buffer.close()
-    return True
+# Use LANCZOS resampling filter (ANTIALIAS deprecated in Pillow >=10)
+RESAMPLE_FILTER = Image.LANCZOS
 
 
 def is_extension_allowed(filename: str) -> bool:
-    if "." in filename:
-        return filename.rsplit(".", 1)[1].lower() in immutable.IMAGE_EXTENSIONS
+    if "." not in filename:
+        return True
+    ext = filename.rsplit(".", 1)[1].lower()
+    return ext in immutable.IMAGE_EXTENSIONS
 
-    return True
+
+def has_valid_mime_type(stream: BytesIO) -> bool:
+    header = stream.read(2048)
+    mime = _mime_detector.from_buffer(header)
+    stream.seek(0)
+    return mime in immutable.IMAGE_MIME
 
 
-def is_really_an_image(file_stream) -> bool:
+def is_really_an_image(stream: BytesIO) -> bool:
     try:
-        with Image.open(file_stream) as img:
-            # Verifies that an image can be opened and decoded
+        with Image.open(stream) as img:
             img.verify()
-
-        # Reset file stream position
-        file_stream.seek(0)
     except Exception:
+        stream.seek(0)
         return False
-
+    stream.seek(0)
     return True
-
-
-def has_valid_mime_type(file_stream: bytes) -> bool:
-    # Reads the mime type from the first bytes of the image
-    mime = magic.from_buffer(file_stream.read(2048), mime=True)
-
-    # Reset file stream position
-    file_stream.seek(0)
-
-    return mime in ("image/png", "image/jpeg", "image/jpg", "image/webp")
 
 
 def has_allowed_dimensions(
-    image_stream: bytes, min_width: int = 200, min_height: int = 200
+    stream: BytesIO, min_w=150, min_h=150, max_w=5000, max_h=5000
 ) -> bool:
-    """Checks if image dimension is in range.
+    with Image.open(stream) as img:
+        w, h = img.size
+    stream.seek(0)
+    return (min_w <= w <= max_w) and (min_h <= h <= max_h)
 
-    Arguments
-        image_stream (bytes): The image itself.
-        min_width (int): Defaults to 300. The minimum width.
-        min_height (int): Defaults to 300. The minimum height.
 
-    Returns
-        bool: If the image complies with the determined min and max width and height.
+def validate_image(image_bytes: bytes, filename: str) -> None:
+    """Runs all checks on the image and raises InfomundiCustomException(message=) on failure."""
+    target_logger.info("Validating image %s", filename)
+
+    if not is_extension_allowed(filename):
+        raise InfomundiCustomException(message="Invalid file extension.")
+
+    stream = BytesIO(image_bytes)
+    if not has_valid_mime_type(stream):
+        raise InfomundiCustomException(message="Disallowed MIME type.")
+
+    if not is_really_an_image(stream):
+        raise InfomundiCustomException(message="Cannot identify or decode image.")
+
+    if not has_allowed_dimensions(stream):
+        raise InfomundiCustomException(message="Image dimensions out of allowed range.")
+
+    # AI-based inappropriate content check
+    if llm_util.is_inappropriate(image_stream=BytesIO(image_bytes)):
+        raise InfomundiCustomException(message="Image flagged as inappropriate.")
+
+    target_logger.info("Image passed validation: %s", filename)
+
+
+def process_image(image_bytes: bytes, category: str) -> BytesIO:
+    """Crops/resizes the image per category rules and returns a WebP buffer."""
+    rules = IMAGE_CATEGORIES.get(category)
+    if rules is None:
+        raise ValueError(f"Unknown category: {category}")
+
+    stream = BytesIO(image_bytes)
+    with Image.open(stream) as img:
+        if rules["crop"]:
+            side = min(img.width, img.height)
+            left = (img.width - side) / 2
+            top = (img.height - side) / 2
+            img = img.crop((left, top, left + side, top + side))
+
+        # Use LANCZOS filter for high-quality downsampling
+        img.thumbnail(rules["size"], RESAMPLE_FILTER)
+        img = img.convert("RGB")
+
+        out = BytesIO()
+        img.save(out, format="WEBP", optimize=True, quality=70, progressive=True)
+        out.seek(0)
+        return out
+
+
+def upload_image(buffer: BytesIO, s3_key: str) -> None:
+    """Uploads a BytesIO buffer to S3; raises on failure."""
+    try:
+        s3_client.upload_fileobj(buffer, config.BUCKET_NAME, s3_key)
+        target_logger.info("Uploaded to %s", s3_key)
+    except Exception as e:
+        target_logger.error("Upload failed for %s: %s", s3_key, e)
+        raise
+
+
+def convert_and_save(file_stream, filename: str, category: str, s3_key: str) -> tuple:
     """
-    image = Image.open(image_stream)
-    width, height = image.size
+    Reads from a file-like object or bytes, validates, processes, and uploads.
+    Returns (True, "Upload successful") on success, or (False, error_message) on failure.
+    """
+    try:
+        # Read bytes from stream or accept raw bytes
+        if hasattr(file_stream, "read"):
+            try:
+                file_stream.seek(0)
+            except Exception:
+                pass
+            image_bytes = file_stream.read()
+        elif isinstance(file_stream, (bytes, bytearray)):
+            image_bytes = file_stream
+        else:
+            raise InfomundiCustomException(message="Unsupported file_stream type.")
 
-    minimum_dimensions = width >= min_width and height >= min_height
-    maximum_dimensions = width <= 5000 and height <= 5000
+        validate_image(image_bytes, filename)
+        buffer = process_image(image_bytes, category)
+        upload_image(buffer, s3_key)
+        buffer.close()
+        return (True, "Upload successful")
 
-    return minimum_dimensions and maximum_dimensions
-
-
-def perform_all_checks(image_stream: bytes, filename: str) -> bool:
-    """Performs all checks to make sure the user-supplied image is safe"""
-    return (
-        is_extension_allowed(filename)
-        and has_valid_mime_type(image_stream)
-        and is_really_an_image(image_stream)
-        and has_allowed_dimensions(image_stream)
-        and not llm_util.is_inappropriate(image_stream=image_stream)
-    )
+    except InfomundiCustomException as err:
+        target_logger.warning("Validation error: %s", err.message)
+        return (False, err.message)
+    except Exception as e:
+        target_logger.error("Error in convert_and_save: %s", e)
+        return (False, "Unknown error")

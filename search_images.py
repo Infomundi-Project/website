@@ -3,7 +3,12 @@ import os
 import sys
 import asyncio
 import logging
-import random
+import boto3
+
+from requests.exceptions import ProxyError, ConnectionError, Timeout
+from random import shuffle, choice
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from io import BytesIO
 from urllib.parse import urljoin
 
@@ -84,6 +89,31 @@ async def init_s3_client():
         region_name="auto",
     ).__aenter__()
 
+def fetch_stories_with_publishers(category_id: int, limit: int = 20):
+    log_message("Fetching stories with nested publisher dict...")
+    try:
+        with db_connection.cursor() as cursor:
+            sql = """
+            SELECT
+                s.*,
+                p.favicon_url AS publisher_favicon_url,
+                p.id          AS publisher_id,
+                p.name        AS publisher_name,
+                p.feed_url    AS publisher_feed_url,
+                p.site_url    AS publisher_site_url
+            FROM stories AS s
+            JOIN publishers AS p
+              ON s.publisher_id = p.id
+            WHERE s.category_id = %s
+              AND NOT s.has_image
+            ORDER BY s.created_at DESC
+            LIMIT %s
+            """
+            cursor.execute(sql, (category_id, limit))
+            rows = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching stories: {e}")
+        return []
 
 async def fetch_categories(pool):
     async with pool.acquire() as conn:

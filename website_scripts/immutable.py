@@ -44,6 +44,7 @@ USER_AGENTS = (
 )
 
 IMAGE_EXTENSIONS = ("png", "jpg", "jpeg", "webp", "avif")
+IMAGE_MIME = ("image/png", "image/jpeg", "image/jpg", "image/webp")
 
 RSS_ENDPOINTS = (
     "",

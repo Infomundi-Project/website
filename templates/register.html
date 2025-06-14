@@ -1,100 +1,89 @@
-{% extends "base.html" %} 
-{% block title %}Register{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}Register{% endblock %} {% block content %}
 <div class="container col-xl-10 col-xxl-8 px-4 py-5">
-    <div class="row align-items-center g-lg-5 py-5">
-      
-      {% if is_mobile %}
-      <div class="col-lg-7 text-lg-start mb-5">
-        <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/register.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500">
-        <h1 class="display-5 fw-bold lh-1 text-body-emphasis mb-3">We're excited to have you join our community.</h1>
-        <h2 class="col-lg-10 fs-4">Signing up is quick and easy. Get started today and become a part of our growing community!</h2>
-      </div>
-      {% endif %}
+  <div class="row align-items-center g-lg-5 py-5">
+    {% if is_mobile %}
+    <div class="col-lg-7 text-lg-start mb-5">
+      <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/register.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500" />
+      <h1 class="display-5 fw-bold lh-1 text-body-emphasis mb-3">We're excited to have you join our community.</h1>
+      <h2 class="col-lg-10 fs-4">Signing up is quick and easy. Get started today and become a part of our growing community!</h2>
+    </div>
+    {% endif %}
 
-      <div class="col-md-10 mx-auto col-lg-5">
-        <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" method="post" action="{{ url_for('auth.register') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="col-md-10 mx-auto col-lg-5">
+      <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" method="post" action="{{ url_for('auth.register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
         <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="floatingEmail" placeholder="name@example.com" name="email" required>
-            <label for="floatingEmail">Email address</label>
-            <div class="invalid-feedback">
-                Please provide a valid email address.
-            </div>
+          <input type="email" class="form-control" id="floatingEmail" placeholder="name@example.com" name="email" required />
+          <label for="floatingEmail">Email address</label>
+          <div class="invalid-feedback">
+            Please provide a valid email address.
+          </div>
         </div>
-        
+
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingUsername" placeholder="john" name="username" required>
-            <label for="floatingUsername">Username</label>
-            <div class="invalid-feedback">
-                Username must be 3-25 characters long and contain only alphanumeric characters, underscores, or hyphens.
-            </div>
+          <input type="text" class="form-control" id="floatingUsername" placeholder="john" name="username" required />
+          <label for="floatingUsername">Username</label>
+          <div class="invalid-feedback">
+            Username must be 3-25 characters long and contain only alphanumeric characters, underscores, or hyphens.
+          </div>
         </div>
 
         <div class="input-group">
-            <div class="form-floating flex-grow-1">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required>
-                <label for="floatingPassword">Password</label>
-                <div class="invalid-feedback">
-                    Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
-                </div>
+          <div class="form-floating flex-grow-1">
+            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required />
+            <label for="floatingPassword">Password</label>
+            <div class="invalid-feedback">
+              Password must be 8-50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
             </div>
+          </div>
 
-            <span class="input-group-text password-toggle" id="floatingPasswordIcon" style="max-height: 60px;">
-                <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
-            </span>
+          <span class="input-group-text password-toggle" id="floatingPasswordIcon" style="max-height: 60px;">
+            <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
+          </span>
         </div>
         <div id="passwordStrengthDisplay" class="mt-1"></div>
 
-
         <div class="input-group mb-3 mt-3">
-            <div class="form-floating flex-grow-1">
-                <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" name="confirm_password" maxlength="50" minlength="8" required>
-                <label for="floatingConfirmPassword">Confirm Password</label>
-                <div class="invalid-feedback">
-                    Passwords must match.
-                </div>
+          <div class="form-floating flex-grow-1">
+            <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" name="confirm_password" maxlength="50" minlength="8" required />
+            <label for="floatingConfirmPassword">Confirm Password</label>
+            <div class="invalid-feedback">
+              Passwords must match.
             </div>
-            <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon" style="max-height: 60px;">
-                <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
-            </span>
+          </div>
+          <span class="input-group-text password-toggle" id="floatingConfirmPasswordIcon" style="max-height: 60px;">
+            <i class="fa-solid fa-eye" data-toggle="floatingConfirmPassword"></i>
+          </span>
         </div>
 
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact" {% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
 
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact"{% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
-
-        <p id="captchaMessage" class="my-2 small">
-            <i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign up button.
-        </p>
+        <p id="captchaMessage" class="my-2 small"><i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign up button.</p>
         <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Sign up</button>
 
-        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}"><img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30">Sign up with Google<span class="invisible">.</span></a>
+        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}">
+          <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign up with Google<span class="invisible">.</span>
+        </a>
 
         <p>I already have an account. <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Sign in</a>.</p>
-        <hr class="my-4">
+        <hr class="my-4" />
         <small class="text-muted">By clicking Sign up, you agree to <a href="{{ url_for('views.policies') }}" class="text-decoration-none">our policies</a>.</small>
-    </form>
-      </div>
-
-      {% if not is_mobile %}
-      <div class="col-lg-7 text-lg-start">
-        <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/register.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500">
-        <h1 class="display-5 fw-bold lh-1 text-body-emphasis mb-3">We're excited to have you join our community.</h1>
-        <p class="col-lg-10 fs-4">Signing up is quick and easy. Get started today and become a part of our growing community!</p>
-      </div>
-      {% endif %}
+      </form>
     </div>
+
+    {% if not is_mobile %}
+    <div class="col-lg-7 text-lg-start">
+      <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/register.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500" />
+      <h1 class="display-5 fw-bold lh-1 text-body-emphasis mb-3">We're excited to have you join our community.</h1>
+      <p class="col-lg-10 fs-4">Signing up is quick and easy. Get started today and become a part of our growing community!</p>
+    </div>
+    {% endif %}
   </div>
-{% endblock %}
+</div>
+{% endblock %} {% block scripts %}
 
-{% block scripts %}
-
-<script nonce="{{ nonce }}"
-src="{{ url_for('static', filename='js/registerFormValidation.js') }}"
-></script>
-<script nonce="{{ nonce }}"
-src="{{ url_for('static', filename='js/passwordUtility.js') }}"
-></script>
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/registerFormValidation.js') }}"></script>
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/passwordUtility.js') }}"></script>
 
 {% endblock %}

@@ -283,21 +283,14 @@ def is_valid_email(email):
 
 
 def is_strong_password(password: str) -> bool:
-    """One regex check for all conditions:
+    """Checks that the password:
 
-    - At least 8 characters long and no more than 100 characters
+    - Is between 12 and 100 characters
     - Contains at least one uppercase letter
     - Contains at least one lowercase letter
     - Contains at least one digit
-    - Contains at least one special character
-
     """
-    return bool(
-        re.match(
-            r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,100}$",
-            password,
-        )
-    )
+    return bool(re.match(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{12,100}$", password))
 
 
 def is_valid_text(text: str) -> bool:

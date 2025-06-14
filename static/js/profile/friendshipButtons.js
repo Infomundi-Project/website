@@ -15,19 +15,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const actionConfigs = {
     add: {
       title: `<i class="fa-solid fa-user-plus me-2"></i> Send Friend Request`,
-      body: `Are you sure you want to send a friend request to <strong>${profileName}</strong>? They’ll have to accept before you become friends.`,
+      body: `Are you sure you want to send a friend request to <strong class="mx-2">${profileName}?</strong> They’ll have to accept before you become friends.`,
       btnClass: "btn-primary",
       btnHtml: `<i class="fa-solid fa-paper-plane me-1"></i> Send Request`
     },
     delete_pending: {
       title: `<i class="fa-solid fa-ban me-2"></i> Cancel Friend Request`,
-      body: `Sure you want to cancel your pending request to <strong>${profileName}</strong>?`,
+      body: `Sure you want to cancel your pending request to <strong>${profileName}?</strong>`,
       btnClass: "btn-warning",
       btnHtml: `<i class="fa-solid fa-ban me-1"></i> Cancel Request`
     },
     delete_accepted: {
       title: `<i class="fa-solid fa-user-slash me-2"></i> Unfriend`,
-      body: `This will remove <strong>${profileName}</strong> from your friends. Are you sure?`,
+      body: `This will remove <strong class="mx-2">${profileName}</strong> from your friends. Are you sure?`,
       btnClass: "btn-outline-danger",
       btnHtml: `<i class="fa-solid fa-user-slash me-1"></i> Unfriend`
     }
