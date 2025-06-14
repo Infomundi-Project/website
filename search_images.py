@@ -115,6 +115,33 @@ def fetch_stories_with_publishers(category_id: int, limit: int = 20):
         log_message(f"Error fetching stories: {e}")
         return []
 
+def fetch_stories_with_publishers(category_id: int, limit: int = 20):
+    log_message("Fetching stories with nested publisher dict...")
+    try:
+        with db_connection.cursor() as cursor:
+            sql = """
+            SELECT
+                s.*,
+                p.favicon_url AS publisher_favicon_url,
+                p.id          AS publisher_id,
+                p.name        AS publisher_name,
+                p.feed_url    AS publisher_feed_url,
+                p.site_url    AS publisher_site_url
+            FROM stories AS s
+            JOIN publishers AS p
+              ON s.publisher_id = p.id
+            WHERE s.category_id = %s
+              AND NOT s.has_image
+            ORDER BY s.created_at DESC
+            LIMIT %s
+            """
+            cursor.execute(sql, (category_id, limit))
+            rows = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching stories: {e}")
+        return []
+
+
 async def fetch_categories(pool):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:

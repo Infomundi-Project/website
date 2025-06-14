@@ -37,12 +37,12 @@ Infomundi was created with the mission of simplifying access to reliable, detail
 	- Display name, description, profile picture, banner and background images
 - ✅ AI Story Summarization (Maximus)
 	- Users are presented with a free AI sumarization for the story they're reading, including **Addressed Topics**, **Context Around**, **Methods for Investigation** and **Questioning the Subject**
-- 🚧 Profile Statistics
+- ✅ Profile Statistics
 	- Daily, weekly, monthly stories read
 	- Most read news sources
 	- Most related topics and people
 	- Countries you've read news about
-- 🚧 Commenting System
+- ✅ Commenting System
 	- User avatar display (when logged in)
 	- User username/display name showcase (when logged in)
 	- Comment actions when logged in (like, dislike, sharing, mentioning, replying, reporting, saving)
@@ -52,7 +52,7 @@ Infomundi was created with the mission of simplifying access to reliable, detail
 - 🚧 User / Publisher Reputation
 	- Users should obtain reputation by performing actions in the platform
 	- Users and publishers should be able to obtain reputation by being upvoted by other users
-- 🚧 Direct Messages
+- ✅ Direct Messages
 	- Users should be able to use the platform to send direct messages to other users
 	- Users should be able to create groups in the platform with other users to chat
 
@@ -71,11 +71,6 @@ Contributions are what make the open-source community such a fantastic place to 
 
 See the [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
----
-
-## License
-
-Distributed under the X License. See `LICENSE` for more information.
 
 ---
 
