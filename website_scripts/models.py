@@ -11,6 +11,7 @@ class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
 
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     name = db.Column(db.String(150), nullable=False)
     feed_url = db.Column(db.String(200))
     site_url = db.Column(db.String(200))
@@ -80,9 +81,6 @@ class Story(db.Model):
     stats = db.relationship("StoryStats", backref="story", uselist=False, lazy="joined")
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
-    
-    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
-    country = db.relationship("Country", backref="story", lazy="joined")
 
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
     country = db.relationship("Country", backref="story", lazy="joined")

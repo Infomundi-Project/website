@@ -1,4 +1,3 @@
-static/js/amcharts/
 static/fontawesome/
 .webassets-cache/
 static/webfonts/
@@ -7,8 +6,6 @@ static/js/libs/
 static/fonts/
 __pycache__/
 static/gen/
-backups/
-stories/
 assets/
 .venv/
 logs/

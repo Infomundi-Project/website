@@ -89,6 +89,7 @@ async def init_s3_client():
         region_name="auto",
     ).__aenter__()
 
+
 def fetch_stories_with_publishers(category_id: int, limit: int = 20):
     log_message("Fetching stories with nested publisher dict...")
     try:
@@ -114,6 +115,7 @@ def fetch_stories_with_publishers(category_id: int, limit: int = 20):
     except pymysql.MySQLError as e:
         log_message(f"Error fetching stories: {e}")
         return []
+
 
 async def fetch_categories(pool):
     async with pool.acquire() as conn:

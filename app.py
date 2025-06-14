@@ -386,10 +386,10 @@ js_base_authenticated = Bundle(
 )
 # homepage.html
 js_home = Bundle(
-    "js/amcharts/map.js",
-    "js/amcharts/worldLow.js",
-    "js/amcharts/animated.js",
-    "js/amcharts/continentsLow.js",
+    "js/libs/amcharts/map.js",
+    "js/libs/amcharts/worldLow.js",
+    "js/libs/amcharts/animated.js",
+    "js/libs/amcharts/continentsLow.js",
     "js/chart.js",
     filters="jsmin",
     output="gen/home_packed.js",

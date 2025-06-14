@@ -6,8 +6,6 @@ DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS story_stats;
 DROP TABLE IF EXISTS story_reactions;
-DROP TABLE IF EXISTS user_ip_history;
-DROP TABLE IF EXISTS feeds;
 DROP TABLE IF EXISTS friendships;
 DROP TABLE IF EXISTS user_story_views;
 DROP TABLE IF EXISTS stories;
@@ -94,7 +92,7 @@ CREATE TABLE users (
 
     -- Totp 
     is_totp_enabled TINYINT(1) DEFAULT 0,
-    totp_secret BINARY(100), -- Stored in encrypted format (AES/GCM)
+    totp_secret BINARY(120  ), -- Stored in encrypted format (AES/GCM)
 
     totp_recovery VARCHAR(150), -- Stored in encrypted format (Argon2id)
 
@@ -126,7 +124,7 @@ CREATE TABLE publishers (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    name VARCHAR(200) NOT NULL,
+    name VARCHAR(150) NOT NULL,
     feed_url VARCHAR(200),
     site_url VARCHAR(200),
     
@@ -247,7 +245,7 @@ CREATE TABLE comments (
     is_edited TINYINT(1) DEFAULT 0,
     is_deleted TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
