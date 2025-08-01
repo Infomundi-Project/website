@@ -5,7 +5,7 @@ from unidecode import unidecode
 from bs4 import BeautifulSoup
 from random import choice
 
-from . import config, json_util, immutable, models, extensions, qol_util, country_util
+from . import config, json_util, immutable, models, extensions, country_util
 
 
 @extensions.cache.memoize(timeout=60 * 60 * 1)  # 1 hour

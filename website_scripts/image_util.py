@@ -1,8 +1,8 @@
 import logging
 import magic
 import boto3
-from io import BytesIO, BufferedReader
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
+from io import BytesIO
 
 from . import immutable, config, llm_util
 from .custom_exceptions import InfomundiCustomException

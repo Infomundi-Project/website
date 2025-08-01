@@ -227,7 +227,11 @@ def get_device_info(user_agent_string: str):
         device = (
             "Mobile"
             if ua.is_mobile
-            else "Tablet" if ua.is_tablet else "PC" if ua.is_pc else "Other"
+            else "Tablet"
+            if ua.is_tablet
+            else "PC"
+            if ua.is_pc
+            else "Other"
         )
         return {
             "browser": ua.browser_family,

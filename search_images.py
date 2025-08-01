@@ -1,95 +1,98 @@
-#!/usr/bin/env python3
-import os
-import sys
-import asyncio
+import concurrent.futures
+import requests
+import pymysql
 import logging
 import boto3
 
-from requests.exceptions import ProxyError, ConnectionError, Timeout
 from random import shuffle, choice
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from io import BytesIO
-from urllib.parse import urljoin
-
-import aiohttp
-import aiomysql
-from aiobotocore.session import get_session
-import pyvips
+from PIL import Image
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
-# Configuration
-WORKERS = int(os.getenv("WORKERS", 50))
-DB_BATCH_SIZE = int(os.getenv("DB_BATCH_SIZE", 500))
-HTTP_CONCURRENCY = int(os.getenv("HTTP_CONCURRENCY", 100))
-S3_CONCURRENCY = int(os.getenv("S3_CONCURRENCY", 50))
+WORKERS = 1
 DEFAULT_IMAGE = None
 
-PROXY_FILE = os.path.join(config.LOCAL_ROOT, "assets", "http-proxies.txt")
-LOG_FILE = os.path.join(config.LOCAL_ROOT, "logs", "search_images_async.log")
+# Define proxies variable as global and load proxy list from file
+with open(f"{config.LOCAL_ROOT}/assets/http-proxies.txt") as f:
+    proxies = [x.rstrip() for x in f.readlines()]
+    shuffle(proxies)
 
-S3_BUCKET = "infomundi"
-S3_BASE_URL = "https://bucket.infomundi.net"
+# Global list to keep track of bad proxies
+bad_proxies = []
 
-DB_CONFIG = {
+# r2 configuration
+s3_client = boto3.client(
+    "s3",
+    endpoint_url=config.R2_ENDPOINT,
+    aws_access_key_id=config.R2_ACCESS_KEY,
+    aws_secret_access_key=config.R2_SECRET,
+    region_name="auto",
+)
+bucket_name = "infomundi"
+bucket_base_url = "https://bucket.infomundi.net"
+
+db_params = {
     "host": "127.0.0.1",
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
     "db": config.MYSQL_DATABASE,
     "charset": "utf8mb4",
-    "cursorclass": aiomysql.DictCursor,
-    "autocommit": False,
+    "cursorclass": pymysql.cursors.DictCursor,
 }
+db_connection = pymysql.connect(**db_params)
 
-# Logging
-logger = logging.getLogger("image_gatherer_async")
-logger.setLevel(logging.INFO)
-handler = logging.handlers.RotatingFileHandler(
-    LOG_FILE, maxBytes=10 * 1024 * 1024, backupCount=5
+
+# Setup logging
+logging.basicConfig(
+    filename=f"{config.LOCAL_ROOT}/logs/search_images.log",
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s",
 )
-handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s %(message)s"))
-logger.addHandler(handler)
-
-# Load and shuffle proxies
-with open(PROXY_FILE) as pf:
-    _proxies = [line.strip() for line in pf if line.strip()]
-random.shuffle(_proxies)
-proxies = _proxies[:]
-bad_proxies = set()
-proxy_lock = asyncio.Lock()
-
-# Semaphores for limiting concurrency
-http_sem = asyncio.Semaphore(HTTP_CONCURRENCY)
-s3_sem = asyncio.Semaphore(S3_CONCURRENCY)
 
 
-async def get_proxy():
-    async with proxy_lock:
-        valid = [p for p in proxies if p not in bad_proxies]
-        return random.choice(valid) if valid else None
+def log_message(message):
+    print(f"[~] {message}")
+    # logging.info(message)
 
 
-async def mark_bad(proxy):
-    async with proxy_lock:
-        bad_proxies.add(proxy)
+def fetch_categories_from_database():
+    log_message("Fetching categories from the database")
+    try:
+        with db_connection.cursor() as cursor:
+            # Construct the SQL query to fetch category IDs
+            sql_query = "SELECT * FROM categories"
+            cursor.execute(sql_query)
+            categories = cursor.fetchall()
+
+            shuffle(categories)
+    except pymysql.MySQLError as e:
+        log_message(f"Error fetching categories: {e}")
+        return []
+
+    log_message(f"Got a total of {len(categories)} categories from the database")
+    return categories
 
 
-async def init_db_pool(loop):
-    return await aiomysql.create_pool(loop=loop, **DB_CONFIG)
+def fetch_publishers_from_database(category_id: int):
+    log_message(f"Fetching publishers for category ID: {category_id}")
+    try:
+        with db_connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM publishers WHERE category_id = %s", (category_id,)
+            )
+            publishers = cursor.fetchall()
+    except Exception as e:
+        log_message(f"Error fetching publishers: {e}")
+        return []
+
+    log_message(f"Got {len(publishers)} publishers from the database")
+    return publishers
 
 
-async def init_s3_client():
-    session = get_session()
-    return await session.create_client(
-        "s3",
-        endpoint_url=config.R2_ENDPOINT,
-        aws_access_key_id=config.R2_ACCESS_KEY,
-        aws_secret_access_key=config.R2_SECRET,
-        region_name="auto",
-    ).__aenter__()
-
-def fetch_stories_with_publishers(category_id: int, limit: int = 20):
+def fetch_stories_with_publishers(category_id: int, limit: int = 30):
     log_message("Fetching stories with nested publisher dict...")
     try:
         with db_connection.cursor() as cursor:
@@ -115,208 +118,375 @@ def fetch_stories_with_publishers(category_id: int, limit: int = 20):
         log_message(f"Error fetching stories: {e}")
         return []
 
-def fetch_stories_with_publishers(category_id: int, limit: int = 20):
-    log_message("Fetching stories with nested publisher dict...")
-    try:
-        with db_connection.cursor() as cursor:
-            sql = """
-            SELECT
-                s.*,
-                p.favicon_url AS publisher_favicon_url,
-                p.id          AS publisher_id,
-                p.name        AS publisher_name,
-                p.feed_url    AS publisher_feed_url,
-                p.site_url    AS publisher_site_url
-            FROM stories AS s
-            JOIN publishers AS p
-              ON s.publisher_id = p.id
-            WHERE s.category_id = %s
-              AND NOT s.has_image
-            ORDER BY s.created_at DESC
-            LIMIT %s
-            """
-            cursor.execute(sql, (category_id, limit))
-            rows = cursor.fetchall()
-    except pymysql.MySQLError as e:
-        log_message(f"Error fetching stories: {e}")
-        return []
-
-
-async def fetch_categories(pool):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM categories")
-            cats = await cur.fetchall()
-    random.shuffle(cats)
-    return cats
-
-
-async def fetch_stories(pool, category_id):
-    sql = (
-        "SELECT s.*, p.favicon_url AS publisher_favicon_url,"
-        " p.id AS publisher_id, p.name AS publisher_name,"
-        " p.feed_url, p.site_url"
-        " FROM stories s JOIN publishers p ON s.publisher_id=p.id"
-        " WHERE s.category_id=%s AND NOT s.has_image"
-        " ORDER BY s.created_at DESC LIMIT %s"
-    )
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(sql, (category_id, DB_BATCH_SIZE))
-            rows = await cur.fetchall()
     stories = []
     for row in rows:
-        pub = {
-            k.replace("publisher_", ""): row[k]
-            for k in row
-            if k.startswith("publisher_")
+        # split out publisher fields
+        publisher = {
+            key.replace("publisher_", ""): row[key]
+            for key in row
+            if key.startswith("publisher_")
         }
-        data = {k: row[k] for k in row if not k.startswith("publisher_")}
-        data["publisher"] = pub
-        stories.append(data)
+        # everything else is story data
+        story_data = {key: row[key] for key in row if not key.startswith("publisher_")}
+        story_data["publisher"] = publisher
+        stories.append(story_data)
+
+    log_message(
+        f"Got {len(stories)} stories (with nested publisher) for category {category_id}"
+    )
     return stories
 
 
-async def update_story_images(pool, ids):
-    if not ids:
-        return
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.executemany(
-                "UPDATE stories SET has_image=1 WHERE id=%s", [(i,) for i in ids]
-            )
-        await conn.commit()
+def get_link_preview(data, source: str = "default", category_name: str = "None"):
+    """
+    Attempts to retrieve a link preview image URL for a given URL. Handles proxy rotation
+    and retries upon failure. Can return either a preview image URL or, under certain conditions,
+    a response object directly.
 
+    Parameters:
+        data (str or dict): If a dict, expects 'link' key with the URL. Otherwise, directly uses the string as the URL.
+        source (str): Determines the mode of operation. If not 'default', the raw response object is returned for further processing.
+        category_name (str): Not directly used in this function but passed to subsequent functions for directory management.
 
-async def update_favicons(pool, items):
-    if not items:
-        return
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.executemany(
-                "UPDATE publishers SET favicon_url=%s WHERE id=%s", items
-            )
-        await conn.commit()
+    Returns:
+        str or requests.Response: Returns the image preview URL as a string under normal operation. If source is not 'default',
+        returns the response object for further processing.
+    """
+    global proxies
+    global bad_proxies
 
+    # Determine URL based on data type.
+    if isinstance(data, str):
+        url = data
+    else:
+        url = data["url"]
 
-async def fetch_url(session, url):
-    proxy = await get_proxy()
-    proxy_url = f"http://{proxy}" if proxy else None
+    if not input_sanitization.is_valid_url(url):
+        log_message(f"Invalid url: {url}")
+        return DEFAULT_IMAGE
+
+    bad_proxies_count = 0
     try:
-        async with http_sem, session.get(url, timeout=5, proxy=proxy_url) as resp:
-            if resp.status in (200, 301, 302):
-                return await resp.read(), resp
-            logger.warning(f"Bad HTTP status {resp.status} for {url}")
-    except aiohttp.ClientProxyConnectionError:
-        await mark_bad(proxy)
+        while True:
+            # Randomly select a user agent to simulate browser requests
+            headers = {"User-Agent": choice(immutable.USER_AGENTS)}
+
+            # Filter out bad proxies identified in previous attempts
+            proxies = [x for x in proxies if x not in bad_proxies]
+
+            if not proxies:
+                log_message("No proxies left! Returning default image!")
+                return DEFAULT_IMAGE
+
+            chosen_proxy = choice(proxies)
+
+            try:
+                response = requests.get(
+                    url,
+                    timeout=5,
+                    headers=headers,
+                    proxies={"http": f"http://{chosen_proxy}"},
+                )
+                if response.status_code not in [200, 301, 302]:
+                    log_message(
+                        f"[Invalid HTTP Response] {response.status_code} from {url}."
+                    )
+                    return DEFAULT_IMAGE
+            except requests.exceptions.ProxyError:
+                # Handle proxy errors by marking proxy as bad and retrying
+                bad_proxies_count += 1
+                if bad_proxies_count > 10:
+                    log_message(
+                        f"[Proxy Error] Too many bad proxies in sequence, finishing: {url}"
+                    )
+                    bad_proxies_count = 0
+                    return DEFAULT_IMAGE
+                bad_proxies.append(chosen_proxy)
+                log_message(f"[Proxy Error] Added to badlist: {chosen_proxy}")
+                continue
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ) as err:
+                # Connection and timeout errors handling
+                log_message(f"[Timeout] {err} from {url}")
+                return DEFAULT_IMAGE
+            except Exception as err:
+                # General error handling
+                log_message(f"[Unexpected Error] {err}")
+                if isinstance(data, object):
+                    log_message(f"Story: {data['id']}")
+
+                return DEFAULT_IMAGE
+
+            break  # Break the loop if the request was successful
+
+        if source != "default":
+            # Return response object directly for non-default sources. The response object can be used to scrape the story image and favicon url.
+            return response
+
+        # Otherwise, proceed to extract and return the image URL. 'data' in this case is a models.Story object.
+        return extract_image_from_response(response, url, data, category_name)
     except Exception as e:
-        logger.warning(f"Error fetching {url}: {e}")
-    return None, None
+        # Log unexpected errors encountered during execution
+        log_message(f"[Unexpected] From get link preview: {e}")
+        return DEFAULT_IMAGE
 
 
-def parse_meta(html, base_url):
-    soup = BeautifulSoup(html, "html.parser")
-    og = soup.find("meta", property="og:image")
-    story_url = og["content"].strip() if og and og.get("content") else DEFAULT_IMAGE
-    icon = soup.find("link", rel=lambda x: x and "icon" in x)
-    fav_url = icon["href"] if icon and icon.get("href") else "/favicon.ico"
-    if not input_sanitization.is_valid_url(fav_url):
-        fav_url = urljoin(base_url, fav_url)
-    return story_url, fav_url
+def extract_image_from_response(
+    response: requests.Response, url: str, story: dict, category_name: str
+):
+    """
+    Extracts and handles an image URL from a web response, with specific attention to news story imagery.
+
+    It looks for an og:image meta tag for a primary image and a favicon as a secondary option.
+    If no primary image is found, a default is used. If the image is the default or a favicon is available,
+    the function attempts to store these in a structured directory based on a filter criteria.
+
+    Parameters:
+        response (requests.Response): The web response object containing the HTML content.
+        url (str): The URL from which the response was fetched, used for resolving relative image URLs.
+        story (dict): The story itself.
+        category_name (str): A filter criteria indicating the subdirectory within which the image should be stored.
+
+    Returns:
+        The result of attempting to download and convert the found or default image, and favicon if applicable.
+    """
+    global favicon_database
+    log_message(f"Attempting to extract image from response for {story['id']}")
+
+    response.encoding = "utf-8"
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Attempt to find the Open Graph image meta tag for the primary image.
+    image = soup.find("meta", {"property": "og:image"})
+    # If found, strip leading/trailing whitespace from the URL, otherwise use a default image.
+    image_url = image.get("content").strip() if image else DEFAULT_IMAGE
+
+    favicon = soup.find("link", rel="icon")
+    if favicon:
+        favicon_url = favicon["href"]
+
+        if not input_sanitization.is_valid_url(favicon_url):
+            favicon_url = urljoin(url, favicon["href"])
+    else:
+        favicon_url = urljoin(url, "/favicon.ico")
+
+    log_message(
+        f"Checking to see if the favicon for story {story['id']} is in the database"
+    )
+    publisher_id = story["publisher"]["id"]
+    # If the favicon is already stored, there's no need for us to store it again. So, we specify only the story image information.
+    if story["publisher"]["favicon_url"] or f"{publisher_id}.ico" in favicon_database:
+        images = {
+            "story": {
+                "url": image_url,
+                "output_path": f"stories/{category_name}/{hashing_util.binary_to_md5_hex(story['url_hash'])}",
+            }
+        }
+    else:
+        images = {
+            "story": {
+                "url": image_url,
+                "output_path": f"stories/{category_name}/{hashing_util.binary_to_md5_hex(story['url_hash'])}",
+            },
+            "favicon": {
+                "url": favicon_url,
+                "output_path": f"favicons/{category_name}/{publisher_id}",
+            },
+        }
+        favicon_database.append(f"{publisher_id}.ico")
+
+    return download_and_convert_image(images)
 
 
-async def convert_and_upload(kind, content, meta, s3_client, pool):
-    # Convert in threadpool if needed
-    loop = asyncio.get_event_loop()
+def download_and_convert_image(data: dict) -> list:
+    """
+    Downloads and processes images specified in the input dictionary.
 
-    def _convert():
-        img = pyvips.Image.new_from_buffer(content, "")
-        if kind == "story":
-            img = img.thumbnail_image(1280)
-            buf = img.write_to_buffer(".avif[quality=60]")
-            key = f"{meta['output']}.avif"
-        else:
-            img = img.thumbnail_image(32)
-            buf = img.write_to_buffer(".ico")
-            key = f"{meta['output']}.ico"
-        return key, buf
+    This function iterates over each item in the data dictionary, downloads the image from the URL,
+    and then processes the image depending on whether it's a news image or a favicon. News images
+    are resized and converted to the WebP format for efficiency, while favicons are resized to
+    a standard 32x32 pixel size and saved as ICO files.
 
-    key, buf = await loop.run_in_executor(None, _convert)
-    # Upload
-    async with s3_sem:
+    Arguments:
+        data (dict): A dictionary where each key is a type of image ('news' or 'favicon') and
+        the value is another dictionary with 'url' and 'output_path' keys.
+
+    Returns:
+        list: A list containing the paths where the processed images were saved to.
+    """
+    website_paths = []
+    for item in data:
+        url = data[item]["url"]
+
+        if not url:
+            continue
+
+        response = get_link_preview(url, "download")
+
+        # if response is not a requests Object, then the download failed.
+        if isinstance(response, str):
+            continue
+
         try:
-            await s3_client.put_object(Bucket=S3_BUCKET, Key=key, Body=buf)
-            return key
+            # Open the image using PIL
+            image = Image.open(BytesIO(response.content))
+        except Exception:
+            log_message(f"[!] Error opening image from {url}, possibly wrong format.")
+            continue
+
+        output_buffer = BytesIO()
+        if item == "story":
+            # Process as before but save to an in-memory bytes buffer
+            image.thumbnail((1280, 720))
+            image = image.convert("RGB")
+            # AVIF my saviour
+            image.save(
+                output_buffer, format="avif", optimize=True, quality=60, method=6
+            )
+            s3_object_key = data[item]["output_path"] + ".avif"
+        else:
+            # Processing favicon images as before, saving to buffer
+            image = image.resize((32, 32))
+            image.save(output_buffer, format="ico")
+            s3_object_key = data[item]["output_path"] + ".ico"
+
+        output_buffer.seek(0)
+
+        try:
+            log_message(f"Attempting to upload {s3_object_key} to the bucket")
+            s3_client.upload_fileobj(output_buffer, bucket_name, s3_object_key)
         except Exception as e:
-            logger.error(f"S3 upload failed for {key}: {e}")
-    return None
+            log_message(f"Failed to upload to bucket: {e}")
+            continue
+        log_message(f"Upload for {s3_object_key} was a success")
+
+        output_buffer.close()
+        website_paths.append(s3_object_key)
+
+    return website_paths
 
 
-async def process_story(story, session, s3_client, pool, story_ids, favicon_items):
-    html_bytes, resp = await fetch_url(session, story["url"])
-    if not html_bytes:
+def update_story_image_url(stories_to_update):
+    """
+    stories_to_update should be a list of tuples: [(story_id), ...]
+    """
+    if not stories_to_update:
+        log_message("Skipping as there's no stories to update")
         return
-    img_url, fav_url = parse_meta(html_bytes, story["url"])
-    tasks = []
-    if img_url:
-        tasks.append(
-            convert_and_upload(
-                "story",
-                (await fetch_url(session, img_url))[0],
-                {
-                    "output": f"stories/{story['publisher']['name']}/{hashing_util.binary_to_md5_hex(story['url_hash'])}"
-                },
-                s3_client,
-                pool,
-            )
-        )
-        story_ids.append(story["id"])
-    if not story["publisher"]["favicon_url"] and fav_url:
-        tasks.append(
-            convert_and_upload(
-                "favicon",
-                (await fetch_url(session, fav_url))[0],
-                {
-                    "output": f"favicons/{story['publisher']['name']}/{story['publisher']['id']}"
-                },
-                s3_client,
-                pool,
-            )
-        )
-        favicon_items.append((f"{S3_BASE_URL}/%s", story["publisher"]["id"]))
-    await asyncio.gather(*tasks)
+
+    log_message(f"Updating {len(stories_to_update)} story image URLs...")
+    try:
+        with db_connection.cursor() as cursor:
+            update_query = "UPDATE stories SET has_image = 1 WHERE id = %s"
+            cursor.executemany(update_query, stories_to_update)
+        db_connection.commit()
+    except Exception as e:
+        log_message(f"Error updating multiple story image URLs: {e}")
 
 
-async def process_category(cat, session, s3_client, pool):
-    stories = await fetch_stories(pool, cat["id"])
-    if not stories:
+def update_publisher_favicon(favicon_updates):
+    """
+    favicon_updates should be a list of tuples: [(publisher_id), ...]
+    """
+    if not favicon_updates:
         return
-    story_ids, favicon_items = [], []
-    workers = [
-        process_story(story, session, s3_client, pool, story_ids, favicon_items)
-        for story in stories
-    ]
-    await asyncio.gather(*workers)
-    await update_story_images(pool, story_ids)
-    await update_favicons(pool, favicon_items)
-    logger.info(f"Processed category {cat['name']} with {len(story_ids)} images.")
+
+    log_message(f"Updating {len(favicon_updates)} publisher favicons...")
+    try:
+        with db_connection.cursor() as cursor:
+            update_query = "UPDATE publishers SET favicon_url = %s WHERE id = %s"
+            cursor.executemany(update_query, favicon_updates)
+        db_connection.commit()
+    except pymysql.MySQLError as e:
+        log_message(f"Error updating multiple favicons: {e}")
 
 
-async def main():
-    loop = asyncio.get_event_loop()
-    pool = await init_db_pool(loop)
-    s3_client = await init_s3_client()
-    async with aiohttp.ClientSession() as session:
-        cats = await fetch_categories(pool)
-        for cat in cats:
-            await process_category(cat, session, s3_client, pool)
-    await pool.wait_closed()
-    await s3_client.close()
+def process_category(category: dict):
+    """
+    Processes each category to find and replace image URLs in the stories.
+
+    This function fetches stories from the database filtered by the selected category.
+    It then iterates over these stories, using a ThreadPoolExecutor to concurrently
+    attempt to find a suitable image for each story. If a suitable image is found,
+    it updates the story's media content URL in the database.
+
+    Parameters:
+        category (dict): The category data used to filter stories for processing.
+
+    Note:
+        This function handles a fixed number of stories (up to 500 by default) to avoid overwhelming
+        the system with too many concurrent operations. Additionally, it updates the
+        media content URL for each story, either with a direct image URL or paths to
+        downloaded and processed images.
+    """
+    global favicon_database
+    stories = fetch_stories_with_publishers(category["id"])
+    stories_to_update = []
+    favicons_to_update = []
+    favicon_database = []
+
+    log_message(f"Starting threading with {WORKERS} workers for {category['name']}")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
+        futures = []
+        for story in stories:
+            # Submitting a task to the executor to process each story's link preview.
+            future = executor.submit(
+                get_link_preview, story, "default", category["name"]
+            )
+            futures.append((future, story))
+
+        total_updated = 0
+        for future, story in futures:
+            # Gets a list containing paths to the story image and favicon image respectively
+            images_paths = future.result()
+
+            # If it's not a list, meaning that something went wrong during the link preview phase, we simply skip the result.
+            if not isinstance(images_paths, list):
+                continue
+
+            for path in images_paths:
+                image_url = f"{bucket_base_url}/{path}"
+
+                if "stories" in path:
+                    stories_to_update.append((story["id"]))
+                else:
+                    favicons_to_update.append((image_url, story["publisher"]["id"]))
+                    favicon_database.append(f"{story['publisher']['id']}.ico")
+
+                total_updated += 1
+
+        update_story_image_url(stories_to_update)
+        update_publisher_favicon(favicons_to_update)
+
+        if total_updated > 0:
+            log_message(
+                f"[{category['name']}] Downloaded {total_updated}/{len(stories)} images."
+            )
+        else:
+            log_message(f"[{category['name']}] No image has been downloaded.")
+
+
+def search_images():
+    """
+    Searches images for each category in the feeds path.
+    """
+    # DEBUG if x["name"] == "br_general"
+    categories = [x for x in fetch_categories_from_database()]
+
+    total = 0
+    for category in categories:
+        total += 1
+        progress_percentage = (total / 100) * len(categories)
+
+        log_message(
+            f"\n[{round(progress_percentage, 2)}%] Searching images for {category['name']}..."
+        )
+        process_category(category)
+
+    log_message("[+] Finished!")
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info("Shutdown via KeyboardInterrupt")
-        sys.exit(0)
+    search_images()

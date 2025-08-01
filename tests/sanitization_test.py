@@ -203,9 +203,9 @@ def test_sanitize_username(input_username, expected_output):
     ],
 )
 def test_is_valid_email(email, expected_output):
-    assert (
-        input_sanitization.is_valid_email(email) == expected_output
-    ), f"Failed for email: {email}"
+    assert input_sanitization.is_valid_email(email) == expected_output, (
+        f"Failed for email: {email}"
+    )
 
 
 @pytest.mark.parametrize(

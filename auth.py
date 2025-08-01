@@ -1,4 +1,3 @@
-import binascii, json, hmac, hashlib
 from flask import (
     Blueprint,
     render_template,
@@ -14,7 +13,6 @@ from flask_login import login_required, current_user, logout_user
 from datetime import datetime
 
 from website_scripts import (
-    config,
     extensions,
     models,
     input_sanitization,
@@ -22,7 +20,6 @@ from website_scripts import (
     hashing_util,
     qol_util,
     security_util,
-    totp_util,
     decorators,
 )
 

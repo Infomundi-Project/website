@@ -3,8 +3,6 @@ import base64
 import pyotp
 import io
 
-from . import hashing_util, config
-
 
 def generate_totp_secret():
     return pyotp.random_base32()

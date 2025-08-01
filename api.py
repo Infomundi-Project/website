@@ -1596,7 +1596,7 @@ def block_user(uid, action):
 
     return (
         jsonify(
-            message=f"You {'blocked' if request.method == "POST" else 'unblocked'} {target.username}. Take care of your peace!",
+            message=f"You {'blocked' if request.method == 'POST' else 'unblocked'} {target.username}. Take care of your peace!",
         ),
         201,
     )

@@ -20,7 +20,6 @@ def get_statistics() -> dict:
 
     with pymysql.connect(**db_params) as connection:
         with connection.cursor() as cursor:
-
             # Fetching current statistics record
             cursor.execute("SELECT * FROM site_statistics ORDER BY id DESC LIMIT 1")
             statistics = cursor.fetchone()

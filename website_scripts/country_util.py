@@ -1,4 +1,4 @@
-from . import extensions, models, custom_exceptions, scripts
+from . import models, custom_exceptions, scripts
 
 
 def get_country(name: str = "", iso2: str = "", iso3: str = "", ilike: bool = False):

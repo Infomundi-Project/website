@@ -14,9 +14,7 @@ from datetime import datetime
 from website_scripts import (
     scripts,
     config,
-    immutable,
     notifications,
-    image_util,
     extensions,
     models,
     cloudflare_util,
@@ -24,7 +22,6 @@ from website_scripts import (
     friends_util,
     qol_util,
     hashing_util,
-    totp_util,
     auth_util,
     security_util,
     decorators,
@@ -146,7 +143,7 @@ def edit_user_profile():
     if current_user.username != username:
         # Checks if the username is valid
         if not input_sanitization.is_valid_username(username):
-            flash(f"We apologize, but your username is invalid.", "error")
+            flash("We apologize, but your username is invalid.", "error")
             return render_template("edit_profile.html")
 
         username_query = models.User.query.filter_by(username=username).first()
@@ -190,9 +187,7 @@ def edit_user_profile():
             f"{platform_option}_url"
         )  # e.g. linkedin_url or instagram_url
 
-        if (
-            platform_profile_url
-        ):  # we check to see if the user actually did set this, or want to remove from profile
+        if platform_profile_url:  # we check to see if the user actually did set this, or want to remove from profile
             platform_result, username_result = (
                 input_sanitization.extract_username_from_thirdparty_platform_url(
                     platform_profile_url

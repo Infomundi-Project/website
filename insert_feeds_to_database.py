@@ -1,7 +1,6 @@
 import pymysql
-from sys import exit
 
-from website_scripts import config, input_sanitization, hashing_util, json_util
+from website_scripts import config, input_sanitization, json_util
 
 
 # Database connection parameters

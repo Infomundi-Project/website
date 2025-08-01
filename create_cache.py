@@ -5,7 +5,6 @@ import pymysql
 import requests
 import yake
 
-from collections import defaultdict
 from random import shuffle, choice
 from urllib.parse import urljoin
 from datetime import datetime
@@ -173,7 +172,7 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 story_author = None
 
             if not story_title:
-                log_message(f"No story title was identified, skipping")
+                log_message("No story title was identified, skipping")
                 continue
 
             # Gentle cuts text (without breaking off words)

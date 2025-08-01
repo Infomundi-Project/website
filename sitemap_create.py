@@ -1,13 +1,10 @@
-import os
 import pymysql
 from sys import exit
 from xml.etree.ElementTree import Element, ElementTree, SubElement
-from defusedxml.ElementTree import parse as safe_parse
 from datetime import datetime
 from random import shuffle
 
-from website_scripts import config, models, extensions
-from app import app
+from website_scripts import config
 
 # Database connection parameters
 db_params = {
