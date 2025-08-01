@@ -9,7 +9,7 @@ from flask import (
     abort,
 )
 from flask_login import current_user, login_required
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from website_scripts import (
     scripts,
@@ -34,6 +34,27 @@ views = Blueprint("views", __name__)
 @views.route("/", methods=["GET"])
 def home():
     home_data = scripts.home_processing()
+
+    now = datetime.utcnow()
+    country_iso = cloudflare_util.get_user_country().lower()
+
+    # read previous visit (if any)
+    last_visit_iso = session.get("last_visit")
+    last_visit = None
+    if last_visit_iso:
+        try:
+            last_visit = datetime.fromisoformat(last_visit_iso)
+        except ValueError:
+            # invalid format → treat as never-visisted
+            last_visit = None
+
+    # redirect if first visit (no last_visit) OR they've been away too long
+    if not last_visit or (now - last_visit) > timedelta(hours=1):
+        session["last_visit"] = now.isoformat()
+        return redirect(url_for("views.news", country=country_iso))
+
+    # otherwise show homepage as normal
+    session["last_visit"] = now.isoformat()
 
     return render_template(
         "homepage.html",
