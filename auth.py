@@ -29,6 +29,7 @@ auth = Blueprint("auth", __name__)
 @auth.route("/login", methods=["GET", "POST"])
 @decorators.unauthenticated_only
 @decorators.verify_captcha
+@extensions.limiter.limit("20/minute")
 def login():
     # If user is in totp process, redirect them to the correct page
     if session.get("in_twofactor_process", ""):
@@ -67,7 +68,6 @@ def login():
 
 
 @auth.route("/totp", methods=["GET", "POST"])
-@decorators.verify_captcha
 @decorators.check_twofactor
 def totp():
     user = extensions.db.session.get(models.User, session["user_id"])

@@ -357,7 +357,6 @@ def captcha():
 
 
 @views.route("/sensitive", methods=["GET", "POST"])
-@decorators.verify_captcha
 @decorators.check_twofactor
 @login_required
 def sensitive():
@@ -375,7 +374,7 @@ def sensitive():
 
 
 @views.route("/contact", methods=["GET", "POST"])
-@extensions.limiter.limit("120/day;60/hour;6/minute", override_defaults=True)
+@extensions.limiter.limit("120/day;60/hour;12/minute", override_defaults=True)
 @decorators.verify_captcha
 def contact():
     if request.method == "GET":

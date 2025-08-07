@@ -3,10 +3,10 @@ from os import environ
 from . import json_util
 
 
-SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]
-WEBSITE_ROOT = environ["WEBSITE_ROOT"]
-BASE_DOMAIN = environ["BASE_DOMAIN"]
-LOCAL_ROOT = environ["LOCAL_ROOT"]
+SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]  # e.g. infomundi-session
+WEBSITE_ROOT = environ["WEBSITE_ROOT"]  # e.g. /app (inside docker container)
+BASE_DOMAIN = environ["BASE_DOMAIN"]  # e.g. infomundi.net
+LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
 
 # -----------> Secret Keys <-----------
 CAPTCHA_SECRET_KEY = environ["CAPTCHA_SECRET_KEY"]

@@ -9,7 +9,7 @@
     </div>
     {% endif %}
 
-    <div class="col-md-10 mx-auto col-lg-5">
+    <div class="col-md-10 mx-auto p-0 col-lg-5">
       <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" method="post" action="{{ url_for('auth.register') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
@@ -57,10 +57,15 @@
           </span>
         </div>
 
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact" {% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
-
-        <p id="captchaMessage" class="my-2 small"><i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign up button.</p>
-        <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Sign up</button>
+        <infomundi-captcha
+  api-endpoint="/api/captcha"
+  input-name="captcha"
+  input-label="Code"
+  submit-text="Sign up"
+  width="200"
+  height="80"
+  cooldown-ms="2000"
+></infomundi-captcha>
 
         <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}">
           <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign up with Google<span class="invisible">.</span>
