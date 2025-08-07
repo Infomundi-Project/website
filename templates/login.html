@@ -7,7 +7,7 @@
       <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Welcome back!</h1>
       <h2 class="col-lg-10 fs-4">We're glad to see you again. Please log in to access your account.</h2>
     </div>
-    <div class="col-md-10 mx-auto col-lg-5">
+    <div class="col-md-10 mx-auto p-0 col-lg-5">
       <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('auth.login') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
@@ -33,18 +33,24 @@
           </span>
         </div>
 
-        <div class="cf-turnstile mt-3" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" {% if is_mobile %}data-size="compact" {% endif %} data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onCaptchaSuccess"></div>
+        <infomundi-captcha
+  api-endpoint="/api/captcha"
+  input-name="captcha"
+  input-label="Code"
+  submit-text="Sign in"
+  width="200"
+  height="80"
+  cooldown-ms="2000"
+></infomundi-captcha>
 
-        <div class="checkbox mb-3">
-          <label> <input type="checkbox" value="yes" id="rememberMe" name="remember_me" /> Remember me </label>
-        </div>
 
-        <p id="captchaMessage" class="mb-2 small"><i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign in button.</p>
-        <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Sign in</button>
-
-        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %} mb-3" href="{{ url_for('auth.google_redirect') }}">
+        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %}" href="{{ url_for('auth.google_redirect') }}">
           <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign in with Google<span class="invisible">.</span>
         </a>
+
+        <div class="checkbox mt-2 mb-3">
+          <label> <input class="me-2" type="checkbox" value="yes" id="rememberMe" name="remember_me" />Remember me </label>
+        </div>
 
         <p>I don't have an account. <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Sign up</a>.</p>
         <hr class="my-4" />

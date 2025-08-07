@@ -11,9 +11,16 @@
       <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" method="post" action="{{ url_for('views.captcha') }}" id="captcha-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-        <div class="text-center">
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAAN8p0y-GxgH2k2X" data-theme="{{ request.cookies.get('theme', 'light') }}" data-callback="onTurnstileSuccess"></div>
-        </div>
+        <infomundi-captcha
+  api-endpoint="/api/captcha"
+  input-name="captcha"
+  input-label="Code"
+  submit-text="Submit"
+  width="200"
+  height="80"
+  cooldown-ms="2000"
+></infomundi-captcha>
+
       </form>
     </div>
   </div>

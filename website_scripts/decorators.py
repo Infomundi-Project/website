@@ -77,13 +77,42 @@ def verify_captcha(func):
 
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if request.method == "POST":
-            token = request.form.get("cf-turnstile-response", "")
-            if not cloudflare_util.is_valid_captcha(token):
-                flash("Invalid captcha. Are you a robot?", "error")
-                return redirect(request.url)
+        if request.method != "POST":
+            # If captcha is valid, return the function as usual
+            return func(*args, **kwargs)
 
-        # If captcha is valid, return the function as usual
+        CAPTCHA_TTL = 60  # seconds
+
+        answer = request.form.get("captcha", "")
+        if not answer:
+            flash("Captcha is missing. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Retrieve stored CAPTCHA
+        expected = session.get("captcha_text")
+        ts = session.get("captcha_time")
+        if expected is None or ts is None:
+            flash("Invalid captcha. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Check time-to-live
+        elapsed = datetime.utcnow().timestamp() - ts
+        if elapsed > CAPTCHA_TTL:
+            # Clean up
+            session.pop("captcha_text", None)
+            session.pop("captcha_time", None)
+            flash("Captcha expired. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Validate answer (exact match)
+        if answer.lower() != expected.lower():
+            flash("Invalid captcha. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Success: clear session and respond
+        session.pop("captcha_text", None)
+        session.pop("captcha_time", None)
+        # return the function as usual
         return func(*args, **kwargs)
 
     return decorated_function

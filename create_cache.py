@@ -48,59 +48,74 @@ def log_message(message):
     # logging.info(message)
 
 
-def insert_story_and_tags(cursor, story, category_id):
-    # 1) Insert the story
-    story_sql = """
-      INSERT IGNORE INTO stories
-        (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
-      VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-    """
-    cursor.execute(
-        story_sql,
-        (
-            story["story_title"],
-            story["story_lang"],
-            story["story_author"],
-            story["story_description"],
-            story["story_url"],
-            story["story_url_hash"],
-            story["story_pubdate"],
-            category_id,
-            story["publisher_id"],
-        ),
-    )
-    # 2) If the story was new, grab its ID
-    if cursor.lastrowid:
-        new_story_id = cursor.lastrowid
-    else:
-        # it was ignored (duplicate); fetch existing ID
-        cursor.execute(
-            "SELECT id FROM stories WHERE url_hash = %s", (story["story_url_hash"],)
-        )
-        new_story_id = cursor.fetchone()["id"]
-
-    # 3) Insert tags in bulk for this story
-    tag_values = [
-        (new_story_id, tag.strip()) for tag in story["story_tags"] if tag.strip()
-    ]
-    if tag_values:
-        tags_sql = """
-          INSERT IGNORE INTO tags (story_id, tag)
-          VALUES (%s, %s)
-        """
-        cursor.executemany(tags_sql, tag_values)
-
-
 def insert_stories_to_database(stories, category_name, category_id):
+    """
+    Bulk-inserts stories and tags for a given category.
+    Returns the number of exceptions encountered (should be zero).
+    """
     exceptions = 0
     with db_connection.cursor() as cursor:
-        for story in stories:
-            try:
-                insert_story_and_tags(cursor, story, category_id)
-            except Exception as e:
-                log_message(f"Error inserting story or tags: {e}")
-                exceptions += 1
-        db_connection.commit()
+        try:
+            # 1) Bulk-insert all stories at once
+            story_sql = """
+              INSERT IGNORE INTO stories
+                (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            story_values = [
+                (
+                    s["story_title"],
+                    s["story_lang"],
+                    s["story_author"],
+                    s["story_description"],
+                    s["story_url"],
+                    s["story_url_hash"],
+                    s["story_pubdate"],
+                    category_id,
+                    s["publisher_id"],
+                )
+                for s in stories
+            ]
+            cursor.executemany(story_sql, story_values)
+
+            # 2) Fetch IDs for all inserted (or pre-existing) stories in one go
+            url_hashes = tuple(s["story_url_hash"] for s in stories)
+            # Note: if there's only one element, make sure it's still a tuple
+            if len(url_hashes) == 1:
+                url_hashes = (url_hashes[0], url_hashes[0])
+            cursor.execute(
+                "SELECT id, url_hash FROM stories WHERE url_hash IN %s",
+                (url_hashes,),
+            )
+            id_map = {row["url_hash"]: row["id"] for row in cursor.fetchall()}
+
+            # 3) Bulk-insert all tags at once
+            tag_sql = """
+              INSERT IGNORE INTO tags (story_id, tag)
+              VALUES (%s, %s)
+            """
+            tag_values = []
+            for s in stories:
+                sid = id_map.get(s["story_url_hash"])
+                if not sid:
+                    # This should not happen unless something weird occurred
+                    continue
+                for tag in s["story_tags"]:
+                    tag = tag.strip()
+                    if tag:
+                        tag_values.append((sid, tag))
+
+            if tag_values:
+                cursor.executemany(tag_sql, tag_values)
+
+            db_connection.commit()
+
+        except Exception as e:
+            # If anything goes wrong, roll back and count it as an exception
+            db_connection.rollback()
+            log_message(f"Error bulk inserting stories/tags: {e}")
+            exceptions += 1
+
     return exceptions
 
 
@@ -289,12 +304,20 @@ def find_rss_feed(base_url, candidates=None, timeout=5):
     # 2) Fallback: common endpoints
     if candidates is None:
         candidates = [
-            "/rss",
-            "/rss.xml",
-            "/feed",
-            "/feed.xml",
-            "/atom.xml",
-            "/index.rdf",
+            "index.xml",
+            "feed/index.php",
+            "feed.xml",
+            "feed.atom",
+            "feed.rss",
+            "feed.json",
+            "feed.php",
+            "feed.asp",
+            "posts.rss",
+            "blog.xml",
+            "atom.xml",
+            "podcasts.xml",
+            "main.atom",
+            "main.xml",
         ]
 
     # Prepend discovered feeds so they get tested first

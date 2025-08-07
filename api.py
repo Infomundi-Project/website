@@ -24,6 +24,7 @@ from website_scripts import (
     comments_util,
     notifications,
     image_util,
+    captcha_util,
 )
 
 api = Blueprint("api", __name__)
@@ -1713,3 +1714,14 @@ def upload_image(category):
     )
 
     return jsonify(success=True), 201
+
+
+@api.route("/captcha", methods=["GET"])
+@extensions.limiter.limit("20/minute", override_defaults=True)
+def captcha():
+    b64_img, text = captcha_util.generate_captcha()
+
+    session["captcha_text"] = text
+    session["captcha_time"] = datetime.utcnow().timestamp()
+
+    return jsonify({"captcha": b64_img}), 200
