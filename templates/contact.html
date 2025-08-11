@@ -79,20 +79,16 @@
         </div>
         {% endif %}
 
-        <div class="form-floating">
+        <div class="form-floating mb-2">
           <textarea class="form-control" id="floatingMessage" name="message" rows="4" minlength="5" maxlength="1000" placeholder="Message" style="height: 200px;" required></textarea>
           <label for="floatingMessage">Message</label>
           <div id="charCount">Characters remaining: 1000</div>
         </div>
-        <infomundi-captcha
-  api-endpoint="/api/captcha"
-  input-name="captcha"
-  input-label="Code"
-  submit-text="Submit"
-  width="200"
-  height="80"
-  cooldown-ms="2000"
-></infomundi-captcha>
+        <cap-widget 
+            data-cap-api-endpoint="https://cap.infomundi.net/e21b71eb43/"
+        ></cap-widget>
+
+        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Submit</button>
       </form>
     </div>
   </div>

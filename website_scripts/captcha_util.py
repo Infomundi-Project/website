@@ -4,10 +4,33 @@ import string
 import math
 import io
 import base64
+import requests
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 from . import config
+
+
+def is_valid_cap(captcha_token: str) -> bool:
+    """
+    Sends a POST request to the CAPTCHA siteverify endpoint and returns the parsed JSON response.
+    """
+    url = f"https://{config.CAP_HOSTNAME}/{config.CAP_SITE_KEY}/siteverify"
+    payload = {
+        "secret": config.CAP_SECRET_KEY,
+        "response": captcha_token
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+    except (requests.RequestException, ValueError):
+        return False
+
+    return bool(data.get("success"))
 
 
 def load_fonts(

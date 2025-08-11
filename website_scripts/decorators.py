@@ -3,7 +3,7 @@ from flask_login import current_user
 from datetime import datetime
 from functools import wraps
 
-from . import extensions, qol_util, cloudflare_util, config, models
+from . import extensions, qol_util, cloudflare_util, config, models, captcha_util
 
 
 def admin_required(func):
@@ -72,8 +72,8 @@ def captcha_required(func):
     return decorated_function
 
 
-def verify_captcha(func):
-    """This decorator is used to check if a captcha token is valid"""
+def verify_infomundi_captcha(func):
+    """Verifies the defunct Infomundi captcha"""
 
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -113,6 +113,26 @@ def verify_captcha(func):
         session.pop("captcha_text", None)
         session.pop("captcha_time", None)
         # return the function as usual
+        return func(*args, **kwargs)
+
+    return decorated_function
+
+
+def verify_captcha(func):
+    """This decorator is used to check if a captcha token is valid"""
+
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if request.method != "POST":
+            # If does not require captcha (not POST), return normal
+            return func(*args, **kwargs)
+
+        token = request.form.get("cap-token", "")
+        if not captcha_util.is_valid_cap(token):
+            flash("Invalid captcha. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Success: clear session and respond
         return func(*args, **kwargs)
 
     return decorated_function

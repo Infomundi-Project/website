@@ -11,15 +11,11 @@
       <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" method="post" action="{{ url_for('views.captcha') }}" id="captcha-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-        <infomundi-captcha
-  api-endpoint="/api/captcha"
-  input-name="captcha"
-  input-label="Code"
-  submit-text="Submit"
-  width="200"
-  height="80"
-  cooldown-ms="2000"
-></infomundi-captcha>
+        <cap-widget 
+            data-cap-api-endpoint="https://cap.infomundi.net/e21b71eb43/"
+        ></cap-widget>
+
+        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Submit</button>
 
       </form>
     </div>
