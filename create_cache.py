@@ -304,6 +304,7 @@ def find_rss_feed(base_url, candidates=None, timeout=5):
     # 2) Fallback: common endpoints
     if candidates is None:
         candidates = [
+            "rss",
             "index.xml",
             "feed/index.php",
             "feed.xml",

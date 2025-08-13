@@ -19,7 +19,7 @@
           </div>
         </div>
 
-        <div class="input-group">
+        <div class="input-group mb-2">
           <div class="form-floating flex-grow-1">
             <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required />
             <label for="floatingPassword">Password</label>
@@ -33,16 +33,11 @@
           </span>
         </div>
 
-        <infomundi-captcha
-  api-endpoint="/api/captcha"
-  input-name="captcha"
-  input-label="Code"
-  submit-text="Sign in"
-  width="200"
-  height="80"
-  cooldown-ms="2000"
-></infomundi-captcha>
+        <cap-widget 
+            data-cap-api-endpoint="https://cap.infomundi.net/e21b71eb43/"
+        ></cap-widget>
 
+        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Sign in</button>
 
         <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %}" href="{{ url_for('auth.google_redirect') }}">
           <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign in with Google<span class="invisible">.</span>
