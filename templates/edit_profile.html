@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/libs/quill.css') }}">
+{% endblock %}
+{% block edit_profile_content %}
+<h3>General</h3>
+<hr>
+<form method="post" action="{{ url_for('views.edit_user_profile', username=current_user.username) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  
+  <!-- Display Name & Username -->
+  <div class="mb-3">
+    <div class="input-group mb-3">
+      <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+      <div class="form-floating">
+        <input type="text" name="display_name" class="form-control" id="floatingInputDisplayName" placeholder="Display Name" value="{% if current_user.display_name %}{{ current_user.display_name }}{% endif %}" maxlength="40">
+        <label for="floatingInputDisplayName">Display Name</label>
+      </div>
+    </div>
+  </div>
+  
+  <div class="input-group mb-3">
+    <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
+    <div class="form-floating">
+      <input type="text" name="username" class="form-control" id="floatingInputGroup1" placeholder="Username" value="{{ current_user.username }}">
+      <label for="floatingInputGroup1">Username</label>
+    </div>
+  </div>
+  
+  <!-- Profile Description -->
+  <div class="mb-3">
+    <p>Description</p>
+    <div class="form-floating notranslate">
+      <div id="editor" style="height: 200px;">
+        {% if current_user.profile_description %}
+        {{ current_user.profile_description|safe }}
+        {% endif %}
+      </div>
+      <input type="hidden" name="description" id="description-input">
+    </div>
+  </div>
+  
+  <h4 class="mt-5">Contact Information</h4>
+  <hr>
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+      <div class="form-floating">
+        <input type="email" name="public_email" class="form-control" id="floatingEmail" placeholder="Email" value="{% if current_user.public_email %}{{ current_user.public_email }}{% endif %}">
+        <label for="floatingEmail">Public email</label>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
+      <div class="form-floating">
+        <input type="url" name="website_url" class="form-control" id="floatingWebsite" placeholder="Website" value="{% if current_user.website_url %}{{ current_user.website_url }}{% endif %}">
+        <label for="floatingWebsite">Website</label>
+      </div>
+    </div>
+  </div>
+  
+  <h4 class="mt-5">Localization</h4>
+  <hr>
+  <div class="mb-3">
+    <label for="country" class="form-label">Country</label>
+    <select id="country" name="country" class="form-select form-select-lg" aria-label="Select Country">
+      <option selected disabled>Select your country</option>
+    </select>
+  </div>
+  <div class="mb-3 d-none" id="state-div">
+    <label for="state" class="form-label">State</label>
+    <select id="state" name="state" class="form-select form-select-lg" aria-label="Select State">
+      <option selected disabled>Select your state</option>
+    </select>
+  </div>
+  <div class="mb-3 d-none" id="city-div">
+    <label for="city" class="form-label">City</label>
+    <select id="city" name="city" class="form-select form-select-lg" aria-label="Select City">
+      <option selected disabled>Select your city</option>
+    </select>
+  </div>
+  
+  <h4 class="mt-5">Social Links</h4>
+  <hr>
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-brands fa-linkedin"></i></span>
+      <div class="form-floating">
+        <input type="url" name="linkedin_url" class="form-control" id="floatingLinkedIn" placeholder="LinkedIn Profile" value="{% if current_user.linkedin_url %}{{ current_user.linkedin_url }}{% endif %}">
+        <label for="floatingLinkedIn">LinkedIn Profile</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-brands fa-twitter"></i></span>
+      <div class="form-floating">
+        <input type="url" name="twitter_url" class="form-control" id="floatingTwitter" placeholder="Twitter Profile" value="{% if current_user.twitter_url %}{{ current_user.twitter_url }}{% endif %}">
+        <label for="floatingTwitter">Twitter Profile</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-brands fa-instagram"></i></span>
+      <div class="form-floating">
+        <input type="url" name="instagram_url" class="form-control" id="floatingInstagram" placeholder="Instagram Profile" value="{% if current_user.instagram_url %}{{ current_user.instagram_url }}{% endif %}">
+        <label for="floatingInstagram">Instagram Profile</label>
+      </div>
+    </div>
+  </div>
+  
+
+  
+  <button class="btn btn-lg w-100 btn-primary mt-5" type="submit">Submit</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ nonce }}" 
+  src="{{ url_for('static', filename='js/libs/quill.js') }}"
+  ></script>
+<script nonce="{{ nonce }}">
+  $(document).ready(function() {
+    // **1. Capture the user’s current picks as JS vars**  
+    var initialCountryId = "{{ current_user.country_id or '' }}";
+    var initialStateId   = "{{ current_user.state_id   or '' }}";
+    var initialCityId    = "{{ current_user.city_id    or '' }}";
+
+    // **2. Load countries & re-select if needed**
+    $.ajax({
+      url: '/api/countries',
+      method: 'GET',
+      success: function(countries) {
+        let $country = $('#country');
+        // append each country
+        countries.forEach(function(c) {
+          $country.append(new Option(c.name, c.id));
+        });
+        if (initialCountryId) {
+          // set the select, then fire change to load states
+          $country.val(initialCountryId).trigger('change');
+        }
+      },
+      error: function(err) {
+        console.error('Error fetching countries:', err);
+      }
+    });
+
+    // **3. When country changes, load & pre-select state**
+    $('#country').change(function() {
+      let cid = $(this).val();
+      if (!cid) return;
+      $.ajax({
+        url: `/api/countries/${cid}/states`,
+        method: 'GET',
+        success: function(states) {
+          let $state = $('#state')
+            .empty()
+            .append(new Option('Select your state', '', true, false));
+          states.forEach(s => $state.append(new Option(s.name, s.id)));
+          $('#state-div').removeClass('d-none');
+
+          if (initialStateId) {
+            $state.val(initialStateId).trigger('change');
+            // clear so we don’t re-trigger on future country switches
+            initialStateId = null;
+          }
+        },
+        error: function(err) {
+          console.error('Error fetching states:', err);
+        }
+      });
+    });
+
+    // **4. When state changes, load & pre-select city**
+    $('#state').change(function() {
+      let sid = $(this).val();
+      if (!sid) return;
+      $.ajax({
+        url: `/api/states/${sid}/cities`,
+        method: 'GET',
+        success: function(cities) {
+          let $city = $('#city')
+            .empty()
+            .append(new Option('Select your city', '', true, false));
+          cities.forEach(c => $city.append(new Option(c.name, c.id)));
+          $('#city-div').removeClass('d-none');
+
+          if (initialCityId) {
+            $city.val(initialCityId);
+            initialCityId = null;
+          }
+        },
+        error: function(err) {
+          console.error('Error fetching cities:', err);
+        }
+      });
+    });
+  
+      // Initialize Quill editor
+      var quill = new Quill('#editor', {
+          theme: 'snow'
+      });
+  
+      // Handle form submission
+      $('form').submit(function() {
+          $('#description-input').val(quill.root.innerHTML);
+      });
+  });
+</script>
+{% endblock %}

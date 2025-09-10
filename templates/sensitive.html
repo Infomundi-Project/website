@@ -1,0 +1,85 @@
+{% extends "base.html" %}{% block title %}Sensitive Page{% endblock %}
+{% block content %}
+<div class="container col-xl-10 col-xxl-8 px-4 py-2">
+  <div class="row align-items-center g-lg-5 py-5">
+    <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
+      <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Sensitive Page</h1>
+      <h2 class="col-lg-10 fs-5">Hey, {{ current_user.username }}. Looks like you've found a sensitive page, that may allow strangers to change vital settings in your Infomundi account. Please, for your safety, prove that you are indeed who you say you are. <br><br>If you encounter any issues, please don't hesitate to <a href="{{ url_for('views.contact') }}">contact our team</a> for assistance.</h2>
+    </div>
+    <div class="col-md-10 mx-auto col-lg-5">
+      <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('views.sensitive') }}">
+        <span class="badge d-inline-flex align-items-center p-1 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-pill mb-3">
+        <img class="rounded-circle me-1" width="24" height="24" src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture">
+        {% if not is_mobile %}Logged in as{% endif %}<span class="ms-1 notranslate">{{ current_user.username }}</span>
+        <span class="vr mx-2"></span>
+        <a data-bs-toggle="modal" data-bs-target="#signOutModal">
+        <i class="fa-solid fa-right-from-bracket me-1"></i>{% if not is_mobile %}Sign out{% endif %}
+        </a>
+        </span>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        {% if current_user.totp_secret %}
+        <!-- TOTP Input Group -->
+        <div id="totp-input-group">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
+            <div class="form-floating">
+              <input name="code" type="text" class="form-control" id="floatingInputCurrentTOTP" placeholder="TOTP" maxlength="6" minlength="6" required>
+              <label for="floatingInputCurrentTOTP">Code</label>
+            </div>
+          </div>
+        </div>
+        <!-- Recovery Token Input Group (Initially Hidden) -->
+        <div id="recovery-token-input-group" style="display: none;">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+            <div class="form-floating">
+              <input name="recovery_token" type="text" class="form-control" id="floatingInputRecoveryToken" placeholder="Recovery Token">
+              <label for="floatingInputRecoveryToken">Recovery Token</label>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="input-group">
+          <div class="form-floating flex-grow-1">
+            <input type="password" class="form-control" id="floatInputCurrentPassword" placeholder="Current Password" name="password" maxlength="50" minlength="8" required>
+            <label for="floatInputCurrentPassword">Current Password</label>
+            <div class="invalid-feedback">
+              Please provide a password with 8 to 50 characters.
+            </div>
+          </div>
+          <span class="input-group-text password-toggle" id="floatInputCurrentPasswordIcon">
+          <i class="fa-solid fa-eye" data-toggle="floatInputCurrentPassword"></i>
+          </span>
+        </div>
+        {% endif %}
+        <div class="checkbox my-2">
+          <label>
+          <input type="checkbox" value="yes" name="trust_session" class="me-1">Trust this session
+          </label>
+        </div>
+    <button class="btn btn-primary w-100" type="submit" id="captchaSubmitButton">Submit</button>
+    {% if current_user.totp_secret %}
+    <hr class="my-4">
+    <small class="text-muted">
+    <a href="#" id="toggle-device-link" class="text-decoration-none">I don't have access to my two factor device</a>.
+    </small>
+    {% endif %}
+    </form>
+  </div>
+</div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if current_user.totp_secret %}
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/codeTokenChanger.js') }}"
+  ></script>
+{% else %}
+<script defer nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/passwordUtility.js') }}"
+  ></script>
+{% endif %}
+<script nonce="{{ nonce }}"
+  src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"
+  ></script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %} {% block title %}Team{% endblock %} {% block styles %}
+<style type="text/css">
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-img-top {
+    height: 40vh;
+    object-fit: cover;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+</style>
+{% endblock %} {% block about_content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-4 mb-5">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-pills card-header-pills">
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" href="https://www.instagram.com/diogo.cavalcantii/">
+                <i class="fa-brands fa-instagram me"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <a href="/id/db0b96e1-fc56-2eb6-56e1-f7ca0e51e561" class="text-decoration-none text-reset">
+          <img src="{{ url_for('static', filename='img/dbarros.webp') }}" class="card-img-top" alt="Infomundi CEO" />
+        </a>
+        <div class="card-body">
+          <h5 class="card-title">Diogo Cristovão</h5>
+          <p class="card-text">CEO, Creative Director & Co-Founder</p>
+          <figure>
+            <blockquote class="blockquote">
+              <small>
+                <p>Be an eagle every day... not a pigeon!</p>
+              </small>
+            </blockquote>
+            <figcaption class="blockquote-footer">Alexandre Barros, <cite title="Source Title">my father</cite></figcaption>
+          </figure>
+        </div>
+        <ul class="list-group list-group-flush mt-3">
+          <li class="list-group-item">
+            <a href="mailto:barros@infomundi.net" target="_blank" class="text-decoration-none"> <i class="fa-solid fa-envelope me-2"></i>barros@infomundi.net </a>
+          </li>
+        </ul>
+        <div class="card-footer text-body-secondary">
+          <small>
+            <i class="fa-regular fa-clock me-1"></i>
+            <span class="date-info"></span>
+          </small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-pills card-header-pills">
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" href="https://github.com/behindsecurity">
+                <i class="fa-brands fa-github me"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" href="https://behindsecurity.com/">
+                <i class="fa-solid fa-globe"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" href="/static/gui.alves_0xA0136487_public.asc">
+                <i class="fa-solid fa-key"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <a href="/id/1d3636cf-9a96-5dad-0943-43b1b532dd93" class="text-decoration-none text-reset">
+          <img src="{{ url_for('static', filename='img/galves.webp') }}" class="card-img-top" alt="Infomundi CTO" />
+        </a>
+        <div class="card-body">
+          <h5 class="card-title">Guilherme Alves</h5>
+          <p class="card-text">CTO, Fullstack Dev & Co-Founder</p>
+          <p class="card-text">Peel back the layers. See what they missed.</p>
+        </div>
+        <ul class="list-group list-group-flush mt-3">
+          <li class="list-group-item">
+            <a href="mailto:gui.alves@infomundi.net" target="_blank" class="text-decoration-none"> <i class="fa-solid fa-envelope me-2"></i>gui.alves@infomundi.net </a>
+          </li>
+        </ul>
+        <div class="card-footer text-body-secondary">
+          <small>
+            <i class="fa-regular fa-clock me-1"></i>
+            <span class="date-info-eu"></span>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script nonce="{{ nonce }}">
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateElements = document.querySelectorAll(".date-info");
+    const dateElementsEu = document.querySelectorAll(".date-info-eu");
+
+    const date = new Date();
+    const dateTimezone = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Belem",
+    });
+
+    const dateEu = new Date();
+    const dateTimezoneEu = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Belem",
+    });
+
+    dateElements.forEach(function (element) {
+      element.innerHTML = dateTimezone.format(date); // Update the element content
+    });
+    dateElementsEu.forEach(function (element) {
+      element.innerHTML = dateTimezoneEu.format(dateEu); // Update the element content
+    });
+  });
+</script>
+{% endblock %}

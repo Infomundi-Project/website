@@ -1,0 +1,193 @@
+#reportModal .modal-title i {
+  margin-right: 0.5rem;
+}
+#reportModal .report-item .form-label {
+  font-weight: 500;
+}
+#reportModal .edit-report-btn i,
+#reportModal .delete-report-btn i,
+#reportModal #addReportBtn i {
+  margin-right: .3rem;
+}
+/* Toast container positioning */
+#reportToastContainer {
+  z-index: 1100;
+}
+
+.background-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.8));
+  z-index: 1;
+}
+
+.profile-container {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+}
+
+.profile-header {
+  background-size: cover !important;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.profile-avatar {
+  max-width: 10rem;
+  height: auto;
+}
+
+.user-description {
+  max-height: 150px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+@media (max-width: 1000px) {
+  .profile-avatar {
+    max-width: 5rem;
+  }
+  .profile-header {
+    height: 120px;
+  }
+}
+
+
+.calendar-wrapper {
+  margin-bottom: 24px;
+}
+
+/*  
+  Make a container that holds:
+  [ weekday-labels (left) ][ #calendar (right) ]
+*/
+.calendar-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 
+  #calendar should be a 7-row grid (12px height each),
+  auto-flowing by column (Mon→Sun down col1, then col2, etc.),
+  with 3px gaps. 
+*/
+#calendar {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  row-gap: 3px;
+  column-gap: 3px;
+}
+
+/* Each day square: 12×12, rounded corners, plus a tooltip */
+#calendar .day {
+  width: 12px;
+  height: auto;
+  min-height: auto;
+  border-radius: 2px;
+  position: relative;
+  cursor: default;
+}
+
+/* Placeholder days (outside the one-year range) are just lvl-0 but dimmed */
+#calendar .placeholder {
+  opacity: 0.3;
+}
+
+/* -------------------------------------------------- */
+/* 2.2) Weekday labels (7 rows, only Mon/Wed/Fri text)*/
+/* -------------------------------------------------- */
+.weekday-labels {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  row-gap: 3px;
+  font-size: 10px;
+  line-height: 12px;
+}
+
+/* 
+  .month-labels is position:relative so that each <span> we append 
+  can be positioned via `left: Xpx; top: 0;`. 
+  We won’t specify a fixed width here; JS will set it dynamically.
+*/
+.month-labels {
+  position: relative;
+  height: 16px;     /* enough vertical space for 12px font + some padding */
+  font-size: 12px;
+}
+
+/* Each <span> inside .month-labels will be absolutely positioned via JS */
+.month-labels span {
+  position: absolute;
+  top: 0;
+  /* left = weekIndex * 15px (set in JS) */
+}
+
+/* ------------------------------------------------------- */
+/* 3) Activity overview (bottom half)                      */
+/* ------------------------------------------------------- */
+.activity-overview {
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
+}
+
+/* Left column: textual summary, takes ~65% width */
+.overview-text {
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.overview-text p {
+  margin: 4px 0;
+}
+
+.mini-lists {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.mini-list {
+  flex: 1;
+}
+.mini-list strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.mini-list ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+.mini-list li {
+  font-size: 13px;
+}
+
+/* Right column: chart box, ~35% */
+.overview-chart {
+  flex: 0 0 35%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* optionally give it a fixed height so the chart is vertically centered */
+  min-height: 120px;
+}

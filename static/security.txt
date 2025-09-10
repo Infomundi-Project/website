@@ -1,0 +1,7 @@
+Contact: mailto:contact@infomundi.net
+Contact: https://infomundi.net/contact
+Expires: 2026-10-14T04:00:00.000Z
+Encryption: https://infomundi.net/pubkey.asc
+Acknowledgments: https://infomundi.net/hall-of-fame
+Preferred-Languages: en, pt
+Canonical: https://infomundi.net/security.txt

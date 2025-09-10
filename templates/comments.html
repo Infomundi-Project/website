@@ -1,0 +1,388 @@
+{% extends "base.html" %} {% block title %}{{ seo_data[0] }}{% endblock %} {% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}">
+{% endblock %} {% block content %} 
+<div class="container my-5">
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Upper Breadcrumb -->
+      <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('views.home') }}">Home</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{{ from_country_url }}">{{ from_country_name }} {{ from_country_category.title() }}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small>
+          </li>
+        </ol>
+      </nav>
+      <!-- Hero Section -->
+
+      <figure class="figure w-100 position-relative">
+        <img 
+          src="{{ story.image_url }}" 
+          fetchpriority="high" 
+          class="figure-img hero-image rounded" 
+          alt="Story Image" 
+        >
+        <span class="badge text-bg-secondary position-absolute top-0 start-0 m-3" data-bs-toggle="tooltip" data-bs-placement="top" title="This image is NOT affiliated with Infomundi. Used here for informational purposes only. It may also be in the public domain; please refer to the original source for any reuse. Source: {{ story.publisher.name }}, {{ story.pub_date }}"><i class="fa-solid fa-triangle-exclamation me-1"></i>Disclaimer</span>
+      </figure>
+
+      <h1 class="display-5 fw-bold text-uppercase">{{ story.title }}</h1>
+      <div class="mb-3 text-muted">
+        <span class="badge bg-primary me-2">{{ from_country_category.title() }}</span>{% if story.author and story.author != 'None' %}·<span class="mx-2">{{ story.author }}</span>{% endif %}·<a class="mx-2" href="{{ story.url }}" target="_blank">{{ story.publisher.name }}</a>·<span class="mx-2" id="storyPubDate">{{ story.pub_date }}</span>·<span class="ms-2">{{ story.stats.views }} view{% if story.stats.views >= 0 %}s{% endif %}</span>
+      </div>
+      <!-- Article Content -->
+      <article class="mb-5">
+        <p class="lead">{{ story.description }}</p>
+        <!-- Reaction Buttons -->
+      <div class="mt-4 d-flex align-items-center invisible">
+        <button id="likeBtn" class="btn btn-sm btn-outline-success me-2">
+          <i class="fa-regular fa-thumbs-up"></i> Like
+        </button>
+        <button id="dislikeBtn" class="btn btn-sm btn-outline-danger me-2">
+          <i class="fa-regular fa-thumbs-down"></i> Dislike
+        </button>
+        <button id="bookmarkBtn" class="btn btn-sm btn-outline-warning">
+          <i class="fa-regular fa-bookmark"></i> Bookmark
+        </button>
+      </div>
+
+      
+        
+
+        <hr class="mt-5 mb-3">
+
+
+        <div class="maximus">
+          <!-- Header Section -->
+          <div class="maximus-summary-header row align-items-start">
+            <div class="col-3 col-lg-2 py-1 pe-1">
+              <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Profile Picture" class="img-fluid rounded border border-3 p-2">
+            </div>
+            <div class="col-9 col-lg-10">
+              <span class="fs-3">MAXIMUS</span>
+              <span class="ms-3 small badge text-bg-primary text-uppercase">Infomundi's AI</span>
+              <div class="my-3 border rounded">
+                <p class="p-3 m-0">Hi, my name is Maximus, and I'm Infomundi's AI. My job is to help you make sense of complex stories and ideas. Here's how I work:</p>
+                <ul class="p-3 m-0 ms-3">
+                  <li>
+                    <strong>Addressed Topics:</strong> I'll highlight the key themes and main ideas for you.
+                  </li>
+                  <li>
+                    <strong>Context Around:</strong> I'll provide the background and connect the dots so you get the full picture.
+                  </li>
+                  <li>
+                    <strong>Methods for Investigation:</strong> I'll suggest ways to explore further, like useful resources and actionable tools.
+                  </li>
+                  <li>
+                    <strong>Questioning the Subject:</strong> I'll help you critically analyze key questions about the subject.
+                  </li>
+                </ul>
+                <p class="p-3 m-0">Think of me as your guide to turning bulk information into clear and actionable insights.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Content Section -->
+          <div class="maximus-summary-content-placeholder">
+            <!-- Blurred Text -->
+            <p class="maximus-summary-blurred-text text-break" id="maximusSummaryBlurredText"></p>
+            <!-- Progress Bar -->
+            <div class="maximus-summary-progress">
+              <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%;" id="maximusSummaryProgressBar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+          <div class="maximus-summary-api-response"></div>
+        </div>
+
+
+      </article>
+      <!-- Share Buttons -->
+      <div class="mb-4">
+  <h6>Share this article:</h6>
+
+  <!-- Facebook -->
+  <a
+    href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-outline-primary btn-sm me-2"
+  >
+    <i class="fab fa-facebook-f me-1"></i> Facebook
+  </a>
+
+  <!-- Twitter -->
+  <a
+    href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ story.title|urlencode }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-outline-info btn-sm me-2"
+  >
+    <i class="fab fa-twitter me-1"></i> Twitter
+  </a>
+
+  <!-- Reddit -->
+  <a
+    href="https://www.reddit.com/submit?url={{ request.url|urlencode }}&title={{ story.title|urlencode }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-outline-danger btn-sm"
+  >
+    <i class="fab fa-reddit-alien me-1"></i> Reddit
+  </a>
+</div>
+
+      <!-- Author Bio -->
+      <div class="d-flex align-items-center bg-light-subtle p-3 rounded mb-4">
+        <a href="{{ story.url }}" class="text-reset" target="_blank">
+          {% if story.publisher.favicon_url %}
+          <img src="{{ story.publisher.favicon_url }}" class="rounded me-3" alt="{{ story.publisher.name }} icon">
+          {% endif %}
+          <div>
+            <h6 class="mb-0">{{ story.publisher.name }}</h6>
+        </a>
+          <small class="text-muted">One of the thousands of publishers collected and available on <a href="{{ url_for('views.about') }}" class="text-reset">Infomundi</a></small>
+        </div>
+      </div>
+      
+      <!-- Comments --> 
+        <infomundi-comments page_id="{{ story_url_hash }}" type="story">
+          
+          <div id="commentsList"></div>
+
+        </infomundi-comments>
+
+
+      <!-- Bottom Breadcrumbs -->
+      <div class="mt-5">
+        <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="{{ url_for('views.home') }}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="{{ from_country_url }}">{{ from_country_name }} {{ from_country_category.title() }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              <small>{{ ' '.join(story.title.split(' ')[:5]) }}...</small>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <div class="sticky-sidebar">
+        <!-- Newsletter 
+        <div class="mb-4 bg-light-subtle p-3 rounded">
+          <h6>Subscribe to our newsletter</h6>
+          <input type="email" class="form-control mb-2" placeholder="Your email">
+          <button class="btn btn-sm btn-dark w-100">Subscribe</button>
+        </div>
+        -->
+        <!-- Tags -->
+        {% if story.tags %}
+          <div class="mb-4">
+            <h5><i class="fa-solid fa-tags me-2"></i>Tags</h5>
+              {% for tag in story.tags %}
+                <span class="badge bg-secondary me-2">{{ tag.tag }}</span>
+              {% endfor %}
+          </div>
+        {% endif %}
+        <!-- Trending Filters Card -->
+
+
+<!-- Trending List -->
+<div class="mb-4">
+  <h5><i class="fa-solid fa-fire me-2"></i>Trending</h5>
+  <ul class="list-unstyled" id="trendingList">
+    <li>Loading…</li>
+  </ul>
+  <div class="accordion mb-4" id="trendingAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTrending">
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseTrending"
+        aria-expanded="false"
+        aria-controls="collapseTrending"
+      >
+        <i class="fa-solid fa-chart-line me-2"></i>
+        Trending Filters
+      </button>
+    </h2>
+    <div
+      id="collapseTrending"
+      class="accordion-collapse collapse"
+      aria-labelledby="headingTrending"
+      data-bs-parent="#trendingAccordion"
+    >
+      <div class="accordion-body">
+        <form id="trendingFiltersForm" class="row g-3">
+          <!-- Period -->
+          <div class="col-md-4">
+            <label for="periodSelect" class="form-label">
+              <i class="fa-solid fa-clock me-1"></i>Period
+            </label>
+            <select class="form-select" id="periodSelect">
+              <option value="hour">Hourly</option>
+              <option value="day">Daily</option>
+              <option value="week">Weekly</option>
+              <option value="all" selected>All</option>
+            </select>
+          </div>
+          <!-- Metric -->
+          <div class="col-md-4">
+            <label for="metricSelect" class="form-label">
+              <i class="fa-solid fa-eye me-1"></i>Metric
+            </label>
+            <select class="form-select" id="metricSelect">
+              <option value="views" selected>
+                <i class="fa-solid fa-eye"></i> Views
+              </option>
+              <option value="likes">
+                <i class="fa-solid fa-thumbs-up"></i> Likes
+              </option>
+              <option value="dislikes">
+                <i class="fa-solid fa-thumbs-down"></i> Dislikes
+              </option>
+            </select>
+          </div>
+          <!-- Limit -->
+          <div class="col-md-4">
+            <label for="limitInput" class="form-label">
+              <i class="fa-solid fa-list-ol me-1"></i>How Many
+            </label>
+            <input
+              type="number"
+              id="limitInput"
+              class="form-control"
+              min="1"
+              max="20"
+              value="5"
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+        <div class="mb-4 invisible">
+          <img src="https://placehold.co/300x250?text=Ad+Space" class="img-fluid rounded" alt="Ad">
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div> {% endblock %} {% block scripts %}
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/maximusSummary.js') }}"></script>
+<script nonce="{{ nonce }}">
+  const urlParams = new URLSearchParams(window.location.search);
+  const story_id = urlParams.get('id');
+  fetchAndRenderStorySummary(story_id);
+</script>
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
+
+<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/scrollProgressBar.js') }}"></script>
+<script type="application/ld+json" nonce="{{ nonce }}">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ story.title }}",
+    "description": "{{ story.description }}",
+    "image": "{{ story.image_url }}",
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ story.publisher.name }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ story.publisher.favicon_url }}"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ request.url }}"
+    }
+  }
+</script> 
+
+<script defer type="text/javascript" nonce="{{ nonce }}">
+  const storyPubDate = document.getElementById('storyPubDate');
+  const newDate = preciseTimeAgo(storyPubDate.textContent);
+  storyPubDate.textContent = newDate;
+</script>
+
+
+<script nonce="{{ nonce }}">
+  (function(){
+    const params   = new URLSearchParams(window.location.search);
+    const country  = params.get('country')  || '';
+    const category = params.get('category') || '';
+
+    const list         = document.getElementById('trendingList');
+    const periodSelect = document.getElementById('periodSelect');
+    const metricSelect = document.getElementById('metricSelect');
+    const limitInput   = document.getElementById('limitInput');
+
+    function loadTrending() {
+      const period = periodSelect.value;
+      const metric = metricSelect.value;
+      const limit  = limitInput.value;
+
+      list.innerHTML = '<li>Loading…</li>';
+
+      const url = `/api/story/trending`
+        + `?period=${encodeURIComponent(period)}`
+        + `&metric=${encodeURIComponent(metric)}`
+        + `&limit=${encodeURIComponent(limit)}`
+        + `&country=${encodeURIComponent(country)}`
+        + `&category=${encodeURIComponent(category)}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error(res.statusText);
+          return res.json();
+        })
+        .then(stories => {
+          list.innerHTML = '';
+          if (!stories.length) {
+            list.innerHTML = '<li>No trending stories found.</li>';
+            return;
+          }
+          stories.forEach(item => {
+            const li = document.createElement('li');
+            const a  = document.createElement('a');
+            a.href        = `{{ url_for('views.comments') }}?id=${item.story_id}`;
+            a.textContent = item.title;
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+        })
+        .catch(err => {
+          console.error('Trending load error:', err);
+          list.innerHTML = '<li>Failed to load trending stories.</li>';
+        });
+    }
+
+    // Fire on any change
+    [periodSelect, metricSelect, limitInput].forEach(el =>
+      el.addEventListener('change', loadTrending)
+    );
+
+    // Initial load
+    loadTrending();
+  })();
+</script>
+
+
+
+
+{% endblock %}

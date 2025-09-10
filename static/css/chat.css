@@ -1,0 +1,40 @@
+#chatMessages {
+  max-height: 600px;
+}
+
+#chatMessages .me     { text-align: right; }
+#chatMessages .friend { text-align: left;  }
+
+.chat-quote {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-bottom: 0.25em;
+}
+
+/* fade‐in yellow highlight, then fade out */
+.reply-highlight {
+  animation: highlightFade 1.5s ease-out;
+}
+@keyframes highlightFade {
+  0%   { background-color: rgba(255, 255,   0, 0.6); }
+  50%  { background-color: rgba(255, 255,   0, 0.3); }
+  100% { background-color: transparent; }
+}
+
+/* Bubble look */
+.chat-bubble {
+  display: inline-block;
+  padding: .5rem .75rem;
+  border-radius: 1rem;
+  margin-bottom: .25rem;
+  max-width: 75%;
+  word-break: break-word;
+}
+
+.me .chat-bubble {
+  border-bottom-right-radius: 0;
+}
+
+.friend .chat-bubble {
+  border-bottom-left-radius: 0;
+}

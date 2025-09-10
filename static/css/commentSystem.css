@@ -1,0 +1,56 @@
+.hero-image {
+  max-height: 400px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.author-avatar {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.sticky-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.bg-highlight {
+  background-color: rgba(255, 250, 150, 0.4);
+  transition: background-color 0.5s;
+}
+
+.highlight-border {
+  border: 2px solid #ffc107 !important;
+  transition: border-color 0.3s;
+}
+
+/* wrap comment content in this, then blur it */
+.comment-content-wrapper.flagged-blur {
+  filter: blur(6px);
+  position: relative;
+}
+
+/* overlay always sits on top */
+.flagged-overlay {
+  position: absolute;
+  inset: 0;
+  /* top/right/bottom/left: 0 */
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  cursor: pointer;
+  padding: 1rem;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 0.9rem;
+  z-index: 5;
+}
+
+.flagged-overlay button {
+  margin-left: 0.5rem;
+}
+

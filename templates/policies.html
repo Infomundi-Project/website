@@ -1,0 +1,263 @@
+{% extends "base.html" %} {% block title %}Policies{% endblock %} {% block about_content %}
+<div class="container">
+  <div class="row">
+    <!-- Sidebar navigation -->
+    <div class="col-md-4">
+      <!-- Mobile toggler -->
+      <button class="navbar-toggler d-md-none mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#policyNavCollapse" aria-controls="policyNavCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        Policy Sections
+      </button>
+      <div class="collapse d-md-block" id="policyNavCollapse">
+        <nav id="inf-scrollspy-navbar" class="h-100 flex-column align-items-stretch pe-4 border-end sticky-top" aria-label="Policy Sections">
+          <nav class="nav nav-pills flex-column">
+            <a class="nav-link" href="#privacy-policy">Privacy Policy</a>
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link ms-3 my-1" href="#privacy-1">1. What information do we collect?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-2">2. How we use your information?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-3">3. Will Your Information Be Shared With Anyone?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-4">4. How Long Do We Keep Your Information?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-5">5. How We Keep Your Information Safe</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-6">6. Do We Collect Information from Minors?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-7">7. What Are Your Privacy Rights?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-8">8. Do We Make Updates to This Policy?</a>
+              <a class="nav-link ms-3 my-1" href="#privacy-9">9. Cookies</a>
+            </nav>
+            <a class="nav-link mt-4" href="#community-policy">Community Policy</a>
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link ms-3 my-1" href="#community-1">1. Respect for All Members</a>
+              <a class="nav-link ms-3 my-1" href="#community-2">2. Content Guidelines</a>
+              <a class="nav-link ms-3 my-1" href="#community-3">3. Engagement Rules</a>
+              <a class="nav-link ms-3 my-1" href="#community-4">4. Privacy and Safety</a>
+              <a class="nav-link ms-3 my-1" href="#community-5">5. Consequences of Violating the Policy</a>
+              <a class="nav-link ms-3 my-1" href="#community-6">6. Changes to the Policy</a>
+            </nav>
+          </nav>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-md-8">
+      <div data-bs-spy="scroll" data-bs-target="#inf-scrollspy-navbar" data-bs-smooth-scroll="true" tabindex="0">
+        <!-- Privacy Policy Header -->
+        <header>
+          <h1>Privacy Policy</h1>
+        </header>
+        <div class="mb-5" id="privacy-policy">
+          <p><strong>Last Updated:</strong> April 29, 2025 (v1.2)</p>
+          <p>
+            Welcome to Infomundi. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy, or our practices with regards to your personal
+            information, please contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or use the <a href="{{ url_for('views.contact') }}">contact form</a>.
+          </p>
+          <p>
+            When you visit our website (https://infomundi.net/) and use our services, you trust us with your personal information. In this privacy policy, we explain in the clearest way possible what information we collect, how we use it,
+            and what rights you have. If there are any terms in this privacy policy that you do not agree with, please discontinue use of our site.
+          </p>
+          <p>This policy applies to all information collected through our website and related services.</p>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="mb-5" id="privacy-1">
+          <h2 class="mb-4">1. Information Collected By Us</h2>
+          <p class="fst-italic">We only take what we need, and you control most of it.</p>
+          <h4>Personal Information You Disclose to Us</h4>
+          <p>We collect personal information that you voluntarily provide when registering, posting comments, or contacting us. The specific data depends on your interactions and feature choices.</p>
+          <h4>Information Automatically Collected</h4>
+          <p>Some information—like your IP address and browser/device characteristics—is collected automatically for security purposes (e.g., detecting unusual login attempts).</p>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="mb-5" id="privacy-2">
+          <h2 class="mb-2">2. How We Use Your Information</h2>
+          <p class="fst-italic">We use your data to run and improve the site—never to sell it.</p>
+          <p>We process your information to comply with legal obligations and/or your consent. We will never sell your data to third parties.</p>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="mb-5" id="privacy-3">
+          <h2 class="mb-2">3. Will Your Information Be Shared With Anyone?</h2>
+          <p class="fst-italic">Only when required by law or with your explicit permission.</p>
+          <p>We only share information to comply with laws or with your consent.</p>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="mb-5" id="privacy-4">
+          <h2 class="mb-2">4. How Long We Keep Your Information</h2>
+          <p class="fst-italic">For as long as you need our services, or as required by law.</p>
+          <p>We retain your information only for as long as necessary to fulfill the purposes outlined in this policy, unless a longer retention period is required or permitted by law.</p>
+        </div>
+
+        <!-- Section 5 (Security) -->
+        <div class="mb-5" id="privacy-5">
+          <h2 class="mb-2">5. How We Keep Your Information Safe</h2>
+          <p class="fst-italic">We encrypt everything—in transit and at rest—to keep your account locked down.</p>
+          <ul>
+            <li><strong>Passwords & Recovery Tokens:</strong> hashed with <a href="https://en.wikipedia.org/wiki/Argon2" target="_blank">Argon2id</a>.</li>
+            <li>
+              <strong>Email Addresses:</strong>
+              <ol type="a">
+                <li>Encrypted at rest with AES-GCM (application key).</li>
+                <li>Fingerprinted via HMAC-SHA-256 (no plaintext stored).</li>
+              </ol>
+            </li>
+            <li><strong>2FA Secret Tokens:</strong> encrypted at rest with AES-GCM and only unlocked during login.</li>
+          </ul>
+          <p>We host our application in a hardened, containerized environment behind an Nginx reverse-proxy with ModSecurity rulesets, adding an extra layer of defense.</p>
+          <details id="advanced-security-details">
+            <summary>Advanced Security Details</summary>
+            <ul>
+              <li>Unique salt/nonce per record.</li>
+              <li>Derived keys follow NIST-approved PBKDF2 parameters.</li>
+              <li>Docker images are vulnerability-scanned before deployment.</li>
+              <li>Automated rotation of encryption keys and TLS certificates.</li>
+            </ul>
+          </details>
+          <p>Your privacy is our top priority—we continuously review and update our security measures to protect your data.</p>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="mb-5" id="privacy-6">
+          <h2 class="mb-2">6. Do We Collect Information from Minors?</h2>
+          <p class="fst-italic">We respect children’s privacy.</p>
+          <p>We do not knowingly collect data from or market to children under 18 years of age.</p>
+        </div>
+
+        <!-- Section 7 (Rights) -->
+        <div class="mb-5" id="privacy-7">
+          <h2 class="mb-2">7. What Are Your Privacy Rights?</h2>
+          <p class="fst-italic">You’re in control—always.</p>
+          <p>You may review, correct, or delete your account data at any time via the settings dashboard. All your data will be purged upon deletion.</p>
+          <p>If you are an EU or California resident, you may also request access, correction, or deletion of your personal data under GDPR and CCPA. <a href="#">Learn how to submit a request</a>.</p>
+        </div>
+
+        <!-- Section 8 -->
+        <div class="mb-5" id="privacy-8">
+          <h2 class="mb-2">8. Do We Make Updates to This Policy?</h2>
+          <p class="fst-italic">Yes—check back for changes.</p>
+          <p>We may update this policy as needed. We encourage you to review it periodically. Changes will be reflected in the “Last Updated” date and version above.</p>
+        </div>
+
+        <!-- Section 9 (Cookies) -->
+        <div class="mb-5" id="privacy-9">
+          <h2 class="mb-2">9. Cookies</h2>
+          <p class="fst-italic">Essential cookies only—unless you opt in to more.</p>
+          <p>We only use necessary cookies that are crucial for site functionality.</p>
+          <p>Manage your <a href="#" data-bs-toggle="modal" data-bs-target="#cookieSettingsModal">cookie settings</a> at any time.</p>
+          <p>
+            When you enable translation under “Account → Enable Maximus translation,” we use Google Translate. Google may place its own cookies—learn more in
+            <a href="https://policies.google.com/privacy" target="_blank">Google’s Privacy Policy</a>. We also employ Cloudflare for security and performance—visit
+            <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare’s Privacy Policy</a> for details.
+          </p>
+          <p>Cookies used by our website:</p>
+          <ol>
+            <li><code>theme</code> (7 days) – set only if you change the site theme.</li>
+            <li><code>remember_token</code> (15 days or logout) – set when you opt to “remember me.”</li>
+            <li><code>infomundi-session</code> (15 days after login or on browser close) – tracks your last visited country, last story clicked, and more; essential for site functionality.</li>
+          </ol>
+        </div>
+
+        <!-- Cookie Settings Modal -->
+        <div class="modal fade" id="cookieSettingsModal" tabindex="-1" aria-labelledby="cookieSettingsLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="cookieSettingsLabel">Cookie Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Manage your cookie preferences:</p>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="cookieNecessary" checked disabled />
+                  <label class="form-check-label" for="cookieNecessary">
+                    Necessary cookies
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="cookieTranslation" checked />
+                  <label class="form-check-label" for="cookieTranslation">
+                    Translation cookies
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="cookieAnalytics" />
+                  <label class="form-check-label" for="cookieAnalytics">
+                    Analytics cookies
+                  </label>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Save Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-5" />
+
+        <!-- Community Policy Header -->
+        <header>
+          <h1>Community Policy</h1>
+        </header>
+        <div class="mb-5" id="community-policy">
+          <p><strong>Last Updated:</strong> February 15, 2024 (v1.1)</p>
+          <p>
+            We're thrilled to have you as part of our community. Our goal is to create an inclusive, respectful, and engaging space where all members feel valued and safe. To ensure this, we ask all members to adhere to our Community
+            Content Policy. If you have questions, contact us at <a href="mailto:contact@infomundi.net">contact@infomundi.net</a> or via the <a href="{{ url_for('views.contact') }}">contact form</a>.
+          </p>
+        </div>
+
+        <div class="mb-5" id="community-1">
+          <h2 class="mb-2">1. Respect for All Members</h2>
+          <ul>
+            <li>Treat all community members with respect.</li>
+            <li>Personal attacks, harassment, bullying, and hate speech are strictly prohibited.</li>
+            <li>Discrimination based on race, ethnicity, gender, sexual orientation, age, disability, religion, or any other characteristic will not be tolerated.</li>
+          </ul>
+        </div>
+
+        <div class="mb-5" id="community-2">
+          <h2 class="mb-2">2. Content Guidelines</h2>
+          <ul>
+            <li>Share content you have the right to distribute, respecting intellectual property rights.</li>
+            <li>Do not post explicit, obscene, or violent content (including third-party links).</li>
+            <li>Do not share or promote false information.</li>
+          </ul>
+        </div>
+
+        <div class="mb-5" id="community-3">
+          <h2 class="mb-2">3. Engagement Rules</h2>
+          <ul>
+            <li>All forms of spam are prohibited.</li>
+            <li>Please report any content or behavior that violates our policies.</li>
+            <li>Do not use the platform for illegal activities or to promote dangerous organizations.</li>
+          </ul>
+        </div>
+
+        <div class="mb-5" id="community-4">
+          <h2 class="mb-2">4. Privacy and Safety</h2>
+          <ul>
+            <li>Protect the privacy of others. Do not share personal information without consent.</li>
+            <li>Be mindful of the information you share and its potential impact.</li>
+          </ul>
+        </div>
+
+        <div class="mb-5" id="community-5">
+          <h2 class="mb-2">5. Consequences of Violating the Policy</h2>
+          <ul>
+            <li>Violations may result in a warning, content removal, suspension, or ban, depending on severity.</li>
+            <li>We reserve the right to take appropriate action to keep our community safe and welcoming.</li>
+          </ul>
+        </div>
+
+        <div class="mb-5" id="community-6">
+          <h2 class="mb-2">6. Changes to the Policy</h2>
+          <ul>
+            <li>We may update this policy to reflect community needs or legal changes. Review it periodically.</li>
+            <li>Changelog and version history are available on our <a href="https://github.com/Infomundi-Project" target="_blank">GitHub</a>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

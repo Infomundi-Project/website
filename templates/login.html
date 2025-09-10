@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block title %}Sign in{% endblock %} {% block content %}
+
+<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+  <div class="row align-items-center g-lg-5 py-5">
+    <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
+      <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/login.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Login Illustration" width="500" height="500" />
+      <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Welcome back!</h1>
+      <h2 class="col-lg-10 fs-4">We're glad to see you again. Please log in to access your account.</h2>
+    </div>
+    <div class="col-md-10 mx-auto p-0 col-lg-5">
+      <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="email" minlength="10" required />
+          <label for="floatingInput">Email address</label>
+          <div class="invalid-feedback">
+            Please provide a valid email address.
+          </div>
+        </div>
+
+        <div class="input-group mb-2">
+          <div class="form-floating flex-grow-1">
+            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" maxlength="50" minlength="8" aria-describedby="floatingPasswordIcon" required />
+            <label for="floatingPassword">Password</label>
+            <div class="invalid-feedback">
+              Please provide a password with 8 to 50 characters.
+            </div>
+          </div>
+
+          <span class="input-group-text password-toggle" id="floatingPasswordIcon" style="max-height: 60px;">
+            <i class="fa-solid fa-eye" data-toggle="floatingPassword"></i>
+          </span>
+        </div>
+
+        <cap-widget 
+            data-cap-api-endpoint="https://cap.infomundi.net/e21b71eb43/"
+        ></cap-widget>
+
+        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Sign in</button>
+
+        <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %}" href="{{ url_for('auth.google_redirect') }}">
+          <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign in with Google<span class="invisible">.</span>
+        </a>
+
+        <div class="checkbox mt-2 mb-3">
+          <label> <input class="me-2" type="checkbox" value="yes" id="rememberMe" name="remember_me" />Remember me </label>
+        </div>
+
+        <p>I don't have an account. <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Sign up</a>.</p>
+        <hr class="my-4" />
+        <small class="text-muted">Can't sign in? <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none">Recover your account</a>.</small>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"></script>
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/passwordUtility.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %} {% block title %}Two Factor Authentication{% endblock %} {% block content %}
+<div class="container col-xl-10 col-xxl-8 px-4 py-2">
+  <div class="row align-items-center g-lg-5 py-2">
+    <!-- Left column with heading/text -->
+    <div class="col-lg-7 text-center text-lg-start {% if is_mobile %}mb-3{% endif %}">
+      <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Whooo Goes There?</h1>
+      <h2 class="col-lg-10 fs-5">
+        To gain access, you must first prove your wisdom. Enter your 2FA code below to show you're as sharp as the owl's gaze.
+        <br />
+        <br />
+        If you encounter any issues, please don't hesitate to
+        <a href="{{ url_for('views.contact') }}">contact our team</a> for assistance.
+      </h2>
+    </div>
+
+    <!-- Right column with image + form -->
+    <div class="col-md-10 mx-auto col-lg-5">
+      <img fetchpriority="high" src="{{ url_for('static', filename='img/illustrations/owl.webp') }}" class="d-block mx-lg-auto img-fluid" alt="Owl Illustration" width="500" height="500" />
+
+      <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary needs-validation" novalidate method="post" action="{{ url_for('auth.totp') }}">
+        <!-- CSRF token hidden input -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <!-- Badge header -->
+        <span class="badge d-flex align-items-center p-1 pe-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-pill mb-3">
+          <img class="rounded-circle me-1" width="24" height="24" src="{{ user.avatar_url }}" alt="{{ user.username }} profile picture" />
+          Two factor for {{ user.username }}
+          <span class="vr mx-2"></span>
+          <a href="{{ url_for('auth.reset_totp') }}"> <i class="fa-solid fa-right-from-bracket me-1"></i>Not you? </a>
+        </span>
+
+        <!-- —— EMAIL 2FA BUTTON —— -->
+        {% if user.is_mail_twofactor_enabled %}
+        <div class="mb-3">
+          <button type="button" id="send-email-2fa" class="btn btn-outline-primary">
+            Send code to my email
+          </button>
+          <small id="email-timer" class="text-muted ms-2"></small>
+        </div>
+        {% endif %}
+        <!-- ———————————————— -->
+
+        <!-- TOTP Input Group -->
+        <div id="totp-input-group">
+          <div class="input-group mt-2">
+            <span class="input-group-text"><i class="fa-solid fa-shield"></i></span>
+            <div class="form-floating">
+              <input name="code" type="text" class="form-control" id="floatingInputCurrentTOTP" placeholder="TOTP" maxlength="6" minlength="6" required />
+              <label for="floatingInputCurrentTOTP">Code</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recovery Token Input Group (Initially Hidden) -->
+        <div id="recovery-token-input-group" style="display: none;">
+          <div class="input-group mt-2">
+            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+            <div class="form-floating">
+              <input name="recovery_token" type="text" class="form-control" id="floatingInputRecoveryToken" placeholder="Recovery Token" />
+              <label for="floatingInputRecoveryToken">Recovery Token</label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-lg btn-primary w-100 mb-2" type="submit" id="captchaSubmitButton">
+          Submit
+        </button>
+
+        <hr class="my-4" />
+
+        <small class="text-muted">
+          <a href="#" id="toggle-device-link" class="text-decoration-none">
+            I don't have access to my two factor device
+          </a>
+          .
+        </small>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script nonce="{{ nonce }}">
+  document.addEventListener("DOMContentLoaded", function () {
+    // —— existing toggle code —— //
+    const toggleDeviceLink = document.getElementById("toggle-device-link");
+    const totpInputGroup = document.getElementById("totp-input-group");
+    const recoveryTokenInputGroup = document.getElementById("recovery-token-input-group");
+
+    toggleDeviceLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      if (totpInputGroup.style.display === "none") {
+        totpInputGroup.style.display = "block";
+        recoveryTokenInputGroup.style.display = "none";
+        document.getElementById("floatingInputCurrentTOTP").setAttribute("required", true);
+        document.getElementById("floatingInputRecoveryToken").removeAttribute("required");
+        toggleDeviceLink.textContent = "I don't have access to my two factor device";
+      } else {
+        totpInputGroup.style.display = "none";
+        recoveryTokenInputGroup.style.display = "block";
+        document.getElementById("floatingInputRecoveryToken").setAttribute("required", true);
+        document.getElementById("floatingInputCurrentTOTP").removeAttribute("required");
+        toggleDeviceLink.textContent = "Nevermind, I have access to my two factor device";
+      }
+    });
+
+    // —— new email-2FA code —— //
+    const emailBtn = document.getElementById("send-email-2fa");
+    if (emailBtn) {
+      const timerDisplay = document.getElementById("email-timer");
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      let cooldown = 0,
+        intervalId;
+
+      emailBtn.addEventListener("click", () => {
+        if (cooldown > 0) return;
+
+        emailBtn.disabled = true;
+        fetch('{{ url_for("api.send_mail_twofactor_code") }}', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({}),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to send code");
+            cooldown = 60;
+            timerDisplay.textContent = ` (${cooldown}s)`;
+            intervalId = setInterval(() => {
+              cooldown--;
+              if (cooldown <= 0) {
+                clearInterval(intervalId);
+                emailBtn.disabled = false;
+                timerDisplay.textContent = "";
+              } else {
+                timerDisplay.textContent = ` (${cooldown}s)`;
+              }
+            }, 1000);
+          })
+          .catch((err) => {
+            console.error(err);
+            emailBtn.disabled = false;
+            timerDisplay.textContent = "";
+            alert("Oops! Unable to send email. Please try again.");
+          });
+      });
+    }
+    // ———————————————— //
+  });
+</script>
+
+<script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/defaultFormValidation.js') }}"></script>
+{% endblock %}

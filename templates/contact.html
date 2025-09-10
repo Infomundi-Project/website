@@ -1,0 +1,110 @@
+{% extends "base.html" %}{% block title %}Contact{% endblock %} {% block styles %}
+<style>
+  .contact-form {
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
+{% endblock %} {% block about_content %}
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="pgpInfoModal" tabindex="-1" aria-labelledby="pgpInfoModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="pgpInfoModalLabel">What is PGP and Why is it Important?</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          <a href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy" target="_blank">Pretty Good Privacy</a> (PGP) is an encryption tool designed to protect your communications and data. It uses public-key cryptography to ensure that only
+          the intended recipient can read the encrypted messages. With PGP, each user has a public key (which is shared) and a private key (kept secure). The public key is used to encrypt messages, and only the corresponding private key can
+          decrypt them. This ensures privacy, data integrity, and verification of the sender's identity. For secure communication with us, download our
+          <a href="/pubkey.asc" target="_blank"><i class="fa-solid fa-key me-1"></i>PGP Public Key</a>.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+  <div class="row align-items-center g-lg-5 py-5">
+    <div class="col-lg-7 text-lg-start">
+      <h2 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">We'd love to hear from you</h2>
+      <p class="col-lg-10 fs-5">
+        Your thoughts, questions, and feedback are invaluable to us as they help shape our journey towards a more informed and interconnected world.<br />
+        <br />
+        For direct and convenient communication, please use our contact form. It's the quickest way to get your message directly to the team.
+      </p>
+      <a href="mailto:contact@infomundi.net" class="fs-5 mt-5 text-decoration-none"> <i class="fa-solid fa-envelope me-1"></i> contact@infomundi.net </a>
+      <p class="fs-6 mt-3">
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#pgpInfoModal"><i class="fa-solid fa-key me-1"></i> Need More Privacy?</button>
+      </p>
+    </div>
+    <div class="col-md-10 mx-auto p-0 col-lg-5">
+      <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary mt-3" method="post" action="{{ url_for('views.contact') }}" id="captcha-wait-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        {% if not current_user.is_authenticated %}
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingName" name="name" maxlength="50" placeholder="Your name" required />
+          <label for="floatingName">Name</label>
+        </div>
+        {% else %}
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingName" name="name" maxlength="50" value="{{ current_user.username }}" placeholder="Your name" required />
+          <label for="floatingName">Name</label>
+        </div>
+        {% endif %} {% if not current_user.is_authenticated %}
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="floatingEmail" name="email" maxlength="70" placeholder="name@example.com" required />
+          <label for="floatingEmail">Email address</label>
+        </div>
+        {% else %}
+        <div class="input-group mb-3">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="floatingEmail" value="{{ session.get('obfuscated_email_address', '') }}" name="email" disabled />
+            <label for="floatingEmail">Email address</label>
+          </div>
+          <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+        </div>
+        {% endif %}
+
+        <div class="form-floating mb-2">
+          <textarea class="form-control" id="floatingMessage" name="message" rows="4" minlength="5" maxlength="1000" placeholder="Message" style="height: 200px;" required></textarea>
+          <label for="floatingMessage">Message</label>
+          <div id="charCount">Characters remaining: 1000</div>
+        </div>
+        <cap-widget 
+            data-cap-api-endpoint="https://cap.infomundi.net/e21b71eb43/"
+        ></cap-widget>
+
+        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+
+<script nonce="{{ nonce }}">
+  document.addEventListener("DOMContentLoaded", function () {
+    var messageInput = document.getElementById("floatingMessage");
+    var charCount = document.getElementById("charCount");
+
+    messageInput.addEventListener("input", function () {
+      var remainingChars = 1000 - this.value.length;
+      charCount.textContent = "Characters remaining: " + remainingChars;
+    });
+  });
+</script>
+
+{% endblock %}

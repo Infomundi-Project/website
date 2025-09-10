@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="{% if request.endpoint == 'views.comments' %}{{ story.lang }}{% else %}en{% endif %}" data-bs-theme="{% if not is_light_mode %}dark{% else %}light{% endif %}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="canonical" href="{{ request.url }}">
+    <script type="application/ld+json" nonce="{{ nonce }}">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Infomundi",
+        "url": "https://infomundi.net",
+        "logo": "https://infomundi.net/static/img/logos/logo-500-bg-light.webp",
+        "email": "contact@infomundi.net",
+        "contactPoint": [{
+          "@type": "ContactPoint",
+          "email": "contact@infomundi.net",
+          "contactType": "customer support"
+        }],
+        "sameAs": ["https://twitter.com/infomundi_net", "https://instagram.com/infomundi_net", "https://github.com/Infomundi-Project"]
+      }
+    </script>
+    <!-- Primary -->
+    <meta name="title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta name="description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta name="theme-color" content="#000000">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta property="og:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta property="og:image" content="{% if seo_data %}{{ seo_data[2] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="{% if seo_data %}{{ seo_data[0] }}{% else %}Infomundi{% endif %}">
+    <meta property="twitter:description" content="{% if seo_data %}{{ seo_data[1] }}{% else %}Infomundi utilizes various global media channels to cover international news, developing a community dedicated to staying well-informed about global affairs.{% endif %}">
+    <meta property="twitter:image" content="{% if seo_data %}{{ seo_data[2] }}{% else %}https://infomundi.net/static/img/logos/logo-500-bg-dark.webp{% endif %}">
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='img/favicon/site.webmanifest') }}">
+    <link rel="mask-icon" href="{{ url_for('static', filename='img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <!-- Stylesheets/Libraries -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/jquery-ui-1.13.1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}"> {% block header %} {% endblock %}
+    <!-- Stylesheets/Website --> {% assets "css_base" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %} <title>Infomundi - {% block title %}Home{% endblock %}</title> {% block styles %} {% endblock %}
+  </head>
+  <body> {% if page != 'Error' %} <div class="offcanvas inf-nav-offcanvas offcanvas-start shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasNavigation">
+      <div class="offcanvas-header">
+        <a href="/" class="text-decoration-none text-reset">
+          <img data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
+          <span class="logo-text fs-4 notranslate">infomundi</span>
+        </a>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <span class="fs-4">Search a Country</span>
+        <form action="{{ url_for('api.search') }}" method="POST" class="mb-5">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="input-group justify-content-center">
+            <button aria-label="Submit search button" type="submit" class="input-group-text" id="search-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <input class="form-control autocomplete" aria-describedby="search-icon" style="max-width: 360px;" type="search" aria-label="Search Field" id="searchForCountry" minlength="3" name="query">
+          </div>
+        </form>
+        <span class="fs-4">Pages</span>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-5">
+          <li class="nav-item inf-nav-item">
+            <a href="/" class="nav-link {{ 'active' if request.endpoint == 'views.home' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-house"></i>
+              </span>
+              <div class="vr me-2"></div> Homepage
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.about') }}" class="nav-link {{ 'active' if request.endpoint == 'views.about' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-address-card"></i>
+              </span>
+              <div class="vr me-2"></div> About
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.team') }}" class="nav-link {{ 'active' if request.endpoint == 'views.team' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-people-group"></i>
+              </span>
+              <div class="vr me-2"></div> Team
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.contact') }}" class="nav-link {{ 'active' if request.endpoint == 'views.contact' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-phone"></i>
+              </span>
+              <div class="vr me-2"></div> Contact
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.policies') }}" class="nav-link {{ 'active' if request.endpoint == 'views.policies' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-building-shield"></i>
+              </span>
+              <div class="vr me-2"></div> Policies
+            </a>
+          </li>
+        </ul>
+        <span class="fs-4">Follow us</span>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item inf-nav-item">
+            <a href="https://twitter.com/infomundi_net" target="_blank" class="nav-link">
+              <span class="icon-wrapper me-2">
+                <i class="fa-brands fa-x-twitter"></i>
+              </span>
+              <div class="vr me-2"></div> Twitter
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="https://instagram.com/infomundi_net" target="_blank" class="nav-link">
+              <span class="icon-wrapper me-2">
+                <i class="fa-brands fa-instagram"></i>
+              </span>
+              <div class="vr me-2"></div> Instagram
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="https://github.com/Infomundi-Project" target="_blank" class="nav-link">
+              <span class="icon-wrapper me-2">
+                <i class="fa-brands fa-github"></i>
+              </span>
+              <div class="vr me-2"></div> Github
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="offcanvas inf-nav-offcanvas offcanvas-end shadow-lg" data-bs-scroll="true" tabindex="-1" id="offcanvasUserNavigation">
+      <div class="offcanvas-header"> 
+        {% if current_user.is_authenticated %} 
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-2 p-0">
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-decoration-none"><img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}'s profile picture" class="rounded img-fluid"></a>
+            </div>
+            <div class="col-9 text-center">
+              <ul class="list-inline notranslate mb-1">
+              
+                <li class="list-inline-item fw-bold"><a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="text-reset">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</a></li>
+                <li class="list-inline-item text-muted small" title="Username">@{{ current_user.username }}</li>
+
+              </ul>
+            </div>
+            <div class="col-1 text-center p-0">
+              <button type="button" class="btn-close small" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+          </div>
+        </div> 
+        {% else %}
+        <a href="/" class="text-decoration-none text-reset">
+          <img data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 8vh;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon me-2">
+          <span class="logo-text fs-4 notranslate">infomundi</span>
+        </a> {% endif %} </div>
+      <div class="offcanvas-body">
+        <hr class="mt-0">
+        <ul class="nav nav-pills flex-column mb-5"> {% if current_user.is_authenticated %} <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link {% if request.url.endswith('/p/' + current_user.username) or request.url.endswith('/profile/' + current_user.username) %}active{% endif %}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-user"></i>
+              </span>
+              <div class="vr me-2"></div> Profile
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item" id="inboxLeftNavbar">
+            <a href="#" class="nav-link d-flex align-items-center">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-inbox fa-lg"></i>
+              </span>
+              <div class="vr me-2"></div>
+              <span>Inbox</span>
+              <!-- new badge: -->
+              <span id="unreadBadgeNavLeft" class="badge bg-danger ms-auto" style="display:none">0</span>
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('views.edit_user_settings') }}" class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-gear"></i>
+              </span>
+              <div class="vr me-2"></div> Settings
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </span>
+              <div class="vr me-2"></div> Sign out
+            </a>
+          </li> {% else %} <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('auth.login') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.login' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-right-to-bracket"></i>
+              </span>
+              <div class="vr me-2"></div> Sign in
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('auth.register') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.register' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-user-pen"></i>
+              </span>
+              <div class="vr me-2"></div> Sign up
+            </a>
+          </li>
+          <li class="nav-item inf-nav-item">
+            <a href="{{ url_for('auth.forgot_password') }}" class="nav-link {{ 'active' if request.endpoint == 'auth.forgot_password' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-person-circle-question"></i>
+              </span>
+              <div class="vr me-2"></div> Account Recovery
+            </a>
+          </li> {% endif %}
+        </ul>
+        <span class="fs-4">Preferences</span>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-5">
+          <li class="nav-item inf-nav-item" id="infThemeToggleClicker">
+            <a href="#" class="d-flex nav-link {{ 'active' if not is_light_mode else '' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-circle-half-stroke {{ 'fa-flip-horizontal' if is_light_mode else ''}}"></i>
+              </span>
+              <div class="vr me-2"></div>
+              {{ 'Light Mode' if is_light_mode else 'Dark Mode' }}
+            </a>
+          </li>
+        </ul>
+        <span class="fs-4">Session</span>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-5"> {% if session.get('last_visited_country_url') %} <li class="nav-item inf-nav-item">
+            <a href="{{ session['last_visited_country_url'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_country_url']) else '' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-earth-americas"></i>
+              </span>
+              <div class="vr me-2"></div> Last visited country
+            </a>
+          </li> {% endif %} {% if session.get('last_visited_story_url') %} <li class="nav-item inf-nav-item">
+            <a href="{{ session['last_visited_story_url'] }}" class="nav-link {{ 'active' if request.url.endswith(session['last_visited_story_url']) else '' }}">
+              <span class="icon-wrapper me-2">
+                <i class="fa-solid fa-newspaper"></i>
+              </span>
+              <div class="vr me-2"></div> Last visited story
+            </a>
+          </li> {% endif %} </ul>
+      </div>
+    </div>
+    <nav class="navbar bg-body-tertiary navbar-expand shadow-lg sticky-top border-bottom" aria-label="Infomundi Navbar" id="mainNavbar">
+      <div class="container-fluid">
+        <a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavigation" aria-controls="offcanvasNavigation" class="navbar-toggler-icon me-3" style="height: 1.7rem; width: 1.7rem;" aria-label="Click to expand the site navigation"></a>
+        <a href="/" class="navbar-brand py-0 logo-text notranslate fs-5">
+          <img fetchpriority="high" src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.svg" class="me-2" style="height: auto; width: 3.5rem" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth.">{% if not is_mobile %}infomundi{% endif %} </a>
+        <div class="collapse navbar-collapse" id="navbarsExample02">
+          <ul class="navbar-nav me-auto text-uppercase">
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link cool-link" href="{{ url_for('views.about') }}">About</a>
+            </li>
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link disabled" href="#" aria-disabled="true">Community</a>
+            </li>
+            <li class="nav-item d-none d-md-block d-lg-block">
+              <a class="nav-link disabled" href="#" aria-disabled="true">World Trackers</a>
+            </li>
+          </ul>
+          <div class="dropdown me-lg-5 me-3">
+            <button class="btn btn-sm border dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-language me-1"></i>
+              <span id="current-lang">Language</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+              <!-- Disable translation option -->
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="none"> 🚫 Disable Translation <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <!-- 15 most-spoken languages -->
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="en">🇺🇸 English <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="zh-CN">🇨🇳 中文 <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="es">🇪🇸 Español <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="hi">🇮🇳 हिन्दी <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="ar">🇸🇦 العربية <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="bn">🇧🇩 বাংলা <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="pt">🇵🇹 Português <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="ru">🇷🇺 Русский <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="ja">🇯🇵 日本語 <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="pa">🇵🇰 ਪੰਜਾਬੀ <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="mr">🇮🇳 मराठी <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="te">🇮🇳 తెలుగు <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="tr">🇹🇷 Türkçe <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="ko">🇰🇷 한국어 <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="fr">🇫🇷 Français <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-lang="de">🇩🇪 Deutsch <i class="fa-solid fa-check ms-auto d-none"></i>
+                </a>
+              </li>
+            </ul>
+          </div> {% if current_user.is_authenticated %} <div class="me-3 mt-2 d-none d-md-block d-lg-block" data-bs-toggle="modal" data-bs-target="#friendsModal">
+            <span id="totalFriends" class="d-block text-center"></span>
+            <span id="onlineFriends" class="text-muted small text-capitalize">
+              <span class="dot" style="height: 8px; width: 8px; background-color: gray; display: inline-block; border-radius: 50%; margin-right: 4px;"></span>
+            </span>
+          </div>
+          <div id="inboxBtn" class="me-4 mt-2 position-relative d-none d-md-block d-lg-block">
+            <span id="unreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0 <span class="visually-hidden">unread messages</span>
+            </span>
+            <span class="d-block text-center">
+              <i class="fa-solid fa-inbox fa-lg"></i>
+            </span>
+            <span class="text-muted small text-capitalize">inbox</span>
+          </div>
+          <a href="#" class="text-decoration-none text-reset" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation" aria-controls="offcanvasUserNavigation" aria-label="Click here to expand the user navigation">
+            <img src="{{ current_user.avatar_url }}" fetchpriority="high" alt="{{ current_user.username }}'s profile picture" style="height: 3.5rem; width: 3.5rem;" class="rounded">
+          </a> {% else %} <a href="#" class="d-block link-body-emphasis text-decoration-none {% if is_mobile and current_user.is_authenticated %}dropdown-toggle{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUserNavigation" aria-controls="offcanvasUserNavigation" aria-label="Click here to expand the user navigation">
+            <span class="dropdown-toggle">
+              <i class="fa-solid fa-user me-2"></i>{% if not is_mobile %}Account{% endif %} </span>
+          </a> {% endif %}
+        </div>
+      </div>
+    </nav> {% endif %} {% if request.endpoint == 'views.news' %} <div class="hwrap" id="ticker">
+      <div class="hmove"> {% if stock_date and not is_global %} {% if country_index %} <div class="hitem" style="color: white">
+          <span class='fi fi-{{ country_index["country"]["code"] }}'></span>
+          <span style="color: white">{{ country_index['country']['name'] }}</span>
+          <span style="color: {{ country_index['color'] }};">
+            {{ country_index['name'] }} {{ country_index['changes']['percent'] }}
+          </span> {% if country_index['color'] == '#FF6666' %} <span style="color: #FF6666">&#8659;</span> {% else %} <span style="color: #00FF00">&#8657;</span> {% endif %} {% if 'currency' in country_index.keys() %} | <span style="color: white">{{ country_index['currency']['name_plural'].title() }} ({{ country_index['currency']['name'].replace('USD', '') }})</span>
+          <span style="color: {{ country_index['currency']['color'] }};">
+            {{ country_index['currency']['changes']['percent'] }}</span> {% if country_index['currency']['color'] == '#FF6666' %} <span style="color: #FF6666">&#8659;</span> {% else %} <span style="color: #00FF00">&#8657;</span> {% endif %} </span> | <span style="color: white"> {% if country_index['currency']['name'].startswith('USD') %} 1 USD = {{ country_index['currency']['price'] }}
+            {{ country_index['currency']['symbol'] }} {% else %} {{ country_index['currency']['symbol'] }}1 = ${{ country_index['currency']['price'] }} {% endif %} </span> {% endif %}
+        </div> {% endif %} {% endif %} {% if not is_global %} <div class="hitem" style="color: white"> Stocks ({{ stock_date }}) <i class="fa-solid fa-arrow-right ms-1"></i>
+        </div> {% endif %} {% if is_global %} <div class="hitem" style="color: white">
+          <i class="fa-solid fa-circle-info me-1"></i> No national stock data available
+        </div>
+        <div class="hitem" style="color: white">
+          <i class="fa-solid fa-globe me-1"></i> Main world stocks <i class="fa-solid fa-arrow-right ms-1"></i>
+        </div> {% endif %} {% for stock_info in stock_data %} <div class="hitem" style="color:{% if '-' in stock_info['day_change'] %} #FF6666;{% else %} #00FF00;{% endif %}">
+          <span style="color: white">{{ stock_info['name'] }}</span>
+          {{ stock_info['symbol'] }}
+          {{ stock_info['day_change'] }} {% if '-' in stock_info['day_change'] %} <span style="color: #FF6666">&#8659;</span> {% else %} <span style="color: #00FF00">&#8657;</span> {% endif %} {% if stock_info['market_cap'] != None %} <span style="color: white"> ({{ stock_info['market_cap'] }}) </span> {% endif %}
+        </div> {% endfor %}
+      </div>
+    </div> {% endif %} <div class="container-fluid {% if request.endpoint == 'views.user_profile' %}background-container py-3{% endif %}"> {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %} {% if category == 'error' %} <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> {% else %} <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> {% endif %} {% endfor %} {% endif %} {% endwith %} <div class="modal fade" id="friendsModal" tabindex="-1" aria-labelledby="friendsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="friendsModalLabel">Your Friends</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Friend List Container -->
+              <div id="friendsListContainer" class="container"></div>
+              <!-- Pagination Controls -->
+              <nav aria-label="Page navigation" id="paginationControls" class="mt-3">
+                <ul class="pagination justify-content-center"></ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Chat modal -->
+      <div class="modal fade" id="chatModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="chatModalLabel">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content shadow-lg border-0">
+            <!-- header -->
+            <div class="modal-header bg-primary text-white align-items-center">
+              <h5 class="modal-title d-flex align-items-center gap-2 mb-0" id="chatModalLabel">
+                <i class="fa-solid fa-comment-dots"></i>
+                <span id="chatFriendName"></span>
+                <span class="badge bg-success d-flex align-items-center gap-1" data-bs-toggle="tooltip" data-bs-placement="top" title="This chat is encrypted end-to-end. It means that only you and the other end (your friend) have access to the content of the messages. No third party, including Infomundi's staff, can audit this conversation. Enjoy your privacy!">
+                  <i class="fa-solid fa-lock"></i> E2EE </span>
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- message list -->
+            <div class="modal-body p-0" id="chatModalBody">
+              <ul id="chatMessages" class="list-unstyled p-3 mb-0">
+                <!-- bubbles appear here -->
+                <li id="typingIndicator" class="text-muted small d-none">
+                  <em>
+                    <i class="fa-solid fa-ellipsis fa-beat-fade me-1"></i>typing </em>
+                </li>
+              </ul>
+            </div>
+            <!-- composer -->
+            <div class="modal-footer bg-secondary-subtle">
+              <div id="replyPreview" class="d-none text-break"> Replying to <strong class="reply-text"></strong>
+                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="cancelReplyBtn">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="input-group">
+                <input id="chatInput" type="text" class="form-control" placeholder="Type a message..." autocomplete="off">
+                <button id="sendChatBtn" class="btn btn-primary" type="button">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+              <span class="small">Infomundi Chat. Always end-to-end encrypted.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Notifications Modal -->
+      <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="notificationsLabel">Your Notifications</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+              <div id="notificationsList"></div>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button id="markAllReadBtn" type="button" class="btn">Mark All as Read</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Link Warning Modal -->
+      <div class="modal fade" id="externalLinkModal" tabindex="-1" aria-labelledby="externalLinkModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="externalLinkModalLabel">Leaving Infomundi</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="externalLinkModalBody"> You are about to leave our site. Are you sure you want to proceed? </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <a id="proceedLink" type="button" role="button" class="btn btn-primary" href="#">Proceed</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- TRANSLATION MODAL -->
+      <div class="modal fade" id="translationModal" tabindex="-1" aria-labelledby="translationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="translationModalLabel">Translate Page? </h5>
+            </div>
+            <div class="modal-body">
+              <p> We detected your preferred language as <strong id="detectedLangDisplay"></strong>. </p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="translationOption" id="opt-auto" checked />
+                <label class="form-check-label" for="opt-auto"> Translate to <span id="detectedLangInline"></span>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="translationOption" id="opt-none" />
+                <label class="form-check-label" for="opt-none"> No translation (Original English) </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="translationOption" id="opt-other" />
+                <label class="form-check-label" for="opt-other"> Choose another language </label>
+              </div>
+              <div class="mt-2" id="other-lang-group" style="display:none;">
+                <select class="form-select" id="otherLangSelect">
+                  <option value="en">🇺🇸 English</option>
+                  <option value="zh-CN">🇨🇳 中文</option>
+                  <option value="es">🇪🇸 Español</option>
+                  <option value="hi">🇮🇳 हिन्दी</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                  <option value="bn">🇧🇩 বাংলা</option>
+                  <option value="pt">🇵🇹 Português</option>
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="ja">🇯🇵 日本語</option>
+                  <option value="pa">🇵🇰 ਪੰਜਾਬੀ</option>
+                  <option value="mr">🇮🇳 मराठी</option>
+                  <option value="te">🇮🇳 తెలుగు</option>
+                  <option value="tr">🇹🇷 Türkçe</option>
+                  <option value="ko">🇰🇷 한국어</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="de">🇩🇪 Deutsch</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
+              <button type="button" class="btn btn-primary" id="saveTranslationChoice"> Save </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sign out modal --> {% if current_user.is_authenticated %} <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="signOutModalLabel">Sign Out</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Hey, {% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}. Do you really want to sign out?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <a type="button" role="button" class="btn btn-success" href="{{ url_for('auth.logout') }}">
+                <i class="fa-solid fa-check me-1"></i>Confirm </a>
+            </div>
+          </div>
+        </div>
+      </div> {% endif %}
+      <!-- Hidden Google Translate container -->
+      <div id="google_translate_element" style="display:none;"></div> {% if request.endpoint in ('views.about', 'views.contact', 'views.policies', 'views.team') %} <div class="container">
+        <div class="row">
+          <div class="my-5 text-center">
+            <img src="{% if request.cookies.get('theme') == 'dark' %}{{ url_for('static', filename='img/logos/logo-wide-dark-resized.webp') }}{% else %}{{ url_for('static', filename='img/logos/logo-wide-light-resized.webp') }}{% endif %}" class="infomundi-logo" height="16" width="9" alt="A resilient figure cradling Earth in powerful hands - a testament to strength and global impact. Followed by the website name: Infomundi." />
+            <p class="fs-5">About</p>
+            <h1 class="display-5 fw-bold text-body-emphasis"> {% if request.endpoint == 'views.about' %}Website{% else %}{{ request.path.replace('/', '').capitalize() }}{% endif %} </h1>
+            <div class="col-lg-6 mx-auto"></div>
+          </div>
+          <ul class="nav nav-underline nav-fill justify-content-center border-top mb-5">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'views.about' %}active{% endif %}" href="{{ url_for('views.about') }}">Website</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'views.team' %}active{% endif %}" href="{{ url_for('views.team') }}">Team</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'views.contact' %}active{% endif %}" href="{{ url_for('views.contact') }}">Contact</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'views.policies' %}active{% endif %}" href="{{ url_for('views.policies') }}">Policies</a>
+            </li>
+          </ul>
+        </div>
+      </div> {% block about_content %} {% endblock %} {% endif %} {% if request.endpoint in ['views.edit_user_profile', 'views.edit_user_avatar', 'views.edit_user_settings'] %} <div class="container mt-5">
+        <div class="row align-items-start">
+          <div class="col-md-3 p-3 rounded bg-secondary-subtle mb-3">
+            <img src="{{ current_user.avatar_url }}" class="img-thumbnail rounded" alt="{{ current_user.username }}'s profile picture">
+            <ul class="list-inline notranslate mb-1">
+              <li class="list-inline-item fw-bold fs-4">{% if current_user.display_name %}{{ current_user.display_name }}{% else %}{{ current_user.username }}{% endif %}</li>
+              <li class="list-inline-item text-muted" title="Username">@{{ current_user.username }}</li>
+            </ul>
+            <a href="/profile/{{ current_user.username }}" class="btn btn-sm btn-primary mt-2">Return to profile</a>
+            <ul class="nav nav-pills flex-column mt-4">
+              <li class="nav-item inf-nav-item">
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_profile' %}active{% endif %}" href="/profile/edit">
+                  <i class="fa-solid fa-user me-1"></i>Info </a>
+              </li>
+              <li class="nav-item inf-nav-item">
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_avatar' %}active{% endif %}" href="/profile/edit/avatar">
+                  <i class="fa-solid fa-image me-1"></i>Media </a>
+              </li>
+              <li class="nav-item inf-nav-item">
+                <a class="nav-link {% if request.endpoint == 'views.edit_user_settings' %}active{% endif %}" href="/profile/edit/settings">
+                  <i class="fa-solid fa-address-card me-1"></i>Details </a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-9 px-0 px-lg-3">
+            <div class="p-3 rounded bg-secondary-subtle"> {% block edit_profile_content %} {% endblock %} </div>
+          </div>
+        </div>
+      </div> {% endif %}
+      <!-- Where the main content of the webpage gets inserted --> {% block content %} {% endblock %}
+    </div>
+    <!-- Scroll top button -->
+    <button type="button" class="btn btn-primary inf-fixed-button" id="scrollTopBtn" style="position: fixed; bottom: 20px; right: 20px; display: none;">
+      <i class="fa-solid fa-angles-up"></i>
+    </button>
+    <!-- chat toaster -->
+    <div id="chatToastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+    <!-- Start Footer --> {% if page != "Error" %} <div class="container py-5">
+      <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
+        <div class="col-md-4 mb-3">
+          <center>
+            <a href="/" class="text-decoration-none" aria-label="Click to return to the home page.">
+              <img data-src="/static/img/logos/{% if not is_light_mode %}logo-icon-dark{% else %}logo-icon-light{% endif %}.webp" width="380" height="380" style="height: auto; width: 35%;" alt="The Infomundi logo, which depicts a stylized representation of a man standing in front of the Earth." class="lazyload infomundi-icon">
+            </a>
+            <p class="text-body-secondary mt-3 notranslate">&copy; Infomundi 2025 <br>
+              <span class="mt-2 notranslate">
+                <a href="mailto:contact@infomundi.net" class="text-decoration-none">
+                  <i class="fa-solid fa-envelope me-1"></i>contact@infomundi.net </a>
+              </span>
+            </p>
+          </center>
+        </div>
+        <div class="col mb-3">
+          <p class="fs-4 notranslate">INFOMUNDI</p>
+          <ul class="nav flex-column">
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.home') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to return to the home page">
+                <i class="fa-solid fa-house me-1"></i>Homepage </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.about') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the about page">
+                <i class="fa-solid fa-address-card me-1"></i>About </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.team') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page">
+                <i class="fa-solid fa-people-group me-1"></i>Team </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.contact') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the contact page">
+                <i class="fa-solid fa-phone me-1"></i>Contact </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.policies') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the policies page">
+                <i class="fa-solid fa-building-shield me-1"></i>Policies </a>
+            </li>
+          </ul>
+        </div>
+        <div class="col mb-3">
+          <p class="fs-4">SESSION</p>
+          <ul class="nav flex-column"> {% if not current_user.is_authenticated %} <li class="nav-item mb-2">
+              <a href="{{ url_for('auth.forgot_password') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page">
+                <i class="fa-solid fa-person-circle-question me-1"></i>Account Recovery </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('auth.register') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the sign up page">
+                <i class="fa-solid me-1 fa-user-pen me-1"></i>Sign up </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('auth.login') }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open the login page">
+                <i class="fa-solid me-1 fa-right-to-bracket me-1"></i>Login </a>
+            </li> {% else %} <li class="nav-item mb-2">
+              <a href="{{ url_for('views.user_profile', username=current_user.username) }}" class="nav-link p-0 text-body-secondary">
+                <i class="fa-solid fa-user me-1"></i>Profile </a>
+            </li>
+            <li class="nav-item mb-2" id="inboxFooter">
+              <a href="#" class="nav-link p-0 text-body-secondary d-flex align-items-center">
+                <i class="fa-solid fa-inbox fa-lg me-1"></i>
+                <span>Inbox</span>
+                <!-- new badge: -->
+                <span id="unreadBadgeNavFooter" class="badge bg-danger ms-auto" style="display:none">0</span>
+              </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="{{ url_for('views.edit_user_profile') }}" class="nav-link p-0 text-body-secondary">
+                <i class="fa-solid fa-gear me-1"></i>Settings </a>
+            </li> {% if session.get('last_visited_country_url', '') %} <li class="nav-item mb-2">
+              <a href="{{ session['last_visited_country_url'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited country">
+                <i class="fa-solid fa-earth-americas me-1"></i>Last visited country </a>
+            </li> {% endif %} {% if session.get('last_visited_story_url', '') %} <li class="nav-item mb-2">
+              <a href="{{ session['last_visited_story_url'] }}" class="nav-link p-0 text-body-secondary" aria-label="Click to open your last visited story">
+                <i class="fa-solid fa-newspaper me-1"></i>Last visited story </a>
+            </li> {% endif %} <li class="nav-item mb-2">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#signOutModal" class="nav-link p-0 text-body-secondary" aria-label="Click to log out from your account">
+                <i class="fa-solid fa-right-from-bracket me-1"></i>Sign out </a>
+            </li> {% endif %}
+          </ul>
+        </div>
+        <div class="col mb-3">
+          <p class="fs-4">FOLLOW US</p>
+          <ul class="nav flex-column">
+            <li class="nav-item mb-2">
+              <a href="https://twitter.com/infomundi_net" aria-label="Click to open Infomundi's profile on Twitter" target="_blank" class="nav-link p-0 text-body-secondary">
+                <i class="fa-brands fa-x-twitter me-1"></i>Twitter </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="https://instagram.com/infomundi_net" aria-label="Click to open Infomundi's profile on Instagram" target="_blank" class="nav-link p-0 text-body-secondary">
+                <i class="fa-brands fa-instagram me-1"></i>Instagram </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a href="https://github.com/Infomundi-Project" aria-label="Click to open Infomundi's profile on Github" target="_blank" class="nav-link p-0 text-body-secondary">
+                <i class="fa-brands fa-github me-1"></i>Github </a>
+            </li>
+          </ul>
+        </div>
+      </footer>
+    </div> {% endif %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/bootstrap.bundle.min.js') }}"></script>
+    <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/jquery-3.7.1.min.js') }}"></script>
+    <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}"></script> <script nonce="{{ nonce }}" src="https://cap.infomundi.net/assets/widget.js"></script> <script nonce="{{ nonce }}">window.CAP_CUSTOM_WASM_URL = "https://bleeding.infomundi.net/static/js/libs/cap_wasm.min.js";</script><!--<script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/captcha.js') }}"></script>--> {% assets "js_base" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% if current_user.is_authenticated %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
+    <script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script> {% assets "js_base_authenticated" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% endif %} 
+    <script nonce="{{ nonce }}">
+      window.currentUserId = {{ current_user.id if current_user.is_authenticated else 0 }};
+      window.currentUserPublicId = "{{ current_user.get_public_id() if current_user.is_authenticated else '' }}";
+      window.isUserAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+      window.currentUserAvatarUrl = "{{ current_user.avatar_url if current_user.is_authenticated else '/static/img/avatar.webp' }}";
+    </script> 
+    {% if request.endpoint in ('views.home', 'views.user_profile') %}
+    <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/chart.umd.min.js') }}"></script>
+    {% endif %}
+    
+
+    {% block scripts %} {% endblock %}
+  </body>
+</html>
