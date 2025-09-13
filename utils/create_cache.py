@@ -7,8 +7,8 @@ import yake
 
 from random import shuffle, choice
 from urllib.parse import urljoin
-from datetime import datetime
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 
 from website_scripts import (
     config,
@@ -36,6 +36,44 @@ logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
 )
+
+def prune_old_stories(days: int = 7) -> dict:
+    """
+    Delete stories older than `days` and any associated tags.
+    Returns counts of deleted rows.
+    """
+    try:
+        # Use a concrete cutoff timestamp to avoid INTERVAL param quirks
+        cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
+        db_connection.ping(reconnect=True)
+
+        with db_connection.cursor() as cursor:
+            # 1) Remove tags for stories older than cutoff (harmless if FK cascade exists)
+            delete_tags_sql = """
+                DELETE t
+                FROM tags AS t
+                JOIN stories AS s ON s.id = t.story_id
+                WHERE s.pub_date < %s
+            """
+            cursor.execute(delete_tags_sql, (cutoff,))
+            tags_deleted = cursor.rowcount
+
+            # 2) Remove the old stories
+            delete_stories_sql = """
+                DELETE FROM stories
+                WHERE pub_date < %s
+            """
+            cursor.execute(delete_stories_sql, (cutoff,))
+            stories_deleted = cursor.rowcount
+
+        db_connection.commit()
+        log_message(f"Pruned {stories_deleted} stories and {tags_deleted} tags older than {days} days.")
+        return {"stories_deleted": stories_deleted, "tags_deleted": tags_deleted}
+
+    except Exception as e:
+        db_connection.rollback()
+        log_message(f"Error pruning old stories: {e}")
+        return {"stories_deleted": 0, "tags_deleted": 0}
 
 
 def extract_yake(text: str, lang_code: str = "en", top_n: int = 5) -> tuple:
@@ -379,12 +417,14 @@ def fetch_publishers_from_database(category_id: int):
     log_message(f"Got {len(publishers)} publishers from the database")
     return publishers
 
-
 def main():
     total_done = 0
     categories = fetch_categories_from_database()
 
     for category_id, category_name in categories:
+        if category_name != 'br_general':
+            continue
+        
         percentage = (total_done // len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
 
@@ -402,12 +442,10 @@ def main():
         for thread in threads:
             thread.join()
 
-        # Merges all articles in a single list
         merged_articles = []
         for rss_data in result_list:
             if not rss_data:
                 continue
-
             merged_articles.extend(rss_data["items"])
 
         if not merged_articles:
@@ -415,7 +453,6 @@ def main():
             continue
 
         shuffle(merged_articles)
-
         exceptions_count = insert_stories_to_database(
             merged_articles, category_name, category_id
         )
@@ -424,6 +461,9 @@ def main():
         log_message(
             f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}."
         )
+
+    # 👇 auto-delete anything older than 7 days
+    prune_old_stories(days=7)
 
     log_message("Finished!")
 

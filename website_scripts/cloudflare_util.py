@@ -2,8 +2,7 @@ from requests import post as post_request
 from json import loads as json_loads
 from flask import request
 
-from .config import CAPTCHA_SECRET_KEY
-
+from . import config
 
 def is_valid_captcha(token: str) -> bool:
     """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge.
@@ -20,7 +19,7 @@ def is_valid_captcha(token: str) -> bool:
     response = post_request(
         url="https://challenges.cloudflare.com/turnstile/v0/siteverify",
         timeout=3,
-        data={"secret": CAPTCHA_SECRET_KEY, "response": token},
+        data={"secret": config.TURNSTILE_SECRET_KEY, "response": token},
     )
 
     # Parse JSON from response and return if was a success (True or False).
