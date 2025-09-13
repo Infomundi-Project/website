@@ -14,7 +14,6 @@ Usage:
 """
 
 import argparse
-import os
 import sys
 import threading
 from typing import Optional, Tuple, List
@@ -26,9 +25,11 @@ import rss_finder_i18n as finder
 
 # ---- DB helpers -------------------------------------------------------------
 
+
 def get_db_connection():
     # Uses your exact pattern; requires a config module with credentials.
     from website_scripts import config  # noqa: F401 (must exist in your project)
+
     db_params = {
         "host": "127.0.0.1",
         "user": config.MYSQL_USERNAME,
@@ -39,6 +40,7 @@ def get_db_connection():
         "autocommit": False,
     }
     return pymysql.connect(**db_params)
+
 
 def fetch_publishers_missing_feed(conn, limit: Optional[int] = None) -> List[dict]:
     sql = """
@@ -58,20 +60,24 @@ def fetch_publishers_missing_feed(conn, limit: Optional[int] = None) -> List[dic
         cur.execute(sql, args)
         return cur.fetchall()
 
+
 def update_feed_url(conn, pub_id: int, feed_url: str):
     sql = "UPDATE publishers SET feed_url=%s WHERE id=%s"
     with conn.cursor() as cur:
         cur.execute(sql, (feed_url, pub_id))
 
+
 # ---- Feed discovery using your finder --------------------------------------
 
 DEFAULT_UA = finder.DEFAULT_UA  # reuse your UA string
+
 
 def normalize_root(url: str) -> Optional[str]:
     try:
         return finder._norm_url(url)  # your helper; raises on bad URL
     except Exception:
         return None
+
 
 def discover_valid_feed(root_url: str) -> Optional[str]:
     """
@@ -91,9 +97,13 @@ def discover_valid_feed(root_url: str) -> Optional[str]:
             return cand
     return None
 
+
 # ---- Worker logic (optional concurrency) -----------------------------------
 
-def process_one(pub_row: dict, verbose: bool = False) -> Tuple[int, Optional[str], Optional[str]]:
+
+def process_one(
+    pub_row: dict, verbose: bool = False
+) -> Tuple[int, Optional[str], Optional[str]]:
     """
     Returns (publisher_id, site_url, found_feed_url or None)
     """
@@ -110,12 +120,20 @@ def process_one(pub_row: dict, verbose: bool = False) -> Tuple[int, Optional[str
         print(f"[check] id={pub_id} site={site} -> feed={feed}", file=sys.stderr)
     return pub_id, site, feed
 
+
 # ---- Main -------------------------------------------------------------------
 
+
 def main():
-    ap = argparse.ArgumentParser(description="Backfill publishers.feed_url using rss_finder_i18n discovery.")
-    ap.add_argument("--limit", type=int, default=None, help="Max number of publishers to process")
-    ap.add_argument("--workers", type=int, default=8, help="Concurrency for network checks")
+    ap = argparse.ArgumentParser(
+        description="Backfill publishers.feed_url using rss_finder_i18n discovery."
+    )
+    ap.add_argument(
+        "--limit", type=int, default=None, help="Max number of publishers to process"
+    )
+    ap.add_argument(
+        "--workers", type=int, default=8, help="Concurrency for network checks"
+    )
     ap.add_argument("--dry-run", action="store_true", help="Do not write DB updates")
     ap.add_argument("--verbose", action="store_true", help="Verbose logging to stderr")
     args = ap.parse_args()
@@ -128,6 +146,7 @@ def main():
 
     # Concurrency: thread pool, but we’ll keep DB writes on the main thread.
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
     results: List[Tuple[int, Optional[str], Optional[str]]] = []
 
     # Protect stdout/stderr formatting in verbose mode
@@ -156,7 +175,9 @@ def main():
         if not feed:
             continue
         if args.dry_run:
-            print(f"[dry-run] UPDATE publishers SET feed_url='{feed}' WHERE id={pub_id};")
+            print(
+                f"[dry-run] UPDATE publishers SET feed_url='{feed}' WHERE id={pub_id};"
+            )
         else:
             update_feed_url(conn, pub_id, feed)
             updated += 1
@@ -166,7 +187,10 @@ def main():
     conn.close()
 
     # Summary
-    print(f"Processed: {total} | Found feeds: {sum(1 for _,_,f in results if f)} | Updated: {updated}{' (dry-run)' if args.dry_run else ''}")
+    print(
+        f"Processed: {total} | Found feeds: {sum(1 for _, _, f in results if f)} | Updated: {updated}{' (dry-run)' if args.dry_run else ''}"
+    )
+
 
 if __name__ == "__main__":
     main()

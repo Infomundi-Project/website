@@ -37,6 +37,7 @@ logging.basicConfig(
     format="[%(asctime)s] %(message)s",
 )
 
+
 def prune_old_stories(days: int = 7) -> dict:
     """
     Delete stories older than `days` and any associated tags.
@@ -44,7 +45,9 @@ def prune_old_stories(days: int = 7) -> dict:
     """
     try:
         # Use a concrete cutoff timestamp to avoid INTERVAL param quirks
-        cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
+        cutoff = (datetime.utcnow() - timedelta(days=days)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         db_connection.ping(reconnect=True)
 
         with db_connection.cursor() as cursor:
@@ -67,7 +70,9 @@ def prune_old_stories(days: int = 7) -> dict:
             stories_deleted = cursor.rowcount
 
         db_connection.commit()
-        log_message(f"Pruned {stories_deleted} stories and {tags_deleted} tags older than {days} days.")
+        log_message(
+            f"Pruned {stories_deleted} stories and {tags_deleted} tags older than {days} days."
+        )
         return {"stories_deleted": stories_deleted, "tags_deleted": tags_deleted}
 
     except Exception as e:
@@ -417,14 +422,15 @@ def fetch_publishers_from_database(category_id: int):
     log_message(f"Got {len(publishers)} publishers from the database")
     return publishers
 
+
 def main():
     total_done = 0
     categories = fetch_categories_from_database()
 
     for category_id, category_name in categories:
-        if category_name != 'br_general':
+        if category_name != "br_general":
             continue
-        
+
         percentage = (total_done // len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
 

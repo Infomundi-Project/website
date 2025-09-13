@@ -1,4 +1,5 @@
-import csv, re
+import csv
+import re
 from urllib.parse import urlparse, urlunparse
 from pathlib import PurePosixPath
 from difflib import SequenceMatcher
@@ -20,39 +21,53 @@ db_connection = pymysql.connect(**db_params)
 
 # ---------------- helpers ----------------
 
+
 def normalize_url(url: str) -> str | None:
-    if not url: return None
+    if not url:
+        return None
     u = url.strip()
-    if not u: return None
+    if not u:
+        return None
     if "://" not in u:
         u = "http://" + u
     p = urlparse(u)
-    if not p.netloc: return None
+    if not p.netloc:
+        return None
     scheme = (p.scheme or "http").lower()
     netloc = p.netloc.lower()
-    if netloc.endswith(":80") and scheme == "http":  netloc = netloc[:-3]
-    if netloc.endswith(":443") and scheme == "https": netloc = netloc[:-4]
+    if netloc.endswith(":80") and scheme == "http":
+        netloc = netloc[:-3]
+    if netloc.endswith(":443") and scheme == "https":
+        netloc = netloc[:-4]
     path = p.path or "/"
-    if path != "/" and path.endswith("/"): path = path[:-1]
+    if path != "/" and path.endswith("/"):
+        path = path[:-1]
     return urlunparse((scheme, netloc, path, "", "", ""))
 
+
 def slug_from_source(src: str) -> str | None:
-    if not src: return None
+    if not src:
+        return None
     name = PurePosixPath(urlparse(src).path).name.lower()
     return name[:-4] if name.endswith(".htm") else (name or None)
 
+
 def split_slug(slug: str | None):
     """Returns (base_slug, state_candidate) where state_candidate is last 2 letters if present.
-       '...na' -> national => state_candidate=None."""
-    if not slug: return (None, None)
+    '...na' -> national => state_candidate=None."""
+    if not slug:
+        return (None, None)
     if slug.endswith("na"):
-        return (slug[:-2], None)            # national
+        return (slug[:-2], None)  # national
     m = re.search(r"([a-z]{2})$", slug)
-    if m: return (slug[:-2], m.group(1).upper())  # subnational (2-letter code)
+    if m:
+        return (slug[:-2], m.group(1).upper())  # subnational (2-letter code)
     return (slug, None)
+
 
 def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
 
 def category_key(iso2: str | None, state_code: str | None) -> str:
     """<iso2>_<state-or-na>_general, lowercase, trimmed to VARCHAR(15)."""
@@ -61,7 +76,9 @@ def category_key(iso2: str | None, state_code: str | None) -> str:
     key = f"{cc}_{seg}_general"
     return key[:15]  # keep within current categories.name (VARCHAR(15))
 
+
 # ------------- preload countries & states once -------------
+
 
 def load_country_dict(conn):
     with conn.cursor() as cur:
@@ -81,8 +98,11 @@ def load_country_dict(conn):
     return {
         "rows": rows,
         "tld2iso": tld2iso,
-        "name_keys": [(r["id"], r["iso2"] or "", r["iso3"] or "", norm(r["name"])) for r in rows],
+        "name_keys": [
+            (r["id"], r["iso2"] or "", r["iso3"] or "", norm(r["name"])) for r in rows
+        ],
     }
+
 
 def load_state_codes(conn):
     """Build { 'BR': {'AC','AL',...}, 'US': {...}, ... } from states(country_code, iso2)."""
@@ -97,6 +117,7 @@ def load_state_codes(conn):
             continue
         by_country.setdefault(cc, set()).add(sc)
     return by_country
+
 
 def resolve_iso2(country_dict, host: str, source_page: str) -> str | None:
     # tld first
@@ -114,14 +135,19 @@ def resolve_iso2(country_dict, host: str, source_page: str) -> str | None:
     best_iso2, best = None, 0.0
     for _id, iso2, iso3, cname in country_dict["name_keys"]:
         score = 0.0
-        if b == iso2.lower() or b.startswith(iso2.lower()): score = 0.96
-        if iso3 and (b == iso3.lower() or b.startswith(iso3.lower())): score = max(score, 0.92)
+        if b == iso2.lower() or b.startswith(iso2.lower()):
+            score = 0.96
+        if iso3 and (b == iso3.lower() or b.startswith(iso3.lower())):
+            score = max(score, 0.92)
         score = max(score, SequenceMatcher(None, b, cname).ratio())
         if score > best:
             best, best_iso2 = score, iso2
     return best_iso2 if best >= 0.52 else None
 
-def resolve_state_code(states_by_country, iso2: str | None, source_page: str) -> str | None:
+
+def resolve_state_code(
+    states_by_country, iso2: str | None, source_page: str
+) -> str | None:
     """Extract 2-letter state candidate from slug and validate against DB for that country."""
     if not iso2:
         return None
@@ -132,7 +158,9 @@ def resolve_state_code(states_by_country, iso2: str | None, source_page: str) ->
     valid = states_by_country.get(iso2.upper(), set())
     return cand if cand in valid else None
 
+
 # ------------- main pipeline: recategorize + insert -------------
+
 
 def recategorize_and_import_from_csv(conn, csv_path="/root/e.csv", batch_size=5000):
     """
@@ -194,12 +222,12 @@ def recategorize_and_import_from_csv(conn, csv_path="/root/e.csv", batch_size=50
         # 2) Bulk insert into staging
         data = list(staged.values())
         for i in range(0, len(data), batch_size):
-            chunk = data[i:i+batch_size]
+            chunk = data[i : i + batch_size]
             cur.executemany(
                 """INSERT IGNORE INTO publishers_stage
                    (name, site_url, source_page_url, iso2, state_code, category_name)
                    VALUES (%s,%s,%s,%s,%s,%s)""",
-                chunk
+                chunk,
             )
 
         # 3) Ensure all needed categories exist
@@ -232,7 +260,10 @@ def recategorize_and_import_from_csv(conn, csv_path="/root/e.csv", batch_size=50
         inserted = cur.rowcount
 
     conn.commit()
-    print(f"Done. Updated categories for {updated} existing publishers. Inserted {inserted} new publishers.")
+    print(
+        f"Done. Updated categories for {updated} existing publishers. Inserted {inserted} new publishers."
+    )
+
 
 # Usage:
 recategorize_and_import_from_csv(db_connection, "/root/e.csv")

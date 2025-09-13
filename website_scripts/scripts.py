@@ -70,7 +70,7 @@ def news_page_processing(country_name: str) -> dict:
             f"{config.WEBSITE_ROOT}/assets/data/json/stock_data/united-states_stock"
         )
         is_global = True
-    
+
     # Gets the date from the first stock
     stock_date = stock_data[0]["date"]
 

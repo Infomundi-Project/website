@@ -2,28 +2,21 @@ import csv
 
 import pymysql
 import logging
-from random import shuffle, choice
-from urllib.parse import urljoin
-from datetime import datetime
-from bs4 import BeautifulSoup
 from website_scripts import (
     config,
     input_sanitization,
-    immutable,
-    hashing_util,
-    qol_util,
 )
-from sys import exit 
+from sys import exit
 
 
-with open('/root/e.csv', mode ='r')as file:
+with open("/root/e.csv", mode="r") as file:
     # external_url, anchor_text and source_page
     csvFile = csv.DictReader(file)
     index = 0
     count = 0
     for entry in csvFile:
         index += 1
-        if len(entry['external_url']) > 200:
+        if len(entry["external_url"]) > 200:
             count += 1
     print(count)
     exit()
@@ -60,7 +53,7 @@ def fetch_publishers():
     Example:
         {'id': 1282, 'created_at': datetime.datetime(2025, 4, 7, 13, 15, 49), 'name': 'つくおき', 'feed_url': 'https://cookien.com/feed/', 'favicon_url': None, 'category_id': 198, 'site_url': None}
     """
-    log_message(f"Fetching publishers from database")
+    log_message("Fetching publishers from database")
 
     with db_connection.cursor() as cursor:
         cursor.execute(
@@ -76,7 +69,7 @@ print(fetch_publishers())
 
 
 def fetch_categories():
-    log_message(f"Fetching categories from database")
+    log_message("Fetching categories from database")
     with db_connection.cursor() as cursor:
         cursor.execute("SELECT * from categories")
         categories = cursor.fetchall()
