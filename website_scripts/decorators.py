@@ -138,6 +138,26 @@ def verify_captcha(func):
     return decorated_function
 
 
+def verify_turnstile(func):
+    """This decorator is used to check if a captcha token is valid"""
+
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if request.method != "POST":
+            # If does not require captcha (not POST), return normal
+            return func(*args, **kwargs)
+
+        token = request.form.get("cf-turnstile-response", "")
+        if not cloudflare_util.is_valid_turnstile(token):
+            flash("Invalid captcha. Are you a robot?", "error")
+            return redirect(request.url)
+
+        # Success: clear session and respond
+        return func(*args, **kwargs)
+
+    return decorated_function
+
+
 def sensitive_area(func):
     """This decorator is used to check if the user is allowed to access their account's sensitive area"""
 

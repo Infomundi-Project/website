@@ -4,7 +4,7 @@ from flask import request
 
 from . import config
 
-def is_valid_captcha(token: str) -> bool:
+def is_valid_turnstile(token: str) -> bool:
     """Uses the cloudflare turnstile API to check if the user passed the CAPTCHA challenge.
 
     Args:

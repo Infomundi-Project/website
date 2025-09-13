@@ -28,7 +28,7 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/login", methods=["GET", "POST"])
 @decorators.unauthenticated_only
-@decorators.verify_captcha
+@decorators.verify_turnstile
 @extensions.limiter.limit("20/minute")
 def login():
     # If user is in totp process, redirect them to the correct page
@@ -102,7 +102,7 @@ def disable_totp():
 
 @auth.route("/register", methods=["GET", "POST"])
 @decorators.unauthenticated_only
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def register():
     if request.method == "GET":
         return render_template("register.html")
@@ -191,7 +191,7 @@ def invalidate_sessions():
 
 @auth.route("/forgot_password", methods=["GET", "POST"])
 @decorators.unauthenticated_only
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def forgot_password():
     if request.method == "GET":
         recovery_token = request.args.get("token", "")

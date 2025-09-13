@@ -11,9 +11,9 @@
       <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" method="post" action="{{ url_for('views.captcha') }}" id="captcha-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-        <cap-widget 
-            data-cap-api-endpoint="https://cap.infomundi.net/2cfd065046/"
-        ></cap-widget>
+        <div class="my-3">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAB1DjtcW_dBfr2WO" data-callback="onCaptchaSuccess"></div>
+        </div>
 
         <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Submit</button>
 

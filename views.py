@@ -336,7 +336,7 @@ def be_right_back():
 
 
 @views.route("/captcha", methods=["GET", "POST"])
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def captcha():
     if request.method == "GET":
         # If they have clearance (means that they have recently proven they're human)
@@ -375,7 +375,7 @@ def sensitive():
 
 @views.route("/contact", methods=["GET", "POST"])
 @extensions.limiter.limit("120/day;60/hour;12/minute", override_defaults=True)
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def contact():
     if request.method == "GET":
         return render_template("contact.html")

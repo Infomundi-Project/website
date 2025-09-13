@@ -731,34 +731,8 @@
     </div> {% endif %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/bootstrap.bundle.min.js') }}"></script>
     <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/jquery-3.7.1.min.js') }}"></script>
     <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/jquery-ui-1.13.1.min.js') }}"></script> 
-    <script nonce="{{ nonce }}">
-  // Set this once (e.g., in your base layout)
-  window.CAP_SITE_ID = '2cfd065046';
-  (function () {
-    const API_BASE = 'https://cap.infomundi.net';
+    <script nonce="{{ nonce }}" src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-    function apply(el) {
-      if (!el.hasAttribute('data-cap-api-endpoint')) {
-        el.setAttribute('data-cap-api-endpoint', `${API_BASE.replace(/\/+$/,'')}/${window.CAP_SITE_ID}/`);
-      }
-    }
-
-    // 1) Apply to any already in DOM
-    document.querySelectorAll('cap-widget').forEach(apply);
-
-    // 2) Watch for future <cap-widget> insertions (SPA, dynamically rendered, etc.)
-    const mo = new MutationObserver(muts => {
-      for (const m of muts) {
-        for (const node of m.addedNodes || []) {
-          if (node.nodeType !== 1) continue;
-          if (node.matches?.('cap-widget')) apply(node);
-          node.querySelectorAll?.('cap-widget').forEach(apply);
-        }
-      }
-    });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  })();
-</script>
 
 
     <script nonce="{{ nonce }}" src="https://cap.infomundi.net/assets/widget.js"></script> <script nonce="{{ nonce }}">window.CAP_CUSTOM_WASM_URL = "static/js/libs/cap_wasm.min.js";</script><!--<script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/captcha.js') }}"></script>--> {% assets "js_base" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% if current_user.is_authenticated %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
