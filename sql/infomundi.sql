@@ -111,7 +111,7 @@ CREATE TABLE users (
     FOREIGN KEY (country_id) REFERENCES countries(id),
     FOREIGN KEY (state_id) REFERENCES states(id),
     FOREIGN KEY (city_id) REFERENCES cities(id)
-) WITH (DATA_COMPRESSION = ROW);
+);
 
 
 CREATE TABLE categories (
@@ -127,6 +127,7 @@ CREATE TABLE publishers (
     name VARCHAR(150) NOT NULL,
     feed_url VARCHAR(200),
     site_url VARCHAR(200),
+    UNIQUE KEY uq_site_url (site_url),
     
     favicon_url VARCHAR(100),
 
@@ -161,7 +162,7 @@ CREATE TABLE stories (
     FOREIGN KEY (country_id) REFERENCES countries(id),
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(id)
-) WITH (DATA_COMPRESSION = ROW);
+);
 
 
 CREATE TABLE tags (
@@ -174,7 +175,7 @@ CREATE TABLE tags (
     FOREIGN KEY (story_id)
     REFERENCES stories (id)
     ON DELETE CASCADE
-) WITH (DATA_COMPRESSION = ROW);
+);
 
 
 CREATE TABLE story_reactions (
@@ -251,7 +252,7 @@ CREATE TABLE comments (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,
     FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
-) WITH (DATA_COMPRESSION = ROW);
+);
 
 
 CREATE TABLE comment_reactions (
@@ -307,7 +308,7 @@ CREATE TABLE notifications (
         friendship_id,
         is_read
     )
-) WITH (DATA_COMPRESSION = ROW);
+);
 
 -- Index to speed up querying unread notifications per user
 CREATE INDEX idx_notifications_user_unread
@@ -430,4 +431,4 @@ CREATE TABLE messages (
     FOREIGN KEY (parent_id) REFERENCES messages(id),
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id)
-) WITH (DATA_COMPRESSION = ROW);
+);

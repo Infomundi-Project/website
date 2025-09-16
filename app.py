@@ -311,7 +311,6 @@ def check_session_version():
 def add_headers(response):
     nonce = g.get("nonce", "")
 
-    """
     response.headers["Content-Security-Policy"] = (
         "default-src 'none'; "
         "media-src 'self' https://*.infomundi.net; "
@@ -324,7 +323,7 @@ def add_headers(response):
         "base-uri 'self' https://*.infomundi.net; "
         "font-src 'self' https://*.infomundi.net; "
         "frame-ancestors 'self'"
-    )"""
+    )
 
     if request.path.startswith("/static"):
         # Set Cache-Control header for static files
@@ -354,7 +353,7 @@ css_base = Bundle(
     "fontawesome/css/all.min.css",
     "fontawesome/css/fontawesome.min.css",
     "css/libs/cookieconsent.css",
-    filters="cssmin",
+    filters="rcssmin",
     output="gen/base_packed.css",
 )
 # base.html

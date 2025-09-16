@@ -4,6 +4,45 @@
   padding: 0;
 }
 
+.story-card-style {
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* Card cresce nas bordas (sem aumentar texto) */
+.story-card-style:hover {
+  transform: scale(1.05); 
+  box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.2);
+}
+
+/* Imagem acompanha o crescimento */
+.story-card-style img {
+  transition: transform .3s ease;
+  width: 100%;
+  display: block;
+}
+
+.story-card-style:hover img {
+  transform: scale(1.05); /* imagem cresce suavemente */
+}
+
+.story-card-style .line-clamp-3,
+.story-card-style .line-clamp-4,
+.story-card-style .card-footer {
+  margin-left: 0;
+  margin-right: 0;
+  transition: margin .15s ease;
+}
+
+.story-card-style:hover .line-clamp-3,
+.story-card-style:hover .line-clamp-4,
+.story-card-style:hover .card-footer {
+  margin-left: .3rem;
+  margin-right: .3rem;
+}
+
+
 #infomundiStoryModal .modal-header img {
   width: 100%;
   max-height: 650px;
@@ -127,6 +166,7 @@
   clip: rect(0, 0, 0, 0);
 }
 
+/* THIS PART IS GENERATING A BLUE BACKGROUND THAT I DONT WANT IN THE LATERAL MENU
 .list-group-item-check:hover+.list-group-item {
   background-color: var(--bs-secondary-bg);
 }
@@ -136,6 +176,7 @@
   background-color: var(--bs-primary);
   border-color: var(--bs-primary);
 }
+*/
 
 .list-group-item-check[disabled]+.list-group-item,
 .list-group-item-check:disabled+.list-group-item {
@@ -154,6 +195,7 @@
   margin-top: -.5em;
 }
 
+/* AND THIS PART TOO
 .list-group-radio .list-group-item:hover,
 .list-group-radio .list-group-item:focus {
   background-color: var(--bs-secondary-bg);
@@ -164,6 +206,7 @@
   border-color: var(--bs-primary);
   box-shadow: 0 0 0 2px var(--bs-primary);
 }
+*/
 
 .list-group-radio .form-check-input[disabled]+.list-group-item,
 .list-group-radio .form-check-input:disabled+.list-group-item {
@@ -171,3 +214,10 @@
   filter: none;
   opacity: .5;
 }
+
+
+
+
+
+
+

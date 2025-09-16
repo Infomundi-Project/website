@@ -89,12 +89,27 @@
 </div>
 
 <div class="container">
+  <div class="d-flex justify-content-center align-items-center" style="padding-top: 30px;">
+    <img src="/static/img/flags/4x3/{{ country_code }}.svg"
+        style="height: auto; width: 4.75rem;"
+        class="rounded me-2"
+        alt="{{ country_name }}'s flag" />
+    <span class="fw-bold fs-1">{{ country_name }}</span>
+  </div>
+
+  <!-- I wrongly removed this part of the code and i dont remember where to put it 
+    {% if not nation_data %}
+    <br />
+    <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
+    {% endif %}
+  </div> -->
+  <!-- THIS PART IS CURRENT INACTIVE AND WAS USED TO SHOW GEOPOLITICAL INFORMATION ABOUT THE COUNTRY IN THE FEED. ALL PREVIOUS COMMENTS ARE NOW MARKED WITH #.
   <div class="row my-3 align-items-center justify-content-center">
     <div class="col-md-3">
       {% if not is_mobile %}
-      <!-- Left Column Accordions -->
+      ##Left Column Accordions##
       <div class="accordion" id="accordionLeft">
-        <!-- Accordion Item 1: Geographic Information -->
+        ##Accordion Item 1: Geographic Information##
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingGeography">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
@@ -110,7 +125,7 @@
             </div>
           </div>
         </div>
-        <!-- Accordion Item 2: Demographics and Society -->
+        ##Accordion Item 2: Demographics and Society##
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingDemographics">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
@@ -131,21 +146,12 @@
         </div>
       </div>
       {% endif %}
-    </div>
-    <div class="col-md-6 text-center my-4">
-      <div class="d-inline-flex justify-content-center">
-        <img src="/static/img/flags/4x3/{{ country_code }}.svg" style="height: auto; width: 3rem;" class="rounded me-2" alt="{{ country_name }}'s flag" /><span class="fw-bold fs-1">{{ country_name }}</span>
-      </div>
-      {% if not nation_data %}
-      <br />
-      <p class="mt-3 text-danger">We apologize, but there's no geopolitical data available for {{ country_name }}. We'll look into that as soon as possible.</p>
-      {% endif %}
-    </div>
+    </div> 
     <div class="col-md-3">
       {% if not is_mobile %}
-      <!-- Right Column Accordions -->
+      ##Right Column Accordions##
       <div class="accordion" id="accordionRight">
-        <!-- Accordion Item 3: Government and Politics -->
+        ##Accordion Item 3: Government and Politics##
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingGovernment">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGovernment" aria-expanded="false" aria-controls="collapseGovernment">
@@ -160,7 +166,7 @@
             </div>
           </div>
         </div>
-        <!-- Accordion Item 4: Economy -->
+        ##Accordion Item 4: Economy##
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingEconomy">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
@@ -180,7 +186,7 @@
       </div>
       {% else %}
       <div class="accordion" id="accordionMain">
-        <!-- Accordion Item 1: Geographic Information -->
+        ##Accordion Item 1: Geographic Information##
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingCountry">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCountry" aria-expanded="false" aria-controls="collapseCountry">
@@ -190,7 +196,7 @@
           <div id="collapseCountry" class="accordion-collapse collapse" aria-labelledby="headingCountry" data-bs-parent="#accordionMain">
             <div class="accordion-body">
               <div class="accordion" id="accordionLeft">
-                <!-- Accordion Item 1: Geographic Information -->
+                ##Accordion Item 1: Geographic Information##
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="headingGeography">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography" aria-expanded="false" aria-controls="collapseGeography">
@@ -206,7 +212,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- Accordion Item 2: Demographics and Society -->
+                ##Accordion Item 2: Demographics and Society##
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="headingDemographics">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDemographics" aria-expanded="false" aria-controls="collapseDemographics">
@@ -239,7 +245,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- Accordion Item 4: Economy -->
+                ##Accordion Item 4: Economy##
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="headingEconomy">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEconomy" aria-expanded="false" aria-controls="collapseEconomy">
@@ -263,7 +269,7 @@
       </div>
       {% endif %}
     </div>
-  </div>
+  </div> -->
   <!-- Category Modal -->
   <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

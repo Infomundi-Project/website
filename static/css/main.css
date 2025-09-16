@@ -74,13 +74,6 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):hover {
   font-family: 'Spectral SC', serif;
 }
 
-
-
-
-
-
-
-
 .theme-checkbox {
   opacity: 0;
   position: absolute;
@@ -121,15 +114,6 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):hover {
 .theme-checkbox:checked+.theme-checkbox-label .ball {
   transform: translateX(24px);
 }
-
-
-
-
-
-
-
-
-
 
 .inf-fixed-button {
   opacity: 0.9;
@@ -178,3 +162,129 @@ body {
 .goog-te-gadget {
   display: none !important;
 }
+
+/* ====== Nav hover animations ====== */
+.nav-link {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #0d6efd;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  left: 50%;
+  bottom: 0;
+  background-color: #0d6efd;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* THIS IS WORKING AND REMOVED THE PROBLEM BUT I WISH I CHANGED IN A CLEANER WAY */
+/* Remove any background on hover/focus from links, buttons, and items.*/
+a:hover,
+a:focus,
+button:hover,
+button:focus,
+.nav-link:hover,
+.nav-link:focus,
+.dropdown-item:hover,
+.dropdown-item:focus,
+.list-group-item:hover,
+.list-group-item:focus,
+.btn:hover,
+.btn:focus {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.nav-link {
+  text-decoration: none !important;
+}
+
+/* Light mode: make text blue on hover inside list-group items */
+html[data-bs-theme="light"] .list-group-item:hover,
+html[data-bs-theme="light"] .list-group-item:hover *,
+html[data-bs-theme="light"] .nav-link:hover,
+html[data-bs-theme="light"] .nav-link:hover *,
+html[data-bs-theme="light"] a:hover,
+html[data-bs-theme="light"] a:hover *,
+html[data-bs-theme="light"] button:hover,
+html[data-bs-theme="light"] button:hover *,
+html[data-bs-theme="light"] .dropdown-item:hover,
+html[data-bs-theme="light"] .dropdown-item:hover *,
+html[data-bs-theme="light"] .btn:hover,
+html[data-bs-theme="light"] .btn:hover *,
+html[data-bs-theme="light"] .list-group-item:focus,
+html[data-bs-theme="light"] .list-group-item:focus *,
+html[data-bs-theme="light"] .nav-link:focus,
+html[data-bs-theme="light"] .nav-link:focus *,
+html[data-bs-theme="light"] a:focus,
+html[data-bs-theme="light"] a:focus *,
+html[data-bs-theme="light"] button:focus,
+html[data-bs-theme="light"] button:focus *,
+html[data-bs-theme="light"] .dropdown-item:focus,
+html[data-bs-theme="light"] .dropdown-item:focus *,
+html[data-bs-theme="light"] .btn:focus,
+html[data-bs-theme="light"] .btn:focus * {
+  color: #0d6efd !important; /* Bootstrap blue */
+}
+
+/* === LOGO: Fixar cor padrão e impedir hover azul === */
+
+/* LIGHT MODE */
+html[data-bs-theme="light"] .navbar .logo-text,
+html[data-bs-theme="light"] .offcanvas .logo-text,
+html[data-bs-theme="light"] .sidebar .logo-text {
+  --bs-link-color: #212529;
+  --bs-link-hover-color: #212529;
+
+  color: #212529 !important;
+  fill: #212529 !important;
+  stroke: #212529 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+html[data-bs-theme="light"] .navbar .logo-text:hover,
+html[data-bs-theme="light"] .navbar .logo-text:focus,
+html[data-bs-theme="light"] .offcanvas .logo-text:hover,
+html[data-bs-theme="light"] .offcanvas .logo-text:focus,
+html[data-bs-theme="light"] .sidebar .logo-text:hover,
+html[data-bs-theme="light"] .sidebar .logo-text:focus {
+  color: #212529 !important;
+  fill: #212529 !important;
+  stroke: #212529 !important;
+}
+
+/* DARK MODE (opcional, pra não sumir em fundo escuro) */
+html[data-bs-theme="dark"] .navbar .logo-text,
+html[data-bs-theme="dark"] .offcanvas .logo-text,
+html[data-bs-theme="dark"] .sidebar .logo-text {
+  --bs-link-color: #f8f9fa;
+  --bs-link-hover-color: #f8f9fa;
+
+  color: #f8f9fa !important;
+  fill: #f8f9fa !important;
+  stroke: #f8f9fa !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
+
+
+
+

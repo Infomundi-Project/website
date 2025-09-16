@@ -11,7 +11,10 @@ LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
 CAP_HOSTNAME = environ["CAP_HOSTNAME"]  # for cap.infomundi.net
 
 # -----------> Secret Keys <-----------
-CAPTCHA_SECRET_KEY = environ["CAPTCHA_SECRET_KEY"]
+TURNSTILE_SITE_KEY = environ["TURNSTILE_SITE_KEY"]
+TURNSTILE_SECRET_KEY = environ["TURNSTILE_SECRET_KEY"]
+
+
 OPENAI_API_KEY = environ["OPENAI_API_KEY"]
 ENCRYPTION_KEY = environ["ENCRYPTION_KEY"]
 CAP_SECRET_KEY = environ["CAP_SECRET_KEY"]

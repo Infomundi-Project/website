@@ -1,136 +1,179 @@
-{% extends "base.html" %} {% block title %}Dashboard Home{% endblock %} {% block styles %}
-<style>
-  .top-stories-container {
-    cursor: grab;
-  }
-  .top-stories-container.dragging {
-    cursor: grabbing;
-  }
+{% extends "base.html" %}
+{% block title %}World by Region{% endblock %}
 
-  /* Minimal overrides; everything else uses Bootstrap utilities */
+{% block styles %}
+<style>
+  /* --- Hero / Map --- */
   #chartdiv {
     width: 100%;
-    height: 600px;
+    height: 420px;
+    border-radius: .75rem;
   }
-  @media (max-width: 768px) {
-    #chartdiv {
-      height: 300px;
-    }
+  @media (max-width: 768px){ #chartdiv { height: 260px; } }
+
+  .hero-card{ border-radius:.75rem; overflow:hidden; }
+  .hero-header{ letter-spacing:.18em; font-weight:700; }
+
+  /* --- Region legend --- */
+  :root{
+    --region-na:#2aa0ff;
+    --region-sa:#7b5cff;
+    --region-eu:#ff8c42;
+    --region-af:#ff3b30;
+    --region-as:#00c2ff;
+    --region-au:#34c759;
   }
-  /* Keep metric cards uniform height */
-  .metric-card {
-    min-height: 8rem;
+  .region-legend .legend-pill{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.35rem .6rem; border-radius:999px;
+    background:var(--bs-body-bg); border:1px solid var(--bs-border-color);
   }
-  /* Horizontal scroll container for Top Stories */
-  .top-stories-container {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    overflow-x: auto;
+  .region-legend .dot{ width:.6rem; height:.6rem; border-radius:50%; }
+
+  /* --- Countries (chips) --- */
+  .country-chip{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .6rem; border-radius:999px;
+    background:var(--bs-body-bg); border:2.5px solid var(--bs-border-color);
+    font-size:.9rem; white-space:nowrap;
   }
-  /* Hide default scrollbar on WebKit (Chrome/Safari) */
-  .top-stories-container::-webkit-scrollbar {
-    display: none;
+  .country-chip img.flag{ width:1.1rem; height:1.1rem; border-radius:2px; }
+  .country-chip + .country-chip{ margin-left:.5rem; }
+
+  /* --- News grid --- */
+  .masonry{ column-count:1; column-gap:1rem; }
+  @media (min-width:768px){ .masonry{ column-count:2; } }
+  @media (min-width:1200px){ .masonry{ column-count:3; } }
+
+  .news-card{
+    display:inline-block; width:100%; margin:0 0 1rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+    min-width:260px;
   }
-  /* Hide default scrollbar on Firefox */
-  .top-stories-container {
-    scrollbar-width: none;
+  .news-card:hover{ transform:translateY(-2px); box-shadow:0 .75rem 1.5rem rgba(0,0,0,.15); }
+  .news-meta{ font-size:.9rem; opacity:.75; }
+  .news-country-pill{
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.25rem .5rem; border-radius:999px; font-size:1rem;
   }
+
+  /* --- Accordion polish (dark chevron) --- */
+  .accordion-button::after{ filter:invert(1) opacity(.8); }
+
+  /* Keep your existing Top Stories horizontal scroller style */
+  .top-stories-container{ display:flex; gap:1rem; overflow-x:auto; scrollbar-width:none; }
+  .top-stories-container::-webkit-scrollbar{ display:none; }
+  /* Flags inside chips and country-pill — crisp 4:3 rectangles */
+.country-chip img.flag,
+.news-country-pill img.flag{
+  display:inline-block;
+  width: 1.05rem;         /* chip default */
+  aspect-ratio: 4 / 3;    /* keep 4:3 without distortion */
+  height: auto;
+  border-radius: 2px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px var(--bs-border-color) inset; /* subtle hairline */
+}
+
+/* Slightly larger inside the news card badge */
+.news-country-pill img.flag{
+  width: 1.15rem;
+  margin-right: .35rem;
+}
+
 </style>
-{% endblock %} {% block content %}
-<div class="container-fluid py-4">
-  <!-- 1) TOP BAR / SEARCH -->
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-6">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Hero: amCharts map inside rounded card (the “galaxy” area in the screenshot) -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="mb-0"><i class="fa-solid fa-globe me-2"></i>Select a Country</h5>
+        <!-- Legend -->
+        <div class="region-legend d-flex flex-wrap gap-2 small">
+          <span class="legend-pill"><i class="fa-solid fa-globe me-2"></i>{{ statistics['total_countries_supported'] }} countries</span>
+          <span class="legend-pill"><i class="fa-solid fa-newspaper me-2"></i>{{ statistics['total_news'] }} news</span>
+        </div>
+      </div>
+        <div class="card-body p-0">
+          <div id="chartdiv"></div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          <div class="row justify-content-center">
+    <div class="col-12">
       <form action="{{ url_for('api.search') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="input-group input-group-lg">
           <span class="input-group-text" id="search-icon">
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
-          <input type="search" class="form-control" id="query" name="query" placeholder="Search for a country..." aria-label="Search for a country" aria-describedby="search-icon" minlength="3" />
+          <input type="search" class="form-control" id="query" name="query" placeholder="Search for a country" aria-label="Search for a country" aria-describedby="search-icon" minlength="3" />
         </div>
       </form>
     </div>
   </div>
-
-  <!-- 4) GLOBE & METRICS -->
-  <div class="row my-3">
-    <!-- 4a) LEFT: Globe (country selector) -->
-    <div class="col-12 col-lg-8 px-1 mb-2">
-      <div class="card shadow-sm h-100">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="fa-solid fa-earth-americas me-2"></i>Select a Country</h5>
-        </div>
-        <div class="card-body p-0">
-          <div id="chartdiv"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12 col-lg-4">
-      <div class="row">
-        <div class="col px-1 mb-2">
-          <div class="card shadow-sm">
-            <div class="card-header text-center">
-              <h6 class="mb-0"><i class="fa-solid fa-bars-staggered me-2"></i>Top Countries</h6>
-            </div>
-            <div class="card-body">
-              <canvas id="countriesPieChart" width="100%" height="100"></canvas>
-            </div>
-            <div class="card-footer small text-body-secondary"><i class="fa-solid fa-globe me-2"></i><span class="fw-bold">{{ statistics['total_countries_supported'] }}</span> countries</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col px-1 mb-2">
-          <div class="card shadow-sm">
-            <div class="card-header text-center">
-              <h6 class="mb-0"><i class="fa-solid fa-chart-pie me-2"></i>User Engagement</h6>
-            </div>
-            <div class="card-body d-flex justify-content-center">
-              <canvas id="engagementDoughnut" width="100%" height="100"></canvas>
-            </div>
-            <div class="card-footer small text-body-secondary"><i class="fa-solid fa-user me-2"></i><span class="fw-bold">{{ statistics['total_users'] }}</span> users</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col px-1">
-          <div class="card shadow-sm h-100">
-            <div class="card-header text-center">
-              <h6 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>News Published</h6>
-            </div>
-            <div class="card-body">
-              <canvas id="storiesLineChart" width="100%" height="120"></canvas>
-            </div>
-            <div class="card-footer small text-body-secondary"><i class="fa-solid fa-newspaper me-2"></i><span class="fw-bold">{{ statistics['total_news'] }}</span> news</div>
-          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Top Stories -->
+  <!-- Regions accordion (Latin America, North America, Europe...) -->
+  <div class="row">
+    <div class="col-12">
+      <div id="worldFeedAccordion" class="accordion"
+           data-feed-endpoint="#">
+
+        {% set regions = [
+          'North America','Europe','Asia','Latin America','Africa','Oceania'
+        ] %}
+
+        {% for region in regions %}
+        {% set rid = region|replace(' ','') %}
+        <div class="accordion-item bg-transparent border-0 mb-3">
+          <h2 class="accordion-header" id="{{ rid }}Header">
+            <button class="accordion-button {% if region!='Europe' %}collapsed{% endif %} bg-body-tertiary text-body fw-semibold"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#{{ rid }}Collapse"
+                    aria-expanded="{{ 'true' if region=='Europe' else 'false' }}"
+                    aria-controls="{{ rid }}Collapse">
+              {{ region }}
+            </button>
+          </h2>
+          <div id="{{ rid }}Collapse" class="accordion-collapse collapse {% if region=='Europe' %}show{% endif %}"
+               aria-labelledby="{{ rid }}Header" data-bs-parent="#worldFeedAccordion">
+            <div class="accordion-body">
+              <!-- Countries row (chips) -->
+              <h6 class="mb-2">Countries</h6>
+              <div class="mb-3 d-flex flex-wrap gap-2" data-role="countries" data-region="{{ region }}"></div>
+
+              <!-- Latest news grid -->
+              <h6 class="mb-2">Latest News</h6>
+              <div class="masonry" data-role="grid" data-region="{{ region }}"></div>
+
+              <!-- Skeleton (removed when loaded) -->
+              <div class="text-center py-4" data-role="skeleton" data-region="{{ region }}">
+                <div class="spinner-border" role="status" aria-hidden="true"></div>
+                <div class="mt-2 small text-body-secondary">Loading {{ region }}…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- (Optional) Your original Top News row can stay if you still want a global horizontal scroller
   <div class="row mb-3">
-    <div class="col-12 px-1">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="fa-solid fa-fire text-danger me-2"></i>Top News</h5>
-        </div>
-        <div class="card-body">
-          <!-- Single‐row, horizontally scrollable container -->
-          <div id="topStoriesContainer" class="top-stories-container">
-            <!-- JavaScript will inject each story card (fixed‐width) here -->
-          </div>
-        </div>
-      </div>
-    </div>
+    ...
   </div>
+  -->
 
-  <!-- Trackers -->
+  <!-- Trackers (unchanged) -->
   <div class="row mb-4">
     <div class="col-12 px-1">
       <div class="card shadow-sm">
@@ -154,11 +197,19 @@
       </div>
     </div>
   </div>
+
 </div>
-{% endblock %} {% block scripts %}
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/amcharts/index.js') }}"></script>
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
-<script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchHomeDashboard.js') }}"></script>
-{% assets "js_home" %}
-<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
-{% endassets %} {% endblock %}
+{% endblock %}
+
+{% block scripts %}
+  <!-- amCharts + your existing bundles -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/amcharts/index.js') }}"></script>
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchHomeDashboard.js') }}"></script>
+  {% assets "js_home" %}
+  <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+
+  <!-- World feed population -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/worldFeed.js') }}"></script>
+{% endblock %}

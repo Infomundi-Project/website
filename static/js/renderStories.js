@@ -474,7 +474,7 @@ document.addEventListener("DOMContentLoaded", function () {
     colDiv.classList.add("col-lg-6", "col-xl-4", "my-5");
 
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add("card", "image-card", "inf-story-card", "border", "border-0");
+    cardDiv.classList.add("card", "image-card", "inf-story-card", "border", "border-0", "story-card-style");
     cardDiv.id = `${item.story_id}`;
 
     // Image link
@@ -525,6 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const cardFooter = document.createElement("div");
     cardFooter.classList.add("card-footer", "px-1", "inf-story-card-footer", "bg-transparent", "border", "border-0");
 
+
     const rowDiv = document.createElement("div");
     rowDiv.classList.add("row", "d-flex", "justify-content-between");
 
@@ -553,7 +554,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Dislike Icon with Count
     const dislikeIcon = document.createElement("i");
-    dislikeIcon.classList.add(item.is_disliked ? "fa-solid" : "fa-regular", "fa-thumbs-down", "mx-4");
+    dislikeIcon.classList.add(item.is_disliked ? "fa-solid" : "fa-regular", "fa-thumbs-down", "mx-3");
     dislikeIcon.style.cursor = "pointer";
     dislikeIcon.dataset.storyId = item.story_id;
     dislikeIcon.dataset.disliked = item.is_disliked ? "true" : "false";
@@ -587,7 +588,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Satellite Share Icon
     const satelliteIcon = document.createElement("i");
-    satelliteIcon.classList.add("fa-solid", "fa-satellite-dish", "ms-4", "satellite-share-button");
+    satelliteIcon.classList.add("fa-solid", "fa-share-from-square", "ms-3", "satellite-share-button");
     satelliteIcon.style.cursor = "pointer";
 
     // Satellite share button functionality

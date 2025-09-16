@@ -336,7 +336,7 @@ def be_right_back():
 
 
 @views.route("/captcha", methods=["GET", "POST"])
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def captcha():
     if request.method == "GET":
         # If they have clearance (means that they have recently proven they're human)
@@ -375,7 +375,7 @@ def sensitive():
 
 @views.route("/contact", methods=["GET", "POST"])
 @extensions.limiter.limit("120/day;60/hour;12/minute", override_defaults=True)
-@decorators.verify_captcha
+@decorators.verify_turnstile
 def contact():
     if request.method == "GET":
         return render_template("contact.html")
@@ -505,7 +505,6 @@ def news():
     seo_title = f"Infomundi - {country_name.title()} Stories"
     seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news."
 
-    news_page_data = scripts.news_page_processing(country_name)
     return render_template(
         "news.html",
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
@@ -516,13 +515,6 @@ def news():
         gdp=scripts.get_gdp(country_name),
         country_code=contry_cca2,
         country_name=country_name,
-        page_languages=news_page_data["page_languages"],
-        main_religion=news_page_data["main_religion"],
-        country_index=news_page_data["country_index"],
-        stock_data=news_page_data["stocks"]["data"],
-        stock_date=news_page_data["stocks"]["date"],
-        is_global=news_page_data["is_global"],
-        area_rank=news_page_data["area_rank"],
     )
 
 
