@@ -311,7 +311,6 @@ def check_session_version():
 def add_headers(response):
     nonce = g.get("nonce", "")
 
-    
     response.headers["Content-Security-Policy"] = (
         "default-src 'none'; "
         "media-src 'self' https://*.infomundi.net; "
