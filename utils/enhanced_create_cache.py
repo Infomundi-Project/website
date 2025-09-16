@@ -472,6 +472,25 @@ def log_message(message):
 # =============================================================================
 
 
+def update_publisher_feed_url(publisher_id: int, feed_url: str):
+    """Persist discovered feed URL to publishers.feed_url."""
+    try:
+        if not input_sanitization.is_valid_url(feed_url):
+            return
+        # Trim to a safe length if your column is VARCHAR(512) (adjust if needed)
+        feed_url = feed_url[:512]
+        with db_connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE publishers SET feed_url = %s WHERE id = %s",
+                (feed_url, publisher_id),
+            )
+        db_connection.commit()
+    except Exception as e:
+        log_message(
+            f"[warn] Could not update feed_url for publisher {publisher_id}: {e}"
+        )
+
+
 def _chunk(seq: List, size: int) -> Iterable[List]:
     for i in range(0, len(seq), size):
         yield seq[i : i + size]
@@ -661,18 +680,26 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             if resp is None:
                 continue
             if resp.status_code == 304:
-                # No updates for this publisher; keep cache fresh and stop
                 update_publisher_http_cache(publisher["id"], new_etag, new_lastmod)
                 not_modified = True
                 break
             if resp.status_code != 200:
                 continue
+
             parsed = _parse_if_feed(cand, resp)
             if parsed:
                 feed = parsed
-                resolved_url = cand
+                # Prefer the final URL after redirects, fall back to the candidate
+                resolved_url = (getattr(resp, "url", None) or cand).rstrip("/")
+
                 # Save fresh validators
                 update_publisher_http_cache(publisher["id"], new_etag, new_lastmod)
+
+                # Persist feed_url if missing or changed
+                current_feed_url = (publisher.get("feed_url") or "").rstrip("/")
+                if resolved_url and resolved_url != current_feed_url:
+                    update_publisher_feed_url(publisher["id"], resolved_url)
+
                 break
     except Exception as e:
         log_message(f"Exception while resolving feed for {publisher_url}: {e}")
