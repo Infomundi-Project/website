@@ -74,6 +74,7 @@ logging.basicConfig(
     format="[%(asctime)s] %(message)s",
 )
 
+
 def log(msg: str):
     print(f"[~] {msg}")
     # logging.info(msg)  # enable if you want file logging
@@ -344,7 +345,9 @@ def process_category(category: dict, force: bool):
     updates = []
     log(f"Threading with {WORKERS} workers for {category['name']} (force={force})")
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
-        futures = [ex.submit(process_publisher, p, category["name"]) for p in publishers]
+        futures = [
+            ex.submit(process_publisher, p, category["name"]) for p in publishers
+        ]
         for fut in concurrent.futures.as_completed(futures):
             result = fut.result()
             if result:
@@ -371,12 +374,14 @@ def fetch_favicons(force: bool):
 def main():
     parser = argparse.ArgumentParser(description="Fetch/overwrite publisher favicons.")
     parser.add_argument(
-        "-f", "--force",
+        "-f",
+        "--force",
         action="store_true",
-        help="Process ALL publishers and overwrite existing favicons in DB/bucket."
+        help="Process ALL publishers and overwrite existing favicons in DB/bucket.",
     )
     args = parser.parse_args()
     fetch_favicons(force=args.force)
+
 
 if __name__ == "__main__":
     main()

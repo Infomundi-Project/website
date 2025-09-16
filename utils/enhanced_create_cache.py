@@ -486,7 +486,9 @@ def update_publisher_feed_url(publisher_id: int, feed_url: str):
             )
         db_connection.commit()
     except Exception as e:
-        log_message(f"[warn] Could not update feed_url for publisher {publisher_id}: {e}")
+        log_message(
+            f"[warn] Could not update feed_url for publisher {publisher_id}: {e}"
+        )
 
 
 def _chunk(seq: List, size: int) -> Iterable[List]:

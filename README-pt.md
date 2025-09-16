@@ -1,6 +1,7 @@
+markdown
 <div align="center">
 
-![Infomundi Logo](https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp)
+![Logo do Infomundi](https://raw.githubusercontent.com/behindsecurity/behindsecurity/refs/heads/main/images/infomundi-nobg.webp)
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3549171b5ed14423b31b3138afdf80ee)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![Python](https://img.shields.io/badge/Python-3.12.7-blue?style=social&logo=python&logoColor=black)
@@ -10,65 +11,61 @@
 
 </div>
 
-# Infomundi — News platform and community
+# Infomundi — Plataforma de notícias e comunidade
 
-[![Português (Brasil)](https://img.shields.io/badge/README-pt--BR-blue)](README-pt.md)
+Aplicação **Flask** monolítica com renderização no servidor, uma **REST API** e **WebSockets** para recursos em tempo real. Back-end em Python (Flask 3.x + SQLAlchemy/MySQL), front-end com **Jinja2** + **Bootstrap 5** e JavaScript vanilla; **Redis** para cache e **Cloudflare R2** para armazenamento de imagens.
 
-Monolithic **Flask** app with server-side rendering, a **REST API**, and **WebSockets** for real-time features. Back end in Python (Flask 3.x + SQLAlchemy/MySQL), front end with **Jinja2** + **Bootstrap 5** and vanilla JavaScript; **Redis** for caching and **Cloudflare R2** for image storage.
-
-> This README summarizes the architecture and workflow of the Infomundi project and documents how to develop and deploy it.
+> Este README resume a arquitetura e o fluxo de trabalho do projeto Infomundi e documenta como desenvolver e implantar.
 
 ---
 
-## Table of Contents
-- [Overview](#overview)
-- [Stack and key components](#stack-and-key-components)
-- [Folder structure](#folder-structure)
-- [Product features](#product-features)
-- [Getting started (local dev)](#getting-started-local-dev)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment variables](#environment-variables)
-  - [Running the application](#running-the-application)
-- [Docker Compose (recommended)](#docker-compose-recommended)
-- [Jobs and helper scripts](#jobs-and-helper-scripts)
-- [API (overview)](#api-overview)
-- [Real time (Socket.IO)](#real-time-socketio)
-- [Security](#security)
-- [Caching and performance](#caching-and-performance)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
-- [Roadmap and improvements](#roadmap-and-improvements)
+## Tabela de Conteúdos
+- [Visão geral](#visão-geral)
+- [Stack e componentes principais](#stack-e-componentes-principais)
+- [Estrutura de pastas](#estrutura-de-pastas)
+- [Funcionalidades do produto](#funcionalidades-do-produto)
+- [Primeiros passos (dev local)](#primeiros-passos-dev-local)
+  - [Pré-requisitos](#pré-requisitos)
+  - [Instalação](#instalação)
+  - [Variáveis de ambiente](#variáveis-de-ambiente)
+  - [Executando a aplicação](#executando-a-aplicação)
+- [Tarefas e scripts auxiliares](#tarefas-e-scripts-auxiliares)
+- [API (visão geral)](#api-visão-geral)
+- [Tempo real (Socket.IO)](#tempo-real-socketio)
+- [Segurança](#segurança)
+- [Cache e performance](#cache-e-performance)
+- [Implantação](#implantação)
+- [Solução de problemas](#solução-de-problemas)
+- [Roadmap e melhorias](#roadmap-e-melhorias)
 
 ---
 
-## Overview
+## Visão geral
 
-**Infomundi** is a news-discovery platform with social features (comments, reactions, friendships, and messages). The app follows **MVC** using **Flask Blueprints** to separate **views** (HTML pages), **auth** (authentication/accounts), and **api** (JSON endpoints). The front end is server-rendered (good SEO and fast first paint) and is enhanced by AJAX/WebSocket for dynamic content (notifications, comments, and chat).
+**Infomundi** é uma plataforma de descoberta de notícias com recursos sociais (comentários, reações, amizades e mensagens). O app segue **MVC** usando **Flask Blueprints** para separar **views** (páginas HTML), **auth** (autenticação/contas) e **api** (endpoints JSON). O front-end é renderizado no servidor (bom SEO e primeiro paint rápido) e é aprimorado por AJAX/WebSocket para conteúdo dinâmico (notificações, comentários e chat).
 
-## Stack and key components
+## Stack e componentes principais
 
-- **Back end**
+- **Back-end**
   - Python 3.12, Flask 3.x, Flask-Login, Flask-Limiter, Flask-SocketIO
   - SQLAlchemy (MySQL)
-  - Flask-Assets for bundling/minifying CSS/JS
-  - Redis (Flask-Caching) for cache
-- **Front end**
-  - Jinja2 (templates), Bootstrap 5 (responsive UI), vanilla JS (modules in `static/js`)
+  - Flask-Assets para empacotar/minificar CSS/JS
+  - Redis (Flask-Caching) para cache
+- **Front-end**
+  - Jinja2 (templates), Bootstrap 5 (UI responsiva), JS vanilla (módulos em `static/js`)
 - **Infra**
-  - Cloudflare R2 (S3-compatible) for image uploads (avatar, banner, etc.)
-  - SMTP for transactional email (account verification, password reset, contact)
-  - (Optional) Google OAuth
-- **Security**
-  - **TOTP 2FA**, **Argon2id** for passwords, and **AES-GCM** + HMAC for user emails
-  - **Cloudflare Turnstile** and **custom image CAPTCHA** for anti-spam
-- **Real time**
-  - WebSockets via Flask-SocketIO (messages, typing indicators, read receipts)
+  - Cloudflare R2 (compatível com S3) para upload de imagens (avatar, banner etc.)
+  - SMTP para e-mails transacionais (verificação de conta, redefinição de senha, contato)
+  - (Opcional) Google OAuth
+- **Segurança**
+  - **2FA TOTP**, **Argon2id** para senhas e **AES-GCM** + HMAC para e-mails de usuários
+  - **Cloudflare Turnstile** e **CAPTCHA de imagem customizado** para antispam
+- **Tempo real**
+  - WebSockets via Flask-SocketIO (mensagens, indicadores de digitação, recibos de leitura)
 
-## Folder structure
+## Estrutura de pastas
 
 ```
-
 .
 ├── README-pt.md
 ├── README.md
@@ -381,51 +378,48 @@ Monolithic **Flask** app with server-side rendering, a **REST API**, and **WebSo
 │   ├── security_util.py
 │   └── totp_util.py
 └── wsgi.py
-
 ```
 
-## Product features
+## Funcionalidades do produto
 
-- Sign up, login, logout, and email verification; optional **2FA (TOTP)**
-- News pages by country/category; stories with **reactions** (like/dislike)
-- **Threaded comments** with aggregate counts and HTML sanitization
-- **Friendships**, **blocks**, and **real-time private messages** (Socket.IO)
-- **In-app notifications** for events (new comment, friend request, etc.)
-- Profiles with avatar/banner; **standardized image upload** served via R2
+- Cadastro, login, logout e verificação por e-mail; **2FA (TOTP)** opcional
+- Páginas de notícias por país/categoria; histórias com **reações** (curtir/não curtir)
+- **Comentários encadeados** com contagens agregadas e sanitização de HTML
+- **Amizades**, **bloqueios** e **mensagens privadas em tempo real** (Socket.IO)
+- **Notificações in-app** para eventos (novo comentário, solicitação de amizade etc.)
+- Perfis com avatar/banner; **upload de imagem padronizado** servido via R2
 
-## Getting started (local dev)
+## Primeiros passos (dev local)
 
-### Prerequisites
+### Pré-requisitos
 - **Python 3.12**
-- **MySQL** (with user/database created)
-- **Redis** optional (for caching; you can use SimpleCache in dev)
-- (Optional) Local SMTP tool (MailHog, etc.)
+- **MySQL** (com usuário/banco criados)
+- **Redis** opcional (para cache; em dev, pode usar SimpleCache)
+- (Opcional) Ferramenta de SMTP local (MailHog etc.)
 
-### Installation
+### Instalação
 ```bash
 git clone https://github.com/Infomundi-Project/website.git
 cd website
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-````
+```
 
-### Environment variables
+### Variáveis de ambiente
 
-Create a `.env` file (or export in your shell) with at least:
+Crie um arquivo `.env` (ou exporte no seu shell) com pelo menos:
 
 ```
-# Flask / session / security
+# Flask / sessão / segurança
 SESSION_COOKIE_NAME=infomundi-session
 SECRET_KEY=changeme
 
-# Integrations
-OPENAI_API_KEY=                         # optional (summaries)
+# Integrações
+OPENAI_API_KEY=                         # opcional (sumários)
 CAPTCHA_SECRET_KEY=                     # Cloudflare Turnstile
+CAP_SITE_KEY=
 
-TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-
-# Database
+# Banco de dados
 MYSQL_DATABASE=infomundi
 MYSQL_HOST=127.0.0.1
 MYSQL_USERNAME=infomundi
@@ -435,79 +429,74 @@ MYSQL_PASSWORD=changeme
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=
 
-# Storage (Cloudflare R2 / S3-compatible)
+# Storage (Cloudflare R2 / compatível S3)
 R2_ENDPOINT=
 R2_ACCESS_KEY=
 R2_SECRET=
 R2_TOKEN=
 
-# Email (SMTP)
+# E-mail (SMTP)
 SMTP_SERVER=
 SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 
-# OAuth (optional)
+# OAuth (opcional)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# Other
-WEBHOOK_URL=                            # For error alerts (optional)
+# Outros
+WEBHOOK_URL=                            # Para alertas de erro (opcional)
 WEBSITE_ROOT=/abs/path/to/project
 LOCAL_ROOT=/abs/path/local
 ```
 
-> Tip: use `python-dotenv` in dev to load `.env` automatically.
+> Dica: use `python-dotenv` em dev para carregar o `.env` automaticamente.
 
+### Executando a aplicação
 
-### Running the application
-
-Development server:
+Servidor de desenvolvimento:
 
 ```bash
 export FLASK_APP=app.py
 export FLASK_ENV=development
 flask run
-# or
+# ou
 python app.py
 ```
 
-Open `http://localhost:5000`. Create a test account (if SMTP email isn’t configured,
-make temporary adjustments in verification flows for local testing).
+Abra `http://localhost:5000`. Crie uma conta de teste (se o e-mail SMTP não estiver configurado,
+faça ajustes temporários nos fluxos de verificação para testes locais).
 
+## Docker Compose (recomendado)
 
+Executar o Infomundi com Docker Compose é a maneira **principal** de desenvolver e implantar o app. A stack consiste em três serviços centrais:
 
-## Docker Compose (recommended)
+- **infomundi-app** — aplicação Flask (Gunicorn + eventlet)
+- **infomundi-mysql** — banco MySQL
+- **infomundi-redis** — Redis para cache e fila de mensagens do Socket.IO
 
-Running Infomundi with Docker Compose is the **primary** way to develop and deploy the app. The stack consists of three core services:
+> **Segredos**: nunca faça hardcode de segredos no `docker-compose.yml`. Use um `.env` (ou Docker secrets) e referencie variáveis como `${MYSQL_PASSWORD}`.
 
-- **infomundi-app** — the Flask application (Gunicorn + eventlet)
-- **infomundi-mysql** — MySQL database
-- **infomundi-redis** — Redis for caching and Socket.IO message queue
-
-> **Secrets**: never hardcode secrets in `docker-compose.yml`. Use a `.env` file (or Docker secrets) and reference variables like `${MYSQL_PASSWORD}`.
-
-### 1) Files and directories
+### 1) Arquivos e diretórios
 
 ```
-
 .
-├─ website/                     # the Flask project (mounted into the app container)
+├─ website/                     # projeto Flask (montado dentro do container app)
 │  ├─ app.py
 │  ├─ wsgi.py
 │  ├─ requirements.txt
 │  ├─ static/
 │  ├─ templates/
-│  ├─ website\_scripts/
-│  └─ sql/infomundi.sql         # optional: can be auto-imported on first run
+│  ├─ website_scripts/
+│  └─ sql/infomundi.sql         # opcional: pode ser importado automaticamente na primeira execução
 ├─ docker-compose.yml
-└─ .env                         # holds secrets used by compose (NOT committed)
+└─ .env                         # guarda segredos usados pelo compose (NÃO versionar)
+```
 
-````
+### 2) Compose mínimo
 
-### 2) Minimal compose
-
-Below is a pared-down compose excerpt that shows only what is needed to run **infomundi-app** with MySQL and Redis. Replace values via your `.env`.
+Abaixo, um trecho reduzido de compose que mostra apenas o necessário para rodar **infomundi-app** com MySQL e Redis. Substitua valores via seu `.env`.
 
 ```yaml
 services:
@@ -521,9 +510,9 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - infomundi_mysql_data:/var/lib/mysql
-      # Optional: auto-load schema and seed on first boot
+      # Opcional: carregar schema/seed automaticamente no primeiro boot
       - ./website/sql:/docker-entrypoint-initdb.d:ro
-      # Optional: custom MySQL config
+      # Opcional: config MySQL customizada
       # - ./conf/my.cnf:/etc/mysql/my.cnf:ro
     ports:
       - "127.0.0.1:3306:3306"
@@ -550,27 +539,27 @@ services:
       - ./website/static:/app/static
       - ./website/data:/app/data
       - infomundi-app-pip-cache:/root/.cache/pip
-      # Optional (dev): map __pycache__ to avoid container bloat
+      # Opcional (dev): mapear __pycache__ para evitar crescimento do container
       # - ./website/__pycache__:/app/__pycache__
       # - ./website/website_scripts/__pycache__:/app/website_scripts/__pycache__
     environment:
-      # Core app paths
+      # Caminhos básicos do app
       WEBSITE_ROOT: "/app"
       LOCAL_ROOT: "/app"
       SESSION_COOKIE_NAME: "infomundi_session"
       BASE_DOMAIN: ${BASE_DOMAIN}
 
-      # Database
+      # Banco de dados
       MYSQL_HOST: "infomundi-mysql"
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-      # Redis (cache + Socket.IO message queue)
+      # Redis (cache + fila do Socket.IO)
       REDIS_HOST: "infomundi-redis"
       REDIS_PASSWORD: ${REDIS_PASSWORD}
 
-      # OPTIONAL integrations (only set if you actually use them)
+      # Integrações OPCIONAIS (defina somente se usar)
       SECRET_KEY: ${SECRET_KEY}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -588,7 +577,7 @@ services:
       WEBHOOK_URL: ${WEBHOOK_URL}
     expose:
       - "8000"
-    # For local testing without a reverse proxy, also publish the port:
+    # Para testes locais sem proxy reverso, publique a porta:
     # ports:
     #   - "127.0.0.1:8000:8000"
     command: >
@@ -600,11 +589,11 @@ services:
     depends_on:
       - infomundi-mysql
       - infomundi-redis
-      # If you run a separate CAPTCHA microservice, add it here as well and configure CAP_* envs.
+      # Se você rodar um microserviço de CAPTCHA separado, adicione aqui e configure as variáveis CAP_*.
       # - cap
     networks:
-      - infomundi-network      # public edge/reverse proxy network (e.g., nginx)
-      - infomundi-intranet     # private network for DB/Redis
+      - infomundi-network      # rede pública/borda (ex.: nginx)
+      - infomundi-intranet     # rede privada para DB/Redis
     restart: unless-stopped
 
 volumes:
@@ -617,39 +606,38 @@ networks:
     name: infomundi-network
   infomundi-intranet:
     name: infomundi-intranet
-````
+```
 
-**Notes on the app container**
+**Notas sobre o container do app**
 
-* Uses the official `python:3.12-alpine` image.
-* Installs Python dependencies on boot (cached via the `infomundi-app-pip-cache` volume).
-* Serves via **Gunicorn** + **eventlet** on port **8000**.
-* Attaches to two networks:
+* Usa a imagem oficial `python:3.12-alpine`.
+* Instala dependências Python no boot (cache via volume `infomundi-app-pip-cache`).
+* Serve via **Gunicorn** + **eventlet** na porta **8000**.
+* Conecta-se a duas redes:
+  * `infomundi-intranet`: comunicação privada com MySQL e Redis.
+  * `infomundi-network`: exposta por seu proxy reverso (ex.: nginx) em produção.
 
-  * `infomundi-intranet`: private communication with MySQL and Redis.
-  * `infomundi-network`: fronted by your reverse proxy (e.g., nginx) in production.
+### 3) O arquivo `.env` (nível do compose)
 
-### 3) The `.env` file (compose-level)
-
-Create a `.env` file *next to* `docker-compose.yml`. This file is read automatically by Docker Compose.
+Crie um `.env` ao lado do `docker-compose.yml`. O Docker Compose o lê automaticamente.
 
 ```dotenv
-# Database (required)
+# Banco de dados (obrigatório)
 MYSQL_ROOT_PASSWORD=change-me
 MYSQL_DATABASE=infomundi
 MYSQL_USERNAME=infomundi
 MYSQL_PASSWORD=change-me
 
-# Redis (required)
+# Redis (obrigatório)
 REDIS_PASSWORD=change-me
 
-# App basics
+# Básico do app
 BASE_DOMAIN=infomundi.local
 SECRET_KEY=generate-a-random-hex
 ENCRYPTION_KEY=generate-a-random-hex
 HMAC_KEY=generate-a-random-hex
 
-# Optional integrations (fill only if used)
+# Integrações opcionais (preencha somente se usadas)
 OPENAI_API_KEY=
 SMTP_SERVER=
 SMTP_PORT=587
@@ -663,139 +651,138 @@ TURNSTILE_SITE_KEY=
 TURNSTILE_SECRET_KEY=
 WEBHOOK_URL=
 
-# Gunicorn tuning
+# Tuning do Gunicorn
 GUNICORN_WORKERS=2
 ```
 
-> Tip: For production, consider **Docker secrets** or a secret manager instead of `.env`.
+> Dica: em produção, considere **Docker secrets** ou um gerenciador de segredos em vez de `.env`.
 
-### 4) Start-up
+### 4) Inicialização
 
-**First run (local):**
+**Primeira execução (local):**
 
 ```bash
-# Start database and cache first
+# Suba banco e cache primeiro
 docker compose up -d infomundi-mysql infomundi-redis
 
-# (Optional) If not mounting sql/ as init, import schema manually:
+# (Opcional) Se não montar sql/ como init, importe o schema manualmente:
 # docker compose exec -T infomundi-mysql sh -lc 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < website/sql/infomundi.sql
 
-# Start the app
+# Suba o app
 docker compose up -d infomundi-app
 
-# Tail logs
+# Acompanhe logs
 docker compose logs -f infomundi-app
 ```
 
-**Seeding reference data** (categories, publishers, countries, etc.):
+**Seeding de dados de referência** (categorias, publishers, países etc.):
 
 ```bash
 docker compose exec infomundi-app python insert_feeds_to_database.py
-# Optional:
+# Opcional:
 docker compose exec infomundi-app python get_statistics.py
 docker compose exec infomundi-app python create_cache.py
 ```
 
-Open:
+Abra:
 
-* **Direct (dev)**: [http://localhost:8000](http://localhost:8000)  *(only if you mapped the port in `ports:`)*
-* **Behind reverse proxy (prod)**: use your proxy host on `infomundi-network` (see Deployment section).
+* **Direto (dev)**: [http://localhost:8000](http://localhost:8000)  *(apenas se mapeou a porta em `ports:`)*
+* **Atrás do proxy reverso (prod)**: use seu host do proxy em `infomundi-network` (veja a seção de Implantação).
 
-### 5) Common operations
+### 5) Operações comuns
 
 ```bash
-# Recreate app after changing requirements.txt
+# Recriar o app após mudar requirements.txt
 docker compose up -d --force-recreate --no-deps infomundi-app
 
-# Shell into the app container
+# Shell no container do app
 docker compose exec infomundi-app sh
 
-# Apply DB migrations / maintenance scripts
+# Aplicar migrações/manutenção no DB
 docker compose exec infomundi-app python some_script.py
 
-# Stop all
+# Parar tudo
 docker compose down
 ```
 
-### 6) Tuning & production tips (infomundi-app)
+### 6) Tuning & dicas de produção (infomundi-app)
 
-* **Workers**: `GUNICORN_WORKERS` defaults to 2 here; tune based on CPU/RAM. With **Socket.IO**, keep to **eventlet** workers and use a **Redis** message queue for horizontal scaling.
-* **Static assets**: `Flask-Assets` bundles are generated at runtime. For heavy traffic, prebuild assets in a CI step or bake a dedicated image.
-* **Health checks**: add a simple `/healthz` route and configure a Compose/Orchestrator healthcheck for the app container.
-* **Reverse proxy**: terminate TLS at nginx (or your edge), pass traffic to `infomundi-app:8000` on `infomundi-network`.
-* **Persistence**: MySQL and Redis volumes (`infomundi_mysql_data`, `infomundi_redis_data`) are persisted by Compose. Back them up before upgrades.
+* **Workers**: `GUNICORN_WORKERS` default 2; ajuste conforme CPU/RAM. Com **Socket.IO**, mantenha workers **eventlet** e use **Redis** como fila para escalar horizontalmente.
+* **Assets estáticos**: bundles do `Flask-Assets` são gerados em runtime. Para alto tráfego, pré-construa em CI ou bake uma imagem dedicada.
+* **Health checks**: adicione uma rota `/healthz` simples e configure um healthcheck no Compose/orquestrador para o container do app.
+* **Proxy reverso**: termine TLS no nginx (ou na borda), encaminhe para `infomundi-app:8000` em `infomundi-network`.
+* **Persistência**: volumes do MySQL e Redis (`infomundi_mysql_data`, `infomundi_redis_data`) são persistidos pelo Compose. Faça backup antes de upgrades.
 
-### 7) Development variant
+### 7) Variante de desenvolvimento
 
-The repository also includes a development-oriented service (e.g., `dev-infomundi`) that mirrors `infomundi-app` but targets a separate dev DB/Redis and may publish port 8000 directly. Use it for bleeding-edge testing without touching production data.
+O repositório também inclui um serviço voltado a desenvolvimento (ex.: `dev-infomundi`) que espelha `infomundi-app`, mas aponta para DB/Redis de dev separados e pode publicar a porta 8000 diretamente. Use para testes sem tocar dados de produção.
 
+## Tarefas e scripts auxiliares
 
-## Jobs and helper scripts
+* `insert_feeds_to_database.py`: carrega fontes RSS (categorias/publishers).
+* `collect_world_data.py`: atualiza JSONs com indicadores (ações, moedas, cripto).
+* `get_statistics.py` / `create_cache.py`: inicializam/atualizam caches usados pelas páginas.
+* Agende via **cron** (ou Celery beat) em produção para manter dados atualizados.
 
-* `insert_feeds_to_database.py`: loads RSS sources (categories/publishers).
-* `collect_world_data.py`: updates JSONs with indicators (stocks, currencies, crypto).
-* `get_statistics.py` / `create_cache.py`: initialize/update caches used by pages.
-* Schedule via **cron** (or Celery beat) in production to keep data fresh.
+## API (visão geral)
 
-## API (overview)
+Principais rotas **JSON**, consumidas via AJAX no front-end:
 
-Main **JSON** routes, consumed via AJAX on the front end:
+* `GET /api/get_stories` — lista histórias (filtros por país/categoria, paginação).
+* `POST /api/comments` — cria comentário (encadeado); `GET /api/comments/get/<page_id>`.
+* Reações: `POST /api/story/<action>`, `POST /api/comments/<id>/<action>`.
+* Social: `POST /api/friends` (solicitações), `POST /api/user/<id>/block` (bloqueio).
+* Perfil/imagens: `POST /api/user/image/<category>` (avatar/banner/wallpaper).
+* Notificações: `GET /api/notifications`, `POST /api/notifications/<id>/read`.
 
-* `GET /api/get_stories` — list stories (filters by country/category, pagination).
-* `POST /api/comments` — create comment (threaded); `GET /api/comments/get/<page_id>`.
-* Reactions: `POST /api/story/<action>`, `POST /api/comments/<id>/<action>`.
-* Social: `POST /api/friends` (requests), `POST /api/user/<id>/block` (block).
-* Profile/images: `POST /api/user/image/<category>` (avatar/banner/wallpaper).
-* Notifications: `GET /api/notifications`, `POST /api/notifications/<id>/read`.
+**Autorização e proteção**: decoradores `@api_login_required` + **rate limiting**.
 
-**Authorization and protection**: `@api_login_required` decorators + **rate limiting**.
+## Tempo real (Socket.IO)
 
-## Real time (Socket.IO)
+Eventos **WebSocket** para mensagens privadas e presença:
 
-**WebSocket** events for private messages and presence:
+* `send_message` → persiste no MySQL e emite `receive_message` ao destinatário.
+* Indicadores de **digitando** e **lido**.
+* Em produção, use **Gunicorn** com **eventlet**; para escalar horizontalmente,
+  configure uma *fila de mensagens* (ex.: Redis) em `socketio.init_app(...)`.
 
-* `send_message` → persists to MySQL and emits `receive_message` to the recipient.
-* **Typing** and **read** indicators.
-* In production, use **Gunicorn** with **eventlet** workers; to scale horizontally,
-  configure a *message queue* (e.g., Redis) in `socketio.init_app(...)`.
+## Segurança
 
-## Security
+* **Senhas** com **Argon2id**; **2FA (TOTP)** com segredo criptografado.
+* **E-mails de usuários** criptografados (**AES-GCM**) e **HMAC** para fingerprint nas consultas.
+* **Sanitização de HTML** em comentários (Bleach) e limites de tamanho.
+* **CAPTCHA**: Cloudflare Turnstile (verificação server-side) + CAPTCHA de imagem customizado.
 
-* **Passwords** with **Argon2id**; **2FA (TOTP)** with encrypted secret.
-* **User emails** encrypted (**AES-GCM**) and **HMAC** fingerprint for lookups.
-* **HTML sanitization** in comments (Bleach) and size limits.
-* **CAPTCHA**: Cloudflare Turnstile (server-side verify) + custom image CAPTCHA.
+## Cache e performance
 
-## Caching and performance
+* **Flask-Caching (Redis)** em rotas quentes (home/news) com *memoize* (1h/6h).
+* **Flask-Assets** gera bundles `gen/*.js` e `gen/*.css` para reduzir requisições.
+* **/static/** com **Cache-Control** agressivo (30 dias) e opção de servir via CDN/Nginx.
 
-* **Flask-Caching (Redis)** on hot paths (home/news) with *memoize* (1h/6h).
-* **Flask-Assets** generates `gen/*.js` and `gen/*.css` bundles to reduce requests.
-* **/static/** with aggressive **Cache-Control** (30 days) and option to serve via CDN/Nginx.
+## Implantação
 
-## Deployment
-
-* Recommended **container** (code in `/app`), using **Gunicorn** with **eventlet**:
+* Recomendado **container** (código em `/app`), usando **Gunicorn** com **eventlet**:
 
   ```bash
   gunicorn -w 1 --worker-class eventlet -b 0.0.0.0:5000 app:app
   ```
-* **Nginx/Proxy** in front for TLS and static assets (or use CDN/Cloudflare).
-* **HTTPS** required (cookies `Secure`; cookie domain via `BASE_DOMAIN`).
-* **Cloudflare R2** for uploads — ensure keys/bucket and public domain are set.
-* **SMTP** with STARTTLS: configure SPF/DKIM for the production sender.
-* **Jobs**: schedule `collect_world_data.py`, RSS fetching, and statistics.
+* **Nginx/Proxy** na frente para TLS e assets estáticos (ou use CDN/Cloudflare).
+* **HTTPS** obrigatório (cookies `Secure`; domínio do cookie via `BASE_DOMAIN`).
+* **Cloudflare R2** para uploads — garanta chaves/bucket e domínio público configurados.
+* **SMTP** com STARTTLS: configure SPF/DKIM para o remetente de produção.
+* **Tarefas**: agende `collect_world_data.py`, busca de RSS e estatísticas.
 
-## Troubleshooting
+## Solução de problemas
 
-* **MySQL**: prefer `MYSQL_HOST=127.0.0.1` (TCP). Review environment variables.
-* **Front-end dependencies**: install `jsmin/cssmin` filters so Flask-Assets can rebuild bundles.
-* **External services**: if not using OpenAI/Google OAuth in dev, disable routes or provide dummy keys.
+* **MySQL**: prefira `MYSQL_HOST=127.0.0.1` (TCP). Revise variáveis de ambiente.
+* **Dependências de front-end**: instale filtros `jsmin/cssmin` para o Flask-Assets reconstruir bundles.
+* **Serviços externos**: se não usar OpenAI/Google OAuth em dev, desabilite rotas ou forneça chaves dummy.
 
-## Roadmap and improvements
+## Roadmap e melhorias
 
-* Split `api.py` (1700+ lines) by domain (e.g., `comments_api`, `friends_api`, etc.).
-* Reorganize `scripts.py` into focused modules (finance, parsing, etc.).
-* Improve crawling and cache refresh (avoid stale data).
-* Scale Socket.IO with a message queue and add chat history pagination.
-* Fix model nits (duplicate fields) and consolidate friendship/notifications utilities.
-* Implement a future **reputation system** and stub pages (e.g., Donations, Admin).
+* Dividir `api.py` (1700+ linhas) por domínio (ex.: `comments_api`, `friends_api` etc.).
+* Reorganizar `scripts.py` em módulos focados (finanças, parsing etc.).
+* Melhorar crawling e refresh de cache (evitar dados obsoletos).
+* Escalar Socket.IO com fila e adicionar paginação do histórico de chat.
+* Corrigir detalhes de modelo (campos duplicados) e consolidar utilitários de amizade/notificações.
+* Implementar futuro **sistema de reputação** e páginas stub (ex.: Doações, Admin).
