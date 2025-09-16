@@ -266,4 +266,4 @@ def recategorize_and_import_from_csv(conn, csv_path="/root/e.csv", batch_size=50
 
 
 # Usage:
-recategorize_and_import_from_csv(db_connection, "/root/e.csv")
+recategorize_and_import_from_csv(db_connection, "/root/assets/publishers.csv")
