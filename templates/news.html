@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/maximusSummary.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/commentSystem.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/maximusChat.css') }}" />  <!-- NEW -->
 {% endblock %} {% block content %}
 <div class="modal fade" id="infomundiStoryModal" tabindex="-1" aria-labelledby="infomundiStoryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-{% if is_mobile %}lg{% else %}xl{% endif %} modal-dialog-centered">
@@ -75,6 +76,31 @@
                 </div>
               </div>
               <div class="maximus-summary-api-response"></div>
+              <!-- Chat with Maximus -->
+<div class="maximus-chat card mt-4">
+  <div class="card-header bg-light-subtle d-flex align-items-center">
+    <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Maximus" class="rounded me-2" style="width:32px;height:32px;" />
+    <strong>Chat with Maximus</strong>
+    <span class="ms-auto small text-muted">Ask about this story</span>
+  </div>
+
+  <div class="card-body p-0">
+    <div id="maximusChatSuggestions" class="maximus-chat__suggestions px-3 pt-3 pb-1 d-flex flex-wrap gap-2"></div>
+
+    <div id="maximusChatMessages" class="maximus-chat__messages p-3" aria-live="polite"></div>
+
+    <div class="maximus-chat__composer border-top p-2">
+      <form id="maximusChatForm" class="d-flex gap-2 align-items-start">
+        <textarea id="maximusChatInput" class="form-control" rows="2" placeholder="Ask a question about this story… (Shift+Enter for new line)"></textarea>
+        <button id="maximusChatSend" type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-paper-plane me-1"></i>Send
+        </button>
+      </form>
+      <div id="maximusChatError" class="text-danger small mt-2 d-none"></div>
+    </div>
+  </div>
+</div>
+
             </div>
 
             <!-- Comments -->
@@ -473,11 +499,11 @@
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %} {% assets "js_news" %}
+{% endblock %} {% block scripts %}
+{% assets "js_news" %}
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
-
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ url_for('static', filename='js/commentSystem.js') }}"></script>
 <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ url_for('static', filename='js/maximusSummary.js') }}"></script>
-
+<script defer nonce="{{ nonce }}" type="text/javascript" src="{{ url_for('static', filename='js/maximusChat.js') }}"></script> <!-- NEW -->
 {% endblock %}

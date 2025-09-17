@@ -1,4 +1,5 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
+from werkzeug.exceptions import BadRequest
 from sqlalchemy import and_, cast, desc, asc, func
 from datetime import datetime, time, timedelta
 from requests import get as requests_get
@@ -1024,6 +1025,80 @@ def summarize_story(story_url_hash):
     story.gpt_summary = response
     extensions.db.session.commit()
     return jsonify({"response": response}), 200
+
+
+@api.route("/story/chat/<story_url_hash>", methods=["POST"])
+@extensions.limiter.limit("240/day;120/hour;20/minute", override_defaults=True)
+def chat_about_story(story_url_hash: str):
+    # Resolve story
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
+    ).first()
+    if not story:
+        abort(404, "Couldn't find the story.")
+
+    try:
+        data = request.get_json(force=True) or {}
+    except BadRequest:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    user_message = (data.get("message") or "").strip()
+    history = data.get("history") or []
+    if not user_message:
+        return jsonify({"error": "Message is required."}), 400
+
+    # Optional moderation
+    try:
+        if llm_util.is_inappropriate(text=user_message):
+            return jsonify(
+                {"error": "Your message was flagged by our safety system."}
+            ), 400
+    except Exception:
+        # If moderation fails silently, proceed rather than breaking the UX
+        pass
+
+    # Fetch article content (short timeout; graceful fallback)
+    try:
+        article_title = story.title
+        article_text = story.description or ""
+        r = requests_get(story.url, timeout=4)
+        if r.status_code == 200:
+            parsed = scripts.extract_article_fields(r.text) or {}
+            article_title = parsed.get("title", article_title) or article_title
+            article_text = parsed.get("text", article_text) or article_text
+    except Exception:
+        article_title = story.title
+        article_text = story.description or ""
+
+    # Ensure we have/can produce a compact structured summary for grounding
+    summary_obj = story.gpt_summary
+    if not summary_obj:
+        try:
+            summary_obj = llm_util.gpt_summarize(
+                input_sanitization.gentle_cut_text(300, article_title),
+                input_sanitization.gentle_cut_text(1700, article_text),
+            )
+            if summary_obj:
+                story.gpt_summary = summary_obj
+                extensions.db.session.commit()
+        except Exception:
+            summary_obj = {}
+
+    # Call LLM chat
+    try:
+        reply = llm_util.gpt_chat_about_story(
+            title=input_sanitization.gentle_cut_text(300, article_title or story.title),
+            main_text=input_sanitization.gentle_cut_text(
+                1800, article_text or story.description or ""
+            ),
+            summary_dict=summary_obj if isinstance(summary_obj, dict) else {},
+            history=history if isinstance(history, list) else [],
+            user_message=user_message,
+        )
+    except Exception:
+        return jsonify({"error": "Chat failed. Please try again later."}), 500
+
+    return jsonify({"response": reply.get("text", "")}), 200
 
 
 @api.route("/get_stories", methods=["GET"])

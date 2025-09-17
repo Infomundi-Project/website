@@ -63,7 +63,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
     # Send the request to GPT
     client = OpenAI(api_key=OPENAI_API_KEY)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5-nano",
         messages=[
             {
                 "role": "system",
@@ -78,7 +78,6 @@ The output must strictly conform to this structure and contain valid JSON. All g
         ],
         n=1,
         response_format={"type": "json_object"},
-        temperature=0,
     )
 
     output = response.choices[0].message.content
@@ -124,3 +123,67 @@ def is_inappropriate(
     )
 
     return response.results[0].flagged if simple_return else response.results[0]
+
+
+def gpt_chat_about_story(
+    title: str,
+    main_text: str,
+    summary_dict: dict,
+    history: list,
+    user_message: str,
+) -> dict:
+    """
+    Have Maximus chat about a specific story.
+    - Respond concisely, grounded in (title, main_text) and the structured summary.
+    - Follow the language of the user's message (fallback: language of the article if clear).
+    - Avoid inventing facts; if unknown/not in article context, say so and suggest what to check.
+
+    `history` is a list of {"role":"user"|"assistant", "content":"..."} items.
+    Returns: {"text": "<assistant reply>"}
+    """
+    # Keep history safe and small
+    safe_history = []
+    for m in history[-10:]:
+        if not isinstance(m, dict):
+            continue
+        role = m.get("role")
+        content = m.get("content", "")
+        if role in ("user", "assistant") and isinstance(content, str):
+            safe_history.append({"role": role, "content": content[:2000]})
+
+    # Compose system prompt with context
+    story_context = {
+        "title": title,
+        "summary": summary_dict or {},
+        "article_excerpt": (main_text or "")[:3000],  # budget
+    }
+    system_text = (
+        "You are Maximus, Infomundi's AI assistant. You help users reason about a *specific news story*.\n"
+        "GROUNDING:\n"
+        "- Use ONLY the provided story context (title, summary, excerpt) and the conversation.\n"
+        "- If not enough story context was provided, do NOT refuse to help the user with the inquiry."
+        "- If a claim is not supported by the context, say you don't have enough info.\n"
+        "- Offer next steps (what to read/check) instead of guessing.\n\n"
+        "STYLE:\n"
+        "- Match the user's language.\n"
+        "- Keep answers compact and structured (short paragraphs or bullet points).\n"
+        "- Include caveats for uncertain info.\n"
+        "- When user asks 'what does the article say about X?', answer strictly from context.\n\n"
+        f"STORY_CONTEXT (JSON): {json.dumps(story_context, ensure_ascii=False)}"
+    )
+
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    messages = [{"role": "system", "content": system_text}]
+    messages.extend(safe_history)
+    messages.append({"role": "user", "content": user_message})
+
+    resp = client.chat.completions.create(
+        model="gpt-5-nano",
+        messages=messages,
+        top_p=1,
+        n=1,
+        # We want plain text back for the chat bubble
+        response_format={"type": "text"},
+    )
+    text = resp.choices[0].message.content.strip()
+    return {"text": text}

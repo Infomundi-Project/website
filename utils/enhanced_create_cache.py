@@ -38,14 +38,14 @@ from typing import List, Optional, Iterable
 from requests.adapters import HTTPAdapter, Retry
 
 # ---- Tunables ---------------------------------------------------------------
-RSS_TIMEOUT = (3, 8)  # (connect, read)
+RSS_TIMEOUT = (3, 4)  # (connect, read)
 MAX_BYTES_TO_SNIFF = 4096
-MAX_CANDIDATES = 50
+MAX_CANDIDATES = 10
 MAX_WORKERS = 48
 MAX_ENTRIES_PER_FEED = 50
 YAKE_MIN_LEN = 120
-TAG_INSERT_CHUNK = 1000
-STORY_INSERT_CHUNK = 1000
+TAG_INSERT_CHUNK = 300
+STORY_INSERT_CHUNK = 500
 
 _FEED_HINT_RE = re.compile(
     r"(rss|atom|feed|rdf|xml|\.rss|\.atom|\.xml)(?:[?#].*)?$",
@@ -471,20 +471,44 @@ def log_message(message):
 # DB helpers (chunked inserts, temp-table join for tags)
 # =============================================================================
 
+# --- replace the single global connection with a getter ---
+# Remove/stop using: db_connection = pymysql.connect(**db_params)
+
+
+def get_db(autocommit: bool = False) -> pymysql.connections.Connection:
+    conn = getattr(_tls, "db_conn", None)
+    if conn is None or not getattr(conn, "open", False):
+        conn = pymysql.connect(**db_params, autocommit=autocommit)
+        _tls.db_conn = conn
+    else:
+        try:
+            # Reconnect automatically if the server closed it (idle timeout, etc.)
+            conn.ping(reconnect=True)
+        except Exception:
+            conn = pymysql.connect(**db_params, autocommit=autocommit)
+            _tls.db_conn = conn
+    return conn
+
+
+def safe_rollback(conn):
+    try:
+        conn.rollback()
+    except pymysql.err.InterfaceError:
+        # Socket already gone; nothing to do
+        pass
+
 
 def update_publisher_feed_url(publisher_id: int, feed_url: str):
-    """Persist discovered feed URL to publishers.feed_url."""
     try:
         if not input_sanitization.is_valid_url(feed_url):
             return
-        # Trim to a safe length if your column is VARCHAR(512) (adjust if needed)
         feed_url = feed_url[:512]
-        with db_connection.cursor() as cursor:
+        conn = get_db(autocommit=True)
+        with conn.cursor() as cursor:
             cursor.execute(
                 "UPDATE publishers SET feed_url = %s WHERE id = %s",
                 (feed_url, publisher_id),
             )
-        db_connection.commit()
     except Exception as e:
         log_message(
             f"[warn] Could not update feed_url for publisher {publisher_id}: {e}"
@@ -519,8 +543,10 @@ def insert_stories_to_database(stories, category_name, category_id):
         uniq_map.setdefault(s["story_url_hash"], s)
     stories = list(uniq_map.values())
 
+    conn = get_db()  # transaction mode (autocommit=False)
+
     try:
-        with db_connection.cursor() as cursor:
+        with conn.cursor() as cursor:
             # 1) Bulk insert stories (chunked multi-VALUES)
             story_rows = [
                 (
@@ -616,7 +642,7 @@ def insert_stories_to_database(stories, category_name, category_id):
                         chunk=TAG_INSERT_CHUNK,
                     )
 
-            db_connection.commit()
+            conn.commit()
     except Exception as e:
         db_connection.rollback()
         log_message(f"Error bulk inserting stories/tags: {e}")
@@ -636,15 +662,13 @@ def update_publisher_http_cache(
     if not (etag or last_modified):
         return
     try:
-        with db_connection.cursor() as cursor:
-            # Columns must exist: publishers.etag VARCHAR(255), publishers.last_modified VARCHAR(255)
+        conn = get_db(autocommit=True)
+        with conn.cursor() as cursor:
             cursor.execute(
                 "UPDATE publishers SET etag = COALESCE(%s, etag), last_modified = COALESCE(%s, last_modified) WHERE id = %s",
                 (etag, last_modified, publisher_id),
             )
-        db_connection.commit()
     except Exception as e:
-        # Silently ignore if columns don't exist; log for awareness
         log_message(
             f"[warn] Could not update ETag/Last-Modified for publisher {publisher_id}: {e}"
         )
