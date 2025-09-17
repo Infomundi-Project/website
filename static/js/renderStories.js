@@ -273,6 +273,15 @@ document.addEventListener("DOMContentLoaded", function () {
           // Load Maximus content
           fetchAndRenderStorySummary(storyData.story_id);
 
+          // Seed chat with this story’s metadata and id
+          initMaximusChat({
+            storyId: storyData.story_id,
+            title: storyData.title,
+            description: storyData.description || "",
+            url: storyData.url || "",
+          });
+
+
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
           // Show the modal
           infomundiStoryModal.show();

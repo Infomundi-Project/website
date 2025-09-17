@@ -173,16 +173,12 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
     Appends the fetched and processed news items to the result_list.
     """
-    publisher_url = publisher.get("feed_url") or publisher.get("site_url")
+    publisher_url = publisher.get("feed_url")  # or publisher.get("site_url")
     if not input_sanitization.is_valid_url(publisher_url):
         log_message(f"Invalid url: {publisher_url}")
         return {}
 
-    # Removes the ending slash if it ends with one
-    if publisher_url.endswith("/"):
-        publisher_url = publisher_url[:-1]
-
-    invalid_feed = False
+    is_invalid_feed = False
     try:
         response = requests.get(
             publisher_url,
@@ -196,13 +192,9 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
         feed = feedparser.parse(response.content)
     except Exception as e:
         log_message(f"Exception: {e}")
-        invalid_feed = True
+        is_invalid_feed = True
 
-    # Tries to find the RSS feed endpoint
-    if invalid_feed:
-        feed = find_rss_feed(publisher_url)
-
-    if not feed:
+    if is_invalid_feed:
         log_message(f"Could not find feed for {publisher_url}, skipping...")
         return {}
 
@@ -428,9 +420,6 @@ def main():
     categories = fetch_categories_from_database()
 
     for category_id, category_name in categories:
-        if category_name != "br_general":
-            continue
-
         percentage = (total_done // len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
 

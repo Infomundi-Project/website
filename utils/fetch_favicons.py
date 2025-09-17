@@ -135,7 +135,9 @@ def fetch_publishers(category_id: int, force: bool):
 
 def update_publisher_favicons(favicon_updates):
     """
-    favicon_updates: list of (favicon_url, publisher_id)
+    favicon_updates: list of (favicon_url_or_None, publisher_id)
+
+    Note: passing None for favicon_url will set the column to NULL in MySQL.
     """
     if not favicon_updates:
         return
@@ -297,19 +299,20 @@ def download_and_store_favicon(favicon_url: str, s3_object_key: str) -> str | No
 # ======================
 # Per-publisher worker
 # ======================
-def process_publisher(publisher: dict, category_name: str) -> tuple[int, str] | None:
+def process_publisher(publisher: dict, category_name: str) -> tuple[int, str | None]:
     """
-    Returns (publisher_id, uploaded_public_url) on success, else None.
+    Returns (publisher_id, uploaded_public_url_or_None).
 
     Strategy:
       1) Scrape site/feed to find favicon (preferred).
       2) If (1) fails and publisher has existing favicon_url that is NOT in our bucket,
          try that URL as a source and re-upload into our bucket.
+      3) If still nothing, return (id, None) so the caller can set DB to NULL.
     """
     base = publisher.get("site_url") or publisher.get("feed_url")
     if not base or not input_sanitization.is_valid_url(base):
         log(f"Publisher {publisher['id']} has no valid site/feed URL")
-        return None
+        return (publisher["id"], None)
 
     # Try scraping
     page_resp = http_get(base)
@@ -328,9 +331,8 @@ def process_publisher(publisher: dict, category_name: str) -> tuple[int, str] | 
         log(f"Trying existing external favicon as source: {existing}")
         public = download_and_store_favicon(existing, s3_key)
 
-    if public:
-        return (publisher["id"], public)
-    return None
+    # Return (id, public or None). None -> caller will set DB NULL.
+    return (publisher["id"], public if public else None)
 
 
 # ======================
@@ -349,13 +351,24 @@ def process_category(category: dict, force: bool):
             ex.submit(process_publisher, p, category["name"]) for p in publishers
         ]
         for fut in concurrent.futures.as_completed(futures):
-            result = fut.result()
-            if result:
-                pid, public_url = result
-                updates.append((public_url, pid))
+            try:
+                pid, public_url_or_none = fut.result()
+                # Always append an update; None maps to SQL NULL
+                updates.append((public_url_or_none, pid))
+            except Exception as e:
+                # If the worker itself fails, still clear favicon_url
+                log(f"[Worker error] {e}")
+                # We don't have pid here safely, so skip; alternatively, you could
+                # capture pid in the closure if you want to NULL it on worker failure.
+                continue
 
     update_publisher_favicons(updates)
-    log(f"[{category['name']}] Updated {len(updates)}/{len(publishers)} favicons")
+    # Count successes for logging
+    wrote = sum(1 for url, _ in updates if url)
+    log(
+        f"[{category['name']}] Updated {wrote}/{len(publishers)} favicons "
+        f"(set NULL for {len(publishers) - wrote})"
+    )
 
 
 def fetch_favicons(force: bool):
