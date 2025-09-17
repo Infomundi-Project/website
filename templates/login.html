@@ -37,7 +37,8 @@
           <div class="cf-turnstile" data-sitekey="0x4AAAAAAB1DjtcW_dBfr2WO" data-callback="onCaptchaSuccess"></div>
         </div>
 
-        <button class="btn btn-lg btn-primary w-100 my-2" type="submit">Sign in</button>
+        <p id="captchaMessage" class="mb-2 small"><i class="fa-solid fa-robot me-2"></i>Please complete the captcha to enable the sign in button.</p>
+        <button class="btn btn-lg btn-secondary w-100 mb-2" type="submit" id="captchaSubmitButton" disabled>Sign in</button>
 
         <a type="button" role="button" class="d-flex justify-content-between w-100 btn btn-lg btn-outline-{% if request.cookies.get('theme') == 'dark' %}light{% else %}dark{% endif %}" href="{{ url_for('auth.google_redirect') }}">
           <img src="{{ url_for('static', filename='img/brands/google-logo.webp') }}" height="30" width="30" />Sign in with Google<span class="invisible">.</span>
