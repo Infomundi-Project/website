@@ -19,7 +19,6 @@
 }
 
 .maximus-bubble--ai {
-  background: var(--bs-light, #f8f9fa);
   border: 1px solid var(--bs-border-color, rgba(0,0,0,.125));
 }
 
@@ -66,3 +65,16 @@
   0%, 80%, 100% { opacity: .2; transform: translateY(0); }
   40% { opacity: 1; transform: translateY(-2px); }
 }
+
+.maximus-chat__suggestions { border-bottom: 1px dashed var(--bs-border-color, rgba(0,0,0,.125)); }
+.maximus-chat__suggestion {
+  border: 1px dashed var(--bs-primary-border-subtle, #b6d4fe);
+  background: var(--bs-primary-bg-subtle, #e7f1ff);
+  color: var(--bs-body-color);
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: .9rem;
+  user-select: none;
+}
+.maximus-chat__suggestion:hover { opacity: .9; }

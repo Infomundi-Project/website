@@ -161,6 +161,7 @@ def gpt_chat_about_story(
         "You are Maximus, Infomundi's AI assistant. You help users reason about a *specific news story*.\n"
         "GROUNDING:\n"
         "- Use ONLY the provided story context (title, summary, excerpt) and the conversation.\n"
+        "- If not enough story context was provided, do NOT refuse to help the user with the inquiry."
         "- If a claim is not supported by the context, say you don't have enough info.\n"
         "- Offer next steps (what to read/check) instead of guessing.\n\n"
         "STYLE:\n"

@@ -271,15 +271,15 @@ document.addEventListener("DOMContentLoaded", function () {
           initializeBookmarkIcon(storyData.id, modalBookmarkIcon);
 
           // Load Maximus content
-          fetchAndRenderStorySummary(storyData.story_id);
-
-          // Seed chat with this story’s metadata and id
           initMaximusChat({
-            storyId: storyData.story_id,
-            title: storyData.title,
-            description: storyData.description || "",
-            url: storyData.url || "",
-          });
+              storyId: storyData.story_id,
+              title: storyData.title,
+              description: storyData.description || "",
+              url: storyData.url || "",
+            });
+
+            fetchAndRenderStorySummary(storyData.story_id);
+
 
 
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);

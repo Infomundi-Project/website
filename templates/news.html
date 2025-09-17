@@ -78,13 +78,15 @@
               <div class="maximus-summary-api-response"></div>
               <!-- Chat with Maximus -->
 <div class="maximus-chat card mt-4">
-  <div class="card-header bg-light d-flex align-items-center">
+  <div class="card-header bg-light-subtle d-flex align-items-center">
     <img src="{{ url_for('static', filename='img/illustrations/maximus.webp') }}" alt="Maximus" class="rounded me-2" style="width:32px;height:32px;" />
     <strong>Chat with Maximus</strong>
     <span class="ms-auto small text-muted">Ask about this story</span>
   </div>
 
   <div class="card-body p-0">
+    <div id="maximusChatSuggestions" class="maximus-chat__suggestions px-3 pt-3 pb-1 d-flex flex-wrap gap-2"></div>
+
     <div id="maximusChatMessages" class="maximus-chat__messages p-3" aria-live="polite"></div>
 
     <div class="maximus-chat__composer border-top p-2">

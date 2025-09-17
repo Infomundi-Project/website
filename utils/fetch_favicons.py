@@ -33,7 +33,6 @@ from website_scripts import config, immutable, input_sanitization
 # ======================
 WORKERS = 8
 REQUEST_TIMEOUT = 8
-MAX_BAD_PROXIES_IN_A_ROW = 10
 
 LOG_FILE = f"{config.LOCAL_ROOT}/logs/favicons.log"
 
@@ -58,12 +57,6 @@ db_params = {
     "cursorclass": pymysql.cursors.DictCursor,
 }
 db_connection = pymysql.connect(**db_params)
-
-# Proxies
-with open(f"{config.LOCAL_ROOT}/assets/http-proxies.txt") as f:
-    PROXIES = [x.rstrip() for x in f.readlines()]
-random.shuffle(PROXIES)
-BAD_PROXIES = []
 
 # ======================
 # Logging
@@ -154,46 +147,29 @@ def update_publisher_favicons(favicon_updates):
 
 
 # ======================
-# Networking
+# Networking (no proxies)
 # ======================
 def http_get(url: str):
     """
-    GET a URL with proxy rotation. Returns requests.Response or None.
+    Simple HTTP GET without proxies. Returns requests.Response or None.
     """
-    global PROXIES, BAD_PROXIES
     if not input_sanitization.is_valid_url(url):
         log(f"Invalid URL: {url}")
         return None
 
-    bad_in_row = 0
-    while True:
-        headers = {"User-Agent": random.choice(immutable.USER_AGENTS)}
-        PROXIES = [p for p in PROXIES if p not in BAD_PROXIES]
-        chosen_proxy = random.choice(PROXIES) if PROXIES else None
-
-        try:
-            kwargs = {"headers": headers, "timeout": REQUEST_TIMEOUT}
-            if chosen_proxy:
-                kwargs["proxies"] = {"http": f"http://{chosen_proxy}"}
-            resp = requests.get(url, **kwargs)
-            if resp.status_code in (200, 301, 302):
-                return resp
-            log(f"[Bad HTTP {resp.status_code}] {url}")
-            return None
-        except requests.exceptions.ProxyError:
-            bad_in_row += 1
-            if chosen_proxy:
-                BAD_PROXIES.append(chosen_proxy)
-                log(f"[Proxy Error] Added to bad list: {chosen_proxy}")
-            if bad_in_row > MAX_BAD_PROXIES_IN_A_ROW:
-                log("[Proxy Error] Too many bad proxies in a row")
-                return None
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            log(f"[Timeout/ConnError] {e} from {url}")
-            return None
-        except Exception as e:
-            log(f"[Unexpected] {e} from {url}")
-            return None
+    headers = {"User-Agent": random.choice(immutable.USER_AGENTS)}
+    try:
+        resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+        if resp.status_code in (200, 301, 302):
+            return resp
+        log(f"[Bad HTTP {resp.status_code}] {url}")
+        return None
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+        log(f"[Timeout/ConnError] {e} from {url}")
+        return None
+    except Exception as e:
+        log(f"[Unexpected] {e} from {url}")
+        return None
 
 
 # ======================
@@ -358,8 +334,6 @@ def process_category(category: dict, force: bool):
             except Exception as e:
                 # If the worker itself fails, still clear favicon_url
                 log(f"[Worker error] {e}")
-                # We don't have pid here safely, so skip; alternatively, you could
-                # capture pid in the closure if you want to NULL it on worker failure.
                 continue
 
     update_publisher_favicons(updates)
