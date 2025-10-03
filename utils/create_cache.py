@@ -9,6 +9,8 @@ from random import shuffle, choice
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 
 from website_scripts import (
     config,
@@ -28,7 +30,8 @@ db_params = {
     "cursorclass": pymysql.cursors.DictCursor,
 }
 
-db_connection = pymysql.connect(**db_params)
+# Thread-local storage for database connections
+thread_local = threading.local()
 
 # Setup logging
 logging.basicConfig(
@@ -37,6 +40,34 @@ logging.basicConfig(
     format="[%(asctime)s] %(message)s",
 )
 
+# Configuration
+MAX_WORKERS = 20  # Limit concurrent threads
+REQUEST_TIMEOUT = 5  # Seconds
+
+
+@contextmanager
+def get_db_connection():
+    """
+    Thread-safe context manager for database connections.
+    Each thread gets its own connection from thread-local storage.
+    """
+    if not hasattr(thread_local, "connection") or thread_local.connection is None:
+        thread_local.connection = pymysql.connect(**db_params)
+
+    connection = thread_local.connection
+    try:
+        connection.ping(reconnect=True)
+        yield connection
+    except Exception as e:
+        log_message(f"Database connection error: {e}")
+        # Close bad connection and create new one
+        try:
+            connection.close()
+        except:
+            pass
+        thread_local.connection = pymysql.connect(**db_params)
+        yield thread_local.connection
+
 
 def prune_old_stories(days: int = 7) -> dict:
     """
@@ -44,158 +75,155 @@ def prune_old_stories(days: int = 7) -> dict:
     Returns counts of deleted rows.
     """
     try:
-        # Use a concrete cutoff timestamp to avoid INTERVAL param quirks
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
-        db_connection.ping(reconnect=True)
 
-        with db_connection.cursor() as cursor:
-            # 1) Remove tags for stories older than cutoff (harmless if FK cascade exists)
-            delete_tags_sql = """
-                DELETE t
-                FROM tags AS t
-                JOIN stories AS s ON s.id = t.story_id
-                WHERE s.pub_date < %s
-            """
-            cursor.execute(delete_tags_sql, (cutoff,))
-            tags_deleted = cursor.rowcount
+        with get_db_connection() as db_connection:
+            with db_connection.cursor() as cursor:
+                # 1) Remove tags for stories older than cutoff
+                delete_tags_sql = """
+                    DELETE t
+                    FROM tags AS t
+                    JOIN stories AS s ON s.id = t.story_id
+                    WHERE s.pub_date < %s
+                """
+                cursor.execute(delete_tags_sql, (cutoff,))
+                tags_deleted = cursor.rowcount
 
-            # 2) Remove the old stories
-            delete_stories_sql = """
-                DELETE FROM stories
-                WHERE pub_date < %s
-            """
-            cursor.execute(delete_stories_sql, (cutoff,))
-            stories_deleted = cursor.rowcount
+                # 2) Remove the old stories
+                delete_stories_sql = """
+                    DELETE FROM stories
+                    WHERE pub_date < %s
+                """
+                cursor.execute(delete_stories_sql, (cutoff,))
+                stories_deleted = cursor.rowcount
 
-        db_connection.commit()
+            db_connection.commit()
+
         log_message(
             f"Pruned {stories_deleted} stories and {tags_deleted} tags older than {days} days."
         )
         return {"stories_deleted": stories_deleted, "tags_deleted": tags_deleted}
 
     except Exception as e:
-        db_connection.rollback()
         log_message(f"Error pruning old stories: {e}")
         return {"stories_deleted": 0, "tags_deleted": 0}
 
 
 def extract_yake(text: str, lang_code: str = "en", top_n: int = 5) -> tuple:
-    kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
-    return (kw for kw, score in kw_extractor.extract_keywords(text))
+    """Extract keywords using YAKE."""
+    try:
+        kw_extractor = yake.KeywordExtractor(lan=lang_code, n=2, top=top_n)
+        return tuple(kw for kw, score in kw_extractor.extract_keywords(text))
+    except Exception as e:
+        log_message(f"YAKE extraction error: {e}")
+        return tuple()
 
 
 def log_message(message):
     print(f"[~] {message}")
-    # logging.info(message)
+    logging.info(message)
 
 
 def insert_stories_to_database(stories, category_name, category_id):
     """
     Bulk-inserts stories and tags for a given category.
+    Uses thread-safe database connection.
     Returns the number of exceptions encountered (should be zero).
     """
+    if not stories:
+        return 0
+
     exceptions = 0
-    with db_connection.cursor() as cursor:
-        try:
-            # 1) Bulk-insert all stories at once
-            story_sql = """
-              INSERT IGNORE INTO stories
-                (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
-              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            story_values = [
-                (
-                    s["story_title"],
-                    s["story_lang"],
-                    s["story_author"],
-                    s["story_description"],
-                    s["story_url"],
-                    s["story_url_hash"],
-                    s["story_pubdate"],
-                    category_id,
-                    s["publisher_id"],
+
+    with get_db_connection() as db_connection:
+        with db_connection.cursor() as cursor:
+            try:
+                # 1) Bulk-insert all stories at once
+                story_sql = """
+                  INSERT IGNORE INTO stories
+                    (title, lang, author, description, url, url_hash, pub_date, category_id, publisher_id)
+                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                story_values = [
+                    (
+                        s["story_title"],
+                        s["story_lang"],
+                        s["story_author"],
+                        s["story_description"],
+                        s["story_url"],
+                        s["story_url_hash"],
+                        s["story_pubdate"],
+                        category_id,
+                        s["publisher_id"],
+                    )
+                    for s in stories
+                ]
+                cursor.executemany(story_sql, story_values)
+
+                # 2) Fetch IDs for all inserted stories
+                url_hashes = tuple(s["story_url_hash"] for s in stories)
+                if len(url_hashes) == 1:
+                    url_hashes = (url_hashes[0], url_hashes[0])
+
+                cursor.execute(
+                    "SELECT id, url_hash FROM stories WHERE url_hash IN %s",
+                    (url_hashes,),
                 )
-                for s in stories
-            ]
-            cursor.executemany(story_sql, story_values)
+                id_map = {row["url_hash"]: row["id"] for row in cursor.fetchall()}
 
-            # 2) Fetch IDs for all inserted (or pre-existing) stories in one go
-            url_hashes = tuple(s["story_url_hash"] for s in stories)
-            # Note: if there's only one element, make sure it's still a tuple
-            if len(url_hashes) == 1:
-                url_hashes = (url_hashes[0], url_hashes[0])
-            cursor.execute(
-                "SELECT id, url_hash FROM stories WHERE url_hash IN %s",
-                (url_hashes,),
-            )
-            id_map = {row["url_hash"]: row["id"] for row in cursor.fetchall()}
+                # 3) Bulk-insert all tags
+                tag_sql = """
+                  INSERT IGNORE INTO tags (story_id, tag)
+                  VALUES (%s, %s)
+                """
+                tag_values = []
+                for s in stories:
+                    sid = id_map.get(s["story_url_hash"])
+                    if not sid:
+                        continue
+                    for tag in s["story_tags"]:
+                        tag = tag.strip()
+                        if tag:
+                            tag_values.append((sid, tag))
 
-            # 3) Bulk-insert all tags at once
-            tag_sql = """
-              INSERT IGNORE INTO tags (story_id, tag)
-              VALUES (%s, %s)
-            """
-            tag_values = []
-            for s in stories:
-                sid = id_map.get(s["story_url_hash"])
-                if not sid:
-                    # This should not happen unless something weird occurred
-                    continue
-                for tag in s["story_tags"]:
-                    tag = tag.strip()
-                    if tag:
-                        tag_values.append((sid, tag))
+                if tag_values:
+                    cursor.executemany(tag_sql, tag_values)
 
-            if tag_values:
-                cursor.executemany(tag_sql, tag_values)
+                db_connection.commit()
 
-            db_connection.commit()
-
-        except Exception as e:
-            # If anything goes wrong, roll back and count it as an exception
-            db_connection.rollback()
-            log_message(f"Error bulk inserting stories/tags: {e}")
-            exceptions += 1
+            except Exception as e:
+                db_connection.rollback()
+                log_message(f"Error bulk inserting stories/tags: {e}")
+                exceptions += 1
 
     return exceptions
 
 
-def fetch_feed(publisher: dict, news_filter: str, result_list: list):
+def fetch_feed(publisher: dict, news_filter: str):
     """
-    Fetch RSS feed and store relevant information in a result list.
-
-    Args:
-        publisher (dict): The publisher data.
-        news_filter (str): A filter keyword for news items.
-        result_list (list): A list to store the fetched and processed news items.
-
-    Appends the fetched and processed news items to the result_list.
+    Fetch RSS feed and return processed news items.
+    Now returns data instead of appending to shared list (thread-safe).
     """
-    publisher_url = publisher.get("feed_url")  # or publisher.get("site_url")
+    publisher_url = publisher.get("feed_url")
     if not input_sanitization.is_valid_url(publisher_url):
         log_message(f"Invalid url: {publisher_url}")
         return {}
 
-    is_invalid_feed = False
     try:
         response = requests.get(
             publisher_url,
-            timeout=5,
+            timeout=REQUEST_TIMEOUT,
             headers={
                 "User-Agent": choice(immutable.USER_AGENTS),
                 "Referer": "www.google.com",
             },
         )
-
         feed = feedparser.parse(response.content)
-    except Exception as e:
-        log_message(f"Exception: {e}")
-        is_invalid_feed = True
 
-    if is_invalid_feed:
-        log_message(f"Could not find feed for {publisher_url}, skipping...")
+    except Exception as e:
+        log_message(f"Exception fetching {publisher_url}: {e}")
         return {}
 
     try:
@@ -218,14 +246,12 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
             story_author = input_sanitization.sanitize_html(
                 input_sanitization.decode_html_entities(story.get("author"))
             )
-            if story_author == "None":  # this actually happens
+            if story_author == "None":
                 story_author = None
 
             if not story_title:
-                log_message("No story title was identified, skipping")
                 continue
 
-            # Gentle cuts text (without breaking off words)
             story_title = input_sanitization.gentle_cut_text(250, story_title)
             story_description = input_sanitization.gentle_cut_text(
                 500, story_description
@@ -233,10 +259,8 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
             story_categories = [tag.term for tag in story.get("tags", [])]
 
-            # Checks to see if the url is valid
             story_url = story.get("link")
             if not input_sanitization.is_valid_url(story_url) or len(story_url) > 512:
-                log_message(f"Story link ({story_url}) is not valid. Skipping.")
                 continue
 
             pubdate = (
@@ -245,14 +269,11 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
                 or story.get("updated")
             )
 
-            # Tries to format pubdate
             story_pubdate = format_date(pubdate).get(
                 "datetime", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
 
-            story_lang = qol_util.detect_language(
-                f"{story_title} {story_description}"
-            )  # Returns language code (en, pt, es...)
+            story_lang = qol_util.detect_language(f"{story_title} {story_description}")
 
             story_tags = extract_yake(
                 f"{story_title} {story_description}", lang_code=story_lang
@@ -273,31 +294,27 @@ def fetch_feed(publisher: dict, news_filter: str, result_list: list):
 
             data["items"].append(new_story)
 
-    except Exception as err:
-        log_message(f"Exception getting {publisher_url} ({news_filter}) // {err}")
-        data = {}
+        log_message(f"Successfully processed feed for {publisher['name']}!")
+        return data
 
-    log_message(f"Successfully processed feed for {publisher['name']}!")
-    result_list.append(data)
+    except Exception as err:
+        log_message(f"Exception processing {publisher_url} ({news_filter}): {err}")
+        return {}
 
 
 def format_date(date) -> dict:
     """
-    Converts a date object or ISO formatted date string into a readable MySQL DATETIME format.
+    Converts a date object or ISO formatted date string into MySQL DATETIME format.
     """
-
-    # Convert date to a 9-tuple if it's a string in ISO format
     if isinstance(date, str):
         try:
             date = datetime.fromisoformat(date).timetuple()
         except ValueError:
             return {"error": "Invalid date format"}
 
-    # Convert the 9-tuple date to a datetime object
     if isinstance(date, tuple):
         date = datetime(*date[:6])
 
-    # Ensure it's a datetime object
     if not isinstance(date, datetime):
         return {"error": "Invalid date format"}
 
@@ -306,20 +323,10 @@ def format_date(date) -> dict:
 
 def find_rss_feed(base_url, candidates=None, timeout=5):
     """
-    Attempts to discover a valid RSS/Atom feed for the given base URL by
-    1) Crawling <link> tags in the HTML head for feeds.
-    2) Testing a list of common feed endpoint paths.
-
-    Args:
-        base_url (str): The news website's base URL (e.g., https://example.com).
-        candidates (list): Optional list of feed endpoint paths to try.
-        timeout (int): Request timeout in seconds.
-
-    Returns:
-        str or None: The full URL to a discovered feed, or None if none found.
+    Attempts to discover a valid RSS/Atom feed for the given base URL.
     """
     discovered = []
-    # 1) Crawl HTML for <link rel="alternate"> tags
+
     try:
         resp = requests.get(base_url, timeout=timeout)
         if resp.status_code == 200:
@@ -336,7 +343,6 @@ def find_rss_feed(base_url, candidates=None, timeout=5):
     except requests.RequestException:
         pass
 
-    # 2) Fallback: common endpoints
     if candidates is None:
         candidates = [
             "rss",
@@ -356,12 +362,9 @@ def find_rss_feed(base_url, candidates=None, timeout=5):
             "main.xml",
         ]
 
-    # Prepend discovered feeds so they get tested first
     endpoints = discovered + candidates
 
-    # Test each endpoint
     for endpoint in endpoints:
-        # If endpoint looks like full URL, use it; else join with base
         feed_url = (
             endpoint
             if (endpoint.startswith("http") or endpoint.startswith("https"))
@@ -381,16 +384,18 @@ def find_rss_feed(base_url, candidates=None, timeout=5):
 
 
 def fetch_categories_from_database():
+    """Fetch all categories from database."""
     log_message("Fetching categories from the database")
-    try:
-        with db_connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM categories")
-            categories = cursor.fetchall()
-    except Exception as e:
-        log_message(f"Error fetching categories: {e}")
-        return []
 
-    # DEBUG if row["name"] == "br_general"
+    with get_db_connection() as db_connection:
+        try:
+            with db_connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM categories")
+                categories = cursor.fetchall()
+        except Exception as e:
+            log_message(f"Error fetching categories: {e}")
+            return []
+
     category_list = [(row["id"], row["name"]) for row in categories]
     shuffle(category_list)
 
@@ -399,52 +404,75 @@ def fetch_categories_from_database():
 
 
 def fetch_publishers_from_database(category_id: int):
+    """Fetch publishers for a specific category."""
     log_message(f"Fetching publishers for category ID: {category_id}")
-    try:
-        with db_connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM publishers WHERE category_id = %s",
-                (category_id,),
-            )
-            publishers = cursor.fetchall()
-    except Exception as e:
-        log_message(f"Error fetching publishers: {e}")
-        return []
+
+    with get_db_connection() as db_connection:
+        try:
+            with db_connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT * FROM publishers WHERE category_id = %s",
+                    (category_id,),
+                )
+                publishers = cursor.fetchall()
+        except Exception as e:
+            log_message(f"Error fetching publishers: {e}")
+            return []
 
     log_message(f"Got {len(publishers)} publishers from the database")
     return publishers
 
 
 def main():
+    """Main execution function with controlled concurrency."""
     total_done = 0
     categories = fetch_categories_from_database()
 
+    if not categories:
+        log_message("No categories found!")
+        return
+
     for category_id, category_name in categories:
-        percentage = (total_done // len(categories)) * 100
+        # Fixed percentage calculation
+        percentage = (total_done / len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")
 
-        threads = []
-        result_list = []
-
         publishers = fetch_publishers_from_database(category_id)
-        for publisher in publishers:
-            thread = threading.Thread(
-                target=fetch_feed, args=(publisher, category_name, result_list)
-            )
-            threads.append(thread)
-            thread.start()
+        if not publishers:
+            log_message(f"No publishers for {category_name}")
+            total_done += 1
+            continue
 
-        for thread in threads:
-            thread.join()
+        # Use ThreadPoolExecutor with limited workers
+        result_list = []
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            # Submit all tasks
+            future_to_publisher = {
+                executor.submit(fetch_feed, publisher, category_name): publisher
+                for publisher in publishers
+            }
 
+            # Collect results as they complete
+            for future in as_completed(future_to_publisher):
+                try:
+                    data = future.result(timeout=REQUEST_TIMEOUT + 5)
+                    if data:
+                        result_list.append(data)
+                except Exception as e:
+                    publisher = future_to_publisher[future]
+                    log_message(
+                        f"Exception for {publisher.get('name', 'unknown')}: {e}"
+                    )
+
+        # Merge all articles
         merged_articles = []
         for rss_data in result_list:
-            if not rss_data:
-                continue
-            merged_articles.extend(rss_data["items"])
+            if rss_data and "items" in rss_data:
+                merged_articles.extend(rss_data["items"])
 
         if not merged_articles:
             log_message(f"[-] Empty cache: {category_name}")
+            total_done += 1
             continue
 
         shuffle(merged_articles)
@@ -457,7 +485,7 @@ def main():
             f"[{len(merged_articles) - exceptions_count} articles] Saved for {category_name}."
         )
 
-    # 👇 auto-delete anything older than 7 days
+    # Auto-delete anything older than 7 days
     prune_old_stories(days=7)
 
     log_message("Finished!")
