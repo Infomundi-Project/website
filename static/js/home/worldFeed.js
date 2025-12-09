@@ -3,7 +3,7 @@
   if (!root) return;
 
   const FEED_URL = root.dataset.feedEndpoint;
-  const FLAG_BASE = 'https://bleeding.infomundi.net/static/img/flags/4x3/';
+  const FLAG_BASE = '/static/img/flags/4x3/';
 
   // Map API region names -> DOM data-region names (handle "Oceania" vs "Australia")
   const regionDomName = (name) => {

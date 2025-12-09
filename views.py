@@ -487,9 +487,16 @@ def news():
     Arguments:
         country_cca2 (str): GET 'country' parameter. Specifies the country code (2 digits). Example: 'br' (cca2 for Brazil).
     """
-    contry_cca2 = request.args.get("country", "").lower()
+    country_cca2 = request.args.get("country", "").lower()
 
-    country = country_util.get_country(iso2=contry_cca2)
+    if not country_cca2:
+        flash(
+            "We apologize, but we couldn't find the country you are looking for.",
+            "error",
+        )
+        return redirect(url_for("views.home"))
+
+    country = country_util.get_country(iso2=country_cca2)
     if not country:
         flash(
             "We apologize, but we couldn't find the country you are looking for.",
@@ -498,9 +505,9 @@ def news():
         return redirect(url_for("views.user_redirect"))
 
     country_name = country.name
-    session["last_visited_country_url"] = f"/news?country={contry_cca2}"
+    session["last_visited_country_url"] = f"/news?country={country_cca2}"
 
-    supported_categories = scripts.get_supported_categories(contry_cca2)
+    supported_categories = scripts.get_supported_categories(country_cca2)
 
     seo_title = f"Infomundi - {country_name.title()} Stories"
     seo_description = f"Whether you're interested in local events, national happenings, or international affairs affecting {country_name.title()}, Infomundi is your go-to source for news."
@@ -508,12 +515,12 @@ def news():
     return render_template(
         "news.html",
         gdp_per_capita=scripts.get_gdp(country_name, is_per_capita=True),
-        current_time=scripts.get_current_time_in_timezone(contry_cca2),
-        nation_data=scripts.get_nation_data(contry_cca2),
+        current_time=scripts.get_current_time_in_timezone(country_cca2),
+        nation_data=scripts.get_nation_data(country_cca2),
         supported_categories=supported_categories,
         seo_data=(seo_title, seo_description),
         gdp=scripts.get_gdp(country_name),
-        country_code=contry_cca2,
+        country_code=country_cca2,
         country_name=country_name,
     )
 

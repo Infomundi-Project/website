@@ -4,6 +4,7 @@ import logging
 import pymysql
 import requests
 import yake
+import os
 
 from random import shuffle, choice
 from urllib.parse import urljoin
@@ -22,7 +23,7 @@ from website_scripts import (
 
 # Database connection parameters
 db_params = {
-    "host": "127.0.0.1",
+    "host": config.MYSQL_HOST,
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
     "db": config.MYSQL_DATABASE,
@@ -33,9 +34,13 @@ db_params = {
 # Thread-local storage for database connections
 thread_local = threading.local()
 
+# Ensure logs directory exists
+log_dir = f"{config.LOCAL_ROOT}/logs"
+os.makedirs(log_dir, exist_ok=True)
+
 # Setup logging
 logging.basicConfig(
-    filename=f"{config.LOCAL_ROOT}/logs/create_cache.log",
+    filename=f"{log_dir}/create_cache.log",
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
 )
@@ -43,7 +48,7 @@ logging.basicConfig(
 # Configuration
 MAX_WORKERS = 20  # Limit concurrent threads
 REQUEST_TIMEOUT = 5  # Seconds
-
+DEBUG_ON = True  # this limits the news search for only a specific category (in this case, br_general)
 
 @contextmanager
 def get_db_connection():
@@ -396,6 +401,7 @@ def fetch_categories_from_database():
             log_message(f"Error fetching categories: {e}")
             return []
 
+    # e.g. [(15, 'cl_general'), (194, 'as_general'), ...]
     category_list = [(row["id"], row["name"]) for row in categories]
     shuffle(category_list)
 
@@ -433,6 +439,10 @@ def main():
         return
 
     for category_id, category_name in categories:
+        if DEBUG_ON:
+            if category_name != "br_general":
+                continue
+
         # Fixed percentage calculation
         percentage = (total_done / len(categories)) * 100
         log_message(f"\n[{round(percentage, 2)}%] Handling {category_name}...")

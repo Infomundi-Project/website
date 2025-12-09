@@ -735,7 +735,7 @@
 
 
 
-    <script nonce="{{ nonce }}" src="https://cap.infomundi.net/assets/widget.js"></script> <script nonce="{{ nonce }}">window.CAP_CUSTOM_WASM_URL = "static/js/libs/cap_wasm.min.js";</script><!--<script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/captcha.js') }}"></script>--> {% assets "js_base" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% if current_user.is_authenticated %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
+    {% assets "js_base" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% if current_user.is_authenticated %} <script nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/socket.io.min.js') }}"></script>
     <script defer type="module" nonce="{{ nonce }}" src="{{ url_for('static', filename='js/chat.js') }}"></script> {% assets "js_base_authenticated" %} <script defer nonce="{{ nonce }}" src="{{ ASSET_URL }}"></script> {% endassets %} {% endif %} 
     <script nonce="{{ nonce }}">
       window.currentUserId = {{ current_user.id if current_user.is_authenticated else 0 }};

@@ -34,9 +34,12 @@ sed -i "s/your-hmac-key-here.*/$(openssl rand -hex 32)/" .env
 
 Or manually edit `.env` and replace the keys with random strings.
 
-### 3. Start Services
+### 3. Set up Assets & Start Services
 
 ```bash
+# Initialize and update all submodules
+git submodule update --init --recursive
+
 # Start all services in background
 docker compose up -d
 
@@ -44,16 +47,16 @@ docker compose up -d
 docker compose logs -f infomundi-app
 ```
 
-Wait ~30 seconds for services to initialize.
+Wait around 30 seconds for services to initialize.
 
 ### 4. Seed Database
 
 ```bash
 # Import reference data (categories, publishers, countries)
-docker compose exec infomundi-app python utils/extra/insert_feeds_to_database.py
+docker compose exec infomundi-app python -m utils.extra.insert_feeds_to_database
 
 # Generate statistics cache
-docker compose exec infomundi-app python utils/extra/get_statistics.py
+docker compose exec infomundi-app python utils/extra/get_statistics
 docker compose exec infomundi-app python utils/search_news.py
 ```
 

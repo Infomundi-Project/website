@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
+from pathlib import Path
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
@@ -26,20 +27,38 @@ with open(f"{config.LOCAL_ROOT}/assets/http-proxies.txt") as f:
 # Use set for O(1) lookups - FIX: was list with O(n) lookups
 bad_proxies = set()
 
-# R2 configuration
-s3_client = boto3.client(
-    "s3",
-    endpoint_url=config.R2_ENDPOINT,
-    aws_access_key_id=config.R2_ACCESS_KEY,
-    aws_secret_access_key=config.R2_SECRET,
-    region_name="auto",
-)
+# R2/S3 configuration with fallback
+s3_client = None
+USE_LOCAL_STORAGE = False
+LOCAL_STORAGE_PATH = None
 bucket_name = "infomundi"
 bucket_base_url = "https://bucket.infomundi.net"
 
+try:
+    # Check if S3/R2 credentials are properly configured
+    if not config.R2_ENDPOINT or not config.R2_ACCESS_KEY or not config.R2_SECRET:
+        raise ValueError("S3/R2 credentials not configured")
+    
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=config.R2_ENDPOINT,
+        aws_access_key_id=config.R2_ACCESS_KEY,
+        aws_secret_access_key=config.R2_SECRET,
+        region_name="auto",
+    )
+    print("[✓] Successfully initialized S3 client")
+except Exception as e:
+    print(f"[!] S3 client initialization failed: {e}. Falling back to local storage.")
+    USE_LOCAL_STORAGE = True
+    # Create local storage directory
+    LOCAL_STORAGE_PATH = Path("/app/static/local_uploads")
+    LOCAL_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+    print(f"[✓] Local storage initialized at: {LOCAL_STORAGE_PATH}")
+    bucket_base_url = "/static/local_uploads"  # Update base URL for local mode
+
 # Database configuration
 db_params = {
-    "host": "127.0.0.1",
+    "host": config.MYSQL_HOST,
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
     "db": config.MYSQL_DATABASE,
@@ -306,6 +325,42 @@ def extract_image_from_response(
         return DEFAULT_IMAGE
 
 
+def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
+    """
+    Upload image to S3 or local storage based on configuration.
+    
+    Args:
+        buffer: BytesIO buffer containing image data
+        object_key: S3 key or local file path
+        
+    Returns:
+        True if upload successful, False otherwise
+    """
+    try:
+        if USE_LOCAL_STORAGE:
+            # Local storage fallback
+            local_path = LOCAL_STORAGE_PATH / object_key
+            # Create parent directories if they don't exist
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            buffer.seek(0)
+            with open(local_path, 'wb') as f:
+                f.write(buffer.read())
+            
+            log_message(f"Saved to local storage: {local_path}")
+            return True
+        else:
+            # S3/R2 storage
+            buffer.seek(0)
+            s3_client.upload_fileobj(buffer, bucket_name, object_key)
+            log_message(f"Uploaded to S3: {object_key}")
+            return True
+            
+    except Exception as e:
+        log_message(f"Failed to upload {object_key}: {e}")
+        return False
+
+
 def download_and_convert_image(data: dict) -> list:
     """
     Download and process images (story images and favicons).
@@ -314,7 +369,7 @@ def download_and_convert_image(data: dict) -> list:
         data: Dict with image types as keys, each containing 'url' and 'output_path'
 
     Returns:
-        List of successfully uploaded S3 object keys
+        List of successfully uploaded S3 object keys or local paths
     """
     website_paths = []
 
@@ -361,15 +416,15 @@ def download_and_convert_image(data: dict) -> list:
 
             output_buffer.seek(0)
 
-            # Upload to S3
-            log_message(f"Uploading {s3_object_key} to bucket")
-            s3_client.upload_fileobj(output_buffer, bucket_name, s3_object_key)
-            log_message(f"Upload successful: {s3_object_key}")
-
-            website_paths.append(s3_object_key)
+            # Upload to storage (S3 or local)
+            log_message(f"Uploading {s3_object_key} to storage")
+            if upload_image_to_storage(output_buffer, s3_object_key):
+                website_paths.append(s3_object_key)
+            else:
+                log_message(f"Upload failed for {s3_object_key}")
 
         except Exception as e:
-            log_message(f"Failed to process/upload {item}: {e}")
+            log_message(f"Failed to process {item}: {e}")
         finally:
             output_buffer.close()
 
@@ -482,6 +537,9 @@ def process_category(category: dict):
 
 def search_images():
     """Main function to search and process images for all categories"""
+    storage_mode = "LOCAL STORAGE" if USE_LOCAL_STORAGE else "S3/R2"
+    log_message(f"Starting image search using {storage_mode}")
+    
     categories = fetch_categories_from_database()
 
     if not categories:
