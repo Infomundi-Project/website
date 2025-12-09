@@ -271,16 +271,7 @@ document.addEventListener("DOMContentLoaded", function () {
           initializeBookmarkIcon(storyData.id, modalBookmarkIcon);
 
           // Load Maximus content
-          initMaximusChat({
-              storyId: storyData.story_id,
-              title: storyData.title,
-              description: storyData.description || "",
-              url: storyData.url || "",
-            });
-
-            fetchAndRenderStorySummary(storyData.story_id);
-
-
+          fetchAndRenderStorySummary(storyData.story_id);
 
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
           // Show the modal

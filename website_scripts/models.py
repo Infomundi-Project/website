@@ -3,7 +3,33 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.mysql import MEDIUMINT
 
 from .extensions import db
-from . import security_util, hashing_util, totp_util, qol_util, input_sanitization
+from . import security_util, hashing_util, totp_util, qol_util, input_sanitization, config
+
+# Configure basic logging for storage mode detection
+import logging
+target_logger = logging.getLogger(__name__)
+
+# Storage mode detection - check if we're using local storage or S3
+USE_LOCAL_STORAGE = False
+try:
+    if not config.R2_ENDPOINT or not config.R2_ACCESS_KEY or not config.R2_SECRET:
+        USE_LOCAL_STORAGE = True
+        target_logger.info("Models: Using local storage mode for media URLs")
+except AttributeError:
+    USE_LOCAL_STORAGE = True
+    target_logger.info("Models: R2 config not found, using local storage mode")
+
+
+def get_storage_url(path: str) -> str:
+    """
+    Returns appropriate URL based on storage mode.
+    In production: returns S3/R2 bucket URL
+    In dev: returns local static file path
+    """
+    if USE_LOCAL_STORAGE:
+        return f"/static/local_uploads/{path}"
+    else:
+        return f"https://bucket.infomundi.net/{path}"
 
 
 class Publisher(db.Model):
@@ -34,7 +60,7 @@ class Tag(db.Model):
     tag = db.Column(db.String(30), nullable=False)
 
     __table_args__ = (
-        # ensure we don’t get duplicate tags on the same story
+        # ensure we don't get duplicate tags on the same story
         db.UniqueConstraint("story_id", "tag", name="uq_story_tag"),
     )
 
@@ -92,11 +118,11 @@ class Story(db.Model):
         return hashing_util.binary_to_md5_hex(self.url_hash)
 
     def get_image_url(self) -> str:
-        return (
-            f"https://bucket.infomundi.net/stories/{self.category.name}/{self.get_public_id()}.avif"
-            if self.has_image
-            else ""
-        )
+        if not self.has_image:
+            return ""
+        
+        path = f"stories/{self.category.name}/{self.get_public_id()}.avif"
+        return get_storage_url(path)
 
     @property
     def image_url(self) -> str:
@@ -257,7 +283,7 @@ class User(db.Model, UserMixin):
                 return ""
             path = "wallpapers"
 
-        return f"https://bucket.infomundi.net/{path}/{self.get_public_id()}.webp"
+        return get_storage_url(f"{path}/{self.get_public_id()}.webp")
 
     @property
     def avatar_url(self) -> str:

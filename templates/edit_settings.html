@@ -464,15 +464,15 @@
           "X-CSRFToken": csrfToken,
         },
       })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
+        .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+        .then(({ ok, body }) => {
+          if (ok || body.success) {
             showMessage("Code sent! Check your inbox.", "success");
             codeInput.disabled = false;
             verifyBtn.disabled = false;
             sendBtn.disabled = true;
           } else {
-            showMessage(data.error || "Failed to send code.", "danger");
+            showMessage(body.error || "Failed to send code.", "danger");
           }
         })
         .catch(() => showMessage("Network error.", "danger"));

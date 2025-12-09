@@ -121,16 +121,13 @@ function fetchAndRenderStorySummary(storyId) {
               `;
       }
 
-      // Move "Questioning the Subject" into chat as suggestion chips
-if (Array.isArray(questioning_the_subject) && questioning_the_subject.length) {
-  if (window.setMaximusChatSuggestions) {
-    window.setMaximusChatSuggestions(questioning_the_subject);
-  } else {
-    // If chat script hasn't loaded/initialized yet, stash it on the container for pickup
-    maximusApiResponse.dataset.suggestedQuestions = JSON.stringify(questioning_the_subject);
-  }
-}
-
+      // Add "Questioning the Subject"
+      if (questioning_the_subject?.length) {
+        contentHTML += `
+                  <h4>Questioning the Subject</h4>
+                  <ul>${questioning_the_subject.map((question) => `<li>${question}</li>`).join("")}</ul>
+              `;
+      }
 
       // Update Maximus API Response
       maximusApiResponse.innerHTML = contentHTML;

@@ -1,0 +1,176 @@
+# Local Development Docker Compose
+# This file is for running Infomundi locally on developer machines
+# DO NOT use this for production - see deployment documentation
+
+services:
+  # MySQL Database
+  infomundi-mysql:
+    image: mysql:8.0
+    container_name: infomundi-dev-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-dev_root_pass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-infomundi}
+      MYSQL_USER: ${MYSQL_USERNAME:-infomundi}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Auto-import schema and geographic data on first run
+      # Files in docker-entrypoint-initdb.d are executed in alphabetical order
+      - ./assets/sql/regions.sql:/docker-entrypoint-initdb.d/01-regions.sql:ro
+      - ./assets/sql/subregions.sql:/docker-entrypoint-initdb.d/02-subregions.sql:ro
+      - ./assets/sql/countries.sql:/docker-entrypoint-initdb.d/03-countries.sql:ro
+      - ./assets/sql/states.sql:/docker-entrypoint-initdb.d/04-states.sql:ro
+      - ./assets/sql/cities.sql:/docker-entrypoint-initdb.d/05-cities.sql:ro
+      - ./sql/infomundi.sql:/docker-entrypoint-initdb.d/06-schema.sql:ro
+    ports:
+      - "127.0.0.1:3306:3306"
+    networks:
+      - infomundi-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USERNAME:-infomundi}", "-p${MYSQL_PASSWORD:-dev_pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  infomundi-redis:
+    image: redis:7-alpine
+    container_name: infomundi-dev-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-dev_redis_pass}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - infomundi-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-dev_redis_pass}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Flask Application
+  infomundi-app:
+    image: python:3.12-alpine
+    container_name: infomundi-dev-app
+    working_dir: /app
+    volumes:
+      # Mount source code (writable for development)
+      - .:/app
+      # Cache pip packages
+      - pip_cache:/root/.cache/pip
+    environment:
+      # Core Flask settings
+      FLASK_APP: app.py
+      FLASK_ENV: development
+      FLASK_DEBUG: "1"
+
+      # App configuration
+      WEBSITE_ROOT: /app
+      LOCAL_ROOT: /app
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-infomundi_dev}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+
+      # Security keys (use your own in .env)
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-me}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev-encryption-key-change-me}
+      HMAC_KEY: ${HMAC_KEY:-dev-hmac-key-change-me}
+
+      # Database
+      MYSQL_HOST: infomundi-mysql
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-infomundi}
+      MYSQL_USERNAME: ${MYSQL_USERNAME:-infomundi}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev_pass}
+
+      # Redis
+      REDIS_HOST: infomundi-redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-dev_redis_pass}
+
+      # External services (optional - use dummy values or leave empty)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+      # SMTP (use MailHog in development - see optional service below)
+      SMTP_SERVER: ${SMTP_SERVER:-mailhog}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+
+      # Cloudflare R2 (optional for local dev)
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_ACCESS_KEY: ${R2_ACCESS_KEY:-}
+      R2_SECRET: ${R2_SECRET:-}
+      R2_TOKEN: ${R2_TOKEN:-}
+
+      # Webhooks (optional)
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+
+      # CAPTCHA service (optional - comment out if not using)
+      CAP_HOSTNAME: ${CAP_HOSTNAME:-cap}
+      CAP_SITE_KEY: ${CAP_SITE_KEY:-}
+      CAP_SECRET_KEY: ${CAP_SECRET_KEY:-}
+    ports:
+      - "127.0.0.1:5000:5000"
+    command: >
+      sh -c "
+        apk add --no-cache libmagic gcc musl-dev python3-dev libffi-dev openssl-dev &&
+        pip install --upgrade pip &&
+        pip install -r requirements.txt &&
+        echo 'Starting Gunicorn with eventlet workers for Socket.IO support...' &&
+        gunicorn --worker-class eventlet --workers 2 --bind 0.0.0.0:5000 --reload wsgi:app
+      "
+    depends_on:
+      infomundi-mysql:
+        condition: service_healthy
+      infomundi-redis:
+        condition: service_healthy
+    networks:
+      - infomundi-dev
+    restart: unless-stopped
+
+  # MailHog - Email testing (optional but recommended)
+  # Catches all outgoing emails so you can test without sending real emails
+  # Access web UI at http://localhost:8025
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: infomundi-dev-mailhog
+    ports:
+      - "127.0.0.1:1025:1025"  # SMTP
+      - "127.0.0.1:8025:8025"  # Web UI
+    networks:
+      - infomundi-dev
+    restart: unless-stopped
+
+  # Optional: CAPTCHA service (if you need to test CAPTCHA locally)
+  # Comment out if not needed
+  # cap:
+  #   image: tiago2/cap:latest
+  #   container_name: infomundi-dev-cap
+  #   environment:
+  #     ADMIN_KEY: ${CAP_ADMIN_KEY:-local-dev-admin-key}
+  #     ENABLE_ASSETS_SERVER: "true"
+  #   ports:
+  #     - "127.0.0.1:3000:3000"
+  #   volumes:
+  #     - cap_data:/usr/src/app/.data
+  #   networks:
+  #     - infomundi-dev
+  #   restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  pip_cache:
+    driver: local
+  # cap_data:
+  #   driver: local
+
+networks:
+  infomundi-dev:
+    driver: bridge

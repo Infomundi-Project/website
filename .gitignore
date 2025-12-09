@@ -1,13 +1,7 @@
-static/js/amcharts/
-static/fontawesome/
-static/img/flags/
 .webassets-cache/
-static/webfonts/
-static/css/libs/
-static/js/libs/
-static/fonts/
 __pycache__/
 static/gen/
-assets/
 .venv/
 logs/
+.env
+local_uploads/

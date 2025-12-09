@@ -58,7 +58,7 @@ CAPTCHA_CLEARANCE_HOURS = 12
 SMTP_USERNAME = "noreply@infomundi.net"
 SMTP_PASSWORD = environ["SMTP_PASSWORD"]
 SMTP_SERVER = environ["SMTP_SERVER"]
-SMTP_PORT = 587
+SMTP_PORT = environ["SMTP_PORT"]
 
 # -----------> Databases <-----------
 MYSQL_DATABASE = environ["MYSQL_DATABASE"]

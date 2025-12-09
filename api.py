@@ -814,7 +814,7 @@ def setup_totp():
 
 
 @api.route("/2fa/mail/send", methods=["POST"])
-@extensions.limiter.limit("7/day;5/hour;3/minute")
+@extensions.limiter.limit("30/day;3/minute")
 def send_mail_twofactor_code():
     user = extensions.db.session.get(models.User, session["user_id"])
 

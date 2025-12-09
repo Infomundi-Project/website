@@ -156,11 +156,15 @@ def send_email(
 
     try:
         with SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
-            server.starttls()  # Upgrade the connection to secure TLS
-            server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
+            # Only use STARTTLS and auth if not using MailHog (local development)
+            # MailHog doesn't support STARTTLS or authentication
+            if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1"):
+                server.starttls()  # Upgrade the connection to secure TLS
+                server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
 
             # Send the email
-            server.sendmail(config.SMTP_USERNAME, recipient_email, message.as_string())
+            from_addr = config.SMTP_USERNAME if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1") else from_email
+            server.sendmail(from_addr, recipient_email, message.as_string())
     except Exception:
         return False
 
