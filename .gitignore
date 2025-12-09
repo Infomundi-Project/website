@@ -5,3 +5,4 @@ static/gen/
 logs/
 .env
 local_uploads/
+core

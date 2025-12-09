@@ -5,7 +5,7 @@ from . import json_util
 
 SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]  # e.g. infomundi-session
 WEBSITE_ROOT = environ["WEBSITE_ROOT"]  # e.g. /app (inside docker container)
-BASE_DOMAIN = environ["BASE_DOMAIN"]  # e.g. infomundi.net
+BASE_URL = environ["BASE_URL"]  # e.g. https://infomundi.net (without the trailing slash)
 LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
 
 # CAP_HOSTNAME = environ["CAP_HOSTNAME"]  # for cap.infomundi.net

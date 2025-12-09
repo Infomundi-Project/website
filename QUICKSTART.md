@@ -55,9 +55,24 @@ Wait around 30 seconds for services to initialize.
 # Import reference data (categories, publishers, countries)
 docker compose exec infomundi-app python -m utils.extra.insert_feeds_to_database
 
-# Generate statistics cache
-docker compose exec infomundi-app python utils/extra/get_statistics
-docker compose exec infomundi-app python utils/search_news.py
+# Search for some news
+docker compose exec infomundi-app python -m utils.search_news
+
+# Search for some news images (required if you want them to show up in /news?country=)
+docker compose exec infomundi-app python -m utils.search_news_images
+
+# Generate statistics cache (optional)
+docker compose exec infomundi-app python -m utils.extra.get_statistics
+```
+
+**Note**:
+
+The `utils/search_news.py` contains a debug option that you can set to True when feeding the database locally:
+
+```python
+# utils/search_news.py
+
+DEBUG_ON = False  # this limits the news search for only a specific category (in this case, br_general)
 ```
 
 ### 5. Open the App
@@ -173,26 +188,6 @@ docker compose down
 docker compose up -d --build
 ```
 
-## File Structure
-
-```
-website/
-├── app.py              # Flask app entry point
-├── wsgi.py             # Production WSGI entry
-├── views.py            # HTML page routes
-├── auth.py             # Authentication routes
-├── api.py              # JSON API routes
-├── website_scripts/    # Utility modules
-├── templates/          # Jinja2 HTML templates
-├── static/             # CSS, JS, images
-├── sql/                # Database schema
-├── tests/              # Test files
-├── utils/              # Helper scripts
-├── docker-compose.yml  # Local dev environment
-├── .env.example        # Environment template
-└── requirements.txt    # Python dependencies
-```
-
 ## Next Steps
 
 1. **Read** [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
@@ -208,4 +203,4 @@ website/
 - **Bugs**: Open a GitHub issue
 - **Security**: Report privately to maintainers
 
-Happy coding! 🚀
+Happy coding!

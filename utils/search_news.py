@@ -48,7 +48,7 @@ logging.basicConfig(
 # Configuration
 MAX_WORKERS = 20  # Limit concurrent threads
 REQUEST_TIMEOUT = 5  # Seconds
-DEBUG_ON = True  # this limits the news search for only a specific category (in this case, br_general)
+DEBUG_ON = False  # this limits the news search for only a specific category (in this case, br_general)
 
 @contextmanager
 def get_db_connection():

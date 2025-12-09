@@ -50,9 +50,9 @@ Country: {cloudflare_util.get_user_country()}
 
 It's always wise to make sure that you recognize this login. If this was unexpected, it might be time to change your password.
 
-Should you need to take any action, you can recover your account at: https://{config.BASE_DOMAIN}/auth/forgot_password
+Should you need to take any action, you can recover your account at: {config.BASE_URL}/auth/forgot_password
 
-If you encounter any issues, please don't hesitate to contact our team for assistance at: https://{config.BASE_DOMAIN}/contact
+If you encounter any issues, please don't hesitate to contact our team for assistance at: {config.BASE_URL}/contact
 
 Best regards,
 The Infomundi Team
@@ -101,7 +101,7 @@ def handle_register_token(email: str, username: str, password: str) -> bool:
 
 If you've received this message in error, feel free to disregard it. However, if you're here to verify your account, welcome to Infomundi! We've made it quick and easy for you, simply click on the following link to complete the verification process: 
 
-https://{config.BASE_DOMAIN}/auth/verify?token={register_token}
+{config.BASE_URL}/auth/verify?token={register_token}
 
 We're looking forward to seeing you explore our platform!
 
@@ -182,7 +182,7 @@ def send_recovery_token(email: str) -> bool:
 
 If you've received this message in error, feel free to disregard it. However, if you're here to recover your Infomundi account, feel free to click on the link below:
 
-https://{config.BASE_DOMAIN}/auth/forgot_password?token={recovery_token}
+{config.BASE_URL}/auth/forgot_password?token={recovery_token}
 
 Please keep in mind that this token will expire in 30 minutes.
 
@@ -231,7 +231,7 @@ def send_delete_token(email: str) -> bool:
 
 If you've received this message in error, feel free to disregard it. However, if you're here to delete your Infomundi account, feel free to click on the link below:
 
-https://{config.BASE_DOMAIN}/auth/delete?token={token}
+{config.BASE_URL}/auth/delete?token={token}
 
 This link will expire in 30 minutes. Please, keep in mind that this action is permanent and your account data can't be recovered afterwards.
 

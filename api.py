@@ -1308,7 +1308,7 @@ def create_comment():
             ]
         )
     else:
-        comment.url = f"https://{config.BASE_DOMAIN}/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
+        comment.url = f"{config.BASE_URL}/{input_sanitization.sanitize_text(page_id)}#comment-{comment.id}"
 
     # If this is a reply, ping the parent comment's author
     if parent_id:
