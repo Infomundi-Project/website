@@ -108,11 +108,6 @@ services:
 
       # Webhooks (optional)
       WEBHOOK_URL: ${WEBHOOK_URL:-}
-
-      # CAPTCHA service (optional - comment out if not using)
-      CAP_HOSTNAME: ${CAP_HOSTNAME:-cap}
-      CAP_SITE_KEY: ${CAP_SITE_KEY:-}
-      CAP_SECRET_KEY: ${CAP_SECRET_KEY:-}
     ports:
       - "127.0.0.1:5000:5000"
     command: >
@@ -145,22 +140,6 @@ services:
       - infomundi-dev
     restart: unless-stopped
 
-  # Optional: CAPTCHA service (if you need to test CAPTCHA locally)
-  # Comment out if not needed
-  # cap:
-  #   image: tiago2/cap:latest
-  #   container_name: infomundi-dev-cap
-  #   environment:
-  #     ADMIN_KEY: ${CAP_ADMIN_KEY:-local-dev-admin-key}
-  #     ENABLE_ASSETS_SERVER: "true"
-  #   ports:
-  #     - "127.0.0.1:3000:3000"
-  #   volumes:
-  #     - cap_data:/usr/src/app/.data
-  #   networks:
-  #     - infomundi-dev
-  #   restart: unless-stopped
-
 volumes:
   mysql_data:
     driver: local
@@ -168,8 +147,6 @@ volumes:
     driver: local
   pip_cache:
     driver: local
-  # cap_data:
-  #   driver: local
 
 networks:
   infomundi-dev:

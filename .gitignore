@@ -1,8 +1,8 @@
 .webassets-cache/
+local_uploads/
 __pycache__/
 static/gen/
 .venv/
 logs/
 .env
-local_uploads/
 core
