@@ -119,6 +119,9 @@ docker compose exec infomundi-mysql mysql -u infomundi -p
 # Access Redis CLI
 docker compose exec infomundi-redis redis-cli -a dev_redis_pass
 
+# Clear redis cache
+docker compose exec infomundi-redis redis-cli -a dev_redis_pass FLUSHALL
+
 # Access Python shell in app container
 docker compose exec infomundi-app python
 
