@@ -1,24 +1,19 @@
-from os import environ
+from os import environ, getenv
 
 from . import json_util
 
-
+# -----------> General App <-----------
 SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]  # e.g. infomundi-session
 WEBSITE_ROOT = environ["WEBSITE_ROOT"]  # e.g. /app (inside docker container)
 BASE_URL = environ["BASE_URL"]  # e.g. https://infomundi.net (without the trailing slash)
 LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
-
-# CAP_HOSTNAME = environ["CAP_HOSTNAME"]  # for cap.infomundi.net
+SEARCH_NEWS_DEBUG = str(getenv('FLASK_DEBUG', '')).lower() in ('1', 'true')
 
 # -----------> Secret Keys <-----------
 TURNSTILE_SITE_KEY = environ["TURNSTILE_SITE_KEY"]
 TURNSTILE_SECRET_KEY = environ["TURNSTILE_SECRET_KEY"]
-
-
 OPENAI_API_KEY = environ["OPENAI_API_KEY"]
 ENCRYPTION_KEY = environ["ENCRYPTION_KEY"]
-# CAP_SECRET_KEY = environ["CAP_SECRET_KEY"]
-# CAP_SITE_KEY = environ["CAP_SITE_KEY"]
 SECRET_KEY = environ["SECRET_KEY"]
 HMAC_KEY = environ["HMAC_KEY"]
 

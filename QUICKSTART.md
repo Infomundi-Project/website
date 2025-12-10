@@ -65,16 +65,6 @@ docker compose exec infomundi-app python -m utils.search_news_images
 docker compose exec infomundi-app python -m utils.extra.get_statistics
 ```
 
-**Note**:
-
-The `utils/search_news.py` contains a debug option that you can set to True when feeding the database locally:
-
-```python
-# utils/search_news.py
-
-DEBUG_ON = False  # this limits the news search for only a specific category (in this case, br_general)
-```
-
 ### 5. Open the App
 
 **Open http://localhost:5000** in your browser!
@@ -190,12 +180,11 @@ docker compose up -d --build
 
 ## Next Steps
 
-1. **Read** [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
-2. **Read** [CLAUDE.md](CLAUDE.md) - Architecture overview
-3. **Create** a feature branch: `git checkout -b feature/my-feature`
-4. **Make** your changes
-5. **Test** your changes: `docker compose exec infomundi-app pytest tests/`
-6. **Submit** a pull request
+1. **Read** [CLAUDE.md](CLAUDE.md) - Architecture overview
+2. **Create** a feature branch: `git checkout -b feature/my-feature`
+3. **Make** your changes
+4. **Test** your changes
+5. **Submit** a pull request
 
 ## Getting Help
 

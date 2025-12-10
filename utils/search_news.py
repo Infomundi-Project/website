@@ -48,7 +48,6 @@ logging.basicConfig(
 # Configuration
 MAX_WORKERS = 20  # Limit concurrent threads
 REQUEST_TIMEOUT = 5  # Seconds
-DEBUG_ON = False  # this limits the news search for only a specific category (in this case, br_general)
 
 @contextmanager
 def get_db_connection():
@@ -439,7 +438,7 @@ def main():
         return
 
     for category_id, category_name in categories:
-        if DEBUG_ON:
+        if config.SEARCH_NEWS_DEBUG:
             if category_name != "br_general":
                 continue
 
