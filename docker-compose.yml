@@ -72,7 +72,7 @@ services:
       WEBSITE_ROOT: /app
       LOCAL_ROOT: /app
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-infomundi_dev}
-      BASE_URL: ${BASE_URL:-http://localhost}  # Without the trailing slash!
+      BASE_URL: ${BASE_URL:-http://localhost:5000}  # Without the trailing slash!
 
       # Security keys (use your own in .env)
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-me}
