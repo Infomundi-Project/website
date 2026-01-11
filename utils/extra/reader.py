@@ -23,7 +23,7 @@ with open("/root/e.csv", mode="r") as file:
 
 # Database connection parameters
 db_params = {
-    "host": "127.0.0.1",
+    "host": config.MYSQL_HOST,
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
     "db": config.MYSQL_DATABASE,
