@@ -59,7 +59,7 @@ case "$action" in
             exit 1
         fi
         # Check if gunicorn is responding (basic check via container logs)
-        if docker logs --since 30s infomundi-app 2>&1 | grep -qi "error\|exception\|traceback"; then
+        if docker logs --since 60s infomundi-app 2>&1 | grep -qi "error\|exception\|traceback"; then
             echo "Errors detected in container logs"
             exit 1
         fi
@@ -67,7 +67,7 @@ case "$action" in
         ;;
     logs)
         # Get recent logs for debugging
-        docker logs --since 60s infomundi-app 2>&1 | tail -50
+        docker logs --since 90s infomundi-app 2>&1 | tail -50
         ;;
     *)
         echo "Usage: $0 {pull|restart|status|rollback <commit>|get-commit|healthcheck|logs}"
