@@ -5,21 +5,81 @@ on:
     branches:
       - main
 
+env:
+  DEPLOY_SCRIPT: /opt/infomundi/scripts/deploy.sh
+
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
+      - name: Save current commit for rollback
+        id: pre-deploy
+        run: |
+          current_commit=$(sudo $DEPLOY_SCRIPT get-commit)
+          echo "commit=$current_commit" >> $GITHUB_OUTPUT
+          echo "Saved rollback point: $current_commit"
+
       - name: Pull latest changes
-        run: sudo /opt/infomundi/scripts/deploy.sh pull
+        id: pull
+        run: sudo $DEPLOY_SCRIPT pull
+
+      - name: Get new commit info
+        id: new-commit
+        run: |
+          new_commit=$(sudo $DEPLOY_SCRIPT get-commit)
+          echo "commit=$new_commit" >> $GITHUB_OUTPUT
+          echo "short=$(echo $new_commit | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Restart application
-        run: sudo /opt/infomundi/scripts/deploy.sh restart
+        id: restart
+        run: sudo $DEPLOY_SCRIPT restart
 
-      - name: Verify deployment
+      - name: Wait for startup
+        run: sleep 15
+
+      - name: Health check
+        id: healthcheck
         run: |
-          echo "Waiting for application to start..."
-          sleep 10
-          status=$(sudo /opt/infomundi/scripts/deploy.sh status)
-          echo "Container status: $status"
-          echo "$status" | grep -q "Up" && echo "Deployment successful" || exit 1
+          if sudo $DEPLOY_SCRIPT healthcheck; then
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Rollback on failure
+        if: failure() && steps.pre-deploy.outputs.commit != ''
+        run: |
+          echo "Deployment failed, rolling back to ${{ steps.pre-deploy.outputs.commit }}"
+          sudo $DEPLOY_SCRIPT rollback ${{ steps.pre-deploy.outputs.commit }}
+          sudo $DEPLOY_SCRIPT restart
+          echo "Rollback completed"
+
+      - name: Get logs on failure
+        id: logs
+        if: failure()
+        run: |
+          echo "## Container Logs" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          sudo $DEPLOY_SCRIPT logs >> $GITHUB_STEP_SUMMARY 2>&1 || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          # Save logs for Discord notification
+          logs=$(sudo $DEPLOY_SCRIPT logs 2>&1 | tail -20 || echo "Could not retrieve logs")
+          echo "logs<<EOF" >> $GITHUB_OUTPUT
+          echo "$logs" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord - Success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"Deployment Successful\", \"color\": 3066993, \"fields\": [{\"name\": \"Commit\", \"value\": \"[\`${{ steps.new-commit.outputs.short }}\`](https://github.com/${{ github.repository }}/commit/${{ steps.new-commit.outputs.commit }})\", \"inline\": true}, {\"name\": \"Branch\", \"value\": \"\`main\`\", \"inline\": true}, {\"name\": \"Triggered by\", \"value\": \"${{ github.actor }}\", \"inline\": true}], \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}]}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord - Failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"Deployment Failed - Rolled Back\", \"color\": 15158332, \"fields\": [{\"name\": \"Failed Commit\", \"value\": \"[\`${{ steps.new-commit.outputs.short }}\`](https://github.com/${{ github.repository }}/commit/${{ steps.new-commit.outputs.commit }})\", \"inline\": true}, {\"name\": \"Rolled Back To\", \"value\": \"\`$(echo ${{ steps.pre-deploy.outputs.commit }} | cut -c1-7)\`\", \"inline\": true}, {\"name\": \"Triggered by\", \"value\": \"${{ github.actor }}\", \"inline\": true}, {\"name\": \"Action Run\", \"value\": \"[View Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}], \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}]}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
