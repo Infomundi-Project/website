@@ -163,7 +163,11 @@ def send_email(
                 server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
 
             # Send the email
-            from_addr = config.SMTP_USERNAME if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1") else from_email
+            from_addr = (
+                config.SMTP_USERNAME
+                if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1")
+                else from_email
+            )
             server.sendmail(from_addr, recipient_email, message.as_string())
     except Exception:
         return False

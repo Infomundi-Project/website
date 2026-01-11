@@ -49,6 +49,7 @@ logging.basicConfig(
 MAX_WORKERS = 20  # Limit concurrent threads
 REQUEST_TIMEOUT = 5  # Seconds
 
+
 @contextmanager
 def get_db_connection():
     """

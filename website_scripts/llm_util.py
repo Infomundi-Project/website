@@ -16,45 +16,47 @@ def is_local_environment() -> bool:
     """
     try:
         # Check common local hostnames
-        hostname = request.host.split(':')[0]  # Remove port if present
-        
+        hostname = request.host.split(":")[0]  # Remove port if present
+
         local_hostnames = {
-            'localhost',
-            '127.0.0.1',
-            '::1',
-            '[::1]',
+            "localhost",
+            "127.0.0.1",
+            "::1",
+            "[::1]",
         }
-        
+
         # Check if hostname is local
         if hostname in local_hostnames:
             return True
-        
+
         # Check for .local domains
-        if hostname.endswith('.local'):
+        if hostname.endswith(".local"):
             return True
-        
+
         # Check for private IP ranges
-        if (hostname.startswith('192.168.') or 
-            hostname.startswith('10.') or
-            any(hostname.startswith(f'172.{i}.') for i in range(16, 32))):
+        if (
+            hostname.startswith("192.168.")
+            or hostname.startswith("10.")
+            or any(hostname.startswith(f"172.{i}.") for i in range(16, 32))
+        ):
             return True
     except (RuntimeError, AttributeError):
         # If we're outside request context, fall back to env vars
         pass
-    
+
     # Check Flask environment variables
-    flask_env = os.getenv('FLASK_ENV', '').lower()
-    flask_debug = os.getenv('FLASK_DEBUG', '').lower()
-    
-    if flask_env == 'development' or flask_debug in ('1', 'true'):
+    flask_env = os.getenv("FLASK_ENV", "").lower()
+    flask_debug = os.getenv("FLASK_DEBUG", "").lower()
+
+    if flask_env == "development" or flask_debug in ("1", "true"):
         return True
-    
+
     return False
 
 
 def has_api_key() -> bool:
     """Check if OpenAI API key is configured.
-    
+
     Returns:
         bool: True if API key is set and non-empty.
     """
@@ -72,7 +74,7 @@ def gpt_summarize(title: str, main_text: str) -> dict:
             - "methods_for_inquiry": Additional resources
         If the operation fails, returns an error message with details.
     """
-    
+
     # Return mock data in local development or when API key is missing
     if is_local_environment() or not has_api_key():
         print("[DEV] OpenAI API bypassed: returning mock summary data")
@@ -80,23 +82,23 @@ def gpt_summarize(title: str, main_text: str) -> dict:
             "addressed_topics": [
                 f"Mock summary point 1 for: {title[:50]}...",
                 "Mock summary point 2: This is a development placeholder",
-                "Mock summary point 3: Configure OPENAI_API_KEY for real summaries"
+                "Mock summary point 3: Configure OPENAI_API_KEY for real summaries",
             ],
             "context_around": [
                 "Mock context point 1: Background information would appear here",
                 "Mock context point 2: Historical or cultural factors",
-                "Mock context point 3: Socio-economic considerations"
+                "Mock context point 3: Socio-economic considerations",
             ],
             "questioning_the_subject": [
                 "Mock question 1: What are the key implications?",
                 "Mock question 2: Who are the stakeholders?",
-                "Mock question 3: What are alternative perspectives?"
+                "Mock question 3: What are alternative perspectives?",
             ],
             "methods_for_inquiry": [
                 "Mock method 1: Suggested reading materials",
                 "Mock method 2: Research frameworks to apply",
-                "Mock method 3: Expert sources to consult"
-            ]
+                "Mock method 3: Expert sources to consult",
+            ],
         }
 
     prompt = f"""Given the context of "{title}", perform an in-depth analysis of the following news article:
@@ -193,6 +195,7 @@ def is_inappropriate(
                     self.flagged = False
                     self.categories = {}
                     self.category_scores = {}
+
             return MockModerationResult()
 
     model_input = []
@@ -228,11 +231,13 @@ def is_inappropriate(
         if simple_return:
             return False
         else:
+
             class MockModerationResult:
                 def __init__(self):
                     self.flagged = False
                     self.categories = {}
                     self.category_scores = {}
+
             return MockModerationResult()
 
 
@@ -252,7 +257,7 @@ def gpt_chat_about_story(
     `history` is a list of {"role":"user"|"assistant", "content":"..."} items.
     Returns: {"text": "<assistant reply>"}
     """
-    
+
     # Return mock response in local development or when API key is missing
     if is_local_environment() or not has_api_key():
         print("[DEV] OpenAI chat bypassed: returning mock response")
@@ -263,7 +268,7 @@ def gpt_chat_about_story(
                 f"\n\nYour message was: {user_message[:100]}..."
             )
         }
-    
+
     # Keep history safe and small
     safe_history = []
     for m in history[-10:]:

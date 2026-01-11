@@ -34,7 +34,7 @@ from datetime import datetime, timedelta
 # Environment check - only run in development/testing
 flask_env = os.getenv("FLASK_ENV", "production")
 if flask_env not in ("development", "testing"):
-    print(f"ERROR: This script only runs in development/testing environments.")
+    print("ERROR: This script only runs in development/testing environments.")
     print(f"Current FLASK_ENV: {flask_env}")
     print("Set FLASK_ENV=development to run this script.")
     sys.exit(1)
@@ -48,15 +48,18 @@ from website_scripts import models, security_util, hashing_util
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate mock data for development")
-    parser.add_argument(  
-     "--country", "-c",
-     help="Limit data to a specific country code (e.g., 'br', 'us', 'uk')"
+    parser.add_argument(
+        "--country",
+        "-c",
+        help="Limit data to a specific country code (e.g., 'br', 'us', 'uk')",
     )
-    parser.add_argument(  
-     "--category", "-cat",
-     help="Limit data to a specific category name (e.g., 'br_general', 'us_technology')" 
+    parser.add_argument(
+        "--category",
+        "-cat",
+        help="Limit data to a specific category name (e.g., 'br_general', 'us_technology')",
     )
     return parser.parse_args()
+
 
 # ============================================================================
 # Mock Data Constants
@@ -72,12 +75,21 @@ MOCK_USERS = [
     {"username": "janedoe", "email": "jane.doe@example.com", "password": "password123"},
     {"username": "alice_dev", "email": "alice@example.com", "password": "password123"},
     {"username": "bob_tester", "email": "bob@example.com", "password": "password123"},
-    {"username": "charlie99", "email": "charlie@example.com", "password": "password123"},
+    {
+        "username": "charlie99",
+        "email": "charlie@example.com",
+        "password": "password123",
+    },
     {"username": "diana_news", "email": "diana@example.com", "password": "password123"},
     {"username": "evan_reader", "email": "evan@example.com", "password": "password123"},
     {"username": "fiona_tech", "email": "fiona@example.com", "password": "password123"},
     {"username": "george_uk", "email": "george@example.com", "password": "password123"},
-    {"username": "admin_test", "email": "admin@example.com", "password": "adminpass123", "role": "admin"},
+    {
+        "username": "admin_test",
+        "email": "admin@example.com",
+        "password": "adminpass123",
+        "role": "admin",
+    },
 ]
 
 MOCK_STORY_TITLES = [
@@ -127,11 +139,36 @@ MOCK_DESCRIPTIONS = [
 ]
 
 MOCK_TAGS = [
-    "technology", "science", "politics", "economy", "health", "sports", "entertainment",
-    "environment", "education", "business", "finance", "innovation", "research",
-    "climate", "security", "international", "local", "culture", "society", "digital",
-    "energy", "transportation", "healthcare", "industry", "markets", "policy",
-    "development", "community", "infrastructure", "sustainability",
+    "technology",
+    "science",
+    "politics",
+    "economy",
+    "health",
+    "sports",
+    "entertainment",
+    "environment",
+    "education",
+    "business",
+    "finance",
+    "innovation",
+    "research",
+    "climate",
+    "security",
+    "international",
+    "local",
+    "culture",
+    "society",
+    "digital",
+    "energy",
+    "transportation",
+    "healthcare",
+    "industry",
+    "markets",
+    "policy",
+    "development",
+    "community",
+    "infrastructure",
+    "sustainability",
 ]
 
 MOCK_COMMENTS = [
@@ -171,14 +208,19 @@ MOCK_REPLY_COMMENTS = [
 ]
 
 NOTIFICATION_TYPES = [
-    "new_comment", "comment_reply", "comment_reaction",
-    "friend_request", "friend_accepted", "mentions",
+    "new_comment",
+    "comment_reply",
+    "comment_reaction",
+    "friend_request",
+    "friend_accepted",
+    "mentions",
 ]
 
 
 # ============================================================================
 # Helper Functions
 # ============================================================================
+
 
 def random_date_within_days(days: int) -> datetime:
     """Generate a random datetime within the past N days."""
@@ -187,7 +229,9 @@ def random_date_within_days(days: int) -> datetime:
     return now - timedelta(days=random_days)
 
 
-def get_existing_categories_and_publishers(country: str = None, category_name: str = None):
+def get_existing_categories_and_publishers(
+    country: str = None, category_name: str = None
+):
     """Fetch existing categories and publishers from the database."""
     query = models.Category.query
     if category_name:
@@ -200,7 +244,9 @@ def get_existing_categories_and_publishers(country: str = None, category_name: s
 
     if categories:
         category_ids = [c.id for c in categories]
-        publishers = models.Publisher.query.filter(models.Publisher.category_id.in_(category_ids)).all()
+        publishers = models.Publisher.query.filter(
+            models.Publisher.category_id.in_(category_ids)
+        ).all()
     else:
         publishers = []
 
@@ -210,6 +256,7 @@ def get_existing_categories_and_publishers(country: str = None, category_name: s
 # ============================================================================
 # Mock Data Creation Functions
 # ============================================================================
+
 
 def create_mock_users() -> list:
     """Create mock users with proper encryption and hashing (bulk insert)."""
@@ -224,13 +271,15 @@ def create_mock_users() -> list:
     }
 
     existing_usernames = {
-        u.username for u in models.User.query.filter(
+        u.username
+        for u in models.User.query.filter(
             models.User.username.in_([u["username"] for u in MOCK_USERS])
         ).all()
     }
 
     existing_fingerprints = {
-        bytes(u.email_fingerprint) for u in models.User.query.filter(
+        bytes(u.email_fingerprint)
+        for u in models.User.query.filter(
             models.User.email_fingerprint.in_(list(user_fingerprints.values()))
         ).all()
     }
@@ -242,7 +291,10 @@ def create_mock_users() -> list:
     for user_data in MOCK_USERS:
         fingerprint = user_fingerprints[user_data["username"]]
 
-        if user_data["username"] in existing_usernames or fingerprint in existing_fingerprints:
+        if (
+            user_data["username"] in existing_usernames
+            or fingerprint in existing_fingerprints
+        ):
             skipped += 1
             continue
 
@@ -291,22 +343,25 @@ def create_mock_stories(categories: list, publishers: list) -> list:
     target_count = 100
 
     if not categories or not publishers:
-        print("   ERROR: No categories or publishers found. Run insert_feeds_to_database.py first.")
+        print(
+            "   ERROR: No categories or publishers found. Run insert_feeds_to_database.py first."
+        )
         return []
 
     # Pre-generate URLs and hashes
     story_data = []
     for i in range(target_count):
-        fake_url = f"https://example-news.com/article/{i + 1}-{random.randint(10000, 99999)}"
+        fake_url = (
+            f"https://example-news.com/article/{i + 1}-{random.randint(10000, 99999)}"
+        )
         url_hash = hashing_util.string_to_md5_binary(fake_url)
         story_data.append((fake_url, url_hash))
 
     # Fetch existing stories by url_hash in bulk
     url_hashes = [h for _, h in story_data]
     existing_hashes = {
-        bytes(s.url_hash) for s in models.Story.query.filter(
-            models.Story.url_hash.in_(url_hashes)
-        ).all()
+        bytes(s.url_hash)
+        for s in models.Story.query.filter(models.Story.url_hash.in_(url_hashes)).all()
     }
 
     # Build publisher lookup by category for efficiency
@@ -327,7 +382,11 @@ def create_mock_stories(categories: list, publishers: list) -> list:
 
         category = random.choice(categories)
         matching_publishers = publishers_by_category.get(category.id, [])
-        publisher = random.choice(matching_publishers) if matching_publishers else random.choice(publishers)
+        publisher = (
+            random.choice(matching_publishers)
+            if matching_publishers
+            else random.choice(publishers)
+        )
 
         title = random.choice(MOCK_STORY_TITLES)
         if random.random() > 0.5:
@@ -365,9 +424,7 @@ def create_mock_stories(categories: list, publishers: list) -> list:
                     skipped += 1
 
     # Fetch all mock stories (including previously existing ones)
-    all_stories = models.Story.query.filter(
-        models.Story.url_hash.in_(url_hashes)
-    ).all()
+    all_stories = models.Story.query.filter(models.Story.url_hash.in_(url_hashes)).all()
 
     print(f"   Created: {len(new_stories)}, Skipped: {skipped}")
     return all_stories
@@ -454,12 +511,14 @@ def create_mock_story_stats(stories: list) -> int:
             skipped += 1
             continue
 
-        new_stats.append(models.StoryStats(
-            story_id=story.id,
-            views=random.randint(10, 5000),
-            likes=random.randint(0, 200),
-            dislikes=random.randint(0, 50),
-        ))
+        new_stats.append(
+            models.StoryStats(
+                story_id=story.id,
+                views=random.randint(10, 5000),
+                likes=random.randint(0, 200),
+                dislikes=random.randint(0, 50),
+            )
+        )
 
     # Bulk insert
     if new_stats:
@@ -511,14 +570,16 @@ def create_mock_comments(users: list, stories: list) -> list:
         user = random.choice(users)
         page_data = story_page_data[story.id]
 
-        top_level_comments.append(models.Comment(
-            page_hash=page_data["page_hash"],
-            user_id=user.id,
-            story_id=story.id,
-            content=random.choice(MOCK_COMMENTS),
-            url=page_data["url"],
-            created_at=random_date_within_days(20),
-        ))
+        top_level_comments.append(
+            models.Comment(
+                page_hash=page_data["page_hash"],
+                user_id=user.id,
+                story_id=story.id,
+                content=random.choice(MOCK_COMMENTS),
+                url=page_data["url"],
+                created_at=random_date_within_days(20),
+            )
+        )
 
     # Bulk insert top-level comments
     skipped = 0
@@ -539,15 +600,17 @@ def create_mock_comments(users: list, stories: list) -> list:
             parent = random.choice(top_level_comments)
             user = random.choice(users)
 
-            reply_comments.append(models.Comment(
-                page_hash=parent.page_hash,
-                user_id=user.id,
-                story_id=parent.story_id,
-                parent_id=parent.id,
-                content=random.choice(MOCK_REPLY_COMMENTS),
-                url=parent.url,
-                created_at=random_date_within_days(15),
-            ))
+            reply_comments.append(
+                models.Comment(
+                    page_hash=parent.page_hash,
+                    user_id=user.id,
+                    story_id=parent.story_id,
+                    parent_id=parent.id,
+                    content=random.choice(MOCK_REPLY_COMMENTS),
+                    url=parent.url,
+                    created_at=random_date_within_days(15),
+                )
+            )
 
         # Bulk insert replies
         if reply_comments:
@@ -591,11 +654,13 @@ def create_mock_comment_stats(comments: list) -> int:
             skipped += 1
             continue
 
-        new_stats.append(models.CommentStats(
-            comment_id=comment.id,
-            likes=random.randint(0, 50),
-            dislikes=random.randint(0, 10),
-        ))
+        new_stats.append(
+            models.CommentStats(
+                comment_id=comment.id,
+                likes=random.randint(0, 50),
+                dislikes=random.randint(0, 10),
+            )
+        )
 
     # Bulk insert
     if new_stats:
@@ -632,7 +697,9 @@ def create_mock_reactions(users: list, stories: list, comments: list) -> tuple:
 
     # Fetch existing story reactions in bulk
     existing_story_reactions = models.StoryReaction.query.all()
-    existing_story_pairs = {(r.story_id, r.user_id, r.action) for r in existing_story_reactions}
+    existing_story_pairs = {
+        (r.story_id, r.user_id, r.action) for r in existing_story_reactions
+    }
 
     # Build story reactions (~200)
     new_story_reactions = []
@@ -646,12 +713,14 @@ def create_mock_reactions(users: list, stories: list, comments: list) -> tuple:
             skipped += 1
             continue
 
-        new_story_reactions.append(models.StoryReaction(
-            story_id=story.id,
-            user_id=user.id,
-            action=action,
-            created_at=random_date_within_days(25),
-        ))
+        new_story_reactions.append(
+            models.StoryReaction(
+                story_id=story.id,
+                user_id=user.id,
+                action=action,
+                created_at=random_date_within_days(25),
+            )
+        )
         existing_story_pairs.add(key)  # Avoid duplicates within batch
 
     # Bulk insert story reactions
@@ -666,7 +735,9 @@ def create_mock_reactions(users: list, stories: list, comments: list) -> tuple:
 
     # Fetch existing comment reactions in bulk
     existing_comment_reactions = models.CommentReaction.query.all()
-    existing_comment_pairs = {(r.comment_id, r.user_id) for r in existing_comment_reactions}
+    existing_comment_pairs = {
+        (r.comment_id, r.user_id) for r in existing_comment_reactions
+    }
 
     # Build comment reactions (~100)
     new_comment_reactions = []
@@ -681,12 +752,14 @@ def create_mock_reactions(users: list, stories: list, comments: list) -> tuple:
                 skipped += 1
                 continue
 
-            new_comment_reactions.append(models.CommentReaction(
-                comment_id=comment.id,
-                user_id=user.id,
-                action=action,
-                created_at=random_date_within_days(15),
-            ))
+            new_comment_reactions.append(
+                models.CommentReaction(
+                    comment_id=comment.id,
+                    user_id=user.id,
+                    action=action,
+                    created_at=random_date_within_days(15),
+                )
+            )
             existing_comment_pairs.add(key)  # Avoid duplicates within batch
 
         # Bulk insert comment reactions
@@ -699,7 +772,9 @@ def create_mock_reactions(users: list, stories: list, comments: list) -> tuple:
                 print("   ERROR: Bulk insert of comment reactions failed")
                 new_comment_reactions = []
 
-    print(f"   Story reactions: {len(new_story_reactions)}, Comment reactions: {len(new_comment_reactions)}, Skipped: {skipped}")
+    print(
+        f"   Story reactions: {len(new_story_reactions)}, Comment reactions: {len(new_comment_reactions)}, Skipped: {skipped}"
+    )
     return len(new_story_reactions), len(new_comment_reactions)
 
 
@@ -734,16 +809,20 @@ def create_mock_friendships(users: list) -> list:
             skipped += 1
             continue
 
-        status = random.choice(["pending", "accepted", "accepted", "accepted"])  # Bias toward accepted
+        status = random.choice(
+            ["pending", "accepted", "accepted", "accepted"]
+        )  # Bias toward accepted
         accepted_at = datetime.utcnow() if status == "accepted" else None
 
-        new_friendships.append(models.Friendship(
-            user_id=user1.id,
-            friend_id=user2.id,
-            status=status,
-            accepted_at=accepted_at,
-            created_at=random_date_within_days(60),
-        ))
+        new_friendships.append(
+            models.Friendship(
+                user_id=user1.id,
+                friend_id=user2.id,
+                status=status,
+                accepted_at=accepted_at,
+                created_at=random_date_within_days(60),
+            )
+        )
 
         # Mark both directions as used
         existing_pairs.add((user1.id, user2.id))
@@ -795,7 +874,10 @@ def create_mock_notifications(users: list, comments: list, friendships: list) ->
         message = ""
         url = None
 
-        if notif_type in ("new_comment", "comment_reply", "comment_reaction") and comments:
+        if (
+            notif_type in ("new_comment", "comment_reply", "comment_reaction")
+            and comments
+        ):
             comment = random.choice(comments)
             comment_id = comment.id
             message = "New activity on a comment"
@@ -803,23 +885,33 @@ def create_mock_notifications(users: list, comments: list, friendships: list) ->
         elif notif_type in ("friend_request", "friend_accepted") and friendships:
             friendship = random.choice(friendships)
             friendship_id = friendship.id
-            other_user = friendship.user if friendship.friend_id == user.id else friendship.friend
-            message = f"{other_user.username} sent you a friend request" if notif_type == "friend_request" else f"{other_user.username} accepted your friend request"
+            other_user = (
+                friendship.user
+                if friendship.friend_id == user.id
+                else friendship.friend
+            )
+            message = (
+                f"{other_user.username} sent you a friend request"
+                if notif_type == "friend_request"
+                else f"{other_user.username} accepted your friend request"
+            )
             url = f"/user/{other_user.username}"
         else:
             message = "You were mentioned in a discussion"
             url = "/notifications"
 
-        new_notifications.append(models.Notification(
-            user_id=user.id,
-            type=notif_type,
-            comment_id=comment_id,
-            friendship_id=friendship_id,
-            message=message[:100],
-            url=url,
-            is_read=random.choice([True, False]),
-            created_at=random_date_within_days(14),
-        ))
+        new_notifications.append(
+            models.Notification(
+                user_id=user.id,
+                type=notif_type,
+                comment_id=comment_id,
+                friendship_id=friendship_id,
+                message=message[:100],
+                url=url,
+                is_read=random.choice([True, False]),
+                created_at=random_date_within_days(14),
+            )
+        )
 
     # Bulk insert
     skipped = 0
@@ -870,11 +962,13 @@ def create_mock_bookmarks_messages_views(users: list, stories: list) -> tuple:
             skipped += 1
             continue
 
-        new_bookmarks.append(models.Bookmark(
-            user_id=user.id,
-            story_id=story.id,
-            created_at=random_date_within_days(30),
-        ))
+        new_bookmarks.append(
+            models.Bookmark(
+                user_id=user.id,
+                story_id=story.id,
+                created_at=random_date_within_days(30),
+            )
+        )
         existing_bookmark_pairs.add(key)  # Avoid duplicates within batch
 
     # Bulk insert bookmarks
@@ -894,12 +988,14 @@ def create_mock_bookmarks_messages_views(users: list, stories: list) -> tuple:
             sender, receiver = random.sample(users, 2)
             content = f"Mock message content {random.randint(1000, 9999)}"
 
-            new_messages.append(models.Message(
-                sender_id=sender.id,
-                receiver_id=receiver.id,
-                content_encrypted=content,  # In dev, just store as plain text
-                timestamp=random_date_within_days(14),
-            ))
+            new_messages.append(
+                models.Message(
+                    sender_id=sender.id,
+                    receiver_id=receiver.id,
+                    content_encrypted=content,  # In dev, just store as plain text
+                    timestamp=random_date_within_days(14),
+                )
+            )
 
         # Bulk insert messages
         if new_messages:
@@ -917,11 +1013,13 @@ def create_mock_bookmarks_messages_views(users: list, stories: list) -> tuple:
         user = random.choice(users)
         story = random.choice(stories)
 
-        new_views.append(models.UserStoryView(
-            user_id=user.id,
-            story_id=story.id,
-            viewed_at=random_date_within_days(20),
-        ))
+        new_views.append(
+            models.UserStoryView(
+                user_id=user.id,
+                story_id=story.id,
+                viewed_at=random_date_within_days(20),
+            )
+        )
 
     # Bulk insert views
     if new_views:
@@ -933,13 +1031,16 @@ def create_mock_bookmarks_messages_views(users: list, stories: list) -> tuple:
             print("   ERROR: Bulk insert of views failed")
             new_views = []
 
-    print(f"   Bookmarks: {len(new_bookmarks)}, Messages: {len(new_messages)}, Views: {len(new_views)}, Skipped: {skipped}")
+    print(
+        f"   Bookmarks: {len(new_bookmarks)}, Messages: {len(new_messages)}, Views: {len(new_views)}, Skipped: {skipped}"
+    )
     return len(new_bookmarks), len(new_messages), len(new_views)
 
 
 # ============================================================================
 # Main Entry Point
 # ============================================================================
+
 
 def main():
     """Main function to orchestrate mock data creation."""
@@ -951,16 +1052,18 @@ def main():
     print(f"Environment: {flask_env}")
 
     if args.country:
-        print(f'Filtering to country {args.country}')
-    
+        print(f"Filtering to country {args.country}")
+
     if args.category:
-        print(f'Filterinf to category: {args.category}')
-    
+        print(f"Filterinf to category: {args.category}")
+
     print(f"Started at: {datetime.utcnow().isoformat()}")
 
     with app.app_context():
         # Check prerequisites
-        categories, publishers = get_existing_categories_and_publishers(country=args.country, category_name=args.category)
+        categories, publishers = get_existing_categories_and_publishers(
+            country=args.country, category_name=args.category
+        )
         if not categories or not publishers:
             print("\nERROR: No categories or publishers found in database.")
             print("Please run 'python -m utils.extra.insert_feeds_to_database' first.")
@@ -989,7 +1092,7 @@ def main():
         for user_data in MOCK_USERS[:5]:
             print(f"  {user_data['email']} / {user_data['password']}")
         print(f"  ... and {len(MOCK_USERS) - 5} more users")
-        print(f"\nAdmin account: admin@example.com / adminpass123")
+        print("\nAdmin account: admin@example.com / adminpass123")
         print("=" * 60)
 
 

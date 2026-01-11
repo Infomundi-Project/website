@@ -3,7 +3,6 @@ import magic
 import boto3
 from PIL import Image
 from io import BytesIO
-import os
 from pathlib import Path
 
 from . import immutable, config, llm_util
@@ -22,7 +21,7 @@ try:
     # Check if S3/R2 credentials are properly configured
     if not config.R2_ENDPOINT or not config.R2_ACCESS_KEY or not config.R2_SECRET:
         raise ValueError("S3/R2 credentials not configured")
-    
+
     s3_client = boto3.client(
         "s3",
         endpoint_url=config.R2_ENDPOINT,
@@ -32,7 +31,9 @@ try:
     )
     target_logger.info("Successfully initialized S3 client")
 except Exception as e:
-    target_logger.warning(f"S3 client initialization failed: {e}. Falling back to local storage.")
+    target_logger.warning(
+        f"S3 client initialization failed: {e}. Falling back to local storage."
+    )
     USE_LOCAL_STORAGE = True
     # Create local storage directory
     LOCAL_STORAGE_PATH = Path("/app/static/local_uploads")
@@ -143,11 +144,11 @@ def upload_image(buffer: BytesIO, s3_key: str) -> None:
             local_path = LOCAL_STORAGE_PATH / s3_key
             # Create parent directories if they don't exist
             local_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(local_path, 'wb') as f:
+
+            with open(local_path, "wb") as f:
                 buffer.seek(0)
                 f.write(buffer.read())
-            
+
             target_logger.info("Saved to local storage: %s", local_path)
         except Exception as e:
             target_logger.error("Local storage save failed for %s: %s", s3_key, e)

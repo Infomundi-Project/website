@@ -38,7 +38,7 @@ try:
     # Check if S3/R2 credentials are properly configured
     if not config.R2_ENDPOINT or not config.R2_ACCESS_KEY or not config.R2_SECRET:
         raise ValueError("S3/R2 credentials not configured")
-    
+
     s3_client = boto3.client(
         "s3",
         endpoint_url=config.R2_ENDPOINT,
@@ -328,11 +328,11 @@ def extract_image_from_response(
 def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
     """
     Upload image to S3 or local storage based on configuration.
-    
+
     Args:
         buffer: BytesIO buffer containing image data
         object_key: S3 key or local file path
-        
+
     Returns:
         True if upload successful, False otherwise
     """
@@ -342,11 +342,11 @@ def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
             local_path = LOCAL_STORAGE_PATH / object_key
             # Create parent directories if they don't exist
             local_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             buffer.seek(0)
-            with open(local_path, 'wb') as f:
+            with open(local_path, "wb") as f:
                 f.write(buffer.read())
-            
+
             log_message(f"Saved to local storage: {local_path}")
             return True
         else:
@@ -355,7 +355,7 @@ def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
             s3_client.upload_fileobj(buffer, bucket_name, object_key)
             log_message(f"Uploaded to S3: {object_key}")
             return True
-            
+
     except Exception as e:
         log_message(f"Failed to upload {object_key}: {e}")
         return False
@@ -539,7 +539,7 @@ def search_images():
     """Main function to search and process images for all categories"""
     storage_mode = "LOCAL STORAGE" if USE_LOCAL_STORAGE else "S3/R2"
     log_message(f"Starting image search using {storage_mode}")
-    
+
     categories = fetch_categories_from_database()
 
     if not categories:
