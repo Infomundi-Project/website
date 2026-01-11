@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_caching import Cache
+from flask_migrate import Migrate
 
 from .config import (
     REDIS_CONNECTION_STRING,
@@ -14,6 +15,7 @@ from .cloudflare_util import get_user_ip
 
 login_manager = LoginManager()
 db = SQLAlchemy()
+migrate = Migrate()
 cache = Cache()
 
 limiter = Limiter(

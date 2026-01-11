@@ -52,6 +52,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 extensions.db.init_app(app)
+extensions.migrate.init_app(app, extensions.db)
 
 # Cache
 app.config["CACHE_REDIS_URL"] = config.REDIS_CONNECTION_STRING

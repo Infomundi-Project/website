@@ -24,6 +24,10 @@ jobs:
         id: pull
         run: sudo $DEPLOY_SCRIPT pull
 
+      - name: Run database migrations
+        id: migrate
+        run: sudo $DEPLOY_SCRIPT migrate
+
       - name: Get new commit info
         id: new-commit
         run: |
@@ -53,6 +57,7 @@ jobs:
         run: |
           echo "Deployment failed, rolling back to ${{ steps.pre-deploy.outputs.commit }}"
           sudo $DEPLOY_SCRIPT rollback ${{ steps.pre-deploy.outputs.commit }}
+          sudo $DEPLOY_SCRIPT migrate || echo "Migration rollback skipped or failed"
           sudo $DEPLOY_SCRIPT restart
           echo "Rollback completed"
 

@@ -7,7 +7,7 @@ set -euo pipefail
 
 COMPOSE_FILE="/root/docker/docker-compose.yml"
 REPO_DIR="/opt/infomundi/website"
-ALLOWED_ACTIONS=("pull" "restart" "status" "rollback" "get-commit" "healthcheck" "logs")
+ALLOWED_ACTIONS=("pull" "restart" "status" "rollback" "get-commit" "healthcheck" "logs" "migrate")
 
 action="${1:-}"
 param="${2:-}"
@@ -65,12 +65,16 @@ case "$action" in
         fi
         echo "Healthy"
         ;;
+    migrate)
+        docker compose -f "$COMPOSE_FILE" exec -T infomundi-app flask db upgrade
+        echo "Migrations applied successfully"
+        ;;
     logs)
         # Get recent logs for debugging
         docker logs --since 90s infomundi-app 2>&1 | tail -50
         ;;
     *)
-        echo "Usage: $0 {pull|restart|status|rollback <commit>|get-commit|healthcheck|logs}"
+        echo "Usage: $0 {pull|restart|status|rollback <commit>|get-commit|healthcheck|logs|migrate}"
         echo "Allowed actions: ${ALLOWED_ACTIONS[*]}"
         exit 1
         ;;

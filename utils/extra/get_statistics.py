@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from website_scripts import config
 
 db_params = {
-    "host": "127.0.0.1",
+    "host": config.MYSQL_HOST,
     "user": config.MYSQL_USERNAME,
     "password": config.MYSQL_PASSWORD,
     "database": config.MYSQL_DATABASE,
