@@ -276,15 +276,8 @@ For AI assistance during development, see [CLAUDE.md](CLAUDE.md) for architectur
 
 ## Deployment
 
-The included `docker-compose.yml` is for **local development only**. For production deployment:
+The included `docker-compose.yml` is for **local development only**. Changes to the main branch are automatically deployed to production.
 
-1. **Set secure environment variables** (strong random keys)
-2. **Configure Cloudflare R2** for media storage
-3. **Set up SMTP** for email delivery
-4. **Enable HTTPS** (required for secure cookies)
-5. **Set up cron jobs** for background tasks
-6. **Configure monitoring** via webhook alerts
-7. **Use a reverse proxy** (nginx/Cloudflare) for rate limiting and DDoS protection
 
 ## License
 
