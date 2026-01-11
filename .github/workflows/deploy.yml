@@ -1,0 +1,25 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull latest changes
+        run: sudo /opt/infomundi/scripts/deploy.sh pull
+
+      - name: Restart application
+        run: sudo /opt/infomundi/scripts/deploy.sh restart
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for application to start..."
+          sleep 10
+          status=$(sudo /opt/infomundi/scripts/deploy.sh status)
+          echo "Container status: $status"
+          echo "$status" | grep -q "Up" && echo "Deployment successful" || exit 1
