@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 from pathlib import Path
+from os import makedirs as os_makedirs
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
@@ -20,7 +21,7 @@ MAX_PROXY_RETRIES = 10
 MAX_BAD_PROXIES_BEFORE_CLEAR = 50  # NEW: Prevent memory leak
 
 # Load and shuffle proxies
-with open(f"{config.LOCAL_ROOT}/assets/http-proxies.txt") as f:
+with open(f"{config.WEBSITE_ROOT}/assets/http-proxies.txt") as f:
     proxies = [x.rstrip() for x in f.readlines()]
     shuffle(proxies)
 
@@ -67,9 +68,13 @@ db_params = {
     "autocommit": False,
 }
 
+# Ensure logs directory exists
+log_dir = f"{config.WEBSITE_ROOT}/logs"
+os_makedirs(log_dir, exist_ok=True)
+
 # Setup logging - FIX: Actually use logging instead of just print
 logging.basicConfig(
-    filename=f"{config.LOCAL_ROOT}/logs/search_images.log",
+    filename=f"{config.WEBSITE_ROOT}/logs/search_images.log",
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
 )

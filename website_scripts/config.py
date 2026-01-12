@@ -8,7 +8,7 @@ WEBSITE_ROOT = environ["WEBSITE_ROOT"]  # e.g. /app (inside docker container)
 BASE_URL = environ[
     "BASE_URL"
 ]  # e.g. https://infomundi.net (without the trailing slash)
-LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
+LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /opt/infomundi/website
 SEARCH_NEWS_DEBUG = str(getenv("FLASK_DEBUG", "")).lower() in ("1", "true")
 
 # -----------> Secret Keys <-----------
