@@ -35,7 +35,7 @@ db_params = {
 thread_local = threading.local()
 
 # Ensure logs directory exists
-log_dir = f"{config.LOCAL_ROOT}/logs"
+log_dir = f"{config.WEBSITE_ROOT}/logs"
 os.makedirs(log_dir, exist_ok=True)
 
 # Setup logging
@@ -48,6 +48,7 @@ logging.basicConfig(
 # Configuration
 MAX_WORKERS = 20  # Limit concurrent threads
 REQUEST_TIMEOUT = 5  # Seconds
+
 
 @contextmanager
 def get_db_connection():

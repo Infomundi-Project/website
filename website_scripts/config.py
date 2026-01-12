@@ -5,9 +5,11 @@ from . import json_util
 # -----------> General App <-----------
 SESSION_COOKIE_NAME = environ["SESSION_COOKIE_NAME"]  # e.g. infomundi-session
 WEBSITE_ROOT = environ["WEBSITE_ROOT"]  # e.g. /app (inside docker container)
-BASE_URL = environ["BASE_URL"]  # e.g. https://infomundi.net (without the trailing slash)
-LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /root/docker/infomundi
-SEARCH_NEWS_DEBUG = str(getenv('FLASK_DEBUG', '')).lower() in ('1', 'true')
+BASE_URL = environ[
+    "BASE_URL"
+]  # e.g. https://infomundi.net (without the trailing slash)
+LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /opt/infomundi/website
+SEARCH_NEWS_DEBUG = str(getenv("FLASK_DEBUG", "")).lower() in ("1", "true")
 
 # -----------> Secret Keys <-----------
 TURNSTILE_SITE_KEY = environ["TURNSTILE_SITE_KEY"]

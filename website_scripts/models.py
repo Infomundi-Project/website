@@ -3,10 +3,18 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.mysql import MEDIUMINT, TIMESTAMP, TINYBLOB, BINARY, CHAR
 
 from .extensions import db
-from . import security_util, hashing_util, totp_util, qol_util, input_sanitization, config
+from . import (
+    security_util,
+    hashing_util,
+    totp_util,
+    qol_util,
+    input_sanitization,
+    config,
+)
 
 # Configure basic logging for storage mode detection
 import logging
+
 target_logger = logging.getLogger(__name__)
 
 # Storage mode detection - check if we're using local storage or S3
@@ -44,9 +52,7 @@ class Publisher(db.Model):
 
     favicon_url = db.Column(db.String(100), nullable=True)
 
-    __table_args__ = (
-        db.Index('uq_site_url', 'site_url', unique=True),
-    )
+    __table_args__ = (db.Index("uq_site_url", "site_url", unique=True),)
 
 
 class Category(db.Model):
@@ -66,7 +72,7 @@ class Tag(db.Model):
     __table_args__ = (
         # ensure we don't get duplicate tags on the same story
         db.UniqueConstraint("story_id", "tag", name="uq_story_tag"),
-        db.Index('idx_tags_story', 'story_id'),
+        db.Index("idx_tags_story", "story_id"),
     )
 
     # back-ref for convenience
@@ -113,7 +119,9 @@ class Story(db.Model):
     category = db.relationship("Category", backref="story")
     publisher = db.relationship("Publisher", backref="story")
 
-    country_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=True)
+    country_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=True
+    )
     country = db.relationship("Country", backref="story", lazy="joined")
 
     def get_public_id(self) -> str:
@@ -122,7 +130,7 @@ class Story(db.Model):
     def get_image_url(self) -> str:
         if not self.has_image:
             return ""
-        
+
         path = f"stories/{self.category.name}/{self.get_public_id()}.avif"
         return get_storage_url(path)
 
@@ -156,8 +164,12 @@ class StoryReaction(db.Model):
     __tablename__ = "story_reactions"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    story_id = db.Column(db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     action = db.Column(db.String(7), nullable=False)  # 'like', 'dislike', 'report'
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
@@ -257,9 +269,15 @@ class User(db.Model, UserMixin):
     # messaging pk
     public_key_jwk = db.Column(db.JSON, nullable=True)
 
-    country_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=True)
-    state_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("states.id"), nullable=True)
-    city_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("cities.id"), nullable=True)
+    country_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=True
+    )
+    state_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("states.id"), nullable=True
+    )
+    city_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("cities.id"), nullable=True
+    )
 
     country = db.relationship("Country", backref="users", lazy="joined")
     state = db.relationship("State", backref="users", lazy="joined")
@@ -459,8 +477,8 @@ class UserReport(db.Model):
         db.UniqueConstraint(
             "reporter_id", "reported_id", "category", name="uq_user_report"
         ),
-        db.Index('idx_user_reports_reporter', 'reporter_id'),
-        db.Index('idx_user_reports_reported', 'reported_id'),
+        db.Index("idx_user_reports_reporter", "reporter_id"),
+        db.Index("idx_user_reports_reported", "reported_id"),
     )
 
     def to_dict(self):
@@ -498,8 +516,8 @@ class UserBlock(db.Model):
     __table_args__ = (
         # one block per pair
         db.UniqueConstraint("blocker_id", "blocked_id", name="uq_user_block"),
-        db.Index('idx_user_blocks_blocker', 'blocker_id'),
-        db.Index('idx_user_blocks_blocked', 'blocked_id'),
+        db.Index("idx_user_blocks_blocker", "blocker_id"),
+        db.Index("idx_user_blocks_blocked", "blocked_id"),
     )
 
 
@@ -512,8 +530,12 @@ class Friendship(db.Model):
     status = db.Column(db.String(10), nullable=False, default="pending")
     accepted_at = db.Column(TIMESTAMP)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    friend_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    friend_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     __table_args__ = (
         db.UniqueConstraint("user_id", "friend_id", name="unique_friendship"),
@@ -684,8 +706,14 @@ class Notification(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (
-        db.Index('idx_notifications_user_unread', 'user_id', 'is_read'),
-        db.UniqueConstraint('user_id', 'type', 'friendship_id', 'is_read', name='uq_notifications_pending_friend'),
+        db.Index("idx_notifications_user_unread", "user_id", "is_read"),
+        db.UniqueConstraint(
+            "user_id",
+            "type",
+            "friendship_id",
+            "is_read",
+            name="uq_notifications_pending_friend",
+        ),
     )
 
 
@@ -745,7 +773,12 @@ class Region(db.Model):
     wikiDataId = db.Column(db.String(255), comment="Rapid API GeoDB Cities")
 
     subregions = db.relationship("Subregion", backref="parent_region", lazy=True)
-    countries = db.relationship("Country", foreign_keys="Country.region_id", backref="parent_region_rel", lazy=True)
+    countries = db.relationship(
+        "Country",
+        foreign_keys="Country.region_id",
+        backref="parent_region_rel",
+        lazy=True,
+    )
 
 
 class Subregion(db.Model):
@@ -753,17 +786,22 @@ class Subregion(db.Model):
     id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     translations = db.Column(db.Text)
-    region_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("regions.id"), nullable=False)
+    region_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("regions.id"), nullable=False
+    )
     created_at = db.Column(TIMESTAMP, default=None)
     updated_at = db.Column(TIMESTAMP, default=None)
     flag = db.Column(db.Boolean, nullable=False, default=True)
     wikiDataId = db.Column(db.String(255), comment="Rapid API GeoDB Cities")
 
-    countries = db.relationship("Country", foreign_keys="Country.subregion_id", backref="parent_subregion_rel", lazy=True)
-
-    __table_args__ = (
-        db.Index('subregion_continent', 'region_id'),
+    countries = db.relationship(
+        "Country",
+        foreign_keys="Country.subregion_id",
+        backref="parent_subregion_rel",
+        lazy=True,
     )
+
+    __table_args__ = (db.Index("subregion_continent", "region_id"),)
 
 
 class Country(db.Model):
@@ -781,9 +819,13 @@ class Country(db.Model):
     tld = db.Column(db.String(255))
     native = db.Column(db.String(255))
     region = db.Column(db.String(255))  # Legacy text field
-    region_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("regions.id"), nullable=True)
+    region_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("regions.id"), nullable=True
+    )
     subregion = db.Column(db.String(255))  # Legacy text field
-    subregion_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("subregions.id"), nullable=True)
+    subregion_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("subregions.id"), nullable=True
+    )
     nationality = db.Column(db.String(255))
     timezones = db.Column(db.Text)
     translations = db.Column(db.Text)
@@ -802,8 +844,8 @@ class Country(db.Model):
     cities = db.relationship("City", backref="country", lazy=True)
 
     __table_args__ = (
-        db.Index('country_continent', 'region_id'),
-        db.Index('country_subregion', 'subregion_id'),
+        db.Index("country_continent", "region_id"),
+        db.Index("country_subregion", "subregion_id"),
     )
 
 
@@ -811,7 +853,9 @@ class State(db.Model):
     __tablename__ = "states"
     id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    country_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=False)
+    country_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=False
+    )
     country_code = db.Column(CHAR(2), nullable=False)
     fips_code = db.Column(db.String(255))
     iso2 = db.Column(db.String(255))
@@ -825,18 +869,20 @@ class State(db.Model):
 
     cities = db.relationship("City", backref="state", lazy=True)
 
-    __table_args__ = (
-        db.Index('country_region', 'country_id'),
-    )
+    __table_args__ = (db.Index("country_region", "country_id"),)
 
 
 class City(db.Model):
     __tablename__ = "cities"
     id = db.Column(MEDIUMINT(unsigned=True), autoincrement=True, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    state_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("states.id"), nullable=False)
+    state_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("states.id"), nullable=False
+    )
     state_code = db.Column(db.String(255), nullable=False)
-    country_id = db.Column(MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=False)
+    country_id = db.Column(
+        MEDIUMINT(unsigned=True), db.ForeignKey("countries.id"), nullable=False
+    )
     country_code = db.Column(db.String(2), nullable=False)
     latitude = db.Column(db.Numeric(10, 8), nullable=False)
     longitude = db.Column(db.Numeric(11, 8), nullable=False)
@@ -850,6 +896,6 @@ class City(db.Model):
     wikiDataId = db.Column(db.String(255), comment="Rapid API GeoDB Cities")
 
     __table_args__ = (
-        db.Index('cities_test_ibfk_1', 'state_id'),
-        db.Index('cities_test_ibfk_2', 'country_id'),
+        db.Index("cities_test_ibfk_1", "state_id"),
+        db.Index("cities_test_ibfk_2", "country_id"),
     )

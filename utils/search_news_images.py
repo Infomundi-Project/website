@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 from pathlib import Path
+from os import makedirs as os_makedirs
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
@@ -20,7 +21,7 @@ MAX_PROXY_RETRIES = 10
 MAX_BAD_PROXIES_BEFORE_CLEAR = 50  # NEW: Prevent memory leak
 
 # Load and shuffle proxies
-with open(f"{config.LOCAL_ROOT}/assets/http-proxies.txt") as f:
+with open(f"{config.WEBSITE_ROOT}/assets/http-proxies.txt") as f:
     proxies = [x.rstrip() for x in f.readlines()]
     shuffle(proxies)
 
@@ -38,7 +39,7 @@ try:
     # Check if S3/R2 credentials are properly configured
     if not config.R2_ENDPOINT or not config.R2_ACCESS_KEY or not config.R2_SECRET:
         raise ValueError("S3/R2 credentials not configured")
-    
+
     s3_client = boto3.client(
         "s3",
         endpoint_url=config.R2_ENDPOINT,
@@ -67,9 +68,13 @@ db_params = {
     "autocommit": False,
 }
 
+# Ensure logs directory exists
+log_dir = f"{config.WEBSITE_ROOT}/logs"
+os_makedirs(log_dir, exist_ok=True)
+
 # Setup logging - FIX: Actually use logging instead of just print
 logging.basicConfig(
-    filename=f"{config.LOCAL_ROOT}/logs/search_images.log",
+    filename=f"{config.WEBSITE_ROOT}/logs/search_images.log",
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
 )
@@ -328,11 +333,11 @@ def extract_image_from_response(
 def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
     """
     Upload image to S3 or local storage based on configuration.
-    
+
     Args:
         buffer: BytesIO buffer containing image data
         object_key: S3 key or local file path
-        
+
     Returns:
         True if upload successful, False otherwise
     """
@@ -342,11 +347,11 @@ def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
             local_path = LOCAL_STORAGE_PATH / object_key
             # Create parent directories if they don't exist
             local_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             buffer.seek(0)
-            with open(local_path, 'wb') as f:
+            with open(local_path, "wb") as f:
                 f.write(buffer.read())
-            
+
             log_message(f"Saved to local storage: {local_path}")
             return True
         else:
@@ -355,7 +360,7 @@ def upload_image_to_storage(buffer: BytesIO, object_key: str) -> bool:
             s3_client.upload_fileobj(buffer, bucket_name, object_key)
             log_message(f"Uploaded to S3: {object_key}")
             return True
-            
+
     except Exception as e:
         log_message(f"Failed to upload {object_key}: {e}")
         return False
@@ -539,7 +544,7 @@ def search_images():
     """Main function to search and process images for all categories"""
     storage_mode = "LOCAL STORAGE" if USE_LOCAL_STORAGE else "S3/R2"
     log_message(f"Starting image search using {storage_mode}")
-    
+
     categories = fetch_categories_from_database()
 
     if not categories:
