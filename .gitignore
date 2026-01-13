@@ -1,4 +1,5 @@
 .webassets-cache/
+nohup.out
 local_uploads/
 __pycache__/
 static/gen/

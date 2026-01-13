@@ -26,6 +26,10 @@ jobs:
         id: pull
         run: sudo $DEPLOY_SCRIPT pull
 
+      - name: Update deploy script
+        run: |
+          cp /opt/infomundi/website/scripts/deploy.sh $DEPLOY_SCRIPT
+
       - name: Run database migrations
         id: migrate
         run: sudo $DEPLOY_SCRIPT migrate
