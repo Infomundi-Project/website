@@ -47,7 +47,7 @@ docker compose up -d
 docker compose logs -f infomundi-app
 ```
 
-Wait around 30 seconds for services to initialize.
+Wait around 40 seconds for services to initialize.
 
 ### 4. Seed Database
 

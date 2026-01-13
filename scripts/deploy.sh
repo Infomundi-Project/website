@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-COMPOSE_FILE="/root/docker/docker-compose.yml"
+COMPOSE_FILE="/opt/infomundi/docker/docker-compose.yml"
 REPO_DIR="/opt/infomundi/website"
 ALLOWED_ACTIONS=("pull" "restart" "status" "rollback" "get-commit" "healthcheck" "logs" "migrate")
 
