@@ -65,7 +65,7 @@ case "$action" in
         echo "Healthy"
         ;;
     migrate)
-        docker exec -T infomundi-app flask db upgrade
+        docker exec infomundi-app flask db upgrade
         echo "Migrations applied successfully"
         ;;
     logs)

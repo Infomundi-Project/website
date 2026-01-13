@@ -276,7 +276,9 @@ For AI assistance during development, see [CLAUDE.md](CLAUDE.md) for architectur
 
 ## Deployment
 
-The included `docker-compose.yml` is for **local development only**. Changes to the main branch are automatically deployed to production.
+The included `docker-compose.yml` is for **local development only**. Changes to the main branch are automatically deployed to production via GitHub Actions.
+
+For detailed deployment documentation including manual deployment, rollback procedures, and troubleshooting, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 
 ## License
