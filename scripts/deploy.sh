@@ -5,7 +5,6 @@
 
 set -euo pipefail
 
-COMPOSE_FILE="/opt/infomundi/docker/docker-compose.yml"
 REPO_DIR="/opt/infomundi/website"
 ALLOWED_ACTIONS=("pull" "restart" "status" "rollback" "get-commit" "healthcheck" "logs" "migrate")
 
@@ -21,7 +20,7 @@ case "$action" in
         echo "Code pulled successfully"
         ;;
     restart)
-        docker compose -f "$COMPOSE_FILE" restart infomundi-app
+        docker restart infomundi-app
         echo "Application restarted"
         ;;
     status)
@@ -66,7 +65,7 @@ case "$action" in
         echo "Healthy"
         ;;
     migrate)
-        docker compose -f "$COMPOSE_FILE" exec -T infomundi-app flask db upgrade
+        docker exec -T infomundi-app flask db upgrade
         echo "Migrations applied successfully"
         ;;
     logs)
