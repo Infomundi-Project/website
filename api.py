@@ -1803,7 +1803,7 @@ def captcha():
 
 
 @api.route("/world/feed", methods=["GET"])
-# @extensions.cache.cached(timeout=60 * 15)
+@extensions.cache.cached(timeout=60 * 15)
 @extensions.limiter.limit("20/minute", override_defaults=True)
 def world_feed():
     """Returns latest news organized by world regions for the homepage."""
@@ -1836,76 +1836,59 @@ def world_feed():
             continue
     
     result = {"regions": {}}
-    cutoff_date = datetime.utcnow() - timedelta(days=365)  # 1 year (get everything)
+    cutoff_date = datetime.utcnow() - timedelta(days=365)
     
     for region_name, country_codes in REGION_MAP.items():
-        # 1) Get countries for this region
-        countries_data = []
-        for code in country_codes:
-            if code.upper() in country_map:
-                country = country_map[code.upper()]
-                countries_data.append({
-                    "code": code.upper(),
-                    "name": country.get("name", {}).get("common", "Unknown"),
-                    "flag": country.get("flags", {}).get("svg", f"https://flagcdn.com/w40/{code.lower()}.png")
-                })
+        result["regions"][region_name] = {}
         
-        # 2) Get latest stories from these countries
-        stories_data = []
-        category_filters = []
-        
-        # Build list of category IDs for all countries in this region
+        # Process each country in the region
         for code in country_codes:
+            country_code_upper = code.upper()
+            
+            # Get country info
+            if country_code_upper not in country_map:
+                continue
+            
+            country_data = country_map[country_code_upper]
+            country_info = {
+                "code": country_code_upper,
+                "name": country_data.get("name", {}).get("common", "Unknown"),
+                "cca2": country_code_upper,
+                "topStories": []
+            }
+            
+            # Get stories for this country
             categories = extensions.db.session.query(models.Category).filter(
                 models.Category.name.like(f"{code.lower()}_%")
             ).all()
             
-            print(f"[DEBUG] Region: {region_name}, Code: {code.lower()}, Categories found: {len(categories)}")
-            for cat in categories:
-                print(f"  - {cat.name} (ID: {cat.id})")
+            category_ids = [cat.id for cat in categories]
             
-            category_filters.extend([cat.id for cat in categories])
-        
-        print(f"[DEBUG] Total categories for {region_name}: {len(category_filters)}")
-        
-        if category_filters:
-            # Query stories with images
-            stories = (
-                extensions.db.session.query(models.Story)
-                .filter(
-                    models.Story.category_id.in_(category_filters),
-                    models.Story.has_image == True,
-                    models.Story.pub_date >= cutoff_date
-                )
-                .order_by(desc(models.Story.pub_date))
-                .limit(8)
-                .all()
-            )
-            
-            print(f"[DEBUG] Stories found for {region_name}: {len(stories)}")
-            
-            for story in stories:
-                # Extract country code from category name (e.g., "us_general" -> "US")
-                category_name = story.category.name
-                country_code = category_name.split("_")[0].upper()
-                country_name = (
-                    country_map[country_code].get("name", {}).get("common", "Unknown")
-                    if country_code in country_map
-                    else "Unknown"
+            if category_ids:
+                stories = (
+                    extensions.db.session.query(models.Story)
+                    .filter(
+                        models.Story.category_id.in_(category_ids),
+                        models.Story.pub_date >= cutoff_date
+                    )
+                    .order_by(desc(models.Story.pub_date))
+                    .limit(8)
+                    .all()
                 )
                 
-                stories_data.append({
-                    "title": story.title,
-                    "source": input_sanitization.clean_publisher_name(story.publisher.name),
-                    "summary": story.description or "",
-                    "url": f"/comments?id={story.get_public_id()}",
-                    "published_at": story.pub_date.isoformat(),
-                    "image": story.image_url
-                })
-        
-        result["regions"][region_name] = {
-            "countries": countries_data,
-            "topStories": stories_data
-        }
+                for story in stories:
+                    country_info["topStories"].append({
+                        "title": story.title,
+                        "source": input_sanitization.clean_publisher_name(story.publisher.name),
+                        "summary": story.description or "",
+                        "url": f"/comments?id={story.get_public_id()}",
+                        "published_at": story.pub_date.isoformat()
+                    })
+            
+            # Add country to region
+            if "countries" not in result["regions"][region_name]:
+                result["regions"][region_name]["countries"] = []
+            
+            result["regions"][region_name]["countries"].append(country_info)
     
     return jsonify(result), 200
