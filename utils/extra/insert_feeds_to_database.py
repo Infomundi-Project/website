@@ -43,7 +43,7 @@ with db_connection.cursor() as cursor:
                 INSERT INTO categories (name) 
                 VALUES (%s)
             """,
-                (category),
+                (category,),  # Fix: tuple with comma
             )
         except pymysql.err.IntegrityError:
             continue
@@ -70,45 +70,62 @@ with db_connection.cursor() as cursor:
 
         for category_id in categories_id:
             try:
+                # Fix: Validate and truncate feed name and URL
+                feed_name = (feed.get("name") or "Unknown")[:150]  # Max 150 chars
+                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
+                
+                if not feed_name or not feed_url:
+                    continue
+                
                 cursor.execute(
                     """
                     INSERT INTO publishers (name, feed_url, category_id) 
                     VALUES (%s, %s, %s)
                 """,
                     (
-                        input_sanitization.sanitize_html(feed["name"]),
-                        feed["url"].strip(),
+                        input_sanitization.sanitize_html(feed_name),
+                        feed_url,
                         category_id,
                     ),
                 )
             except Exception as e:
-                print(f"Error {e}")
+                print(f"Error inserting feed {feed.get('name')}: {e}")
                 continue
 
     db_connection.commit()
 
 with db_connection.cursor() as cursor:
-    for feed in old_feeds:
-        category = feed
+    for feed_category in old_feeds:
+        category = feed_category
 
         category_id = [
             x["id"] for x in categories_from_database if x["name"] == category
         ][0]
 
-        for feed in old_feeds[feed]:
+        for feed in old_feeds[feed_category]:
             try:
+                # Fix: Validate and truncate feed name and URL
+                feed_name = (feed.get("site") or "Unknown")[:150]  # Max 150 chars
+                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
+                
+                if not feed_name or not feed_url:
+                    continue
+                
                 cursor.execute(
                     """
                     INSERT INTO publishers (name, feed_url, category_id) 
                     VALUES (%s, %s, %s)
                 """,
                     (
-                        input_sanitization.sanitize_html(feed["site"]),
-                        feed["url"].strip(),
+                        input_sanitization.sanitize_html(feed_name),
+                        feed_url,
                         category_id,
                     ),
                 )
             except Exception as e:
-                print(e)
+                print(f"Error inserting old feed {feed.get('site')}: {e}")
                 continue
     db_connection.commit()
+
+db_connection.close()
+print("✅ Publishers inserted successfully!")

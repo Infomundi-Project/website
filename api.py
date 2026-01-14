@@ -1800,3 +1800,112 @@ def captcha():
     session["captcha_time"] = datetime.utcnow().timestamp()
 
     return jsonify({"captcha": b64_img}), 200
+
+
+@api.route("/world/feed", methods=["GET"])
+# @extensions.cache.cached(timeout=60 * 15)
+@extensions.limiter.limit("20/minute", override_defaults=True)
+def world_feed():
+    """Returns latest news organized by world regions for the homepage."""
+    import json
+    from pathlib import Path
+    
+    REGION_MAP = {
+        "North America": ["US", "CA", "MX"],
+        "Latin America": ["BR", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO"],
+        "Europe": ["GB", "DE", "FR", "IT", "ES", "PT", "NL", "BE", "SE", "NO", "PL", "AT", "CH", "IE", "GR", "FI", "DK"],
+        "Middle East": ["IL", "SA", "AE", "QA", "KW", "TR", "IR", "IQ", "JO", "LB", "EG"],
+        "Asia": ["CN", "JP", "IN", "KR", "ID", "TH", "VN", "PH", "MY", "SG", "PK", "BD"],
+        "Africa": ["ZA", "NG", "KE", "EG", "ET", "GH", "TZ", "UG", "DZ", "MA"],
+        "Oceania": ["AU", "NZ", "FJ", "PG"]
+    }
+    
+    # Load detailed country data from JSON files
+    countries_data_path = Path(config.LOCAL_ROOT) / "assets" / "data" / "json" / "countries_data"
+    country_map = {}
+    
+    for code in [c for codes in REGION_MAP.values() for c in codes]:
+        file_path = countries_data_path / f"{code.lower()}.json"
+        try:
+            if file_path.exists():
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if data and isinstance(data, list) and len(data) > 0:
+                        country_map[code.upper()] = data[0]
+        except (json.JSONDecodeError, KeyError, IndexError):
+            continue
+    
+    result = {"regions": {}}
+    cutoff_date = datetime.utcnow() - timedelta(days=365)  # 1 year (get everything)
+    
+    for region_name, country_codes in REGION_MAP.items():
+        # 1) Get countries for this region
+        countries_data = []
+        for code in country_codes:
+            if code.upper() in country_map:
+                country = country_map[code.upper()]
+                countries_data.append({
+                    "code": code.upper(),
+                    "name": country.get("name", {}).get("common", "Unknown"),
+                    "flag": country.get("flags", {}).get("svg", f"https://flagcdn.com/w40/{code.lower()}.png")
+                })
+        
+        # 2) Get latest stories from these countries
+        stories_data = []
+        category_filters = []
+        
+        # Build list of category IDs for all countries in this region
+        for code in country_codes:
+            categories = extensions.db.session.query(models.Category).filter(
+                models.Category.name.like(f"{code.lower()}_%")
+            ).all()
+            
+            print(f"[DEBUG] Region: {region_name}, Code: {code.lower()}, Categories found: {len(categories)}")
+            for cat in categories:
+                print(f"  - {cat.name} (ID: {cat.id})")
+            
+            category_filters.extend([cat.id for cat in categories])
+        
+        print(f"[DEBUG] Total categories for {region_name}: {len(category_filters)}")
+        
+        if category_filters:
+            # Query stories with images
+            stories = (
+                extensions.db.session.query(models.Story)
+                .filter(
+                    models.Story.category_id.in_(category_filters),
+                    models.Story.has_image == True,
+                    models.Story.pub_date >= cutoff_date
+                )
+                .order_by(desc(models.Story.pub_date))
+                .limit(8)
+                .all()
+            )
+            
+            print(f"[DEBUG] Stories found for {region_name}: {len(stories)}")
+            
+            for story in stories:
+                # Extract country code from category name (e.g., "us_general" -> "US")
+                category_name = story.category.name
+                country_code = category_name.split("_")[0].upper()
+                country_name = (
+                    country_map[country_code].get("name", {}).get("common", "Unknown")
+                    if country_code in country_map
+                    else "Unknown"
+                )
+                
+                stories_data.append({
+                    "title": story.title,
+                    "source": input_sanitization.clean_publisher_name(story.publisher.name),
+                    "summary": story.description or "",
+                    "url": f"/comments?id={story.get_public_id()}",
+                    "published_at": story.pub_date.isoformat(),
+                    "image": story.image_url
+                })
+        
+        result["regions"][region_name] = {
+            "countries": countries_data,
+            "topStories": stories_data
+        }
+    
+    return jsonify(result), 200
