@@ -125,7 +125,7 @@
   <div class="row">
     <div class="col-12">
       <div id="worldFeedAccordion" class="accordion"
-           data-feed-endpoint="#">
+           data-feed-endpoint="{{ url_for('api.world_feed') }}">
 
         {% set regions = [
           'North America','Europe','Asia','Latin America','Africa','Oceania'

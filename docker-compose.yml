@@ -66,7 +66,7 @@ services:
       FLASK_APP: app.py
       FLASK_ENV: development
       FLASK_DEBUG: "1"
-      SEARCH_NEWS_DEBUG: ${SEARCH_NEWS_DEBUG:-1}
+      SEARCH_NEWS_DEBUG: ${SEARCH_NEWS_DEBUG:-0}
 
       # App configuration
       WEBSITE_ROOT: /app

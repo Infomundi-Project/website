@@ -9,7 +9,7 @@ BASE_URL = environ[
     "BASE_URL"
 ]  # e.g. https://infomundi.net (without the trailing slash)
 LOCAL_ROOT = environ["LOCAL_ROOT"]  # e.g. /opt/infomundi/website
-SEARCH_NEWS_DEBUG = str(getenv("FLASK_DEBUG", "")).lower() in ("1", "true")
+SEARCH_NEWS_DEBUG = str(getenv("SEARCH_NEWS_DEBUG", "0")).lower() in ("1", "true")
 
 # -----------> Secret Keys <-----------
 TURNSTILE_SITE_KEY = environ["TURNSTILE_SITE_KEY"]
