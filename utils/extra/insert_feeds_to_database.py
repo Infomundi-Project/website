@@ -13,11 +13,11 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str, str] | t
     """
     Validate and truncate feed name and URL to match database column constraints.
     Uses "Unknown" as fallback for missing or empty names.
-    
+
     Args:
         feed: Dictionary containing feed data
         name_key: Key to use for extracting the feed name ('name' or 'site')
-    
+
     Returns:
         Either (feed_name, feed_url) with both as valid strings, or (None, None) if URL is invalid.
     """
@@ -30,18 +30,18 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str, str] | t
             feed_name = "Unknown"
     else:
         feed_name = "Unknown"
-    
+
     raw_url = feed.get("url")
     if raw_url:
         stripped_url = str(raw_url).strip()
         feed_url = stripped_url[:PUBLISHER_URL_MAX_LENGTH] if stripped_url else None
     else:
         feed_url = None
-    
+
     # Only reject if URL is missing (name defaults to "Unknown")
     if feed_url is None:
         return None, None
-    
+
     return feed_name, feed_url
 
 
@@ -113,7 +113,7 @@ with db_connection.cursor() as cursor:
         for category_id in categories_id:
             try:
                 feed_name, feed_url = validate_and_truncate_feed(feed, "name")
-                
+
                 if feed_name is None or feed_url is None:
                     continue
 
@@ -145,7 +145,7 @@ with db_connection.cursor() as cursor:
         for feed in old_feeds[feed_category]:
             try:
                 feed_name, feed_url = validate_and_truncate_feed(feed, "site")
-                
+
                 if feed_name is None or feed_url is None:
                     continue
 
