@@ -21,7 +21,8 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str | None, s
         Tuple of (feed_name, feed_url) or (None, None) if validation fails
     """
     raw_name = feed.get(name_key)
-    feed_name = (str(raw_name) if raw_name else "Unknown")[:PUBLISHER_NAME_MAX_LENGTH]
+    stripped_name = str(raw_name).strip() if raw_name and str(raw_name).strip() else None
+    feed_name = (stripped_name if stripped_name else "Unknown")[:PUBLISHER_NAME_MAX_LENGTH]
     
     raw_url = feed.get("url")
     if raw_url:
