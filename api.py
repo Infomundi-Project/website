@@ -1810,6 +1810,8 @@ def world_feed():
     import json
     from pathlib import Path
     
+    MAX_STORIES_PER_REGION = 8  # Limit total stories per region
+    
     # Region map aligned with homepage.html template regions
     REGION_MAP = {
         "North America": ["US", "CA", "MX"],
@@ -1839,10 +1841,14 @@ def world_feed():
     cutoff_date = datetime.utcnow() - timedelta(days=365)
     
     for region_name, country_codes in REGION_MAP.items():
-        result["regions"][region_name] = {}
+        result["regions"][region_name] = {"countries": []}
+        region_stories_count = 0
         
         # Process each country in the region
         for code in country_codes:
+            if region_stories_count >= MAX_STORIES_PER_REGION:
+                break
+                
             country_code_upper = code.upper()
             
             # Get country info
@@ -1857,7 +1863,8 @@ def world_feed():
                 "topStories": []
             }
             
-            # Get stories for this country
+            # Get stories for this country (limit to remaining slots)
+            remaining_slots = MAX_STORIES_PER_REGION - region_stories_count
             categories = extensions.db.session.query(models.Category).filter(
                 models.Category.name.like(f"{code.lower()}_%")
             ).all()
@@ -1872,7 +1879,7 @@ def world_feed():
                         models.Story.pub_date >= cutoff_date
                     )
                     .order_by(desc(models.Story.pub_date))
-                    .limit(8)
+                    .limit(min(3, remaining_slots))  # Max 3 per country, but respect region limit
                     .all()
                 )
                 
@@ -1884,11 +1891,10 @@ def world_feed():
                         "url": f"/comments?id={story.get_public_id()}",
                         "published_at": story.pub_date.isoformat()
                     })
+                    region_stories_count += 1
             
-            # Add country to region
-            if "countries" not in result["regions"][region_name]:
-                result["regions"][region_name]["countries"] = []
-            
-            result["regions"][region_name]["countries"].append(country_info)
+            # Only add country if it has stories
+            if country_info["topStories"]:
+                result["regions"][region_name]["countries"].append(country_info)
     
     return jsonify(result), 200
