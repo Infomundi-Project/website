@@ -1815,5 +1815,5 @@ def world_feed():
         return jsonify(result), 200
     except (extensions.db.exc.SQLAlchemyError, ValueError, KeyError) as e:
         # Log the error for diagnostics
-        logging.error(f"Error loading world feed: {str(e)}")
+        logging.error(f"Error loading world feed: {e}")
         return jsonify(get_fallback_world_feed()), 200
