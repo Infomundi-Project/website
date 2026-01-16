@@ -420,25 +420,33 @@ WORLD_FEED_REGION_MAP = {
 }
 
 
+def _load_country_json(file_path) -> dict | None:
+    """Load and parse a single country JSON file."""
+    import json
+
+    if not file_path.exists():
+        return None
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data[0] if isinstance(data, list) and data else None
+    except (json.JSONDecodeError, KeyError, IndexError):
+        return None
+
+
 def _load_country_map() -> dict:
     """Load country data from JSON files."""
-    import json
     from pathlib import Path
 
     countries_path = Path(config.COUNTRIES_DATA_PATH)
-    country_map = {}
     all_codes = [c for codes in WORLD_FEED_REGION_MAP.values() for c in codes]
+    country_map = {}
 
     for code in all_codes:
-        file_path = countries_path / f"{code.lower()}.json"
-        try:
-            if file_path.exists():
-                with open(file_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if data and isinstance(data, list) and len(data) > 0:
-                        country_map[code.upper()] = data[0]
-        except (json.JSONDecodeError, KeyError, IndexError):
-            continue
+        data = _load_country_json(countries_path / f"{code.lower()}.json")
+        if data:
+            country_map[code.upper()] = data
+
     return country_map
 
 
