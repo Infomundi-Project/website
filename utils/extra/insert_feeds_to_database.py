@@ -9,7 +9,7 @@ PUBLISHER_NAME_MAX_LENGTH = 150
 PUBLISHER_URL_MAX_LENGTH = 200
 
 
-def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str | None, str | None]:
+def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str, str] | tuple[None, None]:
     """
     Validate and truncate feed name and URL to match database column constraints.
     Uses "Unknown" as fallback for missing or empty names.
@@ -19,8 +19,7 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str | None, s
         name_key: Key to use for extracting the feed name ('name' or 'site')
     
     Returns:
-        Tuple of (feed_name, feed_url) or (None, None) if URL is invalid.
-        feed_name will never be None in successful cases (uses "Unknown" as fallback).
+        Either (feed_name, feed_url) with both as valid strings, or (None, None) if URL is invalid.
     """
     raw_name = feed.get(name_key)
     if raw_name:
