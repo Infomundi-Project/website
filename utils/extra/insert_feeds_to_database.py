@@ -2,6 +2,32 @@ import pymysql
 
 from website_scripts import config, input_sanitization, json_util
 
+# Column size constants from Publisher model (models.py)
+# name = db.Column(db.String(150), nullable=False)
+# feed_url = db.Column(db.String(200))
+PUBLISHER_NAME_MAX_LENGTH = 150
+PUBLISHER_URL_MAX_LENGTH = 200
+
+
+def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str | None, str | None]:
+    """
+    Validate and truncate feed name and URL to match database column constraints.
+    
+    Args:
+        feed: Dictionary containing feed data
+        name_key: Key to use for extracting the feed name ('name' or 'site')
+    
+    Returns:
+        Tuple of (feed_name, feed_url) or (None, None) if validation fails
+    """
+    feed_name = (feed.get(name_key) or "Unknown")[:PUBLISHER_NAME_MAX_LENGTH]
+    feed_url = (feed.get("url") or "").strip()[:PUBLISHER_URL_MAX_LENGTH] if feed.get("url") else None
+    
+    if not feed_name or not feed_url:
+        return None, None
+    
+    return feed_name, feed_url
+
 
 # Database connection parameters
 db_params = {
@@ -70,10 +96,8 @@ with db_connection.cursor() as cursor:
 
         for category_id in categories_id:
             try:
-                # Fix: Validate and truncate feed name and URL
-                feed_name = (feed.get("name") or "Unknown")[:150]  # Max 150 chars
-                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
-
+                feed_name, feed_url = validate_and_truncate_feed(feed, "name")
+                
                 if not feed_name or not feed_url:
                     continue
 
@@ -104,10 +128,8 @@ with db_connection.cursor() as cursor:
 
         for feed in old_feeds[feed_category]:
             try:
-                # Fix: Validate and truncate feed name and URL
-                feed_name = (feed.get("site") or "Unknown")[:150]  # Max 150 chars
-                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
-
+                feed_name, feed_url = validate_and_truncate_feed(feed, "site")
+                
                 if not feed_name or not feed_url:
                     continue
 

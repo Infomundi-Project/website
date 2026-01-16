@@ -1808,9 +1808,12 @@ def captcha():
 def world_feed():
     """Returns latest news organized by world regions for the homepage."""
     from website_scripts.fallback_data import get_fallback_world_feed
+    import logging
 
     try:
         result = scripts.get_world_feed_by_regions()
         return jsonify(result), 200
-    except Exception:
+    except (extensions.db.exc.SQLAlchemyError, ValueError, KeyError) as e:
+        # Log the error for diagnostics
+        logging.error(f"Error loading world feed: {str(e)}")
         return jsonify(get_fallback_world_feed()), 200

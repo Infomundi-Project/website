@@ -579,14 +579,3 @@ def comments():
         story=story,
         next_story="",
     )
-
-
-@views.route("/api/world/feed", methods=["GET"])
-@extensions.limiter.limit("20/minute", override_defaults=True)
-def world_feed():
-    """Returns latest news organized by world regions for the homepage."""
-    try:
-        feed_data = scripts.get_world_feed_by_regions()
-        return jsonify(feed_data)
-    except Exception:
-        return jsonify({"error": "Failed to load world feed"}), 500
