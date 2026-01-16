@@ -26,7 +26,7 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str | None, s
         stripped_name = str(raw_name).strip()
         feed_name = (stripped_name if stripped_name else "Unknown")[:PUBLISHER_NAME_MAX_LENGTH]
     else:
-        feed_name = "Unknown"[:PUBLISHER_NAME_MAX_LENGTH]
+        feed_name = "Unknown"
     
     raw_url = feed.get("url")
     if raw_url:
@@ -111,7 +111,7 @@ with db_connection.cursor() as cursor:
             try:
                 feed_name, feed_url = validate_and_truncate_feed(feed, "name")
                 
-                if not feed_name or not feed_url:
+                if feed_name is None or feed_url is None:
                     continue
 
                 cursor.execute(
@@ -143,7 +143,7 @@ with db_connection.cursor() as cursor:
             try:
                 feed_name, feed_url = validate_and_truncate_feed(feed, "site")
                 
-                if not feed_name or not feed_url:
+                if feed_name is None or feed_url is None:
                     continue
 
                 cursor.execute(
