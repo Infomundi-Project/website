@@ -39,7 +39,7 @@ def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str, str] | t
         feed_url = None
     
     # Only reject if URL is missing (name defaults to "Unknown")
-    if not feed_url:
+    if feed_url is None:
         return None, None
     
     return feed_name, feed_url
