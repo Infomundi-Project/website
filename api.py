@@ -1810,13 +1810,13 @@ def world_feed():
     import json
     from pathlib import Path
     
+    # Region map aligned with homepage.html template regions
     REGION_MAP = {
         "North America": ["US", "CA", "MX"],
-        "Latin America": ["BR", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO"],
-        "Europe": ["GB", "DE", "FR", "IT", "ES", "PT", "NL", "BE", "SE", "NO", "PL", "AT", "CH", "IE", "GR", "FI", "DK"],
-        "Middle East": ["IL", "SA", "AE", "QA", "KW", "TR", "IR", "IQ", "JO", "LB", "EG"],
-        "Asia": ["CN", "JP", "IN", "KR", "ID", "TH", "VN", "PH", "MY", "SG", "PK", "BD"],
-        "Africa": ["ZA", "NG", "KE", "EG", "ET", "GH", "TZ", "UG", "DZ", "MA"],
+        "Latin America": ["BR", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO", "CR", "PA", "CU", "DO", "GT", "HN", "NI", "SV"],
+        "Europe": ["GB", "DE", "FR", "IT", "ES", "PT", "NL", "BE", "SE", "NO", "PL", "AT", "CH", "IE", "GR", "FI", "DK", "CZ", "RO", "HU", "UA", "RU"],
+        "Asia": ["CN", "JP", "IN", "KR", "ID", "TH", "VN", "PH", "MY", "SG", "PK", "BD", "IL", "SA", "AE", "TR", "IR", "TW", "HK"],
+        "Africa": ["ZA", "NG", "KE", "EG", "ET", "GH", "TZ", "UG", "DZ", "MA", "TN", "SN", "CI"],
         "Oceania": ["AU", "NZ", "FJ", "PG"]
     }
     
