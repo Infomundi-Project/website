@@ -2,6 +2,48 @@ import pymysql
 
 from website_scripts import config, input_sanitization, json_util
 
+# Column size constants from Publisher model (models.py)
+# name = db.Column(db.String(150), nullable=False)
+# feed_url = db.Column(db.String(200))
+PUBLISHER_NAME_MAX_LENGTH = 150
+PUBLISHER_URL_MAX_LENGTH = 200
+
+
+def validate_and_truncate_feed(feed: dict, name_key: str) -> tuple[str, str] | tuple[None, None]:
+    """
+    Validate and truncate feed name and URL to match database column constraints.
+    Uses "Unknown" as fallback for missing or empty names.
+
+    Args:
+        feed: Dictionary containing feed data
+        name_key: Key to use for extracting the feed name ('name' or 'site')
+
+    Returns:
+        Either (feed_name, feed_url) with both as valid strings, or (None, None) if URL is invalid.
+    """
+    raw_name = feed.get(name_key)
+    if raw_name:
+        stripped_name = str(raw_name).strip()
+        if stripped_name:
+            feed_name = stripped_name[:PUBLISHER_NAME_MAX_LENGTH]
+        else:
+            feed_name = "Unknown"
+    else:
+        feed_name = "Unknown"
+
+    raw_url = feed.get("url")
+    if raw_url:
+        stripped_url = str(raw_url).strip()
+        feed_url = stripped_url[:PUBLISHER_URL_MAX_LENGTH] if stripped_url else None
+    else:
+        feed_url = None
+
+    # Only reject if URL is missing (name defaults to "Unknown")
+    if feed_url is None:
+        return None, None
+
+    return feed_name, feed_url
+
 
 # Database connection parameters
 db_params = {
@@ -70,11 +112,9 @@ with db_connection.cursor() as cursor:
 
         for category_id in categories_id:
             try:
-                # Fix: Validate and truncate feed name and URL
-                feed_name = (feed.get("name") or "Unknown")[:150]  # Max 150 chars
-                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
+                feed_name, feed_url = validate_and_truncate_feed(feed, "name")
 
-                if not feed_name or not feed_url:
+                if feed_name is None or feed_url is None:
                     continue
 
                 cursor.execute(
@@ -104,11 +144,9 @@ with db_connection.cursor() as cursor:
 
         for feed in old_feeds[feed_category]:
             try:
-                # Fix: Validate and truncate feed name and URL
-                feed_name = (feed.get("site") or "Unknown")[:150]  # Max 150 chars
-                feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
+                feed_name, feed_url = validate_and_truncate_feed(feed, "site")
 
-                if not feed_name or not feed_url:
+                if feed_name is None or feed_url is None:
                     continue
 
                 cursor.execute(

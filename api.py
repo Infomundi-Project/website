@@ -1,12 +1,14 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import and_, cast, desc, asc, func
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, time, timedelta
 from requests import get as requests_get
 from sqlalchemy.orm import joinedload
 from flask_login import current_user
 from collections import defaultdict
 from sqlalchemy.types import Date
+import logging
 
 from website_scripts import (
     config,
@@ -1812,5 +1814,7 @@ def world_feed():
     try:
         result = scripts.get_world_feed_by_regions()
         return jsonify(result), 200
-    except Exception:
+    except (SQLAlchemyError, ValueError, KeyError) as e:
+        # Log the error for diagnostics
+        logging.error(f"Error loading world feed: {e}")
         return jsonify(get_fallback_world_feed()), 200

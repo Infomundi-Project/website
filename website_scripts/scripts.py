@@ -419,6 +419,11 @@ WORLD_FEED_REGION_MAP = {
     "Oceania": ["AU", "NZ", "FJ", "PG"]
 }
 
+# World feed configuration constants
+WORLD_FEED_STORY_AGE_DAYS = 365  # Maximum age of stories to include in world feed
+MAX_STORIES_PER_REGION = 8  # Maximum number of stories to show per region
+MAX_STORIES_PER_COUNTRY = 3  # Maximum number of stories to show per country
+
 
 def _load_country_json(file_path) -> dict | None:
     """Load and parse a single country JSON file."""
@@ -494,7 +499,7 @@ def _process_region(region_name: str, country_codes: list, country_map: dict,
             continue
 
         remaining = max_stories - region_stories_count
-        stories = _get_country_stories(code, cutoff_date, min(3, remaining))
+        stories = _get_country_stories(code, cutoff_date, min(MAX_STORIES_PER_COUNTRY, remaining))
 
         if stories:
             region_data["countries"].append({
@@ -513,12 +518,12 @@ def get_world_feed_by_regions() -> dict:
     from .fallback_data import merge_with_fallback
 
     country_map = _load_country_map()
-    cutoff_date = datetime.utcnow() - timedelta(days=365)
+    cutoff_date = datetime.utcnow() - timedelta(days=WORLD_FEED_STORY_AGE_DAYS)
     result = {"regions": {}}
 
     for region_name, codes in WORLD_FEED_REGION_MAP.items():
         result["regions"][region_name] = _process_region(
-            region_name, codes, country_map, cutoff_date, 8
+            region_name, codes, country_map, cutoff_date, MAX_STORIES_PER_REGION
         )
 
     return merge_with_fallback(result)
