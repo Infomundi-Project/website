@@ -424,9 +424,8 @@ def _load_country_map() -> dict:
     """Load country data from JSON files."""
     import json
     from pathlib import Path
-    from . import input_sanitization
 
-    countries_path = Path(config.LOCAL_ROOT) / "assets" / "data" / "json" / "countries_data"
+    countries_path = Path(config.COUNTRIES_DATA_PATH)
     country_map = {}
     all_codes = [c for codes in WORLD_FEED_REGION_MAP.values() for c in codes]
 

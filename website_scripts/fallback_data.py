@@ -6,154 +6,59 @@ This ensures the homepage always displays content even during errors.
 from datetime import datetime, timedelta
 
 
-def get_fallback_world_feed() -> dict:
-    """
-    Returns fallback news data for all world regions.
-    Used when the database has no stories or when an error occurs.
-    """
-    # Generate dates relative to now for freshness
-    now = datetime.utcnow()
-    
-    def days_ago(n: int) -> str:
-        return (now - timedelta(days=n)).isoformat() + "Z"
-    
-    return {
-        "regions": {
-            "Europe": {
-                "countries": [
-                    {
-                        "code": "FR",
-                        "name": "France",
-                        "cca2": "FR",
-                        "topStories": [
-                            {
-                                "title": "France invests in high-speed rail expansion",
-                                "source": "AFP",
-                                "summary": "New TGV routes will connect major cities with reduced travel times.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            },
-                            {
-                                "title": "Paris launches urban cooling program",
-                                "source": "Le Monde",
-                                "summary": "Shaded corridors and misting stations to mitigate heatwaves.",
-                                "url": "#",
-                                "published_at": days_ago(3)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "DE",
-                        "name": "Germany",
-                        "cca2": "DE",
-                        "topStories": [
-                            {
-                                "title": "Germany leads EU renewable energy goals",
-                                "source": "DW",
-                                "summary": "Electricity generation crosses a new renewable benchmark.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "IT",
-                        "name": "Italy",
-                        "cca2": "IT",
-                        "topStories": [
-                            {
-                                "title": "Italy unveils green tourism plan",
-                                "source": "ANSA",
-                                "summary": "Incentives to preserve coastal parks and villages.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "GB",
-                        "name": "United Kingdom",
-                        "cca2": "GB",
-                        "topStories": [
-                            {
-                                "title": "UK announces new tech investment fund",
-                                "source": "BBC",
-                                "summary": "Government backs AI and clean energy startups with major funding.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "ES",
-                        "name": "Spain",
-                        "cca2": "ES",
-                        "topStories": [
-                            {
-                                "title": "Spain expands solar energy capacity",
-                                "source": "El País",
-                                "summary": "New solar farms to power millions of homes across the country.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    }
-                ]
-            },
-            "North America": {
-                "countries": [
-                    {
-                        "code": "US",
-                        "name": "United States",
-                        "cca2": "US",
-                        "topStories": [
-                            {
-                                "title": "US tech stocks rally after earnings",
-                                "source": "Bloomberg",
-                                "summary": "Major indexes close higher on strong guidance.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            },
-                            {
-                                "title": "Federal infrastructure grants announced",
-                                "source": "Reuters",
-                                "summary": "Funding targets bridges and broadband in rural areas.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "CA",
-                        "name": "Canada",
-                        "cca2": "CA",
-                        "topStories": [
-                            {
-                                "title": "Canada expands EV charging network",
-                                "source": "CBC",
-                                "summary": "New coast-to-coast fast chargers planned along Trans-Canada.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "MX",
-                        "name": "Mexico",
-                        "cca2": "MX",
-                        "topStories": [
-                            {
-                                "title": "Mexico City launches air quality initiative",
-                                "source": "El Universal",
-                                "summary": "Low-emission zones to phase in over the next year.",
-                                "url": "#",
-                                "published_at": days_ago(3)
-                            }
-                        ]
-                    }
-                ]
-            },
-]
+def _days_ago(now: datetime, n: int) -> str:
+    """Return an ISO timestamp for n days ago."""
+    return (now - timedelta(days=n)).isoformat() + "Z"
+
+
+def _get_europe_countries(now: datetime) -> list:
+    """Return fallback countries for Europe region."""
+    return [
+        {"code": "FR", "name": "France", "cca2": "FR", "topStories": [
+            {"title": "France invests in high-speed rail expansion", "source": "AFP",
+             "summary": "New TGV routes will connect major cities with reduced travel times.",
+             "url": "#", "published_at": _days_ago(now, 0)},
+            {"title": "Paris launches urban cooling program", "source": "Le Monde",
+             "summary": "Shaded corridors and misting stations to mitigate heatwaves.",
+             "url": "#", "published_at": _days_ago(now, 3)}]},
+        {"code": "DE", "name": "Germany", "cca2": "DE", "topStories": [
+            {"title": "Germany leads EU renewable energy goals", "source": "DW",
+             "summary": "Electricity generation crosses a new renewable benchmark.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "IT", "name": "Italy", "cca2": "IT", "topStories": [
+            {"title": "Italy unveils green tourism plan", "source": "ANSA",
+             "summary": "Incentives to preserve coastal parks and villages.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "GB", "name": "United Kingdom", "cca2": "GB", "topStories": [
+            {"title": "UK announces new tech investment fund", "source": "BBC",
+             "summary": "Government backs AI and clean energy startups with major funding.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "ES", "name": "Spain", "cca2": "ES", "topStories": [
+            {"title": "Spain expands solar energy capacity", "source": "El País",
+             "summary": "New solar farms to power millions of homes across the country.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+    ]
+
+
+def _get_north_america_countries(now: datetime) -> list:
+    """Return fallback countries for North America region."""
+    return [
+        {"code": "US", "name": "United States", "cca2": "US", "topStories": [
+            {"title": "US tech stocks rally after earnings", "source": "Bloomberg",
+             "summary": "Major indexes close higher on strong guidance.",
+             "url": "#", "published_at": _days_ago(now, 0)},
+            {"title": "Federal infrastructure grants announced", "source": "Reuters",
+             "summary": "Funding targets bridges and broadband in rural areas.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "CA", "name": "Canada", "cca2": "CA", "topStories": [
+            {"title": "Canada expands EV charging network", "source": "CBC",
+             "summary": "New coast-to-coast fast chargers planned along Trans-Canada.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "MX", "name": "Mexico", "cca2": "MX", "topStories": [
+            {"title": "Mexico City launches air quality initiative", "source": "El Universal",
+             "summary": "Low-emission zones to phase in over the next year.",
+             "url": "#", "published_at": _days_ago(now, 3)}]},
+    ]
 
 
 def _get_latin_america_countries(now: datetime) -> list:
@@ -201,6 +106,8 @@ def _get_africa_countries(now: datetime) -> list:
              "summary": "Infrastructure upgrades aim to increase shipping capacity.",
              "url": "#", "published_at": _days_ago(now, 2)}]},
     ]
+
+
 def _get_asia_countries(now: datetime) -> list:
     """Return fallback countries for Asia region."""
     return [
@@ -263,37 +170,27 @@ def merge_with_fallback(db_result: dict) -> dict:
     """
     Merges database results with fallback data.
     If a region has no countries with stories, uses fallback data for that region.
-    
-    Args:
-        db_result: The result from the database query
-        
-    Returns:
-        Merged result with fallback data where needed
     """
     fallback = get_fallback_world_feed()
-    
+
     if not db_result or "regions" not in db_result:
         return fallback
-    
+
     result = {"regions": {}}
-    
-    # Get all region names from both sources
     all_regions = set(db_result.get("regions", {}).keys()) | set(fallback["regions"].keys())
-    
+
     for region_name in all_regions:
         db_region = db_result.get("regions", {}).get(region_name, {})
         fallback_region = fallback["regions"].get(region_name, {})
-        
+
         db_countries = db_region.get("countries", [])
         fallback_countries = fallback_region.get("countries", [])
-        
-        # If database has countries with stories, use them
+
         if db_countries:
             result["regions"][region_name] = {"countries": db_countries}
-        # Otherwise, use fallback
         elif fallback_countries:
             result["regions"][region_name] = {"countries": fallback_countries}
         else:
             result["regions"][region_name] = {"countries": []}
-    
+
     return result
