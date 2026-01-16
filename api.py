@@ -1806,112 +1806,11 @@ def captcha():
 @extensions.cache.cached(timeout=60 * 15)
 @extensions.limiter.limit("20/minute", override_defaults=True)
 def world_feed():
-    """Returns latest news organized by world regions for the homepage.
-    
-    Uses fallback data when:
-    - Database query fails
-    - A region has no stories
-    - Any other error occurs
-    """
-    import json
-    from pathlib import Path
-    from website_scripts.fallback_data import get_fallback_world_feed, merge_with_fallback
-    
+    """Returns latest news organized by world regions for the homepage."""
+    from website_scripts.fallback_data import get_fallback_world_feed
+
     try:
-        MAX_STORIES_PER_REGION = 8  # Limit total stories per region
-        
-        # Region map aligned with homepage.html template regions
-        REGION_MAP = {
-            "North America": ["US", "CA", "MX"],
-            "Latin America": ["BR", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO", "CR", "PA", "CU", "DO", "GT", "HN", "NI", "SV"],
-            "Europe": ["GB", "DE", "FR", "IT", "ES", "PT", "NL", "BE", "SE", "NO", "PL", "AT", "CH", "IE", "GR", "FI", "DK", "CZ", "RO", "HU", "UA", "RU"],
-            "Asia": ["CN", "JP", "IN", "KR", "ID", "TH", "VN", "PH", "MY", "SG", "PK", "BD", "IL", "SA", "AE", "TR", "IR", "TW", "HK"],
-            "Africa": ["ZA", "NG", "KE", "EG", "ET", "GH", "TZ", "UG", "DZ", "MA", "TN", "SN", "CI"],
-            "Oceania": ["AU", "NZ", "FJ", "PG"]
-        }
-        
-        # Load detailed country data from JSON files
-        countries_data_path = Path(config.LOCAL_ROOT) / "assets" / "data" / "json" / "countries_data"
-        country_map = {}
-        
-        for code in [c for codes in REGION_MAP.values() for c in codes]:
-            file_path = countries_data_path / f"{code.lower()}.json"
-            try:
-                if file_path.exists():
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                        if data and isinstance(data, list) and len(data) > 0:
-                            country_map[code.upper()] = data[0]
-            except (json.JSONDecodeError, KeyError, IndexError):
-                continue
-        
-        result = {"regions": {}}
-        cutoff_date = datetime.utcnow() - timedelta(days=365)
-        
-        for region_name, country_codes in REGION_MAP.items():
-            result["regions"][region_name] = {"countries": []}
-            region_stories_count = 0
-            
-            # Process each country in the region
-            for code in country_codes:
-                if region_stories_count >= MAX_STORIES_PER_REGION:
-                    break
-                    
-                country_code_upper = code.upper()
-                
-                # Get country info
-                if country_code_upper not in country_map:
-                    continue
-                
-                country_data = country_map[country_code_upper]
-                country_info = {
-                    "code": country_code_upper,
-                    "name": country_data.get("name", {}).get("common", "Unknown"),
-                    "cca2": country_code_upper,
-                    "topStories": []
-                }
-                
-                # Get stories for this country (limit to remaining slots)
-                remaining_slots = MAX_STORIES_PER_REGION - region_stories_count
-                categories = extensions.db.session.query(models.Category).filter(
-                    models.Category.name.like(f"{code.lower()}_%")
-                ).all()
-                
-                category_ids = [cat.id for cat in categories]
-                
-                if category_ids:
-                    stories = (
-                        extensions.db.session.query(models.Story)
-                        .filter(
-                            models.Story.category_id.in_(category_ids),
-                            models.Story.pub_date >= cutoff_date
-                        )
-                        .order_by(desc(models.Story.pub_date))
-                        .limit(min(3, remaining_slots))  # Max 3 per country, but respect region limit
-                        .all()
-                    )
-                    
-                    for story in stories:
-                        country_info["topStories"].append({
-                            "title": story.title,
-                            "source": input_sanitization.clean_publisher_name(story.publisher.name),
-                            "summary": story.description or "",
-                            "url": f"/comments?id={story.get_public_id()}",
-                            "published_at": story.pub_date.isoformat()
-                        })
-                        region_stories_count += 1
-                
-                # Only add country if it has stories
-                if country_info["topStories"]:
-                    result["regions"][region_name]["countries"].append(country_info)
-        
-        # Merge with fallback data for regions without stories
-        result = merge_with_fallback(result)
-        
+        result = scripts.get_world_feed_by_regions()
         return jsonify(result), 200
-        
-    except Exception as e:
-        # Log the error and return fallback data
-        import logging
-        logging.error(f"Error in world_feed endpoint: {e}")
+    except Exception:
         return jsonify(get_fallback_world_feed()), 200

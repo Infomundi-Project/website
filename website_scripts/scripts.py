@@ -403,3 +403,115 @@ def get_supported_categories(country_code: str) -> list:
 
 def get_current_date_and_time() -> str:
     return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+
+# ── World Feed Functions ──
+
+WORLD_FEED_REGION_MAP = {
+    "North America": ["US", "CA", "MX"],
+    "Latin America": ["BR", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO",
+                      "CR", "PA", "CU", "DO", "GT", "HN", "NI", "SV"],
+    "Europe": ["GB", "DE", "FR", "IT", "ES", "PT", "NL", "BE", "SE", "NO", "PL",
+               "AT", "CH", "IE", "GR", "FI", "DK", "CZ", "RO", "HU", "UA", "RU"],
+    "Asia": ["CN", "JP", "IN", "KR", "ID", "TH", "VN", "PH", "MY", "SG", "PK",
+             "BD", "IL", "SA", "AE", "TR", "IR", "TW", "HK"],
+    "Africa": ["ZA", "NG", "KE", "EG", "ET", "GH", "TZ", "UG", "DZ", "MA", "TN", "SN", "CI"],
+    "Oceania": ["AU", "NZ", "FJ", "PG"]
+}
+
+
+def _load_country_map() -> dict:
+    """Load country data from JSON files."""
+    import json
+    from pathlib import Path
+    from . import input_sanitization
+
+    countries_path = Path(config.LOCAL_ROOT) / "assets" / "data" / "json" / "countries_data"
+    country_map = {}
+    all_codes = [c for codes in WORLD_FEED_REGION_MAP.values() for c in codes]
+
+    for code in all_codes:
+        file_path = countries_path / f"{code.lower()}.json"
+        try:
+            if file_path.exists():
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if data and isinstance(data, list) and len(data) > 0:
+                        country_map[code.upper()] = data[0]
+        except (json.JSONDecodeError, KeyError, IndexError):
+            continue
+    return country_map
+
+
+def _get_country_stories(code: str, cutoff_date, limit: int) -> list:
+    """Get top stories for a country."""
+    from . import input_sanitization
+    from sqlalchemy import desc
+
+    categories = extensions.db.session.query(models.Category).filter(
+        models.Category.name.like(f"{code.lower()}_%")
+    ).all()
+    category_ids = [cat.id for cat in categories]
+
+    if not category_ids:
+        return []
+
+    stories = (
+        extensions.db.session.query(models.Story)
+        .filter(models.Story.category_id.in_(category_ids), models.Story.pub_date >= cutoff_date)
+        .order_by(desc(models.Story.pub_date))
+        .limit(limit)
+        .all()
+    )
+
+    return [{
+        "title": s.title,
+        "source": input_sanitization.clean_publisher_name(s.publisher.name),
+        "summary": s.description or "",
+        "url": f"/comments?id={s.get_public_id()}",
+        "published_at": s.pub_date.isoformat()
+    } for s in stories]
+
+
+def _process_region(region_name: str, country_codes: list, country_map: dict,
+                    cutoff_date, max_stories: int) -> dict:
+    """Process a single region and return its countries with stories."""
+    region_data = {"countries": []}
+    region_stories_count = 0
+
+    for code in country_codes:
+        if region_stories_count >= max_stories:
+            break
+        code_upper = code.upper()
+        if code_upper not in country_map:
+            continue
+
+        remaining = max_stories - region_stories_count
+        stories = _get_country_stories(code, cutoff_date, min(3, remaining))
+
+        if stories:
+            region_data["countries"].append({
+                "code": code_upper,
+                "name": country_map[code_upper].get("name", {}).get("common", "Unknown"),
+                "cca2": code_upper,
+                "topStories": stories
+            })
+            region_stories_count += len(stories)
+
+    return region_data
+
+
+def get_world_feed_by_regions() -> dict:
+    """Get world feed data organized by regions."""
+    from .fallback_data import merge_with_fallback
+
+    country_map = _load_country_map()
+    cutoff_date = datetime.utcnow() - timedelta(days=365)
+    result = {"regions": {}}
+
+    for region_name, codes in WORLD_FEED_REGION_MAP.items():
+        result["regions"][region_name] = _process_region(
+            region_name, codes, country_map, cutoff_date, 8
+        )
+
+    return merge_with_fallback(result)

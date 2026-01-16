@@ -153,246 +153,108 @@ def get_fallback_world_feed() -> dict:
                     }
                 ]
             },
-            "Latin America": {
-                "countries": [
-                    {
-                        "code": "BR",
-                        "name": "Brazil",
-                        "cca2": "BR",
-                        "topStories": [
-                            {
-                                "title": "Brazil accelerates Amazon reforestation",
-                                "source": "Folha",
-                                "summary": "Public-private partnerships aim to restore key corridors.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            },
-                            {
-                                "title": "São Paulo invests in public transport modernization",
-                                "source": "Estadão",
-                                "summary": "New metro lines and bus corridors planned for the metropolitan area.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "AR",
-                        "name": "Argentina",
-                        "cca2": "AR",
-                        "topStories": [
-                            {
-                                "title": "Argentina announces export incentives",
-                                "source": "La Nación",
-                                "summary": "New measures target agribusiness and lithium.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "CL",
-                        "name": "Chile",
-                        "cca2": "CL",
-                        "topStories": [
-                            {
-                                "title": "Chile expands national park system",
-                                "source": "BioBio",
-                                "summary": "New protected areas designated in Patagonia.",
-                                "url": "#",
-                                "published_at": days_ago(4)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "CO",
-                        "name": "Colombia",
-                        "cca2": "CO",
-                        "topStories": [
-                            {
-                                "title": "Colombia launches digital economy initiative",
-                                "source": "El Tiempo",
-                                "summary": "Government supports tech startups and digital infrastructure.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    }
-                ]
-            },
-            "Africa": {
-                "countries": [
-                    {
-                        "code": "NG",
-                        "name": "Nigeria",
-                        "cca2": "NG",
-                        "topStories": [
-                            {
-                                "title": "Nigeria launches fintech regulatory sandbox",
-                                "source": "Punch",
-                                "summary": "Startups to test products with consumer safeguards.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "ZA",
-                        "name": "South Africa",
-                        "cca2": "ZA",
-                        "topStories": [
-                            {
-                                "title": "Cape Town water resilience plan updated",
-                                "source": "News24",
-                                "summary": "Desalination and reuse projects move forward.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "KE",
-                        "name": "Kenya",
-                        "cca2": "KE",
-                        "topStories": [
-                            {
-                                "title": "Kenya expands mobile money interoperability",
-                                "source": "Nation",
-                                "summary": "Transfers between networks become seamless.",
-                                "url": "#",
-                                "published_at": days_ago(3)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "EG",
-                        "name": "Egypt",
-                        "cca2": "EG",
-                        "topStories": [
-                            {
-                                "title": "Egypt invests in new Suez Canal expansion",
-                                "source": "Al-Ahram",
-                                "summary": "Infrastructure upgrades aim to increase shipping capacity.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    }
-                ]
-            },
-            "Asia": {
-                "countries": [
-                    {
-                        "code": "IN",
-                        "name": "India",
-                        "cca2": "IN",
-                        "topStories": [
-                            {
-                                "title": "India unveils semiconductor cluster incentives",
-                                "source": "The Hindu",
-                                "summary": "States compete to host fab projects.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "JP",
-                        "name": "Japan",
-                        "cca2": "JP",
-                        "topStories": [
-                            {
-                                "title": "Japan tests next-gen wind turbines",
-                                "source": "NHK",
-                                "summary": "Floating platforms deployed off Hokkaido.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "CN",
-                        "name": "China",
-                        "cca2": "CN",
-                        "topStories": [
-                            {
-                                "title": "China announces new high-speed rail link",
-                                "source": "Xinhua",
-                                "summary": "Route will reduce travel time by 40%.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "KR",
-                        "name": "South Korea",
-                        "cca2": "KR",
-                        "topStories": [
-                            {
-                                "title": "South Korea advances AI research initiatives",
-                                "source": "Yonhap",
-                                "summary": "New funding for AI labs and talent development programs.",
-                                "url": "#",
-                                "published_at": days_ago(1)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "SG",
-                        "name": "Singapore",
-                        "cca2": "SG",
-                        "topStories": [
-                            {
-                                "title": "Singapore launches smart city 2.0 initiative",
-                                "source": "Straits Times",
-                                "summary": "New sensors and AI systems to improve urban services.",
-                                "url": "#",
-                                "published_at": days_ago(3)
-                            }
-                        ]
-                    }
-                ]
-            },
-            "Oceania": {
-                "countries": [
-                    {
-                        "code": "AU",
-                        "name": "Australia",
-                        "cca2": "AU",
-                        "topStories": [
-                            {
-                                "title": "Australia expands solar storage rebates",
-                                "source": "ABC",
-                                "summary": "Households to get additional support for batteries.",
-                                "url": "#",
-                                "published_at": days_ago(0)
-                            },
-                            {
-                                "title": "Melbourne announces new public transit expansion",
-                                "source": "The Age",
-                                "summary": "New tram and rail lines planned for the suburbs.",
-                                "url": "#",
-                                "published_at": days_ago(2)
-                            }
-                        ]
-                    },
-                    {
-                        "code": "NZ",
-                        "name": "New Zealand",
-                        "cca2": "NZ",
-                        "topStories": [
-                            {
-                                "title": "New Zealand launches green hydrogen pilot",
-                                "source": "RNZ",
-                                "summary": "Port operations to trial zero-emission equipment.",
-                                "url": "#",
-                                "published_at": days_ago(3)
-                            }
-                        ]
-                    }
-                ]
-            }
+]
+
+
+def _get_latin_america_countries(now: datetime) -> list:
+    """Return fallback countries for Latin America region."""
+    return [
+        {"code": "BR", "name": "Brazil", "cca2": "BR", "topStories": [
+            {"title": "Brazil accelerates Amazon reforestation", "source": "Folha",
+             "summary": "Public-private partnerships aim to restore key corridors.",
+             "url": "#", "published_at": _days_ago(now, 0)},
+            {"title": "São Paulo invests in public transport modernization", "source": "Estadão",
+             "summary": "New metro lines and bus corridors planned for the metropolitan area.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "AR", "name": "Argentina", "cca2": "AR", "topStories": [
+            {"title": "Argentina announces export incentives", "source": "La Nación",
+             "summary": "New measures target agribusiness and lithium.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "CL", "name": "Chile", "cca2": "CL", "topStories": [
+            {"title": "Chile expands national park system", "source": "BioBio",
+             "summary": "New protected areas designated in Patagonia.",
+             "url": "#", "published_at": _days_ago(now, 4)}]},
+        {"code": "CO", "name": "Colombia", "cca2": "CO", "topStories": [
+            {"title": "Colombia launches digital economy initiative", "source": "El Tiempo",
+             "summary": "Government supports tech startups and digital infrastructure.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+    ]
+
+
+def _get_africa_countries(now: datetime) -> list:
+    """Return fallback countries for Africa region."""
+    return [
+        {"code": "NG", "name": "Nigeria", "cca2": "NG", "topStories": [
+            {"title": "Nigeria launches fintech regulatory sandbox", "source": "Punch",
+             "summary": "Startups to test products with consumer safeguards.",
+             "url": "#", "published_at": _days_ago(now, 0)}]},
+        {"code": "ZA", "name": "South Africa", "cca2": "ZA", "topStories": [
+            {"title": "Cape Town water resilience plan updated", "source": "News24",
+             "summary": "Desalination and reuse projects move forward.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "KE", "name": "Kenya", "cca2": "KE", "topStories": [
+            {"title": "Kenya expands mobile money interoperability", "source": "Nation",
+             "summary": "Transfers between networks become seamless.",
+             "url": "#", "published_at": _days_ago(now, 3)}]},
+        {"code": "EG", "name": "Egypt", "cca2": "EG", "topStories": [
+            {"title": "Egypt invests in new Suez Canal expansion", "source": "Al-Ahram",
+             "summary": "Infrastructure upgrades aim to increase shipping capacity.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+    ]
+def _get_asia_countries(now: datetime) -> list:
+    """Return fallback countries for Asia region."""
+    return [
+        {"code": "IN", "name": "India", "cca2": "IN", "topStories": [
+            {"title": "India unveils semiconductor cluster incentives", "source": "The Hindu",
+             "summary": "States compete to host fab projects.",
+             "url": "#", "published_at": _days_ago(now, 0)}]},
+        {"code": "JP", "name": "Japan", "cca2": "JP", "topStories": [
+            {"title": "Japan tests next-gen wind turbines", "source": "NHK",
+             "summary": "Floating platforms deployed off Hokkaido.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "CN", "name": "China", "cca2": "CN", "topStories": [
+            {"title": "China announces new high-speed rail link", "source": "Xinhua",
+             "summary": "Route will reduce travel time by 40%.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "KR", "name": "South Korea", "cca2": "KR", "topStories": [
+            {"title": "South Korea advances AI research initiatives", "source": "Yonhap",
+             "summary": "New funding for AI labs and talent development programs.",
+             "url": "#", "published_at": _days_ago(now, 1)}]},
+        {"code": "SG", "name": "Singapore", "cca2": "SG", "topStories": [
+            {"title": "Singapore launches smart city 2.0 initiative", "source": "Straits Times",
+             "summary": "New sensors and AI systems to improve urban services.",
+             "url": "#", "published_at": _days_ago(now, 3)}]},
+    ]
+
+
+def _get_oceania_countries(now: datetime) -> list:
+    """Return fallback countries for Oceania region."""
+    return [
+        {"code": "AU", "name": "Australia", "cca2": "AU", "topStories": [
+            {"title": "Australia expands solar storage rebates", "source": "ABC",
+             "summary": "Households to get additional support for batteries.",
+             "url": "#", "published_at": _days_ago(now, 0)},
+            {"title": "Melbourne announces new public transit expansion", "source": "The Age",
+             "summary": "New tram and rail lines planned for the suburbs.",
+             "url": "#", "published_at": _days_ago(now, 2)}]},
+        {"code": "NZ", "name": "New Zealand", "cca2": "NZ", "topStories": [
+            {"title": "New Zealand launches green hydrogen pilot", "source": "RNZ",
+             "summary": "Port operations to trial zero-emission equipment.",
+             "url": "#", "published_at": _days_ago(now, 3)}]},
+    ]
+
+
+def get_fallback_world_feed() -> dict:
+    """Returns fallback news data for all world regions."""
+    now = datetime.utcnow()
+    return {
+        "regions": {
+            "Europe": {"countries": _get_europe_countries(now)},
+            "North America": {"countries": _get_north_america_countries(now)},
+            "Latin America": {"countries": _get_latin_america_countries(now)},
+            "Africa": {"countries": _get_africa_countries(now)},
+            "Asia": {"countries": _get_asia_countries(now)},
+            "Oceania": {"countries": _get_oceania_countries(now)},
         }
     }
 

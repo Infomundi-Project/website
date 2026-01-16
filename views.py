@@ -588,5 +588,5 @@ def world_feed():
     try:
         feed_data = scripts.get_world_feed_by_regions()
         return jsonify(feed_data)
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Failed to load world feed"}), 500

@@ -73,10 +73,10 @@ with db_connection.cursor() as cursor:
                 # Fix: Validate and truncate feed name and URL
                 feed_name = (feed.get("name") or "Unknown")[:150]  # Max 150 chars
                 feed_url = (feed.get("url") or "").strip()[:200] if feed.get("url") else None  # Max 200 chars
-                
+
                 if not feed_name or not feed_url:
                     continue
-                
+
                 cursor.execute(
                     """
                     INSERT INTO publishers (name, feed_url, category_id) 
