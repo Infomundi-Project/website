@@ -5,12 +5,6 @@
   const FEED_URL = root.dataset.feedEndpoint;
   const FLAG_BASE = '/static/img/flags/4x3/';
 
-  // Map API region names -> DOM data-region names (handle "Oceania" vs "Australia")
-  const regionDomName = (name) => {
-    const map = { Oceania: 'Australia' };
-    return map[name] || name;
-  };
-
   const fmtDate = (iso) => {
     try {
       return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric' });
@@ -68,10 +62,9 @@
   };
 
   const renderRegion = (regionName, regionData) => {
-    const domName = regionDomName(regionName);
-    const chipsWrap = root.querySelector(`[data-role="countries"][data-region="${domName}"]`);
-    const grid = root.querySelector(`[data-role="grid"][data-region="${domName}"]`);
-    const skeleton = root.querySelector(`[data-role="skeleton"][data-region="${domName}"]`);
+    const chipsWrap = root.querySelector(`[data-role="countries"][data-region="${regionName}"]`);
+    const grid = root.querySelector(`[data-role="grid"][data-region="${regionName}"]`);
+    const skeleton = root.querySelector(`[data-role="skeleton"][data-region="${regionName}"]`);
     skeleton?.remove();
 
     const countries = regionData?.countries || [];
