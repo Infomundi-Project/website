@@ -33,9 +33,34 @@
   /* --- Countries (chips) --- */
   .country-chip{
     display:inline-flex; align-items:center; gap:.4rem;
-    padding:.35rem .6rem; border-radius:999px;
+    padding:.35rem .6rem; border-radius:4px;
     background:var(--bs-body-bg); border:2.5px solid var(--bs-border-color);
     font-size:.9rem; white-space:nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor:pointer;
+  }
+  .country-chip:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: var(--bs-primary);
+  }
+  .country-chip:hover,
+  .country-chip:hover *,
+  .country-chip:hover span,
+  .country-chip:focus,
+  .country-chip:focus *,
+  .country-chip:focus span,
+  html[data-bs-theme="light"] .country-chip:hover,
+  html[data-bs-theme="light"] .country-chip:hover *,
+  html[data-bs-theme="light"] .country-chip:hover span,
+  html[data-bs-theme="light"] .country-chip:focus,
+  html[data-bs-theme="light"] .country-chip:focus *,
+  html[data-bs-theme="light"] .country-chip:focus span,
+  html[data-bs-theme="light"] button.country-chip:hover,
+  html[data-bs-theme="light"] button.country-chip:hover *,
+  html[data-bs-theme="light"] button.country-chip:focus,
+  html[data-bs-theme="light"] button.country-chip:focus *{
+    color: var(--bs-body-color) !important;
   }
   .country-chip img.flag{ width:1.1rem; height:1.1rem; border-radius:2px; }
   .country-chip + .country-chip{ margin-left:.5rem; }
