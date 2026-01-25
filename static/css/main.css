@@ -369,6 +369,16 @@ html[data-bs-theme="light"] #filterForm .nav-link:focus * {
   color: inherit !important;
 }
 
+/* Footer links - blue on hover without underline */
+footer .nav-link:hover,
+footer .nav-link:focus {
+  color: #0d6efd !important;
+}
+
+footer .nav-link::after {
+  display: none;
+}
+
 
 
 
