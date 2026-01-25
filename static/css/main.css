@@ -213,21 +213,21 @@ button:focus,
 }
 
 /* Light mode: make text blue on hover inside list-group items */
-/* Exclude story cards, filter modals, and their children from blue hover effect */
-html[data-bs-theme="light"] .nav-link:hover,
-html[data-bs-theme="light"] .nav-link:hover *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):hover,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):hover *,
+/* Exclude story cards, filter modals, logo, and their children from blue hover effect */
+html[data-bs-theme="light"] .nav-link:not(.navbar-brand):hover,
+html[data-bs-theme="light"] .nav-link:not(.navbar-brand):hover *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover *:not(.logo-text),
 html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):hover,
 html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):hover *,
 html[data-bs-theme="light"] .dropdown-item:hover,
 html[data-bs-theme="light"] .dropdown-item:hover *,
 html[data-bs-theme="light"] .btn:hover,
 html[data-bs-theme="light"] .btn:hover *,
-html[data-bs-theme="light"] .nav-link:focus,
-html[data-bs-theme="light"] .nav-link:focus *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):focus,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):focus *,
+html[data-bs-theme="light"] .nav-link:not(.navbar-brand):focus,
+html[data-bs-theme="light"] .nav-link:not(.navbar-brand):focus *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus *:not(.logo-text),
 html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):focus,
 html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):focus *,
 html[data-bs-theme="light"] .dropdown-item:focus,
@@ -241,8 +241,19 @@ html[data-bs-theme="light"] .btn:focus * {
 
 /* LIGHT MODE */
 html[data-bs-theme="light"] .navbar .logo-text,
+html[data-bs-theme="light"] .navbar .logo-text *,
+html[data-bs-theme="light"] .navbar a.logo-text,
+html[data-bs-theme="light"] .navbar a.logo-text *,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text *,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text *,
 html[data-bs-theme="light"] .offcanvas .logo-text,
-html[data-bs-theme="light"] .sidebar .logo-text {
+html[data-bs-theme="light"] .offcanvas .logo-text *,
+html[data-bs-theme="light"] .offcanvas a .logo-text,
+html[data-bs-theme="light"] .offcanvas a .logo-text *,
+html[data-bs-theme="light"] .sidebar .logo-text,
+html[data-bs-theme="light"] .sidebar .logo-text * {
   --bs-link-color: #212529;
   --bs-link-hover-color: #212529;
 
@@ -254,11 +265,33 @@ html[data-bs-theme="light"] .sidebar .logo-text {
 }
 
 html[data-bs-theme="light"] .navbar .logo-text:hover,
+html[data-bs-theme="light"] .navbar .logo-text:hover *,
 html[data-bs-theme="light"] .navbar .logo-text:focus,
+html[data-bs-theme="light"] .navbar .logo-text:focus *,
+html[data-bs-theme="light"] .navbar a.logo-text:hover,
+html[data-bs-theme="light"] .navbar a.logo-text:hover *,
+html[data-bs-theme="light"] .navbar a.logo-text:focus,
+html[data-bs-theme="light"] .navbar a.logo-text:focus *,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text:hover,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text:hover *,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text:focus,
+html[data-bs-theme="light"] .navbar .navbar-brand.logo-text:focus *,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text:hover,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text:hover *,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text:focus,
+html[data-bs-theme="light"] .navbar .navbar-brand .logo-text:focus *,
 html[data-bs-theme="light"] .offcanvas .logo-text:hover,
+html[data-bs-theme="light"] .offcanvas .logo-text:hover *,
 html[data-bs-theme="light"] .offcanvas .logo-text:focus,
+html[data-bs-theme="light"] .offcanvas .logo-text:focus *,
+html[data-bs-theme="light"] .offcanvas a .logo-text:hover,
+html[data-bs-theme="light"] .offcanvas a .logo-text:hover *,
+html[data-bs-theme="light"] .offcanvas a .logo-text:focus,
+html[data-bs-theme="light"] .offcanvas a .logo-text:focus *,
 html[data-bs-theme="light"] .sidebar .logo-text:hover,
-html[data-bs-theme="light"] .sidebar .logo-text:focus {
+html[data-bs-theme="light"] .sidebar .logo-text:hover *,
+html[data-bs-theme="light"] .sidebar .logo-text:focus,
+html[data-bs-theme="light"] .sidebar .logo-text:focus * {
   color: #212529 !important;
   fill: #212529 !important;
   stroke: #212529 !important;
@@ -266,8 +299,19 @@ html[data-bs-theme="light"] .sidebar .logo-text:focus {
 
 /* DARK MODE (opcional, pra não sumir em fundo escuro) */
 html[data-bs-theme="dark"] .navbar .logo-text,
+html[data-bs-theme="dark"] .navbar .logo-text *,
+html[data-bs-theme="dark"] .navbar a.logo-text,
+html[data-bs-theme="dark"] .navbar a.logo-text *,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text *,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text *,
 html[data-bs-theme="dark"] .offcanvas .logo-text,
-html[data-bs-theme="dark"] .sidebar .logo-text {
+html[data-bs-theme="dark"] .offcanvas .logo-text *,
+html[data-bs-theme="dark"] .offcanvas a .logo-text,
+html[data-bs-theme="dark"] .offcanvas a .logo-text *,
+html[data-bs-theme="dark"] .sidebar .logo-text,
+html[data-bs-theme="dark"] .sidebar .logo-text * {
   --bs-link-color: #f8f9fa;
   --bs-link-hover-color: #f8f9fa;
 
@@ -276,6 +320,35 @@ html[data-bs-theme="dark"] .sidebar .logo-text {
   stroke: #f8f9fa !important;
   text-decoration: none !important;
   box-shadow: none !important;
+}
+
+html[data-bs-theme="dark"] .navbar .logo-text:hover,
+html[data-bs-theme="dark"] .navbar .logo-text:hover *,
+html[data-bs-theme="dark"] .navbar .logo-text:focus,
+html[data-bs-theme="dark"] .navbar .logo-text:focus *,
+html[data-bs-theme="dark"] .navbar a.logo-text:hover,
+html[data-bs-theme="dark"] .navbar a.logo-text:hover *,
+html[data-bs-theme="dark"] .navbar a.logo-text:focus,
+html[data-bs-theme="dark"] .navbar a.logo-text:focus *,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text:hover,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text:hover *,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text:focus,
+html[data-bs-theme="dark"] .navbar .navbar-brand.logo-text:focus *,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text:hover,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text:hover *,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text:focus,
+html[data-bs-theme="dark"] .navbar .navbar-brand .logo-text:focus *,
+html[data-bs-theme="dark"] .offcanvas .logo-text:hover,
+html[data-bs-theme="dark"] .offcanvas .logo-text:hover *,
+html[data-bs-theme="dark"] .offcanvas .logo-text:focus,
+html[data-bs-theme="dark"] .offcanvas .logo-text:focus *,
+html[data-bs-theme="dark"] .offcanvas a .logo-text:hover,
+html[data-bs-theme="dark"] .offcanvas a .logo-text:hover *,
+html[data-bs-theme="dark"] .offcanvas a .logo-text:focus,
+html[data-bs-theme="dark"] .offcanvas a .logo-text:focus * {
+  color: #f8f9fa !important;
+  fill: #f8f9fa !important;
+  stroke: #f8f9fa !important;
 }
 
 /* Override blue hover effect for filter modal list items */
