@@ -42,6 +42,17 @@
   margin-right: .3rem;
 }
 
+/* Prevent blue hover effect on story cards */
+.story-card-style,
+.story-card-style * {
+  color: inherit !important;
+}
+
+.story-card-style:hover,
+.story-card-style:hover * {
+  color: inherit !important;
+}
+
 
 #infomundiStoryModal .modal-header img {
   width: 100%;
