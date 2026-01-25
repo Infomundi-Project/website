@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const modalDislikeIcon = modalElement.querySelector(".fa-thumbs-down");
   const modalLikeCount = modalLikeIcon.querySelector("span");
   const modalDislikeCount = modalDislikeIcon.querySelector("span");
-  const modalSatelliteIcon = modalElement.querySelector(".fa-satellite-dish");
+  const modalSatelliteIcon = modalElement.querySelector(".satellite-share-button");
   const modalPublishedDate = modalElement.querySelector("#publishedDateStoryModal");
   const modalViewCount = modalElement.querySelector("#viewCountStoryModal");
 

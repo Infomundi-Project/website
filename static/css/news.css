@@ -16,30 +16,53 @@
   box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.2);
 }
 
-/* Imagem acompanha o crescimento */
+/* Imagem mantém tamanho fixo */
 .story-card-style img {
-  transition: transform .3s ease;
   width: 100%;
   display: block;
 }
 
-.story-card-style:hover img {
-  transform: scale(1.05); /* imagem cresce suavemente */
+/* Prevent blue hover effect on story cards */
+.story-card-style,
+.story-card-style * {
+  color: inherit !important;
 }
 
-.story-card-style .line-clamp-3,
-.story-card-style .line-clamp-4,
-.story-card-style .card-footer {
-  margin-left: 0;
-  margin-right: 0;
-  transition: margin .15s ease;
+.story-card-style:hover,
+.story-card-style:hover * {
+  color: inherit !important;
 }
 
-.story-card-style:hover .line-clamp-3,
-.story-card-style:hover .line-clamp-4,
-.story-card-style:hover .card-footer {
-  margin-left: .3rem;
-  margin-right: .3rem;
+/* Prevent blue hover effect on filter items in modals */
+.list-group-checkable .list-group-item,
+.list-group-checkable .list-group-item * {
+  color: inherit !important;
+}
+
+.list-group-checkable .list-group-item:hover,
+.list-group-checkable .list-group-item:hover * {
+  color: inherit !important;
+}
+
+/* Keep filter navbar text color unchanged on hover */
+#filterForm .nav-link,
+#filterForm .nav-link * {
+  transition: none !important;
+}
+
+/* Override the global blue hover - keep original text-primary color */
+html[data-bs-theme="light"] #filterForm .nav-link .text-primary {
+  color: var(--bs-primary) !important;
+}
+
+html[data-bs-theme="light"] #filterForm .nav-link:hover .text-primary,
+html[data-bs-theme="light"] #filterForm .nav-link:hover span.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+/* Keep non-primary text unchanged on hover */
+html[data-bs-theme="light"] #filterForm .nav-link:hover {
+  color: inherit !important;
 }
 
 
