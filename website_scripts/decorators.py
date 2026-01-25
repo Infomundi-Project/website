@@ -5,6 +5,28 @@ from functools import wraps
 
 from . import extensions, qol_util, cloudflare_util, config, models, captcha_util
 
+# Trusted session expires after this many hours
+TRUSTED_SESSION_DURATION_HOURS = 3
+
+
+def is_session_trusted() -> bool:
+    """Check if the current session is trusted and not expired."""
+    trusted_at = session.get("is_trusted_session")
+    if not trusted_at:
+        return False
+
+    # Handle legacy boolean values (treat as expired)
+    if not isinstance(trusted_at, (int, float)):
+        return False
+
+    elapsed_hours = (datetime.utcnow().timestamp() - trusted_at) / 3600
+    return elapsed_hours < TRUSTED_SESSION_DURATION_HOURS
+
+
+def set_session_trusted():
+    """Mark the current session as trusted with a timestamp."""
+    session["is_trusted_session"] = datetime.utcnow().timestamp()
+
 
 def admin_required(func):
     @wraps(func)
@@ -163,8 +185,7 @@ def sensitive_area(func):
 
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        is_trusted_session = session.get("is_trusted_session", "")
-        if is_trusted_session:
+        if is_session_trusted():
             return func(*args, **kwargs)
 
         return redirect(url_for("views.sensitive"))

@@ -27,6 +27,7 @@ from website_scripts import (
     models,
     friends_util,
 )
+from website_scripts.extensions import IS_DEV
 from views import views
 from auth import auth
 from api import api
@@ -54,12 +55,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 extensions.db.init_app(app)
 extensions.migrate.init_app(app, extensions.db)
 
-# Cache
-app.config["CACHE_REDIS_URL"] = config.REDIS_CONNECTION_STRING
-app.config["CACHE_REDIS_DB"] = config.REDIS_DATABASE
-app.config["CACHE_REDIS_HOST"] = config.REDIS_HOST
-app.config["CACHE_REDIS_PORT"] = config.REDIS_PORT
-app.config["CACHE_TYPE"] = "RedisCache"
+# Cache Configuration
+if IS_DEV:
+    app.config["CACHE_TYPE"] = "NullCache"
+else:
+    app.config["CACHE_REDIS_URL"] = config.REDIS_CONNECTION_STRING
+    app.config["CACHE_REDIS_DB"] = config.REDIS_DATABASE
+    app.config["CACHE_REDIS_HOST"] = config.REDIS_HOST
+    app.config["CACHE_REDIS_PORT"] = config.REDIS_PORT
+    app.config["CACHE_TYPE"] = "RedisCache"
 extensions.cache.init_app(app)
 
 
@@ -327,8 +331,12 @@ def add_headers(response):
     )
 
     if request.path.startswith("/static"):
-        # Set Cache-Control header for static files
-        response.headers["Cache-Control"] = "public, max-age=2592000"  # 30 days
+        if IS_DEV:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=2592000"  # 30 days
 
     return response
 
@@ -412,6 +420,11 @@ assets.register("js_home", js_home)
 assets.register("js_news", js_news)
 assets.register("js_profile", js_profile)
 assets.register("js_base_authenticated", js_base_authenticated)
+
+if IS_DEV:
+    assets.debug = True
+    assets.auto_build = True
+    app.config["ASSETS_DEBUG"] = True
 
 
 @app.context_processor

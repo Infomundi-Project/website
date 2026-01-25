@@ -206,7 +206,7 @@ def forgot_password():
         auth_util.perform_login_actions(
             user, security_util.decrypt(user.email_encrypted)
         )
-        session["is_trusted_session"] = True
+        decorators.set_session_trusted()
 
         flash("Success! You may be able to change your password now.")
         return redirect(url_for("views.edit_user_settings"))

@@ -214,7 +214,36 @@ def delete_account(email: str, token: str) -> bool:
 
     # Logout and delete user from database
     logout_user()
+
+    # Delete all related records to prevent foreign key constraint violations
+    # These need explicit deletion because SQLAlchemy tries to handle relationships
+    # at the ORM level before database CASCADE can occur
     friends_util.delete_all_friends(user.id)
+    models.UserStoryView.query.filter_by(user_id=user.id).delete()
+    models.StoryReaction.query.filter_by(user_id=user.id).delete()
+    models.CommentReaction.query.filter_by(user_id=user.id).delete()
+    models.Notification.query.filter_by(user_id=user.id).delete()
+    models.Bookmark.query.filter_by(user_id=user.id).delete()
+    models.Comment.query.filter_by(user_id=user.id).delete()
+    models.UserReport.query.filter(
+        or_(
+            models.UserReport.reporter_id == user.id,
+            models.UserReport.reported_id == user.id,
+        )
+    ).delete(synchronize_session=False)
+    models.UserBlock.query.filter(
+        or_(
+            models.UserBlock.blocker_id == user.id,
+            models.UserBlock.blocked_id == user.id,
+        )
+    ).delete(synchronize_session=False)
+    models.Message.query.filter(
+        or_(
+            models.Message.sender_id == user.id,
+            models.Message.receiver_id == user.id,
+        )
+    ).delete(synchronize_session=False)
+
     extensions.db.session.delete(user)
     extensions.db.session.commit()
 
