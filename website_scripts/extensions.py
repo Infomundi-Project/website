@@ -1,3 +1,5 @@
+import os
+
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -12,6 +14,16 @@ from .config import (
     GOOGLE_CLIENT_SECRET,
 )
 from .cloudflare_util import get_user_ip
+
+
+def is_development_environment() -> bool:
+    """Check if running in development environment."""
+    flask_env = os.getenv("FLASK_ENV", "").lower()
+    flask_debug = os.getenv("FLASK_DEBUG", "").lower()
+    return flask_env == "development" or flask_debug in ("1", "true")
+
+
+IS_DEV = is_development_environment()
 
 login_manager = LoginManager()
 db = SQLAlchemy()
