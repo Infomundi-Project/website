@@ -53,6 +53,38 @@
   color: inherit !important;
 }
 
+/* Prevent blue hover effect on filter items in modals */
+.list-group-checkable .list-group-item,
+.list-group-checkable .list-group-item * {
+  color: inherit !important;
+}
+
+.list-group-checkable .list-group-item:hover,
+.list-group-checkable .list-group-item:hover * {
+  color: inherit !important;
+}
+
+/* Keep filter navbar text color unchanged on hover */
+#filterForm .nav-link,
+#filterForm .nav-link * {
+  transition: none !important;
+}
+
+/* Override the global blue hover - keep original text-primary color */
+html[data-bs-theme="light"] #filterForm .nav-link .text-primary {
+  color: var(--bs-primary) !important;
+}
+
+html[data-bs-theme="light"] #filterForm .nav-link:hover .text-primary,
+html[data-bs-theme="light"] #filterForm .nav-link:hover span.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+/* Keep non-primary text unchanged on hover */
+html[data-bs-theme="light"] #filterForm .nav-link:hover {
+  color: inherit !important;
+}
+
 
 #infomundiStoryModal .modal-header img {
   width: 100%;

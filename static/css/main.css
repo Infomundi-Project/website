@@ -213,27 +213,23 @@ button:focus,
 }
 
 /* Light mode: make text blue on hover inside list-group items */
-/* Exclude story cards and their children from blue hover effect */
-html[data-bs-theme="light"] .list-group-item:hover,
-html[data-bs-theme="light"] .list-group-item:hover *,
+/* Exclude story cards, filter modals, and their children from blue hover effect */
 html[data-bs-theme="light"] .nav-link:hover,
 html[data-bs-theme="light"] .nav-link:hover *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):hover,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):hover *,
-html[data-bs-theme="light"] button:not(.story-card-style *):hover,
-html[data-bs-theme="light"] button:not(.story-card-style *):hover *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):hover,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):hover *,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):hover,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):hover *,
 html[data-bs-theme="light"] .dropdown-item:hover,
 html[data-bs-theme="light"] .dropdown-item:hover *,
 html[data-bs-theme="light"] .btn:hover,
 html[data-bs-theme="light"] .btn:hover *,
-html[data-bs-theme="light"] .list-group-item:focus,
-html[data-bs-theme="light"] .list-group-item:focus *,
 html[data-bs-theme="light"] .nav-link:focus,
 html[data-bs-theme="light"] .nav-link:focus *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):focus,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):focus *,
-html[data-bs-theme="light"] button:not(.story-card-style *):focus,
-html[data-bs-theme="light"] button:not(.story-card-style *):focus *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):focus,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):focus *,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):focus,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):focus *,
 html[data-bs-theme="light"] .dropdown-item:focus,
 html[data-bs-theme="light"] .dropdown-item:focus *,
 html[data-bs-theme="light"] .btn:focus,
@@ -280,6 +276,24 @@ html[data-bs-theme="dark"] .sidebar .logo-text {
   stroke: #f8f9fa !important;
   text-decoration: none !important;
   box-shadow: none !important;
+}
+
+/* Override blue hover effect for filter modal list items */
+html[data-bs-theme="light"] .list-group-checkable .list-group-item,
+html[data-bs-theme="light"] .list-group-checkable .list-group-item *,
+html[data-bs-theme="light"] .list-group-checkable .list-group-item:hover,
+html[data-bs-theme="light"] .list-group-checkable .list-group-item:hover *,
+html[data-bs-theme="light"] .list-group-checkable .list-group-item:focus,
+html[data-bs-theme="light"] .list-group-checkable .list-group-item:focus * {
+  color: inherit !important;
+}
+
+/* Override blue hover effect for filter form navigation links */
+html[data-bs-theme="light"] #filterForm .nav-link:hover,
+html[data-bs-theme="light"] #filterForm .nav-link:hover *,
+html[data-bs-theme="light"] #filterForm .nav-link:focus,
+html[data-bs-theme="light"] #filterForm .nav-link:focus * {
+  color: inherit !important;
 }
 
 
