@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from sqlalchemy import insert
 
-from smtplib import SMTP
+from smtplib import SMTP, SMTPNotSupportedError
 
 from . import config, extensions, models
 from .custom_exceptions import InfomundiCustomException
@@ -156,18 +156,24 @@ def send_email(
 
     try:
         with SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
-            # Only use STARTTLS and auth if not using MailHog (local development)
-            # MailHog doesn't support STARTTLS or authentication
-            if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1"):
-                server.starttls()  # Upgrade the connection to secure TLS
-                server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
+            # Try to upgrade to TLS if the server supports it
+            try:
+                server.starttls()
+            except SMTPNotSupportedError:
+                # Server doesn't support STARTTLS, continue without encryption
+                pass
 
-            # Send the email
-            from_addr = (
-                config.SMTP_USERNAME
-                if config.SMTP_SERVER not in ("mailhog", "localhost", "127.0.0.1")
-                else from_email
-            )
+            # Authenticate if credentials are configured
+            if config.SMTP_USERNAME and config.SMTP_PASSWORD:
+                try:
+                    server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
+                    from_addr = config.SMTP_USERNAME
+                except SMTPNotSupportedError:
+                    # Server doesn't support authentication
+                    from_addr = from_email
+            else:
+                from_addr = from_email
+
             server.sendmail(from_addr, recipient_email, message.as_string())
     except Exception:
         return False

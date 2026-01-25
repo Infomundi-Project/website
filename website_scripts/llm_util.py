@@ -75,8 +75,8 @@ def gpt_summarize(title: str, main_text: str) -> dict:
         If the operation fails, returns an error message with details.
     """
 
-    # Return mock data in local development or when API key is missing
-    if is_local_environment() or not has_api_key():
+    # Return mock data when API key is missing
+    if not has_api_key():
         print("[DEV] OpenAI API bypassed: returning mock summary data")
         return {
             "addressed_topics": [
@@ -183,8 +183,8 @@ def is_inappropriate(
             'You should supply "text" or "image_url"/"image_stream" or both.'
         )
 
-    # Return safe (not flagged) in local development or when API key is missing
-    if is_local_environment() or not has_api_key():
+    # Return safe (not flagged) when API key is missing
+    if not has_api_key():
         print("[DEV] OpenAI moderation bypassed: returning safe (not flagged)")
         if simple_return:
             return False  # Not flagged
@@ -258,8 +258,8 @@ def gpt_chat_about_story(
     Returns: {"text": "<assistant reply>"}
     """
 
-    # Return mock response in local development or when API key is missing
-    if is_local_environment() or not has_api_key():
+    # Return mock response when API key is missing
+    if not has_api_key():
         print("[DEV] OpenAI chat bypassed: returning mock response")
         return {
             "text": (

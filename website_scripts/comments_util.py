@@ -23,8 +23,8 @@ def get_anonymous_user() -> object:
             is_enabled=True,
             role="official",
         )
-        extensions.db.session.commit()
         extensions.db.session.add(anonymous_user)
+        extensions.db.session.commit()
 
     return anonymous_user
 
