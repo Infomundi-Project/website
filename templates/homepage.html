@@ -99,8 +99,55 @@
     padding:.25rem .5rem; border-radius:999px; font-size:1rem;
   }
 
-  /* --- Accordion polish (dark chevron) --- */
-  .accordion-button::after{ filter:invert(1) opacity(.8); }
+  /* --- Accordion +/- icons --- */
+  .accordion-button::after {
+    background-image: none !important;
+    content: "−";
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: none;
+    transform: none !important;
+  }
+
+  .accordion-button.collapsed::after {
+    content: "+";
+  }
+
+  /* Prevent text from turning blue on hover */
+  html[data-bs-theme="light"] .accordion-button:hover,
+  html[data-bs-theme="light"] .accordion-button:focus,
+  html[data-bs-theme="light"] .accordion-button:hover *,
+  html[data-bs-theme="light"] .accordion-button:focus * {
+    color: var(--bs-body-color) !important;
+  }
+
+  /* Keep bottom border always visible with consistent thickness */
+  .accordion-button,
+  .accordion-button:not(.collapsed),
+  .accordion-button.collapsed,
+  .accordion-button:hover,
+  .accordion-button:focus {
+    border-bottom: 1px solid var(--bs-border-color) !important;
+    box-shadow: none !important;
+  }
+
+  /* Make only the +/- turn blue on hover (not focus) */
+  html[data-bs-theme="light"] .accordion-button:hover::after {
+    color: #0d6efd !important;
+  }
+
+  /* Remove focus outline to prevent blue persisting after click */
+  .accordion-button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
 
   /* Keep your existing Top Stories horizontal scroller style */
   .top-stories-container{ display:flex; gap:1rem; overflow-x:auto; scrollbar-width:none; }
