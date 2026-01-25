@@ -4,6 +4,7 @@
 
   const FEED_URL = root.dataset.feedEndpoint;
   const FLAG_BASE = '/static/img/flags/4x3/';
+  const VISIBLE_CHIPS_COUNT = 6; // Number of country chips visible by default
 
   const fmtDate = (iso) => {
     try {
@@ -68,7 +69,33 @@
     skeleton?.remove();
 
     const countries = regionData?.countries || [];
-    countries.forEach((c) => chipsWrap?.appendChild(chip(c)));
+    const hiddenCount = Math.max(0, countries.length - VISIBLE_CHIPS_COUNT);
+
+    countries.forEach((c, index) => {
+      const chipEl = chip(c);
+      if (index >= VISIBLE_CHIPS_COUNT) {
+        chipEl.classList.add('country-chip-hidden');
+      }
+      chipsWrap?.appendChild(chipEl);
+    });
+
+    // Add "Show more" button if there are hidden chips
+    if (hiddenCount > 0 && chipsWrap) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'country-chip-toggle btn btn-sm btn-ghost';
+      toggleBtn.innerHTML = `<span>+${hiddenCount}</span>`;
+      toggleBtn.title = `Ver mais ${hiddenCount} países`;
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = chipsWrap.classList.toggle('chips-expanded');
+        toggleBtn.innerHTML = isExpanded
+          ? `<span>Ver menos</span>`
+          : `<span>+${hiddenCount}</span>`;
+        toggleBtn.title = isExpanded ? 'Ver menos países' : `Ver mais ${hiddenCount} países`;
+      });
+      chipsWrap.appendChild(toggleBtn);
+    }
+
     countries.forEach((c) => (c.topStories || []).forEach((s) => grid?.appendChild(card(c, s))));
   };
 

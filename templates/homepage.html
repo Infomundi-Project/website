@@ -65,6 +65,23 @@
   .country-chip img.flag{ width:1.1rem; height:1.1rem; border-radius:2px; }
   .country-chip + .country-chip{ margin-left:.5rem; }
 
+  /* --- Collapsible chips --- */
+  .country-chip-hidden{ display:none; }
+  .chips-expanded .country-chip-hidden{ display:inline-flex; }
+  .country-chip-toggle{
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding:.35rem .6rem; border-radius:4px;
+    background:var(--bs-secondary-bg); border:2px dashed var(--bs-border-color);
+    font-size:.85rem; color:var(--bs-secondary-color);
+    cursor:pointer; margin-left:.5rem;
+    transition: all 0.2s ease;
+  }
+  .country-chip-toggle:hover{
+    background:var(--bs-tertiary-bg);
+    border-color:var(--bs-primary);
+    color:var(--bs-primary);
+  }
+
   /* --- News grid --- */
   .masonry{ column-count:1; column-gap:1rem; }
   @media (min-width:768px){ .masonry{ column-count:2; } }
