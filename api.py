@@ -1,6 +1,6 @@
 from flask import Blueprint, request, redirect, jsonify, url_for, session, abort
 from werkzeug.exceptions import BadRequest
-from sqlalchemy import and_, cast, desc, asc, func
+from sqlalchemy import and_, or_, cast, desc, asc, func
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, time, timedelta
 from requests import get as requests_get
@@ -1117,6 +1117,7 @@ def get_stories():
 
     start_date = request.args.get("start_date", "", type=str)
     end_date = request.args.get("end_date", "", type=str)
+    query_search = input_sanitization.sanitize_text(request.args.get("query", "", type=str)).strip()
 
     # 2) Resolve the Category row (e.g. "br_general")
     category = models.Category.query.filter_by(
@@ -1176,6 +1177,26 @@ def get_stories():
             )
         except ValueError:
             return jsonify({"error": "Invalid date format: must be YYYY-MM-DD."}), 400
+
+    # 9.5) Apply search filtering if query is provided
+    if query_search:
+        search_term = f"%{query_search}%"
+
+        # Search in title, description, and tags
+        tag_subquery = (
+            extensions.db.session.query(models.Tag.story_id)
+            .filter(models.Tag.tag.ilike(search_term))
+            .distinct()
+            .subquery()
+        )
+
+        query = query.filter(
+            or_(
+                models.Story.title.ilike(search_term),
+                models.Story.description.ilike(search_term),
+                models.Story.id.in_(tag_subquery),
+            )
+        )
 
     # 10) Determine the ORDER BY column
     if order_by == "views":

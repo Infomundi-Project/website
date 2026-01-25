@@ -358,17 +358,18 @@ def captcha():
 
 
 @views.route("/sensitive", methods=["GET", "POST"])
+#@extensions.limiter.limit("10/minute", override_defaults=True)
 @decorators.check_twofactor
 @login_required
 def sensitive():
     if request.method == "GET":
         return (
             abort(404)
-            if session.get("is_trusted_session", "")
+            if decorators.is_session_trusted()
             else render_template("sensitive.html")
         )
 
-    session["is_trusted_session"] = request.form.get("trust_session", "") == "yes"
+    decorators.set_session_trusted()
 
     flash("Thanks for verifying!")
     return redirect(url_for("views.edit_user_settings"))

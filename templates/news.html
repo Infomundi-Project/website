@@ -461,6 +461,25 @@
   </div>
   <form id="filterForm" class="form-inline">
     <input type="hidden" id="country" name="country" />
+    <!-- Search Bar -->
+    <div class="row justify-content-center mt-4">
+      <div class="col-lg-6 col-md-8">
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0">
+            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          </span>
+          <input
+            type="text"
+            id="query"
+            name="query"
+            class="form-control border-start-0"
+            placeholder="Search stories..."
+            autocomplete="off"
+            maxlength="100"
+          />
+        </div>
+      </div>
+    </div>
     <ul class="nav nav-fill mt-5">
       <!-- Existing nav items -->
       <li class="nav-item">

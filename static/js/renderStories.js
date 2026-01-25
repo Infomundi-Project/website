@@ -441,7 +441,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (query) {
-      url += `&query=${query}`;
+      url += `&query=${encodeURIComponent(query)}`;
     }
 
     fetch(url)
@@ -753,7 +753,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
     const startDate = document.getElementById("modalStartDate").value;
     const endDate = document.getElementById("modalEndDate").value;
-    const query = document.getElementById("query");
+    let query = document.getElementById("query");
     if (query) {
       query = query.value;
     }
