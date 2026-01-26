@@ -487,28 +487,67 @@ def _get_country_stories(code: str, cutoff_date, limit: int) -> list:
 
 def _process_region(region_name: str, country_codes: list, country_map: dict,
                     cutoff_date, max_stories: int) -> dict:
-    """Process a single region and return its countries with stories."""
-    region_data = {"countries": []}
-    region_stories_count = 0
+    """Process a single region and return its countries with stories.
 
+    Uses round-robin distribution to ensure all countries get representation
+    rather than only the first few countries getting all the stories.
+    """
+    region_data = {"countries": []}
+
+    # First, collect stories from all countries
+    countries_with_stories = []
     for code in country_codes:
-        if region_stories_count >= max_stories:
-            break
         code_upper = code.upper()
         if code_upper not in country_map:
             continue
 
-        remaining = max_stories - region_stories_count
-        stories = _get_country_stories(code, cutoff_date, min(MAX_STORIES_PER_COUNTRY, remaining))
-
+        # Fetch up to MAX_STORIES_PER_COUNTRY for each country
+        stories = _get_country_stories(code, cutoff_date, MAX_STORIES_PER_COUNTRY)
         if stories:
-            region_data["countries"].append({
+            countries_with_stories.append({
                 "code": code_upper,
                 "name": country_map[code_upper].get("name", {}).get("common", "Unknown"),
                 "cca2": code_upper,
-                "topStories": stories
+                "all_stories": stories,  # Store all fetched stories
+                "topStories": []  # Will be populated with distributed stories
             })
-            region_stories_count += len(stories)
+
+    # Distribute stories fairly across countries using round-robin
+    # First pass: Give each country 1 story
+    stories_distributed = 0
+    for country in countries_with_stories:
+        if stories_distributed >= max_stories:
+            break
+        if len(country["all_stories"]) > 0:
+            country["topStories"].append(country["all_stories"][0])
+            stories_distributed += 1
+
+    # Second pass: Round-robin additional stories until we hit max_stories
+    story_index = 1  # Start from the second story for each country
+    while stories_distributed < max_stories and story_index < MAX_STORIES_PER_COUNTRY:
+        added_any = False
+        for country in countries_with_stories:
+            if stories_distributed >= max_stories:
+                break
+            if story_index < len(country["all_stories"]):
+                country["topStories"].append(country["all_stories"][story_index])
+                stories_distributed += 1
+                added_any = True
+
+        if not added_any:
+            break
+        story_index += 1
+
+    # Clean up: remove the all_stories field and only include countries with stories
+    region_data["countries"] = [
+        {
+            "code": c["code"],
+            "name": c["name"],
+            "cca2": c["cca2"],
+            "topStories": c["topStories"]
+        }
+        for c in countries_with_stories if c["topStories"]
+    ]
 
     return region_data
 
