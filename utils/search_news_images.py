@@ -3,6 +3,7 @@ import requests
 import pymysql
 import logging
 import boto3
+import time
 from contextlib import contextmanager
 from random import shuffle, choice
 from urllib.parse import urljoin
@@ -19,6 +20,7 @@ WORKERS = 20  # FIX: Increased from 1 for actual concurrency
 DEFAULT_IMAGE = None
 MAX_PROXY_RETRIES = 10
 MAX_BAD_PROXIES_BEFORE_CLEAR = 50  # NEW: Prevent memory leak
+LOCAL_STORAGE_MAX_AGE_DAYS = 30  # Delete local files older than this many days
 
 # Load and shuffle proxies
 with open(f"{config.WEBSITE_ROOT}/assets/http-proxies.txt") as f:
@@ -84,6 +86,63 @@ def log_message(message):
     """Log message to both console and file"""
     print(f"[~] {message}")
     logging.info(message)
+
+
+def cleanup_old_local_files():
+    """
+    Delete old files from local storage to prevent unlimited growth.
+    Only runs when USE_LOCAL_STORAGE is True.
+    """
+    if not USE_LOCAL_STORAGE or not LOCAL_STORAGE_PATH:
+        return
+
+    log_message(f"Starting cleanup of files older than {LOCAL_STORAGE_MAX_AGE_DAYS} days...")
+
+    current_time = time.time()
+    max_age_seconds = LOCAL_STORAGE_MAX_AGE_DAYS * 24 * 60 * 60
+    deleted_count = 0
+    total_size_freed = 0
+
+    try:
+        # Walk through all files in local storage directory
+        for file_path in LOCAL_STORAGE_PATH.rglob("*"):
+            # Skip directories
+            if not file_path.is_file():
+                continue
+
+            try:
+                # Get file modification time
+                file_age_seconds = current_time - file_path.stat().st_mtime
+
+                # Delete if older than threshold
+                if file_age_seconds > max_age_seconds:
+                    file_size = file_path.stat().st_size
+                    file_path.unlink()
+                    deleted_count += 1
+                    total_size_freed += file_size
+                    log_message(f"Deleted old file: {file_path.relative_to(LOCAL_STORAGE_PATH)}")
+
+            except Exception as e:
+                log_message(f"Error processing file {file_path}: {e}")
+                continue
+
+        # Clean up empty directories
+        for dir_path in sorted(LOCAL_STORAGE_PATH.rglob("*"), reverse=True):
+            if dir_path.is_dir() and not any(dir_path.iterdir()):
+                try:
+                    dir_path.rmdir()
+                    log_message(f"Removed empty directory: {dir_path.relative_to(LOCAL_STORAGE_PATH)}")
+                except Exception as e:
+                    log_message(f"Error removing directory {dir_path}: {e}")
+
+        if deleted_count > 0:
+            size_mb = total_size_freed / (1024 * 1024)
+            log_message(f"Cleanup complete: deleted {deleted_count} files, freed {size_mb:.2f} MB")
+        else:
+            log_message("Cleanup complete: no old files found")
+
+    except Exception as e:
+        log_message(f"Error during cleanup: {e}")
 
 
 @contextmanager
@@ -544,6 +603,9 @@ def search_images():
     """Main function to search and process images for all categories"""
     storage_mode = "LOCAL STORAGE" if USE_LOCAL_STORAGE else "S3/R2"
     log_message(f"Starting image search using {storage_mode}")
+
+    # Clean up old local files if using local storage
+    cleanup_old_local_files()
 
     categories = fetch_categories_from_database()
 
