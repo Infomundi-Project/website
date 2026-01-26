@@ -67,6 +67,16 @@ jobs:
           sudo $DEPLOY_SCRIPT restart
           echo "Rollback completed"
 
+      - name: Purge Cloudflare cache
+        if: success()
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' \
+            --fail --silent --show-error
+          echo "Cloudflare cache purged successfully"
+
       - name: Get logs on failure
         id: logs
         if: failure()
