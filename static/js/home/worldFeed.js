@@ -136,28 +136,82 @@
   };
 
   const card = (c, s) => {
-    const a = document.createElement('a');
-    a.href = s.url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.className = 'card news-card text-decoration-none';
-    a.dataset.country = (c.code || c.cca2 || '').toUpperCase();
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card news-card';
+    wrapper.dataset.country = (c.code || c.cca2 || '').toUpperCase();
     const url = flagUrl(c);
-    a.innerHTML = `
+
+    wrapper.innerHTML = `
       <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center mb-2">
           <span class="news-country-pill">
             ${url ? `<img class="flag" src="${url}" alt="${c.name} flag">` : '🏳️'}
             <span class="fw-semibold">${c.name}</span>
           </span>
-          <span class="news-meta">${fmtDate(s.published_at)}</span>
         </div>
-        ${s.source ? `<div class="small text-body-secondary mb-1">${s.source}</div>` : ``}
-        <h6 class="card-title mb-2">${s.title}</h6>
-        ${s.summary ? `<p class="card-text text-body-secondary">${s.summary}</p>` : ``}
+        <h6 class="card-title" data-role="title">${s.title}</h6>
+        ${s.summary ? `<p class="card-text" data-role="summary">${s.summary}</p>` : ``}
+        <div class="card-actions" data-role="actions">
+          <button class="read-more-btn" data-role="read-more" style="display: none;">
+            <span data-role="read-more-text">Ver mais</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <a href="${s.url}" target="_blank" rel="noopener" class="read-full-btn" data-role="read-full" style="display: none;">
+            <span>Ler notícia completa</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+        <div class="news-meta">
+          ${s.source ? `<span class="text-body-secondary">${s.source}</span>` : ``}
+          <span class="text-body-secondary">${fmtDate(s.published_at)}</span>
+        </div>
       </div>
     `;
-    return a;
+
+    // Card click opens the news URL
+    wrapper.addEventListener('click', (e) => {
+      // Don't navigate if clicking on buttons or links inside
+      if (e.target.closest('.read-more-btn') || e.target.closest('.read-full-btn')) {
+        return;
+      }
+      window.open(s.url, '_blank', 'noopener');
+    });
+
+    // Check if content is truncated and show "Read more" button
+    requestAnimationFrame(() => {
+      const titleEl = wrapper.querySelector('[data-role="title"]');
+      const summaryEl = wrapper.querySelector('[data-role="summary"]');
+      const readMoreBtn = wrapper.querySelector('[data-role="read-more"]');
+      const readFullBtn = wrapper.querySelector('[data-role="read-full"]');
+
+      const isTruncated = () => {
+        const titleTruncated = titleEl && titleEl.scrollHeight > titleEl.clientHeight;
+        const summaryTruncated = summaryEl && summaryEl.scrollHeight > summaryEl.clientHeight;
+        return titleTruncated || summaryTruncated;
+      };
+
+      if (isTruncated()) {
+        readMoreBtn.style.display = 'inline-flex';
+
+        readMoreBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const isExpanded = wrapper.classList.toggle('expanded');
+          const text = readMoreBtn.querySelector('[data-role="read-more-text"]');
+          text.textContent = isExpanded ? 'Ver menos' : 'Ver mais';
+
+          // Show "Read full article" button when expanded
+          if (isExpanded) {
+            readFullBtn.style.display = 'inline-flex';
+          } else {
+            readFullBtn.style.display = 'none';
+          }
+        });
+      }
+    });
+
+    return wrapper;
   };
 
   const renderRegion = (regionName, regionData) => {

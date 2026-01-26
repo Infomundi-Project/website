@@ -79,35 +79,265 @@
   .country-chip-toggle span {
     color: var(--bs-secondary-color);
   }
-  .country-chip-toggle:hover,
-  .country-chip-toggle:focus,
   .country-chip-toggle.expanded {
     background: var(--bs-tertiary-bg) !important;
     border-color: var(--bs-primary) !important;
     border-style: dashed !important;
     color: var(--bs-primary) !important;
   }
-  .country-chip-toggle:hover span,
-  .country-chip-toggle:focus span,
   .country-chip-toggle.expanded span {
+    color: var(--bs-primary) !important;
+  }
+  .country-chip-toggle:hover,
+  .country-chip-toggle:focus {
+    background: var(--bs-tertiary-bg) !important;
+    border-color: var(--bs-primary) !important;
+    border-style: dashed !important;
+    color: var(--bs-primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .country-chip-toggle:hover span,
+  .country-chip-toggle:focus span {
     color: var(--bs-primary) !important;
   }
 
   /* --- News grid --- */
-  .masonry{ column-count:1; column-gap:1rem; }
-  @media (min-width:768px){ .masonry{ column-count:2; } }
-  @media (min-width:1200px){ .masonry{ column-count:3; } }
-
-  .news-card{
-    display:inline-block; width:100%; margin:0 0 1rem;
-    transition:transform .15s ease, box-shadow .15s ease;
-    min-width:260px;
+  .masonry {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  .news-card:hover{ transform:translateY(-2px); box-shadow:0 .75rem 1.5rem rgba(0,0,0,.15); }
-  .news-meta{ font-size:.9rem; opacity:.75; }
-  .news-country-pill{
-    display:inline-flex; align-items:center; gap:.35rem;
-    padding:.25rem .5rem; border-radius:999px; font-size:1rem;
+  @media (min-width: 768px) {
+    .masonry {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1200px) {
+    .masonry {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .news-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 280px;
+    max-height: 380px;
+    transition: transform .15s ease, box-shadow .15s ease, max-height .3s ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .news-card.expanded {
+    max-height: none;
+  }
+
+  .news-card .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .news-card.expanded .card-body {
+    overflow: visible;
+  }
+
+  .news-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.8rem;
+  }
+
+  .news-card.expanded .card-title {
+    display: block;
+    -webkit-line-clamp: unset;
+    min-height: auto;
+  }
+
+  .news-card .card-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--bs-secondary-color);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin-bottom: 1rem;
+  }
+
+  .news-card.expanded .card-text {
+    display: block;
+    -webkit-line-clamp: unset;
+  }
+
+  .news-card .news-meta {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--bs-border-color);
+  }
+
+  .news-card {
+    cursor: pointer;
+  }
+
+  .news-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.15);
+  }
+
+  .news-card.expanded {
+    cursor: default;
+  }
+
+  .news-card.expanded:hover {
+    transform: none;
+  }
+
+  /* Card actions container */
+  .card-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Read more button - text link style */
+  .read-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--bs-primary);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .read-more-btn:hover {
+    color: #0a58ca;
+  }
+
+  /* Underline only the text, not the icon */
+  .read-more-btn:hover [data-role="read-more-text"] {
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+  }
+
+  .read-more-btn i {
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+  }
+
+  .news-card.expanded .read-more-btn i {
+    transform: rotate(180deg);
+  }
+
+  .read-more-btn:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Dark mode adjustment */
+  html[data-bs-theme="dark"] .read-more-btn {
+    color: #6ea8fe;
+  }
+
+  html[data-bs-theme="dark"] .read-more-btn:hover {
+    color: #9ec5fe;
+  }
+
+
+  /* Card body */
+  .news-card .card-body {
+    position: relative;
+  }
+
+  /* Buttons inside card */
+  .read-more-btn {
+    cursor: pointer;
+  }
+
+  /* Read full article button */
+  .read-full-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    background: var(--bs-success);
+    color: white !important;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none !important;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .read-full-btn:hover,
+  .read-full-btn:focus,
+  .read-full-btn:active {
+    background: var(--bs-success) !important;
+    color: white !important;
+    text-decoration: none !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  .read-full-btn *,
+  .read-full-btn:hover *,
+  .read-full-btn:focus *,
+  .read-full-btn:active * {
+    color: white !important;
+    text-decoration: none !important;
+  }
+
+  .read-full-btn i {
+    font-size: 0.75rem;
+  }
+
+  .read-full-btn:focus-visible {
+    outline: 2px solid var(--bs-success);
+    outline-offset: 2px;
+  }
+
+  .news-meta {
+    font-size: .85rem;
+    opacity: .75;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .news-country-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .25rem .5rem;
+    border-radius: 999px;
+    font-size: .9rem;
   }
 
   /* --- Accordion +/- icons --- */
@@ -200,11 +430,22 @@
 
 /* Go to country button */
 .go-to-country-btn {
-  display: none;
+  display: inline-flex;
   margin-left: auto;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  pointer-events: none;
 }
 .go-to-country-btn.visible {
-  display: inline-flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 /* Sorted/All chip - same style as .country-chip-toggle */
@@ -213,6 +454,7 @@ button.country-chip.sorted-chip {
   border: 2px dashed var(--bs-border-color);
   font-size: .85rem;
   color: var(--bs-secondary-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 button.country-chip.sorted-chip i,
 button.country-chip.sorted-chip span {
@@ -224,6 +466,8 @@ button.country-chip.sorted-chip.selected {
   border-color: var(--bs-primary) !important;
   border-style: dashed !important;
   color: var(--bs-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 button.country-chip.sorted-chip:hover i,
 button.country-chip.sorted-chip:hover span,
@@ -316,7 +560,7 @@ button.country-chip.sorted-chip.selected span {
               <div class="d-flex align-items-center mb-2 gap-2">
                 <h6 class="mb-0">Countries</h6>
                 <a href="#" class="btn btn-sm btn-primary go-to-country-btn" data-role="go-to-country" data-region="{{ region }}">
-                  <i class="fa-solid fa-arrow-right me-1"></i><span>Go to country</span>
+                  <i class="fa-solid fa-arrow-right"></i><span>Go to country</span>
                 </a>
               </div>
               <div class="mb-3 d-flex flex-wrap gap-2" data-role="countries" data-region="{{ region }}"></div>
