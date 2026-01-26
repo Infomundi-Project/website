@@ -340,5 +340,54 @@ html[data-bs-theme="dark"] #clearFiltersButton:hover {
   box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
+/* Placeholder for stories without images */
+.story-image-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+html[data-bs-theme="dark"] .story-image-placeholder {
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+}
+
+.story-image-placeholder::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+  pointer-events: none;
+}
+
+.story-image-placeholder-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+  padding: 1rem;
+}
+
+.story-image-placeholder-flag {
+  width: 80px;
+  height: 60px;
+  object-fit: contain;
+  margin: 0 auto 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.story-image-placeholder-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
 
 
