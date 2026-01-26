@@ -4,6 +4,9 @@ import pymysql
 import logging
 import boto3
 import time
+import argparse
+import signal
+import sys
 from contextlib import contextmanager
 from random import shuffle, choice
 from urllib.parse import urljoin
@@ -12,11 +15,219 @@ from io import BytesIO
 from PIL import Image
 from pathlib import Path
 from os import makedirs as os_makedirs
+from dataclasses import dataclass, field
+from typing import Optional
+
+# Progress and color libraries
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+
+try:
+    from colorama import init as colorama_init, Fore, Style
+    colorama_init()
+    COLORAMA_AVAILABLE = True
+except ImportError:
+    COLORAMA_AVAILABLE = False
+    # Fallback stubs
+    class Fore:
+        GREEN = RED = YELLOW = CYAN = MAGENTA = WHITE = ""
+    class Style:
+        RESET_ALL = BRIGHT = ""
 
 from website_scripts import config, immutable, input_sanitization, hashing_util
 
+
+# =============================================================================
+# CLI Argument Parsing
+# =============================================================================
+def parse_arguments():
+    """Parse command-line arguments for configuration"""
+    parser = argparse.ArgumentParser(
+        description="Search and download images for news stories",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s                      # Run normally
+  %(prog)s --dry-run            # Preview without making changes
+  %(prog)s -v --category Tech   # Verbose mode, single category
+  %(prog)s --workers 10 -q      # 10 workers, quiet mode
+        """
+    )
+    parser.add_argument(
+        '--workers', '-w',
+        type=int,
+        default=20,
+        help='Number of concurrent workers (default: 20)'
+    )
+    parser.add_argument(
+        '--category', '-c',
+        type=str,
+        default=None,
+        help='Process only a specific category by name'
+    )
+    parser.add_argument(
+        '--dry-run', '-n',
+        action='store_true',
+        help='Preview what would happen without making changes'
+    )
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Enable verbose output (show debug messages)'
+    )
+    parser.add_argument(
+        '--quiet', '-q',
+        action='store_true',
+        help='Quiet mode (only show errors and summary)'
+    )
+    parser.add_argument(
+        '--no-color',
+        action='store_true',
+        help='Disable colored output'
+    )
+    parser.add_argument(
+        '--limit', '-l',
+        type=int,
+        default=30,
+        help='Max stories per category (default: 30)'
+    )
+    return parser.parse_args()
+
+
+# Parse args early so they're available for configuration
+args = parse_arguments()
+
+
+# =============================================================================
+# Colored Logging System
+# =============================================================================
+class Logger:
+    """Colored logging with verbosity levels"""
+
+    def __init__(self, verbose: bool = False, quiet: bool = False, no_color: bool = False):
+        self.verbose = verbose
+        self.quiet = quiet
+        self.use_color = COLORAMA_AVAILABLE and not no_color
+
+    def _color(self, color: str, text: str) -> str:
+        if self.use_color:
+            return f"{color}{text}{Style.RESET_ALL}"
+        return text
+
+    def success(self, msg: str):
+        """Green success message"""
+        if not self.quiet:
+            print(self._color(Fore.GREEN, f"[✓] {msg}"))
+        logging.info(f"[SUCCESS] {msg}")
+
+    def error(self, msg: str):
+        """Red error message - always shown"""
+        print(self._color(Fore.RED, f"[✗] {msg}"))
+        logging.error(msg)
+
+    def warning(self, msg: str):
+        """Yellow warning message"""
+        if not self.quiet:
+            print(self._color(Fore.YELLOW, f"[!] {msg}"))
+        logging.warning(msg)
+
+    def info(self, msg: str):
+        """Cyan info message"""
+        if not self.quiet:
+            print(self._color(Fore.CYAN, f"[~] {msg}"))
+        logging.info(msg)
+
+    def debug(self, msg: str):
+        """Debug message - only in verbose mode"""
+        if self.verbose:
+            print(self._color(Fore.WHITE, f"[.] {msg}"))
+        logging.debug(msg)
+
+    def progress(self, msg: str):
+        """Magenta progress message"""
+        if not self.quiet:
+            print(self._color(Fore.MAGENTA, f"[→] {msg}"))
+        logging.info(msg)
+
+    def header(self, msg: str):
+        """Bright header message"""
+        if not self.quiet:
+            if self.use_color:
+                print(f"\n{Style.BRIGHT}{Fore.CYAN}{'='*60}")
+                print(f"  {msg}")
+                print(f"{'='*60}{Style.RESET_ALL}\n")
+            else:
+                print(f"\n{'='*60}")
+                print(f"  {msg}")
+                print(f"{'='*60}\n")
+
+
+# =============================================================================
+# Statistics Tracking
+# =============================================================================
+@dataclass
+class RunStatistics:
+    """Track statistics for the current run"""
+    start_time: float = field(default_factory=time.time)
+    categories_processed: int = 0
+    categories_total: int = 0
+    stories_processed: int = 0
+    stories_updated: int = 0
+    favicons_updated: int = 0
+    downloads_failed: int = 0
+    proxy_errors: int = 0
+
+    def elapsed_time(self) -> str:
+        """Return formatted elapsed time"""
+        elapsed = time.time() - self.start_time
+        minutes, seconds = divmod(int(elapsed), 60)
+        if minutes > 0:
+            return f"{minutes}m {seconds}s"
+        return f"{seconds}s"
+
+    def success_rate(self) -> float:
+        """Calculate success rate percentage"""
+        if self.stories_processed == 0:
+            return 0.0
+        return (self.stories_updated / self.stories_processed) * 100
+
+
+# Global statistics instance
+stats = RunStatistics()
+
+
+# =============================================================================
+# Graceful Shutdown Handler
+# =============================================================================
+shutdown_requested = False
+
+def signal_handler(signum, frame):
+    """Handle interrupt signals gracefully"""
+    global shutdown_requested
+    if shutdown_requested:
+        # Second interrupt - force exit
+        print("\n\nForce exit requested. Exiting immediately...")
+        sys.exit(1)
+
+    shutdown_requested = True
+    print(f"\n\n{Fore.YELLOW if COLORAMA_AVAILABLE else ''}[!] Shutdown requested. Finishing current batch...{Style.RESET_ALL if COLORAMA_AVAILABLE else ''}")
+    print("    (Press Ctrl+C again to force exit)\n")
+
+# Register signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+
+# =============================================================================
 # Configuration
-WORKERS = 20  # FIX: Increased from 1 for actual concurrency
+# =============================================================================
+# Initialize logger with CLI args
+log = Logger(verbose=args.verbose, quiet=args.quiet, no_color=args.no_color)
+
+WORKERS = args.workers  # FIX: Increased from 1 for actual concurrency
 DEFAULT_IMAGE = None
 MAX_PROXY_RETRIES = 10
 MAX_BAD_PROXIES_BEFORE_CLEAR = 50  # NEW: Prevent memory leak
@@ -49,14 +260,17 @@ try:
         aws_secret_access_key=config.R2_SECRET,
         region_name="auto",
     )
-    print("[✓] Successfully initialized S3 client")
+    if not args.quiet:
+        print(f"{Fore.GREEN if COLORAMA_AVAILABLE else ''}[✓] S3 client initialized{Style.RESET_ALL if COLORAMA_AVAILABLE else ''}")
 except Exception as e:
-    print(f"[!] S3 client initialization failed: {e}. Falling back to local storage.")
+    if not args.quiet:
+        print(f"{Fore.YELLOW if COLORAMA_AVAILABLE else ''}[!] S3 failed: {e}. Using local storage.{Style.RESET_ALL if COLORAMA_AVAILABLE else ''}")
     USE_LOCAL_STORAGE = True
     # Create local storage directory
     LOCAL_STORAGE_PATH = Path("/app/static/local_uploads")
     LOCAL_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
-    print(f"[✓] Local storage initialized at: {LOCAL_STORAGE_PATH}")
+    if not args.quiet:
+        print(f"{Fore.GREEN if COLORAMA_AVAILABLE else ''}[✓] Local storage: {LOCAL_STORAGE_PATH}{Style.RESET_ALL if COLORAMA_AVAILABLE else ''}")
     bucket_base_url = "/static/local_uploads"  # Update base URL for local mode
 
 # Database configuration
@@ -75,17 +289,17 @@ log_dir = f"{config.WEBSITE_ROOT}/logs"
 os_makedirs(log_dir, exist_ok=True)
 
 # Setup logging - FIX: Actually use logging instead of just print
+log_level = logging.DEBUG if args.verbose else logging.INFO
 logging.basicConfig(
     filename=f"{config.WEBSITE_ROOT}/logs/search_images.log",
-    level=logging.INFO,
-    format="[%(asctime)s] %(message)s",
+    level=log_level,
+    format="[%(asctime)s] %(levelname)s: %(message)s",
 )
 
 
 def log_message(message):
-    """Log message to both console and file"""
-    print(f"[~] {message}")
-    logging.info(message)
+    """Log message to both console and file - legacy wrapper for verbose details"""
+    log.debug(message)
 
 
 def cleanup_old_local_files():
@@ -235,14 +449,14 @@ def get_working_proxy():
 
     # FIX: Clear bad proxies if list gets too large (memory leak prevention)
     if len(bad_proxies) >= MAX_BAD_PROXIES_BEFORE_CLEAR:
-        log_message(f"Clearing {len(bad_proxies)} bad proxies to prevent memory leak")
+        log.warning(f"Proxy pool exhausted ({len(bad_proxies)}/{len(proxies)}). Clearing bad list...")
         bad_proxies.clear()
 
     # FIX: O(1) set lookups instead of O(n) list filtering in loop
     working_proxies = [p for p in proxies if p not in bad_proxies]
 
     if not working_proxies:
-        log_message("No working proxies available!")
+        log.warning("No working proxies available!")
         return None
 
     return choice(working_proxies)
@@ -298,8 +512,9 @@ def get_link_preview(data, source: str = "default", category_name: str = "None")
 
         except requests.exceptions.ProxyError:
             bad_proxies_count += 1
+            stats.proxy_errors += 1
             bad_proxies.add(chosen_proxy)  # FIX: Use set.add instead of list.append
-            log_message(f"[Proxy Error] Added to badlist: {chosen_proxy}")
+            log.debug(f"Proxy error, added to badlist: {chosen_proxy}")
 
             if bad_proxies_count > 5:  # FIX: Reduced threshold
                 log_message(f"[Proxy Error] Too many bad proxies for {url}, giving up")
@@ -501,19 +716,18 @@ def update_story_image_url(stories_to_update):
     FIX: Proper tuple creation with trailing comma.
     """
     if not stories_to_update:
-        log_message("Skipping - no stories to update")
         return
 
-    log_message(f"Updating {len(stories_to_update)} story image URLs...")
+    log.debug(f"Updating {len(stories_to_update)} story image URLs...")
     try:
         with get_db_connection() as db_connection:
             with db_connection.cursor() as cursor:
                 update_query = "UPDATE stories SET has_image = 1 WHERE id = %s"
                 cursor.executemany(update_query, stories_to_update)
             db_connection.commit()
-            log_message(f"Successfully updated {len(stories_to_update)} stories")
+            log.debug(f"Updated {len(stories_to_update)} stories in DB")
     except pymysql.MySQLError as e:
-        log_message(f"Error updating story image URLs: {e}")
+        log.error(f"DB error updating stories: {e}")
 
 
 def update_publisher_favicon(favicon_updates):
@@ -540,16 +754,23 @@ def process_category(category: dict):
     Process all stories in a category to find and store images.
     FIX: Use set for favicon tracking, proper tuple creation.
     """
-    stories = fetch_stories_with_publishers(category["id"])
+    global shutdown_requested
+
+    stories = fetch_stories_with_publishers(category["id"], limit=args.limit)
     if not stories:
-        log_message(f"No stories to process for {category['name']}")
+        log.debug(f"No stories to process for {category['name']}")
+        return
+
+    # Check for shutdown before processing
+    if shutdown_requested:
+        log.warning(f"Skipping {category['name']} due to shutdown request")
         return
 
     stories_to_update = []
     favicons_to_update = []
     favicon_database = set()  # FIX: Use set instead of list for O(1) lookups
 
-    log_message(f"Starting threading with {WORKERS} workers for {category['name']}")
+    log.debug(f"Starting threading with {WORKERS} workers for {category['name']}")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
         # Submit all tasks
@@ -559,19 +780,44 @@ def process_category(category: dict):
         }
 
         total_updated = 0
+        local_failed = 0
+
+        # Create progress bar iterator
+        if TQDM_AVAILABLE and not args.quiet:
+            futures_iter = tqdm(
+                concurrent.futures.as_completed(future_to_story),
+                total=len(stories),
+                desc=f"  {category['name'][:20]:<20}",
+                unit="story",
+                leave=False,
+                ncols=80
+            )
+        else:
+            futures_iter = concurrent.futures.as_completed(future_to_story)
 
         # Process completed futures
-        for future in concurrent.futures.as_completed(future_to_story):
+        for future in futures_iter:
+            # Check for shutdown
+            if shutdown_requested:
+                log.warning("Shutdown requested, stopping current batch...")
+                executor.shutdown(wait=False, cancel_futures=True)
+                break
+
             story = future_to_story[future]
+            stats.stories_processed += 1
 
             try:
                 images_paths = future.result()
             except Exception as e:
-                log_message(f"Error processing story {story['id']}: {e}")
+                log.debug(f"Error processing story {story['id']}: {e}")
+                stats.downloads_failed += 1
+                local_failed += 1
                 continue
 
             # Validate result
-            if not isinstance(images_paths, list):
+            if not isinstance(images_paths, list) or not images_paths:
+                stats.downloads_failed += 1
+                local_failed += 1
                 continue
 
             for path in images_paths:
@@ -580,56 +826,127 @@ def process_category(category: dict):
                 if "stories" in path:
                     # FIX: Proper tuple with trailing comma
                     stories_to_update.append((story["id"],))
+                    stats.stories_updated += 1
                 else:
                     # FIX: Proper tuple creation
                     favicons_to_update.append((image_url, story["publisher"]["id"]))
                     favicon_database.add(f"{story['publisher']['id']}.ico")
+                    stats.favicons_updated += 1
 
                 total_updated += 1
 
-        # Batch update database
-        update_story_image_url(stories_to_update)
-        update_publisher_favicon(favicons_to_update)
-
-        if total_updated > 0:
-            log_message(
-                f"[{category['name']}] Downloaded {total_updated}/{len(stories)} images."
-            )
+        # Batch update database (skip in dry-run mode)
+        if not args.dry_run:
+            update_story_image_url(stories_to_update)
+            update_publisher_favicon(favicons_to_update)
         else:
-            log_message(f"[{category['name']}] No images downloaded.")
+            log.info(f"[DRY-RUN] Would update {len(stories_to_update)} stories, {len(favicons_to_update)} favicons")
+
+        # Summary for this category
+        if total_updated > 0:
+            log.success(f"{category['name']}: {total_updated} images ({local_failed} failed)")
+        else:
+            log.debug(f"{category['name']}: No images downloaded")
+
+
+def print_summary():
+    """Print final run statistics"""
+    if args.quiet:
+        # Even in quiet mode, show minimal summary
+        print(f"\nDone: {stats.stories_updated} images in {stats.elapsed_time()}")
+        return
+
+    success_rate = stats.success_rate()
+
+    # Color the success rate based on value
+    if log.use_color:
+        if success_rate >= 70:
+            rate_color = Fore.GREEN
+        elif success_rate >= 40:
+            rate_color = Fore.YELLOW
+        else:
+            rate_color = Fore.RED
+        rate_str = f"{rate_color}{success_rate:.1f}%{Style.RESET_ALL}"
+    else:
+        rate_str = f"{success_rate:.1f}%"
+
+    print(f"""
+{'='*50}
+  {'[DRY-RUN] ' if args.dry_run else ''}Run Summary
+{'='*50}
+  Categories processed:  {stats.categories_processed}/{stats.categories_total}
+  Stories processed:     {stats.stories_processed}
+  Stories updated:       {stats.stories_updated}
+  Favicons updated:      {stats.favicons_updated}
+  Failed downloads:      {stats.downloads_failed}
+  Proxy errors:          {stats.proxy_errors}
+  Success rate:          {rate_str}
+  Time elapsed:          {stats.elapsed_time()}
+{'='*50}
+""")
 
 
 def search_images():
     """Main function to search and process images for all categories"""
+    global shutdown_requested
+
     storage_mode = "LOCAL STORAGE" if USE_LOCAL_STORAGE else "S3/R2"
-    log_message(f"Starting image search using {storage_mode}")
+
+    # Show header
+    log.header(f"News Image Search {'[DRY-RUN]' if args.dry_run else ''}")
+
+    if args.dry_run:
+        log.warning("DRY-RUN MODE: No changes will be made to database or storage")
+
+    log.info(f"Storage: {storage_mode} | Workers: {WORKERS} | Limit: {args.limit}/category")
 
     # Clean up old local files if using local storage
-    cleanup_old_local_files()
+    if not args.dry_run:
+        cleanup_old_local_files()
 
     categories = fetch_categories_from_database()
 
+    # Filter by category name if specified
+    if args.category:
+        categories = [c for c in categories if c['name'].lower() == args.category.lower()]
+        if not categories:
+            log.error(f"Category '{args.category}' not found")
+            return
+
     if not categories:
-        log_message("No categories found, exiting")
+        log.error("No categories found, exiting")
         return
 
-    total = 0
-    for category in categories:
-        total += 1
-        # FIX: Correct progress calculation
-        progress_percentage = (total / len(categories)) * 100
+    stats.categories_total = len(categories)
+    log.info(f"Processing {len(categories)} categories...")
+    print()  # Blank line before progress
 
-        log_message(
-            f"\n[{round(progress_percentage, 2)}%] Searching images for {category['name']}..."
-        )
+    for i, category in enumerate(categories, 1):
+        # Check for shutdown
+        if shutdown_requested:
+            log.warning("Shutdown requested, stopping...")
+            break
+
+        stats.categories_processed = i
+
+        # Show category progress (unless using tqdm which handles this)
+        if not TQDM_AVAILABLE or args.quiet:
+            progress_pct = (i / len(categories)) * 100
+            log.progress(f"[{progress_pct:5.1f}%] {category['name']}")
 
         try:
             process_category(category)
         except Exception as e:
-            log_message(f"Error processing category {category['name']}: {e}")
+            log.error(f"Error processing {category['name']}: {e}")
             continue
 
-    log_message("[+] Finished!")
+    # Print summary
+    print_summary()
+
+    if shutdown_requested:
+        log.warning("Run was interrupted before completion")
+    else:
+        log.success("Finished!")
 
 
 if __name__ == "__main__":
