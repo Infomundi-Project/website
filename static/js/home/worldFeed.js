@@ -153,11 +153,11 @@
         ${s.summary ? `<p class="card-text" data-role="summary">${s.summary}</p>` : ``}
         <div class="card-actions" data-role="actions">
           <button class="read-more-btn" data-role="read-more" style="display: none;">
-            <span data-role="read-more-text">Ver mais</span>
+            <span data-role="read-more-text">View more</span>
             <i class="fa-solid fa-chevron-down"></i>
           </button>
           <a href="${s.url}" target="_blank" rel="noopener" class="read-full-btn" data-role="read-full" style="display: none;">
-            <span>Ler notícia completa</span>
+            <span>Read story</span>
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
           </a>
         </div>
@@ -199,7 +199,7 @@
 
           const isExpanded = wrapper.classList.toggle('expanded');
           const text = readMoreBtn.querySelector('[data-role="read-more-text"]');
-          text.textContent = isExpanded ? 'Ver menos' : 'Ver mais';
+          text.textContent = isExpanded ? 'View less' : 'View more';
 
           // Show "Read full article" button when expanded
           if (isExpanded) {
@@ -243,14 +243,14 @@
       toggleBtn.type = 'button';
       toggleBtn.className = 'country-chip-toggle btn btn-sm btn-ghost';
       toggleBtn.innerHTML = `<span>+${hiddenCount}</span>`;
-      toggleBtn.title = `Ver mais ${hiddenCount} países`;
+      toggleBtn.title = `View more ${hiddenCount} countries`;
       toggleBtn.addEventListener('click', () => {
         const isExpanded = chipsWrap.classList.toggle('chips-expanded');
         toggleBtn.classList.toggle('expanded', isExpanded);
         toggleBtn.innerHTML = isExpanded
           ? `<span>Ver menos</span>`
           : `<span>+${hiddenCount}</span>`;
-        toggleBtn.title = isExpanded ? 'Ver menos países' : `Ver mais ${hiddenCount} países`;
+        toggleBtn.title = isExpanded ? 'View less countries' : `View more ${hiddenCount} countries`;
         toggleBtn.blur(); // Remove focus to reset style when not expanded
       });
       chipsWrap.appendChild(toggleBtn);
