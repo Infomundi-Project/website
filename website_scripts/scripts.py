@@ -492,23 +492,27 @@ def _process_region(region_name: str, country_codes: list, country_map: dict,
     region_stories_count = 0
 
     for code in country_codes:
-        if region_stories_count >= max_stories:
-            break
         code_upper = code.upper()
         if code_upper not in country_map:
             continue
 
-        remaining = max_stories - region_stories_count
-        stories = _get_country_stories(code, cutoff_date, min(MAX_STORIES_PER_COUNTRY, remaining))
+        # Always add the country to the list for display as chip
+        country_entry = {
+            "code": code_upper,
+            "name": country_map[code_upper].get("name", {}).get("common", "Unknown"),
+            "cca2": code_upper,
+            "topStories": []
+        }
 
-        if stories:
-            region_data["countries"].append({
-                "code": code_upper,
-                "name": country_map[code_upper].get("name", {}).get("common", "Unknown"),
-                "cca2": code_upper,
-                "topStories": stories
-            })
-            region_stories_count += len(stories)
+        # Only fetch stories if we haven't reached the max for this region
+        if region_stories_count < max_stories:
+            remaining = max_stories - region_stories_count
+            stories = _get_country_stories(code, cutoff_date, min(MAX_STORIES_PER_COUNTRY, remaining))
+            if stories:
+                country_entry["topStories"] = stories
+                region_stories_count += len(stories)
+
+        region_data["countries"].append(country_entry)
 
     return region_data
 
