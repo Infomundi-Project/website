@@ -209,11 +209,22 @@
 
 /* Go to country button */
 .go-to-country-btn {
-  display: none;
+  display: inline-flex;
   margin-left: auto;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  pointer-events: none;
 }
 .go-to-country-btn.visible {
-  display: inline-flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 /* Sorted/All chip - same style as .country-chip-toggle */
@@ -328,7 +339,7 @@ button.country-chip.sorted-chip.selected span {
               <div class="d-flex align-items-center mb-2 gap-2">
                 <h6 class="mb-0">Countries</h6>
                 <a href="#" class="btn btn-sm btn-primary go-to-country-btn" data-role="go-to-country" data-region="{{ region }}">
-                  <i class="fa-solid fa-arrow-right me-1"></i><span>Go to country</span>
+                  <i class="fa-solid fa-arrow-right"></i><span>Go to country</span>
                 </a>
               </div>
               <div class="mb-3 d-flex flex-wrap gap-2" data-role="countries" data-region="{{ region }}"></div>
