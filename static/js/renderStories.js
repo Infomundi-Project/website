@@ -3,6 +3,33 @@ document.addEventListener("DOMContentLoaded", function () {
     keyboard: false,
   });
 
+  // Get country code from the page
+  const countryCode = document.getElementById("filterForm").dataset.countryCode;
+
+  // Function to create placeholder for stories without images
+  function createImagePlaceholder() {
+    const placeholderDiv = document.createElement("div");
+    placeholderDiv.classList.add("story-image-placeholder");
+
+    const contentDiv = document.createElement("div");
+    contentDiv.classList.add("story-image-placeholder-content");
+
+    const flagImg = document.createElement("img");
+    flagImg.src = `/static/img/flags/4x3/${countryCode}.svg`;
+    flagImg.alt = "Country flag";
+    flagImg.classList.add("story-image-placeholder-flag");
+
+    const textDiv = document.createElement("div");
+    textDiv.classList.add("story-image-placeholder-text");
+    textDiv.textContent = "Image not available";
+
+    contentDiv.appendChild(flagImg);
+    contentDiv.appendChild(textDiv);
+    placeholderDiv.appendChild(contentDiv);
+
+    return placeholderDiv;
+  }
+
   // Modal element selectors
   const modalElement = document.getElementById("infomundiStoryModal");
   const modalTitle = modalElement.querySelector(".modal-header h1");
@@ -151,6 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
   modalElement.addEventListener("hidden.bs.modal", function () {
     modalTitle.textContent = "";
     modalImage.src = "";
+    modalImage.style.display = "block";
     modalDescription.textContent = "";
     modalTagsContainer.innerHTML = ""; // Clear the tags container
     modalLikeCount.innerHTML = " 0";
@@ -165,6 +193,13 @@ document.addEventListener("DOMContentLoaded", function () {
     modalSatelliteIcon.dataset.storyId = "";
     modalSatelliteIcon.dataset.storyTitle = "";
     modalSatelliteIcon.dataset.storyDescription = "";
+
+    // Remove placeholder if exists
+    const modalHeader = modalElement.querySelector(".modal-header");
+    const existingPlaceholder = modalHeader.querySelector(".story-image-placeholder");
+    if (existingPlaceholder) {
+      existingPlaceholder.remove();
+    }
   });
 
   // Attach event listener to dynamically created story cards
@@ -187,7 +222,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Update modal content
           modalTitle.textContent = storyData.title;
-          modalImage.src = storyData.image_url;
+
+          // Handle image or placeholder in modal
+          const modalHeader = modalElement.querySelector(".modal-header");
+          const existingPlaceholder = modalHeader.querySelector(".story-image-placeholder");
+
+          if (storyData.image_url) {
+            modalImage.src = storyData.image_url;
+            modalImage.style.display = "block";
+            // Remove placeholder if it exists
+            if (existingPlaceholder) {
+              existingPlaceholder.remove();
+            }
+          } else {
+            modalImage.style.display = "none";
+            // Add placeholder if not already present
+            if (!existingPlaceholder) {
+              const placeholder = createImagePlaceholder();
+              placeholder.style.maxHeight = "650px";
+              placeholder.style.minHeight = "400px";
+              placeholder.style.borderRadius = "0.5rem 0.5rem 0 0";
+              modalHeader.insertBefore(placeholder, modalHeader.firstChild);
+            }
+          }
+
           // Set the story description and link dynamically
           modalDescription.textContent = storyData.description || "No description available.";
 
@@ -342,6 +400,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     document.getElementById("modalStartDate").value = "";
     document.getElementById("modalEndDate").value = "";
+    document.getElementById("includeNoImage").checked = false;
 
     // Reset radio buttons to default
     document.querySelector(`input[name="category"][value="general"]`).checked = true;
@@ -584,6 +643,14 @@ document.addEventListener("DOMContentLoaded", function () {
       debounceApplyFilters();
     });
   }
+
+  // Event listener for include_no_image checkbox
+  const includeNoImageCheckbox = document.getElementById("includeNoImage");
+  if (includeNoImageCheckbox) {
+    includeNoImageCheckbox.addEventListener("change", function () {
+      applyFilters();
+    });
+  }
   window.addEventListener("scroll", () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 2000 && !isLoading && hasMoreStories) {
       fetchStories(false);
@@ -614,6 +681,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const country = document.getElementById("country").value;
     const startDate = document.getElementById("modalStartDate").value;
     const endDate = document.getElementById("modalEndDate").value;
+    const includeNoImage = document.getElementById("includeNoImage").checked;
     let query = document.getElementById("query");
     if (query) {
       query = query.value;
@@ -627,6 +695,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (query) {
       url += `&query=${encodeURIComponent(query)}`;
+    }
+
+    if (includeNoImage) {
+      url += `&include_no_image=true`;
     }
 
     fetch(url)
@@ -669,23 +741,32 @@ document.addEventListener("DOMContentLoaded", function () {
     cardDiv.classList.add("card", "image-card", "inf-story-card", "border", "border-0", "story-card-style");
     cardDiv.id = `${item.story_id}`;
 
-    // Image link
-    const imageLink = document.createElement("a");
-    imageLink.href = `/comments?id=${item.story_id}`;
+    // Image or placeholder
+    if (item.image_url) {
+      const imageLink = document.createElement("a");
+      imageLink.href = `/comments?id=${item.story_id}`;
 
-    // Image tag
-    const imgTag = document.createElement("img");
-    imgTag.classList.add("card-img-top", "rounded");
-    imgTag.alt = item.title;
-    imgTag.style = "width: 100%; aspect-ratio: 16 / 9; object-fit: cover;";
-    if (index < 3) {
-      imgTag.src = item.image_url;
-      imgTag.setAttribute("fetchpriority", "high");
+      // Image tag
+      const imgTag = document.createElement("img");
+      imgTag.classList.add("card-img-top", "rounded");
+      imgTag.alt = item.title;
+      imgTag.style = "width: 100%; aspect-ratio: 16 / 9; object-fit: cover;";
+      if (index < 3) {
+        imgTag.src = item.image_url;
+        imgTag.setAttribute("fetchpriority", "high");
+      } else {
+        imgTag.setAttribute("data-src", item.image_url);
+        imgTag.classList.add("lazyload");
+      }
+      imageLink.appendChild(imgTag);
+      cardDiv.appendChild(imageLink);
     } else {
-      imgTag.setAttribute("data-src", item.image_url);
-      imgTag.classList.add("lazyload");
+      // No image available - use placeholder
+      const placeholderLink = document.createElement("a");
+      placeholderLink.href = `/comments?id=${item.story_id}`;
+      placeholderLink.appendChild(createImagePlaceholder());
+      cardDiv.appendChild(placeholderLink);
     }
-    imageLink.appendChild(imgTag);
 
     // Tip logo overlay
     const tipLogoDiv = document.createElement("div");
@@ -814,7 +895,6 @@ document.addEventListener("DOMContentLoaded", function () {
     cardFooter.appendChild(rowDiv);
 
     // Assembling the card
-    cardDiv.appendChild(imageLink);
     cardDiv.appendChild(tipLogoDiv);
     cardDiv.appendChild(cardBody);
     cardDiv.appendChild(cardFooter);
@@ -938,6 +1018,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const orderDir = document.querySelector('input[name="order_dir"]:checked').value;
     const startDate = document.getElementById("modalStartDate").value;
     const endDate = document.getElementById("modalEndDate").value;
+    const includeNoImage = document.getElementById("includeNoImage").checked;
     let query = document.getElementById("query");
     if (query) {
       query = query.value;
@@ -952,6 +1033,7 @@ document.addEventListener("DOMContentLoaded", function () {
         startDate,
         endDate,
         query,
+        includeNoImage,
       })
     );
   }
@@ -960,12 +1042,13 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadSavedFilters() {
     const savedFilters = JSON.parse(localStorage.getItem("newsFilters"));
     if (savedFilters) {
-      const { category, orderBy, orderDir, startDate, endDate, query } = savedFilters;
+      const { category, orderBy, orderDir, startDate, endDate, query, includeNoImage } = savedFilters;
       document.querySelector(`input[name="category"][value="${category}"]`).checked = true;
       document.querySelector(`input[name="order_by"][value="${orderBy}"]`).checked = true;
       document.querySelector(`input[name="order_dir"][value="${orderDir}"]`).checked = true;
       document.getElementById("modalStartDate").value = startDate;
       document.getElementById("modalEndDate").value = endDate;
+      document.getElementById("includeNoImage").checked = includeNoImage || false;
 
       queryElement = document.getElementById("query");
       if (queryElement) {

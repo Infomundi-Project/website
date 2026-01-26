@@ -22,6 +22,7 @@
       </nav>
       <!-- Hero Section -->
 
+      {% if story.image_url %}
       <figure class="figure w-100 position-relative">
         <img 
           src="{{ story.image_url }}" 
@@ -31,6 +32,7 @@
         >
         <span class="badge text-bg-secondary position-absolute top-0 start-0 m-3" data-bs-toggle="tooltip" data-bs-placement="top" title="This image is NOT affiliated with Infomundi. Used here for informational purposes only. It may also be in the public domain; please refer to the original source for any reuse. Source: {{ story.publisher.name }}, {{ story.pub_date }}"><i class="fa-solid fa-triangle-exclamation me-1"></i>Disclaimer</span>
       </figure>
+      {% endif %}
 
       <h1 class="display-5 fw-bold text-uppercase">{{ story.title }}</h1>
       <div class="mb-3 text-muted">
@@ -143,9 +145,9 @@
           <img src="{{ story.publisher.favicon_url }}" class="rounded me-3" alt="{{ story.publisher.name }} icon">
           {% endif %}
           <div>
-            <h6 class="mb-0">{{ story.publisher.name }}</h6>
+            <h6 class="mb-0 fw-bold">{{ story.publisher.name }}</h6>
         </a>
-          <small class="text-muted">One of the thousands of publishers collected and available on <a href="{{ url_for('views.about') }}" class="text-reset">Infomundi</a></small>
+          <small class="text-muted">Brought to you by <a href="{{ url_for('views.about') }}" class="text-reset">Infomundi</a></small>
         </div>
       </div>
       
@@ -275,7 +277,7 @@
   </div>
 </div>
 </div>
-        <div class="mb-4 invisible">
+        <div class="mb-4">
           <img src="https://placehold.co/300x250?text=Ad+Space" class="img-fluid rounded" alt="Ad">
         </div>
 

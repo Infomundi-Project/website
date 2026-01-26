@@ -1118,6 +1118,7 @@ def get_stories():
     start_date = request.args.get("start_date", "", type=str)
     end_date = request.args.get("end_date", "", type=str)
     query_search = input_sanitization.sanitize_text(request.args.get("query", "", type=str)).strip()
+    include_no_image = request.args.get("include_no_image", "false", type=str).lower() == "true"
 
     # 2) Resolve the Category row (e.g. "br_general")
     category = models.Category.query.filter_by(
@@ -1131,11 +1132,14 @@ def get_stories():
     if order_by not in valid_order_columns:
         order_by = "pub_date"
 
-    # 4) Build the base filters on Story (category + has_image)
+    # 4) Build the base filters on Story (category + optionally has_image)
     base_filters = [
         models.Story.category_id == category.id,
-        models.Story.has_image == True,
     ]
+
+    # Only filter by has_image if include_no_image is False
+    if not include_no_image:
+        base_filters.append(models.Story.has_image == True)
 
     # 5) If ordering by "comments", prepare a subquery that counts non-deleted comments per story
     if order_by == "comments":
