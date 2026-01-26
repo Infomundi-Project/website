@@ -146,6 +146,7 @@ The output must strictly conform to this structure and contain valid JSON. All g
         client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.chat.completions.create(
             model="gpt-5-nano",
+            reasoning_effort="minimal",
             messages=[
                 {
                     "role": "system",
@@ -309,6 +310,7 @@ def gpt_chat_about_story(
         resp = client.chat.completions.create(
             model="gpt-5-nano",
             messages=messages,
+            reasoning_effort="minimal",
             top_p=1,
             n=1,
             # We want plain text back for the chat bubble

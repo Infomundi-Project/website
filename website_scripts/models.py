@@ -331,9 +331,9 @@ class User(db.Model, UserMixin):
         self.password = hashing_util.string_to_argon2_hash(password)
         db.session.commit()
 
-    def set_email(self, email):
+    def set_email(self, email: str):
         self.email_encrypted = security_util.encrypt(email)
-        self.email_fingerprint = hashing_util.generate_hmac_signature(email)
+        self.email_fingerprint = hashing_util.generate_hmac_signature(email, as_bytes=True)
         db.session.commit()
 
     def check_password(self, password: str) -> bool:
