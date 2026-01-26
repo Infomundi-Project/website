@@ -353,6 +353,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="category"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
@@ -360,6 +364,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderByModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
@@ -367,16 +375,72 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderDirModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
-  // Date Inputs
-  document.getElementById("modalStartDate").addEventListener("change", function () {
-    applyFilters();
+  // Period Preset Buttons
+  document.querySelectorAll('.period-preset').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const period = this.dataset.period;
+      const today = new Date();
+      let startDate = null;
+      let endDate = new Date();
+
+      switch (period) {
+        case 'today':
+          startDate = new Date();
+          break;
+        case 'yesterday':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 1);
+          endDate = new Date(startDate);
+          break;
+        case '7days':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case '30days':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case 'thisMonth':
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          break;
+        case 'lastMonth':
+          startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+          break;
+        case 'thisYear':
+          startDate = new Date(today.getFullYear(), 0, 1);
+          break;
+        case 'all':
+          startDate = null;
+          endDate = null;
+          break;
+      }
+
+      // Format dates for input fields
+      const formatDate = (date) => date ? date.toISOString().split('T')[0] : '';
+      document.getElementById('modalStartDate').value = formatDate(startDate);
+      document.getElementById('modalEndDate').value = formatDate(endDate);
+
+      // Highlight selected preset
+      document.querySelectorAll('.period-preset').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      this.blur();
+    });
   });
 
-  document.getElementById("modalEndDate").addEventListener("change", function () {
+  // Apply Period Button
+  document.getElementById('applyPeriodButton').addEventListener('click', function () {
     applyFilters();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('periodModal'));
+    if (modal) modal.hide();
+    document.activeElement.blur();
   });
 
   // Debounce Function

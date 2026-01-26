@@ -60,9 +60,24 @@ html[data-bs-theme="light"] #filterForm .nav-link:hover span.text-primary {
   color: var(--bs-primary) !important;
 }
 
+/* Keep text-primary blue on focus states */
+html[data-bs-theme="light"] #filterForm .nav-link:focus .text-primary,
+html[data-bs-theme="light"] #filterForm .nav-link:focus-visible .text-primary,
+html[data-bs-theme="light"] #filterForm .nav-link:active .text-primary {
+  color: var(--bs-primary) !important;
+}
+
 /* Keep non-primary text unchanged on hover */
 html[data-bs-theme="light"] #filterForm .nav-link:hover {
   color: inherit !important;
+}
+
+/* Keep non-primary text unchanged on focus */
+html[data-bs-theme="light"] #filterForm .nav-link:focus,
+html[data-bs-theme="light"] #filterForm .nav-link:focus-visible,
+html[data-bs-theme="light"] #filterForm .nav-link:active {
+  color: inherit !important;
+  outline: none !important;
 }
 
 
@@ -182,6 +197,31 @@ html[data-bs-theme="light"] #filterForm .nav-link:hover {
 
 .list-group-checkable .list-group-item {
   cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.list-group-checkable .list-group-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--bs-primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item-check:checked + .list-group-item,
+.list-group-item-check:checked:focus + .list-group-item,
+.list-group-item-check:checked + .list-group-item:focus,
+.list-group-item-check:checked + .list-group-item:active,
+.list-group-item-check:checked + .list-group-item:focus-visible {
+  border-color: var(--bs-primary) !important;
+  box-shadow: 0 0 0 2px var(--bs-primary) !important;
+  background-color: rgba(13, 110, 253, 0.05) !important;
+  color: inherit !important;
+}
+
+/* Remove default focus outline on list items */
+.list-group-checkable .list-group-item:focus,
+.list-group-checkable .list-group-item:focus-visible,
+.list-group-checkable .list-group-item:active {
+  outline: none !important;
 }
 
 .list-group-item-check {
@@ -211,6 +251,12 @@ html[data-bs-theme="light"] #filterForm .nav-link:hover {
 .list-group-radio .list-group-item {
   cursor: pointer;
   border-radius: .5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.list-group-radio .list-group-item:hover {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 1px var(--bs-primary);
 }
 
 .list-group-radio .form-check-input {
@@ -236,6 +282,26 @@ html[data-bs-theme="light"] #filterForm .nav-link:hover {
   pointer-events: none;
   filter: none;
   opacity: .5;
+}
+
+/* Period preset buttons */
+.period-preset {
+  transition: all 0.2s ease;
+}
+
+.period-preset:hover {
+  transform: translateY(-2px);
+}
+
+.period-preset.active,
+.period-preset.active:focus,
+.period-preset.active:focus-visible,
+.period-preset.active:active {
+  background-color: var(--bs-primary) !important;
+  color: white !important;
+  border-color: var(--bs-primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 
