@@ -4,6 +4,11 @@
 
   const FEED_URL = root.dataset.feedEndpoint;
   const FLAG_BASE = '/static/img/flags/4x3/';
+  const VISIBLE_CHIPS_COUNT = 6;
+  const SORTED_CODE = 'SORTED';
+
+  // Track selected country PER REGION (independent filters)
+  const selectedByRegion = {};
 
   const fmtDate = (iso) => {
     try {
@@ -18,21 +23,115 @@
     return code ? `${FLAG_BASE}${code}.svg` : '';
   };
 
-  const chip = (c) => {
+  // Filter news cards by country within a specific region
+  const filterNewsByCountryInRegion = (region, countryCode) => {
+    const grid = root.querySelector(`[data-role="grid"][data-region="${region}"]`);
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll('.news-card');
+    const noResultsMsg = grid.querySelector('[data-role="no-results"]');
+
+    if (!countryCode || countryCode === SORTED_CODE) {
+      // Show all cards in this region
+      cards.forEach((card) => card.classList.remove('filtered-hidden'));
+      noResultsMsg?.classList.remove('visible');
+      return;
+    }
+
+    // Filter by country
+    let hasVisibleCards = false;
+    cards.forEach((card) => {
+      const cardCountry = card.dataset.country;
+      const isMatch = cardCountry === countryCode;
+      card.classList.toggle('filtered-hidden', !isMatch);
+      if (isMatch) hasVisibleCards = true;
+    });
+
+    // Show/hide "no results" message
+    noResultsMsg?.classList.toggle('visible', !hasVisibleCards);
+  };
+
+  // Update "Go to country" button for a specific region
+  const updateGoToCountryButton = (region, countryCode, countryName) => {
+    const btn = root.querySelector(`[data-role="go-to-country"][data-region="${region}"]`);
+    if (!btn) return;
+
+    if (countryCode && countryCode !== SORTED_CODE) {
+      btn.classList.add('visible');
+      btn.href = `/news?country=${countryCode.toLowerCase()}`;
+      btn.querySelector('span').textContent = `Go to ${countryName}`;
+    } else {
+      btn.classList.remove('visible');
+      btn.href = '#';
+      btn.querySelector('span').textContent = 'Go to country';
+    }
+  };
+
+  // Update chip selection UI for a specific region
+  const updateChipSelectionInRegion = (region, selectedCode) => {
+    const chipsWrap = root.querySelector(`[data-role="countries"][data-region="${region}"]`);
+    if (!chipsWrap) return;
+
+    chipsWrap.querySelectorAll('.country-chip').forEach((chip) => {
+      const chipCode = chip.dataset.country;
+      if (selectedCode === SORTED_CODE || !selectedCode) {
+        // "Sorted" is selected
+        chip.classList.toggle('selected', chipCode === SORTED_CODE);
+      } else {
+        // A country is selected
+        chip.classList.toggle('selected', chipCode === selectedCode);
+      }
+    });
+  };
+
+  // Select/deselect a country within a region
+  const toggleCountrySelection = (region, countryCode, countryName) => {
+    const currentSelection = selectedByRegion[region];
+
+    // If clicking "Sorted" or clicking the already selected country, show all
+    const shouldShowAll = countryCode === SORTED_CODE || currentSelection === countryCode;
+
+    if (shouldShowAll) {
+      // Show all (select "Sorted")
+      selectedByRegion[region] = SORTED_CODE;
+      updateChipSelectionInRegion(region, SORTED_CODE);
+      filterNewsByCountryInRegion(region, null);
+      updateGoToCountryButton(region, null, null);
+    } else {
+      // Select specific country
+      selectedByRegion[region] = countryCode;
+      updateChipSelectionInRegion(region, countryCode);
+      filterNewsByCountryInRegion(region, countryCode);
+      updateGoToCountryButton(region, countryCode, countryName);
+    }
+  };
+
+  // Create the "Sorted" chip (shows all news mixed)
+  const sortedChip = (region) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'country-chip sorted-chip btn btn-sm btn-ghost text-start selected';
+    el.dataset.country = SORTED_CODE;
+    el.innerHTML = `
+      <i class="fa-solid fa-shuffle"></i>
+      <span>Sorted</span>
+    `;
+    el.addEventListener('click', () => toggleCountrySelection(region, SORTED_CODE, 'Sorted'));
+    return el;
+  };
+
+  const chip = (c, region) => {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'country-chip btn btn-sm btn-ghost text-start';
-    el.dataset.country = c.code || c.cca2 || '';
+    const code = (c.code || c.cca2 || '').toUpperCase();
+    el.dataset.country = code;
     const url = flagUrl(c);
     el.innerHTML = `
       ${url ? `<img class="flag" src="${url}" alt="${c.name} flag">` : '🏳️'}
       <span>${c.name}</span>
     `;
-    el.addEventListener('click', () => {
-      const code = (c.code || c.cca2 || '').toUpperCase();
-      const first = root.querySelector(`.news-card[data-country="${code}"]`);
-      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    el.addEventListener('click', () => toggleCountrySelection(region, code, c.name));
     return el;
   };
 
@@ -67,27 +166,59 @@
     const skeleton = root.querySelector(`[data-role="skeleton"][data-region="${regionName}"]`);
     skeleton?.remove();
 
+    // Initialize region state to "Sorted" (show all)
+    selectedByRegion[regionName] = SORTED_CODE;
+
     const countries = regionData?.countries || [];
-    countries.forEach((c) => chipsWrap?.appendChild(chip(c)));
+    const hiddenCount = Math.max(0, countries.length - VISIBLE_CHIPS_COUNT);
+
+    // Add "Sorted" chip first (selected by default)
+    chipsWrap?.appendChild(sortedChip(regionName));
+
+    countries.forEach((c, index) => {
+      const chipEl = chip(c, regionName);
+      if (index >= VISIBLE_CHIPS_COUNT) {
+        chipEl.classList.add('country-chip-hidden');
+      }
+      chipsWrap?.appendChild(chipEl);
+    });
+
+    // Add "Show more" button if there are hidden chips
+    if (hiddenCount > 0 && chipsWrap) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'country-chip-toggle btn btn-sm btn-ghost';
+      toggleBtn.innerHTML = `<span>+${hiddenCount}</span>`;
+      toggleBtn.title = `Ver mais ${hiddenCount} países`;
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = chipsWrap.classList.toggle('chips-expanded');
+        toggleBtn.classList.toggle('expanded', isExpanded);
+        toggleBtn.innerHTML = isExpanded
+          ? `<span>Ver menos</span>`
+          : `<span>+${hiddenCount}</span>`;
+        toggleBtn.title = isExpanded ? 'Ver menos países' : `Ver mais ${hiddenCount} países`;
+        toggleBtn.blur(); // Remove focus to reset style when not expanded
+      });
+      chipsWrap.appendChild(toggleBtn);
+    }
+
     countries.forEach((c) => (c.topStories || []).forEach((s) => grid?.appendChild(card(c, s))));
   };
 
   // Open ALL accordions by default and allow multiple open at once
   const openAllAccordions = () => {
-    // Remove data-bs-parent so Bootstrap doesn't auto-close siblings
     root.querySelectorAll('.accordion-collapse').forEach((el) => {
       el.removeAttribute('data-bs-parent');
       const inst = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
       inst.show();
     });
-    // Update buttons' state (visual "expanded")
     root.querySelectorAll('.accordion-button').forEach((btn) => {
       btn.classList.remove('collapsed');
       btn.setAttribute('aria-expanded', 'true');
     });
   };
 
-  // --- Fallback demo data (now for every region) ---
+  // --- Fallback demo data ---
   const fallback = {
     regions: {
       'Europe': {

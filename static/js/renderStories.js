@@ -353,6 +353,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="category"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
@@ -360,6 +364,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="order_by"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderByModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
@@ -367,16 +375,139 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('input[name="order_dir"]').forEach(function (el) {
     el.addEventListener("change", function () {
       applyFilters();
+      // Close modal after selection
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderDirModal'));
+      if (modal) modal.hide();
+      document.activeElement.blur();
     });
   });
 
-  // Date Inputs
-  document.getElementById("modalStartDate").addEventListener("change", function () {
-    applyFilters();
+  // Helper function to format date nicely
+  function formatDateNice(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T00:00:00');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const currentYear = new Date().getFullYear();
+    // Only show year if different from current year
+    if (year !== currentYear) {
+      return `${day} ${month} ${year}`;
+    }
+    return `${day} ${month}`;
+  }
+
+  // Store selected preset name
+  let selectedPresetName = null;
+
+  // Period Preset Buttons
+  document.querySelectorAll('.period-preset').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const period = this.dataset.period;
+      const today = new Date();
+      let startDate = null;
+      let endDate = new Date();
+
+      // Store the preset name for display
+      selectedPresetName = this.textContent.trim();
+
+      switch (period) {
+        case 'today':
+          startDate = new Date();
+          break;
+        case 'yesterday':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 1);
+          endDate = new Date(startDate);
+          break;
+        case '7days':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case '30days':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case 'thisMonth':
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          break;
+        case 'lastMonth':
+          startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+          break;
+        case 'thisYear':
+          startDate = new Date(today.getFullYear(), 0, 1);
+          break;
+        case 'all':
+          startDate = null;
+          endDate = null;
+          break;
+      }
+
+      // Format dates for input fields
+      const formatDate = (date) => date ? date.toISOString().split('T')[0] : '';
+      document.getElementById('modalStartDate').value = formatDate(startDate);
+      document.getElementById('modalEndDate').value = formatDate(endDate);
+
+      // Highlight selected preset
+      document.querySelectorAll('.period-preset').forEach(b => {
+        b.classList.remove('active');
+        b.style.removeProperty('background-color');
+        b.style.removeProperty('color');
+        b.style.removeProperty('--bs-btn-hover-color');
+      });
+      this.classList.add('active');
+      this.style.setProperty('background-color', 'var(--bs-primary)', 'important');
+      this.style.setProperty('color', '#fff', 'important');
+      this.style.setProperty('--bs-btn-hover-color', '#fff', 'important');
+      this.blur();
+    });
   });
 
-  document.getElementById("modalEndDate").addEventListener("change", function () {
+  // Clear preset name when custom dates are changed
+  document.getElementById('modalStartDate').addEventListener('change', function() {
+    selectedPresetName = null;
+    document.querySelectorAll('.period-preset').forEach(b => {
+      b.classList.remove('active');
+      b.style.removeProperty('background-color');
+      b.style.removeProperty('color');
+    });
+  });
+  document.getElementById('modalEndDate').addEventListener('change', function() {
+    selectedPresetName = null;
+    document.querySelectorAll('.period-preset').forEach(b => {
+      b.classList.remove('active');
+      b.style.removeProperty('background-color');
+      b.style.removeProperty('color');
+    });
+  });
+
+  // Apply Period Button
+  document.getElementById('applyPeriodButton').addEventListener('click', function () {
+    // Update period button text
+    const startDate = document.getElementById('modalStartDate').value;
+    const endDate = document.getElementById('modalEndDate').value;
+    let periodText = 'Start Date - End Date';
+
+    if (selectedPresetName) {
+      // Use preset name if selected
+      periodText = selectedPresetName;
+    } else if (startDate && endDate) {
+      // Use formatted dates for custom selection
+      periodText = `${formatDateNice(startDate)} → ${formatDateNice(endDate)}`;
+    } else if (startDate) {
+      periodText = `From ${formatDateNice(startDate)}`;
+    } else if (endDate) {
+      periodText = `Until ${formatDateNice(endDate)}`;
+    }
+
+    document.getElementById('periodButtonText').textContent = periodText;
+
     applyFilters();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('periodModal'));
+    if (modal) modal.hide();
+    document.activeElement.blur();
   });
 
   // Debounce Function
@@ -787,10 +918,14 @@ document.addEventListener("DOMContentLoaded", function () {
         queryElement.value = query;
       }
 
-      // Update periodButtonText
+      // Update periodButtonText with nice format
       let periodText = "Start Date - End Date";
       if (startDate && endDate) {
-        periodText = `${startDate} to ${endDate}`;
+        periodText = `${formatDateNice(startDate)} → ${formatDateNice(endDate)}`;
+      } else if (startDate) {
+        periodText = `From ${formatDateNice(startDate)}`;
+      } else if (endDate) {
+        periodText = `Until ${formatDateNice(endDate)}`;
       }
       document.getElementById("periodButtonText").textContent = periodText;
     }
@@ -826,25 +961,6 @@ document.addEventListener("DOMContentLoaded", function () {
     el.addEventListener("change", function () {
       updateButtonText("order_dir", "orderDirButtonText");
     });
-  });
-
-  // Event listener for the Apply button in Period Modal
-  document.getElementById("applyPeriodButton").addEventListener("click", function () {
-    // Update the periodButton text
-    let startDate = document.getElementById("modalStartDate").value;
-    let endDate = document.getElementById("modalEndDate").value;
-    let periodText = "Start Date - End Date";
-    if (startDate && endDate) {
-      periodText = `${startDate} to ${endDate}`;
-    }
-    document.getElementById("periodButtonText").textContent = periodText;
-
-    // Close the modal
-    document.getElementById("periodModal").classList.remove("show");
-    document.querySelector(".modal-backdrop").remove();
-
-    // Apply the filters
-    applyFilters();
   });
 
   // Initial fetch to populate stories on page load
