@@ -191,13 +191,23 @@ document.addEventListener("DOMContentLoaded", function () {
           // Set the story description and link dynamically
           modalDescription.textContent = storyData.description || "No description available.";
 
-          // Update the link to the original story
+          // Update the link to the original story (external URL)
           const originalStoryLink = modalElement.querySelector("#originalStoryLink");
           if (storyData.url) {
-            originalStoryLink.href = `/comments?id=${storyData.story_id}`;
+            originalStoryLink.href = storyData.url;
+            originalStoryLink.target = "_blank";
+            originalStoryLink.rel = "noopener noreferrer";
             originalStoryLink.innerHTML = `<i class="fa-solid fa-square-arrow-up-right me-2"></i>View More`;
+            originalStoryLink.style.display = "";
           } else {
             originalStoryLink.style.display = "none"; // Hide the link if no URL is available
+          }
+
+          // Update the link to the internal story page
+          const expandStoryLink = modalElement.querySelector("#expandStoryLink");
+          if (expandStoryLink) {
+            expandStoryLink.href = `/comments?id=${storyData.story_id}`;
+            expandStoryLink.innerHTML = `<i class="fa-solid fa-expand me-2"></i>Expand`;
           }
 
           // Update tags as clickable elements
