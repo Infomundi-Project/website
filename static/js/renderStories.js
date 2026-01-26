@@ -200,13 +200,48 @@ document.addEventListener("DOMContentLoaded", function () {
             originalStoryLink.style.display = "none"; // Hide the link if no URL is available
           }
 
-          // Update tags as links
+          // Update tags as clickable elements
           modalTagsContainer.innerHTML = ""; // Clear previous tags
           if (storyData.tags && Array.isArray(storyData.tags)) {
             storyData.tags.forEach((tag) => {
               const tagLink = document.createElement("span");
               tagLink.className = "badge text-bg-primary me-1";
+              tagLink.style.cursor = "pointer";
+              tagLink.style.transition = "transform 0.2s ease, opacity 0.2s ease";
               tagLink.textContent = tag;
+
+              // Add hover effect
+              tagLink.addEventListener("mouseenter", function() {
+                this.style.transform = "scale(1.1)";
+                this.style.opacity = "0.85";
+              });
+
+              tagLink.addEventListener("mouseleave", function() {
+                this.style.transform = "scale(1)";
+                this.style.opacity = "1";
+              });
+
+              // Add click effect
+              tagLink.addEventListener("mousedown", function() {
+                this.style.transform = "scale(0.95)";
+              });
+
+              tagLink.addEventListener("mouseup", function() {
+                this.style.transform = "scale(1.1)";
+              });
+
+              tagLink.addEventListener("click", function(e) {
+                e.stopPropagation();
+                // Set the search query to the clicked tag
+                const queryInput = document.getElementById("query");
+                if (queryInput) {
+                  queryInput.value = tag;
+                  // Close the modal
+                  infomundiStoryModal.hide();
+                  // Trigger the search
+                  applyFilters();
+                }
+              });
               modalTagsContainer.appendChild(tagLink);
             });
           }
@@ -322,6 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const urlParams = new URLSearchParams(window.location.search);
   const country = urlParams.get("country");
+  const queryParam = urlParams.get("query");
 
   if (country) {
     document.getElementById("country").value = country;
@@ -333,6 +369,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load saved filters from localStorage
   loadSavedFilters();
+
+  // If query parameter exists in URL, populate the search field
+  if (queryParam) {
+    const queryInput = document.getElementById("query");
+    if (queryInput) {
+      queryInput.value = queryParam;
+    }
+  }
 
   // Function to apply filters
   function applyFilters() {

@@ -421,8 +421,8 @@ WORLD_FEED_REGION_MAP = {
 
 # World feed configuration constants
 WORLD_FEED_STORY_AGE_DAYS = 365  # Maximum age of stories to include in world feed
-MAX_STORIES_PER_REGION = 8  # Maximum number of stories to show per region
-MAX_STORIES_PER_COUNTRY = 3  # Maximum number of stories to show per country
+MAX_STORIES_PER_REGION = 32  # Maximum number of stories to show per region
+MAX_STORIES_PER_COUNTRY = 4  # Maximum number of stories to show per country
 
 
 def _load_country_json(file_path) -> dict | None:

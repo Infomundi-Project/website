@@ -319,11 +319,26 @@ html[data-bs-theme="light"] #filterForm .nav-link:active {
   transition: none !important;
   --bs-btn-active-color: #fff !important;
   --bs-btn-hover-color: #fff !important;
+}/* Clear Filters Button Animation */
+#clearFiltersButton {
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+#clearFiltersButton:hover {
+  transform: translateY(-2px) scale(1.02);
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
 
+html[data-bs-theme="dark"] #clearFiltersButton:hover {
+  color: #fff !important;
+}
 
-
+#clearFiltersButton:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
 
 
 

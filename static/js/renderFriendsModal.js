@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ${data.online_friends}&nbsp;online
           `;
         }
+
+        // Update badge counts in modal
+        const allFriendsCount = document.getElementById('allFriendsCount');
+        const onlineFriendsCountBadge = document.getElementById('onlineFriendsCount');
+        if (allFriendsCount) allFriendsCount.textContent = data.total_friends;
+        if (onlineFriendsCountBadge) onlineFriendsCountBadge.textContent = data.online_friends;
       })
       .catch(error => console.error('Error fetching friend counts:', error));
   }
@@ -23,8 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const friendsListContainer = document.getElementById('friendsListContainer');
   const paginationControlsContainer = document.getElementById('paginationControls');
   const paginationControls = paginationControlsContainer ? paginationControlsContainer.querySelector('.pagination') : null;
+  const loadingState = document.getElementById('friendsLoadingState');
+  const emptyState = document.getElementById('friendsEmptyState');
+  const searchInput = document.getElementById('friendSearchInput');
   let currentPage = 1;
   const perPage = 10;
+  let allFriendsData = [];
+  let currentFilter = 'all';
+  let searchTerm = '';
 
   function friendsTimeAgo(date) {
     const seconds = Math.floor((new Date() - date) / 1000);
@@ -62,60 +74,118 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${years}&nbsp;year${years !== 1 ? 's' : ''}&nbsp;ago`;
   }
 
+  function showLoading() {
+    if (loadingState) loadingState.classList.remove('d-none');
+    if (emptyState) emptyState.classList.add('d-none');
+    if (friendsListContainer) friendsListContainer.classList.add('d-none');
+    if (paginationControlsContainer) paginationControlsContainer.classList.add('d-none');
+  }
+
+  function hideLoading() {
+    if (loadingState) loadingState.classList.add('d-none');
+  }
+
+  function showEmptyState() {
+    if (emptyState) emptyState.classList.remove('d-none');
+    if (friendsListContainer) friendsListContainer.classList.add('d-none');
+    if (paginationControlsContainer) paginationControlsContainer.classList.add('d-none');
+  }
+
+  function showFriendsList() {
+    if (friendsListContainer) friendsListContainer.classList.remove('d-none');
+    if (emptyState) emptyState.classList.add('d-none');
+  }
+
   function fetchFriends(page) {
+    showLoading();
     fetch(`/api/user/friends?page=${page}&per_page=${perPage}`)
       .then(response => response.json())
       .then(data => {
-        displayFriends(data.friends);
+        allFriendsData = data.friends;
+        hideLoading();
+        filterAndDisplayFriends();
         updatePaginationControls(data.page, data.total_pages);
       })
-      .catch(error => console.error('Error fetching friends:', error));
+      .catch(error => {
+        console.error('Error fetching friends:', error);
+        hideLoading();
+        showEmptyState();
+      });
+  }
+
+  function filterAndDisplayFriends() {
+    let filteredFriends = allFriendsData;
+
+    // Apply online filter
+    if (currentFilter === 'online') {
+      filteredFriends = filteredFriends.filter(friend => friend.is_online);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filteredFriends = filteredFriends.filter(friend => {
+        const displayName = (friend.display_name || friend.username).toLowerCase();
+        const username = friend.username.toLowerCase();
+        const term = searchTerm.toLowerCase();
+        return displayName.includes(term) || username.includes(term);
+      });
+    }
+
+    if (filteredFriends.length === 0) {
+      showEmptyState();
+    } else {
+      showFriendsList();
+      displayFriends(filteredFriends);
+    }
   }
 
   function displayFriends(friends) {
     if (!friendsListContainer) return;
 
     friendsListContainer.innerHTML = '';
-    let row;
 
     friends.forEach((friend, index) => {
-      if (index % 2 === 0) {
-        row = document.createElement('div');
-        row.className = 'row mb-2';
-        friendsListContainer.appendChild(row);
-      }
-
-      const col = document.createElement('div');
-      col.className = 'col-6 mb-2';
-
-      // Determine online status text
+      // Determine online status
       let statusDisplay;
+      let statusClass = '';
       if (friend.is_online) {
-        statusDisplay = `<span class="dot" style="background-color: #00FF00;"></span>&nbsp;Online`;
+        statusDisplay = `<span class="online-indicator pulse"></span><span class="ms-1">Online</span>`;
+        statusClass = 'online';
       } else {
         const lastActivity = new Date(friend.last_activity);
-        statusDisplay = `Last activity: ${friendsTimeAgo(lastActivity)}`;
+        statusDisplay = `<i class="fa-solid fa-clock me-1"></i>${friendsTimeAgo(lastActivity)}`;
+        statusClass = 'offline';
       }
 
-      // Build friend entry with a Message button
-      col.innerHTML = `
-        <div class="friend-item">
-          <img src="${friend.avatar_url}" alt="${friend.display_name || friend.username}'s avatar" 
-               class="img-thumbnail rounded me-3" style="height: auto; width: 3rem">
-          <div class="flex-grow-1">
-            <h6>${friend.display_name || friend.username}
-              <span class="ms-2 text-muted small">@${friend.username}</span>
-            </h6>
-            <small>${statusDisplay}</small>
+      // Build friend card with enhanced styling
+      const friendCard = document.createElement('div');
+      friendCard.className = 'friend-card';
+      const profileUrl = `/profile/${friend.username}`;
+      friendCard.innerHTML = `
+        <div class="friend-card-inner ${statusClass}">
+          <a href="${profileUrl}" class="friend-avatar-wrapper" title="View ${friend.display_name || friend.username}'s profile">
+            <img src="${friend.avatar_url}" alt="${friend.display_name || friend.username}'s avatar"
+                 class="friend-avatar">
+            ${friend.is_online ? '<span class="avatar-status-badge"></span>' : ''}
+          </a>
+          <div class="friend-info">
+            <a href="${profileUrl}" class="friend-name-link">
+              <div class="friend-name">${friend.display_name || friend.username}</div>
+            </a>
+            <div class="friend-username text-muted">@${friend.username}</div>
+            <div class="friend-status ${friend.is_online ? 'text-success' : 'text-muted'}">${statusDisplay}</div>
           </div>
-          <button class="btn btn-sm btn-outline-primary ms-2 message-btn" 
-                  data-user-id="${friend.user_id}"
-      data-username="${friend.username}">
-            <i class="fa-solid fa-message"></i> Message
-          </button>
+          <div class="friend-actions">
+            <button class="btn btn-sm btn-primary message-btn"
+                    data-user-id="${friend.user_id}"
+                    data-username="${friend.username}"
+                    title="Send message">
+              <i class="fa-solid fa-message"></i>
+            </button>
+          </div>
         </div>
       `;
-      row.appendChild(col);
+      friendsListContainer.appendChild(friendCard);
     });
   }
 
@@ -164,10 +234,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  friendsListContainer.addEventListener('click', (e) => {
-  const btn = e.target.closest('.message-btn');
-  if (!btn) return;
-  openChat(btn.dataset.userId, btn.dataset.username);
-});
+  // Search functionality with debounce
+  let searchTimeout;
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchTerm = e.target.value;
+        filterAndDisplayFriends();
+      }, 300);
+    });
+  }
+
+  // Filter tabs functionality
+  const filterTabs = document.querySelectorAll('#friendsFilterTabs button');
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentFilter = tab.getAttribute('data-filter');
+      filterAndDisplayFriends();
+    });
+  });
+
+  // Message button click handler
+  if (friendsListContainer) {
+    friendsListContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.message-btn');
+      if (!btn) return;
+      openChat(btn.dataset.userId, btn.dataset.username);
+    });
+  }
 
 });
