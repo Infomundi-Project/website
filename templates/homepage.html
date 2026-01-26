@@ -79,17 +79,26 @@
   .country-chip-toggle span {
     color: var(--bs-secondary-color);
   }
-  .country-chip-toggle:hover,
-  .country-chip-toggle:focus,
   .country-chip-toggle.expanded {
     background: var(--bs-tertiary-bg) !important;
     border-color: var(--bs-primary) !important;
     border-style: dashed !important;
     color: var(--bs-primary) !important;
   }
-  .country-chip-toggle:hover span,
-  .country-chip-toggle:focus span,
   .country-chip-toggle.expanded span {
+    color: var(--bs-primary) !important;
+  }
+  .country-chip-toggle:hover,
+  .country-chip-toggle:focus {
+    background: var(--bs-tertiary-bg) !important;
+    border-color: var(--bs-primary) !important;
+    border-style: dashed !important;
+    color: var(--bs-primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .country-chip-toggle:hover span,
+  .country-chip-toggle:focus span {
     color: var(--bs-primary) !important;
   }
 
@@ -213,6 +222,7 @@ button.country-chip.sorted-chip {
   border: 2px dashed var(--bs-border-color);
   font-size: .85rem;
   color: var(--bs-secondary-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 button.country-chip.sorted-chip i,
 button.country-chip.sorted-chip span {
@@ -224,6 +234,8 @@ button.country-chip.sorted-chip.selected {
   border-color: var(--bs-primary) !important;
   border-style: dashed !important;
   color: var(--bs-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 button.country-chip.sorted-chip:hover i,
 button.country-chip.sorted-chip:hover span,
