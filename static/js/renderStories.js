@@ -357,6 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const urlParams = new URLSearchParams(window.location.search);
   const country = urlParams.get("country");
+  const queryParam = urlParams.get("query");
 
   if (country) {
     document.getElementById("country").value = country;
@@ -368,6 +369,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load saved filters from localStorage
   loadSavedFilters();
+
+  // If query parameter exists in URL, populate the search field
+  if (queryParam) {
+    const queryInput = document.getElementById("query");
+    if (queryInput) {
+      queryInput.value = queryParam;
+    }
+  }
 
   // Function to apply filters
   function applyFilters() {

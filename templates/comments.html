@@ -190,7 +190,7 @@
           <div class="mb-4">
             <h5><i class="fa-solid fa-tags me-2"></i>Tags</h5>
               {% for tag in story.tags %}
-                <span class="badge bg-secondary me-2">{{ tag.tag }}</span>
+                <span class="badge bg-secondary me-2 story-tag" data-tag="{{ tag.tag }}" style="cursor: pointer; transition: transform 0.2s ease, opacity 0.2s ease;">{{ tag.tag }}</span>
               {% endfor %}
           </div>
         {% endif %}
@@ -382,7 +382,43 @@
   })();
 </script>
 
+<script nonce="{{ nonce }}">
+  // Make tags clickable with animations
+  document.addEventListener('DOMContentLoaded', function() {
+    const tags = document.querySelectorAll('.story-tag');
+    const countryCode = '{{ from_country_code }}';
 
+    tags.forEach(function(tag) {
+      // Add hover effect
+      tag.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1)';
+        this.style.opacity = '0.85';
+      });
 
+      tag.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+        this.style.opacity = '1';
+      });
+
+      // Add click effect
+      tag.addEventListener('mousedown', function() {
+        this.style.transform = 'scale(0.95)';
+      });
+
+      tag.addEventListener('mouseup', function() {
+        this.style.transform = 'scale(1.1)';
+      });
+
+      // Add click handler
+      tag.addEventListener('click', function() {
+        const tagText = this.dataset.tag;
+
+        // Build URL to news page with tag as search query
+        const newsUrl = `/news?country=${encodeURIComponent(countryCode)}&query=${encodeURIComponent(tagText)}`;
+        window.location.href = newsUrl;
+      });
+    });
+  });
+</script>
 
 {% endblock %}
