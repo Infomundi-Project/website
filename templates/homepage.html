@@ -76,10 +76,21 @@
     cursor:pointer; margin-left:.5rem;
     transition: all 0.2s ease;
   }
-  .country-chip-toggle:hover{
-    background:var(--bs-tertiary-bg);
-    border-color:var(--bs-primary);
-    color:var(--bs-primary);
+  .country-chip-toggle span {
+    color: var(--bs-secondary-color);
+  }
+  .country-chip-toggle:hover,
+  .country-chip-toggle:focus,
+  .country-chip-toggle.expanded {
+    background: var(--bs-tertiary-bg) !important;
+    border-color: var(--bs-primary) !important;
+    border-style: dashed !important;
+    color: var(--bs-primary) !important;
+  }
+  .country-chip-toggle:hover span,
+  .country-chip-toggle:focus span,
+  .country-chip-toggle.expanded span {
+    color: var(--bs-primary) !important;
   }
 
   /* --- News grid --- */
@@ -170,6 +181,73 @@
   margin-right: .35rem;
 }
 
+/* Selected country chip state - only blue border, white background */
+.country-chip.selected:not(.sorted-chip) {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-primary);
+  border-style: solid;
+  color: var(--bs-body-color);
+}
+.country-chip.selected:not(.sorted-chip) span {
+  color: var(--bs-body-color);
+}
+.country-chip.selected:not(.sorted-chip):hover {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Go to country button */
+.go-to-country-btn {
+  display: none;
+  margin-left: auto;
+}
+.go-to-country-btn.visible {
+  display: inline-flex;
+}
+
+/* Sorted/All chip - same style as .country-chip-toggle */
+button.country-chip.sorted-chip {
+  background: var(--bs-secondary-bg);
+  border: 2px dashed var(--bs-border-color);
+  font-size: .85rem;
+  color: var(--bs-secondary-color);
+}
+button.country-chip.sorted-chip i,
+button.country-chip.sorted-chip span {
+  color: var(--bs-secondary-color);
+}
+button.country-chip.sorted-chip:hover,
+button.country-chip.sorted-chip.selected {
+  background: var(--bs-tertiary-bg) !important;
+  border-color: var(--bs-primary) !important;
+  border-style: dashed !important;
+  color: var(--bs-primary) !important;
+}
+button.country-chip.sorted-chip:hover i,
+button.country-chip.sorted-chip:hover span,
+button.country-chip.sorted-chip.selected i,
+button.country-chip.sorted-chip.selected span {
+  color: var(--bs-primary) !important;
+}
+
+/* Hide news cards when filtered */
+.news-card.filtered-hidden {
+  display: none !important;
+}
+
+/* No results message */
+.no-filtered-results {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+  color: var(--bs-secondary-color);
+}
+.no-filtered-results.visible {
+  display: block;
+}
+
 </style>
 {% endblock %}
 
@@ -211,7 +289,7 @@
   </div>
 
   <!-- Regions accordion (Latin America, North America, Europe...) -->
-  <div class="row">
+  <div class="row" id="worldFeedRow">
     <div class="col-12">
       <div id="worldFeedAccordion" class="accordion"
            data-feed-endpoint="{{ url_for('api.world_feed') }}">
@@ -235,12 +313,22 @@
                aria-labelledby="{{ rid }}Header" data-bs-parent="#worldFeedAccordion">
             <div class="accordion-body">
               <!-- Countries row (chips) -->
-              <h6 class="mb-2">Countries</h6>
+              <div class="d-flex align-items-center mb-2 gap-2">
+                <h6 class="mb-0">Countries</h6>
+                <a href="#" class="btn btn-sm btn-primary go-to-country-btn" data-role="go-to-country" data-region="{{ region }}">
+                  <i class="fa-solid fa-arrow-right me-1"></i><span>Go to country</span>
+                </a>
+              </div>
               <div class="mb-3 d-flex flex-wrap gap-2" data-role="countries" data-region="{{ region }}"></div>
 
               <!-- Latest news grid -->
               <h6 class="mb-2">Latest News</h6>
-              <div class="masonry" data-role="grid" data-region="{{ region }}"></div>
+              <div class="masonry" data-role="grid" data-region="{{ region }}">
+                <div class="no-filtered-results" data-role="no-results" data-region="{{ region }}">
+                  <i class="fa-solid fa-filter-circle-xmark fa-2x mb-2"></i>
+                  <p class="mb-0">No news found for this country in this region.</p>
+                </div>
+              </div>
 
               <!-- Skeleton (removed when loaded) -->
               <div class="text-center py-4" data-role="skeleton" data-region="{{ region }}">
