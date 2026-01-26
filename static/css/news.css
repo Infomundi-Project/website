@@ -286,22 +286,39 @@ html[data-bs-theme="light"] #filterForm .nav-link:active {
 
 /* Period preset buttons */
 .period-preset {
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .period-preset:hover {
   transform: translateY(-2px);
+  color: #fff !important;
+  --bs-btn-hover-color: #fff !important;
+  --bs-btn-active-color: #fff !important;
+}
+
+.btn.period-preset:hover,
+.btn-outline-primary.period-preset:hover {
+  color: #fff !important;
 }
 
 .period-preset.active,
+.period-preset.active:hover,
 .period-preset.active:focus,
 .period-preset.active:focus-visible,
-.period-preset.active:active {
+.period-preset.active:active,
+.btn-outline-primary.period-preset.active,
+.btn-outline-primary.period-preset.active:hover,
+.btn-outline-primary.period-preset.active:focus,
+.btn-outline-primary.period-preset.active:active {
   background-color: var(--bs-primary) !important;
-  color: white !important;
+  color: #fff !important;
   border-color: var(--bs-primary) !important;
   box-shadow: none !important;
   outline: none !important;
+  transform: none !important;
+  transition: none !important;
+  --bs-btn-active-color: #fff !important;
+  --bs-btn-hover-color: #fff !important;
 }
 
 
