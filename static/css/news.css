@@ -340,5 +340,18 @@ html[data-bs-theme="dark"] #clearFiltersButton:hover {
   box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
+/* Story Action Buttons (View More / Expand) */
+.story-action-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
 
+.story-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.story-action-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+}
 

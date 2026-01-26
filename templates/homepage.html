@@ -492,6 +492,258 @@ button.country-chip.sorted-chip.selected span {
   display: block;
 }
 
+/* --- Region Market Ticker --- */
+.region-ticker-content {
+  background: var(--bs-dark);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.region-ticker-content .hwrap-region {
+  overflow: hidden;
+  display: flex;
+  position: relative;
+}
+
+.region-ticker-content .hmove-region {
+  display: flex;
+  flex-shrink: 0;
+  animation: scroll-ticker 40s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.region-ticker-content .hmove-region.paused {
+  animation-play-state: paused;
+}
+
+.region-ticker-content .hmove-region:hover {
+  animation-play-state: paused;
+}
+
+.region-ticker-content .ticker-set {
+  display: flex;
+  flex-shrink: 0;
+}
+
+@keyframes scroll-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Country card in ticker */
+.region-ticker-content .hitem-card {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 0.6rem 0.8rem;
+  margin: 0.3rem 0.3rem;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.region-ticker-content .hitem-card:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* Card header - flag + country name */
+.region-ticker-content .hitem-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.region-ticker-content .hitem-header img.flag {
+  width: 1.3rem;
+  height: auto;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.region-ticker-content .hitem-header .country-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Data rows */
+.region-ticker-content .hitem-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.region-ticker-content .hitem-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.region-ticker-content .data-icon {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.region-ticker-content .data-values {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.region-ticker-content .data-sep {
+  color: rgba(255,255,255,0.3);
+}
+
+/* Data badges */
+.region-ticker-content .data-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.region-ticker-content .data-badge.text-success {
+  background: rgba(25, 135, 84, 0.25);
+  color: #4ade80;
+}
+
+.region-ticker-content .data-badge.text-danger {
+  background: rgba(220, 53, 69, 0.25);
+  color: #f87171;
+}
+
+.region-ticker-content .data-badge .badge-name {
+  font-weight: 600;
+}
+
+.region-ticker-content .data-badge .badge-value {
+  font-weight: 500;
+}
+
+.region-ticker-content .rate-text {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.7rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.region-ticker-content .ticker-empty {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.85rem;
+}
+
+/* Ticker speed controls */
+.ticker-speed-controls {
+  background: var(--bs-tertiary-bg);
+  border-radius: 6px;
+  padding: 0.2rem;
+}
+
+.ticker-speed-controls .ticker-speed-btn {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  transition: all 0.15s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.ticker-speed-controls .ticker-speed-btn:hover {
+  background: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
+  transform: scale(1.15);
+}
+
+.ticker-speed-controls .ticker-speed-btn:active {
+  transform: scale(0.9);
+}
+
+.ticker-speed-controls .ticker-pause-btn.active {
+  background: var(--bs-warning);
+  color: var(--bs-dark);
+}
+
+.ticker-speed-controls .ticker-pause-btn.active i::before {
+  content: "\f04b"; /* play icon */
+}
+
+/* Speed display */
+.ticker-speed-controls .ticker-speed-display {
+  min-width: 2.2rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Speed label tooltip - above button */
+.ticker-speed-controls .ticker-speed-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: var(--bs-dark);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.15s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Tooltip arrow */
+.ticker-speed-controls .ticker-speed-btn::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 0.1rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  border: 5px solid transparent;
+  border-top-color: var(--bs-dark);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.15s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.ticker-speed-controls .ticker-speed-btn:hover::after,
+.ticker-speed-controls .ticker-speed-btn:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 </style>
 {% endblock %}
 
@@ -556,6 +808,34 @@ button.country-chip.sorted-chip.selected span {
           <div id="{{ rid }}Collapse" class="accordion-collapse collapse {% if region=='Europe' %}show{% endif %}"
                aria-labelledby="{{ rid }}Header" data-bs-parent="#worldFeedAccordion">
             <div class="accordion-body">
+              <!-- Region Market Ticker -->
+              <div class="mb-3" data-role="region-ticker" data-region="{{ region }}">
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                  <h6 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>Market Tracker</h6>
+                  <div class="ticker-speed-controls d-flex align-items-center gap-1">
+                    <button type="button" class="ticker-speed-btn" data-action="slower" data-region="{{ region }}" data-label="Slower">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="ticker-speed-display" data-region="{{ region }}">1x</span>
+                    <button type="button" class="ticker-speed-btn" data-action="faster" data-region="{{ region }}" data-label="Faster">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button type="button" class="ticker-speed-btn ticker-pause-btn" data-action="pause" data-region="{{ region }}" data-label="Pause">
+                      <i class="fa-solid fa-pause"></i>
+                    </button>
+                    <button type="button" class="ticker-speed-btn" data-action="reset" data-region="{{ region }}" data-label="Reset">
+                      <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="region-ticker-content" data-role="ticker-content" data-region="{{ region }}">
+                  <div class="text-center py-2">
+                    <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                    <span class="ms-2 small text-body-secondary">Loading market data...</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- Countries row (chips) -->
               <div class="d-flex align-items-center mb-2 gap-2">
                 <h6 class="mb-0">Countries</h6>
@@ -588,36 +868,6 @@ button.country-chip.sorted-chip.selected span {
     </div>
   </div>
 
-  <!-- (Optional) Your original Top News row can stay if you still want a global horizontal scroller
-  <div class="row mb-3">
-    ...
-  </div>
-  -->
-
-  <!-- Trackers (unchanged) -->
-  <div class="row mb-4">
-    <div class="col-12 px-1">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="fa-solid fa-chart-gantt text-danger me-2"></i>Trackers - <span id="marketDate"></span></h5>
-        </div>
-        <div class="card-body">
-          <div>
-            <h6><i class="fa-solid fa-arrow-trend-up me-2"></i>Country Indexes</h6>
-            <div id="stocks-ticker"></div>
-          </div>
-          <div class="my-4">
-            <h6><i class="fa-solid fa-money-bill-trend-up me-2"></i>Currencies</h6>
-            <div id="currencies-ticker"></div>
-          </div>
-          <div>
-            <h6><i class="fa-brands fa-bitcoin me-2"></i>Crypto</h6>
-            <div id="crypto-ticker"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </div>
 {% endblock %}
@@ -625,7 +875,6 @@ button.country-chip.sorted-chip.selected span {
 {% block scripts %}
   <!-- amCharts + your existing bundles -->
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/libs/amcharts/index.js') }}"></script>
-  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/fetchHomeTicker.js') }}"></script>
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchHomeDashboard.js') }}"></script>
   {% assets "js_home" %}
   <script defer nonce="{{ nonce }}" type="text/javascript" src="{{ ASSET_URL }}"></script>
@@ -633,4 +882,6 @@ button.country-chip.sorted-chip.selected span {
 
   <!-- World feed population -->
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/worldFeed.js') }}"></script>
+  <!-- Region market tickers -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchRegionTickers.js') }}"></script>
 {% endblock %}
