@@ -213,27 +213,27 @@ button:focus,
 }
 
 /* Light mode: make text blue on hover inside list-group items */
-/* Exclude story cards, filter modals, logo, and their children from blue hover effect */
+/* Exclude story cards, news cards, filter modals, logo, and their children from blue hover effect */
 html[data-bs-theme="light"] .nav-link:not(.navbar-brand):hover,
 html[data-bs-theme="light"] .nav-link:not(.navbar-brand):hover *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover *:not(.logo-text),
-html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):hover,
-html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):hover *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.news-card *):not(.read-full-btn):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.news-card *):not(.read-full-btn):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):hover *:not(.logo-text),
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.news-card *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):not(.read-more-btn):hover,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.news-card *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):not(.read-more-btn):hover *,
 html[data-bs-theme="light"] .dropdown-item:hover,
 html[data-bs-theme="light"] .dropdown-item:hover *,
-html[data-bs-theme="light"] .btn:not(.country-chip):hover,
-html[data-bs-theme="light"] .btn:not(.country-chip):hover *,
+html[data-bs-theme="light"] .btn:not(.country-chip):not(.read-more-btn):not(.read-full-btn):hover,
+html[data-bs-theme="light"] .btn:not(.country-chip):not(.read-more-btn):not(.read-full-btn):hover *,
 html[data-bs-theme="light"] .nav-link:not(.navbar-brand):focus,
 html[data-bs-theme="light"] .nav-link:not(.navbar-brand):focus *,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus,
-html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus *:not(.logo-text),
-html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):focus,
-html[data-bs-theme="light"] button:not(.story-card-style *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):focus *,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.news-card *):not(.read-full-btn):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus,
+html[data-bs-theme="light"] a:not(.story-card-style):not(.story-card-style *):not(.news-card *):not(.read-full-btn):not(.list-group-checkable .list-group-item):not(.list-group-checkable .list-group-item *):not(.navbar-brand):not(:has(.logo-text)):focus *:not(.logo-text),
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.news-card *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):not(.read-more-btn):focus,
+html[data-bs-theme="light"] button:not(.story-card-style *):not(.news-card *):not(.list-group-checkable .list-group-item *):not(.country-chip):not(.accordion-button):not(.read-more-btn):focus *,
 html[data-bs-theme="light"] .dropdown-item:focus,
 html[data-bs-theme="light"] .dropdown-item:focus *,
-html[data-bs-theme="light"] .btn:not(.country-chip):focus,
-html[data-bs-theme="light"] .btn:not(.country-chip):focus * {
+html[data-bs-theme="light"] .btn:not(.country-chip):not(.read-more-btn):not(.read-full-btn):focus,
+html[data-bs-theme="light"] .btn:not(.country-chip):not(.read-more-btn):not(.read-full-btn):focus * {
   color: #0d6efd !important; /* Bootstrap blue */
 }
 
@@ -377,6 +377,116 @@ footer .nav-link:focus {
 
 footer .nav-link::after {
   display: none;
+}
+
+/* === News Cards Global Styles === */
+.news-card {
+  text-decoration: none;
+  display: block;
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  position: relative;
+  cursor: pointer;
+}
+
+.news-card .card-body {
+  padding: 1.25rem;
+}
+
+/* Prevent blue color on green button */
+.read-full-btn,
+.read-full-btn *,
+.read-full-btn:hover,
+.read-full-btn:hover *,
+.read-full-btn:focus,
+.read-full-btn:focus *,
+.read-full-btn:active,
+.read-full-btn:active * {
+  color: white !important;
+  text-decoration: none !important;
+}
+
+html[data-bs-theme="light"] .read-full-btn,
+html[data-bs-theme="light"] .read-full-btn *,
+html[data-bs-theme="light"] .read-full-btn:hover,
+html[data-bs-theme="light"] .read-full-btn:hover *,
+html[data-bs-theme="light"] .read-full-btn:focus,
+html[data-bs-theme="light"] .read-full-btn:focus *,
+html[data-bs-theme="light"] .read-full-btn:active,
+html[data-bs-theme="light"] .read-full-btn:active * {
+  color: white !important;
+  text-decoration: none !important;
+  background-color: var(--bs-success) !important;
+}
+
+html[data-bs-theme="dark"] .read-full-btn,
+html[data-bs-theme="dark"] .read-full-btn *,
+html[data-bs-theme="dark"] .read-full-btn:hover,
+html[data-bs-theme="dark"] .read-full-btn:hover *,
+html[data-bs-theme="dark"] .read-full-btn:focus,
+html[data-bs-theme="dark"] .read-full-btn:focus *,
+html[data-bs-theme="dark"] .read-full-btn:active,
+html[data-bs-theme="dark"] .read-full-btn:active * {
+  color: white !important;
+  text-decoration: none !important;
+  background-color: var(--bs-success) !important;
+}
+
+/* Smooth transitions for cards */
+.news-card,
+.country-chip,
+.country-chip-toggle {
+  will-change: transform;
+}
+
+/* Improve text readability */
+.card-text {
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure consistent spacing in grids */
+.masonry .news-card {
+  margin-bottom: 0;
+}
+
+/* Accessibility improvements */
+.news-card:focus-visible,
+.country-chip:focus-visible,
+.country-chip-toggle:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+
+/* Read more link - allow default link behavior */
+.read-more-btn,
+.read-more-btn * {
+  background: transparent !important;
+}
+
+/* Ensure underline only on text, not on icon */
+.read-more-btn i {
+  text-decoration: none !important;
+}
+
+/* Loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    var(--bs-secondary-bg) 25%,
+    var(--bs-tertiary-bg) 50%,
+    var(--bs-secondary-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 
