@@ -11,8 +11,11 @@
           <li class="breadcrumb-item">
             <a href="{{ url_for('views.home') }}">Home</a>
           </li>
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('views.cluster') }}">Global Clusters</a>
+          </li>
           <li class="breadcrumb-item active" aria-current="page">
-            Global Coverage
+            Coverage Details
           </li>
         </ol>
       </nav>
@@ -133,8 +136,11 @@
 
       <!-- Back Navigation -->
       <div class="mt-4">
-        <a href="{{ url_for('views.home') }}" class="btn btn-outline-primary">
-          <i class="fa-solid fa-arrow-left me-2"></i>Back to Home
+        <a href="{{ url_for('views.cluster') }}" class="btn btn-outline-primary me-2">
+          <i class="fa-solid fa-arrow-left me-2"></i>Back to Clusters
+        </a>
+        <a href="{{ url_for('views.home') }}" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-home me-2"></i>Home
         </a>
       </div>
     </div>

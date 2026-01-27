@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Global News Clusters{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('views.home') }}">Home</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Global Clusters
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Page Header -->
+      <div class="mb-4">
+        <h1 class="display-5">
+          <i class="fa-solid fa-globe me-2"></i>
+          Global News Clusters
+        </h1>
+        <p class="lead text-muted">
+          Explore how major news stories are being covered across different countries and sources worldwide.
+        </p>
+      </div>
+
+      <!-- Filters and Sorting -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('views.cluster') }}" class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label for="sort" class="form-label small">
+                <i class="fa-solid fa-arrow-down-short-wide me-1"></i>Sort By
+              </label>
+              <select name="sort" id="sort" class="form-select form-select-sm">
+                <option value="recent" {% if sort_by == 'recent' %}selected{% endif %}>Most Recent</option>
+                <option value="stories" {% if sort_by == 'stories' %}selected{% endif %}>Most Stories</option>
+                <option value="countries" {% if sort_by == 'countries' %}selected{% endif %}>Most Countries</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="min_stories" class="form-label small">
+                <i class="fa-solid fa-newspaper me-1"></i>Min Stories
+              </label>
+              <select name="min_stories" id="min_stories" class="form-select form-select-sm">
+                <option value="1" {% if min_stories == 1 %}selected{% endif %}>Any</option>
+                <option value="3" {% if min_stories == 3 %}selected{% endif %}>3+</option>
+                <option value="5" {% if min_stories == 5 %}selected{% endif %}>5+</option>
+                <option value="10" {% if min_stories == 10 %}selected{% endif %}>10+</option>
+                <option value="20" {% if min_stories == 20 %}selected{% endif %}>20+</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="min_countries" class="form-label small">
+                <i class="fa-solid fa-earth-americas me-1"></i>Min Countries
+              </label>
+              <select name="min_countries" id="min_countries" class="form-select form-select-sm">
+                <option value="1" {% if min_countries == 1 %}selected{% endif %}>Any</option>
+                <option value="2" {% if min_countries == 2 %}selected{% endif %}>2+</option>
+                <option value="3" {% if min_countries == 3 %}selected{% endif %}>3+</option>
+                <option value="5" {% if min_countries == 5 %}selected{% endif %}>5+</option>
+                <option value="10" {% if min_countries == 10 %}selected{% endif %}>10+</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="fa-solid fa-filter me-2"></i>Apply Filters
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Clusters Count -->
+      {% if clusters %}
+      <div class="alert alert-info mb-4">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        Showing <strong>{{ clusters|length }}</strong> active news clusters
+      </div>
+
+      <!-- Clusters List -->
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for cluster in clusters %}
+        <div class="col">
+          <div class="card h-100 shadow-sm hover-shadow">
+            <div class="card-body">
+              <!-- Dominant Tags -->
+              <div class="mb-2">
+                {% if cluster.dominant_tags %}
+                  {% for tag in cluster.dominant_tags[:3] %}
+                    <span class="badge bg-primary me-1">{{ tag }}</span>
+                  {% endfor %}
+                  {% if cluster.dominant_tags|length > 3 %}
+                    <span class="badge bg-secondary">+{{ cluster.dominant_tags|length - 3 }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge bg-secondary">General News</span>
+                {% endif %}
+              </div>
+
+              <!-- Representative Story Title -->
+              <h5 class="card-title mb-3">
+                {% if cluster.representative_story %}
+                  {{ cluster.representative_story.title[:100] }}{% if cluster.representative_story.title|length > 100 %}...{% endif %}
+                {% else %}
+                  News Cluster
+                {% endif %}
+              </h5>
+
+              <!-- Stats -->
+              <div class="mb-3">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="fa-solid fa-newspaper me-2 text-primary"></i>
+                  <small class="text-muted">{{ cluster.story_count }} {% if cluster.story_count == 1 %}story{% else %}stories{% endif %}</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                  <i class="fa-solid fa-earth-americas me-2 text-success"></i>
+                  <small class="text-muted">{{ cluster.country_count }} {% if cluster.country_count == 1 %}country{% else %}countries{% endif %}</small>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="fa-solid fa-clock me-2 text-warning"></i>
+                  <small class="text-muted">
+                    Updated: {{ cluster.last_pub_date.strftime('%b %d, %Y') if cluster.last_pub_date else 'N/A' }}
+                  </small>
+                </div>
+              </div>
+
+              <!-- Representative Story Description -->
+              {% if cluster.representative_story and cluster.representative_story.description %}
+              <p class="card-text text-muted small mb-3">
+                {{ cluster.representative_story.description[:120] }}{% if cluster.representative_story.description|length > 120 %}...{% endif %}
+              </p>
+              {% endif %}
+
+              <!-- View Button -->
+              <a href="{{ url_for('views.cluster', id=cluster.get_public_id()) }}" class="btn btn-outline-primary btn-sm w-100">
+                <i class="fa-solid fa-arrow-right me-2"></i>View Coverage
+              </a>
+            </div>
+
+            <!-- Card Footer with Timeline -->
+            <div class="card-footer bg-light text-muted small">
+              <i class="fa-solid fa-calendar me-1"></i>
+              First: {{ cluster.first_pub_date.strftime('%b %d') if cluster.first_pub_date else 'N/A' }}
+              <span class="mx-2">|</span>
+              Latest: {{ cluster.last_pub_date.strftime('%b %d') if cluster.last_pub_date else 'N/A' }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination and pagination.pages > 1 %}
+      <nav aria-label="Clusters pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <!-- Previous Page -->
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{% if pagination.has_prev %}{{ url_for('views.cluster', page=pagination.prev_num, sort=sort_by, min_stories=min_stories, min_countries=min_countries) }}{% else %}#{% endif %}">
+              <i class="fa-solid fa-chevron-left"></i> Previous
+            </a>
+          </li>
+
+          <!-- Page Numbers -->
+          {% set start_page = [1, pagination.page - 2]|max %}
+          {% set end_page = [pagination.pages, pagination.page + 2]|min %}
+
+          {% if start_page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('views.cluster', page=1, sort=sort_by, min_stories=min_stories, min_countries=min_countries) }}">1</a>
+            </li>
+            {% if start_page > 2 %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+          {% endif %}
+
+          {% for page_num in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('views.cluster', page=page_num, sort=sort_by, min_stories=min_stories, min_countries=min_countries) }}">{{ page_num }}</a>
+            </li>
+          {% endfor %}
+
+          {% if end_page < pagination.pages %}
+            {% if end_page < pagination.pages - 1 %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('views.cluster', page=pagination.pages, sort=sort_by, min_stories=min_stories, min_countries=min_countries) }}">{{ pagination.pages }}</a>
+            </li>
+          {% endif %}
+
+          <!-- Next Page -->
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{% if pagination.has_next %}{{ url_for('views.cluster', page=pagination.next_num, sort=sort_by, min_stories=min_stories, min_countries=min_countries) }}{% else %}#{% endif %}">
+              Next <i class="fa-solid fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <!-- No Clusters Found -->
+      <div class="alert alert-warning">
+        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+        No news clusters available at the moment. Check back later!
+      </div>
+      {% endif %}
+
+      <!-- Back Navigation -->
+      <div class="mt-4">
+        <a href="{{ url_for('views.home') }}" class="btn btn-outline-primary">
+          <i class="fa-solid fa-arrow-left me-2"></i>Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hover-shadow {
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+
+  .hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-5px);
+  }
+
+  .card-title {
+    min-height: 3em;
+    line-height: 1.5;
+  }
+</style>
+{% endblock %}

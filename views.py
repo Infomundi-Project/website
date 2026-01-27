@@ -585,9 +585,52 @@ def comments():
 
 @views.route("/cluster", methods=["GET"])
 def cluster():
-    """View all stories in a cluster grouped by country."""
+    """View all stories in a cluster grouped by country, or list all clusters if no ID is provided."""
     cluster_id = request.args.get("id", "")
 
+    # If no cluster ID provided, show list of all clusters
+    if not cluster_id:
+        page = request.args.get("page", 1, type=int)
+        per_page = 24  # 24 clusters per page (8 rows of 3 on large screens)
+
+        # Filtering parameters
+        min_stories = request.args.get("min_stories", 1, type=int)
+        min_countries = request.args.get("min_countries", 1, type=int)
+        sort_by = request.args.get("sort", "recent")  # recent, stories, countries
+
+        # Build query with filters
+        query = models.StoryCluster.query
+
+        if min_stories > 1:
+            query = query.filter(models.StoryCluster.story_count >= min_stories)
+
+        if min_countries > 1:
+            query = query.filter(models.StoryCluster.country_count >= min_countries)
+
+        # Apply sorting
+        if sort_by == "stories":
+            query = query.order_by(models.StoryCluster.story_count.desc())
+        elif sort_by == "countries":
+            query = query.order_by(models.StoryCluster.country_count.desc())
+        else:  # default to "recent"
+            query = query.order_by(models.StoryCluster.last_pub_date.desc())
+
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        seo_title = "Infomundi - Global News Clusters"
+        seo_description = "Explore how news stories are covered across different countries and sources worldwide."
+
+        return render_template(
+            "clusters_list.html",
+            clusters=pagination.items,
+            pagination=pagination,
+            min_stories=min_stories,
+            min_countries=min_countries,
+            sort_by=sort_by,
+            seo_data=(seo_title, seo_description, ""),
+        )
+
+    # If cluster ID provided, show specific cluster
     cluster = models.StoryCluster.query.filter_by(
         cluster_hash=hashing_util.md5_hex_to_binary(cluster_id)
     ).first()
