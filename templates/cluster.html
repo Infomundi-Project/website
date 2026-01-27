@@ -91,8 +91,9 @@
                     data-bs-target="#collapse{{ country_code }}"
                     aria-expanded="{{ 'true' if loop.first else 'false' }}"
                     aria-controls="collapse{{ country_code }}">
-              <img src="https://flagcdn.com/24x18/{{ country_code|lower }}.png"
+              <img src="/static/img/flags/4x3/{{ country_code|lower }}.svg"
                    class="me-2"
+                   style="height: auto; width: 1.75rem; border-radius: 5%;"
                    alt="{{ country_code }}"
                    loading="lazy"
                    onerror="this.style.display='none'">
