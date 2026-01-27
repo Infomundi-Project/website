@@ -384,6 +384,16 @@ html[data-bs-theme="dark"] .story-image-placeholder {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+/* Override modal header img styles when using placeholder flag */
+#infomundiStoryModal .modal-header img.story-image-placeholder-flag {
+  width: 80px;
+  height: 60px;
+  min-height: auto;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 0;
+}
+
 .story-image-placeholder-text {
   font-size: 0.875rem;
   font-weight: 500;
