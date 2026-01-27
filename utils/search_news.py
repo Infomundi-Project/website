@@ -594,9 +594,9 @@ async def process_category(session: aiohttp.ClientSession, category_id, category
     Process a single category: fetch feeds from all publishers and save articles.
     Returns the number of articles saved.
     """
-    if config.SEARCH_NEWS_DEBUG:
-        if category_name != "br_general":
-            return 0
+    #if config.SEARCH_NEWS_DEBUG:
+    #    if category_name != "br_general":
+    #        return 0
 
     if shutdown_requested:
         return 0
