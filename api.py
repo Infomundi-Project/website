@@ -1002,7 +1002,11 @@ def summarize_story(story_url_hash):
     if not story:
         abort(404, "Couldn't find the story.")
 
-    if story.gpt_summary:
+    # Check if this is a refresh request
+    is_refresh = request.args.get("refresh", "false").lower() == "true"
+
+    # Return cached summary if available and not a refresh request
+    if story.gpt_summary and not is_refresh:
         return jsonify({"response": story.gpt_summary}), 200
 
     try:

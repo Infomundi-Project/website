@@ -382,6 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
           });
 
           fetchAndRenderStorySummary(storyData.story_id);
+          initializeRefreshButton(storyData.story_id);
 
           initializeLikeDislikeIcons(storyData.story_id, modalLikeIcon, modalDislikeIcon);
           // Show the modal
