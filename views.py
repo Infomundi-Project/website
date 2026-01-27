@@ -27,6 +27,7 @@ from website_scripts import (
     security_util,
     decorators,
     country_util,
+    clustering_util,
 )
 
 views = Blueprint("views", __name__)
@@ -579,4 +580,32 @@ def comments():
         previous_story="",
         story=story,
         next_story="",
+    )
+
+
+@views.route("/cluster", methods=["GET"])
+def cluster():
+    """View all stories in a cluster grouped by country."""
+    cluster_id = request.args.get("id", "")
+
+    cluster = models.StoryCluster.query.filter_by(
+        cluster_hash=hashing_util.md5_hex_to_binary(cluster_id)
+    ).first()
+
+    if not cluster:
+        flash("Could not find the cluster you were looking for.", "error")
+        return redirect(url_for("views.home"))
+
+    stories_by_country = clustering_util.get_cluster_stories(cluster.id)
+
+    # SEO data
+    primary_tag = cluster.dominant_tags[0] if cluster.dominant_tags else "Global News"
+    seo_title = f"Global Coverage: {primary_tag}"
+    seo_description = f"See how {cluster.story_count} news sources from {cluster.country_count} countries are covering this story."
+
+    return render_template(
+        "cluster.html",
+        cluster=cluster,
+        stories_by_country=stories_by_country,
+        seo_data=(seo_title, seo_description, ""),
     )

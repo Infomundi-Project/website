@@ -196,6 +196,19 @@
               {% endfor %}
           </div>
         {% endif %}
+
+        <!-- Global Coverage Section -->
+        <div class="mb-4" id="globalCoverageSection" style="display: none;">
+          <h5><i class="fa-solid fa-globe me-2"></i>Global Coverage</h5>
+          <p class="text-muted small mb-2">This story is being covered by <span id="clusterCountryCount" class="fw-bold">0</span> countries</p>
+          <div id="globalCoverageList" class="d-flex flex-wrap gap-2 mb-2">
+            <!-- Country flags populated by JavaScript -->
+          </div>
+          <a href="#" id="viewAllCoverage" class="btn btn-sm btn-outline-primary">
+            <i class="fa-solid fa-expand me-1"></i>View All Coverage
+          </a>
+        </div>
+
         <!-- Trending Filters Card -->
 
 
@@ -421,6 +434,49 @@
       });
     });
   });
+</script>
+
+<script nonce="{{ nonce }}">
+  // Global Coverage - fetch cluster data for this story
+  (function() {
+    const storyId = '{{ story_url_hash }}';
+
+    fetch(`/api/story/${storyId}/cluster`)
+      .then(res => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then(data => {
+        if (!data.has_cluster) return;
+
+        const section = document.getElementById('globalCoverageSection');
+        const countSpan = document.getElementById('clusterCountryCount');
+        const list = document.getElementById('globalCoverageList');
+        const viewAllLink = document.getElementById('viewAllCoverage');
+
+        section.style.display = 'block';
+        countSpan.textContent = data.country_count;
+        viewAllLink.href = `/cluster?id=${data.cluster_id}`;
+
+        // Show country flags with story counts
+        Object.entries(data.stories_by_country).forEach(([countryCode, stories]) => {
+          const pill = document.createElement('span');
+          pill.className = 'badge bg-light text-dark border d-flex align-items-center';
+          pill.innerHTML = `
+            <img src="https://flagcdn.com/16x12/${countryCode.toLowerCase()}.png"
+                 class="me-1"
+                 alt="${countryCode}"
+                 onerror="this.style.display='none'">
+            ${countryCode} (${stories.length})
+          `;
+          list.appendChild(pill);
+        });
+      })
+      .catch(err => {
+        // Silently fail - no cluster data available
+        console.log('No cluster data:', err.message);
+      });
+  })();
 </script>
 
 {% endblock %}

@@ -124,6 +124,14 @@ class Story(db.Model):
     )
     country = db.relationship("Country", backref="story", lazy="joined")
 
+    # Cluster membership relationship
+    cluster_memberships = db.relationship(
+        "StoryClusterMember",
+        backref="member_story",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+
     def get_public_id(self) -> str:
         return hashing_util.binary_to_md5_hex(self.url_hash)
 
@@ -187,6 +195,80 @@ class StoryStats(db.Model):
     dislikes = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)
+
+
+class StoryCluster(db.Model):
+    """Groups related news stories about the same event from different sources/countries."""
+    __tablename__ = "story_clusters"
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
+    cluster_hash = db.Column(BINARY(16), nullable=False, unique=True)
+    representative_story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
+
+    dominant_tags = db.Column(db.JSON)
+    story_count = db.Column(db.Integer, default=1)
+    country_count = db.Column(db.Integer, default=1)
+
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    first_pub_date = db.Column(db.DateTime, nullable=False)
+    last_pub_date = db.Column(db.DateTime, nullable=False)
+
+    # Relationships
+    representative_story = db.relationship(
+        "Story", foreign_keys=[representative_story_id], lazy="joined"
+    )
+    members = db.relationship(
+        "StoryClusterMember",
+        back_populates="cluster",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+
+    __table_args__ = (
+        db.Index("idx_cluster_story_count", "story_count"),
+        db.Index("idx_cluster_last_pub_date", "last_pub_date"),
+    )
+
+    def get_public_id(self) -> str:
+        return hashing_util.binary_to_md5_hex(self.cluster_hash)
+
+    def to_dict(self) -> dict:
+        return {
+            "cluster_id": self.get_public_id(),
+            "story_count": self.story_count,
+            "country_count": self.country_count,
+            "dominant_tags": self.dominant_tags or [],
+            "first_pub_date": self.first_pub_date.isoformat() if self.first_pub_date else None,
+            "last_pub_date": self.last_pub_date.isoformat() if self.last_pub_date else None,
+            "representative_story": self.representative_story.to_dict() if self.representative_story else None,
+        }
+
+
+class StoryClusterMember(db.Model):
+    """Links stories to their cluster (many-to-many)."""
+    __tablename__ = "story_cluster_members"
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
+    cluster_id = db.Column(
+        db.Integer, db.ForeignKey("story_clusters.id", ondelete="CASCADE"), nullable=False
+    )
+    story_id = db.Column(
+        db.Integer, db.ForeignKey("stories.id", ondelete="CASCADE"), nullable=False
+    )
+
+    similarity_score = db.Column(db.Float)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("cluster_id", "story_id", name="uq_cluster_story"),
+        db.Index("idx_member_cluster", "cluster_id"),
+        db.Index("idx_member_story", "story_id"),
+    )
+
+    cluster = db.relationship("StoryCluster", back_populates="members")
+    story = db.relationship("Story", lazy="joined")
 
 
 class User(db.Model, UserMixin):

@@ -28,6 +28,7 @@ from website_scripts import (
     notifications,
     image_util,
     captcha_util,
+    clustering_util,
 )
 
 api = Blueprint("api", __name__)
@@ -1105,6 +1106,87 @@ def chat_about_story(story_url_hash: str):
         return jsonify({"error": "Chat failed. Please try again later."}), 500
 
     return jsonify({"response": reply.get("text", "")}), 200
+
+
+# ── Story Clustering Endpoints ──
+
+
+@api.route("/clusters", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 5, query_string=True)  # 5 min cached
+@extensions.limiter.limit("20/minute")
+def get_clusters():
+    """
+    Returns trending story clusters.
+    Query params:
+      - limit: int (default 10, max 25)
+      - min_countries: int (default 2) - minimum countries covering the story
+      - min_stories: int (default 3) - minimum stories in cluster
+    """
+    limit = min(request.args.get("limit", 10, type=int), 25)
+    min_countries = max(request.args.get("min_countries", 2, type=int), 1)
+    min_stories = max(request.args.get("min_stories", 3, type=int), 2)
+
+    clusters = clustering_util.get_trending_clusters(
+        limit=limit,
+        min_countries=min_countries,
+        min_stories=min_stories,
+    )
+
+    return jsonify([c.to_dict() for c in clusters]), 200
+
+
+@api.route("/clusters/<cluster_id>", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 5)  # 5 min cached
+@extensions.limiter.limit("20/minute")
+def get_cluster_detail(cluster_id: str):
+    """
+    Get detailed cluster information with all stories grouped by country.
+    """
+    cluster = models.StoryCluster.query.filter_by(
+        cluster_hash=hashing_util.md5_hex_to_binary(cluster_id)
+    ).first()
+
+    if not cluster:
+        abort(404, description="Cluster not found.")
+
+    stories_by_country = clustering_util.get_cluster_stories(cluster.id)
+
+    return jsonify({
+        **cluster.to_dict(),
+        "stories_by_country": stories_by_country,
+    }), 200
+
+
+@api.route("/story/<story_url_hash>/cluster", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 5)  # 5 min cached
+@extensions.limiter.limit("30/minute")
+def get_story_cluster(story_url_hash: str):
+    """
+    Get cluster information for a specific story.
+    Returns the cluster and related stories if the story is part of a cluster.
+    """
+    story = models.Story.query.filter_by(
+        url_hash=hashing_util.md5_hex_to_binary(story_url_hash)
+    ).first()
+
+    if not story:
+        abort(404, description="Story not found.")
+
+    membership = models.StoryClusterMember.query.filter_by(
+        story_id=story.id
+    ).first()
+
+    if not membership:
+        return jsonify({"has_cluster": False}), 200
+
+    cluster = membership.cluster
+    stories_by_country = clustering_util.get_cluster_stories(cluster.id)
+
+    return jsonify({
+        "has_cluster": True,
+        **cluster.to_dict(),
+        "stories_by_country": stories_by_country,
+    }), 200
 
 
 @api.route("/get_stories", methods=["GET"])

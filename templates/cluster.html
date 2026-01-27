@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Global Coverage: {{ cluster.dominant_tags[0] if cluster.dominant_tags else 'News Story' }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '-';">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('views.home') }}">Home</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Global Coverage
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Cluster Header -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h1 class="display-6">
+            <i class="fa-solid fa-globe me-2"></i>
+            Global Coverage
+          </h1>
+          <p class="lead mb-3">
+            {{ cluster.story_count }} stories from {{ cluster.country_count }} countries covering this event
+          </p>
+
+          <!-- Dominant Tags -->
+          <div class="mb-3">
+            {% for tag in cluster.dominant_tags %}
+            <span class="badge bg-secondary me-1">{{ tag }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Timeline -->
+          <small class="text-muted">
+            <i class="fa-solid fa-clock me-1"></i>
+            First reported: {{ cluster.first_pub_date.strftime('%Y-%m-%d %H:%M') if cluster.first_pub_date else 'N/A' }} |
+            Latest: {{ cluster.last_pub_date.strftime('%Y-%m-%d %H:%M') if cluster.last_pub_date else 'N/A' }}
+          </small>
+        </div>
+      </div>
+
+      <!-- Representative Story -->
+      {% if cluster.representative_story %}
+      <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+          <i class="fa-solid fa-star me-2"></i>Primary Coverage
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% if cluster.representative_story.image_url %}
+            <div class="col-md-4 mb-3 mb-md-0">
+              <img src="{{ cluster.representative_story.image_url }}"
+                   class="img-fluid rounded"
+                   alt="Story image"
+                   loading="lazy">
+            </div>
+            {% endif %}
+            <div class="{% if cluster.representative_story.image_url %}col-md-8{% else %}col-12{% endif %}">
+              <h5 class="card-title">
+                <a href="{{ url_for('views.comments', id=cluster.representative_story.get_public_id()) }}"
+                   class="text-decoration-none">
+                  {{ cluster.representative_story.title }}
+                </a>
+              </h5>
+              <p class="card-text text-muted">{{ cluster.representative_story.description[:200] }}{% if cluster.representative_story.description|length > 200 %}...{% endif %}</p>
+              <small class="text-muted">
+                <i class="fa-solid fa-newspaper me-1"></i>{{ cluster.representative_story.publisher.name }}
+                <span class="mx-2">|</span>
+                <i class="fa-solid fa-calendar me-1"></i>{{ cluster.representative_story.pub_date.strftime('%Y-%m-%d') if cluster.representative_story.pub_date else 'N/A' }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Stories by Country -->
+      <h4 class="mb-3"><i class="fa-solid fa-earth-americas me-2"></i>Coverage by Country</h4>
+      <div class="accordion" id="countriesAccordion">
+        {% for country_code, stories in stories_by_country.items() %}
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button {{ '' if loop.first else 'collapsed' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapse{{ country_code }}"
+                    aria-expanded="{{ 'true' if loop.first else 'false' }}"
+                    aria-controls="collapse{{ country_code }}">
+              <img src="https://flagcdn.com/24x18/{{ country_code|lower }}.png"
+                   class="me-2"
+                   alt="{{ country_code }}"
+                   loading="lazy"
+                   onerror="this.style.display='none'">
+              <strong>{{ country_code }}</strong>
+              <span class="badge bg-primary ms-2">{{ stories|length }} {% if stories|length == 1 %}story{% else %}stories{% endif %}</span>
+            </button>
+          </h2>
+          <div id="collapse{{ country_code }}"
+               class="accordion-collapse collapse {{ 'show' if loop.first else '' }}"
+               data-bs-parent="#countriesAccordion">
+            <div class="accordion-body p-0">
+              <div class="list-group list-group-flush">
+                {% for story in stories %}
+                <a href="{{ url_for('views.comments', id=story.story_id) }}"
+                   class="list-group-item list-group-item-action">
+                  <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1 me-3">
+                      <h6 class="mb-1">{{ story.title }}</h6>
+                      <p class="mb-1 text-muted small">{{ story.description[:150] }}{% if story.description|length > 150 %}...{% endif %}</p>
+                      <small class="text-muted">
+                        <i class="fa-solid fa-newspaper me-1"></i>{{ story.publisher.name }}
+                        {% if story.similarity_score %}
+                        <span class="ms-2 badge bg-secondary">{{ (story.similarity_score * 100)|round|int }}% match</span>
+                        {% endif %}
+                      </small>
+                    </div>
+                    <small class="text-muted text-nowrap">{{ story.pub_date.strftime('%Y-%m-%d')if story.pub_date else '' }}</small>
+                  </div>
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Back Navigation -->
+      <div class="mt-4">
+        <a href="{{ url_for('views.home') }}" class="btn btn-outline-primary">
+          <i class="fa-solid fa-arrow-left me-2"></i>Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
