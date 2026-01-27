@@ -391,16 +391,6 @@ js_base_authenticated = Bundle(
     filters="jsmin",
     output="gen/base_packed_authenticated.js",
 )
-# homepage.html
-js_home = Bundle(
-    "js/libs/amcharts/map.js",
-    "js/libs/amcharts/worldLow.js",
-    "js/libs/amcharts/animated.js",
-    "js/libs/amcharts/continentsLow.js",
-    "js/chart.js",
-    filters="jsmin",
-    output="gen/home_packed.js",
-)
 # user_profile.html
 js_profile = Bundle(
     "js/profile/friendshipButtons.js",
@@ -416,7 +406,6 @@ js_news = Bundle("js/renderStories.js", filters="jsmin", output="gen/news_packed
 assets = Environment(app)
 assets.register("css_base", css_base)
 assets.register("js_base", js_base)
-assets.register("js_home", js_home)
 assets.register("js_news", js_news)
 assets.register("js_profile", js_profile)
 assets.register("js_base_authenticated", js_base_authenticated)
