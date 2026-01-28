@@ -3,6 +3,7 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/world-map.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/continent-countries-panel.css') }}">
 <style>
   /* --- Hero / Map (now handled by world-map.css) --- */
 
@@ -870,10 +871,14 @@ button.country-chip.sorted-chip.selected span {
 {% endblock %}
 
 {% block scripts %}
+  <!-- World map zoom controller -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/worldMapZoom.js') }}"></script>
   <!-- Dashboard charts (not map-related) -->
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchHomeDashboard.js') }}"></script>
   <!-- World feed population -->
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/worldFeed.js') }}"></script>
   <!-- Region market tickers -->
   <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/fetchRegionTickers.js') }}"></script>
+  <!-- Continent countries panel -->
+  <script defer nonce="{{ nonce }}" src="{{ url_for('static', filename='js/home/continentCountriesPanel.js') }}"></script>
 {% endblock %}

@@ -1,6 +1,7 @@
 /* ========================================
-   WORLD MAP - Pure CSS Interactive Map
-   With Zoom Animations - No JavaScript
+   WORLD MAP - Interactive SVG Map
+   Zoom controlled by JavaScript (viewBox)
+   Optimized for performance
    ======================================== */
 
 /* Region colors */
@@ -41,14 +42,11 @@
   width: 100%;
   height: 100%;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.3s ease;
-  transform-origin: center center;
 }
 
 /* Water background */
 .water-bg {
-  transition: opacity 0.4s ease;
+  transition: opacity 0.2s ease;
 }
 
 html[data-bs-theme="dark"] .water-bg {
@@ -56,11 +54,13 @@ html[data-bs-theme="dark"] .water-bg {
 }
 
 /* ----------------------------------------
-   Map Layers - Base States
+   Map Layers
    ---------------------------------------- */
 
 .map-layer {
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  /* Fast, GPU-accelerated transition */
+  transition: opacity 0.2s ease-out;
+  will-change: opacity;
 }
 
 /* Continents visible by default */
@@ -78,155 +78,6 @@ html[data-bs-theme="dark"] .water-bg {
 }
 
 /* ----------------------------------------
-   ZOOM ANIMATIONS via :target
-   Each region zooms to its specific viewBox
-   ---------------------------------------- */
-
-/* North America zoom */
-#north-america:target ~ #continents,
-#world-map:has(#north-america:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#north-america:target,
-#world-map:has(#north-america:target) #north-america {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#north-america:target) {
-  transform: scale(2.5) translate(18%, 15%);
-}
-
-/* Central America zoom */
-#central-america:target ~ #continents,
-#world-map:has(#central-america:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#central-america:target,
-#world-map:has(#central-america:target) #central-america {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#central-america:target) {
-  transform: scale(3) translate(16%, -5%);
-}
-
-/* South America zoom */
-#south-america:target ~ #continents,
-#world-map:has(#south-america:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#south-america:target,
-#world-map:has(#south-america:target) #south-america {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#south-america:target) {
-  transform: scale(2.2) translate(12%, -20%);
-}
-
-/* Europe zoom */
-#europe:target ~ #continents,
-#world-map:has(#europe:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#europe:target,
-#world-map:has(#europe:target) #europe {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#europe:target) {
-  transform: scale(3) translate(-8%, 12%);
-}
-
-/* Asia zoom */
-#asia:target ~ #continents,
-#world-map:has(#asia:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#asia:target,
-#world-map:has(#asia:target) #asia {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#asia:target) {
-  transform: scale(2) translate(-20%, 5%);
-}
-
-/* Africa zoom */
-#africa:target ~ #continents,
-#world-map:has(#africa:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#africa:target,
-#world-map:has(#africa:target) #africa {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#africa:target) {
-  transform: scale(2.5) translate(-8%, -8%);
-}
-
-/* Oceania zoom */
-#oceania:target ~ #continents,
-#world-map:has(#oceania:target) #continents {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#oceania:target,
-#world-map:has(#oceania:target) #oceania {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-#world-map:has(#oceania:target) {
-  transform: scale(2.8) translate(-30%, -15%);
-}
-
-/* Reset zoom when #continents is targeted */
-#world-map:has(#continents:target) {
-  transform: scale(1) translate(0, 0);
-}
-
-#continents:target {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* ----------------------------------------
    Continent Styling (World View)
    ---------------------------------------- */
 
@@ -236,9 +87,7 @@ html[data-bs-theme="dark"] .water-bg {
   stroke: #fff;
   stroke-width: 0.5;
   cursor: pointer;
-  transition: fill 0.3s ease,
-              transform 0.3s ease,
-              filter 0.3s ease;
+  transition: fill 0.15s ease, stroke-width 0.15s ease;
 }
 
 /* Region-specific colors for continents */
@@ -250,21 +99,11 @@ html[data-bs-theme="dark"] .water-bg {
 .continent[data-region="africa"] path { fill: var(--region-af); }
 .continent[data-region="oceania"] path { fill: var(--region-oc); }
 
-/* Hover effect with glow */
+/* Hover effect - optimized (no heavy filters) */
 .continent:hover path,
 .continent:focus path {
-  filter: brightness(1.15) drop-shadow(0 0 8px currentColor);
-  transform: scale(1.02);
-}
-
-/* Pulse animation on hover */
-@keyframes continent-pulse {
-  0%, 100% { filter: brightness(1.1); }
-  50% { filter: brightness(1.2); }
-}
-
-.continent:hover path {
-  animation: continent-pulse 1.5s ease-in-out infinite;
+  filter: brightness(1.15);
+  stroke-width: 1.5;
 }
 
 /* ----------------------------------------
@@ -274,19 +113,17 @@ html[data-bs-theme="dark"] .water-bg {
 .country path {
   fill: var(--region-color, #6c9bd2);
   stroke: #fff;
-  stroke-width: 0.4;
+  stroke-width: 0.5;
   cursor: pointer;
-  transition: fill 0.2s ease,
-              filter 0.2s ease,
-              transform 0.2s ease;
+  transition: fill 0.15s ease, stroke-width 0.15s ease;
 }
 
-/* Hover effect */
+/* Hover effect - optimized */
 .country:hover path,
 .country:focus path {
   fill: var(--bs-primary, #0d6efd) !important;
-  filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  transform: scale(1.02);
+  filter: brightness(1.1);
+  stroke-width: 1;
 }
 
 /* ----------------------------------------
@@ -297,7 +134,7 @@ html[data-bs-theme="dark"] .water-bg {
 .bg-country {
   fill: #b8c9d9;
   stroke: #fff;
-  stroke-width: 0.2;
+  stroke-width: 0.3;
   pointer-events: none;
 }
 
@@ -305,17 +142,17 @@ html[data-bs-theme="dark"] .water-bg {
 .other-region-bg {
   fill: #ccd9e6;
   stroke: #fff;
-  stroke-width: 0.2;
-  opacity: 0.4;
+  stroke-width: 0.3;
+  opacity: 0.5;
   pointer-events: none;
 }
 
 /* ----------------------------------------
-   Home Button
+   Home/Back Button
    ---------------------------------------- */
 
 .home-btn-group {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
 }
 
 .home-btn {
@@ -325,28 +162,27 @@ html[data-bs-theme="dark"] .water-bg {
 .home-btn-bg {
   fill: var(--bs-body-bg, #fff);
   stroke: var(--bs-border-color, #dee2e6);
-  stroke-width: 1.5;
-  transition: fill 0.2s ease, stroke 0.2s ease, transform 0.2s ease;
+  stroke-width: 1;
+  transition: fill 0.15s ease, stroke 0.15s ease;
 }
 
 .home-icon {
   fill: var(--bs-body-color, #212529);
-  transition: fill 0.2s ease;
+  transition: fill 0.15s ease;
 }
 
 .home-text {
   fill: var(--bs-body-color, #212529);
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  transition: fill 0.2s ease;
+  transition: fill 0.15s ease;
 }
 
 .home-btn:hover .home-btn-bg,
 .home-btn:focus .home-btn-bg {
   fill: var(--bs-primary, #0d6efd);
   stroke: var(--bs-primary, #0d6efd);
-  transform: scale(1.05);
 }
 
 .home-btn:hover .home-icon,
@@ -363,7 +199,7 @@ html[data-bs-theme="dark"] .water-bg {
 .continent:focus-visible,
 .country:focus-visible,
 .home-btn:focus-visible {
-  outline: 3px solid var(--bs-warning, #ffc107);
+  outline: 2px solid var(--bs-warning, #ffc107);
   outline-offset: 2px;
 }
 
@@ -420,25 +256,6 @@ html[data-bs-theme="dark"] .home-text {
 }
 
 /* ----------------------------------------
-   Loading Animation
-   ---------------------------------------- */
-
-@keyframes map-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-#world-map {
-  animation: map-fade-in 0.5s ease-out;
-}
-
-/* ----------------------------------------
    Touch Device Optimizations
    ---------------------------------------- */
 
@@ -446,11 +263,6 @@ html[data-bs-theme="dark"] .home-text {
   .continent path,
   .country path {
     stroke-width: 0.8;
-  }
-
-  /* Disable hover animations on touch */
-  .continent:hover path {
-    animation: none;
   }
 
   /* Use :active for touch feedback */
@@ -479,10 +291,6 @@ html[data-bs-theme="dark"] .home-text {
     fill: #ccc !important;
     stroke: #999 !important;
   }
-
-  #world-map {
-    transform: none !important;
-  }
 }
 
 /* ----------------------------------------
@@ -490,12 +298,12 @@ html[data-bs-theme="dark"] .home-text {
    ---------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  #world-map,
+  .map-layer,
   .continent path,
   .country path,
   .home-btn-bg,
-  .map-layer {
+  .home-icon,
+  .home-text {
     transition: none !important;
-    animation: none !important;
   }
 }

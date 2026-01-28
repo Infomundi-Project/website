@@ -1831,7 +1831,7 @@ def captcha():
 
 @api.route("/world/feed", methods=["GET"])
 @extensions.cache.cached(timeout=60 * 15)
-@extensions.limiter.limit("20/minute", override_defaults=True)
+#@extensions.limiter.limit("20/minute", override_defaults=True)
 def world_feed():
     """Returns latest news organized by world regions for the homepage."""
     from website_scripts.fallback_data import get_fallback_world_feed
@@ -1843,3 +1843,18 @@ def world_feed():
         # Log the error for diagnostics
         logging.error(f"Error loading world feed: {e}")
         return jsonify(get_fallback_world_feed()), 200
+
+
+@api.route("/country/<cca2>", methods=["GET"])
+@extensions.cache.cached(timeout=60 * 60 * 24)  # 24 hours cached
+@extensions.limiter.limit("30/minute", override_defaults=True)
+def get_country_data(cca2):
+    """Returns detailed country data including capital, population, languages, etc."""
+    try:
+        data = scripts.get_nation_data(cca2.lower())
+        if not data:
+            return jsonify({"error": "Country not found"}), 404
+        return jsonify(data), 200
+    except (FileNotFoundError, ValueError, KeyError) as e:
+        logging.error(f"Error loading country data for {cca2}: {e}")
+        return jsonify({"error": "Country data not available"}), 404
