@@ -23,11 +23,18 @@
   // Cache for country data per continent
   const countryDataCache = {};
 
+  // Cache for region countries data (avoids re-fetching on auto-open)
+  const regionCountriesCache = {};
+
   // Panel elements (will be created dynamically)
   let panelOverlay = null;
   let panel = null;
   let panelContent = null;
   let panelTitle = null;
+
+  // State tracking for auto-open on hover
+  let currentRegionId = null;
+  let isAutoOpening = false;
 
   /**
    * Create panel HTML structure
@@ -49,12 +56,6 @@
     hint.className = 'continent-panel-hint';
     hint.innerHTML = '<i class="fa-solid fa-computer-mouse"></i>Hover to highlight on map';
 
-    const hoverIndicator = document.createElement('div');
-    hoverIndicator.className = 'continent-panel-hover-indicator';
-    hoverIndicator.id = 'hover-indicator';
-    hoverIndicator.style.display = 'none';
-    hoverIndicator.innerHTML = '<i class="fa-solid fa-location-dot"></i><span></span>';
-
     const closeBtn = document.createElement('button');
     closeBtn.className = 'continent-panel-close';
     closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
@@ -62,14 +63,10 @@
     closeBtn.addEventListener('click', closePanel);
 
     const titleContainer = document.createElement('div');
-    titleContainer.style.display = 'flex';
-    titleContainer.style.alignItems = 'center';
-    titleContainer.style.gap = '1rem';
-    titleContainer.style.flex = '1';
+    titleContainer.className = 'continent-panel-title-container';
 
     titleContainer.appendChild(panelTitle);
     titleContainer.appendChild(hint);
-    titleContainer.appendChild(hoverIndicator);
 
     header.appendChild(titleContainer);
     header.appendChild(closeBtn);
@@ -185,9 +182,11 @@
 
   /**
    * Format number with locale
+   * Handles both raw numbers and pre-formatted strings from the API
    */
   const formatNumber = (num) => {
-    if (!num) return 'N/A';
+    if (num === null || num === undefined || num === '') return 'N/A';
+    if (typeof num === 'string') return num; // Already formatted by API
     return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(num);
   };
 
@@ -231,11 +230,17 @@
     card.dataset.countryCode = countryCode; // Store country code for easy matching
     const flagUrl = getFlagUrl(countryCode);
 
-    // Extract detailed info if available
-    const capital = detailedData?.capital?.[0] || 'N/A';
-    const population = detailedData?.population || null;
+    // Extract detailed info - handle both API format (strings) and raw JSON format (arrays/objects)
+    const capital = Array.isArray(detailedData?.capital)
+      ? detailedData.capital[0]
+      : (detailedData?.capital || 'N/A');
+    const population = detailedData?.population ?? null;
     const region = detailedData?.subregion || detailedData?.region || 'N/A';
-    const languages = detailedData?.languages ? Object.values(detailedData.languages).slice(0, 2).join(', ') : 'N/A';
+    const languages = typeof detailedData?.languages === 'string'
+      ? detailedData.languages
+      : (detailedData?.languages && typeof detailedData.languages === 'object'
+        ? Object.values(detailedData.languages).slice(0, 2).join(', ')
+        : 'N/A');
 
     card.innerHTML = `
       <div class="country-card-flag">
@@ -306,22 +311,9 @@
 
       // Highlight this card
       card.classList.add('highlighted');
-
-      // Show hover indicator with country name
-      const hoverIndicator = document.getElementById('hover-indicator');
-      if (hoverIndicator) {
-        hoverIndicator.style.display = 'flex';
-        hoverIndicator.querySelector('span').textContent = country.name;
-      }
     });
 
     card.addEventListener('mouseleave', () => {
-      // Hide hover indicator
-      const hoverIndicator = document.getElementById('hover-indicator');
-      if (hoverIndicator) {
-        hoverIndicator.style.display = 'none';
-      }
-
       clearMapHighlights();
     });
 
@@ -329,7 +321,53 @@
   };
 
   /**
+   * Update an existing card's detail rows with API data
+   */
+  const updateCardDetails = (card, detailedData) => {
+    if (!detailedData) return;
+
+    const detailsDiv = card.querySelector('.country-card-details');
+    if (!detailsDiv) return;
+
+    const capital = Array.isArray(detailedData.capital)
+      ? detailedData.capital[0]
+      : (detailedData.capital || 'N/A');
+    const population = detailedData.population ?? null;
+    const languages = typeof detailedData.languages === 'string'
+      ? detailedData.languages
+      : (detailedData.languages && typeof detailedData.languages === 'object'
+        ? Object.values(detailedData.languages).slice(0, 2).join(', ')
+        : 'N/A');
+
+    detailsDiv.innerHTML = `
+      ${capital && capital !== 'N/A' ? `
+        <div class="country-detail-row">
+          <i class="fa-solid fa-city"></i>
+          <span class="country-detail-label">Capital:</span>
+          <span>${capital}</span>
+        </div>
+      ` : ''}
+      ${population !== null && population !== undefined ? `
+        <div class="country-detail-row">
+          <i class="fa-solid fa-users"></i>
+          <span class="country-detail-label">Population:</span>
+          <span>${formatNumber(population)}</span>
+        </div>
+      ` : ''}
+      ${languages && languages !== 'N/A' ? `
+        <div class="country-detail-row">
+          <i class="fa-solid fa-language"></i>
+          <span class="country-detail-label">Language:</span>
+          <span>${languages}</span>
+        </div>
+      ` : ''}
+    `;
+  };
+
+  /**
    * Render countries in panel
+   * Cards are created immediately for instant interaction;
+   * detailed data is loaded in parallel and cards are updated as data arrives
    */
   const renderCountries = async (countries, continentName) => {
     if (!countries || countries.length === 0) {
@@ -350,27 +388,30 @@
     // Clear content
     panelContent.innerHTML = '';
 
-    // Load detailed data for each country and create cards
-    for (const country of countries) {
+    // Step 1: Create all cards immediately with basic info (name + flag only)
+    const cardEntries = countries.map(country => {
       const countryCode = (country.code || country.cca2 || '').toUpperCase();
+      const cached = countryDataCache[countryCode];
+      const card = createCountryCard(country, cached || null);
+      panelContent.appendChild(card);
+      return { country, card, countryCode, hadCache: !!cached };
+    });
 
-      // Check cache first
-      let detailedData = countryDataCache[countryCode];
+    // Step 2: Set up map hover listeners immediately (no waiting for API)
+    addMapCountryListeners(countries);
 
-      // If not in cache, load it
-      if (!detailedData && countryCode) {
-        detailedData = await loadCountryData(countryCode);
+    // Step 3: Load detailed data in parallel and update cards as data arrives
+    const loadPromises = cardEntries
+      .filter(entry => !entry.hadCache && entry.countryCode)
+      .map(async ({ card, countryCode }) => {
+        const detailedData = await loadCountryData(countryCode);
         if (detailedData) {
           countryDataCache[countryCode] = detailedData;
+          updateCardDetails(card, detailedData);
         }
-      }
+      });
 
-      const card = createCountryCard(country, detailedData);
-      panelContent.appendChild(card);
-    }
-
-    // Add hover listeners to countries in the map for bi-directional sync
-    addMapCountryListeners(countries);
+    await Promise.all(loadPromises);
   };
 
   /**
@@ -412,24 +453,11 @@
           }
         });
 
-        // Show hover indicator with country name
-        const hoverIndicator = document.getElementById('hover-indicator');
-        if (hoverIndicator) {
-          hoverIndicator.style.display = 'flex';
-          hoverIndicator.querySelector('span').textContent = country.name;
-        }
-
         // Highlight on map too
         highlightCountryOnMap(countryCode);
       };
 
       const leaveHandler = () => {
-        // Hide hover indicator
-        const hoverIndicator = document.getElementById('hover-indicator');
-        if (hoverIndicator) {
-          hoverIndicator.style.display = 'none';
-        }
-
         clearMapHighlights();
       };
 
@@ -455,35 +483,47 @@
     });
   };
 
+  // Cache for the world feed API response
+  let worldFeedCache = null;
+
   /**
    * Fetch countries for a region from the API
+   * Caches the feed response to avoid redundant fetches on auto-open
    */
   const fetchRegionCountries = async (regionName) => {
     try {
-      // Check if we already have data in the accordion
       const accordion = document.getElementById('worldFeedAccordion');
       if (!accordion) return [];
 
       const feedUrl = accordion.dataset.feedEndpoint;
       if (!feedUrl) return [];
 
-      // Fetch feed data
-      const response = await fetch(feedUrl, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
+      // Use cached feed data if available
+      if (!worldFeedCache) {
+        const response = await fetch(feedUrl, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
 
-      if (!response.ok) return [];
+        if (!response.ok) return [];
+        worldFeedCache = await response.json();
+      }
 
-      const data = await response.json();
-      const regions = data.regions || {};
-
-      // Get countries for this region
+      const regions = worldFeedCache.regions || {};
       const regionData = regions[regionName];
       return regionData?.countries || [];
     } catch (error) {
       console.error('Error fetching region countries:', error);
       return [];
     }
+  };
+
+  /**
+   * Get display name from continent/region ID
+   */
+  const getDisplayName = (continentId) => {
+    return continentId.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   /**
@@ -501,13 +541,14 @@
 
     if (!regionName) return;
 
-    // Get proper display name for continent
-    const displayName = continentId.split('-').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    // Track current region
+    currentRegionId = continentId;
 
-    // Fetch countries first to get count
+    const displayName = getDisplayName(continentId);
+
+    // Fetch countries first to get count (and cache them)
     const countries = await fetchRegionCountries(regionName);
+    regionCountriesCache[continentId] = countries;
 
     // Open panel with country count
     openPanel(displayName, countries.length);
@@ -517,11 +558,112 @@
   };
 
   /**
+   * Auto-open panel when hovering a country on the map
+   * Works when zoomed into a region but the panel is closed
+   */
+  const setupAutoOpenOnHover = () => {
+    worldMap.addEventListener('mouseover', async (e) => {
+      const countryEl = e.target.closest('.country');
+      if (!countryEl) return;
+
+      // Don't auto-open if panel is already active or already opening
+      if (isAutoOpening) return;
+      if (panel && panel.classList.contains('active')) return;
+
+      // Check if the country belongs to a visible country-layer (zoomed in)
+      const parentLayer = countryEl.closest('.country-layer');
+      if (!parentLayer) return;
+      if (parentLayer.style.visibility === 'hidden' || parentLayer.style.opacity === '0') return;
+
+      const regionId = parentLayer.id; // e.g., 'south-america'
+      const regionName = CONTINENT_TO_REGION[regionId];
+      if (!regionName) return;
+
+      isAutoOpening = true;
+      currentRegionId = regionId;
+      const displayName = getDisplayName(regionId);
+
+      // Use cached countries if available, otherwise fetch
+      let countries = regionCountriesCache[regionId];
+      if (!countries) {
+        countries = await fetchRegionCountries(regionName);
+        regionCountriesCache[regionId] = countries;
+      }
+
+      // Open panel
+      openPanel(displayName, countries.length);
+      await renderCountries(countries, displayName);
+
+      // After panel opens, highlight the hovered country
+      const countryCode = (countryEl.getAttribute('data-country') || '').toUpperCase();
+      if (countryCode) {
+        highlightCountryOnMap(countryCode);
+        if (panelContent) {
+          panelContent.querySelectorAll('.country-card').forEach(card => {
+            if (card.dataset.countryCode === countryCode) {
+              card.classList.add('highlighted');
+              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+      }
+
+      isAutoOpening = false;
+    });
+  };
+
+  /**
+   * Preload world feed data so auto-open on hover is instant
+   */
+  const preloadWorldFeed = async () => {
+    try {
+      const accordion = document.getElementById('worldFeedAccordion');
+      if (!accordion) return;
+
+      const feedUrl = accordion.dataset.feedEndpoint;
+      if (!feedUrl) return;
+
+      const response = await fetch(feedUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+
+      if (response.ok) {
+        worldFeedCache = await response.json();
+      }
+    } catch (error) {
+      // Silently fail - data will be fetched on demand
+    }
+  };
+
+  /**
    * Initialize
    */
   const init = () => {
     // Listen for clicks on continents
     worldMap.addEventListener('click', handleContinentClick);
+
+    // Auto-open panel when hovering countries on the map
+    setupAutoOpenOnHover();
+
+    // Preload world feed data for instant hover response
+    preloadWorldFeed();
+
+    // Close panel when navigating back to world view
+    worldMap.addEventListener('click', (e) => {
+      if (e.target.closest('.home-btn')) {
+        closePanel();
+        currentRegionId = null;
+      }
+    });
+
+    // Close panel on browser back/forward navigation
+    window.addEventListener('popstate', () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash || hash === 'continents') {
+        closePanel();
+        currentRegionId = null;
+      }
+    });
 
     // Close panel on Escape key
     document.addEventListener('keydown', (e) => {
