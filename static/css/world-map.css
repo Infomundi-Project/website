@@ -148,48 +148,54 @@ html[data-bs-theme="dark"] .water-bg {
 }
 
 /* ----------------------------------------
-   Home/Back Button
+   Back Button - HTML Element (outside SVG)
    ---------------------------------------- */
 
-.home-btn-group {
-  cursor: pointer;
-}
-
-.home-btn {
-  cursor: pointer;
-}
-
-.home-btn-bg {
-  fill: var(--bs-body-bg, #fff);
-  stroke: var(--bs-border-color, #dee2e6);
-  stroke-width: 1;
-  transition: fill 0.15s ease, stroke 0.15s ease;
-}
-
-.home-icon {
-  fill: var(--bs-body-color, #212529);
-  transition: fill 0.15s ease;
-}
-
-.home-text {
-  fill: var(--bs-body-color, #212529);
-  font-family: system-ui, -apple-system, sans-serif;
+.map-back-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 12px;
   font-weight: 600;
-  transition: fill 0.15s ease;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.home-btn:hover .home-btn-bg,
-.home-btn:focus .home-btn-bg {
-  fill: var(--bs-primary, #0d6efd);
-  stroke: var(--bs-primary, #0d6efd);
+.map-back-btn svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
 }
 
-.home-btn:hover .home-icon,
-.home-btn:hover .home-text,
-.home-btn:focus .home-icon,
-.home-btn:focus .home-text {
-  fill: #fff;
+.map-back-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+.map-back-btn:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px) scale(1.05);
+  color: #1a1a2e;
+}
+
+.map-back-btn:active {
+  background: #12121f;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* ----------------------------------------
@@ -245,14 +251,21 @@ html[data-bs-theme="dark"] .other-region-bg {
   opacity: 0.5;
 }
 
-html[data-bs-theme="dark"] .home-btn-bg {
-  fill: #2d3748;
-  stroke: #4a5568;
+html[data-bs-theme="dark"] .map-back-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(26, 26, 46, 0.15);
+  color: #1a1a2e;
 }
 
-html[data-bs-theme="dark"] .home-icon,
-html[data-bs-theme="dark"] .home-text {
-  fill: #e2e8f0;
+html[data-bs-theme="dark"] .map-back-btn:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.15);
+  transform: translateX(-3px) scale(1.05);
+}
+
+html[data-bs-theme="dark"] .map-back-btn:active {
+  background: rgba(240, 240, 240, 1);
 }
 
 /* ----------------------------------------
@@ -272,8 +285,8 @@ html[data-bs-theme="dark"] .home-text {
     filter: brightness(1.1);
   }
 
-  .home-btn:active .home-btn-bg {
-    fill: var(--bs-primary, #0d6efd);
+  .map-back-btn:active {
+    background: #12121f;
   }
 }
 
@@ -282,8 +295,8 @@ html[data-bs-theme="dark"] .home-text {
    ---------------------------------------- */
 
 @media print {
-  .home-btn-group {
-    display: none;
+  .map-back-btn {
+    display: none !important;
   }
 
   .continent path,
@@ -301,9 +314,7 @@ html[data-bs-theme="dark"] .home-text {
   .map-layer,
   .continent path,
   .country path,
-  .home-btn-bg,
-  .home-icon,
-  .home-text {
+  .map-back-btn {
     transition: none !important;
   }
 }

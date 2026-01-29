@@ -5,6 +5,7 @@
  */
 (() => {
   const svg = document.getElementById('world-map');
+  const backBtn = document.getElementById('map-back-btn');
   if (!svg) return;
 
   // Default viewBox (world view)
@@ -22,6 +23,7 @@
   };
 
   let animationFrame = null;
+  let currentRegion = 'continents';
 
   // Parse current viewBox
   const parseViewBox = () => {
@@ -32,6 +34,13 @@
   // Set viewBox
   const setViewBox = (vb) => {
     svg.setAttribute('viewBox', `${vb.x.toFixed(1)} ${vb.y.toFixed(1)} ${vb.w.toFixed(1)} ${vb.h.toFixed(1)}`);
+  };
+
+  // Show/hide back button
+  const updateBackButton = (show) => {
+    if (backBtn) {
+      backBtn.style.display = show ? 'inline-flex' : 'none';
+    }
   };
 
   // Faster easing function
@@ -58,7 +67,7 @@
         h: start.h + (target.h - start.h) * eased
       };
 
-      setViewBox(current);
+      svg.setAttribute('viewBox', `${current.x.toFixed(1)} ${current.y.toFixed(1)} ${current.w.toFixed(1)} ${current.h.toFixed(1)}`);
 
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
@@ -107,11 +116,15 @@
   // Navigate to region
   const navigateTo = (regionId) => {
     if (regionId === 'continents' || !regionId || regionId === '') {
+      currentRegion = 'continents';
       showLayer('continents');
       animateViewBox(DEFAULT_VIEWBOX, 350);
+      updateBackButton(false);
     } else if (REGIONS[regionId]) {
+      currentRegion = regionId;
       showLayer(regionId);
       animateViewBox(REGIONS[regionId], 400);
+      updateBackButton(true);
     }
   };
 
@@ -130,15 +143,27 @@
     }
   };
 
-  // Handle back button clicks
-  const handleBackClick = (e) => {
-    const backBtn = e.target.closest('.home-btn');
-    if (backBtn) {
+  // Handle clicks outside region (on empty SVG area)
+  const handleSvgClick = (e) => {
+    // Check if we're currently in a region view (not continents)
+    if (currentRegion === 'continents') return;
+
+    // Check if click was on a country element
+    const country = e.target.closest('.country');
+    const continent = e.target.closest('.continent');
+
+    // If click was not on a country or continent, go back to world view
+    if (!country && !continent) {
       e.preventDefault();
       e.stopPropagation();
-      history.pushState({ region: 'continents' }, '', window.location.pathname + window.location.search);
-      navigateTo('continents');
+      handleBackClick();
     }
+  };
+
+  // Handle back button click
+  const handleBackClick = () => {
+    history.pushState({ region: 'continents' }, '', window.location.pathname + window.location.search);
+    navigateTo('continents');
   };
 
   // Handle browser back/forward
@@ -152,6 +177,7 @@
     // Always start with default view (reset zoom on refresh)
     setViewBox(DEFAULT_VIEWBOX);
     showLayer('continents');
+    updateBackButton(false);
 
     // Clear hash on page load to ensure clean state
     if (window.location.hash) {
@@ -161,7 +187,11 @@
     // Event listeners
     window.addEventListener('popstate', handlePopState);
     svg.addEventListener('click', handleContinentClick);
-    svg.addEventListener('click', handleBackClick);
+    svg.addEventListener('click', handleSvgClick);
+
+    if (backBtn) {
+      backBtn.addEventListener('click', handleBackClick);
+    }
   };
 
   if (document.readyState === 'loading') {
