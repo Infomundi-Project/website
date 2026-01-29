@@ -656,6 +656,24 @@
       }
     });
 
+    // Close panel when clicking the map back button
+    const backBtn = document.getElementById('map-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        closePanel();
+        currentRegionId = null;
+      });
+    }
+
+    // Close panel when clicking on empty SVG area (to go back to world view)
+    worldMap.addEventListener('click', (e) => {
+      // If we're in a zoomed region and click on empty space (not a country/continent)
+      if (currentRegionId && !e.target.closest('.country') && !e.target.closest('.continent')) {
+        closePanel();
+        currentRegionId = null;
+      }
+    });
+
     // Close panel on browser back/forward navigation
     window.addEventListener('popstate', () => {
       const hash = window.location.hash.slice(1);
