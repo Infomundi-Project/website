@@ -63,19 +63,33 @@ html[data-bs-theme="dark"] .water-bg {
   will-change: opacity;
 }
 
-/* Continents visible by default */
+/* Continents as background base */
 .continents-layer {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+}
+
+/* Country layers always visible on top */
+.country-layer {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
-/* Country layers hidden by default */
-.country-layer {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+/* Hide redundant other-regions backgrounds in country layers */
+.country-layer .other-regions {
+  display: none;
 }
+
+/* Set region colors for country layers */
+#north-america { --region-color: var(--region-na); }
+#central-america { --region-color: var(--region-ca); }
+#south-america { --region-color: var(--region-sa); }
+#europe { --region-color: var(--region-eu); }
+#asia { --region-color: var(--region-as); }
+#africa { --region-color: var(--region-af); }
+#oceania { --region-color: var(--region-oc); }
 
 /* ----------------------------------------
    Continent Styling (World View)

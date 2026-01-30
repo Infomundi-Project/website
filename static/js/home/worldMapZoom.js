@@ -9,7 +9,7 @@
   if (!svg) return;
 
   // Default viewBox (world view)
-  const DEFAULT_VIEWBOX = { x: 0, y: 0, w: 1000, h: 500 };
+  const DEFAULT_VIEWBOX = { x: 40, y: 30, w: 920, h: 410 };
 
   // Region viewBox configurations
   const REGIONS = {
@@ -77,40 +77,26 @@
     animationFrame = requestAnimationFrame(animate);
   };
 
-  // Show/hide layers
+  // Show/hide layers - All countries always visible with continents as base
   const showLayer = (layerId) => {
     const allLayers = document.querySelectorAll('.country-layer');
     const continentsLayer = document.getElementById('continents');
 
-    if (layerId === 'continents' || !layerId) {
-      allLayers.forEach(layer => {
-        layer.style.opacity = '0';
-        layer.style.visibility = 'hidden';
-        layer.style.pointerEvents = 'none';
-      });
-      if (continentsLayer) {
-        continentsLayer.style.opacity = '1';
-        continentsLayer.style.visibility = 'visible';
-        continentsLayer.style.pointerEvents = 'auto';
-      }
-    } else {
-      if (continentsLayer) {
-        continentsLayer.style.opacity = '0';
-        continentsLayer.style.visibility = 'hidden';
-        continentsLayer.style.pointerEvents = 'none';
-      }
-      allLayers.forEach(layer => {
-        if (layer.id === layerId) {
-          layer.style.opacity = '1';
-          layer.style.visibility = 'visible';
-          layer.style.pointerEvents = 'auto';
-        } else {
-          layer.style.opacity = '0';
-          layer.style.visibility = 'hidden';
-          layer.style.pointerEvents = 'none';
-        }
-      });
+    // Keep continents as background base
+    if (continentsLayer) {
+      continentsLayer.style.display = 'block';
+      continentsLayer.style.opacity = '1';
+      continentsLayer.style.visibility = 'visible';
+      continentsLayer.style.pointerEvents = 'none';
     }
+
+    // Keep all country layers always visible on top
+    allLayers.forEach(layer => {
+      layer.style.display = 'block';
+      layer.style.opacity = '1';
+      layer.style.visibility = 'visible';
+      layer.style.pointerEvents = 'auto';
+    });
   };
 
   // Navigate to region
