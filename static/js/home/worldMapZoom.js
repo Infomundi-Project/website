@@ -9,17 +9,17 @@
   if (!svg) return;
 
   // Default viewBox (world view)
-  const DEFAULT_VIEWBOX = { x: 40, y: 30, w: 920, h: 410 };
+  const DEFAULT_VIEWBOX = { x: 0, y: 0, w: 1000, h: 500 };
 
   // Region viewBox configurations
   const REGIONS = {
-    'north-america': { x: 100, y: 40, w: 280, h: 180 },
-    'central-america': { x: 180, y: 150, w: 200, h: 130 },
-    'south-america': { x: 240, y: 200, w: 180, h: 240 },
-    'europe': { x: 440, y: 60, w: 180, h: 130 },
-    'asia': { x: 520, y: 40, w: 440, h: 300 },
-    'africa': { x: 420, y: 130, w: 220, h: 260 },
-    'oceania': { x: 700, y: 220, w: 280, h: 200 }
+    'north-america': { x: 80, y: 50, w: 280, h: 200 },
+    'central-america': { x: 120, y: 160, w: 200, h: 150 },
+    'south-america': { x: 180, y: 220, w: 200, h: 280 },
+    'europe': { x: 420, y: 60, w: 200, h: 200 },
+    'asia': { x: 500, y: 50, w: 450, h: 250 },
+    'africa': { x: 400, y: 150, w: 250, h: 300 },
+    'oceania': { x: 700, y: 250, w: 280, h: 200 }
   };
 
   let animationFrame = null;
