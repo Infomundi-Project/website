@@ -49,15 +49,15 @@ REGION_COLORS = {
     "oceania": "#34c759"
 }
 
-# Region viewbox for zoom
+# Region viewbox for zoom (corrected to maintain 2:1 aspect ratio)
 REGION_VIEWBOX = {
-    "north-america": "80 50 280 200",
-    "central-america": "120 160 200 150",
-    "south-america": "180 220 200 280",
-    "europe": "420 60 200 200",
-    "asia": "500 50 450 250",
-    "africa": "400 150 250 300",
-    "oceania": "700 250 280 200"
+    "north-america": "84 13 353 177",
+    "central-america": "190 140 200 100",
+    "south-america": "129 195 481 241",
+    "europe": "409 25 247 123",
+    "asia": "400 5 585 293",
+    "africa": "279 116 514 257",
+    "oceania": "645 237 355 178"
 }
 
 # Microstate minimum size (in SVG units)

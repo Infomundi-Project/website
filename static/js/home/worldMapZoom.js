@@ -8,18 +8,18 @@
   const backBtn = document.getElementById('map-back-btn');
   if (!svg) return;
 
-  // Default viewBox (world view) - Adjusted for better horizontal fill
-  const DEFAULT_VIEWBOX = { x: 10, y: 5, w: 980, h: 490 };
+  // Default viewBox (world view) - Show all countries completely visible
+  const DEFAULT_VIEWBOX = { x: 0, y: 0, w: 1000, h: 400 };
 
-  // Region viewBox configurations
+  // Region viewBox configurations (corrected to maintain 2:1 aspect ratio)
   const REGIONS = {
-    'north-america': { x: 80, y: 50, w: 280, h: 200 },
-    'central-america': { x: 120, y: 160, w: 200, h: 150 },
-    'south-america': { x: 180, y: 220, w: 200, h: 280 },
-    'europe': { x: 420, y: 60, w: 200, h: 200 },
-    'asia': { x: 500, y: 50, w: 450, h: 250 },
-    'africa': { x: 400, y: 150, w: 250, h: 300 },
-    'oceania': { x: 700, y: 250, w: 280, h: 200 }
+    'north-america': { x: 84, y: 13, w: 353, h: 177 },
+    'central-america': { x: 190, y: 140, w: 200, h: 100 },
+    'south-america': { x: 129, y: 195, w: 481, h: 241 },
+    'europe': { x: 409, y: 25, w: 247, h: 123 },
+    'asia': { x: 400, y: 5, w: 585, h: 293 },
+    'africa': { x: 279, y: 116, w: 514, h: 257 },
+    'oceania': { x: 645, y: 237, w: 355, h: 178 }
   };
 
   let animationFrame = null;
@@ -77,26 +77,53 @@
     animationFrame = requestAnimationFrame(animate);
   };
 
-  // Show/hide layers - All countries always visible with continents as base
+  // Show/hide layers - Show continents OR countries (like old amCharts map)
   const showLayer = (layerId) => {
     const allLayers = document.querySelectorAll('.country-layer');
     const continentsLayer = document.getElementById('continents');
 
-    // Keep continents as background base
-    if (continentsLayer) {
-      continentsLayer.style.display = 'block';
-      continentsLayer.style.opacity = '1';
-      continentsLayer.style.visibility = 'visible';
-      continentsLayer.style.pointerEvents = 'none';
-    }
+    if (layerId === 'continents') {
+      // World view: Show ONLY continents, hide all country layers
+      if (continentsLayer) {
+        continentsLayer.style.display = 'block';
+        continentsLayer.style.opacity = '1';
+        continentsLayer.style.visibility = 'visible';
+        continentsLayer.style.pointerEvents = 'auto';
+      }
 
-    // Keep all country layers always visible on top
-    allLayers.forEach(layer => {
-      layer.style.display = 'block';
-      layer.style.opacity = '1';
-      layer.style.visibility = 'visible';
-      layer.style.pointerEvents = 'auto';
-    });
+      // Hide all country layers
+      allLayers.forEach(layer => {
+        layer.style.display = 'none';
+        layer.style.opacity = '0';
+        layer.style.visibility = 'hidden';
+        layer.style.pointerEvents = 'none';
+      });
+    } else {
+      // Region view: Hide continents, show ONLY selected region's countries
+      if (continentsLayer) {
+        continentsLayer.style.display = 'none';
+        continentsLayer.style.opacity = '0';
+        continentsLayer.style.visibility = 'hidden';
+        continentsLayer.style.pointerEvents = 'none';
+      }
+
+      // Hide all country layers first
+      allLayers.forEach(layer => {
+        layer.style.display = 'none';
+        layer.style.opacity = '0';
+        layer.style.visibility = 'hidden';
+        layer.style.pointerEvents = 'none';
+      });
+
+      // Show only the selected region's country layer
+      const selectedLayer = document.getElementById(layerId);
+      if (selectedLayer) {
+        selectedLayer.style.display = 'block';
+        selectedLayer.style.opacity = '1';
+        selectedLayer.style.visibility = 'visible';
+        selectedLayer.style.pointerEvents = 'auto';
+      }
+    }
   };
 
   // Navigate to region

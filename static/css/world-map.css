@@ -18,7 +18,7 @@
 /* Container */
 .world-map-container {
   width: 100%;
-  aspect-ratio: 2.5 / 1;
+  aspect-ratio: 3 / 1;
   max-height: 420px;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -39,7 +39,7 @@
 }
 
 /* Fallback for browsers without aspect-ratio support */
-@supports not (aspect-ratio: 2.5 / 1) {
+@supports not (aspect-ratio: 3 / 1) {
   .world-map-container {
     height: 420px;
   }
@@ -83,18 +83,19 @@ html[data-bs-theme="dark"] .water-bg {
   will-change: opacity;
 }
 
-/* Continents as background base */
+/* Continents layer - visible by default (world view) */
 .continents-layer {
   opacity: 1;
   visibility: visible;
-  pointer-events: none;
+  pointer-events: auto;  /* Allow clicks on continents */
 }
 
-/* Country layers always visible on top */
+/* Country layers - hidden by default, shown only when zoomed into region */
 .country-layer {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Hide redundant other-regions backgrounds in country layers */
