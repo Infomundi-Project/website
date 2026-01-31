@@ -18,7 +18,8 @@
 /* Container */
 .world-map-container {
   width: 100%;
-  height: 420px;
+  aspect-ratio: 2.5 / 1;
+  max-height: 420px;
   border-radius: 0.75rem;
   overflow: hidden;
   position: relative;
@@ -27,13 +28,32 @@
 
 @media (max-width: 768px) {
   .world-map-container {
-    height: 280px;
+    max-height: 280px;
   }
 }
 
 @media (max-width: 576px) {
   .world-map-container {
-    height: 220px;
+    max-height: 220px;
+  }
+}
+
+/* Fallback for browsers without aspect-ratio support */
+@supports not (aspect-ratio: 2.5 / 1) {
+  .world-map-container {
+    height: 420px;
+  }
+
+  @media (max-width: 768px) {
+    .world-map-container {
+      height: 280px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .world-map-container {
+      height: 220px;
+    }
   }
 }
 

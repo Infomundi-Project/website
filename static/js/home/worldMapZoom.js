@@ -8,8 +8,8 @@
   const backBtn = document.getElementById('map-back-btn');
   if (!svg) return;
 
-  // Default viewBox (world view)
-  const DEFAULT_VIEWBOX = { x: 0, y: 0, w: 1000, h: 500 };
+  // Default viewBox (world view) - Adjusted for better horizontal fill
+  const DEFAULT_VIEWBOX = { x: 10, y: 5, w: 980, h: 490 };
 
   // Region viewBox configurations
   const REGIONS = {
